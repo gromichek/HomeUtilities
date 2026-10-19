@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-004 | Meters, registers, readings, consumption calculator | In review | | 88 new tests (200 total). See PR for decisions. |
+| T-005 | Reading-window fallback fix, VAT catalog, tariffs | Ready | | |
 
 ## Done
 
@@ -18,6 +18,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 | T-002 | Domain base types | 2026-10-19, #3 | 52 new tests. `Versioned.At` returns the first item on duplicate ValidFrom; `Validate` flags it. |
 | — | Windows first TFM on Windows hosts | 2026-10-19, #4 | VS defaults to Windows Machine |
 | T-003 | Properties, suppliers, links, contracts | 2026-10-19, #6 | 57 new tests (109 total). Deleted contract link does not override supplier link. |
+| T-004 | Meters, readings, consumption calculator | 2026-10-19, #8 | 88 new tests (197 total). Window fallback refined in T-005. Replacement meter does not copy Digits/SerialNumber (UI pre-fills). |
 
 ## Known issues / tech debt
 

@@ -153,7 +153,12 @@ A simple meter has one `Total/Import` register. Dual-tariff: `Day` + `Night`. So
    or when a reading date is earlier than the previous one.
 5. Assigning readings to a billing period: for each contract, the reading for period `P` is the reading
    taken within the contract's reading window of `P` (or the last one on/before the end of `P` if there
-   is no window). The user can override the chosen reading for a charge.
+   is no window). If there is no reading inside the window: first a **late** reading (after the window end,
+   before the next period's window start; earliest such), else the latest reading before the window start;
+   both add `ReadingOutsideWindow`. The same reading is never used as both start and end of a period.
+   The user can override the chosen reading for a charge.
+6. A replacement meter does **not** inherit `Digits` or `SerialNumber`; the replacement UI pre-fills them
+   from the old meter for the user to confirm (decision 2026-10-19).
 
 ## §5. Tariffs and VAT
 
