@@ -19,11 +19,11 @@ is written; the list below is the plan and will change.
 - T-009 Repositories + seed data (VAT history, service kinds), Data tests on SQLite in-memory
 
 ## Phase 3 — First usable app (reference data + readings)
-- T-010 App shell, navigation, DI, settings page with language switch
+- T-010 App shell, navigation, DI, settings page with language switch, adaptive layout infrastructure (compact/medium/expanded)
 - T-011 Properties: list + edit (+ parameters)
 - T-012 Suppliers and contracts: list + edit, links opening in browser
 - T-013 Meters: list + edit, replacement wizard, verification due
-- T-014 Readings entry (phone-first), history, warnings, meter photo
+- T-014 Readings entry (phone-first, tablet two-pane), history, warnings, meter photo
 
 ## Phase 4 — Tariffs and charges
 - T-015 Tariff editor per contract (components, rates, VAT)
