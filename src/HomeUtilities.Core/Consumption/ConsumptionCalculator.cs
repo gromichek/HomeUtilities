@@ -28,8 +28,10 @@ public static class ConsumptionCalculator
     /// <summary>
     /// Consumption of a month: between the readings assigned to the previous period and to <paramref name="period"/>.
     /// With a reading window (days of month from/to) the latest reading inside the window of a period is used;
-    /// if there is none, the latest reading on or before the window end is used with
-    /// <see cref="ConsumptionWarningCodes.ReadingOutsideWindow"/>. Without a window the latest reading on or before
+    /// if there is none, the earliest reading between the window end and the next period's window start (a late
+    /// reading) or else the latest reading before the window start (an early reading) is used with
+    /// <see cref="ConsumptionWarningCodes.ReadingOutsideWindow"/>; an early reading that already serves as the
+    /// start reading is not used again. Without a window the latest reading on or before
     /// the last day of the period is used.
     /// </summary>
     public static ConsumptionResult CalculateForPeriod(
@@ -47,27 +49,30 @@ public static class ConsumptionCalculator
 
         var readings = LocateReadings(chain, kind);
         var warnings = new List<ConsumptionWarning>();
-        var start = PickForWindow(readings, period.AddMonths(-1), days, warnings);
-        var end = PickForWindow(readings, period, days, warnings);
+        var start = PickForWindow(readings, period.AddMonths(-1), days, null, warnings);
+        var end = PickForWindow(readings, period, days, start, warnings);
         return Compute(chain, kind, start, end, warnings);
     }
 
-    private static Located? PickForWindow(List<Located> readings, YearMonth period, (int From, int To) days, List<ConsumptionWarning> warnings)
+    private static Located? PickForWindow(List<Located> readings, YearMonth period, (int From, int To) days, Located? excluded, List<ConsumptionWarning> warnings)
     {
         var (from, to) = ReadingWindow.For(period, days.From, days.To);
-        var inside = readings.Where(r => r.Reading.Date >= from && r.Reading.Date <= to).ToList();
-        if (inside.Count > 0)
+        var inside = readings.LastOrDefault(r => r.Reading.Date >= from && r.Reading.Date <= to);
+        if (inside is not null)
         {
-            return inside[^1];
+            return inside;
         }
 
-        var fallback = LatestOnOrBefore(readings, to);
-        if (fallback is not null)
+        var nextFrom = ReadingWindow.For(period.AddMonths(1), days.From, days.To).From;
+        var picked = readings.FirstOrDefault(r => r.Reading.Date > to && r.Reading.Date < nextFrom)
+            ?? readings.LastOrDefault(r => r.Reading.Date < from);
+        if (picked is null || picked == excluded)
         {
-            warnings.Add(new(ConsumptionWarningCodes.ReadingOutsideWindow, [period.ToString()]));
+            return null;
         }
 
-        return fallback;
+        warnings.Add(new(ConsumptionWarningCodes.ReadingOutsideWindow, [period.ToString()]));
+        return picked;
     }
 
     /// <summary>Readings of the register of the given kind over all meters of the chain, ordered by date, then by meter position.</summary>
