@@ -80,7 +80,14 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 7. **Money:** `decimal`, currency per amount (EUR, historical LVL). Rounding to 0.01 using
    `MidpointRounding.AwayFromZero`, applied per charge line (configurable per contract later if a
    supplier rounds differently).
-8. **Thin UI.** Pages are bindings + layout. Phone-first layouts; wider layouts for reports on desktop.
+8. **Thin UI.** Pages are bindings + layout.
+9. **Adaptive layouts for three form factors:** Android phone (portrait, narrow), Android tablet
+   (portrait and landscape) and Windows desktop (resizable window). Layout is chosen by **available
+   width, not by platform**: compact < 600 dp (single column, phone), medium 600–1000 dp
+   (tablet portrait: list + detail or two columns), expanded > 1000 dp (tablet landscape / desktop:
+   list + detail side by side, wider charts). Use `AdaptiveTrigger`/`VisualStateManager` or an
+   `ILayoutModeService` exposed to ViewModels — no `DeviceIdiom` checks in pages. Rotation must
+   not lose entered data. Every UI task lists manual checks for phone and tablet.
 
 ## 5. Localization
 
@@ -156,4 +163,5 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-19 | Sync via change logs in Drive appDataFolder | multi-device edits, no DB file sync |
 | 2026-10-19 | Public repository, no personal data in repo | free CI incl. macOS |
 | 2026-10-19 | No portal passwords stored; links open in system browser | browser password manager fills them |
+| 2026-10-19 | Android tablet is a target form factor; width-based adaptive layouts | user request |
 | 2026-10-19 | Coding sessions run in the cloud (Linux) | Windows target is verified only by CI and the owner |
