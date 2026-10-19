@@ -17,7 +17,8 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
 
 ## Workflow
 
-- Branch: `task/T-NNN-short-name` from the latest `main`.
+- Branch: `task/T-NNN-short-name` from the latest `main`. If your environment assigns a branch name
+  (e.g. `claude/...`), use it — but the PR title must start with `T-NNN:`.
 - Commit in small logical steps. Commit messages in English, imperative mood
   (`Add meter register entity`).
 - When done: push the branch and open a PR titled `T-NNN: <task title>`.
