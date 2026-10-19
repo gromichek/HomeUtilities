@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-003 | Properties, suppliers, links, contracts | In review | | 57 new tests in Core.Tests (109 total). See PR for decisions. |
+| T-004 | Meters, registers, readings, consumption calculator | Ready | | |
 
 ## Done
 
@@ -17,6 +17,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 | — | Docs: Android tablet, adaptive layouts | 2026-10-19, #2 | ARCHITECTURE §4.9 |
 | T-002 | Domain base types | 2026-10-19, #3 | 52 new tests. `Versioned.At` returns the first item on duplicate ValidFrom; `Validate` flags it. |
 | — | Windows first TFM on Windows hosts | 2026-10-19, #4 | VS defaults to Windows Machine |
+| T-003 | Properties, suppliers, links, contracts | 2026-10-19, #6 | 57 new tests (109 total). Deleted contract link does not override supplier link. |
 
 ## Known issues / tech debt
 
