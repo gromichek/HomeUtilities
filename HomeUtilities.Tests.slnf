@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "HomeUtilities.sln",
+    "projects": [
+      "src\\HomeUtilities.Core\\HomeUtilities.Core.csproj",
+      "src\\HomeUtilities.Data\\HomeUtilities.Data.csproj",
+      "src\\HomeUtilities.ViewModels\\HomeUtilities.ViewModels.csproj",
+      "tests\\HomeUtilities.Core.Tests\\HomeUtilities.Core.Tests.csproj",
+      "tests\\HomeUtilities.ViewModels.Tests\\HomeUtilities.ViewModels.Tests.csproj"
+    ]
+  }
+}
