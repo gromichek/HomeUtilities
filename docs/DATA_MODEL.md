@@ -78,7 +78,7 @@ Contract links override/add to supplier links (e.g. a contract-specific portal).
 | Title | string | "Water", "Electricity (dual-tariff)" |
 | CustomerNumber | string? | "abonenta numurs" |
 | ContractNumber | string? | |
-| PortalLogin | string? | user name only; password optional via `ISecureStore` |
+| PortalLogin | string? | optional reminder of the user name; passwords are never stored (the browser's password manager fills them) |
 | ValidFrom / ValidTo | DateOnly / DateOnly? | |
 | Currency | Currency | default EUR |
 | BillingMode | BillingMode | `Actual` (by consumption), `Equalized` (fixed monthly + annual settlement), `Fixed` (subscription), `Assessed` (taxes: annual amount + installments) |

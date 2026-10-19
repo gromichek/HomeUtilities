@@ -102,7 +102,7 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | `ILauncherService` | open supplier website / portal in the default browser |
 | `INotificationService` | schedule / cancel local reminders |
 | `IFilePickerService` | pick Excel / attachment files |
-| `ISecureStore` | store tokens and optional portal passwords (MAUI `SecureStorage`, never synced) |
+| `ISecureStore` | store OAuth tokens (MAUI `SecureStorage`, never synced) |
 | `IAppPaths` | database, attachments, backups folders |
 
 ## 7. Data storage
@@ -132,8 +132,8 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 - Google OAuth client id: per platform. Desktop/installed-app client ids are not truly secret, but are
   still kept out of the repo: provided via a git-ignored `secrets.json` / build property and injected at
   build time. Details in the sync phase task.
-- Portal logins: the user name may be stored in the contract; passwords only if the user opts in, only in
-  `ISecureStore`, never in the database and never synced.
+- Supplier portal passwords are **never stored** by the app. Links open in the system browser, whose
+  password manager fills credentials. Only an optional login name may be kept on the contract.
 
 ## 10. CI
 
@@ -155,3 +155,5 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-19 | Multi-register meters (day/night/export) | dual-tariff meters and solar panels |
 | 2026-10-19 | Sync via change logs in Drive appDataFolder | multi-device edits, no DB file sync |
 | 2026-10-19 | Public repository, no personal data in repo | free CI incl. macOS |
+| 2026-10-19 | No portal passwords stored; links open in system browser | browser password manager fills them |
+| 2026-10-19 | Coding sessions run in the cloud (Linux) | Windows target is verified only by CI and the owner |
