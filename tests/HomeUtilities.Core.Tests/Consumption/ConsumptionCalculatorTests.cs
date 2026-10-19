@@ -269,9 +269,9 @@ public class ConsumptionCalculatorTests
     }
 
     [Fact]
-    public void Period_with_window_falls_back_to_earlier_reading_with_warning()
+    public void Period_with_window_prefers_late_reading_over_early_one()
     {
-        // no reading in 2026-10-20..26; latest on or before 2026-10-26 is 2026-10-18: 441.500 - 437.097 = 4.403
+        // no reading in 2026-10-20..26; the earliest reading in 2026-10-27..2026-11-19 is 2026-10-28: 446.000 - 437.097 = 8.903
         var m = Water();
         m.Add(D(2026, 10, 18), 441.500m);
         m.Add(D(2026, 10, 28), 446.000m);
@@ -279,21 +279,64 @@ public class ConsumptionCalculatorTests
         var r = ConsumptionCalculator.CalculateForPeriod(Chain(m), RegisterKind.Total, new YearMonth(2026, 10), (20, 26));
 
         Assert.True(r.IsComplete);
-        Assert.Equal(4.403m, r.Quantity);
+        Assert.Equal(8.903m, r.Quantity);
         Assert.Equal([ConsumptionWarningCodes.ReadingOutsideWindow], Codes(r));
     }
 
     [Fact]
-    public void Period_with_window_and_only_a_reading_after_the_window_reuses_the_previous_reading()
+    public void Period_with_window_uses_late_reading()
     {
-        // the 2026-10-28 reading lies after the window end 2026-10-26, so it is not usable for October
+        // 445.000 - 437.097 = 7.903
         var m = Water();
-        m.Add(D(2026, 10, 28), 446.000m);
+        m.Add(D(2026, 10, 28), 445.000m);
 
         var r = ConsumptionCalculator.CalculateForPeriod(Chain(m), RegisterKind.Total, new YearMonth(2026, 10), (20, 26));
 
-        Assert.Equal(0m, r.Quantity);
+        Assert.Equal(7.903m, r.Quantity);
         Assert.Equal([ConsumptionWarningCodes.ReadingOutsideWindow], Codes(r));
+    }
+
+    [Fact]
+    public void Period_with_window_uses_early_reading_when_no_late_one()
+    {
+        // 441.000 - 437.097 = 3.903
+        var m = Water();
+        m.Add(D(2026, 10, 15), 441.000m);
+
+        var r = ConsumptionCalculator.CalculateForPeriod(Chain(m), RegisterKind.Total, new YearMonth(2026, 10), (20, 26));
+
+        Assert.Equal(3.903m, r.Quantity);
+        Assert.Equal([ConsumptionWarningCodes.ReadingOutsideWindow], Codes(r));
+    }
+
+    [Fact]
+    public void Period_with_window_does_not_reuse_the_start_reading_as_end_reading()
+    {
+        var m = Water();
+
+        var r = ConsumptionCalculator.CalculateForPeriod(Chain(m), RegisterKind.Total, new YearMonth(2026, 10), (20, 26));
+
+        Assert.False(r.IsComplete);
+        Assert.Equal(0m, r.Quantity);
+        Assert.Equal([ConsumptionWarningCodes.MissingEndReading], Codes(r));
+    }
+
+    [Fact]
+    public void Late_reading_is_not_stolen_from_the_next_period()
+    {
+        var m = Water();
+        m.Add(D(2026, 10, 28), 445.000m);
+        m.Add(D(2026, 11, 22), 452.000m);
+
+        var october = ConsumptionCalculator.CalculateForPeriod(Chain(m), RegisterKind.Total, new YearMonth(2026, 10), (20, 26));
+        var november = ConsumptionCalculator.CalculateForPeriod(Chain(m), RegisterKind.Total, new YearMonth(2026, 11), (20, 26));
+
+        Assert.Equal(D(2026, 10, 28), october.EndReading!.Date);
+        Assert.Equal(7.903m, october.Quantity);
+        Assert.Equal(D(2026, 10, 28), november.StartReading!.Date);
+        Assert.Equal(D(2026, 11, 22), november.EndReading!.Date);
+        Assert.Equal(7m, november.Quantity);
+        Assert.Equal([ConsumptionWarningCodes.ReadingOutsideWindow], Codes(november));
     }
 
     [Fact]

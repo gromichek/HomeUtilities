@@ -110,4 +110,46 @@ public static class ErrorCodes
 
     /// <summary>The link ends before it starts.</summary>
     public const string ContractMeterValidToBeforeValidFrom = "contract_meter.valid_to_before_valid_from";
+
+    /// <summary>The VAT code is not 1–32 upper-case letters, digits or dashes.</summary>
+    public const string VatRateCodeInvalid = "vat_rate.code_invalid";
+
+    /// <summary>The VAT rate name is blank.</summary>
+    public const string VatRateNameRequired = "vat_rate.name_required";
+
+    /// <summary>A VAT percent is not within 0–100.</summary>
+    public const string VatPercentOutOfRange = "vat.percent_out_of_range";
+
+    /// <summary>The tariff component name is blank.</summary>
+    public const string TariffNameRequired = "tariff.name_required";
+
+    /// <summary>The tariff component name is longer than 100 characters.</summary>
+    public const string TariffNameTooLong = "tariff.name_too_long";
+
+    /// <summary>The tariff component has no contract.</summary>
+    public const string TariffContractRequired = "tariff.contract_required";
+
+    /// <summary>Neither a VAT code nor a VAT percent override is set.</summary>
+    public const string TariffVatRequired = "tariff.vat_required";
+
+    /// <summary>The tariff component has no active rate.</summary>
+    public const string TariffRateRequired = "tariff.rate_required";
+
+    /// <summary>A price is negative.</summary>
+    public const string TariffPriceNegative = "tariff.price_negative";
+
+    /// <summary>The rate has tiers but no tier period.</summary>
+    public const string TariffTierPeriodRequired = "tariff.tier_period_required";
+
+    /// <summary>The last tier is not unlimited.</summary>
+    public const string TariffTierLastNotUnlimited = "tariff.tier_last_not_unlimited";
+
+    /// <summary>Tier bounds are not ascending, or a tier other than the last is unlimited.</summary>
+    public const string TariffTierOrderInvalid = "tariff.tier_order_invalid";
+
+    /// <summary>Register kinds or meters are set for a basis that does not use them.</summary>
+    public const string TariffSelectionNotAllowed = "tariff.selection_not_allowed";
+
+    /// <summary>A net export component counts a register other than Export.</summary>
+    public const string TariffNetExportRegister = "tariff.net_export_register";
 }

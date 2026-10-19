@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-005 | Reading-window fallback fix, VAT catalog, tariffs | Ready | | |
+| T-005 | Reading-window fallback fix, VAT catalog, tariffs | In review | | 62 new tests (259 total in Core). Window fallback: late reading preferred over early one. |
 
 ## Done
 
