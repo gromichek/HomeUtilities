@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-004 | Meters, registers, readings, consumption calculator | Ready | | |
+| T-004 | Meters, registers, readings, consumption calculator | In review | | 88 new tests (200 total). See PR for decisions. |
 
 ## Done
 

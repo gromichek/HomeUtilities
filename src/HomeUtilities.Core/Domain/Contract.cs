@@ -92,10 +92,6 @@ public class Contract : SyncEntity
             return null;
         }
 
-        var toPeriod = from <= to ? period : period.AddMonths(1);
-        return (Clamp(period, from), Clamp(toPeriod, to));
+        return ReadingWindow.For(period, from, to);
     }
-
-    private static DateOnly Clamp(YearMonth month, int day) =>
-        new(month.Year, month.Month, Math.Min(day, month.LastDay.Day));
 }
