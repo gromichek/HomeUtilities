@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-001 | Solution skeleton, MAUI shell, localization, CI | Ready | | |
+| T-001 | Solution skeleton, MAUI shell, localization, CI | In review | _see PR_ | App (Android/Windows) could not be built in the sandbox; verified by CI. |
 
 ## Done
 
