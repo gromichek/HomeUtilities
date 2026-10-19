@@ -53,4 +53,61 @@ public static class ErrorCodes
 
     /// <summary>Only one of the two reading window days is set.</summary>
     public const string ContractReadingWindowIncomplete = "contract.reading_window_incomplete";
+
+    /// <summary>The meter has no property.</summary>
+    public const string MeterPropertyRequired = "meter.property_required";
+
+    /// <summary>The number of dial digits is not within 1–12.</summary>
+    public const string MeterDigitsOutOfRange = "meter.digits_out_of_range";
+
+    /// <summary>The meter is removed before it is installed.</summary>
+    public const string MeterRemovedBeforeInstalled = "meter.removed_before_installed";
+
+    /// <summary>The verification interval is not within 1–600 months.</summary>
+    public const string MeterVerificationIntervalOutOfRange = "meter.verification_interval_out_of_range";
+
+    /// <summary>The meter has no register.</summary>
+    public const string MeterRegisterRequired = "meter.register_required";
+
+    /// <summary>Two registers of the meter share the same kind and direction.</summary>
+    public const string MeterDuplicateRegister = "meter.duplicate_register";
+
+    /// <summary>An Export register must have Export direction and vice versa.</summary>
+    public const string MeterExportDirectionMismatch = "meter.export_direction_mismatch";
+
+    /// <summary>The unit does not fit the resource.</summary>
+    public const string MeterUnitIncompatible = "meter.unit_incompatible";
+
+    /// <summary>The reading value is negative.</summary>
+    public const string MeterReadingValueNegative = "meter_reading.value_negative";
+
+    /// <summary>The reading date is outside the period the meter was installed.</summary>
+    public const string MeterReadingDateOutsideInstallation = "meter_reading.date_outside_installation";
+
+    /// <summary>The register already has an Initial reading.</summary>
+    public const string MeterReadingDuplicateInitial = "meter_reading.duplicate_initial";
+
+    /// <summary>The Initial reading is not the earliest of the register.</summary>
+    public const string MeterReadingInitialNotEarliest = "meter_reading.initial_not_earliest";
+
+    /// <summary>The register already has a Final reading.</summary>
+    public const string MeterReadingDuplicateFinal = "meter_reading.duplicate_final";
+
+    /// <summary>The Final reading is not the latest of the register.</summary>
+    public const string MeterReadingFinalNotLatest = "meter_reading.final_not_latest";
+
+    /// <summary>The Final reading is not dated on the day the meter was removed.</summary>
+    public const string MeterReadingFinalDateMismatch = "meter_reading.final_date_mismatch";
+
+    /// <summary>Another reading of the same kind exists on the same date.</summary>
+    public const string MeterReadingDuplicateOnDate = "meter_reading.duplicate_on_date";
+
+    /// <summary>The link has no contract.</summary>
+    public const string ContractMeterContractRequired = "contract_meter.contract_required";
+
+    /// <summary>The link has no meter.</summary>
+    public const string ContractMeterMeterRequired = "contract_meter.meter_required";
+
+    /// <summary>The link ends before it starts.</summary>
+    public const string ContractMeterValidToBeforeValidFrom = "contract_meter.valid_to_before_valid_from";
 }
