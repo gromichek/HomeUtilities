@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-003 | Properties, suppliers, links, contracts | Ready | | |
+| T-003 | Properties, suppliers, links, contracts | In review | | 57 new tests in Core.Tests (109 total). See PR for decisions. |
 
 ## Done
 
