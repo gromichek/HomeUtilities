@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-002 | Domain base types | Ready | | |
+| T-002 | Domain base types | In review | | Core types + 52 new tests; all green locally. |
 
 ## Done
 
