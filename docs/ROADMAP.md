@@ -9,7 +9,7 @@ is written; the list below is the plan and will change.
 ## Phase 1 — Domain core (no UI, no DB)
 - T-002 Base types: `SyncEntity`, `YearMonth`, `Versioned<T>`, `MoneyMath`, `Currency`, `IClock`
 - T-003 Properties, parameters, suppliers, links, contracts (entities + validation)
-- T-004 Meters, registers, readings + `ConsumptionCalculator` (rollover, replacement, anomalies)
+- T-004 Meters, registers, readings, `ContractMeter` + `ConsumptionCalculator` (rollover, replacement, anomalies)
 - T-005 VAT catalog, tariff components, rates, tiers
 - T-006 `ChargeCalculator` for all bases (PerUnit, PerArea, PerResident, FixedMonthly, FromBill, NetExport)
 - T-007 Bills, payments, allocations, balances, equalized plans
