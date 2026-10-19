@@ -7,13 +7,16 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-002 | Domain base types | In review | | Core types + 52 new tests; all green locally. |
+| T-003 | Properties, suppliers, links, contracts | Ready | | |
 
 ## Done
 
 | Task | Title | Merged | Notes |
 |---|---|---|---|
 | T-001 | Solution skeleton, MAUI shell, localization, CI | 2026-10-19, #1 | App not buildable in the cloud sandbox (Android SDK download blocked); Android + Windows builds verified by CI. |
+| — | Docs: Android tablet, adaptive layouts | 2026-10-19, #2 | ARCHITECTURE §4.9 |
+| T-002 | Domain base types | 2026-10-19, #3 | 52 new tests. `Versioned.At` returns the first item on duplicate ValidFrom; `Validate` flags it. |
+| — | Windows first TFM on Windows hosts | 2026-10-19, #4 | VS defaults to Windows Machine |
 
 ## Known issues / tech debt
 
@@ -27,4 +30,4 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Date | Build / PR | What was tested | Result |
 |---|---|---|---|
-| | #1 | Start on Windows, language switch, language kept after restart | pending |
+| 2026-10-19 | #1 | Start on Windows and Android emulator | OK (VS framework selection needed, fixed by #4) |
