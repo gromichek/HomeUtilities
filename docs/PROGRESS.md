@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-005 | Reading-window fallback fix, VAT catalog, tariffs | In review | | 62 new tests (259 total in Core). Window fallback: late reading preferred over early one. |
+| T-006 | Charge calculator | Ready | | |
 
 ## Done
 
@@ -19,6 +19,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 | — | Windows first TFM on Windows hosts | 2026-10-19, #4 | VS defaults to Windows Machine |
 | T-003 | Properties, suppliers, links, contracts | 2026-10-19, #6 | 57 new tests (109 total). Deleted contract link does not override supplier link. |
 | T-004 | Meters, readings, consumption calculator | 2026-10-19, #8 | 88 new tests (197 total). Window fallback refined in T-005. Replacement meter does not copy Digits/SerialNumber (UI pre-fills). |
+| T-005 | Window fallback fix, VAT catalog, tariffs | 2026-10-19, #10 | 62 new tests (259 total). LV VAT defaults to be verified by owner. |
 
 ## Known issues / tech debt
 
