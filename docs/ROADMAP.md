@@ -22,6 +22,7 @@ is written; the list below is the plan and will change.
 ## Phase 3 — First usable app (reference data + readings)
 - T-011 App shell, navigation, DI, settings page with language switch, adaptive layout infrastructure (compact/medium/expanded)
 - T-012 Properties: list + edit (+ parameters)
+- T-012a Apply UI guidelines (platform icons, button hierarchy, standard dialogs, Back), rework Properties
 - T-013 Suppliers (links open in browser, payment details with copy) and categories screens
 - T-014 Contracts: list per property + edit (supplier, category, timing, reading window, custom fields, links, payment details override)
 - T-015 Meters: list + edit, replacement wizard, verification due
