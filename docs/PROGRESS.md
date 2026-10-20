@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-011 | App shell, navigation, settings, adaptive layout | Ready | | |
+| T-012 | Properties — list, edit, parameters, shared UI patterns | Ready | | |
 
 ## Done
 
@@ -27,12 +27,12 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-008 | Bills, custom fields, payments, allocations, balances | 2026-10-20, #17 | 103 new tests (472 total). BillLine/PaymentAllocation are SyncEntities. Equalized plans moved to T-020. |
 | T-009 | EF Core persistence | 2026-10-20, #19 | 33 Data tests. ClientCascade for child collections (DB FKs stay RESTRICT). `Pay_Present` shadow column. |
 | T-010 | Data stores, seed data, database in the App | 2026-10-20, #21 | 29 Data + 5 VM tests. Stores are singletons over a context factory. Owner manual test pending. |
+| — | Docs: payment status, Paid quick action, undo | 2026-10-20, #23, #25 | `Payment.CreatedByQuickAction` planned for T-018 |
+| T-011 | App shell, navigation, settings, adaptive layout | 2026-10-20, #24 | 16 new VM tests (558 total). Messenger-based language refresh. |
 
 ## Known issues / tech debt
 
-- `MainViewModel` subscribes to `ILanguageService.LanguageChanged` and never unsubscribes while being
-  registered as transient. Harmless with a single page; resolve when navigation is introduced (T-011),
-  e.g. weak-reference messenger or `IDisposable` view models.
+- `ViewModelBase` uses `WeakReferenceMessenger.RegisterAll` (reflection) — check Android release trimming; switch to explicit `Register<T>` if it breaks.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
 - `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — pick up in T-013.
@@ -49,3 +49,4 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 |---|---|---|---|
 | 2026-10-19 | #1 | Start on Windows and Android emulator | OK (VS framework selection needed, fixed by #4) |
 | | #21 | Database created + seeded on Windows / Android, no duplicates after restart | pending |
+| | #24 | Shell menu, settings (language, theme), adaptive layout on Windows / phone / tablet | pending |
