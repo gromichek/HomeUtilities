@@ -12,6 +12,12 @@ public sealed class ResxLocalizer : ILocalizer
     public string this[string key] =>
         _resources.GetString(key, CultureInfo.CurrentUICulture) ?? $"!{key}!";
 
+    public bool TryGet(string key, out string value)
+    {
+        value = _resources.GetString(key, CultureInfo.CurrentUICulture) ?? string.Empty;
+        return value.Length > 0;
+    }
+
     public string Get(string key, params object[] args) =>
         string.Format(CultureInfo.CurrentCulture, this[key], args);
 }
