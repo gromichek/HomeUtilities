@@ -24,6 +24,15 @@ public class TariffComponent : SyncEntity
     /// <summary>Meters that are counted; empty means all contract meters. Only for PerUnit and NetExport.</summary>
     public List<Guid> MeterIds { get; set; } = [];
 
+    /// <summary>
+    /// Property parameter that gives the quantity of a PerArea or PerResident component. Null means the default:
+    /// <see cref="PropertyParameterKind.TotalArea"/> for PerArea, <see cref="PropertyParameterKind.DeclaredResidents"/> for PerResident.
+    /// </summary>
+    public PropertyParameterKind? QuantityParameter { get; set; }
+
+    /// <summary>Name of the custom parameter; required when <see cref="QuantityParameter"/> is <see cref="PropertyParameterKind.Custom"/>.</summary>
+    public string? QuantityParameterName { get; set; }
+
     /// <summary>Code of the VAT catalog entry; may be empty when <see cref="VatPercentOverride"/> is set.</summary>
     public string VatCode { get; set; } = string.Empty;
 

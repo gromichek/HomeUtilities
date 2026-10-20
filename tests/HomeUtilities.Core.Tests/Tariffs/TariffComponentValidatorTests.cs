@@ -193,4 +193,29 @@ public class TariffComponentValidatorTests
         c.RegisterKinds = [RegisterKind.Export, RegisterKind.Day];
         Assert.Equal([ErrorCodes.TariffNetExportRegister], Codes(c));
     }
+
+    [Theory]
+    [InlineData(ChargeBasis.PerArea, true)]
+    [InlineData(ChargeBasis.PerResident, true)]
+    [InlineData(ChargeBasis.PerUnit, false)]
+    [InlineData(ChargeBasis.FixedMonthly, false)]
+    public void Quantity_parameter_is_allowed_only_for_area_and_resident_bases(ChargeBasis basis, bool allowed)
+    {
+        var c = Valid();
+        c.Basis = basis;
+        c.QuantityParameter = PropertyParameterKind.HeatedArea;
+
+        Assert.Equal(allowed ? [] : [ErrorCodes.TariffQuantityParameterNotAllowed], Codes(c));
+    }
+
+    [Fact]
+    public void Custom_quantity_parameter_requires_a_name()
+    {
+        var c = Valid();
+        c.Basis = ChargeBasis.PerArea;
+        c.QuantityParameter = PropertyParameterKind.Custom;
+        Assert.Equal([ErrorCodes.TariffQuantityParameterNameRequired], Codes(c));
+        c.QuantityParameterName = "Parking places";
+        Assert.True(TariffComponentValidator.Validate(c).IsValid);
+    }
 }

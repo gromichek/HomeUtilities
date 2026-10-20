@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-006 | Charge calculator | Ready | | |
+| T-006 | Charge calculator | In review | | 36 new tests (295 total). `TariffComponent.QuantityParameter(Name)` added. Extra warning code `NoMeters`. |
 | T-007 | User categories, payment details, comments | Ready (after T-006) | | |
 
 ## Done

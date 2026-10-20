@@ -152,4 +152,10 @@ public static class ErrorCodes
 
     /// <summary>A net export component counts a register other than Export.</summary>
     public const string TariffNetExportRegister = "tariff.net_export_register";
+
+    /// <summary>A quantity parameter is set for a basis other than PerArea or PerResident.</summary>
+    public const string TariffQuantityParameterNotAllowed = "tariff.quantity_parameter_not_allowed";
+
+    /// <summary>A custom quantity parameter has no name.</summary>
+    public const string TariffQuantityParameterNameRequired = "tariff.quantity_parameter_name_required";
 }

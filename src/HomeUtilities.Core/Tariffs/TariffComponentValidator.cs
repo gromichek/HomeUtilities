@@ -73,6 +73,20 @@ public static class TariffComponentValidator
         {
             errors.Add(new(ErrorCodes.TariffNetExportRegister, nameof(TariffComponent.RegisterKinds)));
         }
+
+        if (component.QuantityParameter is not { } parameter)
+        {
+            return;
+        }
+
+        if (component.Basis is not (ChargeBasis.PerArea or ChargeBasis.PerResident))
+        {
+            errors.Add(new(ErrorCodes.TariffQuantityParameterNotAllowed, nameof(TariffComponent.QuantityParameter)));
+        }
+        else if (parameter == PropertyParameterKind.Custom && string.IsNullOrWhiteSpace(component.QuantityParameterName))
+        {
+            errors.Add(new(ErrorCodes.TariffQuantityParameterNameRequired, nameof(TariffComponent.QuantityParameterName)));
+        }
     }
 
     private static void ValidateRate(TariffRate rate, string path, List<ValidationError> errors)
