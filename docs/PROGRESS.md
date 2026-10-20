@@ -7,8 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-012a | Apply UI guidelines, rework Properties screen | Ready | | owner feedback 2026-10-20 |
-| T-013 | Suppliers and categories screens | Ready (after T-012a) | | must follow UI_GUIDELINES.md |
+| T-013 | Suppliers and categories screens | Ready | | must follow UI_GUIDELINES.md |
 
 ## Done
 
@@ -32,6 +31,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-011 | App shell, navigation, settings, adaptive layout | 2026-10-20, #24 | 16 new VM tests (558 total). Messenger-based language refresh. |
 | — | Hotfixes: AppShell resources, startup language | 2026-10-20, #27, #28 | Startup-order rules added to CLAUDE.md |
 | T-012 | Properties screens + shared UI patterns | 2026-10-20, #29 | 63 new VM tests (618 total). Owner manual test pending. |
+| T-012a | UI guidelines applied, Properties reworked | 2026-10-20, #32 | Icon font replaced by lead with 330 KB static Material Icons. Owner manual test pending. |
 
 ## Known issues / tech debt
 
@@ -44,6 +44,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
 - `AggregateMerger` adds new children via `db.Add` — UI must set the child's FK (e.g. `PropertyParameter.PropertyId`) before saving.
 - Saving an id that exists only as a soft-deleted row is not supported (resurrect needed for sync, T-030).
+- **Flaky test**: linux CI `Test` step failed once on PR #32 and passed on re-run without code changes (logs not accessible to the lead). Next coding session: run the suite several times, look for tests depending on real time, culture or async timing.
+- Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
@@ -55,3 +57,4 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-20 | #24 | Start on Windows / Android | **Crash**: `StaticResource not found for key PrimaryLight` (AppShell built before App resources) — fixed in hotfix PR |
 | 2026-10-20 | #27 | Restart with Russian selected | **Bug**: menu in English, Settings in Russian (LanguageService created lazily after Shell) — fixed in hotfix PR |
 | 2026-10-20 | #28 + #29 | Shell, settings, Properties on Windows + Android | Works. **Usability**: identical buttons, unclear grouping, non-standard dialog texts; **Android bugs**: Kind picker empty, Back did not leave the editor (after archive toggle), stray "≡" button → T-012a |
+| | #32 | Properties reworked (icons, buttons, dialogs, Back, Kind picker) on Windows + Android | pending |
