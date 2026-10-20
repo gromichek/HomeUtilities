@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-008 | Bills, custom fields, payments, allocations, balances | Ready | | |
+| T-009 | EF Core persistence: DbContext, mappings, soft delete, migration | Ready | | |
 
 ## Done
 
@@ -24,6 +24,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Docs: categories, payment details, comments | 2026-10-20, #12 | |
 | — | Docs: agreed payment types (PAYMENT_TYPES.md) | 2026-10-20, #14 | custom fields confirmed afterwards |
 | T-007 | User categories, payment details, comments | 2026-10-20, #15 | 74 new tests (369 total). 4-meter water test included. |
+| T-008 | Bills, custom fields, payments, allocations, balances | 2026-10-20, #17 | 103 new tests (472 total). BillLine/PaymentAllocation are SyncEntities. Equalized plans moved to T-020. |
 
 ## Known issues / tech debt
 
@@ -32,6 +33,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   e.g. weak-reference messenger or `IDisposable` view models.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
+- `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — pick up in T-013.
 
 ## Manual test log (owner)
 

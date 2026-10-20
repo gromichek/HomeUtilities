@@ -13,11 +13,11 @@ is written; the list below is the plan and will change.
 - T-005 VAT catalog, tariff components, rates, tiers
 - T-006 `ChargeCalculator` for all bases (PerUnit, PerArea, PerResident, FixedMonthly, FromBill, NetExport)
 - T-007 User categories, payment details (IBAN, purpose template), comments on all entities
-- T-008 Bills (incl. one-off, service period, custom fields), payments, allocations, balances, equalized plans
+- T-008 Bills (incl. one-off, service period, custom fields), payments, allocations, balances
 
 ## Phase 2 — Persistence
 - T-009 EF Core DbContext, configurations, first migration, `SyncEntity` interceptor (timestamps, soft delete)
-- T-010 Repositories + seed data (VAT history, service kinds), Data tests on SQLite in-memory
+- T-010 Repositories / unit of work, seed data (VAT history, built-in categories), App DI + migration at startup
 
 ## Phase 3 — First usable app (reference data + readings)
 - T-011 App shell, navigation, DI, settings page with language switch, adaptive layout infrastructure (compact/medium/expanded)
