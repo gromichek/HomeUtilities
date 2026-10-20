@@ -17,9 +17,6 @@
                HorizontalOptions="Center" />
         <Label Text="{Binding DatabaseStatusText}"
                HorizontalOptions="Center" />
-        <Button Text="{Binding SwitchLanguageText}"
-                Command="{Binding ToggleLanguageCommand}"
-                HorizontalOptions="Center" />
     </VerticalStackLayout>
 
 </views:PageBase>

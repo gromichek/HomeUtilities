@@ -18,18 +18,6 @@ public class OverviewViewModelTests
     }
 
     [Fact]
-    public void ToggleLanguage_SwitchesEnToRuToEn()
-    {
-        var vm = CreateViewModel(out var language, out _, out _);
-
-        vm.ToggleLanguageCommand.Execute(null);
-        Assert.Equal("ru", language.CurrentLanguage);
-
-        vm.ToggleLanguageCommand.Execute(null);
-        Assert.Equal("en", language.CurrentLanguage);
-    }
-
-    [Fact]
     public void Title_IsRefreshedAfterLanguageChanged()
     {
         var vm = CreateViewModel(out var language, out _, out _);
@@ -105,7 +93,6 @@ public class OverviewViewModelTests
         return new OverviewViewModel(
             new FakeLocalizer(language),
             clock,
-            language,
             initializer,
             new FakeCategoryStore(16),
             new FakeVatRateStore(3));
@@ -185,6 +172,12 @@ public class OverviewViewModelTests
             "AppTitle" => $"Home utilities [{language.CurrentLanguage}]",
             _ => $"{key} [{language.CurrentLanguage}]",
         };
+
+        public bool TryGet(string key, out string value)
+        {
+            value = this[key];
+            return true;
+        }
 
         public string Get(string key, params object[] args) => key switch
         {

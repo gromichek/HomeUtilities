@@ -6,7 +6,6 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppTitle" xml:space="preserve"><value>Home utilities</value></data>
   <data name="StartPageHint" xml:space="preserve"><value>Nothing here yet.</value></data>
-  <data name="SwitchLanguage" xml:space="preserve"><value>Русский</value></data>
   <data name="TodayIs" xml:space="preserve"><value>Today is {0:d}</value></data>
   <data name="DatabaseStarting" xml:space="preserve"><value>Opening database…</value></data>
   <data name="DatabaseReady" xml:space="preserve"><value>Database ready: {0} categories, {1} VAT rates</value></data>
@@ -33,4 +32,62 @@
   <data name="Layout_Medium" xml:space="preserve"><value>tablet</value></data>
   <data name="Layout_Expanded" xml:space="preserve"><value>desktop</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Discard" xml:space="preserve"><value>Discard</value></data>
+  <data name="KeepEditing" xml:space="preserve"><value>Keep editing</value></data>
+  <data name="DiscardChangesTitle" xml:space="preserve"><value>Discard changes?</value></data>
+  <data name="DiscardChangesMessage" xml:space="preserve"><value>Your changes have not been saved.</value></data>
+  <data name="DeleteConfirmTitle" xml:space="preserve"><value>Confirm deletion</value></data>
+  <data name="Error_Generic" xml:space="preserve"><value>Invalid value</value></data>
+  <data name="Error_common_notes_too_long" xml:space="preserve"><value>The comment is longer than {0} characters.</value></data>
+  <data name="Error_common_number_invalid" xml:space="preserve"><value>Enter a number.</value></data>
+  <data name="Error_property_name_required" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="Error_property_name_too_long" xml:space="preserve"><value>The name is longer than {0} characters.</value></data>
+  <data name="Error_property_parameter_value_negative" xml:space="preserve"><value>The value cannot be negative.</value></data>
+  <data name="Error_property_parameter_residents_not_whole" xml:space="preserve"><value>The number of residents must be a whole number.</value></data>
+  <data name="Error_property_parameter_name_required" xml:space="preserve"><value>Enter a name for the parameter.</value></data>
+  <data name="Error_versioned_duplicate_valid_from" xml:space="preserve"><value>There is already a value valid from {0:d}.</value></data>
+  <data name="Enum_PropertyKind_House" xml:space="preserve"><value>House</value></data>
+  <data name="Enum_PropertyKind_Apartment" xml:space="preserve"><value>Apartment</value></data>
+  <data name="Enum_PropertyKind_Cottage" xml:space="preserve"><value>Cottage</value></data>
+  <data name="Enum_PropertyKind_Garage" xml:space="preserve"><value>Garage</value></data>
+  <data name="Enum_PropertyKind_Land" xml:space="preserve"><value>Land</value></data>
+  <data name="Enum_PropertyKind_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Enum_PropertyParameterKind_TotalArea" xml:space="preserve"><value>Total area (m²)</value></data>
+  <data name="Enum_PropertyParameterKind_HeatedArea" xml:space="preserve"><value>Heated area (m²)</value></data>
+  <data name="Enum_PropertyParameterKind_DeclaredResidents" xml:space="preserve"><value>Declared residents</value></data>
+  <data name="Enum_PropertyParameterKind_LandArea" xml:space="preserve"><value>Land area (m²)</value></data>
+  <data name="Enum_PropertyParameterKind_CadastralValueBuilding" xml:space="preserve"><value>Cadastral value, building</value></data>
+  <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Cadastral value, land</value></data>
+  <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="PropertiesEmpty" xml:space="preserve"><value>No properties yet. Add your first one.</value></data>
+  <data name="PropertyAdd" xml:space="preserve"><value>Add</value></data>
+  <data name="PropertiesShowArchived" xml:space="preserve"><value>Show archived</value></data>
+  <data name="PropertyArchivedBadge" xml:space="preserve"><value>Archived</value></data>
+  <data name="PropertySelectHint" xml:space="preserve"><value>Select a property or add a new one.</value></data>
+  <data name="PropertySummaryResidents" xml:space="preserve"><value>Residents: {0}</value></data>
+  <data name="PropertySummaryArea" xml:space="preserve"><value>Area: {0} m²</value></data>
+  <data name="PropertyNew" xml:space="preserve"><value>New property</value></data>
+  <data name="PropertyName" xml:space="preserve"><value>Name</value></data>
+  <data name="PropertyKindLabel" xml:space="preserve"><value>Kind</value></data>
+  <data name="PropertyAddress" xml:space="preserve"><value>Address</value></data>
+  <data name="PropertyNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="PropertyArchived" xml:space="preserve"><value>Archived (hidden from the list)</value></data>
+  <data name="PropertyDeleteMessage" xml:space="preserve"><value>Delete «{0}»? History is kept but hidden.</value></data>
+  <data name="ParametersHeader" xml:space="preserve"><value>Parameters</value></data>
+  <data name="ParametersEmpty" xml:space="preserve"><value>No parameters yet.</value></data>
+  <data name="ParameterAdd" xml:space="preserve"><value>Add parameter</value></data>
+  <data name="ParameterKind" xml:space="preserve"><value>Parameter</value></data>
+  <data name="ParameterName" xml:space="preserve"><value>Name</value></data>
+  <data name="ParameterValue" xml:space="preserve"><value>Value</value></data>
+  <data name="ParameterValidFrom" xml:space="preserve"><value>Valid from</value></data>
+  <data name="ParameterNote" xml:space="preserve"><value>Note</value></data>
+  <data name="ParameterCurrent" xml:space="preserve"><value>Current: {0}</value></data>
+  <data name="ParameterNoCurrent" xml:space="preserve"><value>No value valid today</value></data>
+  <data name="ParameterRow" xml:space="preserve"><value>{0} from {1:d}</value></data>
+  <data name="ParameterRemoveMessage" xml:space="preserve"><value>Remove this value ({0})?</value></data>
 </root>

@@ -6,7 +6,6 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppTitle" xml:space="preserve"><value>Коммунальные платежи</value></data>
   <data name="StartPageHint" xml:space="preserve"><value>Здесь пока пусто.</value></data>
-  <data name="SwitchLanguage" xml:space="preserve"><value>English</value></data>
   <data name="TodayIs" xml:space="preserve"><value>Сегодня {0:d}</value></data>
   <data name="DatabaseStarting" xml:space="preserve"><value>Открываю базу данных…</value></data>
   <data name="DatabaseReady" xml:space="preserve"><value>База данных готова: категорий {0}, ставок НДС {1}</value></data>
@@ -33,4 +32,62 @@
   <data name="Layout_Medium" xml:space="preserve"><value>планшет</value></data>
   <data name="Layout_Expanded" xml:space="preserve"><value>компьютер</value></data>
   <data name="Cancel" xml:space="preserve"><value>Отмена</value></data>
+  <data name="Save" xml:space="preserve"><value>Сохранить</value></data>
+  <data name="Delete" xml:space="preserve"><value>Удалить</value></data>
+  <data name="Edit" xml:space="preserve"><value>Изменить</value></data>
+  <data name="Remove" xml:space="preserve"><value>Убрать</value></data>
+  <data name="Apply" xml:space="preserve"><value>Применить</value></data>
+  <data name="Discard" xml:space="preserve"><value>Отбросить</value></data>
+  <data name="KeepEditing" xml:space="preserve"><value>Продолжить</value></data>
+  <data name="DiscardChangesTitle" xml:space="preserve"><value>Отбросить изменения?</value></data>
+  <data name="DiscardChangesMessage" xml:space="preserve"><value>Изменения не сохранены.</value></data>
+  <data name="DeleteConfirmTitle" xml:space="preserve"><value>Подтвердите удаление</value></data>
+  <data name="Error_Generic" xml:space="preserve"><value>Неверное значение</value></data>
+  <data name="Error_common_notes_too_long" xml:space="preserve"><value>Комментарий длиннее {0} символов.</value></data>
+  <data name="Error_common_number_invalid" xml:space="preserve"><value>Введите число.</value></data>
+  <data name="Error_property_name_required" xml:space="preserve"><value>Введите название.</value></data>
+  <data name="Error_property_name_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
+  <data name="Error_property_parameter_value_negative" xml:space="preserve"><value>Значение не может быть отрицательным.</value></data>
+  <data name="Error_property_parameter_residents_not_whole" xml:space="preserve"><value>Число жильцов должно быть целым.</value></data>
+  <data name="Error_property_parameter_name_required" xml:space="preserve"><value>Введите название параметра.</value></data>
+  <data name="Error_versioned_duplicate_valid_from" xml:space="preserve"><value>Значение, действующее с {0:d}, уже есть.</value></data>
+  <data name="Enum_PropertyKind_House" xml:space="preserve"><value>Дом</value></data>
+  <data name="Enum_PropertyKind_Apartment" xml:space="preserve"><value>Квартира</value></data>
+  <data name="Enum_PropertyKind_Cottage" xml:space="preserve"><value>Дача</value></data>
+  <data name="Enum_PropertyKind_Garage" xml:space="preserve"><value>Гараж</value></data>
+  <data name="Enum_PropertyKind_Land" xml:space="preserve"><value>Земельный участок</value></data>
+  <data name="Enum_PropertyKind_Other" xml:space="preserve"><value>Другое</value></data>
+  <data name="Enum_PropertyParameterKind_TotalArea" xml:space="preserve"><value>Общая площадь (м²)</value></data>
+  <data name="Enum_PropertyParameterKind_HeatedArea" xml:space="preserve"><value>Отапливаемая площадь (м²)</value></data>
+  <data name="Enum_PropertyParameterKind_DeclaredResidents" xml:space="preserve"><value>Заявленные жильцы</value></data>
+  <data name="Enum_PropertyParameterKind_LandArea" xml:space="preserve"><value>Площадь участка (м²)</value></data>
+  <data name="Enum_PropertyParameterKind_CadastralValueBuilding" xml:space="preserve"><value>Кадастровая стоимость, здание</value></data>
+  <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Кадастровая стоимость, земля</value></data>
+  <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Другой параметр</value></data>
+  <data name="PropertiesEmpty" xml:space="preserve"><value>Объектов пока нет. Добавьте первый.</value></data>
+  <data name="PropertyAdd" xml:space="preserve"><value>Добавить</value></data>
+  <data name="PropertiesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
+  <data name="PropertyArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
+  <data name="PropertySelectHint" xml:space="preserve"><value>Выберите объект или добавьте новый.</value></data>
+  <data name="PropertySummaryResidents" xml:space="preserve"><value>Жильцов: {0}</value></data>
+  <data name="PropertySummaryArea" xml:space="preserve"><value>Площадь: {0} м²</value></data>
+  <data name="PropertyNew" xml:space="preserve"><value>Новый объект</value></data>
+  <data name="PropertyName" xml:space="preserve"><value>Название</value></data>
+  <data name="PropertyKindLabel" xml:space="preserve"><value>Тип</value></data>
+  <data name="PropertyAddress" xml:space="preserve"><value>Адрес</value></data>
+  <data name="PropertyNotes" xml:space="preserve"><value>Заметки</value></data>
+  <data name="PropertyArchived" xml:space="preserve"><value>В архиве (скрыт из списка)</value></data>
+  <data name="PropertyDeleteMessage" xml:space="preserve"><value>Удалить «{0}»? История сохранится, но будет скрыта.</value></data>
+  <data name="ParametersHeader" xml:space="preserve"><value>Параметры</value></data>
+  <data name="ParametersEmpty" xml:space="preserve"><value>Параметров пока нет.</value></data>
+  <data name="ParameterAdd" xml:space="preserve"><value>Добавить параметр</value></data>
+  <data name="ParameterKind" xml:space="preserve"><value>Параметр</value></data>
+  <data name="ParameterName" xml:space="preserve"><value>Название</value></data>
+  <data name="ParameterValue" xml:space="preserve"><value>Значение</value></data>
+  <data name="ParameterValidFrom" xml:space="preserve"><value>Действует с</value></data>
+  <data name="ParameterNote" xml:space="preserve"><value>Примечание</value></data>
+  <data name="ParameterCurrent" xml:space="preserve"><value>Сейчас: {0}</value></data>
+  <data name="ParameterNoCurrent" xml:space="preserve"><value>Сегодня нет действующего значения</value></data>
+  <data name="ParameterRow" xml:space="preserve"><value>{0} с {1:d}</value></data>
+  <data name="ParameterRemoveMessage" xml:space="preserve"><value>Убрать это значение ({0})?</value></data>
 </root>
