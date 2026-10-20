@@ -300,7 +300,7 @@ is allowed (`Net`, `VatPercent`, `Vat` stay null). Invariant when all set: `Net 
 `Name`, `Kind` (Text, Number, Money, Date), `AppliesTo` (Bill, BillLine), `SortOrder`.
 **CustomFieldValue**: `DefinitionId?`, `Name` (kept even if the definition is removed), `Kind`, `Value`
 (string, invariant format). Example: "Meter reading on bill", "Losses m³", "Supplier's reference".
-*(Pending owner confirmation, 2026-10-20.)*
+*(Confirmed by the owner, 2026-10-20.)* Number and Money fields can be summed in reports.
 
 Derived (not stored): `Difference = Gross − CalculatedSnapshot.TotalGross`; `OpenAmount = Gross − allocations`;
 `IsOverdue = OpenAmount > 0 && DueOn < today`; `PerResident = Gross / DeclaredResidents` (shown for waste).
