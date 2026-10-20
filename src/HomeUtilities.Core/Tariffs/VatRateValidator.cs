@@ -26,6 +26,8 @@ public static partial class VatRateValidator
             errors.Add(new(ErrorCodes.VatRateNameRequired, nameof(VatRate.Name)));
         }
 
+        ValidationHelpers.CheckNotes(errors, rate.Notes, nameof(VatRate.Notes));
+
         for (var i = 0; i < rate.Versions.Count; i++)
         {
             var version = rate.Versions[i];

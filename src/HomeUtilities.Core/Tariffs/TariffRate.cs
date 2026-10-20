@@ -25,4 +25,7 @@ public class TariffRate : SyncEntity, IVersioned
 
     /// <summary>Period over which tier thresholds accumulate; required when there are tiers.</summary>
     public TierPeriod? TierPeriod { get; set; }
+
+    /// <summary>Free-form notes.</summary>
+    public string? Notes { get; set; }
 }

@@ -8,6 +8,7 @@ namespace HomeUtilities.Core.Charges;
 /// <param name="ComponentId">The tariff component.</param>
 /// <param name="ComponentName">Name of the component.</param>
 /// <param name="ChargeKind">Service the line counts toward.</param>
+/// <param name="CategoryId">Category of the line: the component's, else the contract's.</param>
 /// <param name="Basis">Basis of the component.</param>
 /// <param name="Quantity">Charged quantity (negative for net export); null if it is not known or not applicable.</param>
 /// <param name="UnitPrice">Unit price as given by the rate; null if not known or not applicable.</param>
@@ -22,6 +23,7 @@ public sealed record ChargeLine(
     Guid ComponentId,
     string ComponentName,
     ServiceKind ChargeKind,
+    Guid CategoryId,
     ChargeBasis Basis,
     decimal? Quantity,
     decimal? UnitPrice,

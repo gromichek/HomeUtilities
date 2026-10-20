@@ -68,7 +68,7 @@ public static class ChargeCalculator
         if (component.Basis == ChargeBasis.FromBill)
         {
             var percent = TryResolveVat(component, input.VatCatalog, period.FirstDay) ?? 0m;
-            return [Line(component, null, null, (0m, 0m, 0m), percent, fromBill: true, complete: true, [])];
+            return [Line(input, component, null, null, (0m, 0m, 0m), percent, fromBill: true, complete: true, [])];
         }
 
         var isMetered = component.Basis is ChargeBasis.PerUnit or ChargeBasis.NetExport;
@@ -79,7 +79,7 @@ public static class ChargeCalculator
         List<ChargeLine> Failed(string code, params object?[] args)
         {
             warnings.Add(new ChargeWarning(code, component.Id, args.Length == 0 ? null : args));
-            return [Line(component, null, null, (0m, 0m, 0m), 0m, fromBill: false, complete: false, consumption)];
+            return [Line(input, component, null, null, (0m, 0m, 0m), 0m, fromBill: false, complete: false, consumption)];
         }
 
         var rate = component.RateAt(rateDate);
@@ -134,17 +134,18 @@ public static class ChargeCalculator
                 throw new ArgumentOutOfRangeException(nameof(component), component.Basis, "Unsupported charge basis.");
         }
 
-        return [Priced(component, rate, quantity, rate.Price, vatPercent, complete, consumption)];
+        return [Priced(input, component, rate, quantity, rate.Price, vatPercent, complete, consumption)];
     }
 
-    private static ChargeLine Priced(TariffComponent component, TariffRate rate, decimal quantity, decimal unitPrice, decimal vatPercent, bool complete, IReadOnlyList<ConsumptionResult> consumption)
+    private static ChargeLine Priced(ChargeInput input, TariffComponent component, TariffRate rate, decimal quantity, decimal unitPrice, decimal vatPercent, bool complete, IReadOnlyList<ConsumptionResult> consumption)
     {
         var amount = quantity * unitPrice;
         var split = rate.PriceIncludesVat ? MoneyMath.FromGross(amount, vatPercent) : MoneyMath.FromNet(amount, vatPercent);
-        return Line(component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption);
+        return Line(input, component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption);
     }
 
     private static ChargeLine Line(
+        ChargeInput input,
         TariffComponent component,
         decimal? quantity,
         decimal? unitPrice,
@@ -157,6 +158,7 @@ public static class ChargeCalculator
             component.Id,
             component.Name,
             component.ChargeKind,
+            component.CategoryId ?? input.Contract.CategoryId,
             component.Basis,
             quantity,
             unitPrice,
@@ -287,6 +289,6 @@ public static class ChargeCalculator
             slices = [new PriceSlice(0m, rate.Tiers[0].Price)];
         }
 
-        return [.. slices.Select(s => Priced(component, rate, MoneyMath.RoundQuantity(s.Quantity), s.UnitPrice, vatPercent, metered.IsComplete, metered.Results))];
+        return [.. slices.Select(s => Priced(input, component, rate, MoneyMath.RoundQuantity(s.Quantity), s.UnitPrice, vatPercent, metered.IsComplete, metered.Results))];
     }
 }

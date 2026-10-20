@@ -3,6 +3,30 @@ namespace HomeUtilities.Core.Common;
 /// <summary>Validation error codes. The UI maps them to localized messages.</summary>
 public static class ErrorCodes
 {
+    /// <summary>A comment is longer than 2000 characters.</summary>
+    public const string NotesTooLong = "common.notes_too_long";
+
+    /// <summary>The contract has no category.</summary>
+    public const string ContractCategoryRequired = "contract.category_required";
+
+    /// <summary>A user category has no name.</summary>
+    public const string CategoryNameRequired = "category.name_required";
+
+    /// <summary>The category name is longer than 100 characters.</summary>
+    public const string CategoryNameTooLong = "category.name_too_long";
+
+    /// <summary>The category colour is not <c>#RRGGBB</c>.</summary>
+    public const string CategoryColorInvalid = "category.color_invalid";
+
+    /// <summary>The IBAN is not valid.</summary>
+    public const string PaymentIbanInvalid = "payment.iban_invalid";
+
+    /// <summary>The BIC is not 8 or 11 characters of the BIC format.</summary>
+    public const string PaymentBicInvalid = "payment.bic_invalid";
+
+    /// <summary>A payment detail is longer than 140 characters.</summary>
+    public const string PaymentFieldTooLong = "payment.field_too_long";
+
     /// <summary>Two versioned items share the same ValidFrom date.</summary>
     public const string DuplicateValidFrom = "versioned.duplicate_valid_from";
 

@@ -7,7 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-007 | User categories, payment details, comments | Ready | | |
+| T-007 | User categories, payment details, comments | In review | | 74 new tests (369 total). `PaymentDetails.Effective` lives on the record. |
 
 ## Done
 

@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Payments;
 
 namespace HomeUtilities.Core.Domain;
 
@@ -19,6 +20,9 @@ public class Supplier : SyncEntity
 
     /// <summary>Free-form notes.</summary>
     public string? Notes { get; set; }
+
+    /// <summary>Default bank details for payments to this supplier.</summary>
+    public PaymentDetails? PaymentDetails { get; set; }
 
     /// <summary>Web links of the supplier.</summary>
     public List<Link> Links { get; set; } = [];

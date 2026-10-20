@@ -11,6 +11,9 @@ public class VatRate : SyncEntity
     /// <summary>Display name.</summary>
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Free-form notes.</summary>
+    public string? Notes { get; set; }
+
     /// <summary>Percentages over time.</summary>
     public List<VatRateVersion> Versions { get; set; } = [];
 

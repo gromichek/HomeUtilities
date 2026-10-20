@@ -20,6 +20,8 @@ public static class PropertyValidator
             errors.Add(new(ErrorCodes.PropertyNameTooLong, nameof(Property.Name), [ValidationHelpers.MaxNameLength]));
         }
 
+        ValidationHelpers.CheckNotes(errors, property.Notes, nameof(Property.Notes));
+
         for (var i = 0; i < property.Parameters.Count; i++)
         {
             if (!property.Parameters[i].IsDeleted)

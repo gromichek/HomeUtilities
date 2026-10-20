@@ -506,4 +506,80 @@ public class ChargeCalculatorTests
 
         Assert.Single(b.Calculate(Sep2026).Lines);
     }
+
+    [Fact]
+    public void Line_category_is_the_component_category_when_set()
+    {
+        var b = new ChargeBuilder();
+        var own = b.Add("Own", ChargeBasis.FixedMonthly, 10m);
+        own.CategoryId = Guid.CreateVersion7();
+        b.Add("Inherited", ChargeBasis.FixedMonthly, 5m);
+
+        var charge = b.Calculate(Sep2026);
+
+        Assert.Equal([b.Contract.CategoryId, own.CategoryId!.Value], charge.Lines.Select(l => l.CategoryId));
+    }
+
+    [Fact]
+    public void Failed_and_from_bill_lines_also_carry_a_category()
+    {
+        var b = new ChargeBuilder();
+        b.Add("Bill", ChargeBasis.FromBill, 0m);
+        b.Add("Unpriced", ChargeBasis.FixedMonthly, 1m).Rates.Clear();
+
+        var charge = b.Calculate(Sep2026);
+
+        Assert.All(charge.Lines, l => Assert.Equal(b.Contract.CategoryId, l.CategoryId));
+    }
+
+    /// <summary>Two cold and two hot meters of one apartment, each 10 m3 higher than a month ago (cold 10, 20; hot 5, 7).</summary>
+    private static (ChargeBuilder Water, Meter Hot1, Meter Hot2) FourMeterFixture()
+    {
+        var b = new ChargeBuilder().Window(20, 26);
+        void Reading(Meter m, decimal from, decimal to)
+        {
+            m.Add(D(2026, 8, 26), from);
+            m.Add(D(2026, 9, 26), to);
+        }
+
+        Reading(b.AddMeter(Meter(D(2020, 1, 1), 6)), 100m, 110m);
+        Reading(b.AddMeter(Meter(D(2020, 1, 1), 6)), 200m, 220m);
+        var hot1 = b.AddMeter(Meter(D(2020, 1, 1), 6));
+        Reading(hot1, 50m, 55m);
+        var hot2 = b.AddMeter(Meter(D(2020, 1, 1), 6));
+        Reading(hot2, 70m, 77m);
+        return (b, hot1, hot2);
+    }
+
+    [Fact]
+    public void Four_water_meters_on_one_contract_are_summed()
+    {
+        // cold 10 + 20, hot 5 + 7 = 42 m3; 42 * 1.50 = 63.00 net; VAT 21% = 13.23; gross 76.23
+        var (b, _, _) = FourMeterFixture();
+        b.Add("Water", ChargeBasis.PerUnit, 1.50m);
+
+        var line = Assert.Single(b.Calculate(Sep2026).Lines);
+
+        Assert.Equal(42m, line.Quantity);
+        Assert.Equal(4, line.Consumption.Count);
+        Assert.Equal((63.00m, 13.23m, 76.23m), (line.Net, line.Vat, line.Gross));
+    }
+
+    [Fact]
+    public void Heat_contract_linked_to_both_hot_meters_sums_those_two()
+    {
+        // hot 5 + 7 = 12 m3 * 4.00 = 48.00 net; VAT 21% = 10.08; gross 58.08
+        var (water, hot1, hot2) = FourMeterFixture();
+        var heat = new ChargeBuilder { };
+        heat.Meters.AddRange(water.Meters);
+        heat.Link(hot1);
+        heat.Link(hot2);
+        heat.Add("Water heating", ChargeBasis.PerUnit, 4.00m);
+
+        var line = Assert.Single(heat.Calculate(Sep2026).Lines);
+
+        Assert.Equal(12m, line.Quantity);
+        Assert.Equal(2, line.Consumption.Count);
+        Assert.Equal((48.00m, 10.08m, 58.08m), (line.Net, line.Vat, line.Gross));
+    }
 }
