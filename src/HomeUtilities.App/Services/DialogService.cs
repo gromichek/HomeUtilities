@@ -75,6 +75,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
     private static View CreateView(EditorDialogViewModel editor) => editor switch
     {
         ParameterEditorViewModel => new ParameterEditorView { BindingContext = editor },
+        LinkEditorViewModel => new LinkEditorView { BindingContext = editor },
         _ => throw new NotSupportedException($"No dialog view is registered for {editor.GetType().Name}."),
     };
 

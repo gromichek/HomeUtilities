@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.SuppliersPage"
+                x:DataType="vm:SuppliersViewModel"
+                Title="{Binding Title}">
+
+    <Grid x:Name="Root" ColumnDefinitions="*,0">
+
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="8">
+            <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
+                    ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                    HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
+
+            <SearchBar Grid.Row="1" Text="{Binding SearchText}" Placeholder="{Binding SearchPlaceholder}"
+                       IsVisible="{Binding HasItems}" />
+
+            <CollectionView Grid.Row="2" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SupplierItemViewModel">
+                        <Border Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" x:DataType="vm:SupplierItemViewModel" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                <Label Text="{Binding LinksText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasLinks}" />
+                                <Label Text="{Binding PaymentDetailsText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasPaymentDetails}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Grid.Row="2" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
+                                 IsVisible="{Binding IsEmpty}">
+                <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
+                <Button Text="{Binding AddText}" Command="{Binding AddCommand}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Phone layout: floating add button, bottom-right. -->
+            <Button Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource FabButton}"
+                    Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
+                    HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
+                    IsVisible="{Binding ShowAddFab}"
+                    ToolTipProperties.Text="{Binding AddText}"
+                    SemanticProperties.Description="{Binding AddText}" />
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <views:SupplierEditView BindingContext="{Binding SelectedEditor}" IsVisible="{Binding HasSelection}" />
+            <Label Text="{Binding SelectHintText}" Style="{StaticResource MutedLabel}"
+                   HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowSelectHint}" />
+        </Grid>
+    </Grid>
+
+</views:PageBase>

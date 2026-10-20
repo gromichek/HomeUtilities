@@ -95,4 +95,89 @@
   <data name="ParameterNew" xml:space="preserve"><value>New parameter</value></data>
   <data name="ParameterEdit" xml:space="preserve"><value>Edit parameter</value></data>
   <data name="ParameterHistory" xml:space="preserve"><value>History ({0})</value></data>
+  <data name="SectionSuppliers" xml:space="preserve"><value>Suppliers</value></data>
+  <data name="SectionCategories" xml:space="preserve"><value>Categories</value></data>
+  <data name="SuppliersEmpty" xml:space="preserve"><value>No suppliers yet.</value></data>
+  <data name="SupplierAdd" xml:space="preserve"><value>New supplier</value></data>
+  <data name="SuppliersSearch" xml:space="preserve"><value>Search by name</value></data>
+  <data name="SupplierSelectHint" xml:space="preserve"><value>Select a supplier or add a new one.</value></data>
+  <data name="SupplierLinksCount" xml:space="preserve"><value>Links: {0}</value></data>
+  <data name="SupplierHasPaymentDetails" xml:space="preserve"><value>Payment details</value></data>
+  <data name="SupplierNew" xml:space="preserve"><value>New supplier</value></data>
+  <data name="SupplierGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="SupplierName" xml:space="preserve"><value>Name</value></data>
+  <data name="SupplierRegistrationNumber" xml:space="preserve"><value>Registration number</value></data>
+  <data name="SupplierPhone" xml:space="preserve"><value>Phone</value></data>
+  <data name="SupplierEmail" xml:space="preserve"><value>E-mail</value></data>
+  <data name="SupplierNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="SupplierDelete" xml:space="preserve"><value>Delete supplier</value></data>
+  <data name="LinksHeader" xml:space="preserve"><value>Links</value></data>
+  <data name="LinksEmpty" xml:space="preserve"><value>No links yet.</value></data>
+  <data name="LinkAdd" xml:space="preserve"><value>Add link</value></data>
+  <data name="LinkNew" xml:space="preserve"><value>New link</value></data>
+  <data name="LinkEdit" xml:space="preserve"><value>Edit link</value></data>
+  <data name="LinkKindLabel" xml:space="preserve"><value>Kind</value></data>
+  <data name="LinkTitleLabel" xml:space="preserve"><value>Title (optional)</value></data>
+  <data name="LinkUrlLabel" xml:space="preserve"><value>Address (https://…)</value></data>
+  <data name="LinkOpen" xml:space="preserve"><value>Open in browser</value></data>
+  <data name="PaymentDetailsHeader" xml:space="preserve"><value>Payment details</value></data>
+  <data name="PaymentRecipient" xml:space="preserve"><value>Recipient</value></data>
+  <data name="PaymentRecipientRegistrationNumber" xml:space="preserve"><value>Recipient registration number</value></data>
+  <data name="PaymentIban" xml:space="preserve"><value>IBAN</value></data>
+  <data name="PaymentBic" xml:space="preserve"><value>BIC</value></data>
+  <data name="PaymentBank" xml:space="preserve"><value>Bank</value></data>
+  <data name="PaymentPurposeTemplate" xml:space="preserve"><value>Payment purpose template</value></data>
+  <data name="PaymentPurposeHint" xml:space="preserve"><value>Placeholders: {CustomerNumber}, {ContractNumber}, {BillNumber}, {Period:MM.yyyy}, {Amount}, {PropertyName}</value></data>
+  <data name="PaymentExample" xml:space="preserve"><value>Example:</value></data>
+  <data name="PaymentCopyIban" xml:space="preserve"><value>Copy IBAN</value></data>
+  <data name="PaymentCopyRecipient" xml:space="preserve"><value>Copy recipient</value></data>
+  <data name="PaymentCopyPurpose" xml:space="preserve"><value>Copy purpose example</value></data>
+  <data name="Copied" xml:space="preserve"><value>Copied</value></data>
+  <data name="Enum_LinkKind_Website" xml:space="preserve"><value>Website</value></data>
+  <data name="Enum_LinkKind_CustomerPortal" xml:space="preserve"><value>Customer portal</value></data>
+  <data name="Enum_LinkKind_SubmitReadings" xml:space="preserve"><value>Submit readings</value></data>
+  <data name="Enum_LinkKind_Tariffs" xml:space="preserve"><value>Tariffs</value></data>
+  <data name="Enum_LinkKind_PayOnline" xml:space="preserve"><value>Pay online</value></data>
+  <data name="Enum_LinkKind_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Enum_ServiceKind_ColdWater" xml:space="preserve"><value>Cold water</value></data>
+  <data name="Enum_ServiceKind_HotWater" xml:space="preserve"><value>Hot water</value></data>
+  <data name="Enum_ServiceKind_Sewerage" xml:space="preserve"><value>Sewerage</value></data>
+  <data name="Enum_ServiceKind_WaterHeating" xml:space="preserve"><value>Water heating</value></data>
+  <data name="Enum_ServiceKind_Heating" xml:space="preserve"><value>Heating</value></data>
+  <data name="Enum_ServiceKind_Electricity" xml:space="preserve"><value>Electricity</value></data>
+  <data name="Enum_ServiceKind_Gas" xml:space="preserve"><value>Gas</value></data>
+  <data name="Enum_ServiceKind_Waste" xml:space="preserve"><value>Waste</value></data>
+  <data name="Enum_ServiceKind_Maintenance" xml:space="preserve"><value>Maintenance</value></data>
+  <data name="Enum_ServiceKind_Internet" xml:space="preserve"><value>Internet</value></data>
+  <data name="Enum_ServiceKind_Tv" xml:space="preserve"><value>TV</value></data>
+  <data name="Enum_ServiceKind_InternetTv" xml:space="preserve"><value>Internet and TV</value></data>
+  <data name="Enum_ServiceKind_PropertyTaxBuilding" xml:space="preserve"><value>Property tax, building</value></data>
+  <data name="Enum_ServiceKind_PropertyTaxLand" xml:space="preserve"><value>Property tax, land</value></data>
+  <data name="Enum_ServiceKind_Insurance" xml:space="preserve"><value>Insurance</value></data>
+  <data name="Enum_ServiceKind_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Error_supplier_name_required" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="Error_supplier_name_too_long" xml:space="preserve"><value>The name is longer than {0} characters.</value></data>
+  <data name="Error_link_url_invalid" xml:space="preserve"><value>Enter a full web address starting with http:// or https://.</value></data>
+  <data name="Error_link_title_too_long" xml:space="preserve"><value>The title is longer than {0} characters.</value></data>
+  <data name="Error_payment_iban_invalid" xml:space="preserve"><value>The IBAN is not valid. Check the digits.</value></data>
+  <data name="Error_payment_bic_invalid" xml:space="preserve"><value>The BIC must have 8 or 11 characters (e.g. ABCDLV22).</value></data>
+  <data name="Error_payment_field_too_long" xml:space="preserve"><value>The text is longer than {0} characters.</value></data>
+  <data name="Error_category_name_required" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="Error_category_name_too_long" xml:space="preserve"><value>The name is longer than {0} characters.</value></data>
+  <data name="Error_category_color_invalid" xml:space="preserve"><value>Enter a colour as #RRGGBB, e.g. #1E88E5.</value></data>
+  <data name="CategoriesEmpty" xml:space="preserve"><value>No categories.</value></data>
+  <data name="CategoryAdd" xml:space="preserve"><value>New category</value></data>
+  <data name="CategoriesShowArchived" xml:space="preserve"><value>Show archived</value></data>
+  <data name="CategoryBuiltInBadge" xml:space="preserve"><value>Built-in</value></data>
+  <data name="CategoryArchivedBadge" xml:space="preserve"><value>Archived</value></data>
+  <data name="CategorySelectHint" xml:space="preserve"><value>Select a category or add a new one.</value></data>
+  <data name="CategoryNew" xml:space="preserve"><value>New category</value></data>
+  <data name="CategoryGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="CategoryName" xml:space="preserve"><value>Name</value></data>
+  <data name="CategoryNameDefaultHint" xml:space="preserve"><value>Leave empty to use the default name: {0}</value></data>
+  <data name="CategoryColor" xml:space="preserve"><value>Colour</value></data>
+  <data name="CategoryColorHex" xml:space="preserve"><value>Colour code (#RRGGBB)</value></data>
+  <data name="CategoryNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="CategoryArchived" xml:space="preserve"><value>Archived (hidden from pickers)</value></data>
+  <data name="CategoryDelete" xml:space="preserve"><value>Delete category</value></data>
 </root>

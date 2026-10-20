@@ -27,6 +27,13 @@
         <ShellContent Title="{Binding PropertiesTitle}" ContentTemplate="{DataTemplate views:PropertiesPage}" />
     </FlyoutItem>
 
+    <FlyoutItem Title="{Binding SuppliersTitle}" Route="Suppliers">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="✉" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding SuppliersTitle}" ContentTemplate="{DataTemplate views:SuppliersPage}" />
+    </FlyoutItem>
+
     <FlyoutItem Title="{Binding ReadingsTitle}" Route="Readings">
         <FlyoutItem.Icon>
             <FontImageSource Glyph="◔" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />

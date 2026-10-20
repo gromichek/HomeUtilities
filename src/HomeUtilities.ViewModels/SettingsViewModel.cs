@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
 namespace HomeUtilities.ViewModels;
@@ -13,6 +14,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly ILanguageService _languageService;
     private readonly IThemeService _themeService;
     private readonly ILayoutModeService _layoutModeService;
+    private readonly INavigationService _navigation;
 
     private bool _refreshing;
 
@@ -35,6 +37,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private string _themeLabel = string.Empty;
 
     [ObservableProperty]
+    private string _categoriesText = string.Empty;
+
+    [ObservableProperty]
     private string _versionText = string.Empty;
 
     [ObservableProperty]
@@ -49,12 +54,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         IThemeService themeService,
         ILayoutModeService layoutModeService,
         IAppInfo appInfo,
-        IAppPaths appPaths)
+        IAppPaths appPaths,
+        INavigationService navigation)
     {
         _localizer = localizer;
         _languageService = languageService;
         _themeService = themeService;
         _layoutModeService = layoutModeService;
+        _navigation = navigation;
         Version = appInfo.Version;
         DatabasePath = appPaths.DatabasePath;
         RefreshTexts();
@@ -63,6 +70,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     public string Version { get; }
 
     public string DatabasePath { get; }
+
+    [RelayCommand]
+    private Task OpenCategoriesAsync() => _navigation.GoToAsync(Routes.Categories);
 
     void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) => RefreshLayoutText();
 
@@ -88,6 +98,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         try
         {
             Title = _localizer["SectionSettings"];
+            CategoriesText = _localizer["SectionCategories"];
             LanguageLabel = _localizer["SettingsLanguage"];
             ThemeLabel = _localizer["SettingsTheme"];
             VersionText = _localizer.Get("SettingsVersion", Version);

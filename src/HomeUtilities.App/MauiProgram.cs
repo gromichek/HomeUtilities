@@ -31,6 +31,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<HomeUtilities.ViewModels.IAppInfo, AppInfoService>();
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
+        builder.Services.AddSingleton<ILauncherService, LauncherService>();
+        builder.Services.AddSingleton<IClipboardService, ClipboardService>();
+        builder.Services.AddSingleton<IToastService, ToastService>();
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
@@ -38,11 +41,21 @@ public static class MauiProgram
         builder.Services.AddTransient<PropertiesViewModel>();
         builder.Services.AddTransient<PropertyEditViewModel>();
         builder.Services.AddTransient<Func<PropertyEditViewModel>>(sp => () => sp.GetRequiredService<PropertyEditViewModel>());
+        builder.Services.AddTransient<SuppliersViewModel>();
+        builder.Services.AddTransient<SupplierEditViewModel>();
+        builder.Services.AddTransient<Func<SupplierEditViewModel>>(sp => () => sp.GetRequiredService<SupplierEditViewModel>());
+        builder.Services.AddTransient<CategoriesViewModel>();
+        builder.Services.AddTransient<CategoryEditViewModel>();
+        builder.Services.AddTransient<Func<CategoryEditViewModel>>(sp => () => sp.GetRequiredService<CategoryEditViewModel>());
         builder.Services.AddTransient<OverviewPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<PlaceholderPage>();
         builder.Services.AddTransient<PropertiesPage>();
         builder.Services.AddTransient<PropertyEditPage>();
+        builder.Services.AddTransient<SuppliersPage>();
+        builder.Services.AddTransient<SupplierEditPage>();
+        builder.Services.AddTransient<CategoriesPage>();
+        builder.Services.AddTransient<CategoryEditPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.SupplierEditView"
+             x:DataType="vm:SupplierEditViewModel">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <toolkit:InvertedBoolConverter x:Key="Not" />
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <!-- General -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding GeneralHeader}" Style="{StaticResource SectionHeader}" />
+
+                        <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Name}" />
+                        <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding RegistrationNumberLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding RegistrationNumber}" />
+
+                        <Label Text="{Binding PhoneLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Phone}" Keyboard="Telephone" />
+
+                        <Label Text="{Binding EmailLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Email}" Keyboard="Email" />
+
+                        <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
+                        <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                        <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Links: the add button is in the card header; rows edit on tap, open in the browser, delete with the trash icon. -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding LinksHeader}" Style="{StaticResource SectionHeader}" />
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconAdd}" Command="{Binding AddLinkCommand}"
+                                    ToolTipProperties.Text="{Binding AddLinkText}"
+                                    SemanticProperties.Description="{Binding AddLinkText}" />
+                        </Grid>
+
+                        <Label Text="{Binding LinksEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoLinks}" />
+
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Links}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LinkRowViewModel">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                        </Grid.GestureRecognizers>
+                                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                            <Label Text="{Binding DisplayText}" FontAttributes="Bold" />
+                                            <Label Text="{Binding Url}" Style="{StaticResource MutedLabel}" LineBreakMode="MiddleTruncation" />
+                                            <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}"
+                                                   IsVisible="{Binding HasError}" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                                Text="{StaticResource IconOpenLink}" Command="{Binding OpenCommand}"
+                                                ToolTipProperties.Text="{Binding OpenText}"
+                                                SemanticProperties.Description="{Binding OpenText}" />
+                                        <Button Grid.Column="2" Style="{StaticResource DestructiveIconButton}"
+                                                Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                                ToolTipProperties.Text="{Binding DeleteText}"
+                                                SemanticProperties.Description="{Binding DeleteText}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Payment details with copy buttons -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding PaymentHeader}" Style="{StaticResource SectionHeader}" />
+
+                        <Label Text="{Binding RecipientNameLabel}" Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Entry Grid.Column="0" Text="{Binding RecipientName}" />
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconCopy}" Command="{Binding CopyRecipientCommand}"
+                                    ToolTipProperties.Text="{Binding CopyRecipientText}"
+                                    SemanticProperties.Description="{Binding CopyRecipientText}" />
+                        </Grid>
+                        <Label Text="{Binding RecipientNameError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding RecipientNameError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding RecipientRegistrationNumberLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding RecipientRegistrationNumber}" />
+                        <Label Text="{Binding RecipientRegistrationNumberError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding RecipientRegistrationNumberError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding IbanLabel}" Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Entry Grid.Column="0" Text="{Binding IbanText}" Keyboard="Text">
+                                <Entry.Behaviors>
+                                    <toolkit:EventToCommandBehavior EventName="Unfocused" Command="{Binding FormatIbanCommand}" />
+                                </Entry.Behaviors>
+                            </Entry>
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconCopy}" Command="{Binding CopyIbanCommand}"
+                                    ToolTipProperties.Text="{Binding CopyIbanText}"
+                                    SemanticProperties.Description="{Binding CopyIbanText}" />
+                        </Grid>
+                        <Label Text="{Binding IbanError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding IbanError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding BicLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Bic}" />
+                        <Label Text="{Binding BicError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding BicError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding BankNameLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding BankName}" />
+                        <Label Text="{Binding BankNameError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding BankNameError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding PurposeTemplateLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding PurposeTemplate}" />
+                        <Label Text="{Binding PurposeHintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <Label Text="{Binding PurposeTemplateError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding PurposeTemplateError, Converter={StaticResource HasText}}" />
+
+                        <!-- Live example of the purpose with sample values -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" IsVisible="{Binding HasPurposePreview}">
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="{Binding ExampleLabel}" Style="{StaticResource MutedLabel}" />
+                                <Label Text="{Binding PurposePreview}" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconCopy}" Command="{Binding CopyPurposeCommand}"
+                                    ToolTipProperties.Text="{Binding CopyPurposeText}"
+                                    SemanticProperties.Description="{Binding CopyPurposeText}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Phone: destructive action at the end of the form. -->
+                <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
+                        IsVisible="{Binding ShowFormDelete}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Tablet / desktop footer: Save (primary), Cancel (secondary), Delete (destructive) at the far end. -->
+        <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
+                BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                        Style="{StaticResource PrimaryButton}" />
+                <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}" />
+                <Button Grid.Column="3" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}"
+                        IsVisible="{Binding IsNew, Converter={StaticResource Not}}" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>
