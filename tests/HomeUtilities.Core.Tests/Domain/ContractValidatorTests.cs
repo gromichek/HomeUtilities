@@ -9,6 +9,7 @@ public class ContractValidatorTests
     {
         PropertyId = Guid.CreateVersion7(),
         SupplierId = Guid.CreateVersion7(),
+        CategoryId = Guid.CreateVersion7(),
         Title = "Water",
         ValidFrom = new DateOnly(2024, 1, 1),
     };
@@ -34,6 +35,14 @@ public class ContractValidatorTests
         var c = Valid();
         c.PropertyId = Guid.Empty;
         Assert.Equal(ErrorCodes.ContractPropertyRequired, Single(c).Code);
+    }
+
+    [Fact]
+    public void Empty_category_fails()
+    {
+        var c = Valid();
+        c.CategoryId = Guid.Empty;
+        Assert.Equal(ErrorCodes.ContractCategoryRequired, Single(c).Code);
     }
 
     [Fact]

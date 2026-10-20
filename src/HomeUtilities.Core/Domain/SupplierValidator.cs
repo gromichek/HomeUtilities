@@ -20,6 +20,8 @@ public static class SupplierValidator
             errors.Add(new(ErrorCodes.SupplierNameTooLong, nameof(Supplier.Name), [ValidationHelpers.MaxNameLength]));
         }
 
+        ValidationHelpers.CheckNotes(errors, supplier.Notes, nameof(Supplier.Notes));
+        errors.AddRange(ValidationHelpers.ValidatePaymentDetails(supplier.PaymentDetails));
         errors.AddRange(ValidationHelpers.ValidateLinks(supplier.Links));
         return ValidationHelpers.ToResult(errors);
     }

@@ -25,6 +25,7 @@ public static class PropertyParameterValidator
             errors.Add(new(ErrorCodes.PropertyParameterNameRequired, nameof(PropertyParameter.Name)));
         }
 
+        ValidationHelpers.CheckNotes(errors, parameter.Note, nameof(PropertyParameter.Note));
         return ValidationHelpers.ToResult(errors);
     }
 }

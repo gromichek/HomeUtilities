@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Payments;
 
 namespace HomeUtilities.Core.Domain;
 
@@ -16,6 +17,9 @@ public class Contract : SyncEntity
 
     /// <summary>Display title, e.g. "Water".</summary>
     public string Title { get; set; } = string.Empty;
+
+    /// <summary>Category the contract's charges are reported under.</summary>
+    public Guid CategoryId { get; set; }
 
     /// <summary>Customer (account) number.</summary>
     public string? CustomerNumber { get; set; }
@@ -52,6 +56,9 @@ public class Contract : SyncEntity
 
     /// <summary>Contract-specific links; they override supplier links per kind.</summary>
     public List<Link> Links { get; set; } = [];
+
+    /// <summary>Contract-level payment details; each field overrides the supplier's.</summary>
+    public PaymentDetails? PaymentDetails { get; set; }
 
     /// <summary>Free-form notes.</summary>
     public string? Notes { get; set; }

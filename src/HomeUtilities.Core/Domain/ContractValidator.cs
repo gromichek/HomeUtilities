@@ -21,6 +21,11 @@ public static class ContractValidator
             errors.Add(new(ErrorCodes.ContractSupplierRequired, nameof(Contract.SupplierId)));
         }
 
+        if (contract.CategoryId == Guid.Empty)
+        {
+            errors.Add(new(ErrorCodes.ContractCategoryRequired, nameof(Contract.CategoryId)));
+        }
+
         if (string.IsNullOrWhiteSpace(contract.Title))
         {
             errors.Add(new(ErrorCodes.ContractTitleRequired, nameof(Contract.Title)));
@@ -46,6 +51,8 @@ public static class ContractValidator
             errors.Add(new(ErrorCodes.ContractReadingWindowIncomplete, missing));
         }
 
+        ValidationHelpers.CheckNotes(errors, contract.Notes, nameof(Contract.Notes));
+        errors.AddRange(ValidationHelpers.ValidatePaymentDetails(contract.PaymentDetails));
         errors.AddRange(ValidationHelpers.ValidateLinks(contract.Links));
         return ValidationHelpers.ToResult(errors);
     }

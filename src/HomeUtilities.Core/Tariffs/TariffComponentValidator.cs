@@ -21,6 +21,8 @@ public static class TariffComponentValidator
             errors.Add(new(ErrorCodes.TariffNameTooLong, nameof(TariffComponent.Name)));
         }
 
+        ValidationHelpers.CheckNotes(errors, component.Notes, nameof(TariffComponent.Notes));
+
         if (component.ContractId == Guid.Empty)
         {
             errors.Add(new(ErrorCodes.TariffContractRequired, nameof(TariffComponent.ContractId)));
@@ -91,6 +93,8 @@ public static class TariffComponentValidator
 
     private static void ValidateRate(TariffRate rate, string path, List<ValidationError> errors)
     {
+        ValidationHelpers.CheckNotes(errors, rate.Notes, nameof(TariffRate.Notes), path + ".");
+
         if (rate.Price < 0)
         {
             errors.Add(new(ErrorCodes.TariffPriceNegative, $"{path}.{nameof(TariffRate.Price)}"));

@@ -36,6 +36,7 @@ public static class MeterReadingValidator
             errors.Add(new(ErrorCodes.MeterReadingDuplicateOnDate, nameof(MeterReading.Date)));
         }
 
+        ValidationHelpers.CheckNotes(errors, reading.Note, nameof(MeterReading.Note));
         return ValidationHelpers.ToResult(errors);
     }
 

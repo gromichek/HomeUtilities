@@ -12,6 +12,7 @@ internal sealed class ChargeBuilder
     {
         PropertyId = Guid.CreateVersion7(),
         SupplierId = Guid.CreateVersion7(),
+        CategoryId = Guid.CreateVersion7(),
         Title = "Test contract",
         ValidFrom = new(2020, 1, 1),
         Currency = Currency.EUR,

@@ -36,6 +36,7 @@ public static class MeterValidator
             errors.Add(new(ErrorCodes.MeterUnitIncompatible, nameof(Meter.Unit), [meter.Resource, meter.Unit]));
         }
 
+        ValidationHelpers.CheckNotes(errors, meter.Notes, nameof(Meter.Notes));
         ValidateRegisters(meter, errors);
         return ValidationHelpers.ToResult(errors);
     }

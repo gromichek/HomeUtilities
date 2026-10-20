@@ -15,6 +15,9 @@ public class TariffComponent : SyncEntity
     /// <summary>Service this line counts toward in reports.</summary>
     public ServiceKind ChargeKind { get; set; }
 
+    /// <summary>Category of the lines; null means the contract's category.</summary>
+    public Guid? CategoryId { get; set; }
+
     /// <summary>What the quantity is based on.</summary>
     public ChargeBasis Basis { get; set; }
 
@@ -41,6 +44,9 @@ public class TariffComponent : SyncEntity
 
     /// <summary>Prices over time.</summary>
     public List<TariffRate> Rates { get; set; } = [];
+
+    /// <summary>Free-form notes.</summary>
+    public string? Notes { get; set; }
 
     /// <summary>Position among the components of the contract.</summary>
     public int SortOrder { get; set; }
