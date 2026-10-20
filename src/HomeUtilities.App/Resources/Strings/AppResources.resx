@@ -11,4 +11,26 @@
   <data name="DatabaseStarting" xml:space="preserve"><value>Opening database…</value></data>
   <data name="DatabaseReady" xml:space="preserve"><value>Database ready: {0} categories, {1} VAT rates</value></data>
   <data name="DatabaseError" xml:space="preserve"><value>Database error: {0}</value></data>
+  <data name="ComingSoon" xml:space="preserve"><value>Coming soon</value></data>
+  <data name="SectionOverview" xml:space="preserve"><value>Overview</value></data>
+  <data name="SectionProperties" xml:space="preserve"><value>Properties</value></data>
+  <data name="SectionReadings" xml:space="preserve"><value>Readings</value></data>
+  <data name="SectionBills" xml:space="preserve"><value>Bills</value></data>
+  <data name="SectionPayments" xml:space="preserve"><value>Payments</value></data>
+  <data name="SectionReports" xml:space="preserve"><value>Reports</value></data>
+  <data name="SectionSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Language</value></data>
+  <data name="SettingsTheme" xml:space="preserve"><value>Theme</value></data>
+  <data name="SettingsVersion" xml:space="preserve"><value>Version: {0}</value></data>
+  <data name="SettingsDatabaseFile" xml:space="preserve"><value>Database file: {0}</value></data>
+  <data name="SettingsLayout" xml:space="preserve"><value>Layout: {0}</value></data>
+  <data name="LanguageName_en" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageName_ru" xml:space="preserve"><value>Русский</value></data>
+  <data name="Theme_System" xml:space="preserve"><value>System</value></data>
+  <data name="Theme_Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Theme_Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Layout_Compact" xml:space="preserve"><value>phone</value></data>
+  <data name="Layout_Medium" xml:space="preserve"><value>tablet</value></data>
+  <data name="Layout_Expanded" xml:space="preserve"><value>desktop</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
 </root>
