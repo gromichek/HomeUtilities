@@ -34,14 +34,6 @@
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
-  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
-  <data name="Remove" xml:space="preserve"><value>Remove</value></data>
-  <data name="Apply" xml:space="preserve"><value>Apply</value></data>
-  <data name="Discard" xml:space="preserve"><value>Discard</value></data>
-  <data name="KeepEditing" xml:space="preserve"><value>Keep editing</value></data>
-  <data name="DiscardChangesTitle" xml:space="preserve"><value>Discard changes?</value></data>
-  <data name="DiscardChangesMessage" xml:space="preserve"><value>Your changes have not been saved.</value></data>
-  <data name="DeleteConfirmTitle" xml:space="preserve"><value>Confirm deletion</value></data>
   <data name="Error_Generic" xml:space="preserve"><value>Invalid value</value></data>
   <data name="Error_common_notes_too_long" xml:space="preserve"><value>The comment is longer than {0} characters.</value></data>
   <data name="Error_common_number_invalid" xml:space="preserve"><value>Enter a number.</value></data>
@@ -65,7 +57,7 @@
   <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Cadastral value, land</value></data>
   <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Custom</value></data>
   <data name="PropertiesEmpty" xml:space="preserve"><value>No properties yet. Add your first one.</value></data>
-  <data name="PropertyAdd" xml:space="preserve"><value>Add</value></data>
+  <data name="PropertyAdd" xml:space="preserve"><value>New property</value></data>
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>Archived</value></data>
   <data name="PropertySelectHint" xml:space="preserve"><value>Select a property or add a new one.</value></data>
@@ -77,7 +69,6 @@
   <data name="PropertyAddress" xml:space="preserve"><value>Address</value></data>
   <data name="PropertyNotes" xml:space="preserve"><value>Notes</value></data>
   <data name="PropertyArchived" xml:space="preserve"><value>Archived (hidden from the list)</value></data>
-  <data name="PropertyDeleteMessage" xml:space="preserve"><value>Delete «{0}»? History is kept but hidden.</value></data>
   <data name="ParametersHeader" xml:space="preserve"><value>Parameters</value></data>
   <data name="ParametersEmpty" xml:space="preserve"><value>No parameters yet.</value></data>
   <data name="ParameterAdd" xml:space="preserve"><value>Add parameter</value></data>
@@ -86,8 +77,22 @@
   <data name="ParameterValue" xml:space="preserve"><value>Value</value></data>
   <data name="ParameterValidFrom" xml:space="preserve"><value>Valid from</value></data>
   <data name="ParameterNote" xml:space="preserve"><value>Note</value></data>
-  <data name="ParameterCurrent" xml:space="preserve"><value>Current: {0}</value></data>
+  <data name="ParameterCurrent" xml:space="preserve"><value>Now: {0} since {1:d}</value></data>
   <data name="ParameterNoCurrent" xml:space="preserve"><value>No value valid today</value></data>
   <data name="ParameterRow" xml:space="preserve"><value>{0} from {1:d}</value></data>
-  <data name="ParameterRemoveMessage" xml:space="preserve"><value>Remove this value ({0})?</value></data>
+  <data name="Dialog_Unsaved_Title" xml:space="preserve"><value>Save changes?</value></data>
+  <data name="Dialog_Unsaved_Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Dialog_Unsaved_DontSave" xml:space="preserve"><value>Don't save</value></data>
+  <data name="Dialog_Unsaved_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Dialog_Delete_Title" xml:space="preserve"><value>Delete «{0}»?</value></data>
+  <data name="Dialog_Delete_Message" xml:space="preserve"><value>It will be hidden; history is kept.</value></data>
+  <data name="Dialog_DeleteRow_Title" xml:space="preserve"><value>Delete this entry?</value></data>
+  <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
+  <data name="Dialog_Error_Title" xml:space="preserve"><value>Error</value></data>
+  <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="PropertyGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="PropertyDelete" xml:space="preserve"><value>Delete property</value></data>
+  <data name="ParameterNew" xml:space="preserve"><value>New parameter</value></data>
+  <data name="ParameterEdit" xml:space="preserve"><value>Edit parameter</value></data>
+  <data name="ParameterHistory" xml:space="preserve"><value>History ({0})</value></data>
 </root>

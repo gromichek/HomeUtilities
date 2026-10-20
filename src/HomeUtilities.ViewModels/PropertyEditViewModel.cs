@@ -20,18 +20,20 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
     private readonly List<ParameterRowViewModel> _rows = [];
+    private readonly HashSet<string> _expandedGroups = [];
 
     private Property _property = new();
     private Property? _pending;
-    private ParameterRowViewModel? _editingRow;
 
     [ObservableProperty]
     private string _name = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedKindIndex))]
     private IReadOnlyList<EnumOption> _kinds = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedKindIndex))]
     private EnumOption? _selectedKind;
 
     [ObservableProperty]
@@ -47,35 +49,9 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     [NotifyPropertyChangedFor(nameof(HasNoParameters))]
     private IReadOnlyList<ParameterGroupViewModel> _groups = [];
 
-    [ObservableProperty]
-    private bool _isParameterFormVisible;
-
-    [ObservableProperty]
-    private IReadOnlyList<EnumOption> _parameterKinds = [];
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFormCustom))]
-    private EnumOption? _formKind;
-
-    [ObservableProperty]
-    private string _formName = string.Empty;
-
-    [ObservableProperty]
-    private string _formValueText = string.Empty;
-
-    [ObservableProperty]
-    private DateOnly _formValidFrom;
-
-    [ObservableProperty]
-    private string _formNote = string.Empty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(FormValueError), nameof(FormNameError), nameof(FormValidFromError), nameof(FormNoteError))]
-    private IReadOnlyDictionary<string, string> _formErrors = new Dictionary<string, string>();
-
     /// <summary>True when the editor is shown on its own page (compact layout) instead of the right-hand pane.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowInlineActions))]
+    [NotifyPropertyChangedFor(nameof(ShowFooter), nameof(ShowFormDelete))]
     private bool _isHostedInPage;
 
     [ObservableProperty]
@@ -100,25 +76,13 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     private string _parametersEmptyText = string.Empty;
 
     [ObservableProperty]
+    private string _generalHeader = string.Empty;
+
+    [ObservableProperty]
     private string _addParameterText = string.Empty;
 
     [ObservableProperty]
-    private string _formKindLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _formNameLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _formValueLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _formValidFromLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _formNoteLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _applyText = string.Empty;
+    private string _deleteWholeText = string.Empty;
 
     public PropertyEditViewModel(
         IPropertyStore store,
@@ -132,7 +96,13 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
-        _formValidFrom = clock.Today;
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(IsNew))
+            {
+                OnPropertyChanged(nameof(ShowFormDelete));
+            }
+        };
         RefreshTexts();
     }
 
@@ -141,11 +111,26 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
 
     public Guid PropertyId => _property.Id;
 
-    public bool IsFormCustom => FormKind?.Value is PropertyParameterKind.Custom;
-
     public bool HasNoParameters => Groups.Count == 0;
 
-    public bool ShowInlineActions => !IsHostedInPage;
+    /// <summary>Save / Cancel / Delete footer of the side pane (medium and expanded layouts).</summary>
+    public bool ShowFooter => !IsHostedInPage;
+
+    /// <summary>"Delete property" at the end of the form on its own page (compact layout).</summary>
+    public bool ShowFormDelete => IsHostedInPage && !IsNew;
+
+    /// <summary>Index into <see cref="Kinds"/> for the picker; out-of-range values (the picker clearing itself) are ignored.</summary>
+    public int SelectedKindIndex
+    {
+        get => SelectedKind is null ? -1 : Kinds.ToList().IndexOf(SelectedKind);
+        set
+        {
+            if (value >= 0 && value < Kinds.Count)
+            {
+                SelectedKind = Kinds[value];
+            }
+        }
+    }
 
     public string NameError => Lookup(Errors, nameof(Property.Name));
 
@@ -155,14 +140,6 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     public string ParametersError => string.Join(
         "\n",
         Errors.Where(e => e.Key.StartsWith("Parameters.", StringComparison.Ordinal)).Select(e => e.Value));
-
-    public string FormValueError => Lookup(FormErrors, nameof(PropertyParameter.Value));
-
-    public string FormNameError => Lookup(FormErrors, nameof(PropertyParameter.Name));
-
-    public string FormValidFromError => Lookup(FormErrors, nameof(PropertyParameter.ValidFrom));
-
-    public string FormNoteError => Lookup(FormErrors, nameof(PropertyParameter.Note));
 
     /// <summary>The rows of all parameters in entry order; indexes match <c>Parameters[i]</c> of validation errors.</summary>
     public IReadOnlyList<ParameterRowViewModel> Rows => _rows;
@@ -179,6 +156,7 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
             IsNew = existing is null;
             Name = _property.Name;
             SelectedKind = Kinds.First(k => k.Value.Equals(_property.Kind));
+            OnPropertyChanged(nameof(SelectedKindIndex));
             Address = _property.Address ?? string.Empty;
             Notes = _property.Notes ?? string.Empty;
             IsArchived = _property.IsArchived;
@@ -189,7 +167,6 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
                 _rows.Add(CreateRow(parameter));
             }
 
-            IsParameterFormVisible = false;
             ClearErrors();
             RebuildGroups();
             Title = TitleText();
@@ -202,31 +179,53 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     }
 
     [RelayCommand]
-    private void AddParameter()
+    private async Task AddParameterAsync()
     {
-        _editingRow = null;
-        OpenForm(PropertyParameterKind.TotalArea, string.Empty, string.Empty, _clock.Today, string.Empty);
+        var editor = new ParameterEditorViewModel(_localizer, _clock, null, candidate => IsDuplicate(candidate, null));
+        if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
+        {
+            return;
+        }
+
+        _rows.Add(CreateRow(result));
+        RebuildGroups();
+        MarkDirty();
     }
 
     [RelayCommand]
-    private void EditParameter(ParameterRowViewModel row)
+    private async Task EditParameterAsync(ParameterRowViewModel row)
     {
-        _editingRow = row;
-        OpenForm(
-            row.Kind,
-            row.Name ?? string.Empty,
-            DecimalInput.Format(row.Value, CultureInfo.CurrentCulture, 4),
-            row.ValidFrom,
-            row.Note ?? string.Empty);
+        var current = new PropertyParameter
+        {
+            Kind = row.Kind,
+            Name = row.Name,
+            ValidFrom = row.ValidFrom,
+            Value = row.Value,
+            Note = row.Note,
+        };
+        var editor = new ParameterEditorViewModel(_localizer, _clock, current, candidate => IsDuplicate(candidate, row));
+        if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
+        {
+            return;
+        }
+
+        row.Kind = result.Kind;
+        row.Name = result.Name;
+        row.ValidFrom = result.ValidFrom;
+        row.Value = result.Value;
+        row.Note = result.Note;
+        row.ErrorText = string.Empty;
+        RebuildGroups();
+        MarkDirty();
     }
 
     [RelayCommand]
     private async Task RemoveParameterAsync(ParameterRowViewModel row)
     {
         var confirmed = await Dialogs.ConfirmAsync(
-            _localizer["DeleteConfirmTitle"],
-            _localizer.Get("ParameterRemoveMessage", row.DisplayText),
-            _localizer["Remove"],
+            _localizer["Dialog_DeleteRow_Title"],
+            _localizer.Get("Dialog_DeleteRow_Message", row.DisplayText),
+            _localizer["Delete"],
             _localizer["Cancel"]);
         if (!confirmed)
         {
@@ -234,78 +233,8 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
         }
 
         _rows.Remove(row);
-        if (ReferenceEquals(_editingRow, row))
-        {
-            IsParameterFormVisible = false;
-            _editingRow = null;
-        }
-
         RebuildGroups();
         MarkDirty();
-    }
-
-    [RelayCommand]
-    private void ApplyParameter()
-    {
-        var errors = new List<ValidationError>();
-        var kind = FormKind?.As<PropertyParameterKind>() ?? PropertyParameterKind.TotalArea;
-        var parsed = DecimalInput.TryParse(FormValueText, CultureInfo.CurrentCulture, out var value);
-        if (!parsed)
-        {
-            errors.Add(new(CommonErrorCodes.NumberInvalid, nameof(PropertyParameter.Value)));
-        }
-
-        var candidate = new PropertyParameter
-        {
-            Kind = kind,
-            Name = kind == PropertyParameterKind.Custom ? FormName.Trim() : null,
-            ValidFrom = FormValidFrom,
-            Value = value,
-            Note = string.IsNullOrWhiteSpace(FormNote) ? null : FormNote.Trim(),
-        };
-        errors.AddRange(PropertyParameterValidator.Validate(candidate).Errors);
-
-        if (_rows.Any(r => !ReferenceEquals(r, _editingRow) && r.Kind == kind && r.Name == candidate.Name && r.ValidFrom == candidate.ValidFrom))
-        {
-            errors.Add(new(ErrorCodes.DuplicateValidFrom, nameof(PropertyParameter.ValidFrom), [candidate.ValidFrom]));
-        }
-
-        FormErrors = errors
-            .GroupBy(e => e.Field ?? string.Empty)
-            .ToDictionary(g => g.Key, g => string.Join("\n", g.Select(e => ValidationText.For(_localizer, e))));
-        if (errors.Count > 0)
-        {
-            return;
-        }
-
-        var row = _editingRow;
-        if (row is null)
-        {
-            row = CreateRow(candidate);
-            _rows.Add(row);
-        }
-        else
-        {
-            row.Kind = candidate.Kind;
-            row.Name = candidate.Name;
-            row.ValidFrom = candidate.ValidFrom;
-            row.Value = candidate.Value;
-            row.Note = candidate.Note;
-            row.ErrorText = string.Empty;
-        }
-
-        _editingRow = null;
-        IsParameterFormVisible = false;
-        RebuildGroups();
-        MarkDirty();
-    }
-
-    [RelayCommand]
-    private void CancelParameter()
-    {
-        _editingRow = null;
-        IsParameterFormVisible = false;
-        FormErrors = new Dictionary<string, string>();
     }
 
     protected override IReadOnlyList<ValidationError> Validate()
@@ -331,7 +260,7 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
 
     protected override Task DeleteCoreAsync() => _store.DeleteAsync(_property.Id);
 
-    protected override string DeleteMessage() => _localizer.Get("PropertyDeleteMessage", _property.Name);
+    protected override string DeleteName() => _property.Name;
 
     protected override async Task OnFinishedAsync(EditOutcome outcome)
     {
@@ -389,10 +318,6 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
             Kinds = EnumText.Options<PropertyKind>(_localizer);
             SelectedKind = Kinds.First(k => k.Value.Equals(kind));
 
-            var formKind = FormKind?.Value ?? PropertyParameterKind.TotalArea;
-            ParameterKinds = EnumText.Options<PropertyParameterKind>(_localizer);
-            FormKind = ParameterKinds.First(k => k.Value.Equals(formKind));
-
             NameLabel = _localizer["PropertyName"];
             KindLabel = _localizer["PropertyKindLabel"];
             AddressLabel = _localizer["PropertyAddress"];
@@ -400,13 +325,9 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
             ArchivedLabel = _localizer["PropertyArchived"];
             ParametersHeader = _localizer["ParametersHeader"];
             ParametersEmptyText = _localizer["ParametersEmpty"];
+            GeneralHeader = _localizer["PropertyGeneral"];
             AddParameterText = _localizer["ParameterAdd"];
-            FormKindLabel = _localizer["ParameterKind"];
-            FormNameLabel = _localizer["ParameterName"];
-            FormValueLabel = _localizer["ParameterValue"];
-            FormValidFromLabel = _localizer["ParameterValidFrom"];
-            FormNoteLabel = _localizer["ParameterNote"];
-            ApplyText = _localizer["Apply"];
+            DeleteWholeText = _localizer["PropertyDelete"];
             Title = TitleText();
             RebuildGroups();
         }
@@ -421,16 +342,20 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
 
     private string TitleText() => IsNew ? _localizer["PropertyNew"] : _property.Name;
 
-    private void OpenForm(PropertyParameterKind kind, string name, string valueText, DateOnly validFrom, string note)
+    private void OnGroupToggled(ParameterGroupViewModel group)
     {
-        FormKind = ParameterKinds.First(k => k.Value.Equals(kind));
-        FormName = name;
-        FormValueText = valueText;
-        FormValidFrom = validFrom;
-        FormNote = note;
-        FormErrors = new Dictionary<string, string>();
-        IsParameterFormVisible = true;
+        if (group.IsExpanded)
+        {
+            _expandedGroups.Add(group.Key);
+        }
+        else
+        {
+            _expandedGroups.Remove(group.Key);
+        }
     }
+
+    private bool IsDuplicate(PropertyParameter candidate, ParameterRowViewModel? editing) =>
+        _rows.Any(r => !ReferenceEquals(r, editing) && r.Kind == candidate.Kind && r.Name == candidate.Name && r.ValidFrom == candidate.ValidFrom);
 
     private ParameterRowViewModel CreateRow(PropertyParameter parameter)
     {
@@ -465,18 +390,22 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
             {
                 row.DisplayText = _localizer.Get(
                     "ParameterRow", DecimalInput.Format(row.Value, CultureInfo.CurrentCulture, 4), row.ValidFrom);
-                row.EditText = _localizer["Edit"];
-                row.RemoveText = _localizer["Remove"];
+                row.DeleteText = _localizer["Delete"];
             }
 
             var current = ordered.FirstOrDefault(r => r.ValidFrom <= today);
             var currentText = current is null
                 ? _localizer["ParameterNoCurrent"]
-                : _localizer.Get("ParameterCurrent", DecimalInput.Format(current.Value, CultureInfo.CurrentCulture, 4));
+                : _localizer.Get("ParameterCurrent", DecimalInput.Format(current.Value, CultureInfo.CurrentCulture, 4), current.ValidFrom);
             var title = group.Key.Kind == PropertyParameterKind.Custom
                 ? group.Key.Name
                 : EnumText.Get(_localizer, group.Key.Kind);
-            groups.Add(new ParameterGroupViewModel(title, currentText, ordered));
+            var key = $"{(int)group.Key.Kind}:{group.Key.Name}";
+            groups.Add(new ParameterGroupViewModel(key, title, currentText, _localizer.Get("ParameterHistory", ordered.Count), ordered)
+            {
+                IsExpanded = _expandedGroups.Contains(key),
+                Toggled = OnGroupToggled,
+            });
         }
 
         Groups = groups;

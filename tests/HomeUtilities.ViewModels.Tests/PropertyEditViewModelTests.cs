@@ -23,8 +23,8 @@ public class PropertyEditViewModelTests
         vm.SelectedKind = Option(vm.Kinds, PropertyKind.Apartment);
         vm.Address = "1 Example street";
         vm.Notes = "";
-        AddParameter(vm, PropertyParameterKind.TotalArea, "52,3", new(2020, 1, 1));
-        AddParameter(vm, PropertyParameterKind.DeclaredResidents, "3", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "52,3", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.DeclaredResidents, "3", new(2020, 1, 1));
 
         await vm.SaveCommand.ExecuteAsync(null);
 
@@ -78,17 +78,14 @@ public class PropertyEditViewModelTests
     [Theory]
     [InlineData("2.5")]
     [InlineData("2,5")]
-    public async Task AddingFractionalResidents_ShowsErrorInTheForm(string text)
+    public async Task AddingFractionalResidents_ShowsErrorInTheDialogAndAddsNothing(string text)
     {
         var vm = await CreateNewAsync();
-        vm.AddParameterCommand.Execute(null);
-        vm.FormKind = Option(vm.ParameterKinds, PropertyParameterKind.DeclaredResidents);
-        vm.FormValueText = text;
 
-        vm.ApplyParameterCommand.Execute(null);
+        var editor = await TryAddAsync(vm, PropertyParameterKind.DeclaredResidents, text, new(2020, 1, 1));
 
-        Assert.True(vm.IsParameterFormVisible);
-        Assert.Equal("Error_property_parameter_residents_not_whole [en]", vm.FormValueError);
+        Assert.False(editor.Saved);
+        Assert.Equal("Error_property_parameter_residents_not_whole [en]", editor.ValueError);
         Assert.Empty(vm.Rows);
     }
 
@@ -96,41 +93,103 @@ public class PropertyEditViewModelTests
     public async Task AddingTextAsValue_ShowsNumberError()
     {
         var vm = await CreateNewAsync();
-        vm.AddParameterCommand.Execute(null);
-        vm.FormValueText = "abc";
 
-        vm.ApplyParameterCommand.Execute(null);
+        var editor = await TryAddAsync(vm, PropertyParameterKind.TotalArea, "abc", new(2020, 1, 1));
 
-        Assert.Equal("Error_common_number_invalid [en]", vm.FormValueError);
+        Assert.Equal("Error_common_number_invalid [en]", editor.ValueError);
     }
 
     [Fact]
     public async Task AddingCustomParameterWithoutName_ShowsNameError()
     {
         var vm = await CreateNewAsync();
-        vm.AddParameterCommand.Execute(null);
-        vm.FormKind = Option(vm.ParameterKinds, PropertyParameterKind.Custom);
-        vm.FormValueText = "5";
 
-        vm.ApplyParameterCommand.Execute(null);
+        var editor = await TryAddAsync(vm, PropertyParameterKind.Custom, "5", new(2020, 1, 1));
 
-        Assert.True(vm.IsFormCustom);
-        Assert.Equal("Error_property_parameter_name_required [en]", vm.FormNameError);
+        Assert.True(editor.IsCustom);
+        Assert.Equal("Error_property_parameter_name_required [en]", editor.NameError);
     }
 
     [Fact]
     public async Task AddingSameKindWithSameValidFrom_ShowsDuplicateError()
     {
         var vm = await CreateNewAsync();
-        AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
-        vm.AddParameterCommand.Execute(null);
-        vm.FormValueText = "55";
-        vm.FormValidFrom = new(2020, 1, 1);
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
 
-        vm.ApplyParameterCommand.Execute(null);
+        var editor = await TryAddAsync(vm, PropertyParameterKind.TotalArea, "55", new(2020, 1, 1));
 
-        Assert.StartsWith("Error_versioned_duplicate_valid_from", vm.FormValidFromError);
+        Assert.StartsWith("Error_versioned_duplicate_valid_from", editor.ValidFromError);
         Assert.Single(vm.Rows);
+    }
+
+    [Fact]
+    public async Task ParameterDialog_Save_AddsRowAndMarksDirty()
+    {
+        var vm = await CreateNewAsync();
+        vm.Name = "Flat";
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.False(vm.IsDirty);
+
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "54,7", new(2026, 10, 20));
+
+        var row = Assert.Single(vm.Rows);
+        Assert.Equal(54.7m, row.Value);
+        Assert.Equal("ParameterNew [en]", _dialogs.LastEditor!.Title);
+        Assert.True(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task ParameterDialog_Cancel_ChangesNothing()
+    {
+        var vm = await CreateNewAsync();
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
+        vm.IsDirty = false;
+
+        _dialogs.EditorScript = e =>
+        {
+            var editor = (ParameterEditorViewModel)e;
+            editor.ValueText = "99";
+            editor.CancelCommand.Execute(null);
+        };
+        await vm.AddParameterCommand.ExecuteAsync(null);
+        await vm.EditParameterCommand.ExecuteAsync(vm.Rows[0]);
+
+        var row = Assert.Single(vm.Rows);
+        Assert.Equal(50m, row.Value);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task ParameterDialog_Edit_PrefillsAndUpdatesTheRowInPlace()
+    {
+        var vm = await CreateNewAsync();
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
+        var row = vm.Rows[0];
+        _dialogs.EditorScript = e =>
+        {
+            var editor = (ParameterEditorViewModel)e;
+            Assert.Equal("50", editor.ValueText);
+            Assert.Equal("ParameterEdit [en]", editor.Title);
+            editor.ValueText = "51,5";
+            editor.SaveCommand.Execute(null);
+        };
+
+        await vm.EditParameterCommand.ExecuteAsync(row);
+
+        Assert.Single(vm.Rows);
+        Assert.Equal(51.5m, row.Value);
+    }
+
+    [Fact]
+    public async Task ParameterDialog_EditingARowKeepingItsOwnDate_IsNotADuplicate()
+    {
+        var vm = await CreateNewAsync();
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
+        _dialogs.EditorScript = e => e.SaveCommand.Execute(null);
+
+        await vm.EditParameterCommand.ExecuteAsync(vm.Rows[0]);
+
+        Assert.True(_dialogs.LastEditor!.Saved);
     }
 
     [Fact]
@@ -155,26 +214,26 @@ public class PropertyEditViewModelTests
     public async Task Groups_ShowCurrentValueAndHistoryNewestFirst()
     {
         var vm = await CreateNewAsync();
-        AddParameter(vm, PropertyParameterKind.DeclaredResidents, "3", new(2020, 1, 1));
-        AddParameter(vm, PropertyParameterKind.DeclaredResidents, "2", new(2026, 6, 1));
-        AddParameter(vm, PropertyParameterKind.DeclaredResidents, "1", new(2027, 1, 1));
-        AddParameter(vm, PropertyParameterKind.TotalArea, "52,3", new(2020, 1, 1));
-        AddParameter(vm, PropertyParameterKind.Custom, "7", new(2021, 1, 1), name: "Parking places");
+        await AddParameter(vm, PropertyParameterKind.DeclaredResidents, "3", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.DeclaredResidents, "2", new(2026, 6, 1));
+        await AddParameter(vm, PropertyParameterKind.DeclaredResidents, "1", new(2027, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "52,3", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.Custom, "7", new(2021, 1, 1), name: "Parking places");
 
         Assert.Equal(
             ["Enum_PropertyParameterKind_TotalArea [en]", "Enum_PropertyParameterKind_DeclaredResidents [en]", "Parking places"],
             vm.Groups.Select(g => g.Title));
         var residents = vm.Groups[1];
         Assert.Equal([new DateOnly(2027, 1, 1), new(2026, 6, 1), new(2020, 1, 1)], residents.Rows.Select(r => r.ValidFrom));
-        Assert.Equal("ParameterCurrent 2 [en]", residents.CurrentText);
-        Assert.Equal("ParameterCurrent 52.3 [en]", vm.Groups[0].CurrentText);
+        Assert.StartsWith("ParameterCurrent 2|", residents.CurrentText);
+        Assert.StartsWith("ParameterCurrent 52.3|", vm.Groups[0].CurrentText);
     }
 
     [Fact]
     public async Task Group_WithOnlyFutureValues_HasNoCurrentValue()
     {
         var vm = await CreateNewAsync();
-        AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2030, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2030, 1, 1));
 
         Assert.Equal("ParameterNoCurrent [en]", vm.Groups[0].CurrentText);
     }
@@ -202,7 +261,7 @@ public class PropertyEditViewModelTests
     public async Task RemoveParameter_WhenDeclined_KeepsIt()
     {
         var vm = await CreateNewAsync();
-        AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
         _dialogs.ConfirmResult = false;
 
         await vm.RemoveParameterCommand.ExecuteAsync(vm.Rows[0]);
@@ -211,52 +270,252 @@ public class PropertyEditViewModelTests
     }
 
     [Fact]
-    public async Task EditParameter_ChangesTheRowInPlace()
+    public async Task CanLeave_WithoutChanges_IsTrueWithoutDialog()
     {
         var vm = await CreateNewAsync();
-        AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
-        var row = vm.Rows[0];
 
-        vm.EditParameterCommand.Execute(row);
-        Assert.Equal("50", vm.FormValueText);
-        vm.FormValueText = "51,5";
-        vm.ApplyParameterCommand.Execute(null);
+        Assert.True(await vm.CanLeaveAsync());
 
-        Assert.Single(vm.Rows);
-        Assert.Equal(51.5m, row.Value);
-        Assert.False(vm.IsParameterFormVisible);
+        Assert.Equal(0, _dialogs.UnsavedAsked);
     }
 
     [Fact]
-    public async Task Cancel_WithChanges_AsksToDiscard()
+    public async Task CanLeave_DirtyAndSaveWithValidData_SavesAndIsTrue()
     {
         var vm = await CreateNewAsync();
-        vm.IsHostedInPage = true;
         vm.Name = "Typed";
-        _dialogs.ConfirmResult = false;
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.Save;
 
-        await vm.CancelCommand.ExecuteAsync(null);
+        Assert.True(await vm.CanLeaveAsync());
 
-        Assert.Single(_dialogs.Confirmations);
-        Assert.Equal(0, _navigation.BackCount);
+        Assert.Equal(1, _dialogs.UnsavedAsked);
+        Assert.Equal("Typed", Assert.Single(_store.Saved).Name);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task CanLeave_DirtyAndSaveWithInvalidData_IsFalseAndShowsErrors()
+    {
+        var vm = await CreateNewAsync();
+        vm.Name = " ";
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.Save;
+
+        Assert.False(await vm.CanLeaveAsync());
+
+        Assert.Empty(_store.Saved);
+        Assert.True(vm.HasErrors);
+        Assert.True(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task CanLeave_DirtyAndDontSave_IsTrueAndSavesNothing()
+    {
+        var vm = await CreateNewAsync();
+        vm.Name = "Typed";
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.DontSave;
+
+        Assert.True(await vm.CanLeaveAsync());
+
+        Assert.Empty(_store.Saved);
+    }
+
+    [Fact]
+    public async Task CanLeave_DirtyAndCancel_IsFalse()
+    {
+        var vm = await CreateNewAsync();
+        vm.Name = "Typed";
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.Cancel;
+
+        Assert.False(await vm.CanLeaveAsync());
+
+        Assert.Empty(_store.Saved);
+        Assert.True(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Back_AfterTogglingArchived_AsksTheUnsavedChangesDialog()
+    {
+        var stored = new Property { Name = "Cottage" };
+        _store.Stored.Add(stored);
+        var vm = Create();
+        await vm.LoadAsync(stored.Id);
+        vm.IsHostedInPage = true;
+        Assert.False(vm.IsDirty);
+
+        vm.IsArchived = true;
         Assert.True(vm.IsDirty);
 
-        _dialogs.ConfirmResult = true;
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.Cancel;
+        await vm.CancelCommand.ExecuteAsync(null);
+        Assert.Equal(1, _dialogs.UnsavedAsked);
+        Assert.Equal(0, _navigation.BackCount);
+
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.DontSave;
+        await vm.CancelCommand.ExecuteAsync(null);
+        Assert.Equal(1, _navigation.BackCount);
+        Assert.Empty(_store.Saved);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Back_WithSaveChoice_SavesThenLeaves()
+    {
+        var stored = new Property { Name = "Cottage" };
+        _store.Stored.Add(stored);
+        var vm = Create();
+        await vm.LoadAsync(stored.Id);
+        vm.IsHostedInPage = true;
+        vm.IsArchived = true;
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.Save;
+
         await vm.CancelCommand.ExecuteAsync(null);
 
+        Assert.True(Assert.Single(_store.Saved).IsArchived);
         Assert.Equal(1, _navigation.BackCount);
     }
 
     [Fact]
-    public async Task Cancel_WithoutChanges_DoesNotAsk()
+    public async Task Back_WithoutChanges_LeavesImmediately()
     {
         var vm = await CreateNewAsync();
         vm.IsHostedInPage = true;
 
         await vm.CancelCommand.ExecuteAsync(null);
 
-        Assert.Empty(_dialogs.Confirmations);
+        Assert.Equal(0, _dialogs.UnsavedAsked);
         Assert.Equal(1, _navigation.BackCount);
+    }
+
+    [Fact]
+    public async Task Load_ResetsIsDirty()
+    {
+        var vm = await CreateNewAsync();
+        vm.Name = "Typed";
+        Assert.True(vm.IsDirty);
+
+        await vm.LoadAsync(null);
+
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Save_ClearsIsDirtyAndRequestsClose()
+    {
+        var vm = await CreateNewAsync();
+        vm.IsHostedInPage = true;
+        EditOutcome? outcome = null;
+        vm.Finished = o =>
+        {
+            outcome = o;
+            return Task.CompletedTask;
+        };
+        vm.Name = "Flat";
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsDirty);
+        Assert.Equal(1, _navigation.BackCount);
+        Assert.Equal(EditOutcome.Saved, outcome);
+    }
+
+    [Fact]
+    public async Task Delete_ClearsIsDirtyAndRequestsClose()
+    {
+        var stored = new Property { Name = "Cottage" };
+        _store.Stored.Add(stored);
+        var vm = Create();
+        await vm.LoadAsync(stored.Id);
+        vm.IsHostedInPage = true;
+        EditOutcome? outcome = null;
+        vm.Finished = o =>
+        {
+            outcome = o;
+            return Task.CompletedTask;
+        };
+        vm.Name = "Changed";
+
+        await vm.DeleteCommand.ExecuteAsync(null);
+
+        Assert.False(vm.IsDirty);
+        Assert.Equal(1, _navigation.BackCount);
+        Assert.Equal(EditOutcome.Deleted, outcome);
+    }
+
+    [Fact]
+    public async Task KindOptions_SelectedKindIsAnElementOfTheList_AfterLoadAndAfterLanguageChange()
+    {
+        var stored = new Property { Name = "Cottage", Kind = PropertyKind.Cottage };
+        _store.Stored.Add(stored);
+        var vm = Create();
+
+        await vm.LoadAsync(stored.Id);
+
+        Assert.Contains(vm.SelectedKind, vm.Kinds);
+        Assert.Equal(PropertyKind.Cottage, vm.SelectedKind!.As<PropertyKind>());
+        Assert.Equal(vm.Kinds.ToList().IndexOf(vm.SelectedKind), vm.SelectedKindIndex);
+
+        _language.SetLanguage("ru");
+
+        Assert.Contains(vm.SelectedKind, vm.Kinds);
+        Assert.Equal(PropertyKind.Cottage, vm.SelectedKind!.As<PropertyKind>());
+    }
+
+    [Fact]
+    public async Task SelectedKindIndex_IgnoresOutOfRangeValues()
+    {
+        var vm = await CreateNewAsync();
+        var before = vm.SelectedKind;
+
+        vm.SelectedKindIndex = -1;
+        vm.SelectedKindIndex = 99;
+
+        Assert.Same(before, vm.SelectedKind);
+        vm.SelectedKindIndex = 1;
+        Assert.Same(vm.Kinds[1], vm.SelectedKind);
+    }
+
+    [Fact]
+    public async Task ParameterDialog_SelectedKindIsAnElementOfTheList()
+    {
+        var vm = await CreateNewAsync();
+        _dialogs.EditorScript = null;
+
+        await vm.AddParameterCommand.ExecuteAsync(null);
+
+        var editor = (ParameterEditorViewModel)_dialogs.LastEditor!;
+        Assert.Contains(editor.SelectedKind, editor.Kinds);
+    }
+
+    [Fact]
+    public async Task Footer_IsShownInPaneAndDeleteInFormOnPage()
+    {
+        var stored = new Property { Name = "Cottage" };
+        _store.Stored.Add(stored);
+        var vm = Create();
+        await vm.LoadAsync(stored.Id);
+
+        Assert.True(vm.ShowFooter);
+        Assert.False(vm.ShowFormDelete);
+
+        vm.IsHostedInPage = true;
+
+        Assert.False(vm.ShowFooter);
+        Assert.True(vm.ShowFormDelete);
+    }
+
+    [Fact]
+    public async Task HistoryToggle_SurvivesRebuildOfGroups()
+    {
+        var vm = await CreateNewAsync();
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "55", new(2023, 1, 1));
+        Assert.False(vm.Groups[0].IsExpanded);
+        Assert.Equal("ParameterHistory 2 [en]", vm.Groups[0].HistoryText);
+
+        vm.Groups[0].ToggleHistoryCommand.Execute(null);
+        _language.SetLanguage("ru");
+
+        Assert.True(vm.Groups[0].IsExpanded);
     }
 
     [Fact]
@@ -269,8 +528,9 @@ public class PropertyEditViewModelTests
 
         await vm.DeleteCommand.ExecuteAsync(null);
 
-        var (_, message) = Assert.Single(_dialogs.Confirmations);
-        Assert.Equal("PropertyDeleteMessage Cottage [en]", message);
+        var (title, message) = Assert.Single(_dialogs.Confirmations);
+        Assert.Equal("Dialog_Delete_Title Cottage [en]", title);
+        Assert.Equal("Dialog_Delete_Message [en]", message);
         Assert.Equal([stored.Id], _store.Deleted);
     }
 
@@ -317,7 +577,7 @@ public class PropertyEditViewModelTests
         var vm = await CreateNewAsync();
         vm.Name = "Typed";
         vm.SelectedKind = Option(vm.Kinds, PropertyKind.Cottage);
-        AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
+        await AddParameter(vm, PropertyParameterKind.TotalArea, "50", new(2020, 1, 1));
 
         _language.SetLanguage("ru");
 
@@ -336,8 +596,8 @@ public class PropertyEditViewModelTests
         {
             CultureInfo.CurrentCulture = new CultureInfo("ru-RU");
             var vm = await CreateNewAsync();
-            AddParameter(vm, PropertyParameterKind.TotalArea, "52,3", new(2020, 1, 1));
-            AddParameter(vm, PropertyParameterKind.HeatedArea, "52.3", new(2020, 1, 1));
+            await AddParameter(vm, PropertyParameterKind.TotalArea, "52,3", new(2020, 1, 1));
+            await AddParameter(vm, PropertyParameterKind.HeatedArea, "52.3", new(2020, 1, 1));
 
             Assert.Equal(52.3m, vm.Rows[0].Value);
             Assert.Equal(52.3m, vm.Rows[1].Value);
@@ -361,15 +621,27 @@ public class PropertyEditViewModelTests
     private static EnumOption Option<TEnum>(IReadOnlyList<EnumOption> options, TEnum value)
         where TEnum : struct, Enum => options.First(o => o.Value.Equals(value));
 
-    private static void AddParameter(
+    /// <summary>Opens the add dialog, fills it and presses Save; the dialog may stay open when the data is invalid.</summary>
+    private async Task<ParameterEditorViewModel> TryAddAsync(
         PropertyEditViewModel vm, PropertyParameterKind kind, string valueText, DateOnly validFrom, string name = "")
     {
-        vm.AddParameterCommand.Execute(null);
-        vm.FormKind = Option(vm.ParameterKinds, kind);
-        vm.FormName = name;
-        vm.FormValueText = valueText;
-        vm.FormValidFrom = validFrom;
-        vm.ApplyParameterCommand.Execute(null);
-        Assert.False(vm.IsParameterFormVisible, vm.FormValueError + vm.FormNameError + vm.FormValidFromError);
+        _dialogs.EditorScript = e =>
+        {
+            var editor = (ParameterEditorViewModel)e;
+            editor.SelectedKind = Option(editor.Kinds, kind);
+            editor.Name = name;
+            editor.ValueText = valueText;
+            editor.ValidFrom = validFrom;
+            editor.SaveCommand.Execute(null);
+        };
+        await vm.AddParameterCommand.ExecuteAsync(null);
+        return (ParameterEditorViewModel)_dialogs.LastEditor!;
+    }
+
+    private async Task AddParameter(
+        PropertyEditViewModel vm, PropertyParameterKind kind, string valueText, DateOnly validFrom, string name = "")
+    {
+        var editor = await TryAddAsync(vm, kind, valueText, validFrom, name);
+        Assert.True(editor.Saved, editor.ValueError + editor.NameError + editor.ValidFromError);
     }
 }

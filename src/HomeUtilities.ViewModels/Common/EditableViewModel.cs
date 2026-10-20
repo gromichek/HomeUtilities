@@ -14,7 +14,7 @@ public enum EditOutcome
 
 /// <summary>
 /// Base of all edit screens: dirty tracking, validation errors for binding, Save / Cancel / Delete with the
-/// "discard changes?" and "delete?" confirmations. Subclasses implement validation, saving and deleting.
+/// "Save changes?" and "Delete «name»?" dialogs of <c>docs/UI_GUIDELINES.md</c>. Subclasses implement validation, saving and deleting.
 /// </summary>
 public abstract partial class EditableViewModel : ViewModelBase
 {
@@ -72,8 +72,8 @@ public abstract partial class EditableViewModel : ViewModelBase
 
     protected abstract Task DeleteCoreAsync();
 
-    /// <summary>Text of the "Delete «name»?" confirmation.</summary>
-    protected abstract string DeleteMessage();
+    /// <summary>Name of the item shown in the "Delete «name»?" confirmation.</summary>
+    protected abstract string DeleteName();
 
     /// <summary>Called after the session ended (navigate back, refresh the list).</summary>
     protected abstract Task OnFinishedAsync(EditOutcome outcome);
@@ -93,41 +93,41 @@ public abstract partial class EditableViewModel : ViewModelBase
 
     protected void ClearErrors() => SetErrors([]);
 
-    /// <summary>True if there is nothing to lose or the user agreed to discard the changes.</summary>
-    public async Task<bool> ConfirmDiscardAsync()
+    /// <summary>
+    /// True if the editor may be left: nothing is unsaved, or the user chose "Save" and it succeeded, or "Don't save".
+    /// False if the user cancelled the dialog or the save failed (errors are shown). Does not close the editor.
+    /// </summary>
+    public async Task<bool> CanLeaveAsync()
     {
         if (!IsDirty)
         {
             return true;
         }
 
-        return await _dialogs.ConfirmAsync(
-            _editableLocalizer["DiscardChangesTitle"],
-            _editableLocalizer["DiscardChangesMessage"],
-            _editableLocalizer["Discard"],
-            _editableLocalizer["KeepEditing"]);
+        switch (await _dialogs.AskUnsavedChangesAsync())
+        {
+            case UnsavedChangesChoice.Save:
+                return await TrySaveAsync();
+            case UnsavedChangesChoice.DontSave:
+                return true;
+            default:
+                return false;
+        }
     }
 
-    protected override void RefreshTexts()
-    {
-        SaveText = _editableLocalizer["Save"];
-        CancelText = _editableLocalizer["Cancel"];
-        DeleteText = _editableLocalizer["Delete"];
-    }
-
-    [RelayCommand]
-    private async Task SaveAsync()
+    /// <summary>Validates and saves; false when validation failed or another save is running.</summary>
+    private async Task<bool> TrySaveAsync()
     {
         if (IsBusy)
         {
-            return;
+            return false;
         }
 
         var errors = Validate();
         SetErrors(errors);
         if (errors.Count > 0)
         {
-            return;
+            return false;
         }
 
         IsBusy = true;
@@ -141,13 +141,30 @@ public abstract partial class EditableViewModel : ViewModelBase
             IsBusy = false;
         }
 
-        await OnFinishedAsync(EditOutcome.Saved);
+        return true;
+    }
+
+    protected override void RefreshTexts()
+    {
+        SaveText = _editableLocalizer["Save"];
+        CancelText = _editableLocalizer["Cancel"];
+        DeleteText = _editableLocalizer["Delete"];
     }
 
     [RelayCommand]
+    private async Task SaveAsync()
+    {
+        if (await TrySaveAsync())
+        {
+            await OnFinishedAsync(EditOutcome.Saved);
+        }
+    }
+
+    /// <summary>Cancel button, toolbar Back and hardware Back: leave the editor, asking about unsaved changes first.</summary>
+    [RelayCommand]
     private async Task CancelAsync()
     {
-        if (!await ConfirmDiscardAsync())
+        if (!await CanLeaveAsync())
         {
             return;
         }
@@ -162,8 +179,8 @@ public abstract partial class EditableViewModel : ViewModelBase
     private async Task DeleteAsync()
     {
         var confirmed = await _dialogs.ConfirmAsync(
-            _editableLocalizer["DeleteConfirmTitle"],
-            DeleteMessage(),
+            _editableLocalizer.Get("Dialog_Delete_Title", DeleteName()),
+            _editableLocalizer["Dialog_Delete_Message"],
             _editableLocalizer["Delete"],
             _editableLocalizer["Cancel"]);
         if (!confirmed)

@@ -37,7 +37,7 @@ public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<Layo
     private PropertyEditViewModel? _selectedProperty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowSelectHint))]
+    [NotifyPropertyChangedFor(nameof(ShowSelectHint), nameof(ShowAddFab), nameof(ShowAddButton))]
     private bool _isTwoPane;
 
     [ObservableProperty]
@@ -77,6 +77,12 @@ public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<Layo
     public bool HasSelection => SelectedProperty is not null;
 
     public bool ShowSelectHint => IsTwoPane && !HasSelection;
+
+    /// <summary>Floating "add" button of the phone layout.</summary>
+    public bool ShowAddFab => !IsTwoPane;
+
+    /// <summary>"New property" button above the list on tablets and desktops.</summary>
+    public bool ShowAddButton => IsTwoPane;
 
     public bool HasItems => Items.Count > 0;
 
@@ -140,7 +146,7 @@ public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<Layo
     {
         if (SelectedProperty is { } current)
         {
-            if (!await current.ConfirmDiscardAsync())
+            if (!await current.CanLeaveAsync())
             {
                 return;
             }

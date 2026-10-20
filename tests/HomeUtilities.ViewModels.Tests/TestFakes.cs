@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels.Tests;
 
@@ -75,6 +76,16 @@ internal sealed class FakeDialogService : IDialogService
 
     public List<(string Title, string Message)> Confirmations { get; } = [];
 
+    /// <summary>The answer to the "Save changes?" dialog.</summary>
+    public UnsavedChangesChoice UnsavedChoice { get; set; } = UnsavedChangesChoice.DontSave;
+
+    public int UnsavedAsked { get; private set; }
+
+    /// <summary>What the "user" does in the next child-item editor dialog; null = just cancel.</summary>
+    public Action<EditorDialogViewModel>? EditorScript { get; set; }
+
+    public EditorDialogViewModel? LastEditor { get; private set; }
+
     public Task AlertAsync(string title, string message) => Task.CompletedTask;
 
     public Task<bool> ConfirmAsync(string title, string message, string accept, string cancel)
@@ -84,6 +95,19 @@ internal sealed class FakeDialogService : IDialogService
     }
 
     public Task<string?> ChooseAsync(string title, IReadOnlyList<string> options) => Task.FromResult<string?>(null);
+
+    public Task<UnsavedChangesChoice> AskUnsavedChangesAsync()
+    {
+        UnsavedAsked++;
+        return Task.FromResult(UnsavedChoice);
+    }
+
+    public Task<bool> ShowEditorAsync(EditorDialogViewModel editor)
+    {
+        LastEditor = editor;
+        EditorScript?.Invoke(editor);
+        return Task.FromResult(editor.Saved);
+    }
 }
 
 internal sealed class FakeNavigationService : INavigationService
