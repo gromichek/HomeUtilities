@@ -4,8 +4,9 @@ Status: agreed with the owner on 2026-10-20 (after testing the Properties screen
 these rules; the Properties screen (after T-012a) is the reference implementation.
 
 ## 1. Icons — use the platform's standard icons
-- **Android**: Google **Material Symbols** (Outlined) — the icons Android users know. Font file bundled in
-  `Resources/Fonts/` (Apache 2.0 licence, keep the licence file next to it).
+- **Android**: Google **Material Icons Outlined** (static font `MaterialIconsOutlined-Regular.otf`, ~330 KB,
+  same code points as Material Symbols) — the icons Android users know. Bundled in `Resources/Fonts/`
+  (Apache 2.0, licence file next to it). **Do not** add the 10 MB variable Material Symbols font.
 - **Windows**: **Segoe Fluent Icons** (built into Windows 11; fall back to **Segoe MDL2 Assets** on Windows 10)
   — the icons of Windows itself. Not bundled (system font).
 - One XAML resource per icon with `OnPlatform`, e.g. `IconDelete`, used everywhere; never raw glyph codes in pages.
@@ -23,6 +24,7 @@ these rules; the Properties screen (after T-012a) is the reference implementatio
 | `IconCopy` | copy | `content_copy` | `E8C8` Copy |
 | `IconArchive` | archive | `archive` | `E7B8` Package |
 | `IconHistory` | history | `history` | `E81C` History |
+| `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` | `E70D` / `E70E` Chevron down/up |
 
 Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an accessibility name
 (`SemanticProperties.Description`) — localized.
