@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-012 | Properties — list, edit, parameters, shared UI patterns | Ready | | |
+| T-013 | Suppliers and categories screens | Ready | | |
 
 ## Done
 
@@ -29,13 +29,15 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-010 | Data stores, seed data, database in the App | 2026-10-20, #21 | 29 Data + 5 VM tests. Stores are singletons over a context factory. Owner manual test pending. |
 | — | Docs: payment status, Paid quick action, undo | 2026-10-20, #23, #25 | `Payment.CreatedByQuickAction` planned for T-018 |
 | T-011 | App shell, navigation, settings, adaptive layout | 2026-10-20, #24 | 16 new VM tests (558 total). Messenger-based language refresh. |
+| — | Hotfixes: AppShell resources, startup language | 2026-10-20, #27, #28 | Startup-order rules added to CLAUDE.md |
+| T-012 | Properties screens + shared UI patterns | 2026-10-20, #29 | 63 new VM tests (618 total). Owner manual test pending. |
 
 ## Known issues / tech debt
 
 - `ViewModelBase` uses `WeakReferenceMessenger.RegisterAll` (reflection) — check Android release trimming; switch to explicit `Register<T>` if it breaks.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
-- `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — pick up in T-013.
+- `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — pick up in T-014 (contracts screen).
 - SQLite decimals lose trailing zeros (`-12.10` → `-12.1`); numerically equal, UI always formats amounts.
 - Snapshot `ChargeWarning.Args` come back as `JsonElement` (display only).
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
@@ -51,4 +53,4 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | | #21 | Database created + seeded on Windows / Android, no duplicates after restart | pending |
 | 2026-10-20 | #24 | Start on Windows / Android | **Crash**: `StaticResource not found for key PrimaryLight` (AppShell built before App resources) — fixed in hotfix PR |
 | 2026-10-20 | #27 | Restart with Russian selected | **Bug**: menu in English, Settings in Russian (LanguageService created lazily after Shell) — fixed in hotfix PR |
-| | hotfix 2 | Shell menu, settings (language, theme), adaptive layout on Windows / phone / tablet | pending |
+| | #28 + #29 | Shell, settings, adaptive layout, Properties screens on Windows / phone / tablet | pending |
