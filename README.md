@@ -21,6 +21,19 @@ dotnet test HomeUtilities.Tests.slnf
 The solution filter contains everything that builds on any OS without MAUI workloads.
 On Linux, `scripts/setup-dev.sh` installs the .NET 10 SDK.
 
+## Database migrations
+
+The schema is managed with EF Core migrations in `HomeUtilities.Data`. The `dotnet-ef` tool is pinned in
+`.config/dotnet-tools.json`. After changing entities or mappings, from the repository root:
+
+```
+dotnet tool restore
+dotnet tool run dotnet-ef migrations add <MigrationName> --project src/HomeUtilities.Data --output-dir Migrations
+```
+
+Never edit a generated migration by hand once it is merged. `dotnet tool run dotnet-ef migrations has-pending-model-changes --project src/HomeUtilities.Data`
+must report no pending changes (a test checks this too). The design-time database `design.db` is git-ignored.
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
