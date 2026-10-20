@@ -324,6 +324,7 @@ Derived (not stored): `Difference = Gross − CalculatedSnapshot.TotalGross`; `O
   `Period = 2026-11`. Before November it is shown as "prepaid". Contract field `BillingTiming` decides the
   default period of new bills.
 - Auto-allocation: oldest open bills first; user can edit.
+- "Paid" quick action: creates a payment for the bill's open amount, dated today, allocated to that bill.
 
 ### Contract balance (derived)
 `Balance(C, date) = Σ payments(C, ≤ date) − Σ bills(C, ≤ date)`. Shown on the contract and dashboard.
