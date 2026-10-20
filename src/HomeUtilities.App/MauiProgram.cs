@@ -34,9 +34,14 @@ public static class MauiProgram
         builder.Services.AddTransient<OverviewViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<PlaceholderViewModel>();
+        builder.Services.AddTransient<PropertiesViewModel>();
+        builder.Services.AddTransient<PropertyEditViewModel>();
+        builder.Services.AddTransient<Func<PropertyEditViewModel>>(sp => () => sp.GetRequiredService<PropertyEditViewModel>());
         builder.Services.AddTransient<OverviewPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<PlaceholderPage>();
+        builder.Services.AddTransient<PropertiesPage>();
+        builder.Services.AddTransient<PropertyEditPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

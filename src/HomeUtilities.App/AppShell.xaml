@@ -24,7 +24,7 @@
         <FlyoutItem.Icon>
             <FontImageSource Glyph="▦" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
-        <ShellContent Title="{Binding PropertiesTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+        <ShellContent Title="{Binding PropertiesTitle}" ContentTemplate="{DataTemplate views:PropertiesPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding ReadingsTitle}" Route="Readings">

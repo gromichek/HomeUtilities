@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.PropertyEditView"
+             x:DataType="vm:PropertyEditViewModel">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <toolkit:InvertedBoolConverter x:Key="Not" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8" MaximumWidthRequest="700" HorizontalOptions="Fill">
+
+            <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Name}" />
+            <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding KindLabel}" Style="{StaticResource MutedLabel}" />
+            <Picker ItemsSource="{Binding Kinds}"
+                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    SelectedItem="{Binding SelectedKind}" />
+
+            <Label Text="{Binding AddressLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Address}" />
+
+            <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
+            <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+            <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8">
+                <Switch IsToggled="{Binding IsArchived}" />
+                <Label Text="{Binding ArchivedLabel}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding ParametersHeader}" FontSize="18" FontAttributes="Bold" Margin="0,16,0,0" />
+            <Label Text="{Binding ParametersError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding ParametersError, Converter={StaticResource HasText}}" />
+            <Label Text="{Binding ParametersEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoParameters}" />
+
+            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Groups}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ParameterGroupViewModel">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Title}" FontAttributes="Bold" />
+                            <Label Text="{Binding CurrentText}" Style="{StaticResource MutedLabel}" />
+                            <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Rows}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ParameterRowViewModel">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" RowDefinitions="Auto,Auto,Auto">
+                                            <Label Grid.Column="0" Text="{Binding DisplayText}" VerticalOptions="Center" />
+                                            <Button Grid.Column="1" Text="{Binding EditText}" Command="{Binding EditCommand}" />
+                                            <Button Grid.Column="2" Text="{Binding RemoveText}" Command="{Binding RemoveCommand}" />
+                                            <Label Grid.Row="1" Grid.ColumnSpan="3" Text="{Binding Note}" Style="{StaticResource MutedLabel}"
+                                                   IsVisible="{Binding Note, Converter={StaticResource HasText}}" />
+                                            <Label Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}"
+                                                   IsVisible="{Binding HasError}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Button Text="{Binding AddParameterText}" Command="{Binding AddParameterCommand}"
+                    HorizontalOptions="Start" IsVisible="{Binding IsParameterFormVisible, Converter={StaticResource Not}}" />
+
+            <Border IsVisible="{Binding IsParameterFormVisible}" Padding="12" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding FormKindLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding ParameterKinds}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            SelectedItem="{Binding FormKind}" />
+
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding IsFormCustom}">
+                        <Label Text="{Binding FormNameLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding FormName}" />
+                        <Label Text="{Binding FormNameError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding FormNameError, Converter={StaticResource HasText}}" />
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding FormValueLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding FormValueText}" Keyboard="Text" />
+                    <Label Text="{Binding FormValueError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding FormValueError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding FormValidFromLabel}" Style="{StaticResource MutedLabel}" />
+                    <DatePicker Date="{Binding FormValidFrom, Converter={StaticResource DateOnly}}" />
+                    <Label Text="{Binding FormValidFromError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding FormValidFromError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding FormNoteLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding FormNote}" />
+                    <Label Text="{Binding FormNoteError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding FormNoteError, Converter={StaticResource HasText}}" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="{Binding ApplyText}" Command="{Binding ApplyParameterCommand}" />
+                        <Button Text="{Binding CancelText}" Command="{Binding CancelParameterCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <HorizontalStackLayout Spacing="8" Margin="0,16,0,0">
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" IsVisible="{Binding ShowInlineActions}" />
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" IsVisible="{Binding ShowInlineActions}" />
+                <Button Text="{Binding DeleteText}" Command="{Binding DeleteCommand}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>
