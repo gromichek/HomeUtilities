@@ -164,4 +164,7 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-19 | Public repository, no personal data in repo | free CI incl. macOS |
 | 2026-10-19 | No portal passwords stored; links open in system browser | browser password manager fills them |
 | 2026-10-19 | Android tablet is a target form factor; width-based adaptive layouts | user request |
+| 2026-10-20 | User-defined payment categories (ServiceKind stays technical) | non-utility payments, e.g. kindergarten |
+| 2026-10-20 | Payment details (IBAN, purpose template) with copy buttons | faster internet-bank payments |
+| 2026-10-20 | Free-text comment on every editable entity | user request |
 | 2026-10-19 | Coding sessions run in the cloud (Linux) | Windows target is verified only by CI and the owner |

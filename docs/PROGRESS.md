@@ -8,6 +8,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
 | T-006 | Charge calculator | In review | | 36 new tests (295 total). `TariffComponent.QuantityParameter(Name)` added. Extra warning code `NoMeters`. |
+| T-007 | User categories, payment details, comments | Ready (after T-006) | | |
 
 ## Done
 
@@ -24,7 +25,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 ## Known issues / tech debt
 
 - `MainViewModel` subscribes to `ILanguageService.LanguageChanged` and never unsubscribes while being
-  registered as transient. Harmless with a single page; resolve when navigation is introduced (T-010),
+  registered as transient. Harmless with a single page; resolve when navigation is introduced (T-011),
   e.g. weak-reference messenger or `IDisposable` view models.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
