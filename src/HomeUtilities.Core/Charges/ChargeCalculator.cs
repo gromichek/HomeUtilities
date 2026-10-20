@@ -1,0 +1,292 @@
+using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Consumption;
+using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Tariffs;
+
+namespace HomeUtilities.Core.Charges;
+
+/// <summary>
+/// Calculates the charge the app expects for one contract and one billing month from tariffs, VAT,
+/// meter consumption and property parameters. The result is later compared with the supplier's bill.
+/// </summary>
+/// <remarks>
+/// Limitation (v1): a month is never split at a mid-month price change; one rate is chosen per component
+/// (the one valid on the end reading date for metered bases, on the first day of the month otherwise).
+/// </remarks>
+public static class ChargeCalculator
+{
+    private sealed record Source(MeterChain Chain, RegisterKind Kind, ConsumptionResult Result);
+
+    private sealed record Metered(IReadOnlyList<Source> Sources, decimal Quantity, bool IsComplete, DateOnly RateDate)
+    {
+        public IReadOnlyList<ConsumptionResult> Results => [.. Sources.Select(s => s.Result)];
+    }
+
+    /// <summary>Calculates the expected charge of the contract for the period of <paramref name="input"/>.</summary>
+    public static CalculatedCharge Calculate(ChargeInput input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+
+        var contract = input.Contract;
+        var period = input.Period;
+        var lines = new List<ChargeLine>();
+        var warnings = new List<ChargeWarning>();
+
+        if (!contract.IsActiveOn(period.FirstDay) && !contract.IsActiveOn(period.LastDay))
+        {
+            warnings.Add(new ChargeWarning(ChargeWarningCodes.ContractInactive));
+            return Totals(input, lines, warnings);
+        }
+
+        var components = input.Components
+            .Where(c => !c.IsDeleted)
+            .OrderBy(c => c.SortOrder)
+            .ThenBy(c => c.Name, StringComparer.Ordinal);
+        foreach (var component in components)
+        {
+            lines.AddRange(CalculateComponent(input, component, warnings));
+        }
+
+        return Totals(input, lines, warnings);
+    }
+
+    private static CalculatedCharge Totals(ChargeInput input, List<ChargeLine> lines, List<ChargeWarning> warnings) =>
+        new(
+            input.Contract.Id,
+            input.Period,
+            input.Contract.Currency,
+            lines,
+            lines.Sum(l => l.Net),
+            lines.Sum(l => l.Vat),
+            lines.Sum(l => l.Gross),
+            lines.All(l => l.IsComplete),
+            warnings);
+
+    private static List<ChargeLine> CalculateComponent(ChargeInput input, TariffComponent component, List<ChargeWarning> warnings)
+    {
+        var period = input.Period;
+        if (component.Basis == ChargeBasis.FromBill)
+        {
+            var percent = TryResolveVat(component, input.VatCatalog, period.FirstDay) ?? 0m;
+            return [Line(component, null, null, (0m, 0m, 0m), percent, fromBill: true, complete: true, [])];
+        }
+
+        var isMetered = component.Basis is ChargeBasis.PerUnit or ChargeBasis.NetExport;
+        var metered = isMetered ? Meter(input, component, warnings) : null;
+        var rateDate = metered?.RateDate ?? period.FirstDay;
+        var consumption = metered?.Results ?? [];
+
+        List<ChargeLine> Failed(string code, params object?[] args)
+        {
+            warnings.Add(new ChargeWarning(code, component.Id, args.Length == 0 ? null : args));
+            return [Line(component, null, null, (0m, 0m, 0m), 0m, fromBill: false, complete: false, consumption)];
+        }
+
+        var rate = component.RateAt(rateDate);
+        if (rate is null)
+        {
+            return Failed(ChargeWarningCodes.NoRateForDate, rateDate.ToString("yyyy-MM-dd"));
+        }
+
+        if (rate.Currency != input.Contract.Currency)
+        {
+            return Failed(ChargeWarningCodes.CurrencyMismatch, rate.Currency, input.Contract.Currency);
+        }
+
+        if (TryResolveVat(component, input.VatCatalog, rateDate) is not { } vatPercent)
+        {
+            return Failed(ChargeWarningCodes.UnknownVat, component.VatCode);
+        }
+
+        decimal quantity;
+        var complete = true;
+        switch (component.Basis)
+        {
+            case ChargeBasis.PerUnit:
+            case ChargeBasis.NetExport:
+                if (component.Basis == ChargeBasis.NetExport && rate.Tiers.Count > 0)
+                {
+                    return Failed(ChargeWarningCodes.InvalidTariff);
+                }
+
+                quantity = component.Basis == ChargeBasis.NetExport ? -metered!.Quantity : metered!.Quantity;
+                complete = metered.IsComplete;
+                if (rate.Tiers.Count > 0)
+                {
+                    return TieredLines(input, component, rate, metered, vatPercent, warnings);
+                }
+
+                break;
+            case ChargeBasis.PerArea:
+            case ChargeBasis.PerResident:
+                var (name, value) = ReadParameter(input, component);
+                if (value is not { } parameter)
+                {
+                    return Failed(ChargeWarningCodes.MissingParameter, name);
+                }
+
+                quantity = MoneyMath.RoundQuantity(parameter);
+                break;
+            case ChargeBasis.FixedMonthly:
+                quantity = 1m;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(component), component.Basis, "Unsupported charge basis.");
+        }
+
+        return [Priced(component, rate, quantity, rate.Price, vatPercent, complete, consumption)];
+    }
+
+    private static ChargeLine Priced(TariffComponent component, TariffRate rate, decimal quantity, decimal unitPrice, decimal vatPercent, bool complete, IReadOnlyList<ConsumptionResult> consumption)
+    {
+        var amount = quantity * unitPrice;
+        var split = rate.PriceIncludesVat ? MoneyMath.FromGross(amount, vatPercent) : MoneyMath.FromNet(amount, vatPercent);
+        return Line(component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption);
+    }
+
+    private static ChargeLine Line(
+        TariffComponent component,
+        decimal? quantity,
+        decimal? unitPrice,
+        (decimal Net, decimal Vat, decimal Gross) amounts,
+        decimal vatPercent,
+        bool fromBill,
+        bool complete,
+        IReadOnlyList<ConsumptionResult> consumption) =>
+        new(
+            component.Id,
+            component.Name,
+            component.ChargeKind,
+            component.Basis,
+            quantity,
+            unitPrice,
+            amounts.Net,
+            vatPercent,
+            amounts.Vat,
+            amounts.Gross,
+            fromBill,
+            complete,
+            consumption);
+
+    private static decimal? TryResolveVat(TariffComponent component, IReadOnlyCollection<VatRate> catalog, DateOnly date)
+    {
+        try
+        {
+            return TariffPricing.ResolveVatPercent(component, catalog, date);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
+    private static (string Name, decimal? Value) ReadParameter(ChargeInput input, TariffComponent component)
+    {
+        var kind = component.QuantityParameter
+            ?? (component.Basis == ChargeBasis.PerArea ? PropertyParameterKind.TotalArea : PropertyParameterKind.DeclaredResidents);
+        var date = input.Period.FirstDay;
+        if (kind != PropertyParameterKind.Custom)
+        {
+            return (kind.ToString(), input.Property.GetParameter(kind, date));
+        }
+
+        var name = component.QuantityParameterName ?? string.Empty;
+        return (name, string.IsNullOrWhiteSpace(name) ? null : input.Property.GetParameter(name, date));
+    }
+
+    private static Metered Meter(ChargeInput input, TariffComponent component, List<ChargeWarning> warnings)
+    {
+        var period = input.Period;
+        var window = input.Contract is { ReadingDayFrom: { } from, ReadingDayTo: { } to } ? (from, to) : ((int, int)?)null;
+        var sources = new List<Source>();
+        foreach (var (chain, kind) in ChainsAndKinds(input, component))
+        {
+            sources.Add(new Source(chain, kind, ConsumptionCalculator.CalculateForPeriod(chain, kind, period, window)));
+        }
+
+        var complete = sources.All(s => s.Result.IsComplete);
+        if (sources.Count == 0)
+        {
+            complete = false;
+            warnings.Add(new ChargeWarning(ChargeWarningCodes.NoMeters, component.Id));
+        }
+        else if (!complete)
+        {
+            warnings.Add(new ChargeWarning(ChargeWarningCodes.ConsumptionIncomplete, component.Id));
+        }
+
+        var quantity = MoneyMath.RoundQuantity(sources.Sum(s => s.Result.Quantity));
+        var endDates = sources.Where(s => s.Result.EndReading is not null).Select(s => s.Result.EndReading!.Date).ToList();
+        var rateDate = endDates.Count == 0 ? period.LastDay : endDates.Max();
+        return new Metered(sources, quantity, complete, rateDate);
+    }
+
+    private static IEnumerable<(MeterChain Chain, RegisterKind Kind)> ChainsAndKinds(ChargeInput input, TariffComponent component)
+    {
+        var linked = input.ContractMeters
+            .Where(cm => cm.IsActiveOn(input.Period.LastDay))
+            .Where(cm => component.MeterIds.Count == 0 || component.MeterIds.Contains(cm.MeterId))
+            .Select(cm => cm.MeterId)
+            .Where(id => input.PropertyMeters.Any(m => !m.IsDeleted && m.Id == id));
+
+        var seen = new HashSet<Guid>();
+        foreach (var meterId in linked)
+        {
+            var chain = MeterChain.Build(input.PropertyMeters, meterId);
+            if (!seen.Add(chain.Meters[0].Id))
+            {
+                continue;
+            }
+
+            foreach (var kind in KindsOf(chain, component))
+            {
+                yield return (chain, kind);
+            }
+        }
+    }
+
+    private static IEnumerable<RegisterKind> KindsOf(MeterChain chain, TariffComponent component)
+    {
+        var registers = chain.Meters.SelectMany(m => m.Registers).Where(r => !r.IsDeleted).ToList();
+        if (component.Basis == ChargeBasis.NetExport)
+        {
+            return registers.Any(r => r.Kind == RegisterKind.Export) ? [RegisterKind.Export] : [];
+        }
+
+        var wanted = component.RegisterKinds.Count > 0
+            ? registers.Where(r => component.RegisterKinds.Contains(r.Kind))
+            : registers.Where(r => r.Direction == EnergyDirection.Import);
+        return wanted.Select(r => r.Kind).Distinct().Order();
+    }
+
+    private static List<ChargeLine> TieredLines(ChargeInput input, TariffComponent component, TariffRate rate, Metered metered, decimal vatPercent, List<ChargeWarning> warnings)
+    {
+        var alreadyUsed = 0m;
+        var tierStart = rate.TierPeriod == TierPeriod.Year ? new DateOnly(input.Period.Year, 1, 1) : input.Period.FirstDay;
+        foreach (var source in metered.Sources)
+        {
+            if (source.Result.StartReading is not { } start || start.Date < tierStart)
+            {
+                continue;
+            }
+
+            var used = ConsumptionCalculator.Calculate(source.Chain, source.Kind, tierStart, start.Date);
+            if (used.IsComplete)
+            {
+                alreadyUsed += used.Quantity;
+            }
+            else
+            {
+                warnings.Add(new ChargeWarning(ChargeWarningCodes.TierUsageUnknown, component.Id));
+            }
+        }
+
+        var slices = TariffPricing.Slice(rate, metered.Quantity, alreadyUsed);
+        if (slices.Count == 0)
+        {
+            slices = [new PriceSlice(0m, rate.Tiers[0].Price)];
+        }
+
+        return [.. slices.Select(s => Priced(component, rate, MoneyMath.RoundQuantity(s.Quantity), s.UnitPrice, vatPercent, metered.IsComplete, metered.Results))];
+    }
+}
