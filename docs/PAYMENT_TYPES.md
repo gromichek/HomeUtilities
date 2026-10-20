@@ -32,6 +32,16 @@ This file explains **what the user does** for each kind of payment; field-level 
 | Other recurring (insurance, chimney cleaning…) | none (bill only) | bill template: Yearly / every N months | confirm draft, adjust amount | drafts, reminders |
 | One-off expense (repair, meter purchase…) | none | optionally a "Once" template | title, category, property, amounts | reports, balances |
 
+## Payment status of a bill
+Derived from payments allocated to the bill (never typed by hand):
+**Unpaid** (grey) · **Partially paid** (yellow, shows the open amount) · **Overdue** (red, also on the
+dashboard) · **Paid** ✓ (green) · **Prepaid** ✓ (paid, service month not started yet).
+**"Paid" quick action** on every open bill: one tap creates a payment for the open amount dated today and
+allocates it; date/amount can be edited afterwards. Detailed allocation is only needed when one payment
+covers several bills.
+Legacy Excel: `***` in the "paid" column → a payment equal to the bill total, dated with the bill date
+(or the 1st of the month), comment "imported".
+
 ## Templates
 1. **Contract template** — how a contract is set up (components, VAT, meter roles, links, payment details,
    custom fields).

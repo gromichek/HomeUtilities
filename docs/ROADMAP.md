@@ -31,7 +31,7 @@ is written; the list below is the plan and will change.
 - T-017 Monthly charges screen: calculated charge per contract/period
 
 ## Phase 5 — Bills, payments, balance
-- T-018 Bill entry (total + optional lines + attachment), difference vs calculation
+- T-018 Bill entry (total + optional lines + attachment), difference vs calculation, status badges, "Paid" quick action
 - T-019 Payments, allocation, prepayment, balance
 - T-020 Equalized plans and annual settlement view; property tax installments
 - T-021 Dashboard: to-do (readings window, due bills, overdue, verification), balances
@@ -43,7 +43,7 @@ is written; the list below is the plan and will change.
 ## Phase 7 — Templates and import
 - T-024 Contract templates, bill templates with schedules (once / monthly / every N months / yearly), drafts
 - T-025 Excel import framework (column mapping, preview, dry run)
-- T-026 Import profile for the owner's legacy workbook (synthetic fixture in tests)
+- T-026 Import profile for the owner's legacy workbook (synthetic fixture in tests); `***` → payment = bill total
 
 ## Phase 8 — Reminders
 - T-027 `INotificationService` for Android and Windows, reminder rules, scheduling
