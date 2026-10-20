@@ -1,6 +1,6 @@
 # Payment types — agreed behaviour
 
-Status: agreed with the owner on 2026-10-20 (item marked *pending* still needs confirmation).
+Status: agreed with the owner on 2026-10-20.
 This file explains **what the user does** for each kind of payment; field-level details are in `DATA_MODEL.md`.
 
 ## General rules
@@ -39,7 +39,7 @@ This file explains **what the user does** for each kind of payment; field-level 
    arrears; default amounts and lines; reminder.
 3. **Payment purpose template** — text for the internet bank, e.g. `Abon. Nr. {CustomerNumber}, {Period:MM.yyyy}`.
 
-## Pending
-- **Custom fields on bills and bill lines** — named fields of type Text / Number / Money / Date, defined on a
-  contract or bill template so they reappear every month. Proposed in `DATA_MODEL.md` §6, waiting for the
-  owner's confirmation.
+## Custom fields (confirmed)
+Named fields of type Text / Number / Money / Date, defined on a contract or bill template (for the whole
+bill or for each line), so they reappear every month. Examples: "Losses m³", "Reading on supplier's bill",
+"Supplier reference". Removing a field definition keeps old values. Number/Money fields can be summed in reports.

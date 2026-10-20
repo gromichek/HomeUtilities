@@ -23,7 +23,8 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   (`Add meter register entity`).
 - When done: push the branch and open a PR titled `T-NNN: <task title>`.
   Fill the PR description using `.github/pull_request_template.md` — that description **is your report**.
-- Update `docs/PROGRESS.md` in the same PR: mark the task as "In review", add notes / known issues.
+- **Do not edit `docs/PROGRESS.md`** — the project lead maintains it (avoids merge conflicts). Put notes and
+  known issues into the PR description instead.
 - **Never merge** your own PR and never push to `main`. The project lead merges.
 
 ## Scope discipline
@@ -31,7 +32,8 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
 - Do only what the task asks. No drive-by refactoring, no renaming outside the task, no new
   dependencies unless the task allows them. If you see something worth fixing, list it under
   "Suggestions" in the PR.
-- Do not edit `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `docs/ROADMAP.md` or other task files.
+- Do not edit `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `docs/PAYMENT_TYPES.md`, `docs/ROADMAP.md`,
+  `docs/PROGRESS.md` or other task files.
   Propose changes in the PR description instead.
 
 ## Code rules

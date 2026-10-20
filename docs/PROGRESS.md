@@ -1,13 +1,13 @@
 # Progress
 
-Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written), `In progress`,
+Maintained by the project lead only (coding sessions do not edit it). Statuses: `Planned`, `Ready` (task file written), `In progress`,
 `In review` (PR open), `Done` (merged), `Reverted`.
 
 ## Current
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-007 | User categories, payment details, comments | In review | | 74 new tests (369 total). `PaymentDetails.Effective` lives on the record. |
+| T-008 | Bills, custom fields, payments, allocations, balances | Ready | | |
 
 ## Done
 
@@ -22,7 +22,8 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 | T-005 | Window fallback fix, VAT catalog, tariffs | 2026-10-19, #10 | 62 new tests (259 total). LV VAT defaults to be verified by owner. |
 | T-006 | Charge calculator | 2026-10-20, #13 | 36 new tests (295 total). Contract inactive only if inactive on both first and last day. Warning `NoMeters` added. |
 | — | Docs: categories, payment details, comments | 2026-10-20, #12 | |
-| — | Docs: agreed payment types (PAYMENT_TYPES.md) | 2026-10-20, #14 | custom fields pending owner confirmation |
+| — | Docs: agreed payment types (PAYMENT_TYPES.md) | 2026-10-20, #14 | custom fields confirmed afterwards |
+| T-007 | User categories, payment details, comments | 2026-10-20, #15 | 74 new tests (369 total). 4-meter water test included. |
 
 ## Known issues / tech debt
 
