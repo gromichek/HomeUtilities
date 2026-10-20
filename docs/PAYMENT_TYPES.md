@@ -39,6 +39,13 @@ dashboard) · **Paid** ✓ (green) · **Prepaid** ✓ (paid, service month not s
 **"Paid" quick action** on every open bill: one tap creates a payment for the open amount dated today and
 allocates it; date/amount can be edited afterwards. Detailed allocation is only needed when one payment
 covers several bills.
+**Undoing a mistaken "Paid"** (decision 2026-10-20):
+1. A snackbar "Bill marked as paid · Undo" for ~6 s right after the tap; Undo soft-deletes the created payment.
+2. Later: "Cancel payment" on a paid bill, with confirmation showing amount and date. A payment that was
+   created by the quick action and covers only this bill is soft-deleted; for a payment covering several
+   bills only this bill's allocation is removed (the rest stays as prepayment) — the dialog says so.
+3. Any payment can be opened and its date/amount corrected.
+Nothing is hard-deleted, so a mistake never loses data.
 Legacy Excel: `***` in the "paid" column → a payment equal to the bill total, dated with the bill date
 (or the 1st of the month), comment "imported".
 
