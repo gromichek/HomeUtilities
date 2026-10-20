@@ -16,7 +16,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-            .ConfigureFonts(fonts => fonts.AddFont("MaterialSymbolsOutlined.ttf", "MaterialSymbols"));
+            .ConfigureFonts(fonts => fonts.AddFont("MaterialIconsOutlined-Regular.otf", "MaterialIcons"));
 
         var appPaths = new AppPaths();
         builder.Services.AddSingleton<IAppPaths>(appPaths);

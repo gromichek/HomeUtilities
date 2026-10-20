@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-    One resource per icon of docs/UI_GUIDELINES.md §1. Android: Material Symbols Outlined (bundled font, code points);
+    One resource per icon of docs/UI_GUIDELINES.md §1. Android: Material Icons Outlined (bundled static font, ~330 KB, same code points as Material Symbols);
     Windows: Segoe Fluent Icons (Windows 11) with Segoe MDL2 Assets as the Windows 10 fallback (system fonts).
     Pages use only these keys, never raw glyph codes.
 -->
@@ -8,7 +8,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <OnPlatform x:Key="IconFontFamily" x:TypeArguments="x:String">
-        <On Platform="Android" Value="MaterialSymbols" />
+        <On Platform="Android" Value="MaterialIcons" />
         <On Platform="WinUI" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
     </OnPlatform>
 
