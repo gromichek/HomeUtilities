@@ -182,4 +182,88 @@ public static class ErrorCodes
 
     /// <summary>A custom quantity parameter has no name.</summary>
     public const string TariffQuantityParameterNameRequired = "tariff.quantity_parameter_name_required";
+
+    /// <summary>Net, VAT percent and total of an amount contradict each other.</summary>
+    public const string AmountInconsistent = "amount.inconsistent";
+
+    /// <summary>An amount needs a total, or net together with VAT percent.</summary>
+    public const string AmountGrossRequired = "amount.gross_required";
+
+    /// <summary>A custom field definition has no name.</summary>
+    public const string CustomFieldNameRequired = "custom_field.name_required";
+
+    /// <summary>A custom field name is longer than 60 characters.</summary>
+    public const string CustomFieldNameTooLong = "custom_field.name_too_long";
+
+    /// <summary>Two definitions of the same owner and target share a name.</summary>
+    public const string CustomFieldNameDuplicate = "custom_field.name_duplicate";
+
+    /// <summary>A custom field value does not parse for its kind.</summary>
+    public const string CustomFieldInvalidValue = "custom_field.invalid_value";
+
+    /// <summary>A text value is longer than 500 characters.</summary>
+    public const string CustomFieldValueTooLong = "custom_field.value_too_long";
+
+    /// <summary>The bill has no property.</summary>
+    public const string BillPropertyRequired = "bill.property_required";
+
+    /// <summary>The bill has no category.</summary>
+    public const string BillCategoryRequired = "bill.category_required";
+
+    /// <summary>A bill has a contract exactly when it is not a one-off.</summary>
+    public const string BillContractKindMismatch = "bill.contract_kind_mismatch";
+
+    /// <summary>A one-off expense has no title.</summary>
+    public const string BillTitleRequired = "bill.title_required";
+
+    /// <summary>The bill belongs to a different contract.</summary>
+    public const string BillContractMismatch = "bill.contract_mismatch";
+
+    /// <summary>The bill's property differs from the contract's.</summary>
+    public const string BillPropertyMismatch = "bill.property_mismatch";
+
+    /// <summary>The bill's currency differs from the contract's.</summary>
+    public const string BillCurrencyMismatch = "bill.currency_mismatch";
+
+    /// <summary>Only one of the service period dates is set.</summary>
+    public const string BillServicePeriodIncomplete = "bill.service_period_incomplete";
+
+    /// <summary>The service period ends before it starts.</summary>
+    public const string BillServiceToBeforeFrom = "bill.service_to_before_from";
+
+    /// <summary>The bill is due before it was issued.</summary>
+    public const string BillDueBeforeIssued = "bill.due_before_issued";
+
+    /// <summary>Only settlements and corrections may have a negative total.</summary>
+    public const string BillNegativeNotAllowed = "bill.negative_not_allowed";
+
+    /// <summary>The bill title is longer than 100 characters.</summary>
+    public const string BillTitleTooLong = "bill.title_too_long";
+
+    /// <summary>The bill number is longer than 100 characters.</summary>
+    public const string BillNumberTooLong = "bill.number_too_long";
+
+    /// <summary>A bill line has no description.</summary>
+    public const string BillLineDescriptionRequired = "bill_line.description_required";
+
+    /// <summary>The payment amount is zero.</summary>
+    public const string PaymentAmountZero = "payment.amount_zero";
+
+    /// <summary>The allocations exceed the payment amount.</summary>
+    public const string PaymentOverAllocated = "payment.over_allocated";
+
+    /// <summary>An allocation amount is zero.</summary>
+    public const string PaymentAllocationAmountZero = "payment_allocation.amount_zero";
+
+    /// <summary>An allocation has a different sign than the payment.</summary>
+    public const string PaymentAllocationSignMismatch = "payment_allocation.sign_mismatch";
+
+    /// <summary>The allocated bill does not exist or is deleted.</summary>
+    public const string PaymentAllocationBillUnknown = "payment_allocation.bill_unknown";
+
+    /// <summary>The allocated bill has a different currency.</summary>
+    public const string PaymentAllocationCurrencyMismatch = "payment_allocation.currency_mismatch";
+
+    /// <summary>Two allocations point to the same bill.</summary>
+    public const string PaymentAllocationDuplicateBill = "payment_allocation.duplicate_bill";
 }

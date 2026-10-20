@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Payments;
 
@@ -53,6 +54,12 @@ public class Contract : SyncEntity
 
     /// <summary>Usual due day of the month.</summary>
     public int? PaymentDueDay { get; set; }
+
+    /// <summary>Whether bills are issued after the service month or paid in advance.</summary>
+    public BillingTiming BillingTiming { get; set; } = BillingTiming.InArrears;
+
+    /// <summary>Custom fields that reappear on every bill of the contract.</summary>
+    public List<CustomFieldDefinition> CustomFields { get; set; } = [];
 
     /// <summary>Contract-specific links; they override supplier links per kind.</summary>
     public List<Link> Links { get; set; } = [];
