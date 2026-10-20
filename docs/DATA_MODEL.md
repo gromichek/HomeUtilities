@@ -13,6 +13,12 @@ Field lists are the intended shape; exact types/names may be refined in the task
 | UpdatedAt | DateTimeOffset | UTC, set on every change |
 | IsDeleted | bool | soft delete |
 
+### Comments on everything
+Every user-editable entity has a free-text comment: `Notes` (string?, max 2000 chars) on main entities
+(Property, Supplier, Contract, Meter, TariffComponent, TariffRate, Bill, Payment, Category) and `Note` on
+small child items (PropertyParameter, MeterReading, BillLine, PaymentAllocation). Comments are searchable
+and shown wherever the item is listed (decision 2026-10-20).
+
 ### Money / quantities
 - `decimal` everywhere. `Currency` enum: `EUR`, `LVL` (historical). Fixed conversion
   **1 EUR = 0.702804 LVL** (used only for reports over pre-2014 data).
@@ -51,6 +57,38 @@ Residents/area change over time and drive calculations (waste by residents, main
 
 ## §3. Suppliers and contracts
 
+### Category (user-defined payment category)
+| Field | Type | Notes |
+|---|---|---|
+| SystemKey | ServiceKind? | set for built-in categories (seeded one per `ServiceKind`), null for user-created |
+| Name | string? | user name; null for a built-in category means "use the localized name of SystemKey" |
+| Color | string | `#RRGGBB`, used in charts |
+| Icon | string? | icon key (later) |
+| SortOrder | int | |
+| IsArchived | bool | hidden from pickers, history kept |
+| Notes | string? | |
+
+`ServiceKind` stays as the **technical** kind (what the service is, how it behaves: meters, units).
+`Category` is what the **user** sees and what reports group by. Examples of user categories: Kindergarten,
+Insurance, Security, Parking. A non-utility payment (kindergarten) is a contract with `Service = Other`,
+`BillingMode = Fixed` or `Actual` without meters, and its own category; bills are entered manually.
+Built-in categories can be renamed (Name set) and recoloured, but not deleted.
+
+### PaymentDetails (owned value on Supplier and Contract)
+| Field | Type | Notes |
+|---|---|---|
+| RecipientName | string? | |
+| RecipientRegistrationNumber | string? | |
+| Iban | string? | validated (ISO 13616 checksum), stored without spaces, displayed in groups of 4 |
+| Bic | string? | |
+| BankName | string? | |
+| PurposeTemplate | string? | e.g. `Abon. Nr. {CustomerNumber}, {Period:MM.yyyy}` |
+
+Effective details for a contract = contract value per field, else supplier value per field.
+Purpose placeholders: `{CustomerNumber}`, `{ContractNumber}`, `{BillNumber}`, `{Period:<format>}`
+(default format `MM.yyyy`), `{Amount}` (invariant `0.00`), `{PropertyName}`. Unknown placeholders are kept as
+typed. The UI offers "copy IBAN", "copy purpose", "copy all" (decision 2026-10-20).
+
 ### Supplier
 | Field | Type | Notes |
 |---|---|---|
@@ -58,6 +96,7 @@ Residents/area change over time and drive calculations (waste by residents, main
 | RegistrationNumber | string? | |
 | Phone, Email | string? | |
 | Notes | string? | |
+| PaymentDetails | PaymentDetails? | see above |
 | Links | list of **Link** | see below |
 
 ### Link (owned by Supplier or Contract)
@@ -74,7 +113,9 @@ Contract links override/add to supplier links (e.g. a contract-specific portal).
 |---|---|---|
 | PropertyId | Guid | |
 | SupplierId | Guid | |
-| Service | ServiceKind | see list below |
+| Service | ServiceKind | technical kind, see list below |
+| CategoryId | Guid | user-facing category for reports (default: built-in category of `Service`) |
+| PaymentDetails | PaymentDetails? | overrides supplier details per field |
 | Title | string | "Water", "Electricity (dual-tariff)" |
 | CustomerNumber | string? | "abonenta numurs" |
 | ContractNumber | string? | |
@@ -177,7 +218,9 @@ the national rate is entered once. A bill or component can override with an expl
 |---|---|---|
 | ContractId | Guid | |
 | Name | string | "Water supply", "Sewerage", "Distribution", "Energy", "Heating of hot water" |
-| ChargeKind | ServiceKind | which service this line counts toward in reports |
+| ChargeKind | ServiceKind | technical kind of the line |
+| CategoryId | Guid? | report category of this line; null = contract's category (e.g. sewerage line of a water contract can have its own category) |
+| Notes | string? | |
 | Basis | ChargeBasis | see below |
 | RegisterKinds | set of RegisterKind? | for `PerUnit`: which registers are counted (e.g. Day only) |
 | MeterIds | set of Guid? | for `PerUnit`: which meters (default: all contract meters) |
@@ -202,6 +245,7 @@ the national rate is entered once. A bill or component can override with an expl
 | Currency | Currency | |
 | Tiers | list `{ UpToQuantity, Price }`? | stepped price; threshold accumulates per `TierPeriod` |
 | TierPeriod | Month / Year? | e.g. the 2013–2014 "1200 kWh per year" electricity rule |
+| Notes | string? | e.g. "price from supplier letter 2025-10" |
 
 ### Charge calculation (Core: `ChargeCalculator`)
 For contract C and period P, per component:
@@ -231,7 +275,9 @@ For contract C and period P, per component:
 | ConsumptionOnBill | decimal? | quantity the supplier billed (to compare with metered, e.g. water losses) |
 | CalculatedSnapshot | CalculatedCharge? | app's calculation at entry time |
 | AttachmentIds | list of Guid | PDF / photo of the bill |
-| Note | string? | |
+| Notes | string? | |
+
+BillLine: `Description, Quantity?, Amount, VatPercent?, Note?`.
 
 Derived (not stored): `Difference = Total − CalculatedSnapshot.Total`; `OpenAmount = Total − allocations`;
 `IsOverdue = OpenAmount > 0 && DueOn < today`.
@@ -245,8 +291,8 @@ Derived (not stored): `Difference = Total − CalculatedSnapshot.Total`; `OpenAm
 | Currency | Currency | |
 | Method | PaymentMethod | BankTransfer, Card, Cash, DirectDebit, Other |
 | Reference | string? | |
-| Allocations | list `{ BillId, Amount }` | |
-| Note | string? | |
+| Allocations | list `{ BillId, Amount, Note? }` | |
+| Notes | string? | |
 
 - Unallocated part of a payment = **prepayment**, increases the contract balance.
 - One payment may cover several bills (also of different contracts/properties — e.g. one electricity
