@@ -1,4 +1,5 @@
 using System.Globalization;
+using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.ViewModels;
 
 namespace HomeUtilities.App.Services;
@@ -18,8 +19,6 @@ public sealed class LanguageService : ILanguageService
 
     public string CurrentLanguage { get; private set; }
 
-    public event EventHandler? LanguageChanged;
-
     public void SetLanguage(string code)
     {
         if (!SupportedLanguages.Contains(code))
@@ -30,7 +29,7 @@ public sealed class LanguageService : ILanguageService
         CurrentLanguage = code;
         Apply(code);
         Preferences.Default.Set(PreferenceKey, code);
-        LanguageChanged?.Invoke(this, EventArgs.Empty);
+        WeakReferenceMessenger.Default.Send(new LanguageChangedMessage(code));
     }
 
     private static string DetectSystemLanguage() =>

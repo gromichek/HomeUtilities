@@ -5,7 +5,7 @@ using HomeUtilities.Core.Abstractions;
 
 namespace HomeUtilities.ViewModels;
 
-public partial class MainViewModel : ObservableObject
+public partial class OverviewViewModel : ViewModelBase
 {
     private readonly ILocalizer _localizer;
     private readonly IClock _clock;
@@ -21,9 +21,6 @@ public partial class MainViewModel : ObservableObject
     private bool _initializationStarted;
 
     [ObservableProperty]
-    private string _title;
-
-    [ObservableProperty]
     private string _todayText;
 
     [ObservableProperty]
@@ -35,7 +32,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _databaseStatusText;
 
-    public MainViewModel(
+    public OverviewViewModel(
         ILocalizer localizer,
         IClock clock,
         ILanguageService languageService,
@@ -50,14 +47,11 @@ public partial class MainViewModel : ObservableObject
         _categoryStore = categoryStore;
         _vatRateStore = vatRateStore;
 
-        _title = string.Empty;
         _todayText = string.Empty;
         _hint = string.Empty;
         _switchLanguageText = string.Empty;
         _databaseStatusText = string.Empty;
         RefreshTexts();
-
-        _languageService.LanguageChanged += (_, _) => RefreshTexts();
     }
 
     private enum DatabaseState
@@ -69,6 +63,8 @@ public partial class MainViewModel : ObservableObject
     }
 
     public DateOnly Today => _clock.Today;
+
+    public override Task OnAppearingAsync() => InitializeAsync();
 
     /// <summary>Opens the database once (migration and seeding) and shows the result in the status line.</summary>
     [RelayCommand]
@@ -116,7 +112,7 @@ public partial class MainViewModel : ObservableObject
             _ => string.Empty,
         };
 
-    private void RefreshTexts()
+    protected override void RefreshTexts()
     {
         Title = _localizer["AppTitle"];
         TodayText = _localizer.Get("TodayIs", Today);

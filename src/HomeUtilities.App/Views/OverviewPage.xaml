@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
-             x:Class="HomeUtilities.App.Views.MainPage"
-             x:DataType="vm:MainViewModel"
-             Title="{Binding Title}">
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.OverviewPage"
+                x:DataType="vm:OverviewViewModel"
+                Title="{Binding Title}">
 
     <VerticalStackLayout Padding="30,0" Spacing="25" VerticalOptions="Center">
         <Label Text="{Binding Title}"
@@ -21,4 +22,4 @@
                 HorizontalOptions="Center" />
     </VerticalStackLayout>
 
-</ContentPage>
+</views:PageBase>

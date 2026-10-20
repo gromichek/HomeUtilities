@@ -24,8 +24,19 @@ public static class MauiProgram
         builder.Services.AddSingleton<ILocalizer, ResxLocalizer>();
         builder.Services.AddHomeUtilitiesData(appPaths.DatabasePath);
         builder.Services.AddSingleton<AppShell>();
-        builder.Services.AddTransient<MainViewModel>();
-        builder.Services.AddTransient<MainPage>();
+        builder.Services.AddSingleton<IThemeService, ThemeService>();
+        builder.Services.AddSingleton<LayoutModeService>();
+        builder.Services.AddSingleton<ILayoutModeService>(sp => sp.GetRequiredService<LayoutModeService>());
+        builder.Services.AddSingleton<HomeUtilities.ViewModels.IAppInfo, AppInfoService>();
+        builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+        builder.Services.AddSingleton<IDialogService, DialogService>();
+        builder.Services.AddSingleton<ShellViewModel>();
+        builder.Services.AddTransient<OverviewViewModel>();
+        builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<PlaceholderViewModel>();
+        builder.Services.AddTransient<OverviewPage>();
+        builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<PlaceholderPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

@@ -11,4 +11,26 @@
   <data name="DatabaseStarting" xml:space="preserve"><value>Открываю базу данных…</value></data>
   <data name="DatabaseReady" xml:space="preserve"><value>База данных готова: категорий {0}, ставок НДС {1}</value></data>
   <data name="DatabaseError" xml:space="preserve"><value>Ошибка базы данных: {0}</value></data>
+  <data name="ComingSoon" xml:space="preserve"><value>Скоро будет</value></data>
+  <data name="SectionOverview" xml:space="preserve"><value>Обзор</value></data>
+  <data name="SectionProperties" xml:space="preserve"><value>Объекты</value></data>
+  <data name="SectionReadings" xml:space="preserve"><value>Показания</value></data>
+  <data name="SectionBills" xml:space="preserve"><value>Счета</value></data>
+  <data name="SectionPayments" xml:space="preserve"><value>Платежи</value></data>
+  <data name="SectionReports" xml:space="preserve"><value>Отчёты</value></data>
+  <data name="SectionSettings" xml:space="preserve"><value>Настройки</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Язык</value></data>
+  <data name="SettingsTheme" xml:space="preserve"><value>Тема</value></data>
+  <data name="SettingsVersion" xml:space="preserve"><value>Версия: {0}</value></data>
+  <data name="SettingsDatabaseFile" xml:space="preserve"><value>Файл базы данных: {0}</value></data>
+  <data name="SettingsLayout" xml:space="preserve"><value>Макет: {0}</value></data>
+  <data name="LanguageName_en" xml:space="preserve"><value>English</value></data>
+  <data name="LanguageName_ru" xml:space="preserve"><value>Русский</value></data>
+  <data name="Theme_System" xml:space="preserve"><value>Системная</value></data>
+  <data name="Theme_Light" xml:space="preserve"><value>Светлая</value></data>
+  <data name="Theme_Dark" xml:space="preserve"><value>Тёмная</value></data>
+  <data name="Layout_Compact" xml:space="preserve"><value>телефон</value></data>
+  <data name="Layout_Medium" xml:space="preserve"><value>планшет</value></data>
+  <data name="Layout_Expanded" xml:space="preserve"><value>компьютер</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Отмена</value></data>
 </root>

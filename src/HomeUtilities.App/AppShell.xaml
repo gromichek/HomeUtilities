@@ -2,9 +2,64 @@
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:views="clr-namespace:HomeUtilities.App.Views"
-       x:Class="HomeUtilities.App.AppShell">
+       xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+       x:Class="HomeUtilities.App.AppShell"
+       x:DataType="vm:ShellViewModel"
+       FlyoutBehavior="Flyout">
 
-    <ShellContent Route="MainPage"
-                  ContentTemplate="{DataTemplate views:MainPage}" />
+    <Shell.Triggers>
+        <DataTrigger TargetType="Shell" x:DataType="vm:ShellViewModel" Binding="{Binding IsFlyoutLocked}" Value="True">
+            <Setter Property="FlyoutBehavior" Value="Locked" />
+        </DataTrigger>
+    </Shell.Triggers>
+
+    <FlyoutItem Title="{Binding OverviewTitle}" Route="Overview">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="⌂" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent ContentTemplate="{DataTemplate views:OverviewPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{Binding PropertiesTitle}" Route="Properties">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="▦" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding PropertiesTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{Binding ReadingsTitle}" Route="Readings">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="◔" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding ReadingsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{Binding BillsTitle}" Route="Bills">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="☰" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding BillsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{Binding PaymentsTitle}" Route="Payments">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="€" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding PaymentsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{Binding ReportsTitle}" Route="Reports">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="▤" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding ReportsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="{Binding SettingsTitle}" Route="Settings">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="⚙" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
+    </FlyoutItem>
 
 </Shell>

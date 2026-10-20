@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
@@ -5,7 +6,7 @@ using HomeUtilities.Core.Tariffs;
 
 namespace HomeUtilities.ViewModels.Tests;
 
-public class MainViewModelTests
+public class OverviewViewModelTests
 {
     [Fact]
     public void Title_ComesFromLocalizer()
@@ -96,12 +97,12 @@ public class MainViewModelTests
         Assert.Equal(string.Empty, vm.DatabaseStatusText);
     }
 
-    private static MainViewModel CreateViewModel(out FakeLanguageService language, out FakeClock clock, out FakeInitializer initializer)
+    private static OverviewViewModel CreateViewModel(out FakeLanguageService language, out FakeClock clock, out FakeInitializer initializer)
     {
         language = new FakeLanguageService();
         clock = new FakeClock();
         initializer = new FakeInitializer();
-        return new MainViewModel(
+        return new OverviewViewModel(
             new FakeLocalizer(language),
             clock,
             language,
@@ -170,12 +171,10 @@ public class MainViewModelTests
 
         public string CurrentLanguage { get; private set; } = "en";
 
-        public event EventHandler? LanguageChanged;
-
         public void SetLanguage(string code)
         {
             CurrentLanguage = code;
-            LanguageChanged?.Invoke(this, EventArgs.Empty);
+            WeakReferenceMessenger.Default.Send(new LanguageChangedMessage(code));
         }
     }
 

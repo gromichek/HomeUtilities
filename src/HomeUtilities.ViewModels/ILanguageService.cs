@@ -6,7 +6,6 @@ public interface ILanguageService
 
     string CurrentLanguage { get; }
 
-    event EventHandler? LanguageChanged;
-
+    /// <summary>Applies the language and sends <see cref="LanguageChangedMessage"/>.</summary>
     void SetLanguage(string code);
 }
