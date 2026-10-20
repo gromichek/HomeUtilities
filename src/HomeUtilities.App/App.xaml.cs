@@ -12,8 +12,15 @@ public partial class App : Application
     // AppShell is resolved lazily in CreateWindow: its XAML uses StaticResource colours from App.xaml,
     // which exist only after InitializeComponent() has run. Injecting AppShell into this constructor
     // would build it too early and fail with "StaticResource not found".
-    public App(IServiceProvider services, LayoutModeService layoutModeService, IThemeService themeService)
+    // ILanguageService is requested here only so that it is created (and applies the saved language to
+    // CurrentCulture/CurrentUICulture) before any page or the Shell reads localized texts.
+    public App(
+        IServiceProvider services,
+        ILanguageService languageService,
+        LayoutModeService layoutModeService,
+        IThemeService themeService)
     {
+        _ = languageService.CurrentLanguage;
         InitializeComponent();
         _services = services;
         _layoutModeService = layoutModeService;

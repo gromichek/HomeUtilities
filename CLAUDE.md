@@ -51,6 +51,10 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   defined in Core/ViewModels and implemented in `HomeUtilities.App`.
 - XAML pages stay thin: bindings and layout only. Logic lives in ViewModels.
 - Use CommunityToolkit.Mvvm source generators (`[ObservableProperty]`, `[RelayCommand]`).
+- App startup order (bugs found by the owner, 2026-10-20): never inject pages or `AppShell` into the `App`
+  constructor — resolve them in `CreateWindow`, after `InitializeComponent()` has loaded the resource
+  dictionaries. Services with startup side effects (language/culture, theme) are resolved in the `App`
+  constructor **before** anything reads localized text. CI only builds the App; it never runs it.
 - Package versions are managed centrally in `Directory.Packages.props`.
 
 ## Tests
