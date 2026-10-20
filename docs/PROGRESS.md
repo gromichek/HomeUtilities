@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-009 | EF Core persistence: DbContext, mappings, soft delete, migration | Ready | | |
+| T-010 | Data stores, seed data, database in the App | Ready | | |
 
 ## Done
 
@@ -25,6 +25,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Docs: agreed payment types (PAYMENT_TYPES.md) | 2026-10-20, #14 | custom fields confirmed afterwards |
 | T-007 | User categories, payment details, comments | 2026-10-20, #15 | 74 new tests (369 total). 4-meter water test included. |
 | T-008 | Bills, custom fields, payments, allocations, balances | 2026-10-20, #17 | 103 new tests (472 total). BillLine/PaymentAllocation are SyncEntities. Equalized plans moved to T-020. |
+| T-009 | EF Core persistence | 2026-10-20, #19 | 33 Data tests. ClientCascade for child collections (DB FKs stay RESTRICT). `Pay_Present` shadow column. |
 
 ## Known issues / tech debt
 
@@ -34,6 +35,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
 - `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — pick up in T-013.
+- SQLite decimals lose trailing zeros (`-12.10` → `-12.1`); numerically equal, UI always formats amounts.
+- Snapshot `ChargeWarning.Args` come back as `JsonElement` (display only).
+- Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
+- Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
 
