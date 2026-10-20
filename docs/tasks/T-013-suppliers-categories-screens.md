@@ -1,5 +1,5 @@
 # T-013: Suppliers and categories screens (links, payment details, copy, open in browser)
-Phase: 3 · Depends on: T-012 · Size: L
+Phase: 3 · Depends on: T-012a · Size: L
 
 ## Goal
 Screens for suppliers (with web links that open in the browser and bank payment details with copy buttons)
@@ -7,6 +7,8 @@ and for payment categories (rename built-ins, recolour, add own categories). Reu
 (`EditableViewModel`, two-pane list/editor, `ValidationText`, `EnumText`, `DecimalInput` where needed).
 
 ## Context
+- **`docs/UI_GUIDELINES.md`** and the reworked Properties screen from T-012a are the pattern to follow
+  (icons, button styles, child-item dialogs for links, standard dialog texts, Back behaviour).
 - `docs/DATA_MODEL.md` §3 (Category, PaymentDetails, Supplier, Link), `docs/PAYMENT_TYPES.md`
 - Existing: `ISupplierStore`, `ICategoryStore`, `SupplierValidator`, `LinkValidator`, `CategoryValidator`,
   `PaymentDetailsValidator`, `Iban`, `PaymentPurpose`, `BuiltInCategories`, T-012 helpers and page structure.

@@ -50,6 +50,7 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
 - `HomeUtilities.ViewModels` must not reference MAUI. Platform features go through interfaces
   defined in Core/ViewModels and implemented in `HomeUtilities.App`.
 - XAML pages stay thin: bindings and layout only. Logic lives in ViewModels.
+- **UI tasks follow `docs/UI_GUIDELINES.md`** (platform icons, button hierarchy, dialogs, Back behaviour).
 - Use CommunityToolkit.Mvvm source generators (`[ObservableProperty]`, `[RelayCommand]`).
 - App startup order (bugs found by the owner, 2026-10-20): never inject pages or `AppShell` into the `App`
   constructor — resolve them in `CreateWindow`, after `InitializeComponent()` has loaded the resource

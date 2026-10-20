@@ -1,0 +1,86 @@
+# UI guidelines
+
+Status: agreed with the owner on 2026-10-20 (after testing the Properties screen). Every UI task follows
+these rules; the Properties screen (after T-012a) is the reference implementation.
+
+## 1. Icons — use the platform's standard icons
+- **Android**: Google **Material Symbols** (Outlined) — the icons Android users know. Font file bundled in
+  `Resources/Fonts/` (Apache 2.0 licence, keep the licence file next to it).
+- **Windows**: **Segoe Fluent Icons** (built into Windows 11; fall back to **Segoe MDL2 Assets** on Windows 10)
+  — the icons of Windows itself. Not bundled (system font).
+- One XAML resource per icon with `OnPlatform`, e.g. `IconDelete`, used everywhere; never raw glyph codes in pages.
+
+| Key | Meaning | Android (Material Symbols) | Windows (Segoe Fluent / MDL2) |
+|---|---|---|---|
+| `IconAdd` | add | `add` | `E710` Add |
+| `IconEdit` | edit | `edit` | `E70F` Edit |
+| `IconDelete` | delete | `delete` (trash can) | `E74D` Delete |
+| `IconSave` | save / confirm | `check` | `E73E` CheckMark (toolbar) / `E74E` Save (desktop command) |
+| `IconClose` | close / cancel | `close` | `E711` Cancel |
+| `IconBack` | back | system back arrow | system back arrow |
+| `IconMore` | more actions | `more_vert` | `E712` More |
+| `IconOpenLink` | open in browser | `open_in_new` | `E8A7` OpenInNewWindow |
+| `IconCopy` | copy | `content_copy` | `E8C8` Copy |
+| `IconArchive` | archive | `archive` | `E7B8` Package |
+| `IconHistory` | history | `history` | `E81C` History |
+
+Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an accessibility name
+(`SemanticProperties.Description`) — localized.
+
+## 2. Button hierarchy
+- **Primary** (filled, accent colour): **one per screen/dialog** — Save / confirm.
+- **Secondary** (outlined or text): Cancel, Edit, secondary actions.
+- **Destructive** (red text or red trash icon): Delete. Placed apart from Save (end of the form, or icon in the
+  row). Always confirmed.
+- Styles `PrimaryButton`, `SecondaryButton`, `DestructiveButton`, `IconButton` in `Styles.xaml`; no ad-hoc colours.
+
+## 3. Layout of list + editor screens
+- **List**: "＋ New …" — on phones a **floating action button** with `IconAdd` bottom-right; on tablet/desktop a
+  button above the list. Tap a row to open it.
+- **Editor**: grouped into **cards/sections** with a header; a section that contains a list (parameters, links,
+  lines…) has its own `IconAdd` button **in the section header**.
+- **Child rows**: tap the row → edit; `IconDelete` at the end of the row (with confirmation). No separate
+  "Edit"/"Remove" text buttons.
+- **Adding/editing a child item opens a dialog** (popup on desktop/tablet, full-screen sheet on phones) with its
+  own title ("New parameter", "Edit parameter") and its own Save / Cancel — never an inline form inside the
+  parent form.
+- **Editor commands**
+  - Phone (separate page): toolbar has system **Back** + **Save** (`IconSave`). No separate "Cancel" — Back
+    cancels. Delete in the `IconMore` menu or as a red "Delete …" at the end of the form.
+  - Tablet/desktop (right pane): a footer with **Save** (primary), **Cancel** (secondary), and **Delete …**
+    (destructive) at the far end.
+- No artificial maximum width of the window or panes (space is needed for charts later). Two-pane split is
+  proportional (list ~35–40 %).
+
+## 4. Navigation and Back
+- Back (Android hardware/gesture back, toolbar back arrow, Windows back) **must always work**:
+  - no unsaved changes → go back immediately;
+  - unsaved changes → the standard "unsaved changes" dialog (§5); after Save/Don't save → go back;
+  - after a successful Save or Delete → go back automatically.
+- Never swallow Back without showing a dialog.
+
+## 5. Standard dialog texts (EN / RU)
+Use these wordings everywhere (resx keys in brackets):
+
+| Situation | Title | Message | Buttons |
+|---|---|---|---|
+| Leaving with unsaved changes [`Dialog_Unsaved_*`] | Save changes? / Сохранить изменения? | — | **Save** / Сохранить · **Don't save** / Не сохранять · **Cancel** / Отмена |
+| Delete an item [`Dialog_Delete_*`] | Delete «{0}»? / Удалить «{0}»? | It will be hidden; history is kept. / Запись будет скрыта, история сохранится. | **Delete** / Удалить · **Cancel** / Отмена |
+| Delete a child row | Delete this entry? / Удалить эту запись? | {0} | **Delete** / Удалить · **Cancel** / Отмена |
+| Error | Error / Ошибка | {0} | **OK** |
+
+"Cancel" in a dialog always means "close the dialog and do nothing". Words like "Discard", "Continue",
+"Отбросить", "Продолжить" are not used.
+
+## 6. Forms
+- Label above the field; validation message in red directly under the field.
+- Pickers must always display the current value (Android binding bugs: test that the selected item shows).
+- Numbers accept `,` and `.`; dates use the platform date picker.
+- Read-only summary lines ("Now: 54.7 m² since 20.10.2026") in muted colour.
+
+## 7. Checklist for every UI task (put into the PR's manual test steps)
+1. Phone, tablet portrait, tablet landscape / wide window.
+2. Back from every page with and without unsaved changes.
+3. Every picker shows its value after reopening the item.
+4. Dark theme readable.
+5. Russian and English texts fit (no cut-off buttons).
