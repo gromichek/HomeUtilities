@@ -82,12 +82,12 @@ Per basis:
   missing → incomplete + warning `MissingParameter`.
 - **FixedMonthly**: quantity 1, unit price = rate price.
 - **FromBill**: line with `IsFromBill = true`, `Quantity`/`UnitPrice` null, amounts 0, complete. (The bill
-  provides the amount later; T-007 combines them.)
+  provides the amount later; T-008 combines them.)
 
 Rounding: quantities in lines via `MoneyMath.RoundQuantity`; unit price unrounded as given by the rate.
 
 ## Scope — do NOT
-- No bills, payments, balances (T-007). No persistence, no UI.
+- No bills, payments, balances (T-008). No persistence, no UI.
 - No splitting of a period on a mid-month price change (v1 limitation, document in XML doc).
 - No reading overrides (later).
 
