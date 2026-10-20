@@ -8,4 +8,7 @@
   <data name="StartPageHint" xml:space="preserve"><value>Здесь пока пусто.</value></data>
   <data name="SwitchLanguage" xml:space="preserve"><value>English</value></data>
   <data name="TodayIs" xml:space="preserve"><value>Сегодня {0:d}</value></data>
+  <data name="DatabaseStarting" xml:space="preserve"><value>Открываю базу данных…</value></data>
+  <data name="DatabaseReady" xml:space="preserve"><value>База данных готова: категорий {0}, ставок НДС {1}</value></data>
+  <data name="DatabaseError" xml:space="preserve"><value>Ошибка базы данных: {0}</value></data>
 </root>

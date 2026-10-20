@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using HomeUtilities.App.Services;
 using HomeUtilities.App.Views;
 using HomeUtilities.Core;
+using HomeUtilities.Data;
 using HomeUtilities.ViewModels;
 using Microsoft.Extensions.Logging;
 
@@ -16,9 +17,12 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit();
 
+        var appPaths = new AppPaths();
+        builder.Services.AddSingleton<IAppPaths>(appPaths);
         builder.Services.AddSingleton<IClock, SystemClock>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<ILocalizer, ResxLocalizer>();
+        builder.Services.AddHomeUtilitiesData(appPaths.DatabasePath);
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddTransient<MainPage>();
