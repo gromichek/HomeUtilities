@@ -10,4 +10,7 @@ public static class Routes
     public const string Payments = "Payments";
     public const string Reports = "Reports";
     public const string Settings = "Settings";
+
+    /// <summary>Pushed page (not a section): the property editor, query parameters <c>id</c> or <c>editor</c>.</summary>
+    public const string PropertyEdit = "PropertyEdit";
 }

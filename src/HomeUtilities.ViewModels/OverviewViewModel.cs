@@ -9,7 +9,6 @@ public partial class OverviewViewModel : ViewModelBase
 {
     private readonly ILocalizer _localizer;
     private readonly IClock _clock;
-    private readonly ILanguageService _languageService;
     private readonly IDatabaseInitializer _databaseInitializer;
     private readonly ICategoryStore _categoryStore;
     private readonly IVatRateStore _vatRateStore;
@@ -27,29 +26,23 @@ public partial class OverviewViewModel : ViewModelBase
     private string _hint;
 
     [ObservableProperty]
-    private string _switchLanguageText;
-
-    [ObservableProperty]
     private string _databaseStatusText;
 
     public OverviewViewModel(
         ILocalizer localizer,
         IClock clock,
-        ILanguageService languageService,
         IDatabaseInitializer databaseInitializer,
         ICategoryStore categoryStore,
         IVatRateStore vatRateStore)
     {
         _localizer = localizer;
         _clock = clock;
-        _languageService = languageService;
         _databaseInitializer = databaseInitializer;
         _categoryStore = categoryStore;
         _vatRateStore = vatRateStore;
 
         _todayText = string.Empty;
         _hint = string.Empty;
-        _switchLanguageText = string.Empty;
         _databaseStatusText = string.Empty;
         RefreshTexts();
     }
@@ -91,12 +84,6 @@ public partial class OverviewViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private void ToggleLanguage()
-    {
-        _languageService.SetLanguage(_languageService.CurrentLanguage == "en" ? "ru" : "en");
-    }
-
     private void SetDatabaseState(DatabaseState state)
     {
         _databaseState = state;
@@ -117,7 +104,6 @@ public partial class OverviewViewModel : ViewModelBase
         Title = _localizer["AppTitle"];
         TodayText = _localizer.Get("TodayIs", Today);
         Hint = _localizer["StartPageHint"];
-        SwitchLanguageText = _localizer["SwitchLanguage"];
         RefreshDatabaseStatus();
     }
 }
