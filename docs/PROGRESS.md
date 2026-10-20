@@ -50,4 +50,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-19 | #1 | Start on Windows and Android emulator | OK (VS framework selection needed, fixed by #4) |
 | | #21 | Database created + seeded on Windows / Android, no duplicates after restart | pending |
 | 2026-10-20 | #24 | Start on Windows / Android | **Crash**: `StaticResource not found for key PrimaryLight` (AppShell built before App resources) — fixed in hotfix PR |
-| | hotfix | Shell menu, settings (language, theme), adaptive layout on Windows / phone / tablet | pending |
+| 2026-10-20 | #27 | Restart with Russian selected | **Bug**: menu in English, Settings in Russian (LanguageService created lazily after Shell) — fixed in hotfix PR |
+| | hotfix 2 | Shell menu, settings (language, theme), adaptive layout on Windows / phone / tablet | pending |
