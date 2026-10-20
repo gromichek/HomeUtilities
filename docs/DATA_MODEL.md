@@ -313,6 +313,7 @@ Derived (not stored): `Difference = Gross − CalculatedSnapshot.TotalGross`; `O
 | Amount | decimal | |
 | Currency | Currency | |
 | Method | PaymentMethod | BankTransfer, Card, Cash, DirectDebit, Other |
+| CreatedByQuickAction | bool | set by the "Paid" button (see PAYMENT_TYPES) |
 | Reference | string? | |
 | PropertyId | Guid? | for payments without contract |
 | Allocations | list `{ BillId, Amount, Note? }` | |
@@ -324,7 +325,8 @@ Derived (not stored): `Difference = Gross − CalculatedSnapshot.TotalGross`; `O
   `Period = 2026-11`. Before November it is shown as "prepaid". Contract field `BillingTiming` decides the
   default period of new bills.
 - Auto-allocation: oldest open bills first; user can edit.
-- "Paid" quick action: creates a payment for the bill's open amount, dated today, allocated to that bill.
+- "Paid" quick action: creates a payment for the bill's open amount, dated today, allocated to that bill;
+  `Payment.CreatedByQuickAction` (bool) marks it so "Cancel payment" can delete it as a whole. Undo = soft delete.
 
 ### Contract balance (derived)
 `Balance(C, date) = Σ payments(C, ≤ date) − Σ bills(C, ≤ date)`. Shown on the contract and dashboard.
