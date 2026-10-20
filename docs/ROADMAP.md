@@ -22,37 +22,38 @@ is written; the list below is the plan and will change.
 ## Phase 3 — First usable app (reference data + readings)
 - T-011 App shell, navigation, DI, settings page with language switch, adaptive layout infrastructure (compact/medium/expanded)
 - T-012 Properties: list + edit (+ parameters)
-- T-013 Suppliers and contracts: list + edit, links opening in browser
-- T-014 Meters: list + edit, replacement wizard, verification due
-- T-015 Readings entry (phone-first, tablet two-pane), history, warnings, meter photo
+- T-013 Suppliers (links open in browser, payment details with copy) and categories screens
+- T-014 Contracts: list per property + edit (supplier, category, timing, reading window, custom fields, links, payment details override)
+- T-015 Meters: list + edit, replacement wizard, verification due
+- T-016 Readings entry (phone-first, tablet two-pane), history, warnings, meter photo
 
 ## Phase 4 — Tariffs and charges
-- T-016 Tariff editor per contract (components, rates, VAT)
-- T-017 Monthly charges screen: calculated charge per contract/period
+- T-017 Tariff editor per contract (components, rates, VAT)
+- T-018 Monthly charges screen: calculated charge per contract/period
 
 ## Phase 5 — Bills, payments, balance
-- T-018 Bill entry (total + optional lines + attachment), difference vs calculation, status badges, "Paid" quick action with Undo / Cancel payment (+ `Payment.CreatedByQuickAction` + migration)
-- T-019 Payments, allocation, prepayment, balance
-- T-020 Equalized plans and annual settlement view; property tax installments
-- T-021 Dashboard: to-do (readings window, due bills, overdue, verification), balances
+- T-019 Bill entry (total + optional lines + attachment), difference vs calculation, status badges, "Paid" quick action with Undo / Cancel payment (+ `Payment.CreatedByQuickAction` + migration)
+- T-020 Payments, allocation, prepayment, balance
+- T-021 Equalized plans and annual settlement view; property tax installments
+- T-022 Dashboard: to-do (readings window, due bills, overdue, verification), balances
 
 ## Phase 6 — Reports and charts
-- T-022 Report queries in Core (by property/service/period, multi-property)
-- T-023 Charts (bar, grouped by property), year-over-year, unit cost; export to Excel
+- T-023 Report queries in Core (by property/service/period, multi-property)
+- T-024 Charts (bar, grouped by property), year-over-year, unit cost; export to Excel
 
 ## Phase 7 — Templates and import
-- T-024 Contract templates, bill templates with schedules (once / monthly / every N months / yearly), drafts
-- T-025 Excel import framework (column mapping, preview, dry run)
-- T-026 Import profile for the owner's legacy workbook (synthetic fixture in tests); `***` → payment = bill total
+- T-025 Contract templates, bill templates with schedules (once / monthly / every N months / yearly), drafts
+- T-026 Excel import framework (column mapping, preview, dry run)
+- T-027 Import profile for the owner's legacy workbook (synthetic fixture in tests); `***` → payment = bill total
 
 ## Phase 8 — Reminders
-- T-027 `INotificationService` for Android and Windows, reminder rules, scheduling
+- T-028 `INotificationService` for Android and Windows, reminder rules, scheduling
 
 ## Phase 9 — Backup and sync
-- T-028 Local backup/restore, export/import full data as JSON
-- T-029 Google sign-in per platform
-- T-030 Sync engine (change logs in appDataFolder, merge, conflict tests)
-- T-031 Attachments sync
+- T-029 Local backup/restore, export/import full data as JSON
+- T-030 Google sign-in per platform
+- T-031 Sync engine (change logs in appDataFolder, merge, conflict tests)
+- T-032 Attachments sync
 
 ## Phase 10 — iOS
-- T-032 Enable `net10.0-ios`, macOS CI job, platform services for iOS
+- T-033 Enable `net10.0-ios`, macOS CI job, platform services for iOS
