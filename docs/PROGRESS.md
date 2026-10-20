@@ -7,8 +7,7 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-006 | Charge calculator | In review | | 36 new tests (295 total). `TariffComponent.QuantityParameter(Name)` added. Extra warning code `NoMeters`. |
-| T-007 | User categories, payment details, comments | Ready (after T-006) | | |
+| T-007 | User categories, payment details, comments | Ready | | |
 
 ## Done
 
@@ -21,6 +20,9 @@ Every task PR updates this file. Statuses: `Planned`, `Ready` (task file written
 | T-003 | Properties, suppliers, links, contracts | 2026-10-19, #6 | 57 new tests (109 total). Deleted contract link does not override supplier link. |
 | T-004 | Meters, readings, consumption calculator | 2026-10-19, #8 | 88 new tests (197 total). Window fallback refined in T-005. Replacement meter does not copy Digits/SerialNumber (UI pre-fills). |
 | T-005 | Window fallback fix, VAT catalog, tariffs | 2026-10-19, #10 | 62 new tests (259 total). LV VAT defaults to be verified by owner. |
+| T-006 | Charge calculator | 2026-10-20, #13 | 36 new tests (295 total). Contract inactive only if inactive on both first and last day. Warning `NoMeters` added. |
+| — | Docs: categories, payment details, comments | 2026-10-20, #12 | |
+| — | Docs: agreed payment types (PAYMENT_TYPES.md) | 2026-10-20, #14 | custom fields pending owner confirmation |
 
 ## Known issues / tech debt
 

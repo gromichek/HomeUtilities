@@ -82,6 +82,9 @@ Pure C# in Core, unit-tested. No persistence, no UI.
 - `PaymentDetailsValidatorTests`: invalid IBAN, bad BIC, 141-char purpose.
 - Notes length: one test per validator listed in §3 (2000 OK, 2001 fails).
 - `ChargeCalculatorTests`: line category = component category when set, else contract category.
+- `ChargeCalculatorTests`: **four water meters** (2 cold + 2 hot, one apartment) linked to one water contract →
+  quantity is the sum of all four; a heat contract linked to both hot meters sums those two
+  (owner requirement 2026-10-20).
 
 ## Manual test steps for the owner
 n/a (no UI changes).

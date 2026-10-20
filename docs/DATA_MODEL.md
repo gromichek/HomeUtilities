@@ -122,6 +122,7 @@ Contract links override/add to supplier links (e.g. a contract-specific portal).
 | PortalLogin | string? | optional reminder of the user name; passwords are never stored (the browser's password manager fills them) |
 | ValidFrom / ValidTo | DateOnly / DateOnly? | |
 | Currency | Currency | default EUR |
+| BillingTiming | BillingTiming | `InArrears` (default) / `InAdvance` (prepaid services) |
 | BillingMode | BillingMode | `Actual` (by consumption), `Equalized` (fixed monthly + annual settlement), `Fixed` (subscription), `Assessed` (taxes: annual amount + installments) |
 | ReadingDayFrom / ReadingDayTo | int? | window for submitting readings (e.g. 20–26) |
 | BillDay | int? | usual day the bill arrives |
@@ -260,27 +261,49 @@ For contract C and period P, per component:
 
 ## §6. Bills, payments, balance
 
-### Bill (supplier invoice)
+### Amount fields — one naming everywhere
+Every money amount that has VAT uses the same four fields (code / UI label):
+`Net` "Amount excl. VAT" · `VatPercent` "VAT %" · `Vat` "VAT" · `Gross` "Total".
+Used by `ChargeLine`, `Bill`, `BillLine`, `BillTemplate`. The user enters **any two** of Net / VatPercent /
+Gross and the third and `Vat` are derived (`MoneyMath.FromNet/FromGross`); entering Gross only (no VAT info)
+is allowed (`Net`, `VatPercent`, `Vat` stay null). Invariant when all set: `Net + Vat = Gross`.
+
+### Bill (supplier invoice or any expense)
 | Field | Type | Notes |
 |---|---|---|
-| ContractId | Guid | |
-| Period | YearMonth | |
-| Kind | BillKind | Regular, Equalized, Settlement (annual reconciliation), Correction, TaxInstallment |
+| PropertyId | Guid | always set (copied from the contract when there is one) |
+| CategoryId | Guid | always set (default: contract's category) |
+| ContractId | Guid? | null = **one-off expense** without a contract (repair, purchase…) |
+| SupplierId | Guid? | optional for one-off expenses |
+| Period | YearMonth | the month the bill **belongs to** = month of service/readings (bill for October readings, issued in November → 2026-10) |
+| ServiceFrom / ServiceTo | DateOnly? | for non-monthly bills (quarter, year, prepaid internet) — reports spread the amount over these months |
+| Kind | BillKind | Regular, Equalized, Settlement (annual reconciliation), Correction, TaxInstallment, OneOff |
+| Title | string? | free description, required for one-off expenses |
 | Number | string? | invoice number |
 | IssuedOn | DateOnly? | |
 | DueOn | DateOnly? | |
-| Total | decimal | **required** — variant B |
+| Net / VatPercent / Vat / Gross | decimal? / … / decimal | **Gross required** (variant B); the rest optional, see "Amount fields" |
 | Currency | Currency | |
-| Lines | list of **BillLine**? | optional detail: Description, Quantity?, Amount, VatPercent? |
+| Lines | list of **BillLine** | optional detail |
+| CustomFields | list of **CustomFieldValue** | optional, see below |
 | ConsumptionOnBill | decimal? | quantity the supplier billed (to compare with metered, e.g. water losses) |
 | CalculatedSnapshot | CalculatedCharge? | app's calculation at entry time |
+| TemplateId | Guid? | the BillTemplate it was created from |
 | AttachmentIds | list of Guid | PDF / photo of the bill |
 | Notes | string? | |
 
-BillLine: `Description, Quantity?, Amount, VatPercent?, Note?`.
+**BillLine**: `Description`, `Quantity?`, `Unit?`, `UnitPrice?`, `Net?`, `VatPercent?`, `Vat?`, `Gross`,
+`CategoryId?` (line in another category), `CustomFields`, `Note?`. Sum of line `Gross` should equal bill
+`Gross` (warning, not error — suppliers round differently).
 
-Derived (not stored): `Difference = Total − CalculatedSnapshot.Total`; `OpenAmount = Total − allocations`;
-`IsOverdue = OpenAmount > 0 && DueOn < today`.
+**CustomFieldDefinition** (on a Contract or a BillTemplate, so the same fields reappear every month):
+`Name`, `Kind` (Text, Number, Money, Date), `AppliesTo` (Bill, BillLine), `SortOrder`.
+**CustomFieldValue**: `DefinitionId?`, `Name` (kept even if the definition is removed), `Kind`, `Value`
+(string, invariant format). Example: "Meter reading on bill", "Losses m³", "Supplier's reference".
+*(Pending owner confirmation, 2026-10-20.)*
+
+Derived (not stored): `Difference = Gross − CalculatedSnapshot.TotalGross`; `OpenAmount = Gross − allocations`;
+`IsOverdue = OpenAmount > 0 && DueOn < today`; `PerResident = Gross / DeclaredResidents` (shown for waste).
 
 ### Payment
 | Field | Type | Notes |
@@ -291,12 +314,15 @@ Derived (not stored): `Difference = Total − CalculatedSnapshot.Total`; `OpenAm
 | Currency | Currency | |
 | Method | PaymentMethod | BankTransfer, Card, Cash, DirectDebit, Other |
 | Reference | string? | |
+| PropertyId | Guid? | for payments without contract |
 | Allocations | list `{ BillId, Amount, Note? }` | |
 | Notes | string? | |
 
 - Unallocated part of a payment = **prepayment**, increases the contract balance.
-- One payment may cover several bills (also of different contracts/properties — e.g. one electricity
-  payment covering apartment and cottage).
+- One payment may cover several bills (also of different contracts/properties).
+- **Paid in advance** (internet, TV): the bill for November is issued and paid in October; it belongs to
+  `Period = 2026-11`. Before November it is shown as "prepaid". Contract field `BillingTiming` decides the
+  default period of new bills.
 - Auto-allocation: oldest open bills first; user can edit.
 
 ### Contract balance (derived)
@@ -316,14 +342,38 @@ dates (usually quarterly, can be paid in full in the first installment). Cadastr
 `PropertyParameter`s for information.
 
 ## §8. Templates
-### ContractTemplate
-A reusable set of tariff components (names, basis, VAT code, current rates) and links for a supplier,
-e.g. "Water utility — water + sewerage". Creating a contract from a template copies the components.
-Templates can be exported/imported as JSON to share between properties.
 
-### RecurringBillRule
-For `Fixed` contracts: generates a draft bill each month with the current fixed amount
-(internet, TV) — the user only confirms.
+### ContractTemplate — how a contract is **set up**
+Reusable set of tariff components (names, basis, VAT code, current rates), meter roles, links, payment
+details and custom field definitions for a supplier, e.g. "Water — water + sewerage, 2 cold + 2 hot meters".
+Creating a contract from a template copies everything; the user then adjusts. Export/import as JSON.
+
+### BillTemplate — how a **payment** is created (monthly, other periods, or one-off)
+| Field | Type | Notes |
+|---|---|---|
+| Name | string | "Internet + TV", "Home insurance", "Property tax", "Chimney cleaning" |
+| PropertyId | Guid | |
+| CategoryId | Guid | |
+| ContractId | Guid? | optional |
+| SupplierId | Guid? | optional |
+| Title | string? | default bill title |
+| Net / VatPercent / Gross | decimal? | default amount (any two, see "Amount fields") |
+| Lines | list of BillLine | default lines (amounts may be empty — user fills them) |
+| CustomFields | list of CustomFieldDefinition | |
+| Schedule | Schedule | see below |
+| Timing | BillingTiming | `InArrears` (bill for a past period) / `InAdvance` (prepaid) |
+| DueDayOffset | int? | due date = issue date + N days |
+| RemindDaysBefore | int? | reminder before due date |
+| IsActive | bool | |
+| Notes | string? | |
+
+**Schedule**: `Kind` = `Once` (manual use only, e.g. "buy water meter"), `Monthly`, `EveryNMonths`
+(`N`, e.g. 3 = quarterly, 6 = half-year), `Yearly`; `StartMonth` (YearMonth), `EndMonth?`, `DayOfMonth?`
+(issue day). A scheduled template creates a **draft** bill for each due period (the user confirms or
+edits the amount); `Once` templates appear in a "New payment from template" picker.
+
+Examples: internet + TV = Monthly, InAdvance, fixed Gross; insurance = Yearly in March; property tax =
+EveryNMonths 3 (or Yearly with 4 installments — see §7); chimney cleaning = Yearly; meter replacement = Once.
 
 ## §9. Reminders
 ### ReminderRule
@@ -352,6 +402,9 @@ dashboard as "To do".
 - Export of any report table to Excel.
 
 ## §12. Mapping of the owner's Excel (for the import phase)
+The workbook is an **example, not the source of truth** — it contains workarounds. When in doubt, ask the
+owner (decision 2026-10-20). Combined apartment + cottage electricity history is imported to the apartment
+with a note; from now on they are two properties with two contracts.
 One sheet per supplier, one row per month. Observed patterns to support:
 - Water: cold + hot readings, price × m³ (later water + sewerage), VAT changing over years, bill total
   in a separate column, difference column, meter replacement noted in comments.
