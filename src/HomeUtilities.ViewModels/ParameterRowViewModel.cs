@@ -26,10 +26,7 @@ public sealed partial class ParameterRowViewModel : ObservableObject
     private string _displayText = string.Empty;
 
     [ObservableProperty]
-    private string _editText = string.Empty;
-
-    [ObservableProperty]
-    private string _removeText = string.Empty;
+    private string _deleteText = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasError))]

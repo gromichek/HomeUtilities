@@ -135,7 +135,7 @@ public class PropertiesViewModelTests
     }
 
     [Fact]
-    public async Task SelectingAnother_WithUnsavedChanges_AsksToDiscard()
+    public async Task SelectingAnother_WithUnsavedChanges_AsksUnsavedChangesDialog()
     {
         _layout.Change(LayoutMode.Expanded);
         _store.Stored.AddRange([Prop("Flat"), Prop("House", sortOrder: 1)]);
@@ -144,14 +144,14 @@ public class PropertiesViewModelTests
         await vm.SelectCommand.ExecuteAsync(vm.Items[0]);
         var first = vm.SelectedProperty!;
         first.Name = "Changed";
-        _dialogs.ConfirmResult = false;
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.Cancel;
 
         await vm.SelectCommand.ExecuteAsync(vm.Items[1]);
 
         Assert.Same(first, vm.SelectedProperty);
-        Assert.Single(_dialogs.Confirmations);
+        Assert.Equal(1, _dialogs.UnsavedAsked);
 
-        _dialogs.ConfirmResult = true;
+        _dialogs.UnsavedChoice = UnsavedChangesChoice.DontSave;
         await vm.SelectCommand.ExecuteAsync(vm.Items[1]);
 
         Assert.NotSame(first, vm.SelectedProperty);
@@ -257,4 +257,17 @@ public class PropertiesViewModelTests
 
     private static PropertyParameter Param(PropertyParameterKind kind, DateOnly from, decimal value) =>
         new() { Kind = kind, ValidFrom = from, Value = value };
+
+    [Fact]
+    public void AddControls_FollowTheLayout()
+    {
+        var vm = Create();
+        Assert.True(vm.ShowAddFab);
+        Assert.False(vm.ShowAddButton);
+
+        _layout.Change(LayoutMode.Expanded);
+
+        Assert.False(vm.ShowAddFab);
+        Assert.True(vm.ShowAddButton);
+    }
 }

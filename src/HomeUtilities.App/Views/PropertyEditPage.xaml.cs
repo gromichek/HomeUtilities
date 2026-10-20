@@ -12,6 +12,9 @@ public partial class PropertyEditPage : PageBase, IQueryAttributable
     {
         InitializeComponent();
         BindingContext = viewModel;
+
+        // Set in code (not bound in XAML) so the toolbar Back always has its command; the default arrow is kept.
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior { Command = new Command(LeaveAsync) });
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -35,14 +38,18 @@ public partial class PropertyEditPage : PageBase, IQueryAttributable
         }
     }
 
+    // Hardware / gesture Back and the toolbar Back arrow take the same path: unsaved changes dialog, then close.
     protected override bool OnBackButtonPressed()
+    {
+        LeaveAsync();
+        return true;
+    }
+
+    private async void LeaveAsync()
     {
         if (BindingContext is PropertyEditViewModel viewModel)
         {
-            viewModel.CancelCommand.Execute(null);
-            return true;
+            await viewModel.CancelCommand.ExecuteAsync(null);
         }
-
-        return base.OnBackButtonPressed();
     }
 }

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    One resource per icon of docs/UI_GUIDELINES.md §1. Android: Material Icons Outlined (bundled static font, ~330 KB, same code points as Material Symbols);
+    Windows: Segoe Fluent Icons (Windows 11) with Segoe MDL2 Assets as the Windows 10 fallback (system fonts).
+    Pages use only these keys, never raw glyph codes.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <OnPlatform x:Key="IconFontFamily" x:TypeArguments="x:String">
+        <On Platform="Android" Value="MaterialIcons" />
+        <On Platform="WinUI" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+    </OnPlatform>
+
+    <OnPlatform x:Key="IconAdd" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE145;" />
+        <On Platform="WinUI" Value="&#xE710;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconEdit" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE3C9;" />
+        <On Platform="WinUI" Value="&#xE70F;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconDelete" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE872;" />
+        <On Platform="WinUI" Value="&#xE74D;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSave" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE5CA;" />
+        <On Platform="WinUI" Value="&#xE73E;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconClose" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE5CD;" />
+        <On Platform="WinUI" Value="&#xE711;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconMore" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE5D4;" />
+        <On Platform="WinUI" Value="&#xE712;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconOpenLink" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE89E;" />
+        <On Platform="WinUI" Value="&#xE8A7;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconCopy" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE14D;" />
+        <On Platform="WinUI" Value="&#xE8C8;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconArchive" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE149;" />
+        <On Platform="WinUI" Value="&#xE7B8;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconHistory" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE889;" />
+        <On Platform="WinUI" Value="&#xE81C;" />
+    </OnPlatform>
+    <!-- Not in the guidelines table yet: expand / collapse chevrons (expand_more / expand_less, ChevronDown / ChevronUp). -->
+    <OnPlatform x:Key="IconExpand" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE5CF;" />
+        <On Platform="WinUI" Value="&#xE70D;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconCollapse" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE5CE;" />
+        <On Platform="WinUI" Value="&#xE70E;" />
+    </OnPlatform>
+
+    <!-- Image sources for toolbar items and buttons with an icon next to the text. -->
+    <FontImageSource x:Key="IconAddSource"
+                     FontFamily="{StaticResource IconFontFamily}"
+                     Glyph="{StaticResource IconAdd}"
+                     Size="20"
+                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+    <FontImageSource x:Key="IconSaveSource"
+                     FontFamily="{StaticResource IconFontFamily}"
+                     Glyph="{StaticResource IconSave}"
+                     Size="24"
+                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+
+</ResourceDictionary>

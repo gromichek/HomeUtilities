@@ -34,14 +34,6 @@
   <data name="Cancel" xml:space="preserve"><value>Отмена</value></data>
   <data name="Save" xml:space="preserve"><value>Сохранить</value></data>
   <data name="Delete" xml:space="preserve"><value>Удалить</value></data>
-  <data name="Edit" xml:space="preserve"><value>Изменить</value></data>
-  <data name="Remove" xml:space="preserve"><value>Убрать</value></data>
-  <data name="Apply" xml:space="preserve"><value>Применить</value></data>
-  <data name="Discard" xml:space="preserve"><value>Отбросить</value></data>
-  <data name="KeepEditing" xml:space="preserve"><value>Продолжить</value></data>
-  <data name="DiscardChangesTitle" xml:space="preserve"><value>Отбросить изменения?</value></data>
-  <data name="DiscardChangesMessage" xml:space="preserve"><value>Изменения не сохранены.</value></data>
-  <data name="DeleteConfirmTitle" xml:space="preserve"><value>Подтвердите удаление</value></data>
   <data name="Error_Generic" xml:space="preserve"><value>Неверное значение</value></data>
   <data name="Error_common_notes_too_long" xml:space="preserve"><value>Комментарий длиннее {0} символов.</value></data>
   <data name="Error_common_number_invalid" xml:space="preserve"><value>Введите число.</value></data>
@@ -65,7 +57,7 @@
   <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Кадастровая стоимость, земля</value></data>
   <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Другой параметр</value></data>
   <data name="PropertiesEmpty" xml:space="preserve"><value>Объектов пока нет. Добавьте первый.</value></data>
-  <data name="PropertyAdd" xml:space="preserve"><value>Добавить</value></data>
+  <data name="PropertyAdd" xml:space="preserve"><value>Новый объект</value></data>
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
   <data name="PropertySelectHint" xml:space="preserve"><value>Выберите объект или добавьте новый.</value></data>
@@ -77,7 +69,6 @@
   <data name="PropertyAddress" xml:space="preserve"><value>Адрес</value></data>
   <data name="PropertyNotes" xml:space="preserve"><value>Заметки</value></data>
   <data name="PropertyArchived" xml:space="preserve"><value>В архиве (скрыт из списка)</value></data>
-  <data name="PropertyDeleteMessage" xml:space="preserve"><value>Удалить «{0}»? История сохранится, но будет скрыта.</value></data>
   <data name="ParametersHeader" xml:space="preserve"><value>Параметры</value></data>
   <data name="ParametersEmpty" xml:space="preserve"><value>Параметров пока нет.</value></data>
   <data name="ParameterAdd" xml:space="preserve"><value>Добавить параметр</value></data>
@@ -86,8 +77,22 @@
   <data name="ParameterValue" xml:space="preserve"><value>Значение</value></data>
   <data name="ParameterValidFrom" xml:space="preserve"><value>Действует с</value></data>
   <data name="ParameterNote" xml:space="preserve"><value>Примечание</value></data>
-  <data name="ParameterCurrent" xml:space="preserve"><value>Сейчас: {0}</value></data>
+  <data name="ParameterCurrent" xml:space="preserve"><value>Сейчас: {0} с {1:d}</value></data>
   <data name="ParameterNoCurrent" xml:space="preserve"><value>Сегодня нет действующего значения</value></data>
   <data name="ParameterRow" xml:space="preserve"><value>{0} с {1:d}</value></data>
-  <data name="ParameterRemoveMessage" xml:space="preserve"><value>Убрать это значение ({0})?</value></data>
+  <data name="Dialog_Unsaved_Title" xml:space="preserve"><value>Сохранить изменения?</value></data>
+  <data name="Dialog_Unsaved_Save" xml:space="preserve"><value>Сохранить</value></data>
+  <data name="Dialog_Unsaved_DontSave" xml:space="preserve"><value>Не сохранять</value></data>
+  <data name="Dialog_Unsaved_Cancel" xml:space="preserve"><value>Отмена</value></data>
+  <data name="Dialog_Delete_Title" xml:space="preserve"><value>Удалить «{0}»?</value></data>
+  <data name="Dialog_Delete_Message" xml:space="preserve"><value>Запись будет скрыта, история сохранится.</value></data>
+  <data name="Dialog_DeleteRow_Title" xml:space="preserve"><value>Удалить эту запись?</value></data>
+  <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
+  <data name="Dialog_Error_Title" xml:space="preserve"><value>Ошибка</value></data>
+  <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="PropertyGeneral" xml:space="preserve"><value>Основное</value></data>
+  <data name="PropertyDelete" xml:space="preserve"><value>Удалить объект</value></data>
+  <data name="ParameterNew" xml:space="preserve"><value>Новый параметр</value></data>
+  <data name="ParameterEdit" xml:space="preserve"><value>Изменить параметр</value></data>
+  <data name="ParameterHistory" xml:space="preserve"><value>История ({0})</value></data>
 </root>

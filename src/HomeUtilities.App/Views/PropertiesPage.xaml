@@ -7,19 +7,19 @@
                 x:DataType="vm:PropertiesViewModel"
                 Title="{Binding Title}">
 
-    <views:PageBase.ToolbarItems>
-        <ToolbarItem Text="{Binding AddText}" Command="{Binding AddCommand}" />
-    </views:PageBase.ToolbarItems>
-
     <Grid x:Name="Root" ColumnDefinitions="*,0">
 
-        <Grid Grid.Column="0" RowDefinitions="Auto,*" Padding="12">
-            <HorizontalStackLayout Grid.Row="0" Spacing="8">
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="8">
+            <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
+                    ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                    HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
+
+            <HorizontalStackLayout Grid.Row="1" Spacing="8">
                 <Switch IsToggled="{Binding ShowArchived}" />
                 <Label Text="{Binding ShowArchivedText}" VerticalOptions="Center" />
             </HorizontalStackLayout>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+            <CollectionView Grid.Row="2" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:PropertyItemViewModel">
                         <Border Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
@@ -44,11 +44,19 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <VerticalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
+            <VerticalStackLayout Grid.Row="2" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
                                  IsVisible="{Binding IsEmpty}">
                 <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
                 <Button Text="{Binding AddText}" Command="{Binding AddCommand}" HorizontalOptions="Center" />
             </VerticalStackLayout>
+
+            <!-- Phone layout: floating add button, bottom-right. -->
+            <Button Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource FabButton}"
+                    Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
+                    HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
+                    IsVisible="{Binding ShowAddFab}"
+                    ToolTipProperties.Text="{Binding AddText}"
+                    SemanticProperties.Description="{Binding AddText}" />
         </Grid>
 
         <Grid Grid.Column="1">
