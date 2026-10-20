@@ -6,6 +6,7 @@
       "src\\HomeUtilities.Data\\HomeUtilities.Data.csproj",
       "src\\HomeUtilities.ViewModels\\HomeUtilities.ViewModels.csproj",
       "tests\\HomeUtilities.Core.Tests\\HomeUtilities.Core.Tests.csproj",
+      "tests\\HomeUtilities.Data.Tests\\HomeUtilities.Data.Tests.csproj",
       "tests\\HomeUtilities.ViewModels.Tests\\HomeUtilities.ViewModels.Tests.csproj"
     ]
   }
