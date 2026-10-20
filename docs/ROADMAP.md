@@ -13,7 +13,7 @@ is written; the list below is the plan and will change.
 - T-005 VAT catalog, tariff components, rates, tiers
 - T-006 `ChargeCalculator` for all bases (PerUnit, PerArea, PerResident, FixedMonthly, FromBill, NetExport)
 - T-007 User categories, payment details (IBAN, purpose template), comments on all entities
-- T-008 Bills, payments, allocations, balances, equalized plans
+- T-008 Bills (incl. one-off, service period, custom fields), payments, allocations, balances, equalized plans
 
 ## Phase 2 — Persistence
 - T-009 EF Core DbContext, configurations, first migration, `SyncEntity` interceptor (timestamps, soft delete)
@@ -41,7 +41,7 @@ is written; the list below is the plan and will change.
 - T-023 Charts (bar, grouped by property), year-over-year, unit cost; export to Excel
 
 ## Phase 7 — Templates and import
-- T-024 Contract templates, recurring fixed bills
+- T-024 Contract templates, bill templates with schedules (once / monthly / every N months / yearly), drafts
 - T-025 Excel import framework (column mapping, preview, dry run)
 - T-026 Import profile for the owner's legacy workbook (synthetic fixture in tests)
 
