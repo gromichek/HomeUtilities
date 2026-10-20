@@ -7,13 +7,9 @@
                 x:DataType="vm:PropertyEditViewModel"
                 Title="{Binding Title}">
 
-    <Shell.BackButtonBehavior>
-        <BackButtonBehavior Command="{Binding CancelCommand}" />
-    </Shell.BackButtonBehavior>
-
+    <!-- Phone: system Back (handled in code, see PropertyEditPage.xaml.cs) + Save. No separate Cancel: Back cancels. -->
     <views:PageBase.ToolbarItems>
-        <ToolbarItem Text="{Binding SaveText}" Command="{Binding SaveCommand}" />
-        <ToolbarItem Text="{Binding CancelText}" Command="{Binding CancelCommand}" />
+        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveSource}" Command="{Binding SaveCommand}" />
     </views:PageBase.ToolbarItems>
 
     <views:PropertyEditView />

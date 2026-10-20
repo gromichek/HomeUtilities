@@ -15,4 +15,9 @@
     <Color x:Key="OnPrimaryLight">#FFFFFF</Color>
     <Color x:Key="OnPrimaryDark">#10243A</Color>
 
+    <Color x:Key="CardLight">#FFFFFF</Color>
+    <Color x:Key="CardDark">#25282D</Color>
+    <Color x:Key="OutlineLight">#D0D5DD</Color>
+    <Color x:Key="OutlineDark">#3A3F47</Color>
+
 </ResourceDictionary>
