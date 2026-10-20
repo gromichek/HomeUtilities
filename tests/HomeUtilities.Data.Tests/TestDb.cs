@@ -28,7 +28,14 @@ public sealed class TestDb : IDisposable
         return new HomeUtilitiesDbContext(options);
     }
 
+    public IDbContextFactory<HomeUtilitiesDbContext> Factory => new TestFactory(this);
+
     public void Dispose() => _connection.Dispose();
+}
+
+internal sealed class TestFactory(TestDb test) : IDbContextFactory<HomeUtilitiesDbContext>
+{
+    public HomeUtilitiesDbContext CreateDbContext() => test.NewContext();
 }
 
 public sealed class FakeClock(DateTimeOffset now) : IClock
