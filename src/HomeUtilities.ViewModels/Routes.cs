@@ -5,6 +5,7 @@ public static class Routes
 {
     public const string Overview = "Overview";
     public const string Properties = "Properties";
+    public const string Suppliers = "Suppliers";
     public const string Readings = "Readings";
     public const string Bills = "Bills";
     public const string Payments = "Payments";
@@ -13,4 +14,13 @@ public static class Routes
 
     /// <summary>Pushed page (not a section): the property editor, query parameters <c>id</c> or <c>editor</c>.</summary>
     public const string PropertyEdit = "PropertyEdit";
+
+    /// <summary>Pushed page (not a section): the supplier editor, same parameters as <see cref="PropertyEdit"/>.</summary>
+    public const string SupplierEdit = "SupplierEdit";
+
+    /// <summary>Pushed page opened from Settings: the list of payment categories.</summary>
+    public const string Categories = "Categories";
+
+    /// <summary>Pushed page (not a section): the category editor, same parameters as <see cref="PropertyEdit"/>.</summary>
+    public const string CategoryEdit = "CategoryEdit";
 }
