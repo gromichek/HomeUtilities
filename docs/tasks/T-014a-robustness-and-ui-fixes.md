@@ -16,6 +16,7 @@ Owner test 2026-10-23 found crashes on unexpected input and two Android UI probl
 ## Scope — do
 
 ### 1. Purpose template (Core)
+- Hotfix #41 already keeps an invalid `{Period:…}` as typed instead of throwing; build the validation on top.
 - `PaymentPurpose.Render` never throws: an invalid or unsupported `{Period:<format>}` is rendered **as typed**.
   Allowed format characters: `d`, `M`, `y` and separators `. - / space` (plus quoted literals not needed);
   anything else (e.g. `m`, `h`, `s`, `t`, `f`, `z`, `K`, `g`) → invalid.
@@ -64,6 +65,15 @@ never an exception**. Specifically:
   payment details, footer buttons) — they must wrap or stack on Compact width, never be cut off.
 - Contract page guard (T-014 open question): a layout-mode change while the contract page is open must not pop
   the contract page; only the property editor host changes.
+
+### 6. Flaky test + CI visibility (happened twice: PR #32 and #41)
+- The project lead cannot read Actions logs. Make failures visible through the API: in `ci.yml` add, after the
+  Test step (`if: failure()`), a step that writes failed test names + messages from the `.trx` files to the
+  **job summary** and as **check-run annotations** (e.g. `dorny/test-reporter`, pinned version, or a small
+  script with `::error::` lines). Add `permissions: checks: write` for the job.
+- Find the flaky test: run the whole suite 20 times locally (`for i in $(seq 20); do dotnet test …; done`), look
+  for tests that depend on the real clock (`DateTime.Now`, `SystemClock`, `Today`), current culture, ordering of
+  `Guid.CreateVersion7()` or async timing. Fix it and describe the cause in the PR.
 
 ## Scope — do NOT
 - No new features. No in-app snackbar yet (T-019).

@@ -35,6 +35,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Hotfix: icon font bundling, editor visibility, duplicate add | 2026-10-23, #35 | pitfalls added to UI_GUIDELINES §6a |
 | T-013 | Suppliers and categories screens | 2026-10-23, #34 | Lead applied #35 fixes to Suppliers/Categories pages. Shared MasterDetail bases introduced. Owner manual test pending. |
 | — | Hotfix: Windows toast crash | 2026-10-23, #37 | |
+| — | Hotfix: purpose format crash | 2026-10-23, #41 | invalid `{Period:…}` kept as typed |
 | T-014 | Contracts screens | 2026-10-23, #38 | 135 new tests (753 total). Properties moved to shared MasterDetail bases. Supplier picker without search (OK for now). |
 
 ## Known issues / tech debt
@@ -47,7 +48,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
 - `AggregateMerger` adds new children via `db.Add` — UI must set the child's FK (e.g. `PropertyParameter.PropertyId`) before saving.
 - Saving an id that exists only as a soft-deleted row is not supported (resurrect needed for sync, T-030).
-- **Flaky test**: linux CI `Test` step failed once on PR #32 and passed on re-run without code changes (logs not accessible to the lead). Next coding session: run the suite several times, look for tests depending on real time, culture or async timing.
+- **Flaky test**: linux CI `Test` step failed on PR #32 and #41 and passed on re-run without code changes (logs not accessible to the lead). In T-014a scope (plus CI failure reporting). Run the suite several times, look for tests depending on real time, culture or async timing.
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - No "Copied" confirmation on Windows (toast disabled there) until the in-app snackbar (T-019).
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
