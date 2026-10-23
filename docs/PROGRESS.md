@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-013 | Suppliers and categories screens | Ready | | must follow UI_GUIDELINES.md |
+| T-014 | Contracts — list in property editor, contract editor | Ready | | |
 
 ## Done
 
@@ -32,13 +32,15 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Hotfixes: AppShell resources, startup language | 2026-10-20, #27, #28 | Startup-order rules added to CLAUDE.md |
 | T-012 | Properties screens + shared UI patterns | 2026-10-20, #29 | 63 new VM tests (618 total). Owner manual test pending. |
 | T-012a | UI guidelines applied, Properties reworked | 2026-10-20, #32 | Icon font replaced by lead with 330 KB static Material Icons. Owner manual test pending. |
+| — | Hotfix: icon font bundling, editor visibility, duplicate add | 2026-10-23, #35 | pitfalls added to UI_GUIDELINES §6a |
+| T-013 | Suppliers and categories screens | 2026-10-23, #34 | Lead applied #35 fixes to Suppliers/Categories pages. Shared MasterDetail bases introduced. Owner manual test pending. |
 
 ## Known issues / tech debt
 
 - `ViewModelBase` uses `WeakReferenceMessenger.RegisterAll` (reflection) — check Android release trimming; switch to explicit `Register<T>` if it breaks.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
-- `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — pick up in T-014 (contracts screen).
+- `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — in T-014 scope.
 - SQLite decimals lose trailing zeros (`-12.10` → `-12.1`); numerically equal, UI always formats amounts.
 - Snapshot `ChargeWarning.Args` come back as `JsonElement` (display only).
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
@@ -57,4 +59,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-20 | #24 | Start on Windows / Android | **Crash**: `StaticResource not found for key PrimaryLight` (AppShell built before App resources) — fixed in hotfix PR |
 | 2026-10-20 | #27 | Restart with Russian selected | **Bug**: menu in English, Settings in Russian (LanguageService created lazily after Shell) — fixed in hotfix PR |
 | 2026-10-20 | #28 + #29 | Shell, settings, Properties on Windows + Android | Works. **Usability**: identical buttons, unclear grouping, non-standard dialog texts; **Android bugs**: Kind picker empty, Back did not leave the editor (after archive toggle), stray "≡" button → T-012a |
-| 2026-10-23 | #32 | Properties reworked on Windows + Android | Layout OK. **Bugs**: Android icons shown as empty boxes (icon font not bundled — `MauiFont` item missing); Windows empty editor visible with no selection (IsVisible binding on changed BindingContext); duplicate "New property" button → hotfix |
+| 2026-10-23 | #32 | Properties reworked on Windows + Android | Layout OK. **Bugs**: Android icons shown as empty boxes (icon font not bundled — `MauiFont` item missing); Windows empty editor visible with no selection (IsVisible binding on changed BindingContext); duplicate "New property" button → hotfix #35 |
+| | #34 + #35 | Suppliers, categories; Properties after hotfix (icons on Android, empty state) | pending |
