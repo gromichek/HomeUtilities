@@ -43,7 +43,6 @@
             <VerticalStackLayout Grid.Row="2" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
                                  IsVisible="{Binding IsEmpty}">
                 <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
-                <Button Text="{Binding AddText}" Command="{Binding AddCommand}" HorizontalOptions="Center" />
             </VerticalStackLayout>
 
             <!-- Phone layout: floating add button, bottom-right. -->
@@ -56,7 +55,10 @@
         </Grid>
 
         <Grid Grid.Column="1">
-            <views:SupplierEditView BindingContext="{Binding SelectedEditor}" IsVisible="{Binding HasSelection}" />
+            <!-- IsVisible must be evaluated on the page view model, not on the (possibly null) editor. -->
+            <ContentView IsVisible="{Binding HasSelection}">
+                <views:SupplierEditView BindingContext="{Binding SelectedEditor}" />
+            </ContentView>
             <Label Text="{Binding SelectHintText}" Style="{StaticResource MutedLabel}"
                    HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowSelectHint}" />
         </Grid>
