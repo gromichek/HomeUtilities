@@ -58,7 +58,8 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 - Back (Android hardware/gesture back, toolbar back arrow, Windows back) **must always work**:
   - no unsaved changes → go back immediately;
   - unsaved changes → the standard "unsaved changes" dialog (§5); after Save/Don't save → go back;
-  - after a successful Save or Delete → go back automatically.
+  - after a successful **Save → stay in the editor** (title updates, short confirmation); after **Delete →
+    go back**. (Changed 2026-10-23 at the owner's request.)
 - Never swallow Back without showing a dialog.
 
 ## 5. Standard dialog texts (EN / RU)
@@ -92,9 +93,15 @@ Use these wordings everywhere (resx keys in brackets):
   Windows app** — never call them directly; use `IToastService` (currently a no-op on Windows until the in-app
   snackbar exists).
 
+## 6b. Robustness
+- No user input may crash the app: every parser uses `TryParse`, every text field has `MaxLength` matching the
+  validator, format strings typed by the user are validated (see `PaymentPurpose.Validate`).
+- Command handlers run through the shared safe wrapper (error dialog + log), never let exceptions escape.
+
 ## 7. Checklist for every UI task (put into the PR's manual test steps)
 1. Phone, tablet portrait, tablet landscape / wide window.
 2. Back from every page with and without unsaved changes.
 3. Every picker shows its value after reopening the item.
 4. Dark theme readable.
-5. Russian and English texts fit (no cut-off buttons).
+5. Russian and English texts fit (no cut-off buttons); rows of buttons/swatches wrap on phones.
+6. Nonsense input in every field → validation message, no crash.

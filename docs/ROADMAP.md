@@ -25,6 +25,7 @@ is written; the list below is the plan and will change.
 - T-012a Apply UI guidelines (platform icons, button hierarchy, standard dialogs, Back), rework Properties
 - T-013 Suppliers (links open in browser, payment details with copy) and categories screens
 - T-014 Contracts: list per property + edit (supplier, category, timing, reading window, custom fields, links, payment details override)
+- T-014a Robustness: no crashes on bad input, global error handler + error log, stay in editor after Save, Android layout fixes
 - T-015 Meters: list + edit, replacement wizard, verification due
 - T-016 Readings entry (phone-first, tablet two-pane), history, warnings, meter photo
 
