@@ -107,6 +107,68 @@ public class InputHardeningTests
 
     [Theory]
     [MemberData(nameof(Inputs))]
+    public async Task MeterEditor_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        kit.Contracts.Stored.Add(new Contract { PropertyId = kit.Property.Id, Title = "Water", ValidFrom = new DateOnly(2020, 1, 1) });
+        var vm = kit.CreateMeterEditor();
+        await vm.LoadAsync(kit.Property.Id, null);
+        vm.ContractSwitches[0].IsOn = true;
+
+        await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+        vm.ApplyDualTariffCommand.Execute(null);
+        await vm.ReplaceCommand.ExecuteAsync(null);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task ReplaceWizard_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var meter = new Meter { PropertyId = kit.Property.Id, Resource = MeterResource.ColdWater, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 10, 1), Digits = 5 };
+        meter.Registers.Add(MeterRegister.CreateDefault(meter.Id));
+        kit.Meters.Stored.Add(meter);
+        var wizard = new ReplaceMeterWizardViewModel(kit.Localizer, kit.Clock, kit.Meters, meter, []);
+
+        Func<Task> walk = async () =>
+        {
+            wizard.Step = ReplaceMeterStep.Date;
+            for (var i = 0; i < 5; i++)
+            {
+                wizard.NextCommand.Execute(null);
+            }
+
+            await wizard.ReplaceCommand.ExecuteAsync(null);
+            wizard.PreviousCommand.Execute(null);
+        };
+        await HammerAsync(wizard, input, walk);
+        foreach (var row in wizard.Registers)
+        {
+            await HammerAsync(row, input, walk);
+        }
+    }
+
+    [Fact]
+    public async Task ReplaceWizard_HammeringReallyReachesTheReplaceLogic()
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var meter = new Meter { PropertyId = kit.Property.Id, Resource = MeterResource.ColdWater, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 10, 1) };
+        meter.Registers.Add(MeterRegister.CreateDefault(meter.Id));
+        kit.Meters.Stored.Add(meter);
+        var wizard = new ReplaceMeterWizardViewModel(kit.Localizer, kit.Clock, kit.Meters, meter, []);
+        wizard.Registers[0].FinalText = "10";
+        for (var i = 0; i < 4; i++)
+        {
+            wizard.NextCommand.Execute(null);
+        }
+
+        await wizard.ReplaceCommand.ExecuteAsync(null);
+
+        Assert.Single(kit.Meters.Replacements);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
     public async Task ChildDialogs_NeverThrow(string input)
     {
         var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
@@ -116,6 +178,9 @@ public class InputHardeningTests
 
         var parameter = new ParameterEditorViewModel(kit.Localizer, kit.Clock, null, _ => false);
         await HammerAsync(parameter, input, () => { parameter.SaveCommand.Execute(null); return Task.CompletedTask; });
+
+        var register = new RegisterEditorViewModel(kit.Localizer, new HashSet<RegisterKind>());
+        await HammerAsync(register, input, () => { register.SaveCommand.Execute(null); return Task.CompletedTask; });
 
         var field = new CustomFieldEditorViewModel(kit.Localizer, null, _ => false);
         await HammerAsync(field, input, () => { field.SaveCommand.Execute(null); return Task.CompletedTask; });

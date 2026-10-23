@@ -609,7 +609,8 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     {
         var resource = SelectedResource?.As<MeterResource>() ?? MeterResource.ColdWater;
         var allowed = MeterUnitRules.UnitsFor(resource);
-        Units = [.. EnumText.Options<MeterUnit>(_localizer).Where(o => allowed.Contains(o.As<MeterUnit>()))];
+        var options = EnumText.Options<MeterUnit>(_localizer);
+        Units = [.. allowed.Select(unit => options.First(o => o.Value.Equals(unit)))];
         var unit = preferred is { } value && allowed.Contains(value) ? value : MeterUnitRules.DefaultUnit(resource);
         SelectedUnit = Units.First(o => o.Value.Equals(unit));
     }
