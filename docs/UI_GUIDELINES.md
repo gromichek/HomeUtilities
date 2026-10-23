@@ -47,8 +47,9 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   own title ("New parameter", "Edit parameter") and its own Save / Cancel — never an inline form inside the
   parent form.
 - **Editor commands**
-  - Phone (separate page): toolbar has system **Back** + **Save** (`IconSave`). No separate "Cancel" — Back
-    cancels. Delete in the `IconMore` menu or as a red "Delete …" at the end of the form.
+  - Phone (separate page): toolbar has system **Back** + **Save** (`IconSave` ✓). **✓ only saves and never
+    leaves the page; only Back leaves** (owner rule 2026-10-23, applies to every editor and dialog page).
+    No separate "Cancel" — Back cancels. Delete in the `IconMore` menu or as a red "Delete …" at the end of the form.
   - Tablet/desktop (right pane): a footer with **Save** (primary), **Cancel** (secondary), and **Delete …**
     (destructive) at the far end.
 - No artificial maximum width of the window or panes (space is needed for charts later). Two-pane split is

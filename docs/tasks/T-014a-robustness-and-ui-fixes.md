@@ -53,6 +53,9 @@ never an exception**. Specifically:
   short confirmation where available (toast on Android; on Windows nothing until the in-app snackbar), the list
   (if visible) refreshes. **Back** leaves. After **Delete**: leave (unchanged).
 - Applies to Property, Supplier, Category, Contract editors and the compact editor pages.
+- Owner rule: on Android the toolbar **✓ only saves, never navigates**; **only Back leaves**. Check every page
+  that has ✓ (incl. full-screen child-item dialogs on phones: there ✓ saves the item and closes the dialog —
+  that is the one exception, because the dialog *is* the item editor; state it in the PR).
 - Update tests that expected "close after save".
 
 ### 5. Android layout
