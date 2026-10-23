@@ -30,13 +30,13 @@
                                IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding ColorLabel}" Style="{StaticResource MutedLabel}" />
-                        <!-- The Grid gives the FlexLayout a finite width; directly inside a stack it measures as one endless row on Android. -->
-                        <Grid>
-                        <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Start" AlignContent="Start"
-                                    BindableLayout.ItemsSource="{Binding Swatches}">
-                            <BindableLayout.ItemTemplate>
+                        <!-- Two fixed rows of 6 (6 x 36 + 5 x 8 = 256 dp) instead of FlexLayout, which clips the first
+                             item of each row on Android (owner screenshot 2026-10-23). -->
+                        <VerticalStackLayout Spacing="8" Padding="2">
+                            <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding SwatchesRow1}">
+                                <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:ColorSwatchViewModel">
-                                    <Border WidthRequest="36" HeightRequest="36" Margin="0,0,8,8"
+                                    <Border WidthRequest="36" HeightRequest="36"
                                             StrokeShape="RoundRectangle 18" StrokeThickness="1"
                                             Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
                                             BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}"
@@ -52,9 +52,30 @@
                                         </Border.GestureRecognizers>
                                     </Border>
                                 </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </FlexLayout>
-                        </Grid>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding SwatchesRow2}">
+                                <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ColorSwatchViewModel">
+                                    <Border WidthRequest="36" HeightRequest="36"
+                                            StrokeShape="RoundRectangle 18" StrokeThickness="1"
+                                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                                            BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}"
+                                            SemanticProperties.Description="{Binding Color}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" x:DataType="vm:ColorSwatchViewModel" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+                                                <Setter Property="StrokeThickness" Value="4" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
 
                         <Label Text="{Binding ColorHexLabel}" Style="{StaticResource MutedLabel}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
