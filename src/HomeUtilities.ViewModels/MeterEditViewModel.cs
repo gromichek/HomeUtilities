@@ -98,6 +98,9 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     private IReadOnlyList<MeterHistoryRowViewModel> _historyRows = [];
 
     [ObservableProperty]
+    private IReadOnlyList<string> _recentReadings = [];
+
+    [ObservableProperty]
     private MeterEditTexts _texts;
 
     public MeterEditViewModel(
@@ -227,6 +230,13 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
 
     public bool HasHistory => HistoryRows.Count > 0;
 
+    /// <summary>The "Readings" card exists for a stored meter.</summary>
+    public bool ShowReadings => !IsNew;
+
+    public bool HasRecentReadings => RecentReadings.Count > 0;
+
+    public bool HasNoReadings => !IsNew && RecentReadings.Count == 0;
+
     public Task LoadAsync(Guid propertyId, Guid? id)
     {
         PropertyId = propertyId;
@@ -268,6 +278,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
             await LoadHistoryAsync();
             ClearErrors();
             RebuildRegisters();
+            RebuildRecentReadings();
             Title = TitleText();
             IsDirty = false;
         }
@@ -349,6 +360,16 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         HistoryRows = rows;
         OnPropertyChanged(nameof(HasHistory));
     }
+
+    /// <summary>Opens the full reading history of the stored meter.</summary>
+    [RelayCommand]
+    private Task ShowAllReadingsAsync() => RunSafeAsync(async () =>
+    {
+        if (!IsNew)
+        {
+            await _navigation.GoToAsync(Routes.ReadingHistory, new Dictionary<string, object> { [EditorNavigation.IdParameter] = _meter.Id });
+        }
+    });
 
     [RelayCommand]
     private Task OpenMeterAsync(Guid id) => RunSafeAsync(async () =>
@@ -564,6 +585,8 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         {
             OnPropertyChanged(nameof(CanReplace));
             OnPropertyChanged(nameof(ShowDeleteBlocked));
+            OnPropertyChanged(nameof(ShowReadings));
+            OnPropertyChanged(nameof(HasNoReadings));
         }
     }
 
@@ -594,6 +617,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
             DeleteWholeText = Texts.DeleteMeterText;
             Title = TitleText();
             RebuildRegisters();
+            RebuildRecentReadings();
             OnPropertyChanged(nameof(VerificationLine));
             OnPropertyChanged(nameof(VerificationBadgeText));
         }
@@ -633,6 +657,29 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         OnPropertyChanged(nameof(ShowDeleteBlocked));
         OnPropertyChanged(nameof(CanApplyDualTariff));
         ApplyDualTariffCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>The last five stored readings over all registers, newest first, for the "Readings" card.</summary>
+    private void RebuildRecentReadings()
+    {
+        var unit = EnumText.Get(_localizer, _meter.Unit);
+        RecentReadings =
+        [
+            .. _registers
+                .SelectMany(r => r.Original.Readings.Where(x => !x.IsDeleted).Select(x => (Reading: x, Register: r.Original)))
+                .OrderByDescending(x => x.Reading.Date)
+                .ThenByDescending(x => x.Reading.CreatedAt)
+                .Take(5)
+                .Select(x =>
+                {
+                    var label = RegisterLabel.For(_localizer, _meter, x.Register);
+                    var value = DecimalInput.Format(x.Reading.Value, CultureInfo.CurrentCulture, 3);
+                    return string.Join(" · ", new[] { x.Reading.Date.ToString("d", CultureInfo.CurrentCulture), label, $"{value} {unit}" }.Where(p => p.Length > 0));
+                }),
+        ];
+        OnPropertyChanged(nameof(HasRecentReadings));
+        OnPropertyChanged(nameof(HasNoReadings));
+        OnPropertyChanged(nameof(ShowReadings));
     }
 
     private void NotifyVerificationChanged()

@@ -186,6 +186,64 @@ public class InputHardeningTests
         await HammerAsync(field, input, () => { field.SaveCommand.Execute(null); return Task.CompletedTask; });
     }
 
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task ReadingsScreen_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var meter = new Meter { PropertyId = kit.Property.Id, Resource = MeterResource.Electricity, Unit = MeterUnit.KWh, InstalledOn = new DateOnly(2020, 10, 1), Digits = 5 };
+        meter.Registers.Add(new MeterRegister { MeterId = meter.Id, Kind = RegisterKind.Day, Direction = EnergyDirection.Import });
+        meter.Registers.Add(new MeterRegister { MeterId = meter.Id, Kind = RegisterKind.Night, Direction = EnergyDirection.Import });
+        foreach (var register in meter.Registers)
+        {
+            register.Readings.Add(new MeterReading { RegisterId = register.Id, Date = new DateOnly(2026, 9, 26), Value = 1000m });
+        }
+
+        kit.Meters.Stored.Add(meter);
+        var vm = kit.CreateReadings();
+        await vm.ReloadAsync();
+
+        foreach (var row in vm.Groups.SelectMany(g => g.Cards).SelectMany(c => c.Rows))
+        {
+            await HammerAsync(row, input, () => vm.SaveAllCommand.ExecuteAsync(null));
+            row.ToggleNoteCommand.Execute(null);
+            row.Clear();
+        }
+
+        await vm.CanLeaveAsync();
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task ReadingEditDialog_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var meter = new Meter { PropertyId = kit.Property.Id, Resource = MeterResource.ColdWater, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 10, 1) };
+        var register = MeterRegister.CreateDefault(meter.Id);
+        meter.Registers.Add(register);
+        var reading = new MeterReading { RegisterId = register.Id, Date = new DateOnly(2026, 9, 26), Value = 100m };
+        register.Readings.Add(reading);
+
+        var dialog = new ReadingEditorViewModel(kit.Localizer, meter, register, reading);
+        await HammerAsync(dialog, input, () => { dialog.SaveCommand.Execute(null); return Task.CompletedTask; });
+    }
+
+    [Fact]
+    public async Task ReadingsScreen_HammeringReallyReachesTheSaveLogic()
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var meter = new Meter { PropertyId = kit.Property.Id, Resource = MeterResource.ColdWater, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 10, 1) };
+        meter.Registers.Add(MeterRegister.CreateDefault(meter.Id));
+        kit.Meters.Stored.Add(meter);
+        var vm = kit.CreateReadings();
+        await vm.ReloadAsync();
+
+        vm.Groups[0].Cards[0].Rows[0].ValueText = "12,5";
+        await vm.SaveAllCommand.ExecuteAsync(null);
+
+        Assert.Single(kit.Meters.AddedBatches);
+    }
+
     [Fact]
     public async Task Hammering_ReallyReachesTheSaveLogic()
     {

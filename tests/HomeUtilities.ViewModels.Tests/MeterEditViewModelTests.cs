@@ -569,4 +569,55 @@ public class MeterEditViewModelTests
         await vm.LoadAsync(meter.PropertyId, meter.Id);
         return vm;
     }
+
+    [Fact]
+    public async Task Readings_card_lists_the_last_five_readings_newest_first()
+    {
+        var meter = new Meter { PropertyId = _kit.Property.Id, Resource = MeterResource.ColdWater, Unit = MeterUnit.M3, Location = "Kitchen", InstalledOn = new DateOnly(2020, 1, 1) };
+        var register = MeterRegister.CreateDefault(meter.Id);
+        meter.Registers.Add(register);
+        for (var month = 1; month <= 7; month++)
+        {
+            register.Readings.Add(new MeterReading { RegisterId = register.Id, Date = new DateOnly(2026, month, 26), Value = month * 10m });
+        }
+
+        _kit.Meters.Stored.Add(meter);
+        var vm = _kit.CreateMeterEditor();
+        await vm.LoadAsync(_kit.Property.Id, meter.Id);
+
+        Assert.True(vm.ShowReadings);
+        Assert.True(vm.HasRecentReadings);
+        Assert.False(vm.HasNoReadings);
+        Assert.Equal(5, vm.RecentReadings.Count);
+        Assert.Contains("70", vm.RecentReadings[0]);
+        Assert.Contains("30", vm.RecentReadings[4]);
+    }
+
+    [Fact]
+    public async Task Readings_card_for_a_meter_without_readings_and_for_a_new_meter()
+    {
+        var vm = await LoadNewAsync();
+        Assert.False(vm.ShowReadings);
+
+        vm.Location = "Kitchen";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(vm.ShowReadings);
+        Assert.False(vm.HasRecentReadings);
+        Assert.True(vm.HasNoReadings);
+    }
+
+    [Fact]
+    public async Task All_readings_opens_the_history_of_the_stored_meter()
+    {
+        var vm = await LoadNewAsync();
+        vm.Location = "Kitchen";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        await vm.ShowAllReadingsCommand.ExecuteAsync(null);
+
+        var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.Equal(Routes.ReadingHistory, route);
+        Assert.Equal(_kit.Meters.Saved[0].Id, parameters!["id"]);
+    }
 }

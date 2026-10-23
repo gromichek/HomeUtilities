@@ -29,6 +29,9 @@ public sealed class MeterEditTexts
         ContractsHint = localizer["MeterContractsHint"];
         ContractsEmpty = localizer["MeterContractsEmpty"];
         HistoryHeader = localizer["MeterHistoryHeader"];
+        ReadingsHeader = localizer["MeterReadingsHeader"];
+        AllReadingsText = localizer["MeterReadingsAll"];
+        ReadingsEmpty = localizer["MeterReadingsEmpty"];
         DeleteBlockedText = localizer["MeterDeleteBlocked"];
         DeleteMeterText = localizer["MeterDelete"];
     }
@@ -80,6 +83,12 @@ public sealed class MeterEditTexts
     public string ContractsEmpty { get; }
 
     public string HistoryHeader { get; }
+
+    public string ReadingsHeader { get; }
+
+    public string AllReadingsText { get; }
+
+    public string ReadingsEmpty { get; }
 
     public string DeleteBlockedText { get; }
 
