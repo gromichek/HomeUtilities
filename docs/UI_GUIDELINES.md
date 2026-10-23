@@ -88,6 +88,10 @@ Use these wordings everywhere (resx keys in brackets):
 - Only one "add" entry point per layout: FAB on phones, button above the list on tablet/desktop; the empty
   state shows text only.
 
+- CommunityToolkit `Toast`/`Snackbar` use system notifications on Windows and **crash the unpackaged
+  Windows app** — never call them directly; use `IToastService` (currently a no-op on Windows until the in-app
+  snackbar exists).
+
 ## 7. Checklist for every UI task (put into the PR's manual test steps)
 1. Phone, tablet portrait, tablet landscape / wide window.
 2. Back from every page with and without unsaved changes.

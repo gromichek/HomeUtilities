@@ -33,7 +33,7 @@ is written; the list below is the plan and will change.
 - T-018 Monthly charges screen: calculated charge per contract/period
 
 ## Phase 5 — Bills, payments, balance
-- T-019 Bill entry (total + optional lines + attachment), difference vs calculation, status badges, "Paid" quick action with Undo / Cancel payment (+ `Payment.CreatedByQuickAction` + migration)
+- T-019 **In-app snackbar/toast control** (both platforms, also replaces the Windows no-op toast; needed for "Undo"), bill entry (total + optional lines + attachment), difference vs calculation, status badges, "Paid" quick action with Undo / Cancel payment (+ `Payment.CreatedByQuickAction` + migration)
 - T-020 Payments, allocation, prepayment, balance
 - T-021 Equalized plans and annual settlement view; property tax installments
 - T-022 Dashboard: to-do (readings window, due bills, overdue, verification), balances
