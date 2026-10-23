@@ -1,0 +1,163 @@
+using System.Reflection;
+using HomeUtilities.Core.Domain;
+using HomeUtilities.ViewModels.Common;
+
+namespace HomeUtilities.ViewModels.Tests;
+
+/// <summary>
+/// Feeds nasty text into every string property of every editor and dialog view model, then saves and reads every
+/// property (previews, error texts): whatever the user types may only produce validation messages, never an exception.
+/// </summary>
+public class InputHardeningTests
+{
+    private static readonly string[] Nasty =
+    [
+        string.Empty,
+        "   ",
+        "abc",
+        "12abc",
+        "1,2,3",
+        "1.234,56",
+        "99999999999999999999999",
+        "-99999999999999999999999",
+        "-5",
+        "-0,5",
+        "5,5",
+        "5.5",
+        "0",
+        "32",
+        "-1",
+        "2147483648",
+        "😀🏠",
+        new string('x', 5000),
+        "  padded  ",
+        "#12",
+        "#GGGGGG",
+        "#1E88E5",
+        "{",
+        "}",
+        "{}",
+        "{Period:mm.yyyy}",
+        "{Period:HH}{Foo}{Period:",
+        "Abon. Nr. {CustomerNumber}, {Period:mm.yyyy}",
+        "https://",
+        "http://x",
+        "javascript:alert(1)",
+        "LV80BANK0000435195001",
+        "LV00BANK0000435195001",
+        "ZZ99",
+        "\0\u0001\r\n\t",
+    ];
+
+    public static TheoryData<string> Inputs => new(Nasty);
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task SupplierEditor_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = kit.CreateSupplierEditor();
+        await vm.LoadAsync(null);
+
+        await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+        vm.FormatIbanCommand.Execute(null);
+        await vm.CopyPurposeCommand.ExecuteAsync(null);
+        await vm.CopyIbanCommand.ExecuteAsync(null);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task ContractEditor_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var supplier = new Supplier { Name = "Water utility" };
+        kit.Suppliers.Stored.Add(supplier);
+        var vm = kit.CreateContractEditor();
+        await vm.LoadAsync(kit.Property.Id, null);
+        vm.ContractTitle = "Water";
+        vm.SelectedSupplier = new ChoiceOption(supplier.Id, supplier.Name, string.Empty);
+        vm.HasReadingWindow = true;
+
+        await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+        vm.FormatIbanCommand.Execute(null);
+        await vm.CopyPurposeCommand.ExecuteAsync(null);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task PropertyEditor_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = kit.CreatePropertyEditor();
+        await vm.LoadAsync(null);
+
+        await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task CategoryEditor_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = new CategoryEditViewModel(kit.Categories, kit.Localizer, kit.Dialogs, kit.Navigation, kit.Toast);
+        await vm.LoadAsync(null);
+
+        await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task ChildDialogs_NeverThrow(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+
+        var link = new LinkEditorViewModel(kit.Localizer, null);
+        await HammerAsync(link, input, () => { link.SaveCommand.Execute(null); return Task.CompletedTask; });
+
+        var parameter = new ParameterEditorViewModel(kit.Localizer, kit.Clock, null, _ => false);
+        await HammerAsync(parameter, input, () => { parameter.SaveCommand.Execute(null); return Task.CompletedTask; });
+
+        var field = new CustomFieldEditorViewModel(kit.Localizer, null, _ => false);
+        await HammerAsync(field, input, () => { field.SaveCommand.Execute(null); return Task.CompletedTask; });
+    }
+
+    [Fact]
+    public async Task Hammering_ReallyReachesTheSaveLogic()
+    {
+        // Guards the harness: a valid name must save, so a silent early exit cannot make the tests pass vacuously.
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = new CategoryEditViewModel(kit.Categories, kit.Localizer, kit.Dialogs, kit.Navigation, kit.Toast);
+        await vm.LoadAsync(null);
+        vm.Name = "Kindergarten";
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.Single(kit.Categories.Saved);
+    }
+
+    /// <summary>Sets each settable string property to <paramref name="input"/>, runs <paramref name="act"/> and reads all properties.</summary>
+    private static async Task HammerAsync(object viewModel, string input, Func<Task> act)
+    {
+        var properties = viewModel.GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.PropertyType == typeof(string) && p.CanWrite && p.GetIndexParameters().Length == 0)
+            .ToList();
+        Assert.NotEmpty(properties);
+
+        foreach (var property in properties)
+        {
+            property.SetValue(viewModel, input);
+            await act();
+            ReadAll(viewModel);
+        }
+    }
+
+    private static void ReadAll(object viewModel)
+    {
+        foreach (var property in viewModel.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.CanRead && property.GetIndexParameters().Length == 0)
+            {
+                _ = property.GetValue(viewModel);
+            }
+        }
+    }
+}

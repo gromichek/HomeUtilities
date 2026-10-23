@@ -403,4 +403,25 @@ public class SupplierEditViewModelTests
         };
         await vm.AddLinkCommand.ExecuteAsync(null);
     }
+
+    [Fact]
+    public async Task InvalidPurposeFormat_ShowsErrorUnderTheField_PreviewShowsTheTemplateAsTyped_AndNothingIsSaved()
+    {
+        var vm = await CreateNewAsync();
+        vm.Name = "Supplier";
+        vm.PurposeTemplate = "Abon. Nr. {CustomerNumber}, {Period:mm.yyyy}";
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_store.Saved);
+        Assert.StartsWith("Error_payment_purpose_invalid_format", vm.PurposeTemplateError);
+        Assert.Equal("Abon. Nr. 12345, {Period:mm.yyyy}", vm.PurposePreview);
+
+        vm.PurposeTemplate = "Abon. Nr. {CustomerNumber}, {Period:MM.yyyy}";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.PurposeTemplateError);
+        Assert.Single(_store.Saved);
+        Assert.Equal("Abon. Nr. 12345, 10.2026", vm.PurposePreview);
+    }
 }

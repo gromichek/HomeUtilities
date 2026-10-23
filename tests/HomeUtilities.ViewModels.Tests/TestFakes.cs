@@ -89,7 +89,13 @@ internal sealed class FakeDialogService : IDialogService
 
     public EditorDialogViewModel? LastEditor { get; private set; }
 
-    public Task AlertAsync(string title, string message) => Task.CompletedTask;
+    public List<(string Title, string Message)> Alerts { get; } = [];
+
+    public Task AlertAsync(string title, string message)
+    {
+        Alerts.Add((title, message));
+        return Task.CompletedTask;
+    }
 
     public Task<bool> ConfirmAsync(string title, string message, string accept, string cancel)
     {
