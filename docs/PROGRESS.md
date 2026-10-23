@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-015 | Meters screens, contract links, replacement wizard | Ready | | |
+| T-016 | Readings entry, history, submit link | Ready | | |
 
 ## Done
 
@@ -38,6 +38,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Hotfix: purpose format crash | 2026-10-23, #41 | invalid `{Period:…}` kept as typed |
 | T-014 | Contracts screens | 2026-10-23, #38 | 135 new tests (753 total). Properties moved to shared MasterDetail bases. Supplier picker without search (OK for now). |
 | T-014a | Robustness, stay after Save, error log, Android layout | 2026-10-23, #43 | Session worked from the first task version; lead merged #41, fixed flaky VM tests (sequential run) and added CI failure annotations. 963 tests. |
+| — | Hotfix: colour swatches clipped on Android | 2026-10-23, #46 | FlexLayout replaced by two fixed rows |
+| T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 
 ## Known issues / tech debt
 
@@ -53,6 +55,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - No "Copied" confirmation on Windows (toast disabled there) until the in-app snackbar (T-019).
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
+- FlexLayout clips first item per row on Android — avoid it (UI_GUIDELINES §6a).
 - Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
@@ -67,4 +70,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-23 | #32 | Properties reworked on Windows + Android | Layout OK. **Bugs**: Android icons shown as empty boxes (icon font not bundled — `MauiFont` item missing); Windows empty editor visible with no selection (IsVisible binding on changed BindingContext); duplicate "New property" button → hotfix #35 |
 | 2026-10-23 | #34 + #35 | Suppliers: Copy button | **Crash on Windows**: CommunityToolkit Toast unsupported in unpackaged app → hotfix (no toast on Windows) |
 | 2026-10-23 | #37 | Suppliers, categories | **Crash** on purpose template `{Period:mm.yyyy}`; Android: Save closes supplier editor (owner wants to stay); colour swatches cut off → T-014a |
-| | #38 + #43 | Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
+| 2026-10-23 | #43 | Colour swatches | first swatch of each row clipped (FlexLayout on Android) → #46 |
+| | #38 + #43 + #45 + #46 | Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |

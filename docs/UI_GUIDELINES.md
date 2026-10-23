@@ -87,6 +87,8 @@ Use these wordings everywhere (resx keys in brackets):
   **new** context — wrap it: `<ContentView IsVisible="{Binding HasSelection}"><views:Editor BindingContext="{Binding Selected}"/></ContentView>`.
 - Bundled fonts need `<MauiFont Include="Resources\Fonts\*.otf;Resources\Fonts\*.ttf" />` in the App csproj;
   missing glyphs show as empty boxes on Android only.
+- **Do not use `FlexLayout`** on Android: it clips the first item of each wrapped row (owner screenshot
+  2026-10-23). Use fixed rows (`HorizontalStackLayout`s) or a `Grid`.
 - Only one "add" entry point per layout: FAB on phones, button above the list on tablet/desktop; the empty
   state shows text only.
 
