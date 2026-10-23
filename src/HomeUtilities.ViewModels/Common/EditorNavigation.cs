@@ -8,4 +8,7 @@ public static class EditorNavigation
 
     /// <summary>Carries the id of the item to load into a fresh editor; absent means a new item.</summary>
     public const string IdParameter = "id";
+
+    /// <summary>Carries the id of the property a new contract belongs to.</summary>
+    public const string PropertyIdParameter = "propertyId";
 }

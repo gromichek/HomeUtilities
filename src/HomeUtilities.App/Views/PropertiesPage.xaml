@@ -61,7 +61,7 @@
         <Grid Grid.Column="1">
             <!-- IsVisible must be evaluated on the page view model, not on the (possibly null) editor. -->
             <ContentView IsVisible="{Binding HasSelection}">
-                <views:PropertyEditView BindingContext="{Binding SelectedProperty}" />
+                <views:PropertyEditView BindingContext="{Binding SelectedEditor}" />
             </ContentView>
             <Label Text="{Binding SelectHintText}" Style="{StaticResource MutedLabel}"
                    HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowSelectHint}" />

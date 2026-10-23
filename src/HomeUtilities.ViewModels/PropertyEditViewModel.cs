@@ -11,19 +11,26 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>Editor of one property with its time-versioned parameters.</summary>
-public sealed partial class PropertyEditViewModel : EditableViewModel
+public sealed partial class PropertyEditViewModel : PaneEditorViewModel
 {
     private static readonly Regex RowErrorField = new(@"^Parameters\[(\d+)\]\.", RegexOptions.Compiled);
 
     private readonly IPropertyStore _store;
+    private readonly IContractStore _contractStore;
+    private readonly ISupplierStore _supplierStore;
+    private readonly ICategoryStore _categoryStore;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
+    private readonly Func<ContractEditViewModel> _contractEditorFactory;
     private readonly List<ParameterRowViewModel> _rows = [];
     private readonly HashSet<string> _expandedGroups = [];
 
     private Property _property = new();
     private Property? _pending;
+    private IReadOnlyList<Contract> _contracts = [];
+    private IReadOnlyDictionary<Guid, Supplier> _suppliers = new Dictionary<Guid, Supplier>();
+    private IReadOnlyDictionary<Guid, Category> _categories = new Dictionary<Guid, Category>();
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -49,10 +56,12 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     [NotifyPropertyChangedFor(nameof(HasNoParameters))]
     private IReadOnlyList<ParameterGroupViewModel> _groups = [];
 
-    /// <summary>True when the editor is shown on its own page (compact layout) instead of the right-hand pane.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowFooter), nameof(ShowFormDelete))]
-    private bool _isHostedInPage;
+    [NotifyPropertyChangedFor(nameof(HasNoContracts))]
+    private IReadOnlyList<ContractRowViewModel> _contractRows = [];
+
+    [ObservableProperty]
+    private bool _showEndedContracts;
 
     [ObservableProperty]
     private string _nameLabel = string.Empty;
@@ -82,42 +91,65 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     private string _addParameterText = string.Empty;
 
     [ObservableProperty]
-    private string _deleteWholeText = string.Empty;
+    private string _contractsHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _contractsEmptyText = string.Empty;
+
+    [ObservableProperty]
+    private string _contractsSaveFirstText = string.Empty;
+
+    [ObservableProperty]
+    private string _addContractText = string.Empty;
+
+    [ObservableProperty]
+    private string _showEndedContractsText = string.Empty;
 
     public PropertyEditViewModel(
         IPropertyStore store,
+        IContractStore contractStore,
+        ISupplierStore supplierStore,
+        ICategoryStore categoryStore,
         IClock clock,
         ILocalizer localizer,
         IDialogService dialogs,
-        INavigationService navigation)
-        : base(localizer, dialogs)
+        INavigationService navigation,
+        Func<ContractEditViewModel> contractEditorFactory)
+        : base(localizer, dialogs, navigation)
     {
         _store = store;
+        _contractStore = contractStore;
+        _supplierStore = supplierStore;
+        _categoryStore = categoryStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
+        _contractEditorFactory = contractEditorFactory;
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(IsNew))
             {
-                OnPropertyChanged(nameof(ShowFormDelete));
+                OnPropertyChanged(nameof(CanAddContract));
+                OnPropertyChanged(nameof(ShowContractsSaveFirst));
+                OnPropertyChanged(nameof(HasNoContracts));
+                AddContractCommand.NotifyCanExecuteChanged();
             }
         };
         RefreshTexts();
     }
 
-    /// <summary>Called when the session ended, after the editor navigated back if it is hosted in a page.</summary>
-    public Func<EditOutcome, Task>? Finished { get; set; }
-
-    public Guid PropertyId => _property.Id;
+    public override Guid EntityId => _property.Id;
 
     public bool HasNoParameters => Groups.Count == 0;
 
-    /// <summary>Save / Cancel / Delete footer of the side pane (medium and expanded layouts).</summary>
-    public bool ShowFooter => !IsHostedInPage;
+    /// <summary>True when the property is saved and has no contract to list (ended and archived ones are hidden by default).</summary>
+    public bool HasNoContracts => ContractRows.Count == 0 && !IsNew;
 
-    /// <summary>"Delete property" at the end of the form on its own page (compact layout).</summary>
-    public bool ShowFormDelete => IsHostedInPage && !IsNew;
+    /// <summary>The add button of the contracts card is disabled until the property exists.</summary>
+    public bool CanAddContract => !IsNew;
+
+    /// <summary>Hint "Save the property first" shown instead of the list for an unsaved property.</summary>
+    public bool ShowContractsSaveFirst => IsNew;
 
     /// <summary>Index into <see cref="Kinds"/> for the picker; out-of-range values (the picker clearing itself) are ignored.</summary>
     public int SelectedKindIndex
@@ -145,7 +177,7 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
     public IReadOnlyList<ParameterRowViewModel> Rows => _rows;
 
     /// <summary>Loads an existing property, or prepares a new one when <paramref name="id"/> is null.</summary>
-    public async Task LoadAsync(Guid? id)
+    public override async Task LoadAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
@@ -176,6 +208,62 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
         {
             SuppressDirty = previous;
         }
+
+        await ReloadContractsAsync();
+    }
+
+    /// <summary>Re-reads the contracts of the property (after the contract editor closed).</summary>
+    public async Task ReloadContractsAsync()
+    {
+        if (IsNew)
+        {
+            _contracts = [];
+        }
+        else
+        {
+            _contracts = await _contractStore.ListByPropertyAsync(_property.Id);
+            _suppliers = (await _supplierStore.ListAsync()).ToDictionary(s => s.Id);
+            _categories = (await _categoryStore.ListAsync()).ToDictionary(c => c.Id);
+        }
+
+        RebuildContracts();
+    }
+
+    private bool CanOpenContract() => !IsNew;
+
+    [RelayCommand(CanExecute = nameof(CanOpenContract))]
+    private Task AddContractAsync() => OpenContractAsync(null);
+
+    [RelayCommand]
+    private Task OpenContractAsync(Guid? id) => OpenContractEditorAsync(id);
+
+    private async Task OpenContractEditorAsync(Guid? id)
+    {
+        var editor = _contractEditorFactory();
+        editor.IsHostedInPage = true;
+        editor.Finished = _ => ReloadContractsAsync();
+        await editor.LoadAsync(_property.Id, id);
+        await _navigation.GoToAsync(Routes.ContractEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
+    }
+
+    partial void OnShowEndedContractsChanged(bool value) => RebuildContracts();
+
+    private void RebuildContracts()
+    {
+        var today = _clock.Today;
+        ContractRows =
+        [
+            .. _contracts
+                .Where(c => ShowEndedContracts || (!c.IsArchived && (c.ValidTo is not { } end || end >= today)))
+                .OrderBy(c => c.Title, StringComparer.CurrentCultureIgnoreCase)
+                .Select(c => new ContractRowViewModel(
+                    c,
+                    _suppliers.TryGetValue(c.SupplierId, out var supplier) ? supplier.Name : string.Empty,
+                    _categories.TryGetValue(c.CategoryId, out var category) ? category.Color : "#808080",
+                    today,
+                    _localizer,
+                    id => OpenContractCommand.Execute(id))),
+        ];
     }
 
     [RelayCommand]
@@ -262,19 +350,6 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
 
     protected override string DeleteName() => _property.Name;
 
-    protected override async Task OnFinishedAsync(EditOutcome outcome)
-    {
-        if (IsHostedInPage)
-        {
-            await _navigation.GoBackAsync();
-        }
-
-        if (Finished is { } finished)
-        {
-            await finished(outcome);
-        }
-    }
-
     protected override void OnErrorsChanged()
     {
         OnPropertyChanged(nameof(NameError));
@@ -328,8 +403,14 @@ public sealed partial class PropertyEditViewModel : EditableViewModel
             GeneralHeader = _localizer["PropertyGeneral"];
             AddParameterText = _localizer["ParameterAdd"];
             DeleteWholeText = _localizer["PropertyDelete"];
+            ContractsHeader = _localizer["ContractsHeader"];
+            ContractsEmptyText = _localizer["ContractsEmpty"];
+            ContractsSaveFirstText = _localizer["ContractsSaveFirst"];
+            AddContractText = _localizer["ContractAdd"];
+            ShowEndedContractsText = _localizer["ContractsShowEnded"];
             Title = TitleText();
             RebuildGroups();
+            RebuildContracts();
         }
         finally
         {

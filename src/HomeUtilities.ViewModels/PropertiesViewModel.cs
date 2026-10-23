@@ -1,6 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
@@ -8,21 +6,12 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>
-/// The list of properties. In compact layout an editor opens as a separate page; in medium/expanded layout it is
-/// shown next to the list. The editor instance is the same in both cases, so switching the layout keeps the input.
-/// </summary>
-public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>
+/// <summary>The list of properties; two-pane like Suppliers, with a switch that also shows archived properties.</summary>
+public sealed partial class PropertiesViewModel : MasterDetailViewModel<PropertyEditViewModel>
 {
-    /// <summary>Name of the navigation parameter that carries the editor instance to <see cref="Routes.PropertyEdit"/>.</summary>
-    public const string EditorParameter = "editor";
-
     private readonly IPropertyStore _store;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
-    private readonly INavigationService _navigation;
-    private readonly ILayoutModeService _layoutModeService;
-    private readonly Func<PropertyEditViewModel> _editorFactory;
 
     private IReadOnlyList<Property> _properties = [];
 
@@ -33,28 +22,7 @@ public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<Layo
     private bool _showArchived;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSelection), nameof(ShowSelectHint))]
-    private PropertyEditViewModel? _selectedProperty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowSelectHint), nameof(ShowAddFab), nameof(ShowAddButton))]
-    private bool _isTwoPane;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsEmpty))]
-    private bool _isLoaded;
-
-    [ObservableProperty]
-    private string _emptyText = string.Empty;
-
-    [ObservableProperty]
-    private string _addText = string.Empty;
-
-    [ObservableProperty]
     private string _showArchivedText = string.Empty;
-
-    [ObservableProperty]
-    private string _selectHintText = string.Empty;
 
     public PropertiesViewModel(
         IPropertyStore store,
@@ -63,74 +31,28 @@ public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<Layo
         INavigationService navigation,
         ILayoutModeService layoutModeService,
         Func<PropertyEditViewModel> editorFactory)
+        : base(navigation, layoutModeService, editorFactory, Routes.PropertyEdit)
     {
         _store = store;
         _clock = clock;
         _localizer = localizer;
-        _navigation = navigation;
-        _layoutModeService = layoutModeService;
-        _editorFactory = editorFactory;
-        _isTwoPane = layoutModeService.Current != LayoutMode.Compact;
         RefreshTexts();
     }
-
-    public bool HasSelection => SelectedProperty is not null;
-
-    public bool ShowSelectHint => IsTwoPane && !HasSelection;
-
-    /// <summary>Floating "add" button of the phone layout.</summary>
-    public bool ShowAddFab => !IsTwoPane;
-
-    /// <summary>"New property" button above the list on tablets and desktops.</summary>
-    public bool ShowAddButton => IsTwoPane;
-
-    public bool HasItems => Items.Count > 0;
-
-    /// <summary>True when the list was loaded and contains nothing (shows the empty state).</summary>
-    public bool IsEmpty => IsLoaded && Items.Count == 0;
 
     /// <summary>The last reload started by toggling <see cref="ShowArchived"/>.</summary>
     public Task PendingReload { get; private set; } = Task.CompletedTask;
 
-    /// <summary>The last layout switch; completes when the editor has been moved between page and pane.</summary>
-    public Task PendingLayoutChange { get; private set; } = Task.CompletedTask;
+    protected override int TotalCount => _properties.Count;
 
-    public override async Task OnAppearingAsync()
-    {
-        // Back on the list in compact layout: the editor page is gone (closed, or left with the system back gesture).
-        if (!IsTwoPane && SelectedProperty is { IsHostedInPage: true } editor)
-        {
-            Detach(editor);
-        }
-
-        await ReloadAsync();
-    }
-
-    public async Task ReloadAsync()
+    public override async Task ReloadAsync()
     {
         _properties = await _store.ListAsync(ShowArchived);
         RebuildItems();
         IsLoaded = true;
+        RaiseItemsChanged();
     }
-
-    [RelayCommand]
-    private Task AddAsync() => OpenEditorAsync(null);
-
-    [RelayCommand]
-    private Task SelectAsync(PropertyItemViewModel item) => OpenEditorAsync(item.Id);
 
     partial void OnShowArchivedChanged(bool value) => PendingReload = ReloadAsync();
-
-    partial void OnItemsChanged(IReadOnlyList<PropertyItemViewModel> value)
-    {
-        OnPropertyChanged(nameof(HasItems));
-        OnPropertyChanged(nameof(IsEmpty));
-    }
-
-    partial void OnSelectedPropertyChanged(PropertyEditViewModel? value) => MarkSelectedItem();
-
-    void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) =>
-        PendingLayoutChange = LayoutChangedAsync();
 
     protected override void RefreshTexts()
     {
@@ -142,83 +64,18 @@ public sealed partial class PropertiesViewModel : ViewModelBase, IRecipient<Layo
         RebuildItems();
     }
 
-    private async Task OpenEditorAsync(Guid? id)
+    protected override void MarkSelectedItem()
     {
-        if (SelectedProperty is { } current)
+        foreach (var item in Items)
         {
-            if (!await current.CanLeaveAsync())
-            {
-                return;
-            }
-
-            Detach(current);
-        }
-
-        var compact = _layoutModeService.Current == LayoutMode.Compact;
-        var editor = _editorFactory();
-        editor.IsHostedInPage = compact;
-        editor.Finished = outcome => EditorFinishedAsync(editor, outcome);
-        await editor.LoadAsync(id);
-        SelectedProperty = editor;
-
-        if (compact)
-        {
-            await _navigation.GoToAsync(Routes.PropertyEdit, new Dictionary<string, object> { [EditorParameter] = editor });
-        }
-    }
-
-    private async Task EditorFinishedAsync(PropertyEditViewModel editor, EditOutcome outcome)
-    {
-        // After a successful save in the side pane the editor stays; every other way out closes it.
-        if (outcome != EditOutcome.Saved || editor.IsHostedInPage)
-        {
-            Detach(editor);
-        }
-
-        await ReloadAsync();
-    }
-
-    private void Detach(PropertyEditViewModel editor)
-    {
-        editor.Finished = null;
-        if (ReferenceEquals(SelectedProperty, editor))
-        {
-            SelectedProperty = null;
-        }
-    }
-
-    private async Task LayoutChangedAsync()
-    {
-        IsTwoPane = _layoutModeService.Current != LayoutMode.Compact;
-        if (SelectedProperty is not { } editor)
-        {
-            return;
-        }
-
-        if (!IsTwoPane && !editor.IsHostedInPage)
-        {
-            editor.IsHostedInPage = true;
-            await _navigation.GoToAsync(Routes.PropertyEdit, new Dictionary<string, object> { [EditorParameter] = editor });
-        }
-        else if (IsTwoPane && editor.IsHostedInPage)
-        {
-            editor.IsHostedInPage = false;
-            await _navigation.GoBackAsync();
+            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
         }
     }
 
     private void RebuildItems()
     {
         var today = _clock.Today;
-        Items = [.. _properties.OrderBy(p => p.SortOrder).ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).Select(p => new PropertyItemViewModel(p, today, _localizer, item => SelectCommand.Execute(item)))];
+        Items = [.. _properties.OrderBy(p => p.SortOrder).ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).Select(p => new PropertyItemViewModel(p, today, _localizer, item => SelectCommand.Execute(item.Id)))];
         MarkSelectedItem();
-    }
-
-    private void MarkSelectedItem()
-    {
-        foreach (var item in Items)
-        {
-            item.IsSelected = SelectedProperty is { IsNew: false } editor && editor.PropertyId == item.Id;
-        }
     }
 }
