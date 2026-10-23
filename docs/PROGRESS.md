@@ -48,6 +48,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Saving an id that exists only as a soft-deleted row is not supported (resurrect needed for sync, T-030).
 - **Flaky test**: linux CI `Test` step failed once on PR #32 and passed on re-run without code changes (logs not accessible to the lead). Next coding session: run the suite several times, look for tests depending on real time, culture or async timing.
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
+- No "Copied" confirmation on Windows (toast disabled there) until the in-app snackbar (T-019).
 - Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
@@ -60,4 +61,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-20 | #27 | Restart with Russian selected | **Bug**: menu in English, Settings in Russian (LanguageService created lazily after Shell) — fixed in hotfix PR |
 | 2026-10-20 | #28 + #29 | Shell, settings, Properties on Windows + Android | Works. **Usability**: identical buttons, unclear grouping, non-standard dialog texts; **Android bugs**: Kind picker empty, Back did not leave the editor (after archive toggle), stray "≡" button → T-012a |
 | 2026-10-23 | #32 | Properties reworked on Windows + Android | Layout OK. **Bugs**: Android icons shown as empty boxes (icon font not bundled — `MauiFont` item missing); Windows empty editor visible with no selection (IsVisible binding on changed BindingContext); duplicate "New property" button → hotfix #35 |
-| | #34 + #35 | Suppliers, categories; Properties after hotfix (icons on Android, empty state) | pending |
+| 2026-10-23 | #34 + #35 | Suppliers: Copy button | **Crash on Windows**: CommunityToolkit Toast unsupported in unpackaged app → hotfix (no toast on Windows) |
+| | hotfix | Suppliers, categories; Properties after hotfix (icons on Android, empty state) | pending |
