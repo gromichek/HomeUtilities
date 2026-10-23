@@ -14,6 +14,8 @@
     <Color x:Key="ErrorDark">#F2B8B5</Color>
     <Color x:Key="WarningLight">#9A5B00</Color>
     <Color x:Key="WarningDark">#FFC871</Color>
+    <Color x:Key="SuccessLight">#2E7D32</Color>
+    <Color x:Key="SuccessDark">#81C784</Color>
     <Color x:Key="OnPrimaryLight">#FFFFFF</Color>
     <Color x:Key="OnPrimaryDark">#10243A</Color>
 

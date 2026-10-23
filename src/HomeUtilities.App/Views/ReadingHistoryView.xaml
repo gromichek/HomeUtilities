@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.ReadingHistoryView"
+             x:DataType="vm:ReadingHistoryViewModel">
+
+    <!-- Reading history of one meter: used as the right pane of the readings screen and as the content of ReadingHistoryPage. -->
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="12">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+            <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" />
+            <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsEmpty}" />
+
+            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Groups}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ReadingHistoryGroupViewModel">
+                        <Border Style="{StaticResource SectionCard}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Header}" Style="{StaticResource SectionHeader}" IsVisible="{Binding HasHeader}" />
+
+                                <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Rows}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ReadingHistoryRowViewModel">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="0,4">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                                </Grid.GestureRecognizers>
+                                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                    <HorizontalStackLayout Spacing="12">
+                                                        <Label Text="{Binding DateText}" Style="{StaticResource MutedLabel}" VerticalOptions="Center" />
+                                                        <Label Text="{Binding ValueText}" FontAttributes="Bold" VerticalOptions="Center" />
+                                                        <Label Text="{Binding ConsumptionText}" IsVisible="{Binding HasConsumption}" VerticalOptions="Center" />
+                                                    </HorizontalStackLayout>
+                                                    <HorizontalStackLayout Spacing="8">
+                                                        <Label Text="{Binding KindText}" Style="{StaticResource BadgeDueSoonLabel}" IsVisible="{Binding HasKind}" />
+                                                        <Label Text="{Binding SubmittedText}" Style="{StaticResource SuccessLabel}" FontSize="12"
+                                                               IsVisible="{Binding HasSubmitted}" />
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding Note}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasNote}" />
+                                                </VerticalStackLayout>
+                                                <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
+                                                        Text="{StaticResource IconDelete}" Command="{Binding DeleteCommand}"
+                                                        IsVisible="{Binding CanDelete}"
+                                                        ToolTipProperties.Text="{Binding DeleteTooltip}"
+                                                        SemanticProperties.Description="{Binding DeleteTooltip}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

@@ -38,7 +38,7 @@
         <FlyoutItem.Icon>
             <FontImageSource Glyph="◔" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
-        <ShellContent Title="{Binding ReadingsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+        <ShellContent Title="{Binding ReadingsTitle}" ContentTemplate="{DataTemplate views:ReadingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding BillsTitle}" Route="Bills">

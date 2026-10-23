@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+                xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.ReadingsPage"
+                x:DataType="vm:ReadingsViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.Resources>
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </views:PageBase.Resources>
+
+    <Grid x:Name="Root" ColumnDefinitions="*,0">
+
+        <!-- Left / only column: entry form with a fixed "Save all" bar at the bottom. -->
+        <Grid Grid.Column="0" RowDefinitions="*,Auto">
+            <ScrollView Grid.Row="0">
+                <VerticalStackLayout Padding="12" Spacing="12">
+
+                    <Label Text="{Binding NoPropertiesText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"
+                           IsVisible="{Binding ShowNoProperties}" />
+
+                    <!-- Property selector: only when there is something to choose from. -->
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMultipleProperties}">
+                        <Label Text="{Binding PropertyLabel}" Style="{StaticResource MutedLabel}" />
+                        <Picker ItemsSource="{Binding Properties}"
+                                ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                                SelectedIndex="{Binding SelectedPropertyIndex, Mode=TwoWay}" />
+                    </VerticalStackLayout>
+
+                    <!-- "Mark as submitted to ...?" after Save all. -->
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Prompts}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SubmitPromptViewModel">
+                                <Border Style="{StaticResource SectionCard}" Padding="12">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Text}" VerticalOptions="Center" />
+                                        <Button Grid.Column="1" Text="{Binding MarkText}" Command="{Binding MarkCommand}"
+                                                Style="{StaticResource SecondaryButton}" />
+                                        <Button Grid.Column="2" Style="{StaticResource IconButton}"
+                                                Text="{StaticResource IconClose}" Command="{Binding DismissCommand}"
+                                                ToolTipProperties.Text="{Binding DismissText}"
+                                                SemanticProperties.Description="{Binding DismissText}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- Reading window of each contract: green = open now, neutral = opens soon, muted = closed. -->
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Banners}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ReadingWindowBannerViewModel">
+                                <Border Style="{StaticResource SectionCard}" Padding="12">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" x:DataType="vm:ReadingWindowBannerViewModel" Binding="{Binding IsOpen}" Value="True">
+                                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Grid Grid.Column="0" VerticalOptions="Center">
+                                            <Label Text="{Binding Text}" Style="{StaticResource SuccessLabel}" IsVisible="{Binding IsOpen}" />
+                                            <Label Text="{Binding Text}" IsVisible="{Binding IsUpcoming}" />
+                                            <Label Text="{Binding Text}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsClosed}" />
+                                        </Grid>
+                                        <Button Grid.Column="1" Text="{Binding SubmitText}" Command="{Binding SubmitCommand}"
+                                                ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
+                                                Style="{StaticResource SecondaryButton}" IsVisible="{Binding HasSubmitLink}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- One date for all readings. -->
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMeters}">
+                        <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" />
+                        <DatePicker Date="{Binding ReadingDate, Converter={StaticResource DateOnly}}" />
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding NoMetersText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"
+                           IsVisible="{Binding ShowNoMeters}" />
+
+                    <!-- Meters grouped by resource; a card per meter, a row per register. -->
+                    <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Groups}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ReadingGroupViewModel">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding Header}" Style="{StaticResource SectionHeader}" />
+
+                                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cards}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:MeterCardViewModel">
+                                                <Border Style="{StaticResource SectionCard}">
+                                                    <Border.Triggers>
+                                                        <DataTrigger TargetType="Border" x:DataType="vm:MeterCardViewModel" Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                                            <Setter Property="StrokeThickness" Value="2" />
+                                                        </DataTrigger>
+                                                    </Border.Triggers>
+                                                    <VerticalStackLayout Spacing="8">
+                                                        <!-- Tap the header to see the history of the meter. -->
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding OpenHistoryCommand}" />
+                                                            </Grid.GestureRecognizers>
+                                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                                <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                                                <Label Text="{Binding SerialText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasSerial}" />
+                                                            </VerticalStackLayout>
+                                                            <Label Grid.Column="1" Text="{StaticResource IconHistory}" FontFamily="{DynamicResource IconFontFamily}"
+                                                                   FontSize="20" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                                        </Grid>
+
+                                                        <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Rows}">
+                                                            <BindableLayout.ItemTemplate>
+                                                                <DataTemplate x:DataType="vm:RegisterEntryViewModel">
+                                                                    <VerticalStackLayout Spacing="4">
+                                                                        <Label Text="{Binding Label}" FontAttributes="Bold" IsVisible="{Binding HasLabel}" />
+                                                                        <Label Text="{Binding LastText}" Style="{StaticResource MutedLabel}" />
+                                                                        <Entry Text="{Binding ValueText}" Keyboard="Numeric"
+                                                                               MaxLength="{x:Static core:InputLimits.Number}" />
+                                                                        <Label Text="{Binding PreviewText}" FontAttributes="Bold" IsVisible="{Binding HasPreview}" />
+                                                                        <Label Text="{Binding WarningText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasWarning}" />
+                                                                        <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
+                                                                        <Button Text="{Binding NoteToggleText}" Command="{Binding ToggleNoteCommand}"
+                                                                                Style="{StaticResource TextButton}" HorizontalOptions="Start" />
+                                                                        <Editor Text="{Binding NoteText}" MaxLength="{x:Static core:InputLimits.Notes}"
+                                                                                AutoSize="TextChanges" MinimumHeightRequest="60" IsVisible="{Binding ShowNote}" />
+                                                                    </VerticalStackLayout>
+                                                                </DataTemplate>
+                                                            </BindableLayout.ItemTemplate>
+                                                        </VerticalStackLayout>
+                                                    </VerticalStackLayout>
+                                                </Border>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- The one primary action of the screen, always in reach. -->
+            <Border Grid.Row="1" Padding="12" StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}"
+                    IsVisible="{Binding HasMeters}">
+                <Button Text="{Binding SaveAllText}" Command="{Binding SaveAllCommand}" Style="{StaticResource PrimaryButton}" />
+            </Border>
+        </Grid>
+
+        <!-- Right pane (tablet / desktop): history of the tapped meter. -->
+        <Grid Grid.Column="1">
+            <ContentView IsVisible="{Binding HasSelectedHistory}">
+                <views:ReadingHistoryView BindingContext="{Binding SelectedHistory}" />
+            </ContentView>
+            <Label Text="{Binding HistoryHintText}" Style="{StaticResource MutedLabel}"
+                   HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowHistoryHint}" />
+        </Grid>
+    </Grid>
+
+</views:PageBase>

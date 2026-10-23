@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.ReadingEditorView"
+             x:DataType="vm:ReadingEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+            <Label Text="{Binding RegisterText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasRegisterText}" />
+
+            <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" />
+            <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" />
+            <Label Text="{Binding DateError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding DateError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding ValueLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding ValueText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+            <Label Text="{Binding ValueError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding ValueError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding KindLabel}" Style="{StaticResource MutedLabel}" />
+            <Picker ItemsSource="{Binding Kinds}"
+                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}"
+                    IsVisible="{Binding IsKindEditable}" />
+            <Label Text="{Binding FixedKindText}" IsVisible="{Binding IsKindFixed}" />
+            <Label Text="{Binding KindError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding KindError, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8">
+                <Switch IsToggled="{Binding HasSubmitted}" />
+                <Label Text="{Binding SubmittedLabel}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSubmitted}">
+                <Label Text="{Binding SubmittedOnLabel}" Style="{StaticResource MutedLabel}" />
+                <DatePicker Date="{Binding SubmittedOn, Converter={StaticResource DateOnly}}" />
+                <Label Text="{Binding SubmittedError}" Style="{StaticResource ErrorLabel}"
+                       IsVisible="{Binding SubmittedError, Converter={StaticResource HasText}}" />
+            </VerticalStackLayout>
+
+            <Label Text="{Binding NoteLabel}" Style="{StaticResource MutedLabel}" />
+            <Editor Text="{Binding Note}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+            <Label Text="{Binding NoteError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding NoteError, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

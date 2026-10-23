@@ -381,4 +381,51 @@
   <data name="Error_contract_meter_contract_required" xml:space="preserve"><value>Select a contract.</value></data>
   <data name="Error_contract_meter_meter_required" xml:space="preserve"><value>Select a meter.</value></data>
   <data name="Error_contract_meter_valid_to_before_valid_from" xml:space="preserve"><value>The end date is before the start date.</value></data>
+  <data name="ReadingsPropertyLabel" xml:space="preserve"><value>Property</value></data>
+  <data name="ReadingsDateLabel" xml:space="preserve"><value>Reading date</value></data>
+  <data name="ReadingsSaveAll" xml:space="preserve"><value>Save all</value></data>
+  <data name="ReadingsNoProperties" xml:space="preserve"><value>No properties yet. Add a property first.</value></data>
+  <data name="ReadingsNoMeters" xml:space="preserve"><value>This property has no active meters. Add meters in the property.</value></data>
+  <data name="ReadingsHistoryHint" xml:space="preserve"><value>Tap a meter to see its readings</value></data>
+  <data name="ReadingsLast" xml:space="preserve"><value>last: {0} · {1}</value></data>
+  <data name="ReadingsNoLast" xml:space="preserve"><value>no readings yet</value></data>
+  <data name="ReadingsNoteShow" xml:space="preserve"><value>Add a note</value></data>
+  <data name="ReadingsNoteHide" xml:space="preserve"><value>Hide note</value></data>
+  <data name="ReadingsWarnHigh" xml:space="preserve"><value>Unusually high (avg {0})</value></data>
+  <data name="ReadingsWarnZero" xml:space="preserve"><value>Zero consumption</value></data>
+  <data name="ReadingsWarnRollover" xml:space="preserve"><value>Roll-over assumed ({0} → {1})</value></data>
+  <data name="ReadingsWarnDateBefore" xml:space="preserve"><value>The date is before the last reading ({0}).</value></data>
+  <data name="ReadingsErrLower" xml:space="preserve"><value>Lower than the last reading ({0}) and the meter has no dial digits set.</value></data>
+  <data name="ReadingsSaved" xml:space="preserve"><value>{0} readings saved</value></data>
+  <data name="ReadingsNothingToSave" xml:space="preserve"><value>Enter at least one new value.</value></data>
+  <data name="ReadingsWindowOpen" xml:space="preserve"><value>{0}: submit {1} — open now</value></data>
+  <data name="ReadingsWindowOpens" xml:space="preserve"><value>{0}: submit {1} — opens in {2} days</value></data>
+  <data name="ReadingsWindowOpensTomorrow" xml:space="preserve"><value>{0}: submit {1} — opens tomorrow</value></data>
+  <data name="ReadingsWindowClosed" xml:space="preserve"><value>{0}: closed, next {1}</value></data>
+  <data name="ReadingsSubmitOnline" xml:space="preserve"><value>Submit online</value></data>
+  <data name="ReadingsMarkPrompt" xml:space="preserve"><value>Mark as submitted to {0}?</value></data>
+  <data name="ReadingsMarkSubmitted" xml:space="preserve"><value>Mark submitted</value></data>
+  <data name="ReadingsMarkDismiss" xml:space="preserve"><value>Not now</value></data>
+  <data name="ReadingsMarked" xml:space="preserve"><value>Marked as submitted</value></data>
+  <data name="ReadingHistoryHeader" xml:space="preserve"><value>Readings</value></data>
+  <data name="ReadingHistoryTitle" xml:space="preserve"><value>Readings — {0}</value></data>
+  <data name="ReadingHistoryEmpty" xml:space="preserve"><value>No readings yet.</value></data>
+  <data name="ReadingSubmittedOn" xml:space="preserve"><value>submitted {0}</value></data>
+  <data name="ReadingEditTitle" xml:space="preserve"><value>Edit reading</value></data>
+  <data name="ReadingDateLabel" xml:space="preserve"><value>Date *</value></data>
+  <data name="ReadingValueLabel" xml:space="preserve"><value>Value *</value></data>
+  <data name="ReadingKindLabel" xml:space="preserve"><value>Kind</value></data>
+  <data name="ReadingSubmittedLabel" xml:space="preserve"><value>Submitted to the supplier</value></data>
+  <data name="ReadingSubmittedOnLabel" xml:space="preserve"><value>Submitted on</value></data>
+  <data name="ReadingNoteLabel" xml:space="preserve"><value>Note</value></data>
+  <data name="ReadingDeleteBlocked" xml:space="preserve"><value>Initial and final readings belong to the meter and its replacement and cannot be deleted.</value></data>
+  <data name="Enum_ReadingKind_Regular" xml:space="preserve"><value>Regular</value></data>
+  <data name="Enum_ReadingKind_Initial" xml:space="preserve"><value>Initial</value></data>
+  <data name="Enum_ReadingKind_Final" xml:space="preserve"><value>Final</value></data>
+  <data name="Enum_ReadingKind_Control" xml:space="preserve"><value>Control</value></data>
+  <data name="Enum_ReadingKind_Estimated" xml:space="preserve"><value>Estimated</value></data>
+  <data name="Error_reading_edit_submitted_before_date" xml:space="preserve"><value>The submission date cannot be before the reading date.</value></data>
+  <data name="MeterReadingsHeader" xml:space="preserve"><value>Readings</value></data>
+  <data name="MeterReadingsAll" xml:space="preserve"><value>All readings</value></data>
+  <data name="MeterReadingsEmpty" xml:space="preserve"><value>No readings yet.</value></data>
 </root>

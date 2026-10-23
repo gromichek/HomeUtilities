@@ -68,6 +68,11 @@
                      Glyph="{StaticResource IconAdd}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+    <FontImageSource x:Key="IconOpenLinkSource"
+                     FontFamily="{StaticResource IconFontFamily}"
+                     Glyph="{StaticResource IconOpenLink}"
+                     Size="20"
+                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconSaveSource"
                      FontFamily="{StaticResource IconFontFamily}"
                      Glyph="{StaticResource IconSave}"

@@ -38,6 +38,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ILauncherService, LauncherService>();
         builder.Services.AddSingleton<IClipboardService, ClipboardService>();
         builder.Services.AddSingleton<IToastService, ToastService>();
+        builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
@@ -52,6 +53,9 @@ public static class MauiProgram
         builder.Services.AddTransient<Func<ContractEditViewModel>>(sp => () => sp.GetRequiredService<ContractEditViewModel>());
         builder.Services.AddTransient<MeterEditViewModel>();
         builder.Services.AddTransient<Func<MeterEditViewModel>>(sp => () => sp.GetRequiredService<MeterEditViewModel>());
+        builder.Services.AddTransient<ReadingsViewModel>();
+        builder.Services.AddTransient<ReadingHistoryViewModel>();
+        builder.Services.AddTransient<Func<ReadingHistoryViewModel>>(sp => () => sp.GetRequiredService<ReadingHistoryViewModel>());
         builder.Services.AddTransient<CategoriesViewModel>();
         builder.Services.AddTransient<CategoryEditViewModel>();
         builder.Services.AddTransient<Func<CategoryEditViewModel>>(sp => () => sp.GetRequiredService<CategoryEditViewModel>());
@@ -62,6 +66,8 @@ public static class MauiProgram
         builder.Services.AddTransient<PropertyEditPage>();
         builder.Services.AddTransient<ContractEditPage>();
         builder.Services.AddTransient<MeterEditPage>();
+        builder.Services.AddTransient<ReadingsPage>();
+        builder.Services.AddTransient<ReadingHistoryPage>();
         builder.Services.AddTransient<SuppliersPage>();
         builder.Services.AddTransient<SupplierEditPage>();
         builder.Services.AddTransient<CategoriesPage>();

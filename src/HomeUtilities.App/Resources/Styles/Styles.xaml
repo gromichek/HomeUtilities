@@ -31,6 +31,17 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
     </Style>
 
+    <!-- Readings: amber warning text under an entry row, green text of an open reading window. -->
+    <Style x:Key="WarningLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+    </Style>
+
+    <Style x:Key="SuccessLabel" TargetType="Label">
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+    </Style>
+
     <!-- Buttons (docs/UI_GUIDELINES.md §2). The implicit style is the secondary look, so a forgotten Style never
          produces a primary button. Icon glyphs come from Icons.xaml, which is merged after this file. -->
     <Style TargetType="Button">
