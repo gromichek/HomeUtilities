@@ -27,6 +27,8 @@
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+    <!-- Bundles the icon font into the app (Android needs it; Windows uses system icon fonts). -->
+    <MauiFont Include="Resources\Fonts\*.otf;Resources\Fonts\*.ttf" />
   </ItemGroup>
 
   <ItemGroup>
