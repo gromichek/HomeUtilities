@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:EditorPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                      xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+                      xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+                      xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                      xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                      xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+                      x:Class="HomeUtilities.App.Views.ContractEditPage"
+                      x:DataType="vm:ContractEditViewModel"
+                      Title="{Binding Title}">
+
+    <!-- The contract editor is a page on every layout: system Back (handled in EditorPageBase) + Save. Back cancels. -->
+    <views:EditorPageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveSource}" Command="{Binding SaveCommand}" />
+    </views:EditorPageBase.ToolbarItems>
+
+    <views:EditorPageBase.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <toolkit:InvertedBoolConverter x:Key="Not" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+        <conv:HexColorConverter x:Key="HexColor" />
+    </views:EditorPageBase.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- 1. General -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding GeneralHeader}" Style="{StaticResource SectionHeader}" />
+
+                    <Label Text="{Binding ContractTitleLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding ContractTitle}" />
+                    <Label Text="{Binding ContractTitleError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding ContractTitleError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding ServiceLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding Services}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            SelectedIndex="{Binding SelectedServiceIndex, Mode=TwoWay}" />
+
+                    <!-- Category and supplier are chosen from a list; the row shows the current value (with the colour dot). -->
+                    <Label Text="{Binding CategoryLabel}" Style="{StaticResource MutedLabel}" />
+                    <Border Padding="12,10" StrokeShape="RoundRectangle 8"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChooseCategoryCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Grid.Column="0" WidthRequest="16" HeightRequest="16" StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0" VerticalOptions="Center" IsVisible="{Binding HasCategoryColor}"
+                                    BackgroundColor="{Binding SelectedCategoryColor, Converter={StaticResource HexColor}}" />
+                            <Label Grid.Column="1" Text="{Binding SelectedCategoryName}" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        </Grid>
+                    </Border>
+                    <Label Text="{Binding CategoryError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding CategoryError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding SupplierLabel}" Style="{StaticResource MutedLabel}" />
+                    <Border Padding="12,10" StrokeShape="RoundRectangle 8"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChooseSupplierCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding SelectedSupplierName}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        </Grid>
+                    </Border>
+                    <Label Text="{Binding SupplierError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding SupplierError, Converter={StaticResource HasText}}" />
+
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowCurrencyPicker}">
+                        <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" />
+                        <Picker ItemsSource="{Binding Currencies}"
+                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                                SelectedIndex="{Binding SelectedCurrencyIndex, Mode=TwoWay}" />
+                    </VerticalStackLayout>
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding IsArchived}" />
+                        <Label Text="{Binding ArchivedLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 2. Account -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding AccountHeader}" Style="{StaticResource SectionHeader}" />
+
+                    <Label Text="{Binding CustomerNumberLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding CustomerNumber}" />
+
+                    <Label Text="{Binding ContractNumberLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding ContractNumber}" />
+
+                    <Label Text="{Binding PortalLoginLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding PortalLogin}" />
+                    <Label Text="{Binding PortalLoginHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+
+                    <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
+                    <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding HasEndDate}" />
+                        <Label Text="{Binding HasEndDateLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEndDate}">
+                        <Label Text="{Binding ValidToLabel}" Style="{StaticResource MutedLabel}" />
+                        <DatePicker Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />
+                    </VerticalStackLayout>
+                    <Label Text="{Binding ValidToError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding ValidToError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 3. Billing -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding BillingHeader}" Style="{StaticResource SectionHeader}" />
+
+                    <Label Text="{Binding BillingModeLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding BillingModes}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            SelectedIndex="{Binding SelectedBillingModeIndex, Mode=TwoWay}" />
+
+                    <Label Text="{Binding BillingTimingLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding BillingTimings}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            SelectedIndex="{Binding SelectedBillingTimingIndex, Mode=TwoWay}" />
+                    <Label Text="{Binding BillingTimingHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding HasReadingWindow}" />
+                        <Label Text="{Binding ReadingWindowLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" IsVisible="{Binding HasReadingWindow}">
+                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding ReadingFromLabel}" Style="{StaticResource MutedLabel}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding ReadingToLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Grid.Row="1" Grid.Column="0" Text="{Binding ReadingDayFromText}" Keyboard="Numeric" />
+                        <Entry Grid.Row="1" Grid.Column="1" Text="{Binding ReadingDayToText}" Keyboard="Numeric" />
+                    </Grid>
+                    <Label Text="{Binding ReadingWindowHint}" Style="{StaticResource MutedLabel}" FontSize="12"
+                           IsVisible="{Binding HasReadingWindow}" />
+                    <Label Text="{Binding ReadingWindowError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding ReadingWindowError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding BillDayLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding BillDayText}" Keyboard="Numeric" />
+                    <Label Text="{Binding BillDayError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding BillDayError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding PaymentDueDayLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding PaymentDueDayText}" Keyboard="Numeric" />
+                    <Label Text="{Binding PaymentDueDayError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding PaymentDueDayError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 4. Links: own links (edit on tap, open, delete) and the muted links inherited from the supplier. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding LinksHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddLinkCommand}"
+                                ToolTipProperties.Text="{Binding AddLinkText}"
+                                SemanticProperties.Description="{Binding AddLinkText}" />
+                    </Grid>
+
+                    <Label Text="{Binding LinksEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoLinks}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Links}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LinkRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding DisplayText}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Url}" Style="{StaticResource MutedLabel}" LineBreakMode="MiddleTruncation" />
+                                        <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}"
+                                               IsVisible="{Binding HasError}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                            Text="{StaticResource IconOpenLink}" Command="{Binding OpenCommand}"
+                                            ToolTipProperties.Text="{Binding OpenText}"
+                                            SemanticProperties.Description="{Binding OpenText}" />
+                                    <Button Grid.Column="2" Style="{StaticResource DestructiveIconButton}"
+                                            Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                            ToolTipProperties.Text="{Binding DeleteText}"
+                                            SemanticProperties.Description="{Binding DeleteText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding InheritedLinks}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:InheritedLinkRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding DisplayText}" Style="{StaticResource MutedLabel}" />
+                                        <Label Text="{Binding Url}" Style="{StaticResource MutedLabel}" LineBreakMode="MiddleTruncation" />
+                                        <Label Text="{Binding FromSupplierText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                            Text="{StaticResource IconOpenLink}" Command="{Binding OpenCommand}"
+                                            ToolTipProperties.Text="{Binding OpenText}"
+                                            SemanticProperties.Description="{Binding OpenText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 5. Payment details: empty fields fall back to the supplier's (shown as placeholders). -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding PaymentHeader}" Style="{StaticResource SectionHeader}" />
+                    <Label Text="{Binding PaymentHintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+
+                    <Label Text="{Binding RecipientNameLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding RecipientName}" Placeholder="{Binding RecipientNamePlaceholder}" />
+                    <Label Text="{Binding RecipientNameError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding RecipientNameError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding RecipientRegistrationNumberLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding RecipientRegistrationNumber}" Placeholder="{Binding RecipientRegistrationNumberPlaceholder}" />
+                    <Label Text="{Binding RecipientRegistrationNumberError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding RecipientRegistrationNumberError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding IbanLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding IbanText}" Placeholder="{Binding IbanPlaceholder}" Keyboard="Text">
+                        <Entry.Behaviors>
+                            <toolkit:EventToCommandBehavior EventName="Unfocused" Command="{Binding FormatIbanCommand}" />
+                        </Entry.Behaviors>
+                    </Entry>
+                    <Label Text="{Binding IbanError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding IbanError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding BicLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding Bic}" Placeholder="{Binding BicPlaceholder}" />
+                    <Label Text="{Binding BicError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding BicError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding BankNameLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding BankName}" Placeholder="{Binding BankNamePlaceholder}" />
+                    <Label Text="{Binding BankNameError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding BankNameError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding PurposeTemplateLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding PurposeTemplate}" Placeholder="{Binding PurposeTemplatePlaceholder}" />
+                    <Label Text="{Binding PurposeHintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding PurposeTemplateError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding PurposeTemplateError, Converter={StaticResource HasText}}" />
+
+                    <!-- Effective details (own value, else the supplier's) with copy buttons; the purpose uses this contract's real data. -->
+                    <Label Text="{Binding EffectiveHeader}" FontAttributes="Bold" Margin="0,8,0,0" />
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" IsVisible="{Binding HasEffectiveRecipient}">
+                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                            <Label Text="{Binding EffectiveRecipientLabel}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding EffectiveRecipient}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconCopy}" Command="{Binding CopyRecipientCommand}"
+                                ToolTipProperties.Text="{Binding CopyRecipientText}"
+                                SemanticProperties.Description="{Binding CopyRecipientText}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" IsVisible="{Binding HasEffectiveIban}">
+                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                            <Label Text="{Binding EffectiveIbanLabel}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding EffectiveIban}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconCopy}" Command="{Binding CopyIbanCommand}"
+                                ToolTipProperties.Text="{Binding CopyIbanText}"
+                                SemanticProperties.Description="{Binding CopyIbanText}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" IsVisible="{Binding HasEffectivePurpose}">
+                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                            <Label Text="{Binding EffectivePurposeLabel}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding EffectivePurpose}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconCopy}" Command="{Binding CopyPurposeCommand}"
+                                ToolTipProperties.Text="{Binding CopyPurposeText}"
+                                SemanticProperties.Description="{Binding CopyPurposeText}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 6. Custom fields: the add button is in the card header; rows edit on tap and delete with the trash icon. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding CustomFieldsHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddCustomFieldCommand}"
+                                ToolTipProperties.Text="{Binding AddCustomFieldText}"
+                                SemanticProperties.Description="{Binding AddCustomFieldText}" />
+                    </Grid>
+                    <Label Text="{Binding CustomFieldsHintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding CustomFieldsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoCustomFields}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding CustomFields}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CustomFieldRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding DisplayText}" FontAttributes="Bold" />
+                                        <Label Text="{Binding DetailText}" Style="{StaticResource MutedLabel}" />
+                                        <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}"
+                                               IsVisible="{Binding HasError}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
+                                            Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                            ToolTipProperties.Text="{Binding DeleteText}"
+                                            SemanticProperties.Description="{Binding DeleteText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 7. Notes -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding NotesHeader}" Style="{StaticResource SectionHeader}" />
+                    <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                    <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Destructive action at the end of the form, apart from Save. -->
+            <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                    Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
+                    IsVisible="{Binding ShowFormDelete}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</views:EditorPageBase>

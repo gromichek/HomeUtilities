@@ -180,4 +180,86 @@
   <data name="CategoryNotes" xml:space="preserve"><value>Заметки</value></data>
   <data name="CategoryArchived" xml:space="preserve"><value>В архиве (скрыта в списках выбора)</value></data>
   <data name="CategoryDelete" xml:space="preserve"><value>Удалить категорию</value></data>
+  <data name="ContractsHeader" xml:space="preserve"><value>Договоры</value></data>
+  <data name="ContractsEmpty" xml:space="preserve"><value>Договоров пока нет.</value></data>
+  <data name="ContractsSaveFirst" xml:space="preserve"><value>Сначала сохраните объект</value></data>
+  <data name="ContractAdd" xml:space="preserve"><value>Добавить договор</value></data>
+  <data name="ContractsShowEnded" xml:space="preserve"><value>Показывать завершённые и архивные</value></data>
+  <data name="ContractEnded" xml:space="preserve"><value>завершён {0:d}</value></data>
+  <data name="ContractArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
+  <data name="ContractNew" xml:space="preserve"><value>Новый договор</value></data>
+  <data name="ContractDelete" xml:space="preserve"><value>Удалить договор</value></data>
+  <data name="ContractGeneral" xml:space="preserve"><value>Основное</value></data>
+  <data name="ContractTitleLabel" xml:space="preserve"><value>Название *</value></data>
+  <data name="ContractServiceLabel" xml:space="preserve"><value>Вид услуги *</value></data>
+  <data name="ContractCategoryLabel" xml:space="preserve"><value>Категория *</value></data>
+  <data name="ContractSupplierLabel" xml:space="preserve"><value>Поставщик *</value></data>
+  <data name="ContractCurrencyLabel" xml:space="preserve"><value>Валюта</value></data>
+  <data name="ContractArchivedLabel" xml:space="preserve"><value>В архиве (скрыт по умолчанию)</value></data>
+  <data name="ContractChooseCategory" xml:space="preserve"><value>Категория</value></data>
+  <data name="ContractChooseSupplier" xml:space="preserve"><value>Поставщик</value></data>
+  <data name="ContractNewSupplier" xml:space="preserve"><value>＋ Новый поставщик…</value></data>
+  <data name="ContractSelectPlaceholder" xml:space="preserve"><value>Выбрать…</value></data>
+  <data name="ContractAccount" xml:space="preserve"><value>Учётная запись</value></data>
+  <data name="ContractCustomerNumber" xml:space="preserve"><value>Номер клиента</value></data>
+  <data name="ContractContractNumber" xml:space="preserve"><value>Номер договора</value></data>
+  <data name="ContractPortalLogin" xml:space="preserve"><value>Логин на портале</value></data>
+  <data name="ContractPortalLoginHint" xml:space="preserve"><value>Пароли не сохраняются — их запоминает ваш браузер.</value></data>
+  <data name="ContractValidFrom" xml:space="preserve"><value>Действует с *</value></data>
+  <data name="ContractHasEndDate" xml:space="preserve"><value>Есть дата окончания</value></data>
+  <data name="ContractValidTo" xml:space="preserve"><value>Действует по</value></data>
+  <data name="ContractBilling" xml:space="preserve"><value>Расчёты</value></data>
+  <data name="ContractBillingModeLabel" xml:space="preserve"><value>Способ расчёта</value></data>
+  <data name="ContractBillingTimingLabel" xml:space="preserve"><value>Время выставления счёта</value></data>
+  <data name="ContractTimingHint_InArrears" xml:space="preserve"><value>Счёт приходит после месяца услуги (вода, электричество).</value></data>
+  <data name="ContractTimingHint_InAdvance" xml:space="preserve"><value>Услуга оплачивается до начала месяца (интернет, ТВ).</value></data>
+  <data name="ContractReadingWindow" xml:space="preserve"><value>Окно передачи показаний</value></data>
+  <data name="ContractReadingFrom" xml:space="preserve"><value>С числа</value></data>
+  <data name="ContractReadingTo" xml:space="preserve"><value>По число</value></data>
+  <data name="ContractReadingHint" xml:space="preserve"><value>Числа месяца 1–31, например 25–28. Окно 28–3 переходит на следующий месяц.</value></data>
+  <data name="ContractBillDay" xml:space="preserve"><value>Обычный день счёта (1–31)</value></data>
+  <data name="ContractPaymentDueDay" xml:space="preserve"><value>День оплаты (1–31)</value></data>
+  <data name="ContractPaymentHint" xml:space="preserve"><value>Оставьте поле пустым, чтобы использовать значение поставщика.</value></data>
+  <data name="ContractEffectiveHeader" xml:space="preserve"><value>Итоговые реквизиты</value></data>
+  <data name="ContractEffectivePurpose" xml:space="preserve"><value>Назначение платежа (с данными этого договора)</value></data>
+  <data name="ContractNotes" xml:space="preserve"><value>Заметки</value></data>
+  <data name="PaymentFromSupplier" xml:space="preserve"><value>от поставщика: {0}</value></data>
+  <data name="LinkFromSupplier" xml:space="preserve"><value>от поставщика</value></data>
+  <data name="CustomFieldsHeader" xml:space="preserve"><value>Дополнительные поля</value></data>
+  <data name="CustomFieldsHint" xml:space="preserve"><value>Эти поля появятся при вводе счёта.</value></data>
+  <data name="CustomFieldsEmpty" xml:space="preserve"><value>Дополнительных полей нет.</value></data>
+  <data name="CustomFieldAdd" xml:space="preserve"><value>Добавить поле</value></data>
+  <data name="CustomFieldNew" xml:space="preserve"><value>Новое поле</value></data>
+  <data name="CustomFieldEdit" xml:space="preserve"><value>Изменить поле</value></data>
+  <data name="CustomFieldName" xml:space="preserve"><value>Название</value></data>
+  <data name="CustomFieldKindLabel" xml:space="preserve"><value>Тип</value></data>
+  <data name="CustomFieldTargetLabel" xml:space="preserve"><value>Относится к</value></data>
+  <data name="CustomFieldRowDetail" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="Enum_BillingMode_Actual" xml:space="preserve"><value>По потреблению</value></data>
+  <data name="Enum_BillingMode_Equalized" xml:space="preserve"><value>Равномерные платежи</value></data>
+  <data name="Enum_BillingMode_Fixed" xml:space="preserve"><value>Фиксированная плата</value></data>
+  <data name="Enum_BillingMode_Assessed" xml:space="preserve"><value>Налог (годовая сумма)</value></data>
+  <data name="Enum_BillingTiming_InArrears" xml:space="preserve"><value>После периода</value></data>
+  <data name="Enum_BillingTiming_InAdvance" xml:space="preserve"><value>Вперёд</value></data>
+  <data name="Enum_CustomFieldKind_Text" xml:space="preserve"><value>Текст</value></data>
+  <data name="Enum_CustomFieldKind_Number" xml:space="preserve"><value>Число</value></data>
+  <data name="Enum_CustomFieldKind_Money" xml:space="preserve"><value>Сумма</value></data>
+  <data name="Enum_CustomFieldKind_Date" xml:space="preserve"><value>Дата</value></data>
+  <data name="Enum_CustomFieldTarget_Bill" xml:space="preserve"><value>Счёт</value></data>
+  <data name="Enum_CustomFieldTarget_BillLine" xml:space="preserve"><value>Строка счёта</value></data>
+  <data name="Enum_Currency_EUR" xml:space="preserve"><value>EUR</value></data>
+  <data name="Enum_Currency_LVL" xml:space="preserve"><value>LVL (латы)</value></data>
+  <data name="Error_contract_property_required" xml:space="preserve"><value>Договор должен относиться к объекту.</value></data>
+  <data name="Error_contract_supplier_required" xml:space="preserve"><value>Выберите поставщика.</value></data>
+  <data name="Error_contract_category_required" xml:space="preserve"><value>Выберите категорию.</value></data>
+  <data name="Error_contract_title_required" xml:space="preserve"><value>Введите название.</value></data>
+  <data name="Error_contract_title_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
+  <data name="Error_contract_valid_to_before_valid_from" xml:space="preserve"><value>Дата окончания раньше даты начала.</value></data>
+  <data name="Error_contract_day_out_of_range" xml:space="preserve"><value>Введите число месяца от 1 до 31.</value></data>
+  <data name="Error_contract_reading_window_incomplete" xml:space="preserve"><value>Укажите оба числа окна передачи показаний или ни одного.</value></data>
+  <data name="Error_custom_field_name_required" xml:space="preserve"><value>Введите название.</value></data>
+  <data name="Error_custom_field_name_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
+  <data name="Error_custom_field_name_duplicate" xml:space="preserve"><value>Поле с таким названием уже есть.</value></data>
+  <data name="Error_custom_field_invalid_value" xml:space="preserve"><value>Значение не соответствует типу поля.</value></data>
+  <data name="Error_custom_field_value_too_long" xml:space="preserve"><value>Текст длиннее {0} символов.</value></data>
 </root>

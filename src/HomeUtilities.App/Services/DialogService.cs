@@ -76,6 +76,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
     {
         ParameterEditorViewModel => new ParameterEditorView { BindingContext = editor },
         LinkEditorViewModel => new LinkEditorView { BindingContext = editor },
+        CustomFieldEditorViewModel => new CustomFieldEditorView { BindingContext = editor },
         _ => throw new NotSupportedException($"No dialog view is registered for {editor.GetType().Name}."),
     };
 

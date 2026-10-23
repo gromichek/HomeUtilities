@@ -180,4 +180,86 @@
   <data name="CategoryNotes" xml:space="preserve"><value>Notes</value></data>
   <data name="CategoryArchived" xml:space="preserve"><value>Archived (hidden from pickers)</value></data>
   <data name="CategoryDelete" xml:space="preserve"><value>Delete category</value></data>
+  <data name="ContractsHeader" xml:space="preserve"><value>Contracts</value></data>
+  <data name="ContractsEmpty" xml:space="preserve"><value>No contracts yet.</value></data>
+  <data name="ContractsSaveFirst" xml:space="preserve"><value>Save the property first</value></data>
+  <data name="ContractAdd" xml:space="preserve"><value>Add contract</value></data>
+  <data name="ContractsShowEnded" xml:space="preserve"><value>Show ended/archived</value></data>
+  <data name="ContractEnded" xml:space="preserve"><value>ended {0:d}</value></data>
+  <data name="ContractArchivedBadge" xml:space="preserve"><value>Archived</value></data>
+  <data name="ContractNew" xml:space="preserve"><value>New contract</value></data>
+  <data name="ContractDelete" xml:space="preserve"><value>Delete contract</value></data>
+  <data name="ContractGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="ContractTitleLabel" xml:space="preserve"><value>Title *</value></data>
+  <data name="ContractServiceLabel" xml:space="preserve"><value>Service kind *</value></data>
+  <data name="ContractCategoryLabel" xml:space="preserve"><value>Category *</value></data>
+  <data name="ContractSupplierLabel" xml:space="preserve"><value>Supplier *</value></data>
+  <data name="ContractCurrencyLabel" xml:space="preserve"><value>Currency</value></data>
+  <data name="ContractArchivedLabel" xml:space="preserve"><value>Archived (hidden by default)</value></data>
+  <data name="ContractChooseCategory" xml:space="preserve"><value>Category</value></data>
+  <data name="ContractChooseSupplier" xml:space="preserve"><value>Supplier</value></data>
+  <data name="ContractNewSupplier" xml:space="preserve"><value>＋ New supplier…</value></data>
+  <data name="ContractSelectPlaceholder" xml:space="preserve"><value>Select…</value></data>
+  <data name="ContractAccount" xml:space="preserve"><value>Account</value></data>
+  <data name="ContractCustomerNumber" xml:space="preserve"><value>Customer number</value></data>
+  <data name="ContractContractNumber" xml:space="preserve"><value>Contract number</value></data>
+  <data name="ContractPortalLogin" xml:space="preserve"><value>Portal login</value></data>
+  <data name="ContractPortalLoginHint" xml:space="preserve"><value>Passwords are not stored — your browser remembers them.</value></data>
+  <data name="ContractValidFrom" xml:space="preserve"><value>Valid from *</value></data>
+  <data name="ContractHasEndDate" xml:space="preserve"><value>Has end date</value></data>
+  <data name="ContractValidTo" xml:space="preserve"><value>Valid to</value></data>
+  <data name="ContractBilling" xml:space="preserve"><value>Billing</value></data>
+  <data name="ContractBillingModeLabel" xml:space="preserve"><value>Billing mode</value></data>
+  <data name="ContractBillingTimingLabel" xml:space="preserve"><value>Billing timing</value></data>
+  <data name="ContractTimingHint_InArrears" xml:space="preserve"><value>The bill comes after the service month (water, electricity).</value></data>
+  <data name="ContractTimingHint_InAdvance" xml:space="preserve"><value>The service is paid before the month starts (internet, TV).</value></data>
+  <data name="ContractReadingWindow" xml:space="preserve"><value>Reading submission window</value></data>
+  <data name="ContractReadingFrom" xml:space="preserve"><value>From day</value></data>
+  <data name="ContractReadingTo" xml:space="preserve"><value>To day</value></data>
+  <data name="ContractReadingHint" xml:space="preserve"><value>Days of the month 1–31, e.g. 25–28. A window like 28–3 continues into the next month.</value></data>
+  <data name="ContractBillDay" xml:space="preserve"><value>Usual bill day (1–31)</value></data>
+  <data name="ContractPaymentDueDay" xml:space="preserve"><value>Payment due day (1–31)</value></data>
+  <data name="ContractPaymentHint" xml:space="preserve"><value>Leave a field empty to use the supplier's value.</value></data>
+  <data name="ContractEffectiveHeader" xml:space="preserve"><value>Effective payment details</value></data>
+  <data name="ContractEffectivePurpose" xml:space="preserve"><value>Payment purpose (with this contract's data)</value></data>
+  <data name="ContractNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="PaymentFromSupplier" xml:space="preserve"><value>from supplier: {0}</value></data>
+  <data name="LinkFromSupplier" xml:space="preserve"><value>from supplier</value></data>
+  <data name="CustomFieldsHeader" xml:space="preserve"><value>Custom fields</value></data>
+  <data name="CustomFieldsHint" xml:space="preserve"><value>These fields appear when you enter a bill.</value></data>
+  <data name="CustomFieldsEmpty" xml:space="preserve"><value>No custom fields.</value></data>
+  <data name="CustomFieldAdd" xml:space="preserve"><value>Add field</value></data>
+  <data name="CustomFieldNew" xml:space="preserve"><value>New field</value></data>
+  <data name="CustomFieldEdit" xml:space="preserve"><value>Edit field</value></data>
+  <data name="CustomFieldName" xml:space="preserve"><value>Name</value></data>
+  <data name="CustomFieldKindLabel" xml:space="preserve"><value>Type</value></data>
+  <data name="CustomFieldTargetLabel" xml:space="preserve"><value>Applies to</value></data>
+  <data name="CustomFieldRowDetail" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="Enum_BillingMode_Actual" xml:space="preserve"><value>By consumption</value></data>
+  <data name="Enum_BillingMode_Equalized" xml:space="preserve"><value>Equalized payments</value></data>
+  <data name="Enum_BillingMode_Fixed" xml:space="preserve"><value>Fixed fee</value></data>
+  <data name="Enum_BillingMode_Assessed" xml:space="preserve"><value>Tax (annual amount)</value></data>
+  <data name="Enum_BillingTiming_InArrears" xml:space="preserve"><value>In arrears</value></data>
+  <data name="Enum_BillingTiming_InAdvance" xml:space="preserve"><value>In advance</value></data>
+  <data name="Enum_CustomFieldKind_Text" xml:space="preserve"><value>Text</value></data>
+  <data name="Enum_CustomFieldKind_Number" xml:space="preserve"><value>Number</value></data>
+  <data name="Enum_CustomFieldKind_Money" xml:space="preserve"><value>Amount</value></data>
+  <data name="Enum_CustomFieldKind_Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Enum_CustomFieldTarget_Bill" xml:space="preserve"><value>Bill</value></data>
+  <data name="Enum_CustomFieldTarget_BillLine" xml:space="preserve"><value>Bill line</value></data>
+  <data name="Enum_Currency_EUR" xml:space="preserve"><value>EUR</value></data>
+  <data name="Enum_Currency_LVL" xml:space="preserve"><value>LVL (lats)</value></data>
+  <data name="Error_contract_property_required" xml:space="preserve"><value>The contract must belong to a property.</value></data>
+  <data name="Error_contract_supplier_required" xml:space="preserve"><value>Choose a supplier.</value></data>
+  <data name="Error_contract_category_required" xml:space="preserve"><value>Choose a category.</value></data>
+  <data name="Error_contract_title_required" xml:space="preserve"><value>Enter a title.</value></data>
+  <data name="Error_contract_title_too_long" xml:space="preserve"><value>The title is longer than {0} characters.</value></data>
+  <data name="Error_contract_valid_to_before_valid_from" xml:space="preserve"><value>The end date is before the start date.</value></data>
+  <data name="Error_contract_day_out_of_range" xml:space="preserve"><value>Enter a day of the month from 1 to 31.</value></data>
+  <data name="Error_contract_reading_window_incomplete" xml:space="preserve"><value>Enter both days of the reading window, or none.</value></data>
+  <data name="Error_custom_field_name_required" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="Error_custom_field_name_too_long" xml:space="preserve"><value>The name is longer than {0} characters.</value></data>
+  <data name="Error_custom_field_name_duplicate" xml:space="preserve"><value>A field with this name already exists.</value></data>
+  <data name="Error_custom_field_invalid_value" xml:space="preserve"><value>The value does not match the field type.</value></data>
+  <data name="Error_custom_field_value_too_long" xml:space="preserve"><value>The text is longer than {0} characters.</value></data>
 </root>

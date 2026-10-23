@@ -44,6 +44,8 @@ public static class MauiProgram
         builder.Services.AddTransient<SuppliersViewModel>();
         builder.Services.AddTransient<SupplierEditViewModel>();
         builder.Services.AddTransient<Func<SupplierEditViewModel>>(sp => () => sp.GetRequiredService<SupplierEditViewModel>());
+        builder.Services.AddTransient<ContractEditViewModel>();
+        builder.Services.AddTransient<Func<ContractEditViewModel>>(sp => () => sp.GetRequiredService<ContractEditViewModel>());
         builder.Services.AddTransient<CategoriesViewModel>();
         builder.Services.AddTransient<CategoryEditViewModel>();
         builder.Services.AddTransient<Func<CategoryEditViewModel>>(sp => () => sp.GetRequiredService<CategoryEditViewModel>());
@@ -52,6 +54,7 @@ public static class MauiProgram
         builder.Services.AddTransient<PlaceholderPage>();
         builder.Services.AddTransient<PropertiesPage>();
         builder.Services.AddTransient<PropertyEditPage>();
+        builder.Services.AddTransient<ContractEditPage>();
         builder.Services.AddTransient<SuppliersPage>();
         builder.Services.AddTransient<SupplierEditPage>();
         builder.Services.AddTransient<CategoriesPage>();

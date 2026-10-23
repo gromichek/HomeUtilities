@@ -24,6 +24,7 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
         else if (BindingContext is PaneEditorViewModel fresh)
         {
             fresh.IsHostedInPage = true;
+            PrepareFresh(fresh, query);
             Guid? id = query.TryGetValue(EditorNavigation.IdParameter, out var value)
                 ? value switch
                 {
@@ -34,6 +35,11 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
                 : null;
             _ = fresh.LoadAsync(id);
         }
+    }
+
+    /// <summary>Lets a page pass extra query parameters to a fresh editor before it is loaded.</summary>
+    protected virtual void PrepareFresh(PaneEditorViewModel editor, IDictionary<string, object> query)
+    {
     }
 
     // Hardware / gesture Back and the toolbar Back arrow take the same path: unsaved changes dialog, then close.
