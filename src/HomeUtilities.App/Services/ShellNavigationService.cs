@@ -18,4 +18,6 @@ public sealed class ShellNavigationService : INavigationService
     }
 
     public Task GoBackAsync() => Shell.Current.GoToAsync("..");
+
+    public bool IsShowing(object viewModel) => ReferenceEquals(Shell.Current?.CurrentPage?.BindingContext, viewModel);
 }

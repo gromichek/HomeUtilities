@@ -42,6 +42,17 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
     {
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // The layout became two-pane while a child page covered this page: the editor lives in the side pane now.
+        if (BindingContext is PaneEditorViewModel { IsHostedInPage: false })
+        {
+            _ = Shell.Current.GoToAsync("..");
+        }
+    }
+
     // Hardware / gesture Back and the toolbar Back arrow take the same path: unsaved changes dialog, then close.
     protected override bool OnBackButtonPressed()
     {

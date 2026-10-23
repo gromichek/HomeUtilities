@@ -7,7 +7,7 @@ namespace HomeUtilities.Core.Payments;
 public static partial class PaymentDetailsValidator
 {
     /// <summary>Maximum length of any field (the bank purpose limit).</summary>
-    public const int MaxFieldLength = 140;
+    public const int MaxFieldLength = InputLimits.PaymentField;
 
     [GeneratedRegex("^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$")]
     private static partial Regex BicPattern();

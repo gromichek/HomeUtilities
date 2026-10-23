@@ -126,6 +126,11 @@ internal sealed class FakeNavigationService : INavigationService
 
     public int BackCount { get; private set; }
 
+    /// <summary>The view model whose page is on top; null = none (then <see cref="IsShowing"/> says yes for any editor).</summary>
+    public object? Top { get; set; }
+
+    public bool IsShowing(object viewModel) => Top is null || ReferenceEquals(Top, viewModel);
+
     public Task GoToAsync(string route, IReadOnlyDictionary<string, object>? parameters = null)
     {
         Visited.Add((route, parameters));

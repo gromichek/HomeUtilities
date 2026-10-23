@@ -195,6 +195,39 @@ public class PropertiesViewModelTests
     }
 
     [Fact]
+    public async Task WideningTheWindowWhileAChildPageIsOpen_DoesNotPopTheChildPage()
+    {
+        _layout.Change(LayoutMode.Compact);
+        var vm = Create();
+        await vm.AddCommand.ExecuteAsync(null);
+        var editor = vm.SelectedEditor!;
+        _navigation.Top = new object(); // e.g. the contract page is on top of the property editor page
+
+        _layout.Change(LayoutMode.Expanded);
+        await vm.PendingLayoutChange;
+
+        Assert.Same(editor, vm.SelectedEditor);
+        Assert.False(editor.IsHostedInPage);
+        Assert.Equal(0, _navigation.BackCount);
+    }
+
+    [Fact]
+    public async Task SavingInCompactLayout_KeepsTheEditorOpenAndSelected()
+    {
+        _layout.Change(LayoutMode.Compact);
+        var vm = Create();
+        await vm.AddCommand.ExecuteAsync(null);
+        var editor = vm.SelectedEditor!;
+        ((PropertyEditViewModel)editor).Name = "Flat";
+
+        await editor.SaveCommand.ExecuteAsync(null);
+
+        Assert.Same(editor, vm.SelectedEditor);
+        Assert.Equal(0, _navigation.BackCount);
+        Assert.Single(_store.Saved);
+    }
+
+    [Fact]
     public async Task SavingInTwoPaneLayout_RefreshesTheListAndKeepsTheEditor()
     {
         _layout.Change(LayoutMode.Expanded);

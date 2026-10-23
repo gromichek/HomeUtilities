@@ -24,12 +24,14 @@
 
             <Label Text="{Binding ErrorLogHeader}" FontAttributes="Bold" Margin="0,24,0,0" />
             <Label Text="{Binding ErrorLogHint}" Style="{StaticResource MutedLabel}" />
-            <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Start">
+            <Grid>
+            <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Start" AlignContent="Start">
                 <Button Text="{Binding CopyLogText}" Command="{Binding CopyLogCommand}"
                         Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
                 <Button Text="{Binding ClearLogText}" Command="{Binding ClearLogCommand}"
                         Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
             </FlexLayout>
+            </Grid>
 
             <Label Text="{Binding VersionText}" Margin="0,12,0,0" />
             <Label Text="{Binding DatabasePathText}" />

@@ -7,7 +7,7 @@ namespace HomeUtilities.Core.Billing;
 public static class CustomFieldValidator
 {
     /// <summary>Maximum length of a definition name.</summary>
-    public const int MaxNameLength = 60;
+    public const int MaxNameLength = InputLimits.CustomFieldName;
 
     /// <summary>Maximum length of a text value.</summary>
     public const int MaxTextLength = 500;

@@ -168,7 +168,13 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         else if (IsTwoPane && editor.IsHostedInPage)
         {
             editor.IsHostedInPage = false;
-            await _navigation.GoBackAsync();
+
+            // Only pop the editor's own page. When a child page (e.g. a contract) is on top, popping would close that
+            // one instead; the editor page below pops itself when it appears again (see EditorPageBase).
+            if (_navigation.IsShowing(editor))
+            {
+                await _navigation.GoBackAsync();
+            }
         }
     }
 }
