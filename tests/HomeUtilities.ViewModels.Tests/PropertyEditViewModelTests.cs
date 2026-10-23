@@ -11,6 +11,7 @@ public class PropertyEditViewModelTests
 
     private readonly FakeLanguageService _language = new();
     private readonly FakePropertyStore _store = new();
+    private readonly FakeMeterStore _meters = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeDialogService _dialogs = new();
 
@@ -612,6 +613,7 @@ public class PropertyEditViewModelTests
         new(
             _store,
             new FakeContractStore(),
+            _meters,
             new FakeSupplierStore(),
             new FakeCategoryStore(),
             new TestClock(Today),
@@ -619,6 +621,7 @@ public class PropertyEditViewModelTests
             _dialogs,
             _navigation,
             new FakeToastService(),
+            () => throw new NotSupportedException(),
             () => throw new NotSupportedException());
 
     private async Task<PropertyEditViewModel> CreateNewAsync()

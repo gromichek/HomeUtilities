@@ -17,18 +17,21 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
 
     private readonly IPropertyStore _store;
     private readonly IContractStore _contractStore;
+    private readonly IMeterStore _meterStore;
     private readonly ISupplierStore _supplierStore;
     private readonly ICategoryStore _categoryStore;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
     private readonly Func<ContractEditViewModel> _contractEditorFactory;
+    private readonly Func<MeterEditViewModel> _meterEditorFactory;
     private readonly List<ParameterRowViewModel> _rows = [];
     private readonly HashSet<string> _expandedGroups = [];
 
     private Property _property = new();
     private Property? _pending;
     private IReadOnlyList<Contract> _contracts = [];
+    private IReadOnlyList<Meter> _meters = [];
     private IReadOnlyDictionary<Guid, Supplier> _suppliers = new Dictionary<Guid, Supplier>();
     private IReadOnlyDictionary<Guid, Category> _categories = new Dictionary<Guid, Category>();
 
@@ -62,6 +65,13 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
 
     [ObservableProperty]
     private bool _showEndedContracts;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoMeters))]
+    private IReadOnlyList<MeterGroupViewModel> _meterGroups = [];
+
+    [ObservableProperty]
+    private bool _showRemovedMeters;
 
     [ObservableProperty]
     private string _nameLabel = string.Empty;
@@ -105,9 +115,22 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     [ObservableProperty]
     private string _showEndedContractsText = string.Empty;
 
+    [ObservableProperty]
+    private string _metersHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _metersEmptyText = string.Empty;
+
+    [ObservableProperty]
+    private string _addMeterText = string.Empty;
+
+    [ObservableProperty]
+    private string _showRemovedMetersText = string.Empty;
+
     public PropertyEditViewModel(
         IPropertyStore store,
         IContractStore contractStore,
+        IMeterStore meterStore,
         ISupplierStore supplierStore,
         ICategoryStore categoryStore,
         IClock clock,
@@ -115,17 +138,20 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         IDialogService dialogs,
         INavigationService navigation,
         IToastService toast,
-        Func<ContractEditViewModel> contractEditorFactory)
+        Func<ContractEditViewModel> contractEditorFactory,
+        Func<MeterEditViewModel> meterEditorFactory)
         : base(localizer, dialogs, navigation, toast)
     {
         _store = store;
         _contractStore = contractStore;
+        _meterStore = meterStore;
         _supplierStore = supplierStore;
         _categoryStore = categoryStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
         _contractEditorFactory = contractEditorFactory;
+        _meterEditorFactory = meterEditorFactory;
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(IsNew))
@@ -133,7 +159,9 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
                 OnPropertyChanged(nameof(CanAddContract));
                 OnPropertyChanged(nameof(ShowContractsSaveFirst));
                 OnPropertyChanged(nameof(HasNoContracts));
+                OnPropertyChanged(nameof(HasNoMeters));
                 AddContractCommand.NotifyCanExecuteChanged();
+                AddMeterCommand.NotifyCanExecuteChanged();
             }
         };
         RefreshTexts();
@@ -145,6 +173,9 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
 
     /// <summary>True when the property is saved and has no contract to list (ended and archived ones are hidden by default).</summary>
     public bool HasNoContracts => ContractRows.Count == 0 && !IsNew;
+
+    /// <summary>True when the property is saved and has no meter to list (removed ones are hidden by default).</summary>
+    public bool HasNoMeters => MeterGroups.Count == 0 && !IsNew;
 
     /// <summary>The add button of the contracts card is disabled until the property exists.</summary>
     public bool CanAddContract => !IsNew;
@@ -211,6 +242,14 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         }
 
         await ReloadContractsAsync();
+        await ReloadMetersAsync();
+    }
+
+    /// <summary>Re-reads the meters of the property (after the meter editor closed).</summary>
+    public async Task ReloadMetersAsync()
+    {
+        _meters = IsNew ? [] : await _meterStore.ListByPropertyAsync(_property.Id);
+        RebuildMeters();
     }
 
     /// <summary>Re-reads the contracts of the property (after the contract editor closed).</summary>
@@ -245,6 +284,39 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         editor.Finished = _ => ReloadContractsAsync();
         await editor.LoadAsync(_property.Id, id);
         await _navigation.GoToAsync(Routes.ContractEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
+    }
+
+    [RelayCommand(CanExecute = nameof(CanOpenContract))]
+    private Task AddMeterAsync() => RunSafeAsync(() => OpenMeterEditorAsync(null));
+
+    [RelayCommand]
+    private Task OpenMeterAsync(Guid? id) => RunSafeAsync(() => OpenMeterEditorAsync(id));
+
+    private async Task OpenMeterEditorAsync(Guid? id)
+    {
+        var editor = _meterEditorFactory();
+        editor.IsHostedInPage = true;
+        editor.Finished = _ => ReloadMetersAsync();
+        await editor.LoadAsync(_property.Id, id);
+        await _navigation.GoToAsync(Routes.MeterEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
+    }
+
+    partial void OnShowRemovedMetersChanged(bool value) => RebuildMeters();
+
+    private void RebuildMeters()
+    {
+        var today = _clock.Today;
+        MeterGroups =
+        [
+            .. _meters
+                .Where(m => ShowRemovedMeters || m.RemovedOn is null)
+                .Select(m => new MeterRowViewModel(m, today, _localizer, id => OpenMeterCommand.Execute(id)))
+                .GroupBy(r => r.Resource)
+                .OrderBy(g => g.Key)
+                .Select(g => new MeterGroupViewModel(
+                    EnumText.Get(_localizer, g.Key),
+                    [.. g.OrderBy(r => r.IsRemoved).ThenBy(r => r.Title, StringComparer.CurrentCultureIgnoreCase)])),
+        ];
     }
 
     partial void OnShowEndedContractsChanged(bool value) => RebuildContracts();
@@ -409,9 +481,14 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
             ContractsSaveFirstText = _localizer["ContractsSaveFirst"];
             AddContractText = _localizer["ContractAdd"];
             ShowEndedContractsText = _localizer["ContractsShowEnded"];
+            MetersHeader = _localizer["MetersHeader"];
+            MetersEmptyText = _localizer["MetersEmpty"];
+            AddMeterText = _localizer["MeterAdd"];
+            ShowRemovedMetersText = _localizer["MetersShowRemoved"];
             Title = TitleText();
             RebuildGroups();
             RebuildContracts();
+            RebuildMeters();
         }
         finally
         {

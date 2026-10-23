@@ -29,4 +29,10 @@ public static class Routes
     /// plus optional <c>id</c>. It is a page in every layout.
     /// </summary>
     public const string ContractEdit = "ContractEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the meter editor, parameters <c>editor</c> (a running editor) or <c>propertyId</c>
+    /// plus optional <c>id</c>. It is a page in every layout.
+    /// </summary>
+    public const string MeterEdit = "MeterEdit";
 }

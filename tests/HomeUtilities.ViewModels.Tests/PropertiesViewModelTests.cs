@@ -282,6 +282,7 @@ public class PropertiesViewModelTests
         () => new PropertyEditViewModel(
             _store,
             new FakeContractStore(),
+            new FakeMeterStore(),
             new FakeSupplierStore(),
             new FakeCategoryStore(),
             _clock,
@@ -289,6 +290,7 @@ public class PropertiesViewModelTests
             _dialogs,
             _navigation,
             new FakeToastService(),
+            () => throw new NotSupportedException(),
             () => throw new NotSupportedException()));
 
     private static Property Prop(string name, int sortOrder = 0, bool archived = false) => new()

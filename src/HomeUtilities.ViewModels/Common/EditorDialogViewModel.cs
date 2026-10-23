@@ -44,6 +44,13 @@ public abstract partial class EditorDialogViewModel : ViewModelBase
     [RelayCommand]
     private void Cancel() => CloseRequested?.Invoke();
 
+    /// <summary>For dialogs whose confirm button does asynchronous work itself: marks the dialog saved and closes it.</summary>
+    protected void CloseSaved()
+    {
+        Saved = true;
+        CloseRequested?.Invoke();
+    }
+
     protected override void RefreshTexts()
     {
         RefreshDialogTexts();
