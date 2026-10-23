@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 
@@ -136,5 +137,41 @@ public class ContractValidatorTests
         var error = Single(c);
         Assert.Equal(ErrorCodes.LinkUrlInvalid, error.Code);
         Assert.Equal("Links[1].Url", error.Field);
+    }
+
+    [Fact]
+    public void Duplicate_custom_field_names_are_reported_with_indexed_field()
+    {
+        var c = Valid();
+        c.CustomFields =
+        [
+            new CustomFieldDefinition { OwnerId = c.Id, Name = "Losses", Target = CustomFieldTarget.Bill },
+            new CustomFieldDefinition { OwnerId = c.Id, Name = "losses", Target = CustomFieldTarget.Bill },
+        ];
+        var error = Single(c);
+        Assert.Equal(ErrorCodes.CustomFieldNameDuplicate, error.Code);
+        Assert.Equal("CustomFields[1].Name", error.Field);
+    }
+
+    [Fact]
+    public void Blank_custom_field_name_is_reported_with_indexed_field()
+    {
+        var c = Valid();
+        c.CustomFields = [new CustomFieldDefinition { OwnerId = c.Id, Name = " " }];
+        var error = Single(c);
+        Assert.Equal(ErrorCodes.CustomFieldNameRequired, error.Code);
+        Assert.Equal("CustomFields[0].Name", error.Field);
+    }
+
+    [Fact]
+    public void Same_custom_field_name_on_different_targets_is_valid()
+    {
+        var c = Valid();
+        c.CustomFields =
+        [
+            new CustomFieldDefinition { OwnerId = c.Id, Name = "Losses", Target = CustomFieldTarget.Bill },
+            new CustomFieldDefinition { OwnerId = c.Id, Name = "Losses", Target = CustomFieldTarget.BillLine },
+        ];
+        Assert.True(ContractValidator.Validate(c).IsValid);
     }
 }

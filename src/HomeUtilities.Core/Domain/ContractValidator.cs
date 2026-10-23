@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 
 namespace HomeUtilities.Core.Domain;
@@ -5,7 +6,7 @@ namespace HomeUtilities.Core.Domain;
 /// <summary>Validation rules of <see cref="Contract"/>.</summary>
 public static class ContractValidator
 {
-    /// <summary>Validates a contract including its links (deleted links are skipped).</summary>
+    /// <summary>Validates a contract including its links and custom field definitions (deleted ones are skipped).</summary>
     public static ValidationResult Validate(Contract contract)
     {
         ArgumentNullException.ThrowIfNull(contract);
@@ -54,6 +55,7 @@ public static class ContractValidator
         ValidationHelpers.CheckNotes(errors, contract.Notes, nameof(Contract.Notes));
         errors.AddRange(ValidationHelpers.ValidatePaymentDetails(contract.PaymentDetails));
         errors.AddRange(ValidationHelpers.ValidateLinks(contract.Links));
+        errors.AddRange(CustomFieldValidator.ValidateAll(contract.CustomFields).Errors);
         return ValidationHelpers.ToResult(errors);
     }
 
