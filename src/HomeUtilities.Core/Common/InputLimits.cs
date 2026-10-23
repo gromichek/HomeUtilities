@@ -27,6 +27,9 @@ public static class InputLimits
     /// <summary>A number typed as text (area, value).</summary>
     public const int Number = 30;
 
+    /// <summary>A small whole number typed as text (dial digits, months).</summary>
+    public const int Count = 4;
+
     /// <summary>A day of month (1–31).</summary>
     public const int Day = 2;
 

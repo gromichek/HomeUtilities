@@ -272,4 +272,113 @@
   <data name="Error_custom_field_name_duplicate" xml:space="preserve"><value>A field with this name already exists.</value></data>
   <data name="Error_custom_field_invalid_value" xml:space="preserve"><value>The value does not match the field type.</value></data>
   <data name="Error_custom_field_value_too_long" xml:space="preserve"><value>The text is longer than {0} characters.</value></data>
+  <data name="Enum_MeterResource_ColdWater" xml:space="preserve"><value>Cold water</value></data>
+  <data name="Enum_MeterResource_HotWater" xml:space="preserve"><value>Hot water</value></data>
+  <data name="Enum_MeterResource_Electricity" xml:space="preserve"><value>Electricity</value></data>
+  <data name="Enum_MeterResource_Gas" xml:space="preserve"><value>Gas</value></data>
+  <data name="Enum_MeterResource_Heat" xml:space="preserve"><value>Heat</value></data>
+  <data name="Enum_MeterResource_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Enum_MeterUnit_M3" xml:space="preserve"><value>m³</value></data>
+  <data name="Enum_MeterUnit_KWh" xml:space="preserve"><value>kWh</value></data>
+  <data name="Enum_MeterUnit_MWh" xml:space="preserve"><value>MWh</value></data>
+  <data name="Enum_MeterUnit_Gcal" xml:space="preserve"><value>Gcal</value></data>
+  <data name="Enum_RegisterKind_Total" xml:space="preserve"><value>Total</value></data>
+  <data name="Enum_RegisterKind_Day" xml:space="preserve"><value>Day</value></data>
+  <data name="Enum_RegisterKind_Night" xml:space="preserve"><value>Night</value></data>
+  <data name="Enum_RegisterKind_Peak" xml:space="preserve"><value>Peak</value></data>
+  <data name="Enum_RegisterKind_Export" xml:space="preserve"><value>Export</value></data>
+  <data name="Enum_EnergyDirection_Import" xml:space="preserve"><value>Consumption</value></data>
+  <data name="Enum_EnergyDirection_Export" xml:space="preserve"><value>Fed into grid</value></data>
+  <data name="MetersHeader" xml:space="preserve"><value>Meters</value></data>
+  <data name="MetersEmpty" xml:space="preserve"><value>No meters yet.</value></data>
+  <data name="MeterAdd" xml:space="preserve"><value>Add meter</value></data>
+  <data name="MetersShowRemoved" xml:space="preserve"><value>Show removed</value></data>
+  <data name="MeterRemoved" xml:space="preserve"><value>Removed {0:d}</value></data>
+  <data name="MeterUnnamed" xml:space="preserve"><value>Meter</value></data>
+  <data name="MeterNumbered" xml:space="preserve"><value>Meter {0}</value></data>
+  <data name="MeterNoSerial" xml:space="preserve"><value>no serial number</value></data>
+  <data name="MeterVerificationOverdue" xml:space="preserve"><value>Verification overdue since {0:d}</value></data>
+  <data name="MeterVerificationDue" xml:space="preserve"><value>Verification due {0:d}</value></data>
+  <data name="MeterNextVerification" xml:space="preserve"><value>Next verification: {0:d}</value></data>
+  <data name="MeterNew" xml:space="preserve"><value>New meter</value></data>
+  <data name="MeterDelete" xml:space="preserve"><value>Delete meter</value></data>
+  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Meters with readings cannot be deleted — use Replace.</value></data>
+  <data name="MeterGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="MeterResourceLabel" xml:space="preserve"><value>Resource *</value></data>
+  <data name="MeterUnitLabel" xml:space="preserve"><value>Unit *</value></data>
+  <data name="MeterSerialNumberLabel" xml:space="preserve"><value>Serial number</value></data>
+  <data name="MeterLocationLabel" xml:space="preserve"><value>Location</value></data>
+  <data name="MeterDigitsLabel" xml:space="preserve"><value>Dial digits</value></data>
+  <data name="MeterDigitsHint" xml:space="preserve"><value>Needed to detect a roll-over, e.g. 99999 → 00000 (1–12).</value></data>
+  <data name="MeterNotesLabel" xml:space="preserve"><value>Notes</value></data>
+  <data name="MeterRegistersHeader" xml:space="preserve"><value>Registers</value></data>
+  <data name="MeterRegisterAdd" xml:space="preserve"><value>Add register</value></data>
+  <data name="MeterDualTariff" xml:space="preserve"><value>Dual tariff (day/night)</value></data>
+  <data name="MeterRegisterNoneLeft" xml:space="preserve"><value>All register kinds are already present.</value></data>
+  <data name="MeterRegisterHasReadings" xml:space="preserve"><value>This register has readings and cannot be deleted.</value></data>
+  <data name="MeterInstallationHeader" xml:space="preserve"><value>Installation and verification</value></data>
+  <data name="MeterInstalledOnLabel" xml:space="preserve"><value>Installed on *</value></data>
+  <data name="MeterHasVerifiedOnLabel" xml:space="preserve"><value>Has verification date</value></data>
+  <data name="MeterVerifiedOnLabel" xml:space="preserve"><value>Verified on</value></data>
+  <data name="MeterIntervalLabel" xml:space="preserve"><value>Verification interval (months)</value></data>
+  <data name="MeterIntervalHint" xml:space="preserve"><value>Water meters usually 72.</value></data>
+  <data name="MeterHasDueOverrideLabel" xml:space="preserve"><value>Set the next verification date explicitly</value></data>
+  <data name="MeterDueOverrideLabel" xml:space="preserve"><value>Next verification due</value></data>
+  <data name="MeterReplace" xml:space="preserve"><value>Replace meter…</value></data>
+  <data name="MeterReplaced" xml:space="preserve"><value>Meter replaced</value></data>
+  <data name="MeterContractsHeader" xml:space="preserve"><value>Contracts</value></data>
+  <data name="MeterContractsHint" xml:space="preserve"><value>A hot water meter is usually linked to both the water and the heating contract.</value></data>
+  <data name="MeterContractsEmpty" xml:space="preserve"><value>No contracts in this property yet.</value></data>
+  <data name="MeterHistoryHeader" xml:space="preserve"><value>History</value></data>
+  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Replaced meter {0} on {1:d}</value></data>
+  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replaced by {0} on {1:d}</value></data>
+  <data name="RegisterNew" xml:space="preserve"><value>New register</value></data>
+  <data name="RegisterKindLabel" xml:space="preserve"><value>Register</value></data>
+  <data name="RegisterExportHint" xml:space="preserve"><value>Counts energy fed into the grid.</value></data>
+  <data name="WizardTitle" xml:space="preserve"><value>Replace meter</value></data>
+  <data name="WizardStepOf" xml:space="preserve"><value>Step {0} of {1}</value></data>
+  <data name="WizardDateStep" xml:space="preserve"><value>Date of replacement</value></data>
+  <data name="WizardFinalStep" xml:space="preserve"><value>Final reading of the old meter</value></data>
+  <data name="WizardNewMeterStep" xml:space="preserve"><value>New meter</value></data>
+  <data name="WizardContractsStep" xml:space="preserve"><value>Contracts</value></data>
+  <data name="WizardSummaryStep" xml:space="preserve"><value>Summary</value></data>
+  <data name="WizardDateLabel" xml:space="preserve"><value>Replacement date *</value></data>
+  <data name="WizardLastReadingDate" xml:space="preserve"><value>Last reading: {0:d}</value></data>
+  <data name="WizardFinalReadingLabel" xml:space="preserve"><value>Final reading *</value></data>
+  <data name="WizardInitialReadingLabel" xml:space="preserve"><value>Initial reading *</value></data>
+  <data name="WizardLastReading" xml:space="preserve"><value>Last reading: {0} on {1:d}</value></data>
+  <data name="WizardRolloverWarning" xml:space="preserve"><value>Lower than the last reading {0} — counted as a roll-over of a {1}-digit dial.</value></data>
+  <data name="WizardContractsHint" xml:space="preserve"><value>The new meter is used by the selected contracts from the replacement date. The old meter's links end the day before.</value></data>
+  <data name="WizardNext" xml:space="preserve"><value>Next</value></data>
+  <data name="WizardBack" xml:space="preserve"><value>Back</value></data>
+  <data name="WizardReplace" xml:space="preserve"><value>Replace</value></data>
+  <data name="WizardSummaryOld" xml:space="preserve"><value>Meter {0} is removed on {1:d}.</value></data>
+  <data name="WizardSummaryFinal" xml:space="preserve"><value>{0}: final reading {1}</value></data>
+  <data name="WizardSummaryNew" xml:space="preserve"><value>New meter {0} is installed on {1:d}.</value></data>
+  <data name="WizardSummaryInitial" xml:space="preserve"><value>{0}: initial reading {1}</value></data>
+  <data name="WizardSummaryContracts" xml:space="preserve"><value>Used by: {0}</value></data>
+  <data name="WizardSummaryNoContracts" xml:space="preserve"><value>Not linked to any contract.</value></data>
+  <data name="Error_common_text_too_long" xml:space="preserve"><value>The text is longer than {0} characters.</value></data>
+  <data name="Error_meter_wizard_date_before_installed" xml:space="preserve"><value>The date is before the installation date of the meter ({0:d}).</value></data>
+  <data name="Error_meter_wizard_date_before_last_reading" xml:space="preserve"><value>The date is before the last reading ({0:d}).</value></data>
+  <data name="Error_meter_wizard_final_below_last" xml:space="preserve"><value>Lower than the last reading ({0}). Set the number of dial digits on the meter if it rolled over.</value></data>
+  <data name="Error_meter_property_required" xml:space="preserve"><value>The meter must belong to a property.</value></data>
+  <data name="Error_meter_digits_out_of_range" xml:space="preserve"><value>Enter a number of digits from 1 to 12.</value></data>
+  <data name="Error_meter_removed_before_installed" xml:space="preserve"><value>The removal date is before the installation date.</value></data>
+  <data name="Error_meter_verification_interval_out_of_range" xml:space="preserve"><value>Enter an interval from 1 to 600 months.</value></data>
+  <data name="Error_meter_register_required" xml:space="preserve"><value>A meter needs at least one register.</value></data>
+  <data name="Error_meter_duplicate_register" xml:space="preserve"><value>This register is present twice.</value></data>
+  <data name="Error_meter_export_direction_mismatch" xml:space="preserve"><value>An export register must count energy fed into the grid.</value></data>
+  <data name="Error_meter_unit_incompatible" xml:space="preserve"><value>This unit does not fit the resource.</value></data>
+  <data name="Error_meter_reading_value_negative" xml:space="preserve"><value>The reading cannot be negative.</value></data>
+  <data name="Error_meter_reading_date_outside_installation" xml:space="preserve"><value>The date is outside the period the meter was installed.</value></data>
+  <data name="Error_meter_reading_duplicate_initial" xml:space="preserve"><value>The register already has an initial reading.</value></data>
+  <data name="Error_meter_reading_initial_not_earliest" xml:space="preserve"><value>The initial reading must be the earliest.</value></data>
+  <data name="Error_meter_reading_duplicate_final" xml:space="preserve"><value>The register already has a final reading.</value></data>
+  <data name="Error_meter_reading_final_not_latest" xml:space="preserve"><value>The final reading must be the latest.</value></data>
+  <data name="Error_meter_reading_final_date_mismatch" xml:space="preserve"><value>The final reading must be dated on the removal day.</value></data>
+  <data name="Error_meter_reading_duplicate_on_date" xml:space="preserve"><value>There is already a reading of this kind on that date.</value></data>
+  <data name="Error_contract_meter_contract_required" xml:space="preserve"><value>Select a contract.</value></data>
+  <data name="Error_contract_meter_meter_required" xml:space="preserve"><value>Select a meter.</value></data>
+  <data name="Error_contract_meter_valid_to_before_valid_from" xml:space="preserve"><value>The end date is before the start date.</value></data>
 </root>

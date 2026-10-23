@@ -10,6 +10,9 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
 {
     private const double PopupWidth = 480;
 
+    /// <summary>Height of the multi-step wizard popup; its Grid needs a definite height so the step content scrolls.</summary>
+    private const double WizardPopupHeight = 560;
+
     public Task AlertAsync(string title, string message) =>
         Page.DisplayAlertAsync(title, message, localizer["Dialog_Ok"]);
 
@@ -56,6 +59,11 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         {
             var host = Page;
             view.WidthRequest = PopupWidth;
+            if (view is ReplaceMeterWizardView)
+            {
+                view.HeightRequest = host.Height > 0 ? Math.Min(WizardPopupHeight, host.Height * 0.9) : WizardPopupHeight;
+            }
+
             Action close = () => _ = host.ClosePopupAsync();
             editor.CloseRequested += close;
             try
@@ -77,6 +85,8 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         ParameterEditorViewModel => new ParameterEditorView { BindingContext = editor },
         LinkEditorViewModel => new LinkEditorView { BindingContext = editor },
         CustomFieldEditorViewModel => new CustomFieldEditorView { BindingContext = editor },
+        RegisterEditorViewModel => new RegisterEditorView { BindingContext = editor },
+        ReplaceMeterWizardViewModel => new ReplaceMeterWizardView { BindingContext = editor },
         _ => throw new NotSupportedException($"No dialog view is registered for {editor.GetType().Name}."),
     };
 

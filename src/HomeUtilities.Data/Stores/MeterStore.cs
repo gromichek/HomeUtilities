@@ -28,6 +28,31 @@ public sealed class MeterStore(IDbContextFactory<HomeUtilitiesDbContext> factory
         ListAsync(q => q.Where(m => m.PropertyId == propertyId), ct);
 
     /// <inheritdoc />
+    public async Task SaveReplacementAsync(
+        Meter oldMeter,
+        Meter newMeter,
+        IReadOnlyList<ContractMeter> linksToClose,
+        IReadOnlyList<ContractMeter> linksToCreate,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(oldMeter);
+        ArgumentNullException.ThrowIfNull(newMeter);
+        ArgumentNullException.ThrowIfNull(linksToClose);
+        ArgumentNullException.ThrowIfNull(linksToCreate);
+
+        await using var db = await Factory.CreateDbContextAsync(ct);
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await AggregateMerger.SaveAsync(db, oldMeter, Include, ct);
+        await AggregateMerger.SaveAsync(db, newMeter, Include, ct);
+        foreach (var link in linksToClose.Concat(linksToCreate))
+        {
+            await AggregateMerger.SaveAsync(db, link, query => query, ct);
+        }
+
+        await transaction.CommitAsync(ct);
+    }
+
+    /// <inheritdoc />
     protected override IQueryable<Meter> Include(IQueryable<Meter> query) => IncludeAll(query);
 
     /// <inheritdoc />

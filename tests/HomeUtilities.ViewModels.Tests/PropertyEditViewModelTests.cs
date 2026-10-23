@@ -11,6 +11,7 @@ public class PropertyEditViewModelTests
 
     private readonly FakeLanguageService _language = new();
     private readonly FakePropertyStore _store = new();
+    private readonly FakeMeterStore _meters = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeDialogService _dialogs = new();
 
@@ -608,10 +609,130 @@ public class PropertyEditViewModelTests
         }
     }
 
+    [Fact]
+    public async Task MetersCard_GroupsMetersByResourceAndHidesRemovedOnes()
+    {
+        var property = StoreProperty();
+        AddMeter(property, MeterResource.HotWater, "Bathroom", "HW-1");
+        AddMeter(property, MeterResource.ColdWater, "Kitchen", "CW-1");
+        AddMeter(property, MeterResource.ColdWater, "Bathroom", "CW-2");
+        AddMeter(property, MeterResource.Electricity, null, "E-1");
+        AddMeter(property, MeterResource.ColdWater, "Old", "CW-0").RemovedOn = new DateOnly(2026, 1, 1);
+        AddMeter(Guid.NewGuid(), MeterResource.Gas, "Elsewhere", "G-1");
+        var vm = Create();
+
+        await vm.LoadAsync(property);
+
+        Assert.Equal(
+            ["Enum_MeterResource_ColdWater [en]", "Enum_MeterResource_HotWater [en]", "Enum_MeterResource_Electricity [en]"],
+            vm.MeterGroups.Select(g => g.Header));
+        Assert.Equal(["Bathroom", "Kitchen"], vm.MeterGroups[0].Rows.Select(r => r.Title));
+        Assert.Equal(["MeterNumbered E-1 [en]"], vm.MeterGroups[2].Rows.Select(r => r.Title));
+        Assert.False(vm.HasNoMeters);
+    }
+
+    [Fact]
+    public async Task MetersCard_ShowRemovedAddsThemMutedAfterTheInstalledOnes()
+    {
+        var property = StoreProperty();
+        AddMeter(property, MeterResource.ColdWater, "Kitchen", "CW-2");
+        AddMeter(property, MeterResource.ColdWater, "Aaa old", "CW-1").RemovedOn = new DateOnly(2026, 10, 23);
+        var vm = Create();
+        await vm.LoadAsync(property);
+        Assert.Single(vm.MeterGroups.Single().Rows);
+
+        vm.ShowRemovedMeters = true;
+
+        var rows = vm.MeterGroups.Single().Rows;
+        Assert.Equal(["Kitchen", "Aaa old"], rows.Select(r => r.Title));
+        Assert.True(rows[1].IsRemoved);
+        Assert.Equal($"MeterRemoved {new DateOnly(2026, 10, 23)} [en]", rows[1].RemovedText);
+        Assert.False(rows[0].IsRemoved);
+    }
+
+    [Fact]
+    public async Task MetersCard_ShowsVerificationBadgesAndRegisterSummary()
+    {
+        var property = StoreProperty();
+        var overdue = AddMeter(property, MeterResource.ColdWater, "Overdue", "A");
+        overdue.VerificationIntervalMonths = 72; // installed 2020-10-01 + 72 months = 2026-10-01; today is 2026-10-20
+        var soon = AddMeter(property, MeterResource.ColdWater, "Soon", "B");
+        soon.NextVerificationDue = new DateOnly(2026, 12, 1);
+        var far = AddMeter(property, MeterResource.ColdWater, "Far", "C");
+        far.VerifiedOn = new DateOnly(2021, 1, 15);
+        far.VerificationIntervalMonths = 72;
+        var none = AddMeter(property, MeterResource.ColdWater, "None", "D");
+        var tariff = AddMeter(property, MeterResource.Electricity, "Panel", "E");
+        tariff.Registers.Clear();
+        foreach (var kind in new[] { RegisterKind.Day, RegisterKind.Night, RegisterKind.Export })
+        {
+            tariff.Registers.Add(new MeterRegister
+            {
+                MeterId = tariff.Id,
+                Kind = kind,
+                Direction = kind == RegisterKind.Export ? EnergyDirection.Export : EnergyDirection.Import,
+            });
+        }
+
+        var vm = Create();
+        await vm.LoadAsync(property);
+
+        var water = vm.MeterGroups[0].Rows.ToDictionary(r => r.Title);
+        Assert.True(water["Overdue"].IsOverdue);
+        Assert.Equal($"MeterVerificationOverdue {new DateOnly(2026, 10, 1)} [en]", water["Overdue"].BadgeText);
+        Assert.True(water["Soon"].IsDueSoon);
+        Assert.Equal($"MeterVerificationDue {new DateOnly(2026, 12, 1)} [en]", water["Soon"].BadgeText);
+        Assert.False(water["Far"].HasBadge);
+        Assert.False(water["None"].HasBadge);
+        Assert.False(water["None"].HasRegisters);
+        Assert.Equal("Enum_RegisterKind_Day [en] / Enum_RegisterKind_Night [en] / Enum_RegisterKind_Export [en]", vm.MeterGroups[1].Rows[0].RegistersText);
+        Assert.Equal("E", vm.MeterGroups[1].Rows[0].SerialText);
+    }
+
+    [Fact]
+    public async Task MetersCard_AddIsDisabledUntilThePropertyIsSaved()
+    {
+        var vm = await CreateNewAsync();
+
+        Assert.False(vm.AddMeterCommand.CanExecute(null));
+        Assert.False(vm.HasNoMeters);
+        vm.Name = "Flat";
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.True(vm.AddMeterCommand.CanExecute(null));
+        Assert.True(vm.HasNoMeters);
+    }
+
+    [Fact]
+    public async Task MetersCard_OpensTheMeterEditorOnARowAndReloadsAfterwards()
+    {
+        var property = StoreProperty();
+        var meter = AddMeter(property, MeterResource.ColdWater, "Kitchen", "CW-1");
+        var kit = new ContractTestKit(Today);
+        kit.Meters.Stored.AddRange(_meters.Stored);
+        kit.Properties.Stored.Clear();
+        kit.Properties.Stored.AddRange(_store.Stored);
+        var vm = kit.CreatePropertyEditor();
+        await vm.LoadAsync(property);
+
+        vm.MeterGroups[0].Rows[0].SelectCommand.Execute(null);
+        await Task.Yield();
+
+        var (route, parameters) = Assert.Single(kit.Navigation.Visited);
+        Assert.Equal(Routes.MeterEdit, route);
+        var editor = Assert.IsType<MeterEditViewModel>(parameters![EditorNavigation.EditorParameter]);
+        Assert.Equal(meter.Id, editor.EntityId);
+        Assert.True(editor.IsHostedInPage);
+
+        kit.Meters.Stored.Add(new Meter { PropertyId = property, Resource = MeterResource.Gas, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 1, 1) });
+        await editor.Finished!(EditOutcome.Saved);
+        Assert.Equal(2, vm.MeterGroups.Count);
+    }
+
     private PropertyEditViewModel Create() =>
         new(
             _store,
             new FakeContractStore(),
+            _meters,
             new FakeSupplierStore(),
             new FakeCategoryStore(),
             new TestClock(Today),
@@ -619,7 +740,31 @@ public class PropertyEditViewModelTests
             _dialogs,
             _navigation,
             new FakeToastService(),
+            () => throw new NotSupportedException(),
             () => throw new NotSupportedException());
+
+    private Guid StoreProperty()
+    {
+        var property = new Property { Name = "Flat", Kind = PropertyKind.Apartment };
+        _store.Stored.Add(property);
+        return property.Id;
+    }
+
+    private Meter AddMeter(Guid propertyId, MeterResource resource, string? location, string serial)
+    {
+        var meter = new Meter
+        {
+            PropertyId = propertyId,
+            Resource = resource,
+            Unit = MeterUnitRules.DefaultUnit(resource),
+            Location = location,
+            SerialNumber = serial,
+            InstalledOn = new DateOnly(2020, 10, 1),
+        };
+        meter.Registers.Add(MeterRegister.CreateDefault(meter.Id));
+        _meters.Stored.Add(meter);
+        return meter;
+    }
 
     private async Task<PropertyEditViewModel> CreateNewAsync()
     {

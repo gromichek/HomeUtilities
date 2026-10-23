@@ -284,10 +284,24 @@ internal sealed class FakeContractStore : IContractStore
     public Task<IReadOnlyList<Contract>> ListByPropertyAsync(Guid propertyId, CancellationToken ct = default) =>
         Task.FromResult<IReadOnlyList<Contract>>([.. Stored.Where(c => c.PropertyId == propertyId)]);
 
-    public Task<IReadOnlyList<ContractMeter>> ListContractMetersAsync(Guid contractId, CancellationToken ct = default) =>
-        Task.FromResult<IReadOnlyList<ContractMeter>>([]);
+    public List<ContractMeter> Links { get; } = [];
 
-    public Task SaveContractMeterAsync(ContractMeter contractMeter, CancellationToken ct = default) => Task.CompletedTask;
+    public List<ContractMeter> SavedLinks { get; } = [];
+
+    public Task<IReadOnlyList<ContractMeter>> ListContractMetersAsync(Guid contractId, CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<ContractMeter>>([.. Links.Where(l => l.ContractId == contractId)]);
+
+    public Task SaveContractMeterAsync(ContractMeter contractMeter, CancellationToken ct = default)
+    {
+        SavedLinks.Add(contractMeter);
+        if (!Links.Contains(contractMeter))
+        {
+            Links.RemoveAll(l => l.Id == contractMeter.Id);
+            Links.Add(contractMeter);
+        }
+
+        return Task.CompletedTask;
+    }
 
     public Task<Contract?> GetAsync(Guid id, CancellationToken ct = default) =>
         Task.FromResult(Stored.FirstOrDefault(c => c.Id == id));
@@ -305,6 +319,115 @@ internal sealed class FakeContractStore : IContractStore
         Deleted.Add(id);
         Stored.RemoveAll(c => c.Id == id);
         return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeMeterStore : IMeterStore
+{
+    public List<Meter> Stored { get; } = [];
+
+    public List<Meter> Saved { get; } = [];
+
+    public List<Guid> Deleted { get; } = [];
+
+    public List<(Meter Old, Meter New, IReadOnlyList<ContractMeter> Closed, IReadOnlyList<ContractMeter> Created)> Replacements { get; } = [];
+
+    /// <summary>When set, <see cref="SaveReplacementAsync"/> throws it instead of storing.</summary>
+    public Exception? ReplacementFailure { get; set; }
+
+    public Task<IReadOnlyList<Meter>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<Meter>>([.. Stored]);
+
+    public Task<IReadOnlyList<Meter>> ListByPropertyAsync(Guid propertyId, CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<Meter>>([.. Stored.Where(m => m.PropertyId == propertyId)]);
+
+    /// <summary>Returns a copy of the stored graph, like a real store: the caller may change it freely.</summary>
+    public Task<Meter?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(m => m.Id == id) is { } meter ? Copy(meter) : null);
+
+    public Task SaveAsync(Meter aggregate, CancellationToken ct = default)
+    {
+        Saved.Add(aggregate);
+        Stored.RemoveAll(m => m.Id == aggregate.Id);
+        Stored.Add(aggregate);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        Deleted.Add(id);
+        Stored.RemoveAll(m => m.Id == id);
+        return Task.CompletedTask;
+    }
+
+    public Task SaveReplacementAsync(
+        Meter oldMeter,
+        Meter newMeter,
+        IReadOnlyList<ContractMeter> linksToClose,
+        IReadOnlyList<ContractMeter> linksToCreate,
+        CancellationToken ct = default)
+    {
+        if (ReplacementFailure is { } failure)
+        {
+            throw failure;
+        }
+
+        Replacements.Add((oldMeter, newMeter, linksToClose, linksToCreate));
+        Stored.RemoveAll(m => m.Id == oldMeter.Id);
+        Stored.Add(oldMeter);
+        Stored.Add(newMeter);
+        return Task.CompletedTask;
+    }
+
+    private static Meter Copy(Meter source)
+    {
+        var copy = new Meter
+        {
+            Id = source.Id,
+            CreatedAt = source.CreatedAt,
+            UpdatedAt = source.UpdatedAt,
+            PropertyId = source.PropertyId,
+            Resource = source.Resource,
+            Unit = source.Unit,
+            SerialNumber = source.SerialNumber,
+            Location = source.Location,
+            Digits = source.Digits,
+            InstalledOn = source.InstalledOn,
+            RemovedOn = source.RemovedOn,
+            ReplacedMeterId = source.ReplacedMeterId,
+            VerifiedOn = source.VerifiedOn,
+            VerificationIntervalMonths = source.VerificationIntervalMonths,
+            NextVerificationDue = source.NextVerificationDue,
+            Notes = source.Notes,
+        };
+        foreach (var register in source.Registers)
+        {
+            var registerCopy = new MeterRegister
+            {
+                Id = register.Id,
+                CreatedAt = register.CreatedAt,
+                MeterId = register.MeterId,
+                Kind = register.Kind,
+                Direction = register.Direction,
+                Name = register.Name,
+            };
+            foreach (var reading in register.Readings)
+            {
+                registerCopy.Readings.Add(new MeterReading
+                {
+                    Id = reading.Id,
+                    CreatedAt = reading.CreatedAt,
+                    RegisterId = reading.RegisterId,
+                    Date = reading.Date,
+                    Value = reading.Value,
+                    Kind = reading.Kind,
+                });
+            }
+
+            copy.Registers.Add(registerCopy);
+        }
+
+        return copy;
     }
 }
 
@@ -331,6 +454,8 @@ internal sealed class ContractTestKit
 
     public FakeContractStore Contracts { get; } = new();
 
+    public FakeMeterStore Meters { get; } = new();
+
     public FakeSupplierStore Suppliers { get; } = new();
 
     public FakeCategoryStore Categories { get; } = new();
@@ -356,7 +481,10 @@ internal sealed class ContractTestKit
         new(Contracts, Suppliers, Categories, Properties, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
 
     public PropertyEditViewModel CreatePropertyEditor() =>
-        new(Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast, CreateContractEditor);
+        new(Properties, Contracts, Meters, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast, CreateContractEditor, CreateMeterEditor);
+
+    public MeterEditViewModel CreateMeterEditor() =>
+        new(Meters, Contracts, Clock, Localizer, Dialogs, Navigation, Toast, CreateMeterEditor);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }

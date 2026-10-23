@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.ReplaceMeterWizardView"
+             x:DataType="vm:ReplaceMeterWizardViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <toolkit:InvertedBoolConverter x:Key="Not" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <!-- One step is visible at a time; Cancel closes the wizard at any step and changes nothing. -->
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="8">
+                <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+                <Label Text="{Binding OldMeterText}" Style="{StaticResource MutedLabel}" />
+                <Label Text="{Binding StepNumberText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                <Label Text="{Binding StepTitle}" FontAttributes="Bold" FontSize="16" />
+
+                <!-- 1. Date -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsDateStep}">
+                    <Label Text="{Binding Texts.DateLabel}" Style="{StaticResource MutedLabel}" />
+                    <DatePicker Date="{Binding ReplacementDate, Converter={StaticResource DateOnly}}" />
+                    <Label Text="{Binding DateHint}" Style="{StaticResource MutedLabel}" FontSize="12"
+                           IsVisible="{Binding DateHint, Converter={StaticResource HasText}}" />
+                    <Label Text="{Binding DateError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding DateError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+
+                <!-- 2. Final reading of the old meter, per register -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsFinalStep}"
+                                     BindableLayout.ItemsSource="{Binding Registers}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:WizardRegisterRowViewModel">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding DisplayText}" Style="{StaticResource MutedLabel}" />
+                                <Entry Text="{Binding FinalText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
+                                <Label Text="{Binding LastReadingHint}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasHint}" />
+                                <Label Text="{Binding FinalWarning}" Style="{StaticResource BadgeDueSoonLabel}" IsVisible="{Binding HasFinalWarning}" />
+                                <Label Text="{Binding FinalError}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasFinalError}" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- 3. New meter -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsNewMeterStep}">
+                    <Label Text="{Binding Texts.SerialNumberLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding NewSerialNumber}" MaxLength="{x:Static core:InputLimits.Code}" />
+                    <Label Text="{Binding SerialError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding SerialError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding Texts.DigitsLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding NewDigitsText}" MaxLength="{x:Static core:InputLimits.Count}" Keyboard="Numeric" />
+                    <Label Text="{Binding Texts.DigitsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding DigitsError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding DigitsError, Converter={StaticResource HasText}}" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding HasVerifiedOn}" />
+                        <Label Text="{Binding Texts.HasVerifiedOnLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasVerifiedOn}">
+                        <Label Text="{Binding Texts.VerifiedOnLabel}" Style="{StaticResource MutedLabel}" />
+                        <DatePicker Date="{Binding VerifiedOn, Converter={StaticResource DateOnly}}" />
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding Texts.IntervalLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding NewIntervalText}" MaxLength="{x:Static core:InputLimits.Count}" Keyboard="Numeric" />
+                    <Label Text="{Binding Texts.IntervalHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding IntervalError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding IntervalError, Converter={StaticResource HasText}}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Registers}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WizardRegisterRowViewModel">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding DisplayText}" Style="{StaticResource MutedLabel}" />
+                                    <Entry Text="{Binding InitialText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
+                                    <Label Text="{Binding InitialError}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasInitialError}" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- 4. Contracts -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsContractsStep}">
+                    <Label Text="{Binding Texts.ContractsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding Texts.ContractsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoContracts}" />
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ContractRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:WizardContractRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" />
+                                    </VerticalStackLayout>
+                                    <Switch Grid.Column="1" IsToggled="{Binding IsOn}" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- 5. Summary -->
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding IsSummaryStep}" BindableLayout.ItemsSource="{Binding SummaryLines}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Label Text="{Binding .}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- One primary button per step: Next, and Replace on the last step. -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8" Padding="20,8,20,16">
+            <Button Grid.Column="0" Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+            <Button Grid.Column="2" Text="{Binding Texts.BackText}" Command="{Binding PreviousCommand}"
+                    Style="{StaticResource SecondaryButton}" IsVisible="{Binding CanGoBack}" />
+            <Button Grid.Column="3" Text="{Binding Texts.NextText}" Command="{Binding NextCommand}"
+                    Style="{StaticResource PrimaryButton}" IsVisible="{Binding IsLastStep, Converter={StaticResource Not}}" />
+            <Button Grid.Column="3" Text="{Binding Texts.ReplaceText}" Command="{Binding ReplaceCommand}"
+                    Style="{StaticResource PrimaryButton}" IsVisible="{Binding IsLastStep}" />
+        </Grid>
+    </Grid>
+</ContentView>

@@ -145,6 +145,59 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- Meters: grouped by resource; the add button is in the card header (disabled until the property is saved). -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding MetersHeader}" Style="{StaticResource SectionHeader}" />
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconAdd}" Command="{Binding AddMeterCommand}"
+                                    ToolTipProperties.Text="{Binding AddMeterText}"
+                                    SemanticProperties.Description="{Binding AddMeterText}" />
+                        </Grid>
+
+                        <Label Text="{Binding ContractsSaveFirstText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowContractsSaveFirst}" />
+                        <Label Text="{Binding MetersEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoMeters}" />
+
+                        <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding MeterGroups}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MeterGroupViewModel">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="{Binding Header}" Style="{StaticResource MutedLabel}" FontAttributes="Bold" />
+                                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Rows}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:MeterRowViewModel">
+                                                    <VerticalStackLayout Spacing="2">
+                                                        <VerticalStackLayout.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                                                        </VerticalStackLayout.GestureRecognizers>
+                                                        <VerticalStackLayout.Triggers>
+                                                            <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsRemoved}" Value="True">
+                                                                <Setter Property="Opacity" Value="0.6" />
+                                                            </DataTrigger>
+                                                        </VerticalStackLayout.Triggers>
+                                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                                        <Label Text="{Binding SerialText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasSerial}" />
+                                                        <Label Text="{Binding RegistersText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasRegisters}" />
+                                                        <Label Text="{Binding RemovedText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsRemoved}" />
+                                                        <Label Text="{Binding BadgeText}" Style="{StaticResource BadgeOverdueLabel}" IsVisible="{Binding IsOverdue}" />
+                                                        <Label Text="{Binding BadgeText}" Style="{StaticResource BadgeDueSoonLabel}" IsVisible="{Binding IsDueSoon}" />
+                                                    </VerticalStackLayout>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch IsToggled="{Binding ShowRemovedMeters}" />
+                            <Label Text="{Binding ShowRemovedMetersText}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- Phone: destructive action at the end of the form. -->
                 <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                         Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
