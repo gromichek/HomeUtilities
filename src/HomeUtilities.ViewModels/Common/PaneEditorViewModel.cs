@@ -9,6 +9,8 @@ namespace HomeUtilities.ViewModels.Common;
 public abstract partial class PaneEditorViewModel : EditableViewModel
 {
     private readonly INavigationService _navigation;
+    private readonly IToastService _saveToast;
+    private readonly ILocalizer _paneLocalizer;
 
     /// <summary>True when the editor is shown on its own page (compact layout) instead of the right-hand pane.</summary>
     [ObservableProperty]
@@ -18,10 +20,12 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
     [ObservableProperty]
     private string _deleteWholeText = string.Empty;
 
-    protected PaneEditorViewModel(ILocalizer localizer, IDialogService dialogs, INavigationService navigation)
+    protected PaneEditorViewModel(ILocalizer localizer, IDialogService dialogs, INavigationService navigation, IToastService toast)
         : base(localizer, dialogs)
     {
         _navigation = navigation;
+        _saveToast = toast;
+        _paneLocalizer = localizer;
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(IsNew))
@@ -57,7 +61,12 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
 
     protected override async Task OnFinishedAsync(EditOutcome outcome)
     {
-        if (IsHostedInPage)
+        // Save keeps the editor open (page or pane); only Cancel / Delete leave it.
+        if (outcome == EditOutcome.Saved)
+        {
+            await _saveToast.ShowAsync(_paneLocalizer["Saved"]);
+        }
+        else if (IsHostedInPage)
         {
             await _navigation.GoBackAsync();
         }

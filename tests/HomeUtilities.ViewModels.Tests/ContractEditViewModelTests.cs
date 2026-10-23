@@ -460,7 +460,7 @@ public class ContractEditViewModelTests
     }
 
     [Fact]
-    public async Task Save_InPage_NavigatesBackAndReportsTheOutcome()
+    public async Task Save_InPage_StaysOpenReportsTheOutcomeAndConfirms()
     {
         var vm = await FilledNewAsync();
         EditOutcome? outcome = null;
@@ -472,8 +472,10 @@ public class ContractEditViewModelTests
 
         await vm.SaveCommand.ExecuteAsync(null);
 
-        Assert.Equal(1, _kit.Navigation.BackCount);
+        Assert.Equal(0, _kit.Navigation.BackCount);
         Assert.Equal(EditOutcome.Saved, outcome);
+        Assert.False(vm.IsDirty);
+        Assert.Contains("Saved [en]", _kit.Toast.Messages);
     }
 
     [Fact]

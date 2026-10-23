@@ -338,13 +338,19 @@ public class SupplierEditViewModelTests
     }
 
     [Fact]
-    public async Task Finish_InPage_NavigatesBack()
+    public async Task Save_InPage_StaysOpen_AndCancelGoesBack()
     {
         var vm = await CreateNewAsync();
         vm.IsHostedInPage = true;
         vm.Name = "Supplier";
 
         await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, _navigation.BackCount);
+        Assert.False(vm.IsDirty);
+        Assert.Equal("Supplier", vm.Title);
+
+        await vm.CancelCommand.ExecuteAsync(null);
 
         Assert.Equal(1, _navigation.BackCount);
     }

@@ -255,6 +255,7 @@ public class PropertiesViewModelTests
             new FakeLocalizer(_language),
             _dialogs,
             _navigation,
+            new FakeToastService(),
             () => throw new NotSupportedException()));
 
     private static Property Prop(string name, int sortOrder = 0, bool archived = false) => new()

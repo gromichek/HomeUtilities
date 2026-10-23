@@ -345,7 +345,20 @@ internal sealed class ContractTestKit
         new(Contracts, Suppliers, Categories, Properties, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
 
     public PropertyEditViewModel CreatePropertyEditor() =>
-        new(Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, CreateContractEditor);
+        new(Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast, CreateContractEditor);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
+}
+
+internal sealed class FakeErrorLog : IErrorLog
+{
+    public string Text { get; set; } = string.Empty;
+
+    public List<(string Source, Exception Exception)> Entries { get; } = [];
+
+    public void Append(string source, Exception exception) => Entries.Add((source, exception));
+
+    public string ReadAll() => Text;
+
+    public void Clear() => Text = string.Empty;
 }

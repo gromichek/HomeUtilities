@@ -18,9 +18,11 @@ public partial class App : Application
         IServiceProvider services,
         ILanguageService languageService,
         LayoutModeService layoutModeService,
-        IThemeService themeService)
+        IThemeService themeService,
+        IErrorReporter errorReporter)
     {
         _ = languageService.CurrentLanguage;
+        ViewModelBase.ErrorReporter = errorReporter;
         InitializeComponent();
         _services = services;
         _layoutModeService = layoutModeService;

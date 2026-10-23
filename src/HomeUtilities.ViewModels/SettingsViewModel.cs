@@ -15,6 +15,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly IThemeService _themeService;
     private readonly ILayoutModeService _layoutModeService;
     private readonly INavigationService _navigation;
+    private readonly IErrorLog _errorLog;
+    private readonly IClipboardService _clipboard;
+    private readonly IToastService _toast;
 
     private bool _refreshing;
 
@@ -48,6 +51,18 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     [ObservableProperty]
     private string _layoutText = string.Empty;
 
+    [ObservableProperty]
+    private string _errorLogHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _errorLogHint = string.Empty;
+
+    [ObservableProperty]
+    private string _copyLogText = string.Empty;
+
+    [ObservableProperty]
+    private string _clearLogText = string.Empty;
+
     public SettingsViewModel(
         ILocalizer localizer,
         ILanguageService languageService,
@@ -55,8 +70,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         ILayoutModeService layoutModeService,
         IAppInfo appInfo,
         IAppPaths appPaths,
-        INavigationService navigation)
+        INavigationService navigation,
+        IErrorLog errorLog,
+        IClipboardService clipboard,
+        IToastService toast)
     {
+        _errorLog = errorLog;
+        _clipboard = clipboard;
+        _toast = toast;
         _localizer = localizer;
         _languageService = languageService;
         _themeService = themeService;
@@ -72,7 +93,25 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     public string DatabasePath { get; }
 
     [RelayCommand]
-    private Task OpenCategoriesAsync() => _navigation.GoToAsync(Routes.Categories);
+    private Task OpenCategoriesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Categories));
+
+    /// <summary>Puts the error log on the clipboard so the owner can send it; an empty log says so instead.</summary>
+    [RelayCommand]
+    private Task CopyLogAsync() => RunSafeAsync(async () =>
+    {
+        var log = _errorLog.ReadAll();
+        if (log.Length == 0)
+        {
+            await _toast.ShowAsync(_localizer["SettingsErrorLogEmpty"]);
+            return;
+        }
+
+        await _clipboard.SetTextAsync(log);
+        await _toast.ShowAsync(_localizer["Copied"]);
+    });
+
+    [RelayCommand]
+    private void ClearLog() => _errorLog.Clear();
 
     void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) => RefreshLayoutText();
 
@@ -99,6 +138,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         {
             Title = _localizer["SectionSettings"];
             CategoriesText = _localizer["SectionCategories"];
+            ErrorLogHeader = _localizer["SettingsErrorLog"];
+            ErrorLogHint = _localizer["SettingsErrorLogHint"];
+            CopyLogText = _localizer["SettingsErrorLogCopy"];
+            ClearLogText = _localizer["SettingsErrorLogClear"];
             LanguageLabel = _localizer["SettingsLanguage"];
             ThemeLabel = _localizer["SettingsTheme"];
             VersionText = _localizer.Get("SettingsVersion", Version);
