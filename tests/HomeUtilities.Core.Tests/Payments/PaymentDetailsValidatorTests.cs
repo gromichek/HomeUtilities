@@ -17,6 +17,14 @@ public class PaymentDetailsValidatorTests
     }
 
     [Fact]
+    public void Invalid_purpose_template_fails_on_the_template_field()
+    {
+        var error = Single(PaymentDetails.Empty with { PurposeTemplate = "Nr. {CustomerNumber}, {Period:mm.yyyy}" });
+        Assert.Equal((ErrorCodes.PaymentPurposeInvalidFormat, "PurposeTemplate"), (error.Code, error.Field));
+        Assert.Equal("mm.yyyy", Assert.Single(error.Args!));
+    }
+
+    [Fact]
     public void Invalid_iban_fails()
     {
         var error = Single(PaymentDetails.Empty with { Iban = "LV81BANK0000435195001" });

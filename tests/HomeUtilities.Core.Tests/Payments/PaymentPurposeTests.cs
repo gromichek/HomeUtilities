@@ -65,4 +65,58 @@ public class PaymentPurposeTests
     {
         Assert.Equal(expected, PaymentPurpose.Render(template, Empty with { CustomerNumber = "1", Amount = 1m }));
     }
+
+    private static readonly PaymentPurposeContext October = Empty with { CustomerNumber = "12345", Period = new YearMonth(2026, 10) };
+
+    [Theory]
+    [InlineData("Abon. Nr. {CustomerNumber}, {Period:mm.yyyy}", "Abon. Nr. 12345, {Period:mm.yyyy}")] // m = minutes: kept as typed
+    [InlineData("{Period:HH}", "{Period:HH}")]
+    [InlineData("{Period:}", "10.2026")] // empty format = default
+    [InlineData("{Period:MM.yyyy}", "10.2026")]
+    [InlineData("{Period:M/yy}", "10/26")]
+    [InlineData("{Period:M}", "10")] // single letter is a custom format, not the standard "month/day" pattern
+    [InlineData("{Period:y}", "26")]
+    [InlineData("{Period:d}", "1")]
+    [InlineData("{Foo}", "{Foo}")]
+    [InlineData("{Period:MM.yyyy", "{Period:MM.yyyy")]
+    [InlineData("}{{Period}", "}{10.2026")]
+    [InlineData("{Period:ssss}{Period:tt}{Period:K}", "{Period:ssss}{Period:tt}{Period:K}")]
+    public void Render_never_throws_and_keeps_invalid_text_as_typed(string template, string expected)
+    {
+        Assert.Equal(expected, PaymentPurpose.Render(template, October));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("Abon. Nr. {CustomerNumber}, {Period:MM.yyyy}")]
+    [InlineData("{Period}{Period:}{Period:M/yy}{Period:d-M-yyyy}{Period:dd MM yyyy}")]
+    [InlineData("{CustomerNumber}{ContractNumber}{BillNumber}{Amount}{PropertyName}")]
+    public void Validate_accepts_valid_templates(string? template)
+    {
+        Assert.Empty(PaymentPurpose.Validate(template));
+    }
+
+    [Theory]
+    [InlineData("{Period:mm.yyyy}", "payment.purpose_invalid_format", "mm.yyyy")]
+    [InlineData("{Period:HH}", "payment.purpose_invalid_format", "HH")]
+    [InlineData("{Period:K}", "payment.purpose_invalid_format", "K")]
+    [InlineData("{Amount:0.0}", "payment.purpose_invalid_format", "0.0")]
+    [InlineData("{Foo}", "payment.purpose_invalid_placeholder", "{Foo}")]
+    [InlineData("{CustomerNumber", "payment.purpose_invalid_placeholder", "{CustomerNumber")]
+    [InlineData("a } b", "payment.purpose_invalid_placeholder", "a } b")]
+    public void Validate_reports_the_right_code_with_the_offending_text(string template, string code, string arg)
+    {
+        var error = Assert.Single(PaymentPurpose.Validate(template));
+        Assert.Equal(code, error.Code);
+        Assert.Equal(arg, Assert.Single(error.Args!));
+    }
+
+    [Fact]
+    public void Validate_reports_every_problem()
+    {
+        var errors = PaymentPurpose.Validate("{Foo} {Period:mm} {Period:ss}");
+        Assert.Equal(3, errors.Count);
+    }
 }

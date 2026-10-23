@@ -28,6 +28,8 @@ public static partial class PaymentDetailsValidator
             errors.Add(new(ErrorCodes.PaymentBicInvalid, nameof(PaymentDetails.Bic)));
         }
 
+        errors.AddRange(PaymentPurpose.Validate(details.PurposeTemplate).Select(e =>
+            new ValidationError(e.Code, nameof(PaymentDetails.PurposeTemplate), e.Args)));
         CheckLength(errors, details.RecipientName, nameof(PaymentDetails.RecipientName));
         CheckLength(errors, details.RecipientRegistrationNumber, nameof(PaymentDetails.RecipientRegistrationNumber));
         CheckLength(errors, details.Iban, nameof(PaymentDetails.Iban));
