@@ -70,7 +70,7 @@ public class MeterReplacementStoreTests
         Assert.Single(await db.Meters.IgnoreQueryFilters().ToListAsync());
     }
 
-    private static async Task<(Guid PropertyId, Contract Contract)> PrepareAsync(TestDb test)
+    internal static async Task<(Guid PropertyId, Contract Contract)> PrepareAsync(TestDb test)
     {
         var (propertyId, supplierId, categoryId) = await StoreTests.PrepareContractOwnersAsync(test);
         var contract = new Contract

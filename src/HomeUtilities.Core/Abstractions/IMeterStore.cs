@@ -24,4 +24,24 @@ public interface IMeterStore : IStore<Meter>
         IReadOnlyList<ContractMeter> linksToClose,
         IReadOnlyList<ContractMeter> linksToCreate,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Adds new readings to existing registers in one transaction: either all of them are stored or none.
+    /// <see cref="MeterReading.RegisterId"/> is set from the pair.
+    /// </summary>
+    /// <param name="readings">The registers and the new readings to store in them.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="InvalidOperationException">A register does not exist.</exception>
+    Task AddReadingsAsync(IEnumerable<(Guid RegisterId, MeterReading Reading)> readings, CancellationToken ct = default);
+
+    /// <summary>
+    /// Updates stored readings (date, value, kind, submission date, note, photo) in one transaction.
+    /// </summary>
+    /// <param name="readings">The readings with their new values; matched by id.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <exception cref="InvalidOperationException">A reading does not exist.</exception>
+    Task UpdateReadingsAsync(IEnumerable<MeterReading> readings, CancellationToken ct = default);
+
+    /// <summary>Soft-deletes one reading. Does nothing if it does not exist.</summary>
+    Task DeleteReadingAsync(Guid readingId, CancellationToken ct = default);
 }
