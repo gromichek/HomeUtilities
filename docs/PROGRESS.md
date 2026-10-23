@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-014 | Contracts — list in property editor, contract editor | Ready | | |
+| T-014a | Robustness, stay after Save, Android layout fixes | Ready | | owner findings 2026-10-23 |
 
 ## Done
 
@@ -34,13 +34,14 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-012a | UI guidelines applied, Properties reworked | 2026-10-20, #32 | Icon font replaced by lead with 330 KB static Material Icons. Owner manual test pending. |
 | — | Hotfix: icon font bundling, editor visibility, duplicate add | 2026-10-23, #35 | pitfalls added to UI_GUIDELINES §6a |
 | T-013 | Suppliers and categories screens | 2026-10-23, #34 | Lead applied #35 fixes to Suppliers/Categories pages. Shared MasterDetail bases introduced. Owner manual test pending. |
+| — | Hotfix: Windows toast crash | 2026-10-23, #37 | |
+| T-014 | Contracts screens | 2026-10-23, #38 | 135 new tests (753 total). Properties moved to shared MasterDetail bases. Supplier picker without search (OK for now). |
 
 ## Known issues / tech debt
 
 - `ViewModelBase` uses `WeakReferenceMessenger.RegisterAll` (reflection) — check Android release trimming; switch to explicit `Register<T>` if it breaks.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
-- `ContractValidator` does not yet validate `Contract.CustomFields` (use `CustomFieldValidator.ValidateAll`) — in T-014 scope.
 - SQLite decimals lose trailing zeros (`-12.10` → `-12.1`); numerically equal, UI always formats amounts.
 - Snapshot `ChargeWarning.Args` come back as `JsonElement` (display only).
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
@@ -49,6 +50,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - **Flaky test**: linux CI `Test` step failed once on PR #32 and passed on re-run without code changes (logs not accessible to the lead). Next coding session: run the suite several times, look for tests depending on real time, culture or async timing.
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - No "Copied" confirmation on Windows (toast disabled there) until the in-app snackbar (T-019).
+- Link-list logic duplicated in supplier and contract editors (extract helper VM later).
 - Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
@@ -62,4 +64,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-20 | #28 + #29 | Shell, settings, Properties on Windows + Android | Works. **Usability**: identical buttons, unclear grouping, non-standard dialog texts; **Android bugs**: Kind picker empty, Back did not leave the editor (after archive toggle), stray "≡" button → T-012a |
 | 2026-10-23 | #32 | Properties reworked on Windows + Android | Layout OK. **Bugs**: Android icons shown as empty boxes (icon font not bundled — `MauiFont` item missing); Windows empty editor visible with no selection (IsVisible binding on changed BindingContext); duplicate "New property" button → hotfix #35 |
 | 2026-10-23 | #34 + #35 | Suppliers: Copy button | **Crash on Windows**: CommunityToolkit Toast unsupported in unpackaged app → hotfix (no toast on Windows) |
-| | hotfix | Suppliers, categories; Properties after hotfix (icons on Android, empty state) | pending |
+| 2026-10-23 | #37 | Suppliers, categories | **Crash** on purpose template `{Period:mm.yyyy}`; Android: Save closes supplier editor (owner wants to stay); colour swatches cut off → T-014a |
+| | #38 | Contracts | pending |
