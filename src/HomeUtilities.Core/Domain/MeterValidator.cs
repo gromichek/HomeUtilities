@@ -31,7 +31,7 @@ public static class MeterValidator
             errors.Add(new(ErrorCodes.MeterVerificationIntervalOutOfRange, nameof(Meter.VerificationIntervalMonths), [meter.VerificationIntervalMonths]));
         }
 
-        if (!IsUnitCompatible(meter.Resource, meter.Unit))
+        if (!MeterUnitRules.IsCompatible(meter.Resource, meter.Unit))
         {
             errors.Add(new(ErrorCodes.MeterUnitIncompatible, nameof(Meter.Unit), [meter.Resource, meter.Unit]));
         }
@@ -71,12 +71,4 @@ public static class MeterValidator
             errors.Add(new(ErrorCodes.MeterRegisterRequired, nameof(Meter.Registers)));
         }
     }
-
-    private static bool IsUnitCompatible(MeterResource resource, MeterUnit unit) => resource switch
-    {
-        MeterResource.ColdWater or MeterResource.HotWater or MeterResource.Gas => unit == MeterUnit.M3,
-        MeterResource.Electricity => unit == MeterUnit.KWh,
-        MeterResource.Heat => unit is MeterUnit.MWh or MeterUnit.Gcal or MeterUnit.KWh,
-        _ => true,
-    };
 }
