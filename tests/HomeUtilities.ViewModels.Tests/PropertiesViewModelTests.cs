@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Domain;
+using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels.Tests;
 
@@ -94,9 +95,9 @@ public class PropertiesViewModelTests
 
         await vm.AddCommand.ExecuteAsync(null);
 
-        Assert.NotNull(vm.SelectedProperty);
-        Assert.True(vm.SelectedProperty.IsNew);
-        Assert.False(vm.SelectedProperty.IsHostedInPage);
+        Assert.NotNull(vm.SelectedEditor);
+        Assert.True(vm.SelectedEditor.IsNew);
+        Assert.False(vm.SelectedEditor.IsHostedInPage);
         Assert.Empty(_navigation.Visited);
         Assert.True(vm.IsTwoPane);
     }
@@ -110,11 +111,11 @@ public class PropertiesViewModelTests
         var vm = Create();
         await vm.ReloadAsync();
 
-        await vm.SelectCommand.ExecuteAsync(vm.Items[0]);
+        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
 
-        Assert.Equal(flat.Id, vm.SelectedProperty!.PropertyId);
-        Assert.Equal("Flat", vm.SelectedProperty.Name);
-        Assert.False(vm.SelectedProperty.IsNew);
+        Assert.Equal(flat.Id, vm.SelectedEditor!.EntityId);
+        Assert.Equal("Flat", vm.SelectedEditor.Name);
+        Assert.False(vm.SelectedEditor.IsNew);
         Assert.True(vm.Items[0].IsSelected);
     }
 
@@ -126,12 +127,12 @@ public class PropertiesViewModelTests
         var vm = Create();
         await vm.ReloadAsync();
 
-        await vm.SelectCommand.ExecuteAsync(vm.Items[0]);
+        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
 
         var visit = Assert.Single(_navigation.Visited);
         Assert.Equal(Routes.PropertyEdit, visit.Route);
-        Assert.Same(vm.SelectedProperty, visit.Parameters![PropertiesViewModel.EditorParameter]);
-        Assert.True(vm.SelectedProperty!.IsHostedInPage);
+        Assert.Same(vm.SelectedEditor, visit.Parameters![EditorNavigation.EditorParameter]);
+        Assert.True(vm.SelectedEditor!.IsHostedInPage);
     }
 
     [Fact]
@@ -141,21 +142,21 @@ public class PropertiesViewModelTests
         _store.Stored.AddRange([Prop("Flat"), Prop("House", sortOrder: 1)]);
         var vm = Create();
         await vm.ReloadAsync();
-        await vm.SelectCommand.ExecuteAsync(vm.Items[0]);
-        var first = vm.SelectedProperty!;
+        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
+        var first = vm.SelectedEditor!;
         first.Name = "Changed";
         _dialogs.UnsavedChoice = UnsavedChangesChoice.Cancel;
 
-        await vm.SelectCommand.ExecuteAsync(vm.Items[1]);
+        await vm.SelectCommand.ExecuteAsync(vm.Items[1].Id);
 
-        Assert.Same(first, vm.SelectedProperty);
+        Assert.Same(first, vm.SelectedEditor);
         Assert.Equal(1, _dialogs.UnsavedAsked);
 
         _dialogs.UnsavedChoice = UnsavedChangesChoice.DontSave;
-        await vm.SelectCommand.ExecuteAsync(vm.Items[1]);
+        await vm.SelectCommand.ExecuteAsync(vm.Items[1].Id);
 
-        Assert.NotSame(first, vm.SelectedProperty);
-        Assert.Equal("House", vm.SelectedProperty!.Name);
+        Assert.NotSame(first, vm.SelectedEditor);
+        Assert.Equal("House", vm.SelectedEditor!.Name);
     }
 
     [Fact]
@@ -164,16 +165,16 @@ public class PropertiesViewModelTests
         _layout.Change(LayoutMode.Expanded);
         var vm = Create();
         await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedProperty!;
+        var editor = vm.SelectedEditor!;
         editor.Name = "Typed but not saved";
 
         _layout.Change(LayoutMode.Compact);
         await vm.PendingLayoutChange;
 
-        Assert.Same(editor, vm.SelectedProperty);
+        Assert.Same(editor, vm.SelectedEditor);
         Assert.Equal("Typed but not saved", editor.Name);
         Assert.True(editor.IsHostedInPage);
-        Assert.Same(editor, _navigation.Visited.Single().Parameters![PropertiesViewModel.EditorParameter]);
+        Assert.Same(editor, _navigation.Visited.Single().Parameters![EditorNavigation.EditorParameter]);
         Assert.False(vm.IsTwoPane);
     }
 
@@ -183,12 +184,12 @@ public class PropertiesViewModelTests
         _layout.Change(LayoutMode.Compact);
         var vm = Create();
         await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedProperty!;
+        var editor = vm.SelectedEditor!;
 
         _layout.Change(LayoutMode.Expanded);
         await vm.PendingLayoutChange;
 
-        Assert.Same(editor, vm.SelectedProperty);
+        Assert.Same(editor, vm.SelectedEditor);
         Assert.False(editor.IsHostedInPage);
         Assert.Equal(1, _navigation.BackCount);
     }
@@ -200,12 +201,12 @@ public class PropertiesViewModelTests
         var vm = Create();
         await vm.ReloadAsync();
         await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedProperty!;
+        var editor = vm.SelectedEditor!;
         editor.Name = "Flat";
 
         await editor.SaveCommand.ExecuteAsync(null);
 
-        Assert.Same(editor, vm.SelectedProperty);
+        Assert.Same(editor, vm.SelectedEditor);
         Assert.Equal(["Flat"], vm.Items.Select(i => i.Name));
         Assert.True(vm.Items[0].IsSelected);
     }
@@ -217,11 +218,11 @@ public class PropertiesViewModelTests
         _store.Stored.Add(Prop("Flat"));
         var vm = Create();
         await vm.ReloadAsync();
-        await vm.SelectCommand.ExecuteAsync(vm.Items[0]);
+        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
 
-        await vm.SelectedProperty!.DeleteCommand.ExecuteAsync(null);
+        await vm.SelectedEditor!.DeleteCommand.ExecuteAsync(null);
 
-        Assert.Null(vm.SelectedProperty);
+        Assert.Null(vm.SelectedEditor);
         Assert.Empty(vm.Items);
         Assert.Equal(0, _navigation.BackCount);
     }
@@ -245,7 +246,16 @@ public class PropertiesViewModelTests
         new FakeLocalizer(_language),
         _navigation,
         _layout,
-        () => new PropertyEditViewModel(_store, _clock, new FakeLocalizer(_language), _dialogs, _navigation));
+        () => new PropertyEditViewModel(
+            _store,
+            new FakeContractStore(),
+            new FakeSupplierStore(),
+            new FakeCategoryStore(),
+            _clock,
+            new FakeLocalizer(_language),
+            _dialogs,
+            _navigation,
+            () => throw new NotSupportedException()));
 
     private static Property Prop(string name, int sortOrder = 0, bool archived = false) => new()
     {

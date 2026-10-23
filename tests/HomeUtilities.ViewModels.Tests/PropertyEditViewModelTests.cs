@@ -609,7 +609,16 @@ public class PropertyEditViewModelTests
     }
 
     private PropertyEditViewModel Create() =>
-        new(_store, new TestClock(Today), new FakeLocalizer(_language), _dialogs, _navigation);
+        new(
+            _store,
+            new FakeContractStore(),
+            new FakeSupplierStore(),
+            new FakeCategoryStore(),
+            new TestClock(Today),
+            new FakeLocalizer(_language),
+            _dialogs,
+            _navigation,
+            () => throw new NotSupportedException());
 
     private async Task<PropertyEditViewModel> CreateNewAsync()
     {
@@ -643,5 +652,117 @@ public class PropertyEditViewModelTests
     {
         var editor = await TryAddAsync(vm, kind, valueText, validFrom, name);
         Assert.True(editor.Saved, editor.ValueError + editor.NameError + editor.ValidFromError);
+    }
+
+    [Fact]
+    public async Task ContractsCard_ListsContractsOfTheProperty_AndHidesEndedAndArchivedByDefault()
+    {
+        var kit = new ContractTestKit(Today);
+        var supplier = new Supplier { Name = "Water utility" };
+        kit.Suppliers.Stored.Add(supplier);
+        var water = Contract(kit, supplier, "Water", ServiceKind.ColdWater);
+        var ended = Contract(kit, supplier, "Old internet", ServiceKind.Internet);
+        ended.ValidTo = Today.AddDays(-1);
+        var archived = Contract(kit, supplier, "Archived gas", ServiceKind.Gas);
+        archived.IsArchived = true;
+        var endsToday = Contract(kit, supplier, "Heating", ServiceKind.Heating);
+        endsToday.ValidTo = Today;
+        kit.Contracts.Stored.Add(new Contract { PropertyId = Guid.CreateVersion7(), Title = "Other property" });
+
+        var vm = kit.CreatePropertyEditor();
+        await vm.LoadAsync(kit.Property.Id);
+
+        Assert.Equal(["Heating", "Water"], vm.ContractRows.Select(r => r.Title));
+        var row = vm.ContractRows[1];
+        Assert.Equal("Water utility", row.SupplierName);
+        Assert.Equal("Enum_ServiceKind_ColdWater [en]", row.ServiceText);
+        Assert.Equal(kit.Categories.Stored.First(c => c.SystemKey == ServiceKind.ColdWater).Color, row.Color);
+        Assert.False(row.IsEnded);
+
+        vm.ShowEndedContracts = true;
+
+        Assert.Equal(["Archived gas", "Heating", "Old internet", "Water"], vm.ContractRows.Select(r => r.Title));
+        Assert.True(vm.ContractRows.Single(r => r.Title == "Old internet").IsEnded);
+        Assert.True(vm.ContractRows.Single(r => r.Title == "Archived gas").IsArchived);
+    }
+
+    [Fact]
+    public async Task ContractsCard_AddIsDisabledUntilThePropertyIsSaved()
+    {
+        var kit = new ContractTestKit(Today);
+        var vm = kit.CreatePropertyEditor();
+        await vm.LoadAsync(null);
+
+        Assert.False(vm.CanAddContract);
+        Assert.True(vm.ShowContractsSaveFirst);
+        Assert.False(vm.AddContractCommand.CanExecute(null));
+
+        vm.Name = "New flat";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(vm.CanAddContract);
+        Assert.False(vm.ShowContractsSaveFirst);
+        Assert.True(vm.AddContractCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task ContractsCard_AddOpensTheContractEditorForThisProperty_AndRefreshesAfterSave()
+    {
+        var kit = new ContractTestKit(Today);
+        var supplier = new Supplier { Name = "Water utility" };
+        kit.Suppliers.Stored.Add(supplier);
+        var vm = kit.CreatePropertyEditor();
+        await vm.LoadAsync(kit.Property.Id);
+        Assert.True(vm.HasNoContracts);
+
+        await vm.AddContractCommand.ExecuteAsync(null);
+
+        var visit = Assert.Single(kit.Navigation.Visited);
+        Assert.Equal(Routes.ContractEdit, visit.Route);
+        var editor = Assert.IsType<ContractEditViewModel>(visit.Parameters![EditorNavigation.EditorParameter]);
+        Assert.True(editor.IsHostedInPage);
+        Assert.True(editor.IsNew);
+        editor.ContractTitle = "Water";
+        editor.SelectedSupplier = new ChoiceOption(supplier.Id, supplier.Name, string.Empty);
+
+        await editor.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(kit.Property.Id, Assert.Single(kit.Contracts.Saved).PropertyId);
+        Assert.Equal(["Water"], vm.ContractRows.Select(r => r.Title));
+        Assert.False(vm.HasNoContracts);
+    }
+
+    [Fact]
+    public async Task ContractsCard_RowOpensTheExistingContract()
+    {
+        var kit = new ContractTestKit(Today);
+        var supplier = new Supplier { Name = "Water utility" };
+        kit.Suppliers.Stored.Add(supplier);
+        var water = Contract(kit, supplier, "Water", ServiceKind.ColdWater);
+        var vm = kit.CreatePropertyEditor();
+        await vm.LoadAsync(kit.Property.Id);
+
+        vm.ContractRows[0].SelectCommand.Execute(null);
+        await Task.Yield();
+
+        var editor = Assert.IsType<ContractEditViewModel>(
+            Assert.Single(kit.Navigation.Visited).Parameters![EditorNavigation.EditorParameter]);
+        Assert.Equal(water.Id, editor.EntityId);
+        Assert.Equal("Water", editor.ContractTitle);
+    }
+
+    private static Contract Contract(ContractTestKit kit, Supplier supplier, string title, ServiceKind kind)
+    {
+        var contract = new Contract
+        {
+            PropertyId = kit.Property.Id,
+            SupplierId = supplier.Id,
+            CategoryId = kit.CategoryIdFor(kind),
+            Service = kind,
+            Title = title,
+            ValidFrom = new DateOnly(2020, 1, 1),
+        };
+        kit.Contracts.Stored.Add(contract);
+        return contract;
     }
 }

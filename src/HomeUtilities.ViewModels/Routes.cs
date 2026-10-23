@@ -23,4 +23,10 @@ public static class Routes
 
     /// <summary>Pushed page (not a section): the category editor, same parameters as <see cref="PropertyEdit"/>.</summary>
     public const string CategoryEdit = "CategoryEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the contract editor, parameters <c>editor</c> (a running editor) or <c>propertyId</c>
+    /// plus optional <c>id</c>. It is a page in every layout.
+    /// </summary>
+    public const string ContractEdit = "ContractEdit";
 }
