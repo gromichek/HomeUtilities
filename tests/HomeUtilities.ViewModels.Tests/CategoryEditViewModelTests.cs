@@ -166,4 +166,13 @@ public class CategoryEditViewModelTests
         await vm.LoadAsync(category?.Id);
         return vm;
     }
+
+    [Fact]
+    public async Task Swatches_AreSplitIntoTwoFixedRows()
+    {
+        var vm = await LoadAsync(null);
+        Assert.Equal(6, vm.SwatchesRow1.Count);
+        Assert.Equal(vm.Swatches.Count - 6, vm.SwatchesRow2.Count);
+        Assert.Same(vm.Swatches[6], vm.SwatchesRow2[0]);
+    }
 }

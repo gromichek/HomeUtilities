@@ -32,7 +32,18 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
     private bool _isArchived;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SwatchesRow1))]
+    [NotifyPropertyChangedFor(nameof(SwatchesRow2))]
     private IReadOnlyList<ColorSwatchViewModel> _swatches = [];
+
+    /// <summary>Number of colour swatches per row; two fixed rows fit every phone width.</summary>
+    public const int SwatchesPerRow = 6;
+
+    /// <summary>First row of the palette (fixed rows instead of FlexLayout, which clips items on Android).</summary>
+    public IReadOnlyList<ColorSwatchViewModel> SwatchesRow1 => [.. Swatches.Take(SwatchesPerRow)];
+
+    /// <summary>Remaining swatches.</summary>
+    public IReadOnlyList<ColorSwatchViewModel> SwatchesRow2 => [.. Swatches.Skip(SwatchesPerRow)];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNameHint))]
