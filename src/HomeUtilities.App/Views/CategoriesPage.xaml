@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.CategoriesPage"
+                x:DataType="vm:CategoriesViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.Resources>
+        <conv:HexColorConverter x:Key="HexColor" />
+    </views:PageBase.Resources>
+
+    <Grid x:Name="Root" ColumnDefinitions="*,0">
+
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="8">
+            <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
+                    ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                    HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
+
+            <HorizontalStackLayout Grid.Row="1" Spacing="8">
+                <Switch IsToggled="{Binding ShowArchived}" />
+                <Label Text="{Binding ShowArchivedText}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <CollectionView Grid.Row="2" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CategoryItemViewModel">
+                        <Border Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" x:DataType="vm:CategoryItemViewModel" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Border Grid.Column="0" WidthRequest="16" HeightRequest="16" StrokeShape="RoundRectangle 8"
+                                        StrokeThickness="0" VerticalOptions="Center"
+                                        BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding BuiltInText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsBuiltIn}" />
+                                    <Label Text="{Binding ArchivedText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsArchived}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Grid.Row="2" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
+                                 IsVisible="{Binding IsEmpty}">
+                <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Phone layout: floating add button, bottom-right. -->
+            <Button Grid.Row="0" Grid.RowSpan="3" Style="{StaticResource FabButton}"
+                    Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
+                    HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
+                    IsVisible="{Binding ShowAddFab}"
+                    ToolTipProperties.Text="{Binding AddText}"
+                    SemanticProperties.Description="{Binding AddText}" />
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <!-- IsVisible must be evaluated on the page view model, not on the (possibly null) editor. -->
+            <ContentView IsVisible="{Binding HasSelection}">
+                <views:CategoryEditView BindingContext="{Binding SelectedEditor}" />
+            </ContentView>
+            <Label Text="{Binding SelectHintText}" Style="{StaticResource MutedLabel}"
+                   HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowSelectHint}" />
+        </Grid>
+    </Grid>
+
+</views:PageBase>

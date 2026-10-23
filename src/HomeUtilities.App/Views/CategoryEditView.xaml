@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.CategoryEditView"
+             x:DataType="vm:CategoryEditViewModel">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:HexColorConverter x:Key="HexColor" />
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding GeneralHeader}" Style="{StaticResource SectionHeader}" />
+
+                        <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Name}" />
+                        <Label Text="{Binding NameHint}" Style="{StaticResource MutedLabel}" FontSize="12"
+                               IsVisible="{Binding HasNameHint}" />
+                        <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding ColorLabel}" Style="{StaticResource MutedLabel}" />
+                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Swatches}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ColorSwatchViewModel">
+                                    <Border WidthRequest="36" HeightRequest="36" Margin="0,0,8,8"
+                                            StrokeShape="RoundRectangle 18" StrokeThickness="1"
+                                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                                            BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}"
+                                            SemanticProperties.Description="{Binding Color}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" x:DataType="vm:ColorSwatchViewModel" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+                                                <Setter Property="StrokeThickness" Value="4" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <Label Text="{Binding ColorHexLabel}" Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry Grid.Column="0" Text="{Binding Color}" />
+                            <Border Grid.Column="1" WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
+                                    StrokeThickness="1" VerticalOptions="Center"
+                                    Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                                    BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}" />
+                        </Grid>
+                        <Label Text="{Binding ColorError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding ColorError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
+                        <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                        <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch IsToggled="{Binding IsArchived}" />
+                            <Label Text="{Binding ArchivedLabel}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Phone: destructive action at the end of the form (user categories only). -->
+                <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
+                        IsVisible="{Binding ShowFormDelete}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
+                BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                        Style="{StaticResource PrimaryButton}" />
+                <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}" />
+                <Button Grid.Column="3" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}"
+                        IsVisible="{Binding CanShowDelete}" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

@@ -68,12 +68,26 @@ public class SettingsViewModelTests
         Assert.Equal("SettingsLayout Layout_Expanded [en] [en]", vm.LayoutText);
     }
 
-    private static SettingsViewModel Create(out FakeLanguageService language, out FakeThemeService theme, out FakeLayoutModeService layout)
+    [Fact]
+    public async Task OpenCategories_NavigatesToCategoriesPage()
     {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+
+        await vm.OpenCategoriesCommand.ExecuteAsync(null);
+
+        Assert.Equal(Routes.Categories, Assert.Single(navigation.Visited).Route);
+        Assert.Equal("SectionCategories [en]", vm.CategoriesText);
+    }
+
+    private static SettingsViewModel Create(
+        out FakeLanguageService language, out FakeThemeService theme, out FakeLayoutModeService layout, FakeNavigationService? navigation = null)
+    {
+        navigation ??= new FakeNavigationService();
         language = new FakeLanguageService();
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
-        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(), new FakeAppPaths());
+        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(), new FakeAppPaths(), navigation);
     }
 
     private sealed class FakeAppInfo : IAppInfo

@@ -20,6 +20,9 @@ public sealed partial class ShellViewModel : ViewModelBase, IRecipient<LayoutMod
     private string _propertiesTitle = string.Empty;
 
     [ObservableProperty]
+    private string _suppliersTitle = string.Empty;
+
+    [ObservableProperty]
     private string _readingsTitle = string.Empty;
 
     [ObservableProperty]
@@ -52,6 +55,7 @@ public sealed partial class ShellViewModel : ViewModelBase, IRecipient<LayoutMod
         Title = _localizer["AppTitle"];
         OverviewTitle = _localizer["SectionOverview"];
         PropertiesTitle = _localizer["SectionProperties"];
+        SuppliersTitle = _localizer["SectionSuppliers"];
         ReadingsTitle = _localizer["SectionReadings"];
         BillsTitle = _localizer["SectionBills"];
         PaymentsTitle = _localizer["SectionPayments"];

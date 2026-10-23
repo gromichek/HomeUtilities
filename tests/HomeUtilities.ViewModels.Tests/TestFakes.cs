@@ -161,3 +161,96 @@ internal sealed class FakePropertyStore : IPropertyStore
         return Task.CompletedTask;
     }
 }
+
+internal sealed class FakeSupplierStore : ISupplierStore
+{
+    public List<Supplier> Stored { get; } = [];
+
+    public List<Supplier> Saved { get; } = [];
+
+    public List<Guid> Deleted { get; } = [];
+
+    public Task<IReadOnlyList<Supplier>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<Supplier>>([.. Stored]);
+
+    public Task<Supplier?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(s => s.Id == id));
+
+    public Task SaveAsync(Supplier aggregate, CancellationToken ct = default)
+    {
+        Saved.Add(aggregate);
+        Stored.RemoveAll(s => s.Id == aggregate.Id);
+        Stored.Add(aggregate);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        Deleted.Add(id);
+        Stored.RemoveAll(s => s.Id == id);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeCategoryStore : ICategoryStore
+{
+    public List<Category> Stored { get; } = [];
+
+    public List<Category> Saved { get; } = [];
+
+    public List<Guid> Deleted { get; } = [];
+
+    public Task<IReadOnlyList<Category>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<Category>>([.. Stored]);
+
+    public Task<Category?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(c => c.Id == id));
+
+    public Task SaveAsync(Category aggregate, CancellationToken ct = default)
+    {
+        Saved.Add(aggregate);
+        Stored.RemoveAll(c => c.Id == aggregate.Id);
+        Stored.Add(aggregate);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        Deleted.Add(id);
+        Stored.RemoveAll(c => c.Id == id);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeLauncherService : ILauncherService
+{
+    public List<Uri> Opened { get; } = [];
+
+    public Task OpenAsync(Uri uri)
+    {
+        Opened.Add(uri);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeClipboardService : IClipboardService
+{
+    public List<string> Texts { get; } = [];
+
+    public Task SetTextAsync(string text)
+    {
+        Texts.Add(text);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeToastService : IToastService
+{
+    public List<string> Messages { get; } = [];
+
+    public Task ShowAsync(string message)
+    {
+        Messages.Add(message);
+        return Task.CompletedTask;
+    }
+}
