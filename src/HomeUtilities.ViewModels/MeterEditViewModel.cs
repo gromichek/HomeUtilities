@@ -41,7 +41,6 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     private Meter _meter = new();
     private Meter? _pending;
     private Guid _propertyId;
-    private IReadOnlyList<ValidationError> _inputErrors = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedResourceIndex))]
@@ -472,7 +471,6 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     {
         var inputErrors = new List<ValidationError>();
         _pending = BuildMeter(inputErrors);
-        _inputErrors = inputErrors;
 
         var errors = new List<ValidationError>(inputErrors);
         errors.AddRange(MeterValidator.Validate(_pending).Errors);

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:EditorPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                      xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+                      xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+                      xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+                      xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                      xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                      xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+                      x:Class="HomeUtilities.App.Views.MeterEditPage"
+                      x:DataType="vm:MeterEditViewModel"
+                      Title="{Binding Title}">
+
+    <!-- The meter editor is a page on every layout: system Back (handled in EditorPageBase) + Save. Back cancels. -->
+    <views:EditorPageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveSource}" Command="{Binding SaveCommand}" />
+    </views:EditorPageBase.ToolbarItems>
+
+    <views:EditorPageBase.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </views:EditorPageBase.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <!-- 1. General -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
+
+                    <Label Text="{Binding Texts.ResourceLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding Resources}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            SelectedIndex="{Binding SelectedResourceIndex, Mode=TwoWay}" />
+
+                    <Label Text="{Binding Texts.UnitLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding Units}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            SelectedIndex="{Binding SelectedUnitIndex, Mode=TwoWay}" />
+                    <Label Text="{Binding UnitError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding UnitError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding Texts.SerialNumberLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding SerialNumber}" MaxLength="{x:Static core:InputLimits.Code}" />
+                    <Label Text="{Binding SerialNumberError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding SerialNumberError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding Texts.LocationLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding Location}" MaxLength="{x:Static core:InputLimits.Name}" />
+                    <Label Text="{Binding LocationError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding LocationError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding Texts.DigitsLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding DigitsText}" MaxLength="{x:Static core:InputLimits.Count}" Keyboard="Numeric" />
+                    <Label Text="{Binding Texts.DigitsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding DigitsError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding DigitsError, Converter={StaticResource HasText}}" />
+
+                    <Label Text="{Binding Texts.NotesLabel}" Style="{StaticResource MutedLabel}" />
+                    <Editor Text="{Binding Notes}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                    <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 2. Registers: the add button is in the card header; rows have a delete icon. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding Texts.RegistersHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddRegisterCommand}"
+                                ToolTipProperties.Text="{Binding Texts.AddRegisterText}"
+                                SemanticProperties.Description="{Binding Texts.AddRegisterText}" />
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding RegisterRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RegisterRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding DisplayText}" VerticalOptions="Center" />
+                                    <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
+                                            Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                            ToolTipProperties.Text="{Binding DeleteText}"
+                                            SemanticProperties.Description="{Binding DeleteText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button Text="{Binding Texts.DualTariffText}" Command="{Binding ApplyDualTariffCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            IsVisible="{Binding CanApplyDualTariff}" />
+                    <Label Text="{Binding RegistersError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding RegistersError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 3. Installation and verification -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Texts.InstallationHeader}" Style="{StaticResource SectionHeader}" />
+
+                    <Label Text="{Binding Texts.InstalledOnLabel}" Style="{StaticResource MutedLabel}" />
+                    <DatePicker Date="{Binding InstalledOn, Converter={StaticResource DateOnly}}" />
+                    <Label Text="{Binding InstalledOnError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding InstalledOnError, Converter={StaticResource HasText}}" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding HasVerifiedOn}" />
+                        <Label Text="{Binding Texts.HasVerifiedOnLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasVerifiedOn}">
+                        <Label Text="{Binding Texts.VerifiedOnLabel}" Style="{StaticResource MutedLabel}" />
+                        <DatePicker Date="{Binding VerifiedOn, Converter={StaticResource DateOnly}}" />
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding Texts.IntervalLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding IntervalText}" MaxLength="{x:Static core:InputLimits.Count}" Keyboard="Numeric" />
+                    <Label Text="{Binding Texts.IntervalHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding IntervalError}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding IntervalError, Converter={StaticResource HasText}}" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding HasDueOverride}" />
+                        <Label Text="{Binding Texts.HasDueOverrideLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasDueOverride}">
+                        <Label Text="{Binding Texts.DueOverrideLabel}" Style="{StaticResource MutedLabel}" />
+                        <DatePicker Date="{Binding DueOverride, Converter={StaticResource DateOnly}}" />
+                    </VerticalStackLayout>
+
+                    <!-- Computed next verification with the same colours as the badge in the list. -->
+                    <Label Text="{Binding VerificationLine}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasVerificationLine}" />
+                    <Label Text="{Binding VerificationBadgeText}" Style="{StaticResource BadgeOverdueLabel}" IsVisible="{Binding IsVerificationOverdue}" />
+                    <Label Text="{Binding VerificationBadgeText}" Style="{StaticResource BadgeDueSoonLabel}" IsVisible="{Binding IsVerificationDueSoon}" />
+
+                    <Button Text="{Binding Texts.ReplaceText}" Command="{Binding ReplaceCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            IsVisible="{Binding CanReplace}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 4. Contracts that use the meter -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Texts.ContractsHeader}" Style="{StaticResource SectionHeader}" />
+                    <Label Text="{Binding Texts.ContractsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding Texts.ContractsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoContracts}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ContractSwitches}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MeterContractSwitchViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" />
+                                    </VerticalStackLayout>
+                                    <Switch Grid.Column="1" IsToggled="{Binding IsOn}" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 5. History (read-only): the meter this one replaced and the one that replaced it. -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding HasHistory}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Texts.HistoryHeader}" Style="{StaticResource SectionHeader}" />
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding HistoryRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MeterHistoryRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <Label Grid.Column="0" Text="{Binding Text}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{StaticResource IconOpenLink}" FontFamily="{DynamicResource IconFontFamily}"
+                                           VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Destructive action at the end of the form, apart from Save; a meter with readings is replaced, not deleted. -->
+            <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                    Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
+                    IsVisible="{Binding ShowFormDelete}" />
+            <Label Text="{Binding Texts.DeleteBlockedText}" Style="{StaticResource MutedLabel}"
+                   IsVisible="{Binding ShowDeleteBlocked}" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</views:EditorPageBase>

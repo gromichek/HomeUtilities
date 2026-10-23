@@ -272,4 +272,113 @@
   <data name="Error_custom_field_name_duplicate" xml:space="preserve"><value>Поле с таким названием уже есть.</value></data>
   <data name="Error_custom_field_invalid_value" xml:space="preserve"><value>Значение не соответствует типу поля.</value></data>
   <data name="Error_custom_field_value_too_long" xml:space="preserve"><value>Текст длиннее {0} символов.</value></data>
+  <data name="Enum_MeterResource_ColdWater" xml:space="preserve"><value>Холодная вода</value></data>
+  <data name="Enum_MeterResource_HotWater" xml:space="preserve"><value>Горячая вода</value></data>
+  <data name="Enum_MeterResource_Electricity" xml:space="preserve"><value>Электричество</value></data>
+  <data name="Enum_MeterResource_Gas" xml:space="preserve"><value>Газ</value></data>
+  <data name="Enum_MeterResource_Heat" xml:space="preserve"><value>Тепло</value></data>
+  <data name="Enum_MeterResource_Other" xml:space="preserve"><value>Другое</value></data>
+  <data name="Enum_MeterUnit_M3" xml:space="preserve"><value>м³</value></data>
+  <data name="Enum_MeterUnit_KWh" xml:space="preserve"><value>кВт·ч</value></data>
+  <data name="Enum_MeterUnit_MWh" xml:space="preserve"><value>МВт·ч</value></data>
+  <data name="Enum_MeterUnit_Gcal" xml:space="preserve"><value>Гкал</value></data>
+  <data name="Enum_RegisterKind_Total" xml:space="preserve"><value>Общий</value></data>
+  <data name="Enum_RegisterKind_Day" xml:space="preserve"><value>День</value></data>
+  <data name="Enum_RegisterKind_Night" xml:space="preserve"><value>Ночь</value></data>
+  <data name="Enum_RegisterKind_Peak" xml:space="preserve"><value>Пик</value></data>
+  <data name="Enum_RegisterKind_Export" xml:space="preserve"><value>Отдача</value></data>
+  <data name="Enum_EnergyDirection_Import" xml:space="preserve"><value>Потребление</value></data>
+  <data name="Enum_EnergyDirection_Export" xml:space="preserve"><value>Отдача в сеть</value></data>
+  <data name="MetersHeader" xml:space="preserve"><value>Счётчики</value></data>
+  <data name="MetersEmpty" xml:space="preserve"><value>Счётчиков пока нет.</value></data>
+  <data name="MeterAdd" xml:space="preserve"><value>Добавить счётчик</value></data>
+  <data name="MetersShowRemoved" xml:space="preserve"><value>Показать снятые</value></data>
+  <data name="MeterRemoved" xml:space="preserve"><value>Снят {0:d}</value></data>
+  <data name="MeterUnnamed" xml:space="preserve"><value>Счётчик</value></data>
+  <data name="MeterNumbered" xml:space="preserve"><value>Счётчик {0}</value></data>
+  <data name="MeterNoSerial" xml:space="preserve"><value>без серийного номера</value></data>
+  <data name="MeterVerificationOverdue" xml:space="preserve"><value>Поверка просрочена с {0:d}</value></data>
+  <data name="MeterVerificationDue" xml:space="preserve"><value>Поверка до {0:d}</value></data>
+  <data name="MeterNextVerification" xml:space="preserve"><value>Следующая поверка: {0:d}</value></data>
+  <data name="MeterNew" xml:space="preserve"><value>Новый счётчик</value></data>
+  <data name="MeterDelete" xml:space="preserve"><value>Удалить счётчик</value></data>
+  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Счётчики с показаниями удалить нельзя — используйте «Заменить».</value></data>
+  <data name="MeterGeneral" xml:space="preserve"><value>Основное</value></data>
+  <data name="MeterResourceLabel" xml:space="preserve"><value>Ресурс *</value></data>
+  <data name="MeterUnitLabel" xml:space="preserve"><value>Единица *</value></data>
+  <data name="MeterSerialNumberLabel" xml:space="preserve"><value>Серийный номер</value></data>
+  <data name="MeterLocationLabel" xml:space="preserve"><value>Расположение</value></data>
+  <data name="MeterDigitsLabel" xml:space="preserve"><value>Разрядов на циферблате</value></data>
+  <data name="MeterDigitsHint" xml:space="preserve"><value>Нужно для перехода через ноль, например 99999 → 00000 (1–12).</value></data>
+  <data name="MeterNotesLabel" xml:space="preserve"><value>Заметки</value></data>
+  <data name="MeterRegistersHeader" xml:space="preserve"><value>Регистры</value></data>
+  <data name="MeterRegisterAdd" xml:space="preserve"><value>Добавить регистр</value></data>
+  <data name="MeterDualTariff" xml:space="preserve"><value>Два тарифа (день/ночь)</value></data>
+  <data name="MeterRegisterNoneLeft" xml:space="preserve"><value>Все виды регистров уже добавлены.</value></data>
+  <data name="MeterRegisterHasReadings" xml:space="preserve"><value>У этого регистра есть показания, удалить его нельзя.</value></data>
+  <data name="MeterInstallationHeader" xml:space="preserve"><value>Установка и поверка</value></data>
+  <data name="MeterInstalledOnLabel" xml:space="preserve"><value>Установлен *</value></data>
+  <data name="MeterHasVerifiedOnLabel" xml:space="preserve"><value>Есть дата поверки</value></data>
+  <data name="MeterVerifiedOnLabel" xml:space="preserve"><value>Поверен</value></data>
+  <data name="MeterIntervalLabel" xml:space="preserve"><value>Межповерочный интервал (месяцев)</value></data>
+  <data name="MeterIntervalHint" xml:space="preserve"><value>Для счётчиков воды обычно 72.</value></data>
+  <data name="MeterHasDueOverrideLabel" xml:space="preserve"><value>Указать дату следующей поверки вручную</value></data>
+  <data name="MeterDueOverrideLabel" xml:space="preserve"><value>Следующая поверка</value></data>
+  <data name="MeterReplace" xml:space="preserve"><value>Заменить счётчик…</value></data>
+  <data name="MeterReplaced" xml:space="preserve"><value>Счётчик заменён</value></data>
+  <data name="MeterContractsHeader" xml:space="preserve"><value>Договоры</value></data>
+  <data name="MeterContractsHint" xml:space="preserve"><value>Счётчик горячей воды обычно привязан и к договору на воду, и к договору на отопление.</value></data>
+  <data name="MeterContractsEmpty" xml:space="preserve"><value>В этом объекте пока нет договоров.</value></data>
+  <data name="MeterHistoryHeader" xml:space="preserve"><value>История</value></data>
+  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Заменил счётчик {0} {1:d}</value></data>
+  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Заменён счётчиком {0} {1:d}</value></data>
+  <data name="RegisterNew" xml:space="preserve"><value>Новый регистр</value></data>
+  <data name="RegisterKindLabel" xml:space="preserve"><value>Регистр</value></data>
+  <data name="RegisterExportHint" xml:space="preserve"><value>Считает энергию, отданную в сеть.</value></data>
+  <data name="WizardTitle" xml:space="preserve"><value>Замена счётчика</value></data>
+  <data name="WizardStepOf" xml:space="preserve"><value>Шаг {0} из {1}</value></data>
+  <data name="WizardDateStep" xml:space="preserve"><value>Дата замены</value></data>
+  <data name="WizardFinalStep" xml:space="preserve"><value>Последние показания старого счётчика</value></data>
+  <data name="WizardNewMeterStep" xml:space="preserve"><value>Новый счётчик</value></data>
+  <data name="WizardContractsStep" xml:space="preserve"><value>Договоры</value></data>
+  <data name="WizardSummaryStep" xml:space="preserve"><value>Итог</value></data>
+  <data name="WizardDateLabel" xml:space="preserve"><value>Дата замены *</value></data>
+  <data name="WizardLastReadingDate" xml:space="preserve"><value>Последние показания: {0:d}</value></data>
+  <data name="WizardFinalReadingLabel" xml:space="preserve"><value>Конечные показания *</value></data>
+  <data name="WizardInitialReadingLabel" xml:space="preserve"><value>Начальные показания *</value></data>
+  <data name="WizardLastReading" xml:space="preserve"><value>Последние показания: {0} от {1:d}</value></data>
+  <data name="WizardRolloverWarning" xml:space="preserve"><value>Меньше последних показаний {0} — считается переходом через ноль ({1} разрядов).</value></data>
+  <data name="WizardContractsHint" xml:space="preserve"><value>Новый счётчик учитывается в выбранных договорах с даты замены. Привязки старого счётчика заканчиваются накануне.</value></data>
+  <data name="WizardNext" xml:space="preserve"><value>Далее</value></data>
+  <data name="WizardBack" xml:space="preserve"><value>Назад</value></data>
+  <data name="WizardReplace" xml:space="preserve"><value>Заменить</value></data>
+  <data name="WizardSummaryOld" xml:space="preserve"><value>Счётчик {0} снимается {1:d}.</value></data>
+  <data name="WizardSummaryFinal" xml:space="preserve"><value>{0}: конечные показания {1}</value></data>
+  <data name="WizardSummaryNew" xml:space="preserve"><value>Новый счётчик {0} устанавливается {1:d}.</value></data>
+  <data name="WizardSummaryInitial" xml:space="preserve"><value>{0}: начальные показания {1}</value></data>
+  <data name="WizardSummaryContracts" xml:space="preserve"><value>Учитывается в договорах: {0}</value></data>
+  <data name="WizardSummaryNoContracts" xml:space="preserve"><value>Не привязан ни к одному договору.</value></data>
+  <data name="Error_common_text_too_long" xml:space="preserve"><value>Текст длиннее {0} символов.</value></data>
+  <data name="Error_meter_wizard_date_before_installed" xml:space="preserve"><value>Дата раньше даты установки счётчика ({0:d}).</value></data>
+  <data name="Error_meter_wizard_date_before_last_reading" xml:space="preserve"><value>Дата раньше последних показаний ({0:d}).</value></data>
+  <data name="Error_meter_wizard_final_below_last" xml:space="preserve"><value>Меньше последних показаний ({0}). Если счётчик прошёл через ноль, укажите число разрядов в счётчике.</value></data>
+  <data name="Error_meter_property_required" xml:space="preserve"><value>Счётчик должен относиться к объекту.</value></data>
+  <data name="Error_meter_digits_out_of_range" xml:space="preserve"><value>Введите число разрядов от 1 до 12.</value></data>
+  <data name="Error_meter_removed_before_installed" xml:space="preserve"><value>Дата снятия раньше даты установки.</value></data>
+  <data name="Error_meter_verification_interval_out_of_range" xml:space="preserve"><value>Введите интервал от 1 до 600 месяцев.</value></data>
+  <data name="Error_meter_register_required" xml:space="preserve"><value>У счётчика должен быть хотя бы один регистр.</value></data>
+  <data name="Error_meter_duplicate_register" xml:space="preserve"><value>Этот регистр указан дважды.</value></data>
+  <data name="Error_meter_export_direction_mismatch" xml:space="preserve"><value>Регистр отдачи должен считать энергию, отданную в сеть.</value></data>
+  <data name="Error_meter_unit_incompatible" xml:space="preserve"><value>Эта единица не подходит к ресурсу.</value></data>
+  <data name="Error_meter_reading_value_negative" xml:space="preserve"><value>Показания не могут быть отрицательными.</value></data>
+  <data name="Error_meter_reading_date_outside_installation" xml:space="preserve"><value>Дата вне периода, когда счётчик был установлен.</value></data>
+  <data name="Error_meter_reading_duplicate_initial" xml:space="preserve"><value>У регистра уже есть начальные показания.</value></data>
+  <data name="Error_meter_reading_initial_not_earliest" xml:space="preserve"><value>Начальные показания должны быть самыми ранними.</value></data>
+  <data name="Error_meter_reading_duplicate_final" xml:space="preserve"><value>У регистра уже есть конечные показания.</value></data>
+  <data name="Error_meter_reading_final_not_latest" xml:space="preserve"><value>Конечные показания должны быть самыми поздними.</value></data>
+  <data name="Error_meter_reading_final_date_mismatch" xml:space="preserve"><value>Конечные показания должны быть датированы днём снятия.</value></data>
+  <data name="Error_meter_reading_duplicate_on_date" xml:space="preserve"><value>На эту дату уже есть показание такого вида.</value></data>
+  <data name="Error_contract_meter_contract_required" xml:space="preserve"><value>Выберите договор.</value></data>
+  <data name="Error_contract_meter_meter_required" xml:space="preserve"><value>Выберите счётчик.</value></data>
+  <data name="Error_contract_meter_valid_to_before_valid_from" xml:space="preserve"><value>Дата окончания раньше даты начала.</value></data>
 </root>

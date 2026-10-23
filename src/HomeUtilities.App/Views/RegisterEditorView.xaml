@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.RegisterEditorView"
+             x:DataType="vm:RegisterEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+
+            <Label Text="{Binding KindLabel}" Style="{StaticResource MutedLabel}" />
+            <Picker ItemsSource="{Binding Kinds}"
+                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}" />
+            <Label Text="{Binding ExportHint}" Style="{StaticResource MutedLabel}" FontSize="12"
+                   IsVisible="{Binding ExportHint, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>
