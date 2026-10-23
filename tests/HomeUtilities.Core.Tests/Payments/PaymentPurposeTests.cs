@@ -118,6 +118,8 @@ public class PaymentPurposeTests
     {
         var errors = PaymentPurpose.Validate("{Foo} {Period:mm} {Period:ss}");
         Assert.Equal(3, errors.Count);
+    }
+
     [Theory]
     [InlineData("Abon. Nr. {CustomerNumber}, {Period:mm.yyyy}", "Abon. Nr. 12345, {Period:mm.yyyy}")]
     [InlineData("{Period:HH}", "{Period:HH}")]
