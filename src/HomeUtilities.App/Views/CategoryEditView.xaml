@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
@@ -22,14 +23,17 @@
                         <Label Text="{Binding GeneralHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
-                        <Entry Text="{Binding Name}" />
+                        <Entry Text="{Binding Name}" MaxLength="{x:Static core:InputLimits.Name}" />
                         <Label Text="{Binding NameHint}" Style="{StaticResource MutedLabel}" FontSize="12"
                                IsVisible="{Binding HasNameHint}" />
                         <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding ColorLabel}" Style="{StaticResource MutedLabel}" />
-                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Swatches}">
+                        <!-- The Grid gives the FlexLayout a finite width; directly inside a stack it measures as one endless row on Android. -->
+                        <Grid>
+                        <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Start" AlignContent="Start"
+                                    BindableLayout.ItemsSource="{Binding Swatches}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:ColorSwatchViewModel">
                                     <Border WidthRequest="36" HeightRequest="36" Margin="0,0,8,8"
@@ -50,10 +54,11 @@
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </FlexLayout>
+                        </Grid>
 
                         <Label Text="{Binding ColorHexLabel}" Style="{StaticResource MutedLabel}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                            <Entry Grid.Column="0" Text="{Binding Color}" />
+                            <Entry Grid.Column="0" Text="{Binding Color}" MaxLength="{x:Static core:InputLimits.Color}" />
                             <Border Grid.Column="1" WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
                                     StrokeThickness="1" VerticalOptions="Center"
                                     Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
@@ -63,7 +68,7 @@
                                IsVisible="{Binding ColorError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
-                        <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                        <Editor Text="{Binding Notes}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
                         <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
 

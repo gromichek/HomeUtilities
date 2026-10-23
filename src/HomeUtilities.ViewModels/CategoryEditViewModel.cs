@@ -60,8 +60,9 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
         ICategoryStore store,
         ILocalizer localizer,
         IDialogService dialogs,
-        INavigationService navigation)
-        : base(localizer, dialogs, navigation)
+        INavigationService navigation,
+        IToastService toast)
+        : base(localizer, dialogs, navigation, toast)
     {
         _store = store;
         _localizer = localizer;

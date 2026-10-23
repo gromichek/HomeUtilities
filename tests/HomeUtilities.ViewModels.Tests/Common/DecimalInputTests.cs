@@ -52,4 +52,15 @@ public class DecimalInputTests
         Assert.Equal("3", DecimalInput.Format(3m, English, 0));
         Assert.Equal("-12.1", DecimalInput.Format(-12.10m, English, 2));
     }
+
+    [Theory]
+    [InlineData("99999999999999999999999999999999")]
+    [InlineData("-99999999999999999999999999999999")]
+    [InlineData("79228162514264337593543950336")]
+    [InlineData("1e5")]
+    [InlineData("0x10")]
+    public void TryParse_ReturnsFalseOnOverflowAndOtherNonsense_WithoutThrowing(string text)
+    {
+        Assert.False(DecimalInput.TryParse(text, English, out _));
+    }
 }

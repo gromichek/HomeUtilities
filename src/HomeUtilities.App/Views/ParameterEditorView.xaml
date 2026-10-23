@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
@@ -25,13 +26,13 @@
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustom}">
                 <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
-                <Entry Text="{Binding Name}" />
+                <Entry Text="{Binding Name}" MaxLength="{x:Static core:InputLimits.Name}" />
                 <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
                        IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
             </VerticalStackLayout>
 
             <Label Text="{Binding ValueLabel}" Style="{StaticResource MutedLabel}" />
-            <Entry Text="{Binding ValueText}" Keyboard="Text" />
+            <Entry Text="{Binding ValueText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
             <Label Text="{Binding ValueError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding ValueError, Converter={StaticResource HasText}}" />
 
@@ -41,7 +42,7 @@
                    IsVisible="{Binding ValidFromError, Converter={StaticResource HasText}}" />
 
             <Label Text="{Binding NoteLabel}" Style="{StaticResource MutedLabel}" />
-            <Entry Text="{Binding Note}" />
+            <Entry Text="{Binding Note}" MaxLength="{x:Static core:InputLimits.Notes}" />
             <Label Text="{Binding NoteError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding NoteError, Converter={StaticResource HasText}}" />
 

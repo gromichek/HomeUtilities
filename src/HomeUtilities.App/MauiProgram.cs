@@ -20,6 +20,10 @@ public static class MauiProgram
 
         var appPaths = new AppPaths();
         builder.Services.AddSingleton<IAppPaths>(appPaths);
+        var errorLog = new FileErrorLog(appPaths.ErrorLogPath);
+        GlobalErrorHandlers.Install(errorLog);
+        builder.Services.AddSingleton<IErrorLog>(errorLog);
+        builder.Services.AddSingleton<IErrorReporter, ErrorReporter>();
         builder.Services.AddSingleton<IClock, SystemClock>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<ILocalizer, ResxLocalizer>();

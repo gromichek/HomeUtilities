@@ -2,6 +2,46 @@ namespace HomeUtilities.ViewModels.Tests;
 
 public class SettingsViewModelTests
 {
+    private FakeErrorLog ErrorLog { get; } = new();
+
+    private FakeClipboardService Clipboard { get; } = new();
+
+    private FakeToastService Toast { get; } = new();
+
+    [Fact]
+    public async Task CopyLog_PutsTheLogOnTheClipboard()
+    {
+        var vm = Create(out _, out _, out _);
+        ErrorLog.Text = "boom";
+
+        await vm.CopyLogCommand.ExecuteAsync(null);
+
+        Assert.Equal(["boom"], Clipboard.Texts);
+        Assert.Equal(["Copied [en]"], Toast.Messages);
+    }
+
+    [Fact]
+    public async Task CopyLog_WithEmptyLog_SaysSoAndCopiesNothing()
+    {
+        var vm = Create(out _, out _, out _);
+
+        await vm.CopyLogCommand.ExecuteAsync(null);
+
+        Assert.Empty(Clipboard.Texts);
+        Assert.Equal(["SettingsErrorLogEmpty [en]"], Toast.Messages);
+    }
+
+    [Fact]
+    public void ClearLog_ClearsTheLog()
+    {
+        var vm = Create(out _, out _, out _);
+        ErrorLog.Text = "boom";
+
+        vm.ClearLogCommand.Execute(null);
+
+        Assert.Equal(string.Empty, ErrorLog.Text);
+    }
+
     [Fact]
     public void Languages_AreListedWithLocalizedNamesAndCurrentSelected()
     {
@@ -80,14 +120,14 @@ public class SettingsViewModelTests
         Assert.Equal("SectionCategories [en]", vm.CategoriesText);
     }
 
-    private static SettingsViewModel Create(
+    private SettingsViewModel Create(
         out FakeLanguageService language, out FakeThemeService theme, out FakeLayoutModeService layout, FakeNavigationService? navigation = null)
     {
         navigation ??= new FakeNavigationService();
         language = new FakeLanguageService();
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
-        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(), new FakeAppPaths(), navigation);
+        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast);
     }
 
     private sealed class FakeAppInfo : IAppInfo
@@ -98,5 +138,7 @@ public class SettingsViewModelTests
     private sealed class FakeAppPaths : IAppPaths
     {
         public string DatabasePath => "/data/test.db";
+
+        public string ErrorLogPath => "/data/logs/errors.log";
     }
 }

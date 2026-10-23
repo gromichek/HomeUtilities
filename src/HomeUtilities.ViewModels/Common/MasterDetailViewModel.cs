@@ -90,10 +90,10 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     }
 
     [RelayCommand]
-    private Task AddAsync() => OpenEditorAsync(null);
+    private Task AddAsync() => RunSafeAsync(() => OpenEditorAsync(null));
 
     [RelayCommand]
-    private Task SelectAsync(Guid id) => OpenEditorAsync(id);
+    private Task SelectAsync(Guid id) => RunSafeAsync(() => OpenEditorAsync(id));
 
     partial void OnSelectedEditorChanged(TEditor? value) => MarkSelectedItem();
 
@@ -134,8 +134,8 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
 
     private async Task EditorFinishedAsync(TEditor editor, EditOutcome outcome)
     {
-        // After a successful save in the side pane the editor stays; every other way out closes it.
-        if (outcome != EditOutcome.Saved || editor.IsHostedInPage)
+        // After a successful save the editor stays (pane or page); every other way out closes it.
+        if (outcome != EditOutcome.Saved)
         {
             Detach(editor);
         }
@@ -168,7 +168,13 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         else if (IsTwoPane && editor.IsHostedInPage)
         {
             editor.IsHostedInPage = false;
-            await _navigation.GoBackAsync();
+
+            // Only pop the editor's own page. When a child page (e.g. a contract) is on top, popping would close that
+            // one instead; the editor page below pops itself when it appears again (see EditorPageBase).
+            if (_navigation.IsShowing(editor))
+            {
+                await _navigation.GoBackAsync();
+            }
         }
     }
 }

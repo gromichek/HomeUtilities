@@ -333,7 +333,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         IClipboardService clipboard,
         IToastService toast,
         Func<SupplierEditViewModel> supplierEditorFactory)
-        : base(localizer, dialogs, navigation)
+        : base(localizer, dialogs, navigation, toast)
     {
         _store = store;
         _supplierStore = supplierStore;
@@ -551,7 +551,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
 
     /// <summary>Opens the category list; the chosen category becomes the user's own choice.</summary>
     [RelayCommand]
-    private async Task ChooseCategoryAsync()
+    private Task ChooseCategoryAsync() => RunSafeAsync(async () =>
     {
         var options = CategoryOptions();
         var picked = await Dialogs.ChooseAsync(_localizer["ContractChooseCategory"], [.. options.Select(o => o.Name)]);
@@ -562,11 +562,11 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
 
         _categoryTouched = true;
         SelectedCategory = option;
-    }
+    });
 
     /// <summary>Opens the supplier list with "＋ New supplier…" as the last entry.</summary>
     [RelayCommand]
-    private async Task ChooseSupplierAsync()
+    private Task ChooseSupplierAsync() => RunSafeAsync(async () =>
     {
         var options = SupplierOptions();
         var newSupplier = _localizer["ContractNewSupplier"];
@@ -584,14 +584,14 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         {
             SelectedSupplier = option;
         }
-    }
+    });
 
     /// <summary>
     /// Opens the supplier editor as a page; when the supplier was saved the list is re-read and the new supplier
     /// becomes the selected one. Anything else leaves the selection alone.
     /// </summary>
     [RelayCommand]
-    private async Task NewSupplierAsync()
+    private Task NewSupplierAsync() => RunSafeAsync(async () =>
     {
         var editor = _supplierEditorFactory();
         editor.IsHostedInPage = true;
@@ -608,7 +608,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         };
         await editor.LoadAsync(null);
         await _navigation.GoToAsync(Routes.SupplierEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
-    }
+    });
 
     /// <summary>Groups the typed IBAN by four characters; bound to the field losing focus.</summary>
     [RelayCommand]
@@ -634,16 +634,16 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     }
 
     [RelayCommand]
-    private Task CopyIbanAsync() => CopyAsync(Iban.Normalize(EffectiveIban));
+    private Task CopyIbanAsync() => RunSafeAsync(() => CopyAsync(Iban.Normalize(EffectiveIban)));
 
     [RelayCommand]
-    private Task CopyRecipientAsync() => CopyAsync(EffectiveRecipient.Trim());
+    private Task CopyRecipientAsync() => RunSafeAsync(() => CopyAsync(EffectiveRecipient.Trim()));
 
     [RelayCommand]
-    private Task CopyPurposeAsync() => CopyAsync(EffectivePurpose);
+    private Task CopyPurposeAsync() => RunSafeAsync(() => CopyAsync(EffectivePurpose));
 
     [RelayCommand]
-    private async Task AddLinkAsync()
+    private Task AddLinkAsync() => RunSafeAsync(async () =>
     {
         var editor = new LinkEditorViewModel(_localizer, null);
         if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
@@ -654,10 +654,10 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _linkRows.Add(CreateLinkRow(result));
         RebuildLinks();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task EditLinkAsync(LinkRowViewModel row)
+    private Task EditLinkAsync(LinkRowViewModel row) => RunSafeAsync(async () =>
     {
         var current = new Link { Kind = row.Kind, Title = row.Title, Url = row.Url };
         var editor = new LinkEditorViewModel(_localizer, current);
@@ -672,10 +672,10 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         row.ErrorText = string.Empty;
         RebuildLinks();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task RemoveLinkAsync(LinkRowViewModel row)
+    private Task RemoveLinkAsync(LinkRowViewModel row) => RunSafeAsync(async () =>
     {
         if (!await ConfirmRowDeleteAsync(row.DisplayText))
         {
@@ -685,11 +685,11 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _linkRows.Remove(row);
         RebuildLinks();
         MarkDirty();
-    }
+    });
 
     /// <summary>Opens the link in the system browser; a URL that is not http/https shows the validation message instead.</summary>
     [RelayCommand]
-    private async Task OpenLinkAsync(LinkRowViewModel row)
+    private Task OpenLinkAsync(LinkRowViewModel row) => RunSafeAsync(async () =>
     {
         var uri = new Link { Url = row.Url.Trim() }.TryGetUri();
         if (uri is null)
@@ -700,10 +700,10 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
 
         row.ErrorText = string.Empty;
         await _launcher.OpenAsync(uri);
-    }
+    });
 
     [RelayCommand]
-    private async Task AddCustomFieldAsync()
+    private Task AddCustomFieldAsync() => RunSafeAsync(async () =>
     {
         var editor = new CustomFieldEditorViewModel(_localizer, null, candidate => IsDuplicateField(candidate, null));
         if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
@@ -714,10 +714,10 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _fieldRows.Add(CreateFieldRow(result));
         RebuildFields();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task EditCustomFieldAsync(CustomFieldRowViewModel row)
+    private Task EditCustomFieldAsync(CustomFieldRowViewModel row) => RunSafeAsync(async () =>
     {
         var current = new CustomFieldDefinition { Name = row.Name, Kind = row.Kind, Target = row.Target };
         var editor = new CustomFieldEditorViewModel(_localizer, current, candidate => IsDuplicateField(candidate, row));
@@ -732,10 +732,10 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         row.ErrorText = string.Empty;
         RebuildFields();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task RemoveCustomFieldAsync(CustomFieldRowViewModel row)
+    private Task RemoveCustomFieldAsync(CustomFieldRowViewModel row) => RunSafeAsync(async () =>
     {
         if (!await ConfirmRowDeleteAsync(row.DisplayText))
         {
@@ -745,7 +745,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _fieldRows.Remove(row);
         RebuildFields();
         MarkDirty();
-    }
+    });
 
     protected override IReadOnlyList<ValidationError> Validate()
     {

@@ -89,7 +89,13 @@ internal sealed class FakeDialogService : IDialogService
 
     public EditorDialogViewModel? LastEditor { get; private set; }
 
-    public Task AlertAsync(string title, string message) => Task.CompletedTask;
+    public List<(string Title, string Message)> Alerts { get; } = [];
+
+    public Task AlertAsync(string title, string message)
+    {
+        Alerts.Add((title, message));
+        return Task.CompletedTask;
+    }
 
     public Task<bool> ConfirmAsync(string title, string message, string accept, string cancel)
     {
@@ -119,6 +125,11 @@ internal sealed class FakeNavigationService : INavigationService
     public List<(string Route, IReadOnlyDictionary<string, object>? Parameters)> Visited { get; } = [];
 
     public int BackCount { get; private set; }
+
+    /// <summary>The view model whose page is on top; null = none (then <see cref="IsShowing"/> says yes for any editor).</summary>
+    public object? Top { get; set; }
+
+    public bool IsShowing(object viewModel) => Top is null || ReferenceEquals(Top, viewModel);
 
     public Task GoToAsync(string route, IReadOnlyDictionary<string, object>? parameters = null)
     {
@@ -345,7 +356,20 @@ internal sealed class ContractTestKit
         new(Contracts, Suppliers, Categories, Properties, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
 
     public PropertyEditViewModel CreatePropertyEditor() =>
-        new(Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, CreateContractEditor);
+        new(Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast, CreateContractEditor);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
+}
+
+internal sealed class FakeErrorLog : IErrorLog
+{
+    public string Text { get; set; } = string.Empty;
+
+    public List<(string Source, Exception Exception)> Entries { get; } = [];
+
+    public void Append(string source, Exception exception) => Entries.Add((source, exception));
+
+    public string ReadAll() => Text;
+
+    public void Clear() => Text = string.Empty;
 }

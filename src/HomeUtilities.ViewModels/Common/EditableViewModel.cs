@@ -75,7 +75,10 @@ public abstract partial class EditableViewModel : ViewModelBase
     /// <summary>Name of the item shown in the "Delete «name»?" confirmation.</summary>
     protected abstract string DeleteName();
 
-    /// <summary>Called after the session ended (navigate back, refresh the list).</summary>
+    /// <summary>
+    /// Called after the session ended: Cancelled / Deleted leave the editor; Saved does not (the editor stays open,
+    /// owner rule 2026-10-23) — the subclass only refreshes the list and confirms.
+    /// </summary>
     protected abstract Task OnFinishedAsync(EditOutcome outcome);
 
     /// <summary>Called whenever <see cref="Errors"/> changed, to refresh the per-field error properties.</summary>
@@ -98,6 +101,13 @@ public abstract partial class EditableViewModel : ViewModelBase
     /// False if the user cancelled the dialog or the save failed (errors are shown). Does not close the editor.
     /// </summary>
     public async Task<bool> CanLeaveAsync()
+    {
+        var canLeave = false;
+        await RunSafeAsync(async () => canLeave = await CanLeaveCoreAsync());
+        return canLeave;
+    }
+
+    private async Task<bool> CanLeaveCoreAsync()
     {
         if (!IsDirty)
         {
@@ -152,17 +162,17 @@ public abstract partial class EditableViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task SaveAsync()
+    private Task SaveAsync() => RunSafeAsync(async () =>
     {
         if (await TrySaveAsync())
         {
             await OnFinishedAsync(EditOutcome.Saved);
         }
-    }
+    });
 
     /// <summary>Cancel button, toolbar Back and hardware Back: leave the editor, asking about unsaved changes first.</summary>
     [RelayCommand]
-    private async Task CancelAsync()
+    private Task CancelAsync() => RunSafeAsync(async () =>
     {
         if (!await CanLeaveAsync())
         {
@@ -171,12 +181,12 @@ public abstract partial class EditableViewModel : ViewModelBase
 
         IsDirty = false;
         await OnFinishedAsync(EditOutcome.Cancelled);
-    }
+    });
 
     private bool CanDelete() => !IsNew;
 
     [RelayCommand(CanExecute = nameof(CanDelete))]
-    private async Task DeleteAsync()
+    private Task DeleteAsync() => RunSafeAsync(async () =>
     {
         var confirmed = await _dialogs.ConfirmAsync(
             _editableLocalizer.Get("Dialog_Delete_Title", DeleteName()),
@@ -200,5 +210,5 @@ public abstract partial class EditableViewModel : ViewModelBase
         }
 
         await OnFinishedAsync(EditOutcome.Deleted);
-    }
+    });
 }

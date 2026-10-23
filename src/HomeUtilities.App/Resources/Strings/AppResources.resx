@@ -133,6 +133,14 @@
   <data name="PaymentCopyRecipient" xml:space="preserve"><value>Copy recipient</value></data>
   <data name="PaymentCopyPurpose" xml:space="preserve"><value>Copy purpose example</value></data>
   <data name="Copied" xml:space="preserve"><value>Copied</value></data>
+  <data name="Saved" xml:space="preserve"><value>Saved</value></data>
+  <data name="Error_Unexpected_Title" xml:space="preserve"><value>Error</value></data>
+  <data name="Error_Unexpected_Message" xml:space="preserve"><value>Something went wrong. Your data was not changed.</value></data>
+  <data name="SettingsErrorLog" xml:space="preserve"><value>Error log</value></data>
+  <data name="SettingsErrorLogHint" xml:space="preserve"><value>If the app reports an error, copy the log and send it to the developer.</value></data>
+  <data name="SettingsErrorLogCopy" xml:space="preserve"><value>Copy log</value></data>
+  <data name="SettingsErrorLogClear" xml:space="preserve"><value>Clear</value></data>
+  <data name="SettingsErrorLogEmpty" xml:space="preserve"><value>The error log is empty.</value></data>
   <data name="Enum_LinkKind_Website" xml:space="preserve"><value>Website</value></data>
   <data name="Enum_LinkKind_CustomerPortal" xml:space="preserve"><value>Customer portal</value></data>
   <data name="Enum_LinkKind_SubmitReadings" xml:space="preserve"><value>Submit readings</value></data>
@@ -162,6 +170,8 @@
   <data name="Error_payment_iban_invalid" xml:space="preserve"><value>The IBAN is not valid. Check the digits.</value></data>
   <data name="Error_payment_bic_invalid" xml:space="preserve"><value>The BIC must have 8 or 11 characters (e.g. ABCDLV22).</value></data>
   <data name="Error_payment_field_too_long" xml:space="preserve"><value>The text is longer than {0} characters.</value></data>
+  <data name="Error_payment_purpose_invalid_format" xml:space="preserve"><value>The purpose format "{0}" is not supported. Use d, M, y and . - / (e.g. MM.yyyy).</value></data>
+  <data name="Error_payment_purpose_invalid_placeholder" xml:space="preserve"><value>Unknown or incomplete placeholder: {0}</value></data>
   <data name="Error_category_name_required" xml:space="preserve"><value>Enter a name.</value></data>
   <data name="Error_category_name_too_long" xml:space="preserve"><value>The name is longer than {0} characters.</value></data>
   <data name="Error_category_color_invalid" xml:space="preserve"><value>Enter a colour as #RRGGBB, e.g. #1E88E5.</value></data>

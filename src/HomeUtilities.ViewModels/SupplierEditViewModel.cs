@@ -143,7 +143,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         ILauncherService launcher,
         IClipboardService clipboard,
         IToastService toast)
-        : base(localizer, dialogs, navigation)
+        : base(localizer, dialogs, navigation, toast)
     {
         _store = store;
         _clock = clock;
@@ -233,16 +233,16 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
     }
 
     [RelayCommand]
-    private Task CopyIbanAsync() => CopyAsync(Iban.Normalize(IbanText));
+    private Task CopyIbanAsync() => RunSafeAsync(() => CopyAsync(Iban.Normalize(IbanText)));
 
     [RelayCommand]
-    private Task CopyRecipientAsync() => CopyAsync(RecipientName.Trim());
+    private Task CopyRecipientAsync() => RunSafeAsync(() => CopyAsync(RecipientName.Trim()));
 
     [RelayCommand]
-    private Task CopyPurposeAsync() => CopyAsync(PurposePreview);
+    private Task CopyPurposeAsync() => RunSafeAsync(() => CopyAsync(PurposePreview));
 
     [RelayCommand]
-    private async Task AddLinkAsync()
+    private Task AddLinkAsync() => RunSafeAsync(async () =>
     {
         var editor = new LinkEditorViewModel(_localizer, null);
         if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
@@ -253,10 +253,10 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         _rows.Add(CreateRow(result));
         RebuildLinks();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task EditLinkAsync(LinkRowViewModel row)
+    private Task EditLinkAsync(LinkRowViewModel row) => RunSafeAsync(async () =>
     {
         var current = new Link { Kind = row.Kind, Title = row.Title, Url = row.Url };
         var editor = new LinkEditorViewModel(_localizer, current);
@@ -271,10 +271,10 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         row.ErrorText = string.Empty;
         RebuildLinks();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task RemoveLinkAsync(LinkRowViewModel row)
+    private Task RemoveLinkAsync(LinkRowViewModel row) => RunSafeAsync(async () =>
     {
         var confirmed = await Dialogs.ConfirmAsync(
             _localizer["Dialog_DeleteRow_Title"],
@@ -289,11 +289,11 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         _rows.Remove(row);
         RebuildLinks();
         MarkDirty();
-    }
+    });
 
     /// <summary>Opens the link in the system browser; a URL that is not http/https shows the validation message instead.</summary>
     [RelayCommand]
-    private async Task OpenLinkAsync(LinkRowViewModel row)
+    private Task OpenLinkAsync(LinkRowViewModel row) => RunSafeAsync(async () =>
     {
         var uri = new Link { Url = row.Url.Trim() }.TryGetUri();
         if (uri is null)
@@ -304,7 +304,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
 
         row.ErrorText = string.Empty;
         await _launcher.OpenAsync(uri);
-    }
+    });
 
     protected override IReadOnlyList<ValidationError> Validate()
     {

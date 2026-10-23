@@ -5,9 +5,9 @@ namespace HomeUtilities.Core.Domain;
 
 internal static class ValidationHelpers
 {
-    public const int MaxNameLength = 100;
+    public const int MaxNameLength = InputLimits.Name;
 
-    public const int MaxNotesLength = 2000;
+    public const int MaxNotesLength = InputLimits.Notes;
 
     /// <summary>Adds <see cref="ErrorCodes.NotesTooLong"/> if the comment exceeds <see cref="MaxNotesLength"/>.</summary>
     public static void CheckNotes(List<ValidationError> errors, string? notes, string field, string? prefix = null)

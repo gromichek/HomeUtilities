@@ -7,7 +7,7 @@ namespace HomeUtilities.Core.Payments;
 public static partial class PaymentDetailsValidator
 {
     /// <summary>Maximum length of any field (the bank purpose limit).</summary>
-    public const int MaxFieldLength = 140;
+    public const int MaxFieldLength = InputLimits.PaymentField;
 
     [GeneratedRegex("^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$")]
     private static partial Regex BicPattern();
@@ -28,6 +28,8 @@ public static partial class PaymentDetailsValidator
             errors.Add(new(ErrorCodes.PaymentBicInvalid, nameof(PaymentDetails.Bic)));
         }
 
+        errors.AddRange(PaymentPurpose.Validate(details.PurposeTemplate).Select(e =>
+            new ValidationError(e.Code, nameof(PaymentDetails.PurposeTemplate), e.Args)));
         CheckLength(errors, details.RecipientName, nameof(PaymentDetails.RecipientName));
         CheckLength(errors, details.RecipientRegistrationNumber, nameof(PaymentDetails.RecipientRegistrationNumber));
         CheckLength(errors, details.Iban, nameof(PaymentDetails.Iban));

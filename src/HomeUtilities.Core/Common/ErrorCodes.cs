@@ -27,6 +27,12 @@ public static class ErrorCodes
     /// <summary>A payment detail is longer than 140 characters.</summary>
     public const string PaymentFieldTooLong = "payment.field_too_long";
 
+    /// <summary>The purpose template contains a placeholder that does not exist or a stray brace; Args: the offending text.</summary>
+    public const string PaymentPurposeInvalidPlaceholder = "payment.purpose_invalid_placeholder";
+
+    /// <summary>A placeholder of the purpose template has an unsupported format; Args: the offending format.</summary>
+    public const string PaymentPurposeInvalidFormat = "payment.purpose_invalid_format";
+
     /// <summary>Two versioned items share the same ValidFrom date.</summary>
     public const string DuplicateValidFrom = "versioned.duplicate_valid_from";
 

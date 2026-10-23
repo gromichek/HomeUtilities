@@ -61,7 +61,7 @@ public partial class OverviewViewModel : ViewModelBase
 
     /// <summary>Opens the database once (migration and seeding) and shows the result in the status line.</summary>
     [RelayCommand]
-    private async Task InitializeAsync()
+    private Task InitializeAsync() => RunSafeAsync(async () =>
     {
         if (_initializationStarted)
         {
@@ -82,7 +82,7 @@ public partial class OverviewViewModel : ViewModelBase
             _databaseError = ex.Message;
             SetDatabaseState(DatabaseState.Failed);
         }
-    }
+    });
 
     private void SetDatabaseState(DatabaseState state)
     {

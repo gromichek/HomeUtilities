@@ -57,7 +57,7 @@ public class PropertyEditViewModelTests
     }
 
     [Fact]
-    public async Task Save_InPage_NavigatesBackAndReportsOutcome()
+    public async Task Save_InPage_StaysOpenAndReportsOutcome()
     {
         var vm = await CreateNewAsync();
         vm.IsHostedInPage = true;
@@ -71,7 +71,7 @@ public class PropertyEditViewModelTests
 
         await vm.SaveCommand.ExecuteAsync(null);
 
-        Assert.Equal(1, _navigation.BackCount);
+        Assert.Equal(0, _navigation.BackCount);
         Assert.Equal(EditOutcome.Saved, outcome);
     }
 
@@ -399,7 +399,7 @@ public class PropertyEditViewModelTests
     }
 
     [Fact]
-    public async Task Save_ClearsIsDirtyAndRequestsClose()
+    public async Task Save_ClearsIsDirtyAndStaysOpen()
     {
         var vm = await CreateNewAsync();
         vm.IsHostedInPage = true;
@@ -414,7 +414,7 @@ public class PropertyEditViewModelTests
         await vm.SaveCommand.ExecuteAsync(null);
 
         Assert.False(vm.IsDirty);
-        Assert.Equal(1, _navigation.BackCount);
+        Assert.Equal(0, _navigation.BackCount);
         Assert.Equal(EditOutcome.Saved, outcome);
     }
 
@@ -618,6 +618,7 @@ public class PropertyEditViewModelTests
             new FakeLocalizer(_language),
             _dialogs,
             _navigation,
+            new FakeToastService(),
             () => throw new NotSupportedException());
 
     private async Task<PropertyEditViewModel> CreateNewAsync()

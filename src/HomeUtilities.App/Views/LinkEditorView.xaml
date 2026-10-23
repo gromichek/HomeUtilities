@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
              xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
@@ -22,12 +23,12 @@
                     SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}" />
 
             <Label Text="{Binding LinkTitleLabel}" Style="{StaticResource MutedLabel}" />
-            <Entry Text="{Binding LinkTitle}" />
+            <Entry Text="{Binding LinkTitle}" MaxLength="{x:Static core:InputLimits.Name}" />
             <Label Text="{Binding LinkTitleError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding LinkTitleError, Converter={StaticResource HasText}}" />
 
             <Label Text="{Binding UrlLabel}" Style="{StaticResource MutedLabel}" />
-            <Entry Text="{Binding Url}" Keyboard="Url" />
+            <Entry Text="{Binding Url}" MaxLength="{x:Static core:InputLimits.Url}" Keyboard="Url" />
             <Label Text="{Binding UrlError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding UrlError, Converter={StaticResource HasText}}" />
 

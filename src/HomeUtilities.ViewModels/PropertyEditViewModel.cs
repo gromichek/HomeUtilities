@@ -114,8 +114,9 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
+        IToastService toast,
         Func<ContractEditViewModel> contractEditorFactory)
-        : base(localizer, dialogs, navigation)
+        : base(localizer, dialogs, navigation, toast)
     {
         _store = store;
         _contractStore = contractStore;
@@ -232,10 +233,10 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     private bool CanOpenContract() => !IsNew;
 
     [RelayCommand(CanExecute = nameof(CanOpenContract))]
-    private Task AddContractAsync() => OpenContractAsync(null);
+    private Task AddContractAsync() => RunSafeAsync(() => OpenContractAsync(null));
 
     [RelayCommand]
-    private Task OpenContractAsync(Guid? id) => OpenContractEditorAsync(id);
+    private Task OpenContractAsync(Guid? id) => RunSafeAsync(() => OpenContractEditorAsync(id));
 
     private async Task OpenContractEditorAsync(Guid? id)
     {
@@ -267,7 +268,7 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     }
 
     [RelayCommand]
-    private async Task AddParameterAsync()
+    private Task AddParameterAsync() => RunSafeAsync(async () =>
     {
         var editor = new ParameterEditorViewModel(_localizer, _clock, null, candidate => IsDuplicate(candidate, null));
         if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
@@ -278,10 +279,10 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         _rows.Add(CreateRow(result));
         RebuildGroups();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task EditParameterAsync(ParameterRowViewModel row)
+    private Task EditParameterAsync(ParameterRowViewModel row) => RunSafeAsync(async () =>
     {
         var current = new PropertyParameter
         {
@@ -305,10 +306,10 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         row.ErrorText = string.Empty;
         RebuildGroups();
         MarkDirty();
-    }
+    });
 
     [RelayCommand]
-    private async Task RemoveParameterAsync(ParameterRowViewModel row)
+    private Task RemoveParameterAsync(ParameterRowViewModel row) => RunSafeAsync(async () =>
     {
         var confirmed = await Dialogs.ConfirmAsync(
             _localizer["Dialog_DeleteRow_Title"],
@@ -323,7 +324,7 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         _rows.Remove(row);
         RebuildGroups();
         MarkDirty();
-    }
+    });
 
     protected override IReadOnlyList<ValidationError> Validate()
     {

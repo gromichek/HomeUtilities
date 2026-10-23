@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
              xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
@@ -25,7 +26,7 @@
                         <Label Text="{Binding GeneralHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
-                        <Entry Text="{Binding Name}" />
+                        <Entry Text="{Binding Name}" MaxLength="{x:Static core:InputLimits.Name}" />
                         <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
 
@@ -35,10 +36,10 @@
                                 SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}" />
 
                         <Label Text="{Binding AddressLabel}" Style="{StaticResource MutedLabel}" />
-                        <Entry Text="{Binding Address}" />
+                        <Entry Text="{Binding Address}" MaxLength="{x:Static core:InputLimits.Text}" />
 
                         <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
-                        <Editor Text="{Binding Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                        <Editor Text="{Binding Notes}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
                         <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
 
