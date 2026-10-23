@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-014a | Robustness, stay after Save, Android layout fixes | Ready | | owner findings 2026-10-23 |
+| T-015 | Meters screens, contract links, replacement wizard | Ready | | |
 
 ## Done
 
@@ -37,6 +37,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Hotfix: Windows toast crash | 2026-10-23, #37 | |
 | — | Hotfix: purpose format crash | 2026-10-23, #41 | invalid `{Period:…}` kept as typed |
 | T-014 | Contracts screens | 2026-10-23, #38 | 135 new tests (753 total). Properties moved to shared MasterDetail bases. Supplier picker without search (OK for now). |
+| T-014a | Robustness, stay after Save, error log, Android layout | 2026-10-23, #43 | Session worked from the first task version; lead merged #41, fixed flaky VM tests (sequential run) and added CI failure annotations. 963 tests. |
 
 ## Known issues / tech debt
 
@@ -48,7 +49,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
 - `AggregateMerger` adds new children via `db.Add` — UI must set the child's FK (e.g. `PropertyParameter.PropertyId`) before saving.
 - Saving an id that exists only as a soft-deleted row is not supported (resurrect needed for sync, T-030).
-- **Flaky test**: linux CI `Test` step failed on PR #32 and #41 and passed on re-run without code changes (logs not accessible to the lead). In T-014a scope (plus CI failure reporting). Run the suite several times, look for tests depending on real time, culture or async timing.
+- Flaky test fixed (shared static messenger in parallel VM tests → ViewModels.Tests run sequentially). CI now writes failed tests as check-run annotations (readable via API).
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - No "Copied" confirmation on Windows (toast disabled there) until the in-app snackbar (T-019).
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
@@ -66,4 +67,4 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-23 | #32 | Properties reworked on Windows + Android | Layout OK. **Bugs**: Android icons shown as empty boxes (icon font not bundled — `MauiFont` item missing); Windows empty editor visible with no selection (IsVisible binding on changed BindingContext); duplicate "New property" button → hotfix #35 |
 | 2026-10-23 | #34 + #35 | Suppliers: Copy button | **Crash on Windows**: CommunityToolkit Toast unsupported in unpackaged app → hotfix (no toast on Windows) |
 | 2026-10-23 | #37 | Suppliers, categories | **Crash** on purpose template `{Period:mm.yyyy}`; Android: Save closes supplier editor (owner wants to stay); colour swatches cut off → T-014a |
-| | #38 | Contracts | pending |
+| | #38 + #43 | Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |

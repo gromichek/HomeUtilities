@@ -18,6 +18,10 @@
 6. Owner pulls `main` in Visual Studio, tests, reports results. Bugs become new tasks;
    a broken merge is reverted.
 
+## Diagnosing CI failures
+Failed tests appear as check-run annotations (`report_trx.py`):
+`gh api repos/gromichek/HomeUtilities/check-runs/<id>/annotations`. Compiler errors appear there too.
+
 ## Task file template
 ```
 # T-NNN: Title
