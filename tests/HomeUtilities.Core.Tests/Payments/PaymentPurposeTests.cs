@@ -65,4 +65,15 @@ public class PaymentPurposeTests
     {
         Assert.Equal(expected, PaymentPurpose.Render(template, Empty with { CustomerNumber = "1", Amount = 1m }));
     }
+
+    [Theory]
+    [InlineData("Abon. Nr. {CustomerNumber}, {Period:mm.yyyy}", "Abon. Nr. 12345, {Period:mm.yyyy}")]
+    [InlineData("{Period:HH}", "{Period:HH}")]
+    [InlineData("{Period:MM.yyyy}", "10.2026")]
+    public void Render_InvalidPeriodFormat_KeepsPlaceholderInsteadOfThrowing(string template, string expected)
+    {
+        // Owner crash 2026-10-23: lowercase "m" means minutes, which DateOnly cannot format.
+        var ctx = new PaymentPurposeContext("12345", null, null, new YearMonth(2026, 10), null, null);
+        Assert.Equal(expected, PaymentPurpose.Render(template, ctx));
+    }
 }

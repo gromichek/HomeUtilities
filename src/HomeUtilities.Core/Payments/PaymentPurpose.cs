@@ -31,14 +31,30 @@ public static partial class PaymentPurpose
                 "BillNumber" when format is null => ctx.BillNumber ?? string.Empty,
                 "PropertyName" when format is null => ctx.PropertyName ?? string.Empty,
                 "Amount" when format is null => ctx.Amount?.ToString("0.00", CultureInfo.InvariantCulture) ?? string.Empty,
-                "Period" => FormatPeriod(ctx, format),
+                "Period" => FormatPeriod(ctx, format) ?? m.Value,
                 _ => m.Value,
             };
         });
     }
 
-    private static string FormatPeriod(PaymentPurposeContext ctx, string? format) =>
-        ctx.Period is { } period
-            ? period.FirstDay.ToString(string.IsNullOrEmpty(format) ? DefaultPeriodFormat : format, CultureInfo.InvariantCulture)
-            : string.Empty;
+    // Returns null for a format a date cannot use (e.g. "mm" = minutes): the placeholder is then kept as typed
+    // instead of throwing. Full validation with a user-facing message comes with T-014a.
+    private static string? FormatPeriod(PaymentPurposeContext ctx, string? format)
+    {
+        if (ctx.Period is not { } period)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            return period.FirstDay.ToString(
+                string.IsNullOrEmpty(format) ? DefaultPeriodFormat : format,
+                CultureInfo.InvariantCulture);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
 }
