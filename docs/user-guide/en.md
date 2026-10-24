@@ -144,8 +144,27 @@ you can add your own.
 Language (English / Русский), theme (system / light / dark), categories, version, database file location, and the
 **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
 
+### Backup
+
+Everything you type (properties, suppliers, contracts, meters, readings) and all attachments and photos live only
+inside the app. If you uninstall the app, they are deleted with it. A backup is a single file
+(`HomeUtilities-backup-YYYY-MM-DD-HHmm.zip`) that you keep outside the app and can restore later, also on another
+device (for example Windows → Android).
+
+- **Save backup…** — on Android the system share sheet opens: choose Drive, e-mail, or Files/Downloads. On Windows a
+  save dialog opens: choose a folder (if the dialog is not available, the file goes to
+  `Documents\HomeUtilities\Backups` and the message shows the path). The line under the buttons shows when the last
+  backup was made on this device.
+- **Restore from backup…** — pick a backup file. The app checks it and asks *Restore backup from … ?* Your current
+  data will be replaced, but **a copy of it is kept** inside the app (the last three copies). After you confirm, the app
+  asks you to close it; open it again and the restored data is there. If you choose a file that is not a backup, or a
+  backup made by a newer version of the app, you get a message and nothing changes.
+
+After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
+again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
+
 ## 10. Coming soon
 
 Tariffs and VAT rates per contract, calculated monthly charges, bills with the "Paid" quick action, payments and
 balances, equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
-bill templates, Excel import, reminders, backup and Google Drive sync.
+bill templates, Excel import, reminders, automatic backups and Google Drive sync.

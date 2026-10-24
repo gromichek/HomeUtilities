@@ -33,6 +33,30 @@ public partial class App : Application
     {
         var window = new Window(_services.GetRequiredService<AppShell>());
         _layoutModeService.Attach(window);
+        ShowRestoreFailureOnce(window);
         return window;
+    }
+
+    // A failed startup restore is reported once, when the first page is on screen.
+    private void ShowRestoreFailureOnce(Window window)
+    {
+        if (_services.GetRequiredService<StartupNotice>().RestoreFailure is not { } reason)
+        {
+            return;
+        }
+
+        var localizer = _services.GetRequiredService<ILocalizer>();
+        var dialogs = _services.GetRequiredService<IDialogService>();
+        window.Created += (_, _) => Dispatcher.Dispatch(async () =>
+        {
+            try
+            {
+                await dialogs.AlertAsync(localizer["BackupRestoreTitle"], localizer.Get("BackupRestoreFailed", reason));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Showing the restore failure failed: {ex}");
+            }
+        });
     }
 }

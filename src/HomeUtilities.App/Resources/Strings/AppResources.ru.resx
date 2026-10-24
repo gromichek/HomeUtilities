@@ -453,4 +453,31 @@
   <data name="Error_attachment_empty" xml:space="preserve"><value>Файл пустой.</value></data>
   <data name="Error_attachment_too_large" xml:space="preserve"><value>Файл больше {0} МБ.</value></data>
   <data name="Error_attachment_hash_invalid" xml:space="preserve"><value>Не удалось проверить файл.</value></data>
+  <data name="SettingsBackup" xml:space="preserve"><value>Резервная копия</value></data>
+  <data name="SettingsBackupHint" xml:space="preserve"><value>Резервная копия — это один файл со всеми вашими данными и вложениями. Храните его вне приложения (например, на диске Google или на компьютере): после переустановки приложения из него можно восстановить всё. В файле все ваши данные, поэтому не передавайте его посторонним.</value></data>
+  <data name="SettingsBackupSave" xml:space="preserve"><value>Сохранить копию…</value></data>
+  <data name="SettingsBackupRestore" xml:space="preserve"><value>Восстановить из копии…</value></data>
+  <data name="SettingsBackupLast" xml:space="preserve"><value>Последняя копия на этом устройстве: {0:g}</value></data>
+  <data name="SettingsBackupNever" xml:space="preserve"><value>На этом устройстве копия ещё не создавалась.</value></data>
+  <data name="BackupSaved" xml:space="preserve"><value>Копия сохранена.</value></data>
+  <data name="BackupSavedTo" xml:space="preserve"><value>Копия сохранена: {0}</value></data>
+  <data name="BackupRestoreTitle" xml:space="preserve"><value>Восстановление из копии</value></data>
+  <data name="BackupRestoreConfirm" xml:space="preserve"><value>Восстановить данные из копии от {0:g}? Текущие данные будут заменены. Их копия сохранится.</value></data>
+  <data name="BackupRestoreAction" xml:space="preserve"><value>Восстановить</value></data>
+  <data name="BackupRestartMessage" xml:space="preserve"><value>Закройте и снова откройте приложение, чтобы завершить восстановление.</value></data>
+  <data name="BackupCloseApp" xml:space="preserve"><value>Закрыть приложение</value></data>
+  <data name="BackupLater" xml:space="preserve"><value>Позже</value></data>
+  <data name="BackupNotABackup" xml:space="preserve"><value>Этот файл не является резервной копией HomeUtilities.</value></data>
+  <data name="BackupNewerVersion" xml:space="preserve"><value>Эта копия создана более новой версией приложения. Сначала обновите приложение.</value></data>
+  <data name="BackupRestoreFailed" xml:space="preserve"><value>Не удалось восстановить данные из копии: {0}</value></data>
+  <data name="SettingsTestData" xml:space="preserve"><value>Тестовые данные</value></data>
+  <data name="SettingsTestDataFill" xml:space="preserve"><value>Заполнить примерами</value></data>
+  <data name="SettingsTestDataDelete" xml:space="preserve"><value>Удалить все данные</value></data>
+  <data name="TestDataFillConfirm" xml:space="preserve"><value>Заполнить приложение выдуманными тестовыми данными?</value></data>
+  <data name="TestDataFillAction" xml:space="preserve"><value>Заполнить</value></data>
+  <data name="TestDataFilled" xml:space="preserve"><value>Тестовые данные добавлены.</value></data>
+  <data name="TestDataNotEmpty" xml:space="preserve"><value>В приложении уже есть данные. Тестовые данные можно добавить только в пустое приложение.</value></data>
+  <data name="TestDataDeleteConfirm" xml:space="preserve"><value>Удалить ВСЕ данные и вложения? Это нельзя отменить.</value></data>
+  <data name="TestDataDeleteAction" xml:space="preserve"><value>Удалить</value></data>
+  <data name="TestDataDeleteRestart" xml:space="preserve"><value>Все данные будут удалены при следующем запуске. Закрыть приложение сейчас?</value></data>
 </root>
