@@ -38,6 +38,9 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
     private string _saveText = string.Empty;
 
     [ObservableProperty]
+    private string _helpText = string.Empty;
+
+    [ObservableProperty]
     private string _cancelText = string.Empty;
 
     [ObservableProperty]
@@ -159,6 +162,7 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
     protected override void RefreshTexts()
     {
         SaveText = _editableLocalizer["Save"];
+        HelpText = _editableLocalizer["SectionHelp"];
         CancelText = _editableLocalizer["Cancel"];
         DeleteText = _editableLocalizer["Delete"];
     }

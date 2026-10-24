@@ -14,6 +14,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>Editor of one meter of a property. It is a page in every layout; see <see cref="Routes.MeterEdit"/>.</summary>
 public sealed partial class MeterEditViewModel : PaneEditorViewModel
 {
+    protected override HelpTopic? GuideTopic => HelpTopic.Meters;
+
     private static readonly Regex RegisterErrorField = new(@"^Registers\[(\d+)\]", RegexOptions.Compiled);
 
     /// <summary>The properties that mark the editor dirty when the user changes them.</summary>

@@ -16,6 +16,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>Editor of one contract of a property. It is a page in every layout; see <see cref="Routes.ContractEdit"/>.</summary>
 public sealed partial class ContractEditViewModel : PaneEditorViewModel
 {
+    protected override HelpTopic? GuideTopic => HelpTopic.Contracts;
+
     private const string DetailsPrefix = "PaymentDetails.";
 
     private static readonly Regex LinkErrorField = new(@"^Links\[(\d+)\]\.", RegexOptions.Compiled);

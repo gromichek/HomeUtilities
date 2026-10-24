@@ -8,6 +8,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>The list of suppliers with a search box; two-pane like Properties.</summary>
 public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierEditViewModel>
 {
+    protected override HelpTopic GuideTopic => HelpTopic.Suppliers;
+
     private readonly ISupplierStore _store;
     private readonly ILocalizer _localizer;
 
@@ -52,6 +54,7 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
         Title = _localizer["SectionSuppliers"];
         EmptyText = _localizer["SuppliersEmpty"];
         AddText = _localizer["SupplierAdd"];
+        HelpText = _localizer["SectionHelp"];
         SelectHintText = _localizer["SupplierSelectHint"];
         SearchPlaceholder = _localizer["SuppliersSearch"];
         RebuildItems();

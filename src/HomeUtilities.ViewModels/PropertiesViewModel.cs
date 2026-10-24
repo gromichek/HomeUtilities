@@ -9,6 +9,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>The list of properties; two-pane like Suppliers, with a switch that also shows archived properties.</summary>
 public sealed partial class PropertiesViewModel : MasterDetailViewModel<PropertyEditViewModel>
 {
+    protected override HelpTopic GuideTopic => HelpTopic.Properties;
+
     private readonly IPropertyStore _store;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
@@ -59,6 +61,7 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
         Title = _localizer["SectionProperties"];
         EmptyText = _localizer["PropertiesEmpty"];
         AddText = _localizer["PropertyAdd"];
+        HelpText = _localizer["SectionHelp"];
         ShowArchivedText = _localizer["PropertiesShowArchived"];
         SelectHintText = _localizer["PropertySelectHint"];
         RebuildItems();
