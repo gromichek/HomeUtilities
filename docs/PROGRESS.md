@@ -8,6 +8,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
 | T-017 | Tariff editor + VAT catalog screen | Ready | | |
+| T-017a | Navigation guard, menu opens section root | Ready | | owner finding 2026-10-24 |
 
 ## Done
 
