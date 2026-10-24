@@ -53,6 +53,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private string _categoriesText = string.Empty;
 
     [ObservableProperty]
+    private string _vatRatesText = string.Empty;
+
+    [ObservableProperty]
     private string _versionText = string.Empty;
 
     [ObservableProperty]
@@ -149,6 +152,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     [RelayCommand]
     private Task OpenCategoriesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Categories));
+
+    [RelayCommand]
+    private Task OpenVatRatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.VatRates));
 
     /// <summary>Puts the error log on the clipboard so the owner can send it; an empty log says so instead.</summary>
     [RelayCommand]
@@ -309,6 +315,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         {
             Title = _localizer["SectionSettings"];
             CategoriesText = _localizer["SectionCategories"];
+            VatRatesText = _localizer["SectionVatRates"];
             ErrorLogHeader = _localizer["SettingsErrorLog"];
             ErrorLogHint = _localizer["SettingsErrorLogHint"];
             CopyLogText = _localizer["SettingsErrorLogCopy"];

@@ -6,6 +6,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Payments;
+using HomeUtilities.Core.Tariffs;
 
 namespace HomeUtilities.Data.Sample;
 
@@ -20,6 +21,7 @@ public sealed class SampleDataGenerator(
     ICategoryStore categories,
     IContractStore contracts,
     IMeterStore meters,
+    ITariffStore tariffs,
     IClock clock) : ISampleDataGenerator
 {
     /// <summary>Number of monthly readings generated per register.</summary>
@@ -77,12 +79,97 @@ public sealed class SampleDataGenerator(
             await contracts.SaveAsync(contract, ct);
         }
 
-        await AddFlatMetersAsync(flat, cWater, cHeat, cPowerFlat, ct);
+        var hotMeters = await AddFlatMetersAsync(flat, cWater, cHeat, cPowerFlat, ct);
         await AddCottageMeterAsync(cottage, cPowerCottage, ct);
+        await AddTariffsAsync(cWater, cHeat, cPowerFlat, cWaste, cMaint, cNet, cPowerCottage, hotMeters, ct);
         return true;
     }
 
-    private async Task AddFlatMetersAsync(Property flat, Contract water, Contract heat, Contract power, CancellationToken ct)
+    /// <summary>Tariffs of the sample contracts: all bases, a stepped price, hot meters only, and one price change.</summary>
+    private async Task AddTariffsAsync(
+        Contract water,
+        Contract heat,
+        Contract power,
+        Contract waste,
+        Contract maintenance,
+        Contract internet,
+        Contract cottagePower,
+        IReadOnlyList<Meter> hotMeters,
+        CancellationToken ct)
+    {
+        var start = _today.AddYears(-6);
+        var changeMonth = YearMonth.From(_today).AddMonths(-3);
+        var changeDate = new DateOnly(changeMonth.Year, changeMonth.Month, 1);
+        var waterHeating = Component(heat, "Water heating", ServiceKind.WaterHeating, ChargeBasis.PerUnit, 0, "LV-REDUCED", Rate(start, 4.56m));
+        waterHeating.MeterIds = [.. hotMeters.Select(m => m.Id)];
+        var day = Component(cottagePower, "Energy, day", ServiceKind.Electricity, ChargeBasis.PerUnit, 0, Rate(start, 0.1245m));
+        day.RegisterKinds = [RegisterKind.Day];
+        var night = Component(cottagePower, "Energy, night", ServiceKind.Electricity, ChargeBasis.PerUnit, 1, Rate(start, 0.0733m));
+        night.RegisterKinds = [RegisterKind.Night];
+        var export = Component(cottagePower, "Solar export", ServiceKind.Electricity, ChargeBasis.NetExport, 2, Rate(start, 0.061m));
+        export.RegisterKinds = [RegisterKind.Export];
+
+        List<TariffComponent> components =
+        [
+            // One component with two prices: the water price changed three months ago.
+            Component(water, "Water supply", ServiceKind.ColdWater, ChargeBasis.PerUnit, 0, Rate(start, 1.32m), Rate(changeDate, 1.41m)),
+            Component(water, "Sewerage", ServiceKind.Sewerage, ChargeBasis.PerUnit, 1, Rate(start, 0.86m)),
+            waterHeating,
+            Component(heat, "Heating", ServiceKind.Heating, ChargeBasis.FromBill, 1, "LV-REDUCED"),
+            Component(maintenance, "Maintenance", ServiceKind.Maintenance, ChargeBasis.PerArea, 0, Rate(start, 0.6711m, includesVat: true)),
+            Component(waste, "Waste", ServiceKind.Waste, ChargeBasis.PerResident, 0, Rate(start, 5.4m)),
+            Component(internet, "Internet and TV", ServiceKind.InternetTv, ChargeBasis.FixedMonthly, 0, Rate(start, 22.95m, includesVat: true)),
+            Component(power, "Energy", ServiceKind.Electricity, ChargeBasis.PerUnit, 0, SteppedRate(start)),
+            Component(power, "Distribution", ServiceKind.Electricity, ChargeBasis.PerUnit, 1, Rate(start, 0.0391m)),
+            day,
+            night,
+            export,
+        ];
+
+        foreach (var component in components)
+        {
+            await tariffs.SaveAsync(component, ct);
+        }
+    }
+
+    private static TariffComponent Component(
+        Contract contract, string name, ServiceKind kind, ChargeBasis basis, int sortOrder, params TariffRate[] rates) =>
+        Component(contract, name, kind, basis, sortOrder, "LV-STANDARD", rates);
+
+    private static TariffComponent Component(
+        Contract contract, string name, ServiceKind kind, ChargeBasis basis, int sortOrder, string vatCode, params TariffRate[] rates)
+    {
+        var component = new TariffComponent
+        {
+            ContractId = contract.Id,
+            Name = name,
+            ChargeKind = kind,
+            Basis = basis,
+            VatCode = vatCode,
+            SortOrder = sortOrder,
+        };
+        foreach (var rate in rates)
+        {
+            rate.ComponentId = component.Id;
+            component.Rates.Add(rate);
+        }
+
+        return component;
+    }
+
+    private static TariffRate Rate(DateOnly validFrom, decimal price, bool includesVat = false) =>
+        new() { ValidFrom = validFrom, Price = price, PriceIncludesVat = includesVat, Currency = Currency.EUR };
+
+    /// <summary>Electricity energy with two steps per month: the first 100 kWh are dearer than the rest.</summary>
+    private static TariffRate SteppedRate(DateOnly validFrom)
+    {
+        var rate = Rate(validFrom, 0.1065m);
+        rate.Tiers = [new TariffTier(100m, 0.1065m), new TariffTier(null, 0.0818m)];
+        rate.TierPeriod = TierPeriod.Month;
+        return rate;
+    }
+
+    private async Task<IReadOnlyList<Meter>> AddFlatMetersAsync(Property flat, Contract water, Contract heat, Contract power, CancellationToken ct)
     {
         var installed = _today.AddYears(-8);
 
@@ -146,6 +233,7 @@ public sealed class SampleDataGenerator(
         AddMonthlyReadings(electricity, RegisterKind.Total, 99_000, 130m, 25m, 28, null, 1, decimals: 0, rollOverAt: 100_000m);
         await meters.SaveAsync(electricity, ct);
         await contracts.SaveContractMeterAsync(Link(power, electricity), ct);
+        return [hotKitchen, hotBath];
     }
 
     private async Task AddCottageMeterAsync(Property cottage, Contract power, CancellationToken ct)

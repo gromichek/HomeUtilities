@@ -9,6 +9,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Payments;
+using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
@@ -38,6 +39,9 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private readonly ISupplierStore _supplierStore;
     private readonly ICategoryStore _categoryStore;
     private readonly IPropertyStore _propertyStore;
+    private readonly ITariffStore _tariffStore;
+    private readonly IVatRateStore _vatStore;
+    private readonly IMeterStore _meterStore;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
@@ -52,6 +56,10 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private Contract? _pending;
     private Guid _propertyId;
     private string _propertyName = string.Empty;
+    private Property? _property;
+    private IReadOnlyList<TariffComponent> _components = [];
+    private IReadOnlyList<VatRate> _catalog = [];
+    private IReadOnlyList<Meter> _linkedMeters = [];
     private IReadOnlyList<Supplier> _suppliers = [];
     private IReadOnlyList<Category> _categories = [];
     private bool _categoryTouched;
@@ -322,11 +330,36 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     [ObservableProperty]
     private string _notesHeader = string.Empty;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoTariff), nameof(ShowTariffPresets))]
+    private IReadOnlyList<TariffRowViewModel> _tariffRows = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<TariffPresetRowViewModel> _tariffPresetRows = [];
+
+    [ObservableProperty]
+    private string _tariffHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _tariffEmptyText = string.Empty;
+
+    [ObservableProperty]
+    private string _addTariffText = string.Empty;
+
+    [ObservableProperty]
+    private string _tariffPresetsLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _tariffSaveFirstText = string.Empty;
+
     public ContractEditViewModel(
         IContractStore store,
         ISupplierStore supplierStore,
         ICategoryStore categoryStore,
         IPropertyStore propertyStore,
+        ITariffStore tariffStore,
+        IVatRateStore vatStore,
+        IMeterStore meterStore,
         IClock clock,
         ILocalizer localizer,
         IDialogService dialogs,
@@ -341,6 +374,9 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _supplierStore = supplierStore;
         _categoryStore = categoryStore;
         _propertyStore = propertyStore;
+        _tariffStore = tariffStore;
+        _vatStore = vatStore;
+        _meterStore = meterStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
@@ -377,6 +413,17 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     public bool HasNoLinks => Links.Count == 0 && InheritedLinks.Count == 0;
 
     public bool HasNoCustomFields => CustomFields.Count == 0;
+
+    public bool HasNoTariff => TariffRows.Count == 0;
+
+    /// <summary>Components are added to a saved contract only (they belong to it).</summary>
+    public bool CanAddTariff => !IsNew;
+
+    /// <summary>The quick-start presets are offered while a saved contract has no components.</summary>
+    public bool ShowTariffPresets => CanAddTariff && HasNoTariff;
+
+    /// <summary>"Save the contract first" hint instead of the add button.</summary>
+    public bool ShowTariffSaveFirst => IsNew;
 
     /// <summary>LVL is offered only for a contract that already uses it.</summary>
     public bool ShowCurrencyPicker => Currencies.Count > 1;
@@ -486,7 +533,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             _propertyId = _contract.PropertyId;
             IsNew = existing is null;
 
-            _propertyName = (await _propertyStore.GetAsync(_propertyId))?.Name ?? string.Empty;
+            _property = await _propertyStore.GetAsync(_propertyId);
+            _propertyName = _property?.Name ?? string.Empty;
             _suppliers = await _supplierStore.ListAsync();
             _categories = await _categoryStore.ListAsync();
             _hasLegacyCurrency = _contract.Currency != Currency.EUR;
@@ -539,6 +587,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
                 _fieldRows.Add(CreateFieldRow(field));
             }
 
+            await LoadTariffAsync();
             ClearErrors();
             RebuildLinks();
             RebuildFields();
@@ -549,6 +598,130 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         {
             SuppressDirty = previous;
         }
+    }
+
+    /// <summary>Back from the component editor: its changes are saved on their own, so the card is re-read.</summary>
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        if (!IsNew)
+        {
+            await LoadTariffAsync();
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAddTariff))]
+    private Task AddTariffAsync() => RunSafeAsync(() => OpenComponentAsync(null));
+
+    private Task OpenComponentAsync(Guid? id)
+    {
+        var parameters = new Dictionary<string, object> { [EditorNavigation.ContractIdParameter] = _contract.Id };
+        if (id is { } value)
+        {
+            parameters[EditorNavigation.IdParameter] = value;
+        }
+
+        return _navigation.GoToAsync(Routes.TariffComponentEdit, parameters);
+    }
+
+    /// <summary>Creates the components of a quick-start preset (without prices); only while the card is empty.</summary>
+    [RelayCommand]
+    private Task ApplyTariffPresetAsync(TariffPreset preset) => RunSafeAsync(async () =>
+    {
+        if (IsNew || _components.Count > 0)
+        {
+            return;
+        }
+
+        var hot = _linkedMeters.Where(m => m.Resource == MeterResource.HotWater).Select(m => m.Id).ToList();
+        var service = SelectedService?.As<ServiceKind>() ?? _contract.Service;
+        foreach (var component in TariffPresets.Create(preset, _contract.Id, service, key => _localizer["TariffPresetName_" + key], hot))
+        {
+            await _tariffStore.SaveAsync(component);
+        }
+
+        await LoadTariffAsync();
+    });
+
+    private Task MoveTariffAsync(TariffRowViewModel row, int direction) => RunSafeAsync(async () =>
+    {
+        var ordered = _components.OrderBy(c => c.SortOrder).ToList();
+        var index = ordered.FindIndex(c => c.Id == row.Id);
+        var target = index + direction;
+        if (index < 0 || target < 0 || target >= ordered.Count)
+        {
+            return;
+        }
+
+        (ordered[index], ordered[target]) = (ordered[target], ordered[index]);
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            if (ordered[i].SortOrder != i)
+            {
+                ordered[i].SortOrder = i;
+                await _tariffStore.SaveAsync(ordered[i]);
+            }
+        }
+
+        _components = ordered;
+        RebuildTariff();
+    });
+
+    private async Task LoadTariffAsync()
+    {
+        if (IsNew)
+        {
+            _components = [];
+            _linkedMeters = [];
+        }
+        else
+        {
+            _components = await _tariffStore.ListByContractAsync(_contract.Id);
+            _catalog = await _vatStore.ListAsync();
+            var links = await _store.ListContractMetersAsync(_contract.Id);
+            var wanted = links
+                .Where(l => !l.IsDeleted && (l.ValidTo is null || l.ValidTo >= _clock.Today))
+                .Select(l => l.MeterId)
+                .ToHashSet();
+            var propertyMeters = await _meterStore.ListByPropertyAsync(_propertyId);
+            _linkedMeters = [.. propertyMeters.Where(m => wanted.Contains(m.Id))];
+        }
+
+        RebuildTariff();
+    }
+
+    private void RebuildTariff()
+    {
+        var describer = new TariffDescriber(
+            _localizer, _clock.Today, SelectedCurrency?.As<Currency>() ?? _contract.Currency, _catalog, _property, _linkedMeters);
+        var ordered = _components.OrderBy(c => c.SortOrder).ThenBy(c => c.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var rows = new List<TariffRowViewModel>();
+        foreach (var component in ordered)
+        {
+            var row = new TariffRowViewModel(component, EnumText.Get(_localizer, component.Basis), describer.Summary(component))
+            {
+                MoveUpText = _localizer["TariffMoveUp"],
+                MoveDownText = _localizer["TariffMoveDown"],
+            };
+            row.CanMoveUp = rows.Count > 0;
+            row.EditCommand = new RelayCommand(() => _ = RunSafeAsync(() => OpenComponentAsync(row.Id)));
+            row.MoveUpCommand = new RelayCommand(() => _ = MoveTariffAsync(row, -1));
+            row.MoveDownCommand = new RelayCommand(() => _ = MoveTariffAsync(row, 1));
+            rows.Add(row);
+        }
+
+        foreach (var row in rows)
+        {
+            row.CanMoveDown = row != rows[^1];
+        }
+
+        TariffRows = rows;
+        TariffPresetRows =
+        [
+            .. Enum.GetValues<TariffPreset>().Select(p => new TariffPresetRowViewModel(
+                p, _localizer["TariffPreset_" + p], new RelayCommand(() => _ = ApplyTariffPresetCommand.ExecuteAsync(p)))),
+        ];
+        OnPropertyChanged(nameof(ShowTariffPresets));
     }
 
     /// <summary>Opens the category list; the chosen category becomes the user's own choice.</summary>
@@ -808,9 +981,26 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (e.PropertyName is { } name && DirtyFields.Contains(name))
+        if (e.PropertyName is not { } name)
+        {
+            return;
+        }
+
+        if (DirtyFields.Contains(name))
         {
             MarkDirty();
+        }
+
+        if (name == nameof(IsNew))
+        {
+            OnPropertyChanged(nameof(CanAddTariff));
+            OnPropertyChanged(nameof(ShowTariffPresets));
+            OnPropertyChanged(nameof(ShowTariffSaveFirst));
+            AddTariffCommand.NotifyCanExecuteChanged();
+            if (!IsNew && !SuppressDirty && _components.Count == 0)
+            {
+                _ = RunSafeAsync(LoadTariffAsync);
+            }
         }
     }
 
@@ -894,6 +1084,12 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             CustomFieldsEmptyText = _localizer["CustomFieldsEmpty"];
             AddCustomFieldText = _localizer["CustomFieldAdd"];
             NotesHeader = _localizer["ContractNotes"];
+            TariffHeader = _localizer["ContractTariff"];
+            TariffEmptyText = _localizer["ContractTariffEmpty"];
+            AddTariffText = _localizer["ContractTariffAdd"];
+            TariffPresetsLabel = _localizer["ContractTariffPresets"];
+            TariffSaveFirstText = _localizer["ContractTariffSaveFirst"];
+            RebuildTariff();
             DeleteWholeText = _localizer["ContractDelete"];
             Title = TitleText();
             RebuildLinks();
