@@ -482,8 +482,8 @@ public class ChargesViewModelTests : IDisposable
         Read(meter, new DateOnly(2026, 10, 27), 106.5m);
         await vm.OnAppearingAsync();
 
-        // the window is 25–28, the latest reading in it is now 106.500: 6.500 × 1.41 = 9.165 → net 9.17; VAT 21 % of 9.165 = 1.92; total 11.09
-        Assert.Equal("11.09 Currency_Symbol_EUR [en]", vm.Cards[0].TotalText);
+        // the window is 25–28, the latest reading in it is now 106.500: 6.500 × 1.41 = 9.165 → net 9.17; VAT 21 % of 9.17 = 1.9257 → 1.93; total 11.10
+        Assert.Equal("11.10 Currency_Symbol_EUR [en]", vm.Cards[0].TotalText);
     }
 
     [Fact]

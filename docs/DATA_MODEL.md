@@ -254,7 +254,7 @@ For contract C and period P, per component:
 2. Pick the rate valid on the period's reference date (first day of P; components with readings use the
    end reading date). Price changes inside a period are **not** split in v1 (documented limitation).
 3. Net = quantity × price (if price includes VAT: gross = quantity × price, net = gross / (1+vat)).
-4. VAT = Round(net × vat%), Gross = net + VAT. Each line rounded to 0.01.
+4. Net is rounded to 0.01 first; VAT = Round(rounded Net × vat%), Gross = rounded Net + VAT.
 5. Result: `CalculatedCharge` with lines `{ ComponentId, Quantity, UnitPrice, Net, VatPercent, Vat, Gross }`
    and total. Calculated on demand; a snapshot is stored when a bill for P is entered (so later tariff
    edits do not silently change history), and can be recalculated explicitly.

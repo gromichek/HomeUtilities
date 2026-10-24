@@ -32,6 +32,13 @@ public class MoneyMathTests
     }
 
     [Fact]
+    public void FromNet_VatIsCalculatedFromTheRoundedNet()
+    {
+        // 6.500 m3 * 1.41 = 9.165 -> net 9.17; VAT 21% of 9.17 = 1.9257 -> 1.93 (not 1.92 from the unrounded 9.165); total 11.10
+        Assert.Equal((9.17m, 1.93m, 11.10m), MoneyMath.FromNet(6.5m * 1.41m, 21));
+    }
+
+    [Fact]
     public void FromNet_TwelvePercent()
     {
         // 10.00 + 12% = 1.20 -> 11.20
