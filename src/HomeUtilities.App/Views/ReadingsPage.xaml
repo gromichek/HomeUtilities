@@ -9,6 +9,11 @@
                 x:DataType="vm:ReadingsViewModel"
                 Title="{Binding Title}">
 
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+
     <views:PageBase.Resources>
         <conv:DateOnlyConverter x:Key="DateOnly" />
         <conv:StreamFactoryImageConverter x:Key="StreamImage" />

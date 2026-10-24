@@ -13,6 +13,7 @@
 
     <!-- The meter editor is a page on every layout: system Back (handled in EditorPageBase) + Save. Back cancels. -->
     <views:EditorPageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
         <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveSource}" Command="{Binding SaveCommand}" />
     </views:EditorPageBase.ToolbarItems>
 

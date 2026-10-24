@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace HomeUtilities.ViewModels.Common;
 
@@ -34,6 +35,14 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
             }
         };
     }
+
+    /// <summary>The user-guide section the "?" button of this editor opens; null = the editor has no "?".</summary>
+    protected virtual HelpTopic? GuideTopic => null;
+
+    [RelayCommand]
+    private Task OpenHelpAsync() => GuideTopic is { } topic
+        ? RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, topic))
+        : Task.CompletedTask;
 
     /// <summary>Called when the session ended, after the editor navigated back if it is hosted in a page.</summary>
     public Func<EditOutcome, Task>? Finished { get; set; }
