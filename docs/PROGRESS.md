@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-017 | Tariff editor + VAT catalog screen | Ready | | |
+| T-018 | Charges screen | Ready | | |
 
 ## Done
 
@@ -44,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
+| T-017 | Tariff editor + VAT catalog screen | 2026-10-24, #74 | ~230 new tests. FromBill needs no price. Open question (replacement vs `MeterIds`) decided: a selected meter includes its replacement chain → fix PR by a Sonnet helper. |
 | T-017b | In-app help (user guide in the app) | 2026-10-24, #70 | Markdig; diagrams as SVG rendered from .mmd (scripts/render-guide-diagrams.sh). |
 | T-017d | Two-pane screens keep the selection on return | 2026-10-24, #69 | Cause inferred (root page recreated); singleton selection memory. Lead fixed the App build (missing using) and a test after merging #70. |
 | — | Hotfix: restore deadlock at startup, Android save dialog | 2026-10-24, #66 | sync-over-async on the UI thread hung the app after Restore (Windows) |
@@ -86,7 +87,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
-| | #69 + #70 | Selection kept on return (Windows wide); Help in menu, ? on screens, both languages, dark theme | pending |
+| | #74 | T-017 tariffs + VAT rates (manual steps in PR #74) | pending |
+| 2026-10-24 | #69 + #70 | Selection kept on return; in-app help | OK |
 | 2026-10-24 | #66 | Restore on Windows and Android (save to Downloads, reinstall, restore incl. photos), bad file refused | OK |
 | 2026-10-24 | #60 | T-017a navigation guard: menu → section list, Save changes? on menu / Back / window ✕ | OK, except: Windows wide, after contract → Readings → Objects the property is **not selected** any more (spec: stays selected) → known issue |
 | | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
