@@ -10,13 +10,16 @@ public static class MoneyMath
     public static decimal RoundQuantity(decimal value, int decimals = 3) =>
         Math.Round(value, decimals, MidpointRounding.AwayFromZero);
 
-    /// <summary>Calculates VAT and gross from a net amount.</summary>
+    /// <summary>
+    /// Calculates VAT and gross from a net amount, like a supplier invoice does: the net is rounded to 0.01 first,
+    /// then VAT = Round(rounded net × VAT %), gross = rounded net + VAT.
+    /// </summary>
     /// <param name="net">Net amount.</param>
     /// <param name="vatPercent">VAT rate in percent, e.g. 21.</param>
     public static (decimal Net, decimal Vat, decimal Gross) FromNet(decimal net, decimal vatPercent)
     {
         var roundedNet = Round(net);
-        var vat = Round(net * vatPercent / 100);
+        var vat = Round(roundedNet * vatPercent / 100);
         return (roundedNet, vat, roundedNet + vat);
     }
 

@@ -198,7 +198,8 @@ they always follow the latest data. (Entering the supplier's bill and comparing 
 **Where the numbers come from:** readings → consumption (end reading − start reading) → × price from the tariff →
 net amount → VAT → total. Area-based and per-resident lines use the property's parameters (area, declared residents)
 valid on the first day of the month; fixed lines are one month's price; a line *From the supplier's bill* has no
-calculation.
+calculation. As on a supplier's invoice, the net amount is rounded to 0.01 first and the VAT is
+calculated from that rounded amount (6.500 m³ × 1.41 € = 9.165 → 9.17 €; VAT 21 % = 1.93 €; total 11.10 €).
 
 **Choosing the month.** Pick the **property** and the **month** with ‹ › or by tapping the month. When you open the
 screen it shows the **current** month if the reading window of one of the property's contracts has already started
