@@ -34,6 +34,7 @@ is written; the list below is the plan and will change.
 - T-017 Tariff editor per contract (components, rates, VAT)
 - T-017a Navigation guard: menu always opens section root; unsaved-changes dialog on every exit (menu, back, window close)
 - T-017c Backup to a file / restore (share sheet / save dialog), sample data generator for testing (Debug only)
+- T-017d Hotfix: two-pane screens keep the selected item when coming back via the menu
 - T-017b In-app help: the user guide (docs/user-guide) shown in the app, "?" on screens opens the matching section
 - T-018 Monthly charges screen: calculated charge per contract/period
 
