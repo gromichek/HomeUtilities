@@ -9,7 +9,7 @@ namespace HomeUtilities.ViewModels.Common;
 /// layout it is shown next to the list. The editor instance is the same in both cases, so switching the layout keeps
 /// the input. Same behaviour as <see cref="PropertiesViewModel"/>.
 /// </summary>
-public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IRecipient<LayoutModeChangedMessage>
+public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IRecipient<LayoutModeChangedMessage>, IUnsavedChangesGuarded
     where TEditor : PaneEditorViewModel
 {
     private readonly INavigationService _navigation;
@@ -49,6 +49,40 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         _editorFactory = editorFactory;
         _editRoute = editRoute;
         _isTwoPane = layoutModeService.Current != LayoutMode.Compact;
+    }
+
+    /// <summary>Only an editor in the side pane belongs to this screen; an editor page guards itself.</summary>
+    bool IUnsavedChangesGuarded.HasUnsavedChanges => SelectedEditor is { IsHostedInPage: false, IsDirty: true };
+
+    /// <summary>
+    /// Leaving the section with the side-pane editor dirty: asks the standard question. "Don't save" discards the
+    /// input, so the section reopens with the saved state (a new, unsaved item is closed).
+    /// </summary>
+    public async Task<bool> CanLeaveAsync()
+    {
+        if (SelectedEditor is not { IsHostedInPage: false, IsDirty: true } editor)
+        {
+            return true;
+        }
+
+        if (!await editor.CanLeaveAsync())
+        {
+            return false;
+        }
+
+        if (editor.IsDirty)
+        {
+            if (editor.IsNew)
+            {
+                Detach(editor);
+            }
+            else
+            {
+                await editor.LoadAsync(editor.EntityId);
+            }
+        }
+
+        return true;
     }
 
     public bool HasSelection => SelectedEditor is not null;
