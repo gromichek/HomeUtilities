@@ -63,6 +63,9 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   - after a successful **Save → stay in the editor** (title updates, short confirmation); after **Delete →
     go back**. (Changed 2026-10-23 at the owner's request.)
 - Never swallow Back without showing a dialog.
+- **Menu (flyout) items always open the section's root page**; pages pushed inside the section being left are
+  closed. Leaving any page with unsaved changes — menu, back, window close — goes through the central navigation
+  guard (T-017a) with the standard "Save changes?" dialog. The menu is never disabled. (Owner decision 2026-10-24.)
 
 ## 5. Standard dialog texts (EN / RU)
 Use these wordings everywhere (resx keys in brackets):
