@@ -7,6 +7,11 @@
                 x:DataType="vm:SuppliersViewModel"
                 Title="{Binding Title}">
 
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+
     <Grid x:Name="Root" ColumnDefinitions="*,0">
 
         <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="8">

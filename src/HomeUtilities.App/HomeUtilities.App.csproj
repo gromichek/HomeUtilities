@@ -32,6 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The user guide is bundled from docs/user-guide (one source, no copies): guide/en.md, guide/ru.md, guide/img/*.svg. -->
+    <MauiAsset Include="..\..\docs\user-guide\**\*" Exclude="..\..\docs\user-guide\**\*.mmd" LogicalName="guide\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Maui" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
   </ItemGroup>
