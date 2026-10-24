@@ -37,9 +37,13 @@ public sealed class MediaService : IMediaService
     {
         try
         {
-            return Wrap(OperatingSystem.IsWindows()
-                ? await FilePicker.Default.PickAsync(new PickOptions { FileTypes = FilePickerFileType.Images })
-                : await MediaPicker.Default.PickPhotoAsync());
+            if (OperatingSystem.IsWindows())
+            {
+                return Wrap(await FilePicker.Default.PickAsync(new PickOptions { FileTypes = FilePickerFileType.Images }));
+            }
+
+            // The picker may allow several photos; one photo belongs to a reading, so the first is taken.
+            return Wrap((await MediaPicker.Default.PickPhotosAsync()).FirstOrDefault());
         }
         catch (PermissionException)
         {
