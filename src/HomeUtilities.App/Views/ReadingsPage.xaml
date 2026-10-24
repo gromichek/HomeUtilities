@@ -95,7 +95,7 @@
                                     <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cards}">
                                         <BindableLayout.ItemTemplate>
                                             <DataTemplate x:DataType="vm:MeterCardViewModel">
-                                                <Border Style="{StaticResource SectionCard}">
+                                                <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Style="{StaticResource SectionCard}">
                                                     <Border.Triggers>
                                                         <DataTrigger TargetType="Border" x:DataType="vm:MeterCardViewModel" Binding="{Binding IsSelected}" Value="True">
                                                             <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
