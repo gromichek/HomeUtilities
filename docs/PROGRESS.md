@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-016a | Attachments infrastructure + meter/reading photos | Ready | | |
+| T-017 | Tariff editor + VAT catalog screen | Ready | | |
 
 ## Done
 
@@ -43,6 +43,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Hotfix: colour swatches clipped on Android | 2026-10-23, #46 | FlexLayout replaced by two fixed rows |
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
+| T-016a | Attachments, meter/reading photos, submit links on meter cards | 2026-10-24, #54 | Image shrinking on Android only. Soft-deleted attachment files kept (cleanup later). |
 
 ## Known issues / tech debt
 
@@ -59,6 +60,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - No "Copied" confirmation on Windows (toast disabled there) until the in-app snackbar (T-019).
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
 - FlexLayout clips first item per row on Android — avoid it (UI_GUIDELINES §6a).
+- Attachment files of soft-deleted rows are never removed (cleanup job later); image shrinking only on Android.
 - Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
