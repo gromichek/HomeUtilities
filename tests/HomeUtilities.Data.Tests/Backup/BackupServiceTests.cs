@@ -38,6 +38,42 @@ public class BackupServiceTests
     }
 
     [Fact]
+    public async Task Apply_on_a_blocked_ui_thread_with_existing_data_does_not_deadlock()
+    {
+        // Owner bug 2026-10-24: at app start the restore runs on the UI thread; copying the current data blocked on
+        // an async method whose continuations were posted to that (blocked) thread, so the window never appeared.
+        using var source = new BackupFixture();
+        await source.InitializeAsync();
+        await source.AddPropertiesAsync("From backup");
+        using var file = await source.BackupToMemoryAsync();
+
+        using var target = new BackupFixture();
+        await target.InitializeAsync();
+        await target.AddPropertiesAsync("Current");
+        await target.Backup.StageRestoreAsync(file);
+
+        RestoreOutcome? outcome = null;
+        var thread = new Thread(() =>
+        {
+            SynchronizationContext.SetSynchronizationContext(new NeverRunningContext());
+            outcome = target.Backup.ApplyPendingRestore();
+        });
+        thread.Start();
+
+        Assert.True(thread.Join(TimeSpan.FromSeconds(30)), "ApplyPendingRestore deadlocked");
+        Assert.True(outcome!.Succeeded);
+        Assert.Single(Directory.GetFiles(target.Options.BackupsFolder, "before-restore-*.zip"));
+    }
+
+    /// <summary>Like a UI thread that is busy: posted work never runs.</summary>
+    private sealed class NeverRunningContext : SynchronizationContext
+    {
+        public override void Post(SendOrPostCallback d, object? state)
+        {
+        }
+    }
+
+    [Fact]
     public async Task A_backup_made_while_the_wal_holds_uncommitted_pages_contains_all_rows()
     {
         using var source = new BackupFixture();
