@@ -118,3 +118,4 @@ Use these wordings everywhere (resx keys in brackets):
 4. Dark theme readable.
 5. Russian and English texts fit (no cut-off buttons); rows of buttons/swatches wrap on phones.
 6. Nonsense input in every field → validation message, no crash.
+7. `docs/user-guide/en.md` and `ru.md` updated for everything the user sees (CLAUDE.md, "User guide").

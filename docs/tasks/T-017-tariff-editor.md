@@ -65,6 +65,11 @@ blocked with a message.
 Unit word from the basis: PerUnit/NetExport → unit of the first selected meter (m³, kWh, MWh, Gcal), PerArea → m²,
 PerResident → "resident"/"жилец", FixedMonthly → "month"/"мес." (resx).
 
+### 5. User guide
+Update `docs/user-guide/en.md` and `ru.md`: new section "Tariffs" (what a tariff component is, the bases with one
+example each, VAT catalog vs custom %, prices with "valid from", stepped prices, presets) and "VAT rates" under
+Settings; extend the contract section with the Tariff card; remove tariffs/VAT from "Coming soon".
+
 ## Scope — do NOT
 - No charge screen (T-018). No contract templates (T-025).
 

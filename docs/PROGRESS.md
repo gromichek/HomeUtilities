@@ -44,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | — | Hotfix: colour swatches clipped on Android | 2026-10-23, #46 | FlexLayout replaced by two fixed rows |
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
+| — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-016a | Attachments, meter/reading photos, submit links on meter cards | 2026-10-24, #54 | Image shrinking on Android only. Soft-deleted attachment files kept (cleanup later). |
 
 ## Known issues / tech debt

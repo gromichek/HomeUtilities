@@ -58,6 +58,16 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   constructor **before** anything reads localized text. CI only builds the App; it never runs it.
 - Package versions are managed centrally in `Directory.Packages.props`.
 
+## User guide (EN + RU)
+
+- `docs/user-guide/en.md` and `docs/user-guide/ru.md` describe the app for the owner. **Every task that adds or
+  changes something the user sees updates both files in the same PR** (new screen, field, button, rule, warning).
+  Describe what the feature is for and how it relates to the other records (property – supplier – contract – meter),
+  not only which buttons exist. Move items out of "Coming soon" when they are done.
+- Use exactly the UI wording from `AppResources.resx` / `AppResources.ru.resx`. The Russian file is the only
+  place where non-English text is allowed in `docs/`; write natural Russian, not a word-by-word translation.
+- Examples are invented (no real names, numbers or IBANs). Tasks without visible changes: write "n/a" in the PR.
+
 ## Tests
 
 - Every piece of domain or calculation logic gets unit tests (xUnit) in the matching test project.
