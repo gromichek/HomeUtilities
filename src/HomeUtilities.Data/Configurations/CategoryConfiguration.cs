@@ -14,6 +14,6 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.Icon).HasMaxLength(ConfigurationExtensions.CodeLength);
         builder.Property(c => c.Notes).HasMaxLength(ConfigurationExtensions.NotesLength);
         builder.Ignore(c => c.IsBuiltIn);
-        builder.HasIndex(c => c.SystemKey).IsUnique().HasFilter("\"SystemKey\" IS NOT NULL");
+        builder.HasIndex(c => c.SystemKey).IsUnique().HasFilter("\"SystemKey\" IS NOT NULL AND \"IsDeleted\" = 0");
     }
 }

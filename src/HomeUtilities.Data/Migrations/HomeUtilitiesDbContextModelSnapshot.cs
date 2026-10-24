@@ -374,7 +374,7 @@ namespace HomeUtilities.Data.Migrations
 
                     b.HasIndex("SystemKey")
                         .IsUnique()
-                        .HasFilter("\"SystemKey\" IS NOT NULL");
+                        .HasFilter("\"SystemKey\" IS NOT NULL AND \"IsDeleted\" = 0");
 
                     b.HasIndex("UpdatedAt");
 
@@ -1026,7 +1026,8 @@ namespace HomeUtilities.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = 0");
 
                     b.HasIndex("UpdatedAt");
 

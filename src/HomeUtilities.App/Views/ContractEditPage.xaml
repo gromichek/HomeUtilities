@@ -193,23 +193,23 @@
                     <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TariffRows}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:TariffRowViewModel">
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding EditCommand}" />
-                                    </Grid.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,40,40" ColumnSpacing="4">
                                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                        </VerticalStackLayout.GestureRecognizers>
                                         <Label Text="{Binding Name}" FontAttributes="Bold" />
                                         <Label Text="{Binding BasisText}" Style="{StaticResource MutedLabel}" FontSize="12" />
                                         <Label Text="{Binding SummaryText}" Style="{StaticResource MutedLabel}" />
                                     </VerticalStackLayout>
                                     <Button Grid.Column="1" Style="{StaticResource IconButton}"
                                             Text="{StaticResource IconCollapse}" Command="{Binding MoveUpCommand}"
-                                            IsEnabled="{Binding CanMoveUp}"
+                                            IsVisible="{Binding CanMoveUp}"
                                             ToolTipProperties.Text="{Binding MoveUpText}"
                                             SemanticProperties.Description="{Binding MoveUpText}" />
                                     <Button Grid.Column="2" Style="{StaticResource IconButton}"
                                             Text="{StaticResource IconExpand}" Command="{Binding MoveDownCommand}"
-                                            IsEnabled="{Binding CanMoveDown}"
+                                            IsVisible="{Binding CanMoveDown}"
                                             ToolTipProperties.Text="{Binding MoveDownText}"
                                             SemanticProperties.Description="{Binding MoveDownText}" />
                                 </Grid>

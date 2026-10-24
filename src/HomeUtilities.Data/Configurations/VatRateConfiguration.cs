@@ -12,7 +12,7 @@ internal sealed class VatRateConfiguration : IEntityTypeConfiguration<VatRate>, 
         builder.Property(v => v.Code).HasMaxLength(ConfigurationExtensions.CodeLength);
         builder.Property(v => v.Name).HasMaxLength(ConfigurationExtensions.NameLength);
         builder.Property(v => v.Notes).HasMaxLength(ConfigurationExtensions.NotesLength);
-        builder.HasIndex(v => v.Code).IsUnique();
+        builder.HasIndex(v => v.Code).IsUnique().HasFilter("\"IsDeleted\" = 0");
         builder.HasMany(v => v.Versions).WithOne().HasForeignKey(v => v.VatRateId).OnDelete(DeleteBehavior.ClientCascade);
     }
 
