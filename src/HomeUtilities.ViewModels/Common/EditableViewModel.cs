@@ -77,6 +77,11 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
 
     protected abstract Task DeleteCoreAsync();
 
+    /// <summary>
+    /// Called before the "Delete «name»?" confirmation; return false (after telling the user why) to refuse the deletion.
+    /// </summary>
+    protected virtual Task<bool> CanDeleteAsync() => Task.FromResult(true);
+
     /// <summary>Name of the item shown in the "Delete «name»?" confirmation.</summary>
     protected abstract string DeleteName();
 
@@ -194,6 +199,11 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
     [RelayCommand(CanExecute = nameof(CanDelete))]
     private Task DeleteAsync() => RunSafeAsync(async () =>
     {
+        if (!await CanDeleteAsync())
+        {
+            return;
+        }
+
         var confirmed = await _dialogs.ConfirmAsync(
             _editableLocalizer.Get("Dialog_Delete_Title", DeleteName()),
             _editableLocalizer["Dialog_Delete_Message"],

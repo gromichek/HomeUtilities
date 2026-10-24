@@ -87,6 +87,8 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         CustomFieldEditorViewModel => new CustomFieldEditorView { BindingContext = editor },
         RegisterEditorViewModel => new RegisterEditorView { BindingContext = editor },
         ReadingEditorViewModel => new ReadingEditorView { BindingContext = editor },
+        TariffRateEditorViewModel => new TariffRateEditorView { BindingContext = editor },
+        VatVersionEditorViewModel => new VatVersionEditorView { BindingContext = editor },
         ReplaceMeterWizardViewModel => new ReplaceMeterWizardView { BindingContext = editor },
         _ => throw new NotSupportedException($"No dialog view is registered for {editor.GetType().Name}."),
     };

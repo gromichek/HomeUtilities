@@ -164,6 +164,61 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- 3a. Tariff: the priced components of the bill (edited on their own page; the arrows reorder them). -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding TariffHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddTariffCommand}"
+                                ToolTipProperties.Text="{Binding AddTariffText}"
+                                SemanticProperties.Description="{Binding AddTariffText}" />
+                    </Grid>
+
+                    <Label Text="{Binding TariffSaveFirstText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowTariffSaveFirst}" />
+                    <Label Text="{Binding TariffEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowTariffPresets}" />
+
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowTariffPresets}">
+                        <Label Text="{Binding TariffPresetsLabel}" Style="{StaticResource MutedLabel}" />
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TariffPresetRows}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TariffPresetRowViewModel">
+                                    <Button Text="{Binding Name}" Command="{Binding ApplyCommand}"
+                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TariffRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TariffRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding BasisText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                        <Label Text="{Binding SummaryText}" Style="{StaticResource MutedLabel}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                            Text="{StaticResource IconCollapse}" Command="{Binding MoveUpCommand}"
+                                            IsEnabled="{Binding CanMoveUp}"
+                                            ToolTipProperties.Text="{Binding MoveUpText}"
+                                            SemanticProperties.Description="{Binding MoveUpText}" />
+                                    <Button Grid.Column="2" Style="{StaticResource IconButton}"
+                                            Text="{StaticResource IconExpand}" Command="{Binding MoveDownCommand}"
+                                            IsEnabled="{Binding CanMoveDown}"
+                                            ToolTipProperties.Text="{Binding MoveDownText}"
+                                            SemanticProperties.Description="{Binding MoveDownText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- 4. Links: own links (edit on tap, open, delete) and the muted links inherited from the supplier. -->
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">

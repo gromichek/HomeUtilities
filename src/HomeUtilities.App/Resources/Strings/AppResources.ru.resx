@@ -482,4 +482,149 @@
   <data name="TestDataDeleteConfirm" xml:space="preserve"><value>Удалить ВСЕ данные и вложения? Это нельзя отменить.</value></data>
   <data name="TestDataDeleteAction" xml:space="preserve"><value>Удалить</value></data>
   <data name="TestDataDeleteRestart" xml:space="preserve"><value>Все данные будут удалены при следующем запуске. Закрыть приложение сейчас?</value></data>
+  <data name="Currency_Symbol_EUR" xml:space="preserve"><value>€</value></data>
+  <data name="Currency_Symbol_LVL" xml:space="preserve"><value>Ls</value></data>
+  <data name="Unit_Area" xml:space="preserve"><value>м²</value></data>
+  <data name="Unit_Resident" xml:space="preserve"><value>жилец</value></data>
+  <data name="Unit_Month" xml:space="preserve"><value>мес.</value></data>
+  <data name="Unit_Units" xml:space="preserve"><value>ед.</value></data>
+  <data name="Enum_ChargeBasis_PerUnit" xml:space="preserve"><value>По потреблению (счётчики)</value></data>
+  <data name="Enum_ChargeBasis_PerArea" xml:space="preserve"><value>По площади</value></data>
+  <data name="Enum_ChargeBasis_PerResident" xml:space="preserve"><value>На жильца</value></data>
+  <data name="Enum_ChargeBasis_FixedMonthly" xml:space="preserve"><value>Фиксированная сумма в месяц</value></data>
+  <data name="Enum_ChargeBasis_FromBill" xml:space="preserve"><value>Из счёта поставщика</value></data>
+  <data name="Enum_ChargeBasis_NetExport" xml:space="preserve"><value>Отдача в сеть (зачёт)</value></data>
+  <data name="Enum_TierPeriod_Month" xml:space="preserve"><value>Месяц</value></data>
+  <data name="Enum_TierPeriod_Year" xml:space="preserve"><value>Год</value></data>
+  <data name="TariffBasisHint_PerUnit" xml:space="preserve"><value>Потребление по счётчикам × цена. Для воды, газа, электричества.</value></data>
+  <data name="TariffBasisHint_PerArea" xml:space="preserve"><value>Площадь объекта × цена за м². Для платы за обслуживание.</value></data>
+  <data name="TariffBasisHint_PerResident" xml:space="preserve"><value>Число зарегистрированных жильцов × цена на жильца. Для вывоза мусора.</value></data>
+  <data name="TariffBasisHint_FixedMonthly" xml:space="preserve"><value>Одна и та же сумма каждый месяц. Для интернета, ТВ, абонентской платы.</value></data>
+  <data name="TariffBasisHint_FromBill" xml:space="preserve"><value>Собственного расчёта нет: сумма берётся из счёта поставщика. Для отопления по общедомовому счётчику.</value></data>
+  <data name="TariffBasisHint_NetExport" xml:space="preserve"><value>Энергия, отданная в сеть × цена, учитывается как зачёт. Для солнечных панелей.</value></data>
+  <data name="TariffPreset_WaterSewerage" xml:space="preserve"><value>Вода + канализация</value></data>
+  <data name="TariffPreset_WaterHeatingAndHeating" xml:space="preserve"><value>Подогрев воды + отопление</value></data>
+  <data name="TariffPreset_Electricity" xml:space="preserve"><value>Электричество</value></data>
+  <data name="TariffPreset_AreaFee" xml:space="preserve"><value>Плата по площади</value></data>
+  <data name="TariffPreset_PerResident" xml:space="preserve"><value>На жильца</value></data>
+  <data name="TariffPreset_FixedMonthly" xml:space="preserve"><value>Фиксированная в месяц</value></data>
+  <data name="TariffPresetName_WaterSupply" xml:space="preserve"><value>Водоснабжение</value></data>
+  <data name="TariffPresetName_Sewerage" xml:space="preserve"><value>Канализация</value></data>
+  <data name="TariffPresetName_WaterHeating" xml:space="preserve"><value>Подогрев воды</value></data>
+  <data name="TariffPresetName_Heating" xml:space="preserve"><value>Отопление</value></data>
+  <data name="TariffPresetName_Energy" xml:space="preserve"><value>Энергия</value></data>
+  <data name="TariffPresetName_Distribution" xml:space="preserve"><value>Распределение</value></data>
+  <data name="TariffPresetName_AreaFee" xml:space="preserve"><value>Плата по площади</value></data>
+  <data name="TariffPresetName_PerResident" xml:space="preserve"><value>На жильца</value></data>
+  <data name="TariffPresetName_FixedMonthly" xml:space="preserve"><value>Ежемесячная плата</value></data>
+  <data name="ContractTariff" xml:space="preserve"><value>Тариф</value></data>
+  <data name="ContractTariffAdd" xml:space="preserve"><value>Добавить компонент тарифа</value></data>
+  <data name="ContractTariffEmpty" xml:space="preserve"><value>Тарифа пока нет — добавьте составляющие счёта (например, водоснабжение, канализацию).</value></data>
+  <data name="ContractTariffPresets" xml:space="preserve"><value>Быстрый старт:</value></data>
+  <data name="ContractTariffSaveFirst" xml:space="preserve"><value>Сначала сохраните договор, затем добавьте тариф.</value></data>
+  <data name="TariffMoveUp" xml:space="preserve"><value>Выше</value></data>
+  <data name="TariffMoveDown" xml:space="preserve"><value>Ниже</value></data>
+  <data name="TariffFromBill" xml:space="preserve"><value>из счёта</value></data>
+  <data name="TariffNoPrice" xml:space="preserve"><value>цена не указана</value></data>
+  <data name="TariffPriceLine" xml:space="preserve"><value>{0} {1}/{2} {3}</value></data>
+  <data name="TariffVatIncluded" xml:space="preserve"><value>с НДС</value></data>
+  <data name="TariffVatExcluded" xml:space="preserve"><value>без НДС</value></data>
+  <data name="TariffPriceStepped" xml:space="preserve"><value>ступенчатая цена, ступеней: {0}, {1}</value></data>
+  <data name="TariffSummaryVat" xml:space="preserve"><value>{0} · НДС {1} %</value></data>
+  <data name="TariffQuantityTimes" xml:space="preserve"><value>{0} × {1}</value></data>
+  <data name="TariffParameterNow" xml:space="preserve"><value>сейчас: {0}</value></data>
+  <data name="TariffParameterMissing" xml:space="preserve"><value>У объекта пока нет значения этого параметра.</value></data>
+  <data name="TariffExampleHeader" xml:space="preserve"><value>Пример</value></data>
+  <data name="TariffExampleFromBill" xml:space="preserve"><value>Сумма берётся из счёта поставщика.</value></data>
+  <data name="TariffExampleNoPrice" xml:space="preserve"><value>Введите цену, чтобы увидеть пример.</value></data>
+  <data name="TariffExampleNoVat" xml:space="preserve"><value>Выберите ставку НДС, чтобы увидеть пример.</value></data>
+  <data name="TariffExampleNoParameter" xml:space="preserve"><value>Укажите это значение в объекте, чтобы увидеть пример.</value></data>
+  <data name="TariffExampleInvalid" xml:space="preserve"><value>Для этой цены пример недоступен.</value></data>
+  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
+  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + НДС {4} = {5} {6}</value></data>
+  <data name="TariffComponentNew" xml:space="preserve"><value>Новый компонент тарифа</value></data>
+  <data name="TariffGeneral" xml:space="preserve"><value>Общее</value></data>
+  <data name="TariffNameLabel" xml:space="preserve"><value>Название *</value></data>
+  <data name="TariffServiceLabel" xml:space="preserve"><value>Вид начисления</value></data>
+  <data name="TariffCategoryLabel" xml:space="preserve"><value>Категория</value></data>
+  <data name="TariffCategorySameAsContract" xml:space="preserve"><value>как у договора</value></data>
+  <data name="TariffChooseCategory" xml:space="preserve"><value>Выберите категорию</value></data>
+  <data name="TariffBasisLabel" xml:space="preserve"><value>Основа расчёта *</value></data>
+  <data name="TariffNotes" xml:space="preserve"><value>Заметки</value></data>
+  <data name="TariffDelete" xml:space="preserve"><value>Удалить компонент</value></data>
+  <data name="TariffCountedHeader" xml:space="preserve"><value>Что считается</value></data>
+  <data name="TariffMetersLabel" xml:space="preserve"><value>Счётчики</value></data>
+  <data name="TariffNoMeters" xml:space="preserve"><value>К договору пока не привязаны счётчики (карточка «Счётчики» объекта). Привязанные позже тоже будут учитываться.</value></data>
+  <data name="TariffRegistersLabel" xml:space="preserve"><value>Регистры</value></data>
+  <data name="TariffParameterLabel" xml:space="preserve"><value>Параметр объекта</value></data>
+  <data name="TariffCustomParameterLabel" xml:space="preserve"><value>Название параметра</value></data>
+  <data name="TariffMeterTitle" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="TariffVatHeader" xml:space="preserve"><value>НДС</value></data>
+  <data name="TariffVatPercentLabel" xml:space="preserve"><value>НДС, %</value></data>
+  <data name="TariffVatOption" xml:space="preserve"><value>{0} {1} %</value></data>
+  <data name="TariffVatCustom" xml:space="preserve"><value>Свой процент</value></data>
+  <data name="TariffPricesHeader" xml:space="preserve"><value>Цены</value></data>
+  <data name="TariffPricesEmpty" xml:space="preserve"><value>Цены пока нет — добавьте первую.</value></data>
+  <data name="TariffRateAdd" xml:space="preserve"><value>Добавить цену</value></data>
+  <data name="TariffRateRow" xml:space="preserve"><value>с {0:d} — {1}</value></data>
+  <data name="TariffSteppedBadge" xml:space="preserve"><value>ступенчатая</value></data>
+  <data name="TariffRateNew" xml:space="preserve"><value>Новая цена</value></data>
+  <data name="TariffRateEdit" xml:space="preserve"><value>Изменить цену</value></data>
+  <data name="TariffRateValidFrom" xml:space="preserve"><value>Действует с *</value></data>
+  <data name="TariffRatePrice" xml:space="preserve"><value>Цена *</value></data>
+  <data name="TariffRateIncludesVat" xml:space="preserve"><value>Цена включает НДС</value></data>
+  <data name="TariffRateCurrency" xml:space="preserve"><value>Валюта</value></data>
+  <data name="TariffRateStepped" xml:space="preserve"><value>Ступенчатая цена</value></data>
+  <data name="TariffRateTiersHint" xml:space="preserve"><value>У каждой ступени своя цена. Количество считается за период; у последней ступени предела нет.</value></data>
+  <data name="TariffRateTierUpTo" xml:space="preserve"><value>До количества</value></data>
+  <data name="TariffRateTierPrice" xml:space="preserve"><value>Цена</value></data>
+  <data name="TariffRateTierAndAbove" xml:space="preserve"><value>и выше</value></data>
+  <data name="TariffRateAddTier" xml:space="preserve"><value>Добавить ступень</value></data>
+  <data name="TariffRateTierPeriod" xml:space="preserve"><value>Период ступеней</value></data>
+  <data name="TariffRateNotes" xml:space="preserve"><value>Заметки</value></data>
+  <data name="Error_common_number_too_large" xml:space="preserve"><value>Число слишком большое (максимум {0}).</value></data>
+  <data name="Error_tariff_editor_too_many_decimals" xml:space="preserve"><value>Не больше 6 знаков после запятой.</value></data>
+  <data name="Error_tariff_editor_no_meter_selected" xml:space="preserve"><value>Включите хотя бы один счётчик.</value></data>
+  <data name="Error_tariff_editor_no_register_selected" xml:space="preserve"><value>Включите хотя бы один регистр.</value></data>
+  <data name="Error_vat_editor_code_duplicate" xml:space="preserve"><value>Этот код уже занят другой ставкой НДС.</value></data>
+  <data name="Error_vat_editor_version_required" xml:space="preserve"><value>Добавьте хотя бы один процент.</value></data>
+  <data name="Error_vat_rate_code_invalid" xml:space="preserve"><value>1–32 заглавные буквы, цифры или дефисы.</value></data>
+  <data name="Error_vat_rate_name_required" xml:space="preserve"><value>Введите название.</value></data>
+  <data name="Error_vat_percent_out_of_range" xml:space="preserve"><value>НДС должен быть от 0 до 100 %.</value></data>
+  <data name="Error_tariff_name_required" xml:space="preserve"><value>Введите название.</value></data>
+  <data name="Error_tariff_name_too_long" xml:space="preserve"><value>Название длиннее 100 символов.</value></data>
+  <data name="Error_tariff_contract_required" xml:space="preserve"><value>Тариф должен относиться к договору.</value></data>
+  <data name="Error_tariff_vat_required" xml:space="preserve"><value>Выберите ставку НДС или введите процент.</value></data>
+  <data name="Error_tariff_rate_required" xml:space="preserve"><value>Добавьте хотя бы одну цену.</value></data>
+  <data name="Error_tariff_price_negative" xml:space="preserve"><value>Цена не может быть отрицательной.</value></data>
+  <data name="Error_tariff_tier_period_required" xml:space="preserve"><value>Выберите период ступеней.</value></data>
+  <data name="Error_tariff_tier_last_not_unlimited" xml:space="preserve"><value>У последней ступени не должно быть предела.</value></data>
+  <data name="Error_tariff_tier_order_invalid" xml:space="preserve"><value>Пределы ступеней должны возрастать, а предела нет только у последней.</value></data>
+  <data name="Error_tariff_selection_not_allowed" xml:space="preserve"><value>Для этой основы нельзя выбирать счётчики и регистры.</value></data>
+  <data name="Error_tariff_net_export_register" xml:space="preserve"><value>Отдача в сеть учитывает только регистр «Export».</value></data>
+  <data name="Error_tariff_quantity_parameter_not_allowed" xml:space="preserve"><value>Эта основа не использует параметр объекта.</value></data>
+  <data name="Error_tariff_quantity_parameter_name_required" xml:space="preserve"><value>Введите название параметра.</value></data>
+  <data name="SectionVatRates" xml:space="preserve"><value>Ставки НДС</value></data>
+  <data name="VatRatesEmpty" xml:space="preserve"><value>Ставок НДС нет.</value></data>
+  <data name="VatRateAdd" xml:space="preserve"><value>Новая ставка НДС</value></data>
+  <data name="VatRateSelectHint" xml:space="preserve"><value>Выберите ставку НДС или добавьте новую.</value></data>
+  <data name="VatRatesBanner" xml:space="preserve"><value>Латвийские ставки по умолчанию — проверьте их по своим счетам.</value></data>
+  <data name="VatPercentValue" xml:space="preserve"><value>{0} %</value></data>
+  <data name="VatNoPercent" xml:space="preserve"><value>нет процента</value></data>
+  <data name="VatRateNew" xml:space="preserve"><value>Новая ставка НДС</value></data>
+  <data name="VatGeneral" xml:space="preserve"><value>Общее</value></data>
+  <data name="VatNameLabel" xml:space="preserve"><value>Название *</value></data>
+  <data name="VatCodeLabel" xml:space="preserve"><value>Код *</value></data>
+  <data name="VatCodeHint" xml:space="preserve"><value>Заглавные буквы, цифры и дефисы. Код ставок по умолчанию изменить нельзя.</value></data>
+  <data name="VatNotesLabel" xml:space="preserve"><value>Заметки</value></data>
+  <data name="VatVersionsHeader" xml:space="preserve"><value>Проценты</value></data>
+  <data name="VatVersionsEmpty" xml:space="preserve"><value>Процентов пока нет — добавьте первый.</value></data>
+  <data name="VatVersionAdd" xml:space="preserve"><value>Добавить процент</value></data>
+  <data name="VatVersionRow" xml:space="preserve"><value>с {0:d} — {1} %</value></data>
+  <data name="VatVersionNew" xml:space="preserve"><value>Новый процент</value></data>
+  <data name="VatVersionEdit" xml:space="preserve"><value>Изменить процент</value></data>
+  <data name="VatVersionValidFrom" xml:space="preserve"><value>Действует с *</value></data>
+  <data name="VatVersionPercent" xml:space="preserve"><value>НДС, % *</value></data>
+  <data name="VatRateDelete" xml:space="preserve"><value>Удалить ставку НДС</value></data>
+  <data name="VatRateInUse" xml:space="preserve"><value>«{0}» используется в компонентах тарифов ({1}), удалить нельзя.</value></data>
 </root>

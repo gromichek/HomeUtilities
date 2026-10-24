@@ -11,4 +11,7 @@ public static class EditorNavigation
 
     /// <summary>Carries the id of the property a new contract belongs to.</summary>
     public const string PropertyIdParameter = "propertyId";
+
+    /// <summary>Carries the id of the contract a new tariff component belongs to.</summary>
+    public const string ContractIdParameter = "contractId";
 }

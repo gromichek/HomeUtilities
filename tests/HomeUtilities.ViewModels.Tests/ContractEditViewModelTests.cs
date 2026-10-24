@@ -2,6 +2,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Payments;
+using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -644,6 +645,207 @@ public class ContractEditViewModelTests
         where TEnum : struct, Enum => options.First(o => o.Value.Equals(value));
 
     private static ChoiceOption Supplier(Supplier supplier) => new(supplier.Id, supplier.Name, string.Empty);
+
+    [Fact]
+    public async Task TariffCard_AddAndPresetsAreDisabledForAnUnsavedContract_AndEnabledAfterTheFirstSave()
+    {
+        var vm = await FilledNewAsync();
+
+        Assert.False(vm.CanAddTariff);
+        Assert.False(vm.AddTariffCommand.CanExecute(null));
+        Assert.True(vm.ShowTariffSaveFirst);
+        Assert.False(vm.ShowTariffPresets);
+        await vm.ApplyTariffPresetCommand.ExecuteAsync(TariffPreset.WaterSewerage);
+        Assert.Empty(_kit.Tariffs.Saved);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(vm.AddTariffCommand.CanExecute(null));
+        Assert.False(vm.ShowTariffSaveFirst);
+        Assert.True(vm.ShowTariffPresets);
+        Assert.Equal(6, vm.TariffPresetRows.Count);
+    }
+
+    [Fact]
+    public async Task TariffCard_ListsTheComponentsInOrderWithTheirCurrentPrice()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        AddComponent(contract, "Sewerage", ChargeBasis.PerUnit, 1, 0.86m);
+        AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 0, 1.41m);
+        AddComponent(contract, "Heating", ChargeBasis.FromBill, 2, null);
+        AddComponent(contract, "Maintenance", ChargeBasis.PerArea, 3, 0.6711m, includesVat: true);
+        _kit.Property.Parameters.Add(new PropertyParameter { PropertyId = _kit.Property.Id, Kind = PropertyParameterKind.TotalArea, Value = 52.3m, ValidFrom = new DateOnly(2020, 1, 1) });
+        var vm = _kit.CreateContractEditor();
+
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        Assert.Equal(["Water supply", "Sewerage", "Heating", "Maintenance"], vm.TariffRows.Select(r => r.Name));
+        Assert.False(vm.HasNoTariff);
+        Assert.False(vm.ShowTariffPresets);
+        Assert.Equal("Enum_ChargeBasis_PerUnit [en]", vm.TariffRows[0].BasisText);
+        // 1.41 EUR/m3 excl. VAT, VAT 21 %
+        Assert.StartsWith("TariffSummaryVat TariffPriceLine 1.41", vm.TariffRows[0].SummaryText.Replace("|", " "));
+        Assert.Contains("21", vm.TariffRows[0].SummaryText);
+        Assert.Equal("TariffFromBill [en]", vm.TariffRows[2].SummaryText);
+        // 52.3 m2 x 0.6711 EUR/m2 incl. VAT
+        Assert.Contains("TariffQuantityTimes " + DecimalInput.Format(52.3m, System.Globalization.CultureInfo.CurrentCulture, 2), vm.TariffRows[3].SummaryText);
+        Assert.Contains("TariffVatIncluded", vm.TariffRows[3].SummaryText);
+        Assert.DoesNotContain("TariffSummaryVat", vm.TariffRows[3].SummaryText);
+    }
+
+    [Fact]
+    public async Task TariffCard_ComponentWithoutPriceSaysSo_AndTheArrowsFollowThePosition()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 0, null);
+        AddComponent(contract, "Sewerage", ChargeBasis.PerUnit, 1, null);
+        var vm = _kit.CreateContractEditor();
+
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        Assert.Equal("TariffNoPrice [en]", vm.TariffRows[0].SummaryText);
+        Assert.Equal((false, true), (vm.TariffRows[0].CanMoveUp, vm.TariffRows[0].CanMoveDown));
+        Assert.Equal((true, false), (vm.TariffRows[1].CanMoveUp, vm.TariffRows[1].CanMoveDown));
+    }
+
+    [Fact]
+    public async Task TariffCard_ReorderUpdatesTheSortOrderOfTheComponents()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var water = AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 0, 1m);
+        var sewerage = AddComponent(contract, "Sewerage", ChargeBasis.PerUnit, 1, 1m);
+        var heating = AddComponent(contract, "Heating", ChargeBasis.FromBill, 2, null);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        vm.TariffRows[2].MoveUpCommand.Execute(null);
+
+        Assert.Equal(["Water supply", "Heating", "Sewerage"], vm.TariffRows.Select(r => r.Name));
+        Assert.Equal((0, 2, 1), (water.SortOrder, sewerage.SortOrder, heating.SortOrder));
+        Assert.Equal([heating.Id, sewerage.Id], _kit.Tariffs.Saved.Select(c => c.Id));
+
+        vm.TariffRows[0].MoveDownCommand.Execute(null);
+
+        Assert.Equal(["Heating", "Water supply", "Sewerage"], vm.TariffRows.Select(r => r.Name));
+        Assert.Equal((1, 2, 0), (water.SortOrder, sewerage.SortOrder, heating.SortOrder));
+
+        // Moving the first one up or the last one down changes nothing.
+        var saves = _kit.Tariffs.Saved.Count;
+        vm.TariffRows[0].MoveUpCommand.Execute(null);
+        vm.TariffRows[^1].MoveDownCommand.Execute(null);
+        Assert.Equal(saves, _kit.Tariffs.Saved.Count);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task TariffCard_TapOpensTheComponentEditor_AndAddOpensANewOne()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var water = AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 0, 1m);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        vm.TariffRows[0].EditCommand.Execute(null);
+        await vm.AddTariffCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, _kit.Navigation.Visited.Count);
+        var edit = _kit.Navigation.Visited[0];
+        Assert.Equal(Routes.TariffComponentEdit, edit.Route);
+        Assert.Equal(contract.Id, edit.Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal(water.Id, edit.Parameters[EditorNavigation.IdParameter]);
+        var add = _kit.Navigation.Visited[1];
+        Assert.Equal(Routes.TariffComponentEdit, add.Route);
+        Assert.Equal(contract.Id, add.Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.False(add.Parameters.ContainsKey(EditorNavigation.IdParameter));
+    }
+
+    [Fact]
+    public async Task TariffCard_ReloadsWhenThePageAppearsAgain()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.True(vm.HasNoTariff);
+
+        AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 0, 1m);
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(["Water supply"], vm.TariffRows.Select(r => r.Name));
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Presets_CreateTheComponentsOnlyWhileTheCardIsEmpty()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.True(vm.ShowTariffPresets);
+
+        await vm.ApplyTariffPresetCommand.ExecuteAsync(TariffPreset.WaterSewerage);
+
+        Assert.Equal(["TariffPresetName_WaterSupply [en]", "TariffPresetName_Sewerage [en]"], vm.TariffRows.Select(r => r.Name));
+        Assert.Equal([0, 1], _kit.Tariffs.Stored.Select(c => c.SortOrder));
+        Assert.All(_kit.Tariffs.Stored, c => Assert.Equal(contract.Id, c.ContractId));
+        Assert.False(vm.ShowTariffPresets);
+
+        await vm.ApplyTariffPresetCommand.ExecuteAsync(TariffPreset.Electricity);
+
+        Assert.Equal(2, _kit.Tariffs.Stored.Count);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Preset_WaterHeating_CountsOnlyTheHotMetersLinkedToTheContract()
+    {
+        var contract = AddContract(ServiceKind.Heating);
+        var hot = AddLinkedMeter(contract, MeterResource.HotWater);
+        var cold = AddLinkedMeter(contract, MeterResource.ColdWater);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        await vm.ApplyTariffPresetCommand.ExecuteAsync(TariffPreset.WaterHeatingAndHeating);
+
+        var heating = _kit.Tariffs.Stored.Single(c => c.Basis == ChargeBasis.PerUnit);
+        Assert.Equal([hot.Id], heating.MeterIds);
+        Assert.DoesNotContain(cold.Id, heating.MeterIds);
+        Assert.Equal("LV-REDUCED", heating.VatCode);
+        Assert.Equal(ChargeBasis.FromBill, _kit.Tariffs.Stored.Single(c => c.Basis != ChargeBasis.PerUnit).Basis);
+    }
+
+    [Fact]
+    public async Task Preset_AreaFee_TakesTheServiceOfTheContract()
+    {
+        var contract = AddContract(ServiceKind.Maintenance);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        await vm.ApplyTariffPresetCommand.ExecuteAsync(TariffPreset.AreaFee);
+
+        var component = Assert.Single(_kit.Tariffs.Stored);
+        Assert.Equal((ChargeBasis.PerArea, ServiceKind.Maintenance, "LV-STANDARD"), (component.Basis, component.ChargeKind, component.VatCode));
+    }
+
+    private TariffComponent AddComponent(Contract contract, string name, ChargeBasis basis, int sortOrder, decimal? price, bool includesVat = false)
+    {
+        var component = new TariffComponent { ContractId = contract.Id, Name = name, Basis = basis, VatCode = "LV-STANDARD", SortOrder = sortOrder };
+        if (price is { } value)
+        {
+            component.Rates.Add(new TariffRate { ComponentId = component.Id, ValidFrom = new DateOnly(2020, 1, 1), Price = value, PriceIncludesVat = includesVat });
+        }
+
+        _kit.Tariffs.Stored.Add(component);
+        return component;
+    }
+
+    private Meter AddLinkedMeter(Contract contract, MeterResource resource)
+    {
+        var meter = new Meter { PropertyId = contract.PropertyId, Resource = resource, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 1, 1) };
+        meter.Registers.Add(MeterRegister.CreateDefault(meter.Id));
+        _kit.Meters.Stored.Add(meter);
+        _kit.Contracts.Links.Add(new ContractMeter { ContractId = contract.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2020, 1, 1) });
+        return meter;
+    }
 
     private Contract AddContract(ServiceKind kind)
     {

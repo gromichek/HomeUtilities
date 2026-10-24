@@ -103,6 +103,10 @@ public static class MauiProgram
         builder.Services.AddTransient<CategoriesViewModel>();
         builder.Services.AddTransient<CategoryEditViewModel>();
         builder.Services.AddTransient<Func<CategoryEditViewModel>>(sp => () => sp.GetRequiredService<CategoryEditViewModel>());
+        builder.Services.AddTransient<TariffComponentEditViewModel>();
+        builder.Services.AddTransient<VatRatesViewModel>();
+        builder.Services.AddTransient<VatRateEditViewModel>();
+        builder.Services.AddTransient<Func<VatRateEditViewModel>>(sp => () => sp.GetRequiredService<VatRateEditViewModel>());
         builder.Services.AddTransient<OverviewPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<PlaceholderPage>();
@@ -117,6 +121,9 @@ public static class MauiProgram
         builder.Services.AddTransient<SupplierEditPage>();
         builder.Services.AddTransient<CategoriesPage>();
         builder.Services.AddTransient<CategoryEditPage>();
+        builder.Services.AddTransient<TariffComponentEditPage>();
+        builder.Services.AddTransient<VatRatesPage>();
+        builder.Services.AddTransient<VatRateEditPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

@@ -22,9 +22,12 @@ information, so start here.
 | **Meter ↔ contract link** | Says which contracts use a meter. One meter can be used by several contracts. | The hot water meter is linked to the **water** contract (water volume) **and** the **heating** contract (water heating). |
 | **Reading** | A value of a meter register on a date. Consumption is calculated from readings. | 01.10.2026: 1234.567 m³ |
 | **Category** | Your own grouping with a colour for reports (e.g. "Water", "Taxes"). Every contract has one. | "Water", blue |
+| **Tariff component** | One priced line of a contract's bill, with prices that change over time and a VAT rate. Several components make the **tariff** of a contract. | "Water supply" 1.41 €/m³ excl. VAT, "Sewerage" 0.86 €/m³ excl. VAT |
+| **VAT rate** | A named VAT percentage that changes over time; tariff components point to it, so a change of the national rate is entered once. | "Standard rate": 21 % |
 
 **Order of setting things up:** properties → suppliers → contracts (in the property) → meters (in the property,
-linked to contracts) → readings. You can add a supplier directly from the contract editor ("＋ New supplier…").
+linked to contracts) → readings. Enter the **tariff** (prices) of a contract when you want the app to calculate what
+a bill should be. You can add a supplier directly from the contract editor ("＋ New supplier…").
 
 ## 2. Screens and common behaviour
 
@@ -32,8 +35,8 @@ linked to contracts) → readings. You can add a supplier directly from the cont
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
-item **Help**. Screens such as Properties, Suppliers, Readings, Categories and the contract and meter editors have a
-**?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
+item **Help**. Screens such as Properties, Suppliers, Readings, Categories, VAT rates and the contract, meter and tariff component
+editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
 left and the editor on the right. Settings shows the current layout (phone / tablet / desktop).
@@ -91,6 +94,8 @@ Open a property → card **Contracts** → **Add contract**.
   like 28–3 continues into the next month. The Readings screen uses it to show "open now / opens in N days".
 - **Payment details / Links:** leave a field empty to use the supplier's value. "Effective payment details" shows
   the result, including the payment purpose filled with this contract's numbers.
+- **Tariff:** the priced components of this contract (see [Tariffs](#9-tariffs)). Available after the contract is
+  saved. Tap a row to edit it; the arrows change the order.
 - **Custom fields:** extra fields (text, number, amount, date) that will appear when you enter a bill or a bill line
   for this contract.
 
@@ -135,10 +140,70 @@ final readings belong to a meter replacement and cannot be deleted.
 Built-in categories can be renamed (leave the name empty to return to the default) and archived but not deleted;
 you can add your own.
 
-## 9. Settings
+## 9. Tariffs
 
-Language (English / Русский), theme (system / light / dark), categories, version, database file location, and the
-**Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
+A **tariff** tells the app how a contract is priced, so that it can later work out the expected charge for a month.
+It consists of **components** — the lines of the supplier's bill, for example "Water supply" and "Sewerage" on a
+water bill, or "Energy" and "Distribution" on an electricity bill. Each component has a **basis** (what is
+multiplied by the price), a **VAT rate** and one or more **prices**, each valid from a date.
+
+Open a saved contract → card **Tariff**. The card lists the components with their current price, for example
+"1.41 €/m³ excl. VAT · VAT 21 %" or "52.30 m² × 0.6711 €/m² incl. VAT". Tap a row to edit it, ＋ adds a component, the
+arrows reorder the lines. While the card is empty, **quick-start presets** create ready-made components without
+prices (you enter the prices afterwards): *Water + sewerage*, *Water heating + heating*, *Electricity*,
+*Area-based fee*, *Per resident*, *Fixed monthly*.
+
+**Component editor**
+- **General:** name, *charge kind* (what the line counts toward in reports; the contract's service by default),
+  category (empty = the contract's category), basis and notes.
+- **Basis** — what the price is multiplied by:
+
+| Basis | Quantity | Example |
+|---|---|---|
+| **By consumption (meters)** | consumption from the contract's meters | Cold water 10 m³ × 1.41 € |
+| **By area** | area of the property (a parameter of the property) | Maintenance 52.3 m² × 0.6711 € |
+| **Per resident** | declared residents | Waste 3 residents × 5.40 € |
+| **Fixed amount per month** | 1 | Internet 22.95 € a month |
+| **From the supplier's bill** | no own calculation; the amount is taken from the bill | Heating by the building heat meter |
+| **Net export (credit)** | energy fed into the grid (Export register), counted as a credit | Solar panels |
+
+- **What is counted:** for consumption-based components, switch the **meters** and **registers** the component
+  counts. All meters on means "all meters of the contract, also those linked later". A hot-water meter that feeds
+  both the water and the heating contract can be counted by "Water heating" only. For *By area* and *Per resident* pick
+  the **parameter** of the property (total area, heated area, residents, or your own); the line "now: 52.3 m²" shows its
+  current value — change it in the property (Parameters card).
+- **VAT:** choose a rate from the catalog (it shows the percent valid today, e.g. "Standard rate 21 %") or
+  **Custom %** and type the percent yourself. See [VAT rates](#vat-rates).
+- **Prices:** a list of prices, newest first, each with **Valid from**. When a supplier changes a price, **add a new
+  price** with the new date instead of editing the old one — earlier months are then still calculated with the old
+  price. The price dialog has the price (up to 6 decimals), *Price includes VAT* (suppliers often quote gross
+  prices) and the currency of the contract.
+- **Stepped price:** switch *Stepped price* on to enter steps, for example "up to 100 kWh: 0.1065 €, above: 0.0818 €".
+  The last step is "and above" (no limit). *Tier period* says whether the thresholds count per month or per year.
+- **Example:** a live calculation with the newest price, for example "10 m³ → 14.10 + VAT 2.96 = 17.06 €". For a
+  stepped price each step is shown on its own line. It helps to check that the numbers you typed are sensible.
+
+Invented example — a water contract: "Water supply" 1.41 and "Sewerage" 0.86, both *By consumption*, VAT *Standard
+rate*, valid from 01.01.2026. A heating contract: "Water heating" 4.56, *By consumption*, only the hot-water meters
+switched on, VAT *Reduced rate*; "Heating" *From the supplier's bill*.
+
+## 10. Settings
+
+Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
+and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
+
+### VAT rates
+
+**Settings → VAT rates** is the catalog of VAT percentages that tariff components refer to. It starts with three
+entries — *Standard rate*, *Reduced rate* and *Zero / exempt* — with their Latvian history. **These defaults were
+entered from memory: please check them against your bills** and correct them if needed. The list shows the percent
+valid today.
+
+Open an entry to see its **name**, **code** and the **percentages over time**: each has a *Valid from* date, so a
+change of the national rate is a new row, and past months keep using the old percent. Add rows with ＋, tap a row to
+edit it. The code of the three default entries cannot be changed and they cannot be deleted; you can add your own
+rates (for example for a special case). A rate that is used by a tariff component cannot be deleted — the app tells
+you how many components use it. A component can also skip the catalog and use its own *Custom %*.
 
 ### Backup
 
@@ -159,8 +224,8 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
-## 10. Coming soon
+## 11. Coming soon
 
-Tariffs and VAT rates per contract, calculated monthly charges, bills with the "Paid" quick action, payments and
+Calculated monthly charges from the tariffs, bills with the "Paid" quick action, payments and
 balances, equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.

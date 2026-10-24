@@ -1,5 +1,7 @@
 using System.Reflection;
+using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -165,6 +167,95 @@ public class InputHardeningTests
         await wizard.ReplaceCommand.ExecuteAsync(null);
 
         Assert.Single(kit.Meters.Replacements);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task TariffComponentEditor_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var contract = new Contract { PropertyId = kit.Property.Id, Title = "Water", Service = ServiceKind.ColdWater };
+        kit.Contracts.Stored.Add(contract);
+        var meter = new Meter { PropertyId = kit.Property.Id, Resource = MeterResource.ColdWater, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 1, 1) };
+        meter.Registers.Add(MeterRegister.CreateDefault(meter.Id));
+        kit.Meters.Stored.Add(meter);
+        kit.Contracts.Links.Add(new ContractMeter { ContractId = contract.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2020, 1, 1) });
+        kit.Property.Parameters.Add(new PropertyParameter { PropertyId = kit.Property.Id, Kind = PropertyParameterKind.TotalArea, Value = 52.3m, ValidFrom = new DateOnly(2020, 1, 1) });
+
+        foreach (var basis in Enum.GetValues<ChargeBasis>())
+        {
+            var vm = kit.CreateTariffEditor();
+            vm.ContractId = contract.Id;
+            await vm.LoadAsync(null);
+            vm.SelectedBasis = vm.Bases.Single(o => o.Value.Equals(basis));
+            kit.Dialogs.EditorScript = editor =>
+            {
+                var dialog = (TariffRateEditorViewModel)editor;
+                dialog.PriceText = "1,41";
+                dialog.SaveCommand.Execute(null);
+            };
+            await vm.AddRateCommand.ExecuteAsync(null);
+            kit.Dialogs.EditorScript = null;
+
+            vm.SelectedVatOption = vm.VatOptions.Single(o => o.IsCustom);
+            if (vm.Parameters.FirstOrDefault(o => o.Value.Equals(PropertyParameterKind.Custom)) is { } custom)
+            {
+                vm.SelectedParameter = custom;
+            }
+
+            await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task TariffRateDialog_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var rate = new TariffRateEditorViewModel(kit.Localizer, kit.Clock, null, Currency.EUR, true, null, _ => false);
+        await HammerAsync(rate, input, () => { rate.SaveCommand.Execute(null); return Task.CompletedTask; });
+
+        rate.IsStepped = true;
+        rate.AddTierCommand.Execute(null);
+        await HammerAsync(rate, input, () => { rate.SaveCommand.Execute(null); return Task.CompletedTask; });
+        foreach (var row in rate.TierRows)
+        {
+            await HammerAsync(row, input, () => { rate.SaveCommand.Execute(null); return Task.CompletedTask; });
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task VatRateEditorAndVersionDialog_NeverThrow(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = kit.CreateVatRateEditor();
+        await vm.LoadAsync(null);
+        await HammerAsync(vm, input, () => vm.SaveCommand.ExecuteAsync(null));
+
+        var seeded = kit.CreateVatRateEditor();
+        await seeded.LoadAsync(kit.VatRates.Stored[0].Id);
+        await HammerAsync(seeded, input, () => seeded.SaveCommand.ExecuteAsync(null));
+
+        var version = new VatVersionEditorViewModel(kit.Localizer, kit.Clock, null, _ => false);
+        await HammerAsync(version, input, () => { version.SaveCommand.Execute(null); return Task.CompletedTask; });
+    }
+
+    [Fact]
+    public async Task TariffEditorHammering_ReallyReachesTheSaveLogic()
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var contract = new Contract { PropertyId = kit.Property.Id, Title = "Water", Service = ServiceKind.ColdWater };
+        kit.Contracts.Stored.Add(contract);
+        var vm = kit.CreateTariffEditor();
+        vm.ContractId = contract.Id;
+        await vm.LoadAsync(null);
+        vm.SelectedBasis = vm.Bases.Single(o => o.Value.Equals(ChargeBasis.FromBill));
+        vm.ComponentName = "Heating";
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Single(kit.Tariffs.Saved);
     }
 
     [Theory]
