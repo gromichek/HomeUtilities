@@ -85,7 +85,7 @@ public sealed class SampleDataGenerator(
         return true;
     }
 
-    /// <summary>Tariffs of the sample contracts: all bases, a stepped price, hot meters only, and one price change.</summary>
+    /// <summary>Tariffs of the sample contracts: all bases, a stepped price, hot meters only, one price change and one price that starts next month (a "no price" warning).</summary>
     private async Task AddTariffsAsync(
         Contract water,
         Contract heat,
@@ -100,6 +100,7 @@ public sealed class SampleDataGenerator(
         var start = _today.AddYears(-6);
         var changeMonth = YearMonth.From(_today).AddMonths(-3);
         var changeDate = new DateOnly(changeMonth.Year, changeMonth.Month, 1);
+        var nextMonth = YearMonth.From(_today).AddMonths(1).FirstDay;
         var waterHeating = Component(heat, "Water heating", ServiceKind.WaterHeating, ChargeBasis.PerUnit, 0, "LV-REDUCED", Rate(start, 4.56m));
         waterHeating.MeterIds = [.. hotMeters.Select(m => m.Id)];
         var day = Component(cottagePower, "Energy, day", ServiceKind.Electricity, ChargeBasis.PerUnit, 0, Rate(start, 0.1245m));
@@ -118,6 +119,9 @@ public sealed class SampleDataGenerator(
             Component(heat, "Heating", ServiceKind.Heating, ChargeBasis.FromBill, 1, "LV-REDUCED"),
             Component(maintenance, "Maintenance", ServiceKind.Maintenance, ChargeBasis.PerArea, 0, Rate(start, 0.6711m, includesVat: true)),
             Component(waste, "Waste", ServiceKind.Waste, ChargeBasis.PerResident, 0, Rate(start, 5.4m)),
+
+            // The only price starts next month, so the charges of the current and earlier months show "no price valid".
+            Component(waste, "Container rental", ServiceKind.Waste, ChargeBasis.FixedMonthly, 1, Rate(nextMonth, 1.5m)),
             Component(internet, "Internet and TV", ServiceKind.InternetTv, ChargeBasis.FixedMonthly, 0, Rate(start, 22.95m, includesVat: true)),
             Component(power, "Energy", ServiceKind.Electricity, ChargeBasis.PerUnit, 0, SteppedRate(start)),
             Component(power, "Distribution", ServiceKind.Electricity, ChargeBasis.PerUnit, 1, Rate(start, 0.0391m)),

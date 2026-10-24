@@ -243,7 +243,7 @@ public class SampleDataGeneratorTests
         var components = await rig.Tariffs.ListAsync();
         var catalog = await rig.VatRates.ListAsync();
 
-        Assert.Equal(12, components.Count);
+        Assert.Equal(13, components.Count);
         foreach (var component in components)
         {
             Assert.True(TariffComponentValidator.Validate(component).IsValid, component.Name);
@@ -301,16 +301,17 @@ public class SampleDataGeneratorTests
     }
 
     [Fact]
-    public async Task Charges_of_the_sample_contracts_are_calculated_without_tariff_warnings()
+    public async Task Charges_of_the_sample_contracts_have_no_tariff_warnings_except_the_price_that_starts_next_month()
     {
         using var rig = new Rig();
         await rig.Generator.FillAsync();
         var period = YearMonth.From(rig.Clock.Today).AddMonths(-2);
         var forbidden = new[]
         {
-            ChargeWarningCodes.NoRateForDate, ChargeWarningCodes.UnknownVat, ChargeWarningCodes.InvalidTariff,
+            ChargeWarningCodes.UnknownVat, ChargeWarningCodes.InvalidTariff,
             ChargeWarningCodes.CurrencyMismatch, ChargeWarningCodes.MissingParameter,
         };
+        var container = (await rig.Tariffs.ListAsync()).Single(c => c.Name == "Container rental");
 
         foreach (var contract in await rig.Contracts.ListAsync())
         {
@@ -322,8 +323,56 @@ public class SampleDataGeneratorTests
             var charge = ChargeCalculator.Calculate((await rig.Loader.LoadAsync(contract.Id, period))!);
 
             Assert.DoesNotContain(charge.Warnings, w => forbidden.Contains(w.Code));
+            Assert.DoesNotContain(charge.Warnings, w => w.Code == ChargeWarningCodes.NoRateForDate && w.ComponentId != container.Id);
             Assert.True(charge.Lines.Count > 0, contract.Title);
         }
+    }
+
+    [Fact]
+    public async Task Charges_of_the_last_three_months_are_calculated_for_every_contract_without_exceptions_and_show_every_case()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+        var thisMonth = YearMonth.From(rig.Clock.Today);
+        var container = (await rig.Tariffs.ListAsync()).Single(c => c.Name == "Container rental");
+        var charges = new List<CalculatedCharge>();
+
+        foreach (var contract in await rig.Contracts.ListAsync())
+        {
+            for (var back = 1; back <= 3; back++)
+            {
+                var input = await rig.Loader.LoadAsync(contract.Id, thisMonth.AddMonths(-back));
+                Assert.NotNull(input);
+                charges.Add(ChargeCalculator.Calculate(input));
+            }
+        }
+
+        Assert.Equal(30, charges.Count);
+        Assert.Contains(charges, c => c.Lines.Count > 0 && c.IsComplete && c.Warnings.Count == 0);
+        Assert.Contains(charges, c => c.Lines.Count(l => l.ComponentName == "Energy") > 1);
+        Assert.Contains(charges, c => c.Lines.Any(l => l.IsFromBill));
+        Assert.Contains(charges, c => c.Warnings.Any(w => w.Code == ChargeWarningCodes.NoRateForDate && w.ComponentId == container.Id));
+    }
+
+    [Fact]
+    public async Task The_replaced_meter_shows_two_segments_in_the_replacement_month()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+        var flat = (await rig.Properties.ListAsync(true))[0];
+        var water = (await rig.Contracts.ListByPropertyAsync(flat.Id)).Single(c => c.Service == ServiceKind.ColdWater);
+        var replacementMonth = YearMonth.From(rig.Clock.Today).AddMonths(-5);
+
+        // the replacement is on the 15th of the month five months ago; the reading window (25–28) of that month
+        // and the next one end on the new meter, so one of the two months spans both meters
+        var spans = new List<int>();
+        foreach (var month in new[] { replacementMonth, replacementMonth.AddMonths(1) })
+        {
+            var charge = ChargeCalculator.Calculate((await rig.Loader.LoadAsync(water.Id, month))!);
+            spans.Add(charge.Lines.SelectMany(l => l.Consumption).Max(c => c.Segments.Count));
+        }
+
+        Assert.Contains(2, spans);
     }
 
     [Fact]
