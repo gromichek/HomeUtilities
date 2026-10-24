@@ -272,4 +272,25 @@ public static class ErrorCodes
 
     /// <summary>Two allocations point to the same bill.</summary>
     public const string PaymentAllocationDuplicateBill = "payment_allocation.duplicate_bill";
+
+    /// <summary>An attachment has no file name.</summary>
+    public const string AttachmentFileNameRequired = "attachment.file_name_required";
+
+    /// <summary>An attachment file name is longer than 200 characters.</summary>
+    public const string AttachmentFileNameTooLong = "attachment.file_name_too_long";
+
+    /// <summary>An attachment has no content type.</summary>
+    public const string AttachmentContentTypeRequired = "attachment.content_type_required";
+
+    /// <summary>The file type is not JPEG, PNG, HEIC or PDF.</summary>
+    public const string AttachmentContentTypeNotAllowed = "attachment.content_type_not_allowed";
+
+    /// <summary>The file is empty.</summary>
+    public const string AttachmentEmpty = "attachment.empty";
+
+    /// <summary>The file is larger than the limit; Args: the limit in MB.</summary>
+    public const string AttachmentTooLarge = "attachment.too_large";
+
+    /// <summary>The SHA-256 is not 64 hex characters.</summary>
+    public const string AttachmentHashInvalid = "attachment.hash_invalid";
 }

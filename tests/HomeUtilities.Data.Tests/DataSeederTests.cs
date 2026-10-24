@@ -99,7 +99,7 @@ public class DataSeederTests
         {
             var services = new ServiceCollection();
             services.AddSingleton<IClock>(new FakeClock(DateTimeOffset.UtcNow));
-            services.AddHomeUtilitiesData(path);
+            services.AddHomeUtilitiesData(path, Path.Combine(Path.GetDirectoryName(path)!, "attachments"));
             await using var provider = services.BuildServiceProvider();
             var initializer = provider.GetRequiredService<IDatabaseInitializer>();
 
