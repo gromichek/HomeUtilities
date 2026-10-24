@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-016 | Readings entry, history, submit link | Ready | | |
+| T-016a | Attachments infrastructure + meter/reading photos | Ready | | |
 
 ## Done
 
@@ -40,6 +40,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-014a | Robustness, stay after Save, error log, Android layout | 2026-10-23, #43 | Session worked from the first task version; lead merged #41, fixed flaky VM tests (sequential run) and added CI failure annotations. 963 tests. |
 | — | Hotfix: colour swatches clipped on Android | 2026-10-23, #46 | FlexLayout replaced by two fixed rows |
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
+| T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 
 ## Known issues / tech debt
 
@@ -71,4 +72,4 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-23 | #34 + #35 | Suppliers: Copy button | **Crash on Windows**: CommunityToolkit Toast unsupported in unpackaged app → hotfix (no toast on Windows) |
 | 2026-10-23 | #37 | Suppliers, categories | **Crash** on purpose template `{Period:mm.yyyy}`; Android: Save closes supplier editor (owner wants to stay); colour swatches cut off → T-014a |
 | 2026-10-23 | #43 | Colour swatches | first swatch of each row clipped (FlexLayout on Android) → #46 |
-| | #38 + #43 + #45 + #46 | Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
+| | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
