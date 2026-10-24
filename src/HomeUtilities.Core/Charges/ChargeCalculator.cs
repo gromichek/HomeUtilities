@@ -227,7 +227,6 @@ public static class ChargeCalculator
     {
         var linked = input.ContractMeters
             .Where(cm => cm.IsActiveOn(input.Period.LastDay))
-            .Where(cm => component.MeterIds.Count == 0 || component.MeterIds.Contains(cm.MeterId))
             .Select(cm => cm.MeterId)
             .Where(id => input.PropertyMeters.Any(m => !m.IsDeleted && m.Id == id));
 
@@ -235,6 +234,13 @@ public static class ChargeCalculator
         foreach (var meterId in linked)
         {
             var chain = MeterChain.Build(input.PropertyMeters, meterId);
+
+            // MeterIds identifies a meter position: any meter of the replacement chain may be the selected one.
+            if (component.MeterIds.Count > 0 && !chain.Meters.Any(m => component.MeterIds.Contains(m.Id)))
+            {
+                continue;
+            }
+
             if (!seen.Add(chain.Meters[0].Id))
             {
                 continue;

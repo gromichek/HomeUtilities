@@ -376,6 +376,52 @@ public class ChargeCalculatorTests
         Assert.Equal(11.197m, b.Calculate(Sep2026).Lines.Single().Quantity);
     }
 
+    /// <summary>Kitchen meter replaced on 10 Sep (old 120.000 -> final 123.000, new 0.000 -> 2.500) plus an untouched bathroom meter.</summary>
+    private static (ChargeBuilder B, Meter OldKitchen, Meter NewKitchen) ReplacedKitchenFixture()
+    {
+        var b = new ChargeBuilder().Window(20, 26);
+        var oldKitchen = b.AddMeter(Meter(D(2020, 1, 1), 6), link: false);
+        oldKitchen.Add(D(2026, 8, 26), 120.000m);
+        oldKitchen.Add(D(2026, 9, 10), 123.000m, ReadingKind.Final);
+        oldKitchen.RemovedOn = D(2026, 9, 10);
+        b.Link(oldKitchen, validTo: D(2026, 9, 10));
+        var newKitchen = b.AddMeter(Meter(D(2026, 9, 10), 6, oldKitchen.Id));
+        newKitchen.Add(D(2026, 9, 10), 0.000m, ReadingKind.Initial);
+        newKitchen.Add(D(2026, 9, 26), 2.500m);
+        var bathroom = b.AddMeter(Meter(D(2020, 1, 1), 6));
+        bathroom.Add(D(2026, 8, 26), 50.000m);
+        bathroom.Add(D(2026, 9, 26), 58.000m);
+        return (b, oldKitchen, newKitchen);
+    }
+
+    [Fact]
+    public void Component_selecting_the_old_meter_also_counts_its_replacement_but_not_other_meters()
+    {
+        // old: 120.000 -> final 123.000 = 3; new: initial 0.000 -> 2.500 = 2.5; bathroom (8) is not selected
+        // total 5.5 m3 * 1.41 = 7.755 -> net 7.76; VAT 21% = 1.6296 -> 1.63; gross 9.39
+        var (b, oldKitchen, _) = ReplacedKitchenFixture();
+        b.Add("Kitchen water", ChargeBasis.PerUnit, 1.41m).MeterIds = [oldKitchen.Id];
+
+        var line = b.Calculate(Sep2026).Lines.Single();
+
+        Assert.Equal(5.5m, line.Quantity);
+        Assert.Equal((7.76m, 1.63m, 9.39m), (line.Net, line.Vat, line.Gross));
+        Assert.Single(line.Consumption);
+    }
+
+    [Fact]
+    public void Component_selecting_only_the_new_meter_counts_the_whole_chain()
+    {
+        // same chain as above: 3 + 2.5 = 5.5 m3 * 1.41 = 7.755 -> net 7.76; VAT 1.63; gross 9.39
+        var (b, _, newKitchen) = ReplacedKitchenFixture();
+        b.Add("Kitchen water", ChargeBasis.PerUnit, 1.41m).MeterIds = [newKitchen.Id];
+
+        var line = b.Calculate(Sep2026).Lines.Single();
+
+        Assert.Equal(5.5m, line.Quantity);
+        Assert.Equal((7.76m, 1.63m, 9.39m), (line.Net, line.Vat, line.Gross));
+    }
+
     [Fact]
     public void Links_that_are_not_active_at_period_end_are_ignored()
     {
