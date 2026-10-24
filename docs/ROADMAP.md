@@ -33,6 +33,7 @@ is written; the list below is the plan and will change.
 ## Phase 4 — Tariffs and charges
 - T-017 Tariff editor per contract (components, rates, VAT)
 - T-017a Navigation guard: menu always opens section root; unsaved-changes dialog on every exit (menu, back, window close)
+- T-017b In-app help: the user guide (docs/user-guide) shown in the app, "?" on screens opens the matching section
 - T-018 Monthly charges screen: calculated charge per contract/period
 
 ## Phase 5 — Bills, payments, balance
