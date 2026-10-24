@@ -17,4 +17,7 @@ public static class CommonErrorCodes
 
     /// <summary>The final reading is lower than the last reading and the meter has no digit count for a roll-over.</summary>
     public const string WizardFinalBelowLast = "meter_wizard.final_below_last";
+
+    /// <summary>The "submitted on" date of a reading is before the reading date.</summary>
+    public const string ReadingSubmittedBeforeDate = "reading_edit.submitted_before_date";
 }

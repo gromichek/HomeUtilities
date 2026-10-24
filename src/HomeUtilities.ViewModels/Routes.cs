@@ -35,4 +35,10 @@ public static class Routes
     /// plus optional <c>id</c>. It is a page in every layout.
     /// </summary>
     public const string MeterEdit = "MeterEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the reading history of one meter, parameters <c>editor</c> (a loaded
+    /// <see cref="ReadingHistoryViewModel"/>) or <c>id</c> (the meter id).
+    /// </summary>
+    public const string ReadingHistory = "ReadingHistory";
 }

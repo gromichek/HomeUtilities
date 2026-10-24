@@ -165,6 +165,24 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- 5a. Readings: the last five and a link to the full history. -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowReadings}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Texts.ReadingsHeader}" Style="{StaticResource SectionHeader}" />
+                    <Label Text="{Binding Texts.ReadingsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoReadings}" />
+                    <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding RecentReadings}" IsVisible="{Binding HasRecentReadings}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Button Text="{Binding Texts.AllReadingsText}" Command="{Binding ShowAllReadingsCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            IsVisible="{Binding HasRecentReadings}" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- 5. History (read-only): the meter this one replaced and the one that replaced it. -->
             <Border Style="{StaticResource SectionCard}" IsVisible="{Binding HasHistory}">
                 <VerticalStackLayout Spacing="8">

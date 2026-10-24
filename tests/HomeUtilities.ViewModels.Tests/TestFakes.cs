@@ -332,6 +332,59 @@ internal sealed class FakeMeterStore : IMeterStore
 
     public List<(Meter Old, Meter New, IReadOnlyList<ContractMeter> Closed, IReadOnlyList<ContractMeter> Created)> Replacements { get; } = [];
 
+    /// <summary>One entry per <see cref="AddReadingsAsync"/> call with the readings it stored.</summary>
+    public List<IReadOnlyList<(Guid RegisterId, MeterReading Reading)>> AddedBatches { get; } = [];
+
+    /// <summary>One entry per <see cref="UpdateReadingsAsync"/> call.</summary>
+    public List<IReadOnlyList<MeterReading>> UpdatedBatches { get; } = [];
+
+    public List<Guid> DeletedReadings { get; } = [];
+
+    /// <summary>The readings of a stored register; empty if the register is unknown.</summary>
+    public IEnumerable<MeterReading> ReadingsOf(Guid registerId) =>
+        Stored.SelectMany(m => m.Registers).Where(r => r.Id == registerId).SelectMany(r => r.Readings);
+
+    public Task AddReadingsAsync(IEnumerable<(Guid RegisterId, MeterReading Reading)> readings, CancellationToken ct = default)
+    {
+        var list = readings.ToList();
+        AddedBatches.Add(list);
+        foreach (var (registerId, reading) in list)
+        {
+            reading.RegisterId = registerId;
+            Stored.SelectMany(m => m.Registers).First(r => r.Id == registerId).Readings.Add(reading);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateReadingsAsync(IEnumerable<MeterReading> readings, CancellationToken ct = default)
+    {
+        var list = readings.ToList();
+        UpdatedBatches.Add(list);
+        foreach (var incoming in list)
+        {
+            var stored = Stored.SelectMany(m => m.Registers).SelectMany(r => r.Readings).First(r => r.Id == incoming.Id);
+            stored.Date = incoming.Date;
+            stored.Value = incoming.Value;
+            stored.Kind = incoming.Kind;
+            stored.SubmittedOn = incoming.SubmittedOn;
+            stored.Note = incoming.Note;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteReadingAsync(Guid readingId, CancellationToken ct = default)
+    {
+        DeletedReadings.Add(readingId);
+        foreach (var register in Stored.SelectMany(m => m.Registers))
+        {
+            register.Readings.RemoveAll(r => r.Id == readingId);
+        }
+
+        return Task.CompletedTask;
+    }
+
     /// <summary>When set, <see cref="SaveReplacementAsync"/> throws it instead of storing.</summary>
     public Exception? ReplacementFailure { get; set; }
 
@@ -421,6 +474,8 @@ internal sealed class FakeMeterStore : IMeterStore
                     Date = reading.Date,
                     Value = reading.Value,
                     Kind = reading.Kind,
+                    SubmittedOn = reading.SubmittedOn,
+                    Note = reading.Note,
                 });
             }
 
@@ -428,6 +483,25 @@ internal sealed class FakeMeterStore : IMeterStore
         }
 
         return copy;
+    }
+}
+
+internal sealed class FakeSettingsStore : ISettingsStore
+{
+    public Dictionary<string, string> Values { get; } = [];
+
+    public string? GetString(string key) => Values.GetValueOrDefault(key);
+
+    public void SetString(string key, string? value)
+    {
+        if (value is null)
+        {
+            Values.Remove(key);
+        }
+        else
+        {
+            Values[key] = value;
+        }
     }
 }
 
@@ -472,6 +546,10 @@ internal sealed class ContractTestKit
 
     public FakeToastService Toast { get; } = new();
 
+    public FakeSettingsStore Settings { get; } = new();
+
+    public FakeLayoutModeService Layout { get; } = new();
+
     public Property Property { get; } = new() { Name = "Sample flat", Kind = PropertyKind.Apartment };
 
     public SupplierEditViewModel CreateSupplierEditor() =>
@@ -485,6 +563,11 @@ internal sealed class ContractTestKit
 
     public MeterEditViewModel CreateMeterEditor() =>
         new(Meters, Contracts, Clock, Localizer, Dialogs, Navigation, Toast, CreateMeterEditor);
+
+    public ReadingHistoryViewModel CreateHistory() => new(Meters, Localizer, Dialogs);
+
+    public ReadingsViewModel CreateReadings() =>
+        new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Layout, CreateHistory);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }

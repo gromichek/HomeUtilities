@@ -39,7 +39,7 @@ public abstract class StoreBase<T>(IDbContextFactory<HomeUtilitiesDbContext> fac
     }
 
     /// <inheritdoc />
-    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
+    public virtual async Task DeleteAsync(Guid id, CancellationToken ct = default)
     {
         await using var db = await Factory.CreateDbContextAsync(ct);
         var existing = await Include(db.Set<T>()).AsSplitQuery().FirstOrDefaultAsync(e => e.Id == id, ct);
