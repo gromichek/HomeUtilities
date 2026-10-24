@@ -141,7 +141,7 @@ public static class ChargeCalculator
     {
         var amount = quantity * unitPrice;
         var split = rate.PriceIncludesVat ? MoneyMath.FromGross(amount, vatPercent) : MoneyMath.FromNet(amount, vatPercent);
-        return Line(input, component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption);
+        return Line(input, component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption, rate.PriceIncludesVat);
     }
 
     private static ChargeLine Line(
@@ -153,7 +153,8 @@ public static class ChargeCalculator
         decimal vatPercent,
         bool fromBill,
         bool complete,
-        IReadOnlyList<ConsumptionResult> consumption) =>
+        IReadOnlyList<ConsumptionResult> consumption,
+        bool priceIncludesVat = false) =>
         new(
             component.Id,
             component.Name,
@@ -168,7 +169,8 @@ public static class ChargeCalculator
             amounts.Gross,
             fromBill,
             complete,
-            consumption);
+            consumption,
+            priceIncludesVat);
 
     private static decimal? TryResolveVat(TariffComponent component, IReadOnlyCollection<VatRate> catalog, DateOnly date)
     {
