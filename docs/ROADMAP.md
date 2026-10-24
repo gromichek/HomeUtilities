@@ -33,6 +33,7 @@ is written; the list below is the plan and will change.
 ## Phase 4 — Tariffs and charges
 - T-017 Tariff editor per contract (components, rates, VAT)
 - T-017a Navigation guard: menu always opens section root; unsaved-changes dialog on every exit (menu, back, window close)
+- T-017c Backup to a file / restore (share sheet / save dialog), sample data generator for testing (Debug only)
 - T-017b In-app help: the user guide (docs/user-guide) shown in the app, "?" on screens opens the matching section
 - T-018 Monthly charges screen: calculated charge per contract/period
 
@@ -55,7 +56,7 @@ is written; the list below is the plan and will change.
 - T-028 `INotificationService` for Android and Windows, reminder rules, scheduling
 
 ## Phase 9 — Backup and sync
-- T-029 Local backup/restore, export/import full data as JSON
+- T-029 Automatic local backups, export/import full data as JSON (manual backup file exists since T-017c)
 - T-030 Google sign-in per platform
 - T-031 Sync engine (change logs in appDataFolder, merge, conflict tests)
 - T-032 Attachments sync
