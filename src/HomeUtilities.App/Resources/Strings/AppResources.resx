@@ -428,4 +428,29 @@
   <data name="MeterReadingsHeader" xml:space="preserve"><value>Readings</value></data>
   <data name="MeterReadingsAll" xml:space="preserve"><value>All readings</value></data>
   <data name="MeterReadingsEmpty" xml:space="preserve"><value>No readings yet.</value></data>
+  <data name="Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="No" xml:space="preserve"><value>No</value></data>
+  <data name="ReadingsSubmitTo" xml:space="preserve"><value>Submit: {0}</value></data>
+  <data name="ReadingsMarkReturnTitle" xml:space="preserve"><value>Readings submitted?</value></data>
+  <data name="ReadingsMarkReturnMessage" xml:space="preserve"><value>Mark readings for {0} as submitted?</value></data>
+  <data name="PhotoTitle" xml:space="preserve"><value>Photo of the meter</value></data>
+  <data name="PhotoTake" xml:space="preserve"><value>Take photo</value></data>
+  <data name="PhotoGallery" xml:space="preserve"><value>Choose from gallery</value></data>
+  <data name="PhotoChooseFile" xml:space="preserve"><value>Choose an image…</value></data>
+  <data name="PhotoRemove" xml:space="preserve"><value>Remove photo</value></data>
+  <data name="PhotoAddTooltip" xml:space="preserve"><value>Add a photo of the meter</value></data>
+  <data name="PhotoOpenTooltip" xml:space="preserve"><value>Open photo</value></data>
+  <data name="PhotoLabel" xml:space="preserve"><value>Photo</value></data>
+  <data name="PhotoAttached" xml:space="preserve"><value>Photo attached</value></data>
+  <data name="PhotoNone" xml:space="preserve"><value>No photo</value></data>
+  <data name="PhotoNew" xml:space="preserve"><value>New photo: {0}</value></data>
+  <data name="PhotoPermissionDenied" xml:space="preserve"><value>Camera access was denied. Allow it in the system settings or choose a photo from the gallery.</value></data>
+  <data name="PhotoMissing" xml:space="preserve"><value>The photo file was not found on this device.</value></data>
+  <data name="Error_attachment_file_name_required" xml:space="preserve"><value>The file has no name.</value></data>
+  <data name="Error_attachment_file_name_too_long" xml:space="preserve"><value>The file name is longer than {0} characters.</value></data>
+  <data name="Error_attachment_content_type_required" xml:space="preserve"><value>The file type is unknown.</value></data>
+  <data name="Error_attachment_content_type_not_allowed" xml:space="preserve"><value>Only JPEG, PNG and HEIC images and PDF files can be attached.</value></data>
+  <data name="Error_attachment_empty" xml:space="preserve"><value>The file is empty.</value></data>
+  <data name="Error_attachment_too_large" xml:space="preserve"><value>The file is larger than {0} MB.</value></data>
+  <data name="Error_attachment_hash_invalid" xml:space="preserve"><value>The file could not be verified.</value></data>
 </root>

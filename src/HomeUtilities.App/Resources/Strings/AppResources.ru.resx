@@ -428,4 +428,29 @@
   <data name="MeterReadingsHeader" xml:space="preserve"><value>Показания</value></data>
   <data name="MeterReadingsAll" xml:space="preserve"><value>Все показания</value></data>
   <data name="MeterReadingsEmpty" xml:space="preserve"><value>Показаний пока нет.</value></data>
+  <data name="Yes" xml:space="preserve"><value>Да</value></data>
+  <data name="No" xml:space="preserve"><value>Нет</value></data>
+  <data name="ReadingsSubmitTo" xml:space="preserve"><value>Передать: {0}</value></data>
+  <data name="ReadingsMarkReturnTitle" xml:space="preserve"><value>Показания переданы?</value></data>
+  <data name="ReadingsMarkReturnMessage" xml:space="preserve"><value>Отметить показания для «{0}» как переданные?</value></data>
+  <data name="PhotoTitle" xml:space="preserve"><value>Фото счётчика</value></data>
+  <data name="PhotoTake" xml:space="preserve"><value>Сделать фото</value></data>
+  <data name="PhotoGallery" xml:space="preserve"><value>Выбрать из галереи</value></data>
+  <data name="PhotoChooseFile" xml:space="preserve"><value>Выбрать изображение…</value></data>
+  <data name="PhotoRemove" xml:space="preserve"><value>Удалить фото</value></data>
+  <data name="PhotoAddTooltip" xml:space="preserve"><value>Добавить фото счётчика</value></data>
+  <data name="PhotoOpenTooltip" xml:space="preserve"><value>Открыть фото</value></data>
+  <data name="PhotoLabel" xml:space="preserve"><value>Фото</value></data>
+  <data name="PhotoAttached" xml:space="preserve"><value>Фото прикреплено</value></data>
+  <data name="PhotoNone" xml:space="preserve"><value>Нет фото</value></data>
+  <data name="PhotoNew" xml:space="preserve"><value>Новое фото: {0}</value></data>
+  <data name="PhotoPermissionDenied" xml:space="preserve"><value>Доступ к камере запрещён. Разрешите его в настройках системы или выберите фото из галереи.</value></data>
+  <data name="PhotoMissing" xml:space="preserve"><value>Файл фото не найден на этом устройстве.</value></data>
+  <data name="Error_attachment_file_name_required" xml:space="preserve"><value>У файла нет имени.</value></data>
+  <data name="Error_attachment_file_name_too_long" xml:space="preserve"><value>Имя файла длиннее {0} символов.</value></data>
+  <data name="Error_attachment_content_type_required" xml:space="preserve"><value>Тип файла неизвестен.</value></data>
+  <data name="Error_attachment_content_type_not_allowed" xml:space="preserve"><value>Можно прикреплять только изображения JPEG, PNG, HEIC и файлы PDF.</value></data>
+  <data name="Error_attachment_empty" xml:space="preserve"><value>Файл пустой.</value></data>
+  <data name="Error_attachment_too_large" xml:space="preserve"><value>Файл больше {0} МБ.</value></data>
+  <data name="Error_attachment_hash_invalid" xml:space="preserve"><value>Не удалось проверить файл.</value></data>
 </root>

@@ -52,6 +52,10 @@
         <On Platform="Android" Value="&#xE889;" />
         <On Platform="WinUI" Value="&#xE81C;" />
     </OnPlatform>
+    <OnPlatform x:Key="IconPhoto" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE412;" />
+        <On Platform="WinUI" Value="&#xE722;" />
+    </OnPlatform>
     <!-- Not in the guidelines table yet: expand / collapse chevrons (expand_more / expand_less, ChevronDown / ChevronUp). -->
     <OnPlatform x:Key="IconExpand" x:TypeArguments="x:String">
         <On Platform="Android" Value="&#xE5CF;" />

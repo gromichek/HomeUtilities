@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using HomeUtilities.App.Services;
 using HomeUtilities.App.Views;
 using HomeUtilities.Core;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Data;
 using HomeUtilities.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -27,7 +28,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IClock, SystemClock>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<ILocalizer, ResxLocalizer>();
-        builder.Services.AddHomeUtilitiesData(appPaths.DatabasePath);
+        builder.Services.AddSingleton<IImageProcessor, ImageProcessor>();
+        builder.Services.AddHomeUtilitiesData(appPaths.DatabasePath, appPaths.AttachmentsFolder);
         builder.Services.AddSingleton<AppShell>();
         builder.Services.AddSingleton<IThemeService, ThemeService>();
         builder.Services.AddSingleton<LayoutModeService>();
@@ -36,6 +38,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<ILauncherService, LauncherService>();
+        builder.Services.AddSingleton<IMediaService, MediaService>();
+        builder.Services.AddSingleton<IFileViewer, FileViewer>();
         builder.Services.AddSingleton<IClipboardService, ClipboardService>();
         builder.Services.AddSingleton<IToastService, ToastService>();
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
