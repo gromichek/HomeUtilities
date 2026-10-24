@@ -41,6 +41,13 @@
         <ShellContent Title="{Binding ReadingsTitle}" ContentTemplate="{DataTemplate views:ReadingsPage}" />
     </FlyoutItem>
 
+    <FlyoutItem Title="{Binding ChargesTitle}" Route="Charges">
+        <FlyoutItem.Icon>
+            <FontImageSource Glyph="∑" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+        </FlyoutItem.Icon>
+        <ShellContent Title="{Binding ChargesTitle}" ContentTemplate="{DataTemplate views:ChargesPage}" />
+    </FlyoutItem>
+
     <FlyoutItem Title="{Binding BillsTitle}" Route="Bills">
         <FlyoutItem.Icon>
             <FontImageSource Glyph="☰" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />

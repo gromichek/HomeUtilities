@@ -1,4 +1,5 @@
 using HomeUtilities.ViewModels;
+using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.App.Views;
 
@@ -7,13 +8,29 @@ namespace HomeUtilities.App.Views;
 /// "Save changes?" question through the central navigation guard (see <c>AppShell</c> and <c>PageBase</c>); pushing
 /// the history page does not, the values stay on this page.
 /// </summary>
-public partial class ReadingsPage : PageBase
+public partial class ReadingsPage : PageBase, IQueryAttributable
 {
     public ReadingsPage(ReadingsViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
         TwoPaneLayout.Attach(Root, viewModel, () => viewModel.IsTwoPane);
+    }
+
+    /// <summary>
+    /// As a pushed page (opened from a charge warning) the query parameters <c>propertyId</c> and <c>date</c> choose the
+    /// property and the reading date; as a menu section there are none.
+    /// </summary>
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (BindingContext is ReadingsViewModel viewModel
+            && query.TryGetValue(EditorNavigation.PropertyIdParameter, out var property)
+            && (property is Guid || property is string text && Guid.TryParse(text, out _)))
+        {
+            var propertyId = property is Guid guid ? guid : Guid.Parse((string)property);
+            var date = query.TryGetValue(ReadingsViewModel.DateParameter, out var value) && value is DateOnly parsed ? parsed : DateOnly.FromDateTime(DateTime.Today);
+            viewModel.OpenFor(propertyId, date);
+        }
     }
 
     protected override void OnAppearing()

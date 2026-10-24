@@ -627,4 +627,59 @@
   <data name="VatVersionPercent" xml:space="preserve"><value>НДС, % *</value></data>
   <data name="VatRateDelete" xml:space="preserve"><value>Удалить ставку НДС</value></data>
   <data name="VatRateInUse" xml:space="preserve"><value>«{0}» используется в компонентах тарифов ({1}), удалить нельзя.</value></data>
+  <data name="SectionCharges" xml:space="preserve"><value>Начисления</value></data>
+  <data name="ChargesMonthLabel" xml:space="preserve"><value>Месяц</value></data>
+  <data name="ChargesPreviousMonth" xml:space="preserve"><value>Предыдущий месяц</value></data>
+  <data name="ChargesNextMonth" xml:space="preserve"><value>Следующий месяц</value></data>
+  <data name="ChargesTotalsLabel" xml:space="preserve"><value>Ожидаемое начисление за месяц</value></data>
+  <data name="ChargesIncomplete" xml:space="preserve"><value>Неполно — часть сумм не удалось рассчитать.</value></data>
+  <data name="ChargesNoContracts" xml:space="preserve"><value>В этом месяце нет действующих договоров.</value></data>
+  <data name="ChargesTotals" xml:space="preserve"><value>Без НДС {0} · НДС {1} · Итого {2}</value></data>
+  <data name="ContractShowCharges" xml:space="preserve"><value>Показать начисления</value></data>
+  <data name="ChargeStatus_Complete" xml:space="preserve"><value>Полностью</value></data>
+  <data name="ChargeStatus_Incomplete" xml:space="preserve"><value>Неполно</value></data>
+  <data name="ChargeStatus_FromBill" xml:space="preserve"><value>По счёту</value></data>
+  <data name="ChargeStatus_NoTariff" xml:space="preserve"><value>Нет тарифа</value></data>
+  <data name="ChargeStatus_Error" xml:space="preserve"><value>Ошибка</value></data>
+  <data name="ChargeCardError" xml:space="preserve"><value>Не удалось рассчитать этот договор. Ошибка записана в журнал ошибок.</value></data>
+  <data name="ChargeNoTariff" xml:space="preserve"><value>Тарифа нет — добавьте его в договоре.</value></data>
+  <data name="ChargeOpenContract" xml:space="preserve"><value>Открыть договор</value></data>
+  <data name="ChargeOpenTariff" xml:space="preserve"><value>Открыть тариф</value></data>
+  <data name="ChargeOpenProperty" xml:space="preserve"><value>Открыть объект</value></data>
+  <data name="ChargeOpenReadings" xml:space="preserve"><value>Открыть показания</value></data>
+  <data name="ChargeNet" xml:space="preserve"><value>Без НДС</value></data>
+  <data name="ChargeVat" xml:space="preserve"><value>НДС</value></data>
+  <data name="ChargeTotal" xml:space="preserve"><value>Итого</value></data>
+  <data name="ChargeUnitPrice" xml:space="preserve"><value>× {0} {1} {2}</value></data>
+  <data name="ChargePercent" xml:space="preserve"><value>{0} %</value></data>
+  <data name="ChargeFromBill" xml:space="preserve"><value>Сумма берётся из счёта поставщика</value></data>
+  <data name="ChargeUnitResident_One" xml:space="preserve"><value>чел.</value></data>
+  <data name="ChargeUnitResident_Many" xml:space="preserve"><value>чел.</value></data>
+  <data name="ChargeReadingStart" xml:space="preserve"><value>Начало: {0} на {1:d}</value></data>
+  <data name="ChargeReadingStartMissing" xml:space="preserve"><value>Начало: нет показаний</value></data>
+  <data name="ChargeReadingEnd" xml:space="preserve"><value>Конец: {0} на {1:d}</value></data>
+  <data name="ChargeReadingEndMissing" xml:space="preserve"><value>Конец: нет показаний</value></data>
+  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Расход: {0} {1}</value></data>
+  <data name="ChargeSegmentOld" xml:space="preserve"><value>{0} (старый счётчик): {1} → итоговые {2} = {3}</value></data>
+  <data name="ChargeSegmentNew" xml:space="preserve"><value>{0} (новый счётчик): начальные {1} → {2} = {3}</value></data>
+  <data name="ChargeNoteRollover" xml:space="preserve"><value>Переход через ноль на счётчике «{0}»: {1} → {2}</value></data>
+  <data name="ChargeConsumption_rollover_assumed" xml:space="preserve"><value>Предположен переход через ноль.</value></data>
+  <data name="ChargeConsumption_negative_consumption" xml:space="preserve"><value>Конечное показание меньше начального.</value></data>
+  <data name="ChargeConsumption_missing_start_reading" xml:space="preserve"><value>Нет начального показания.</value></data>
+  <data name="ChargeConsumption_missing_end_reading" xml:space="preserve"><value>Нет конечного показания.</value></data>
+  <data name="ChargeConsumption_missing_final_reading" xml:space="preserve"><value>Нет итогового показания заменённого счётчика.</value></data>
+  <data name="ChargeConsumption_missing_initial_reading" xml:space="preserve"><value>Нет начального показания нового счётчика.</value></data>
+  <data name="ChargeConsumption_estimated_reading_used" xml:space="preserve"><value>Использовано расчётное показание.</value></data>
+  <data name="ChargeConsumption_reading_outside_window" xml:space="preserve"><value>В окне подачи показаний показаний нет — использовано ближайшее.</value></data>
+  <data name="ChargeConsumption_unusually_high" xml:space="preserve"><value>Необычно большой расход.</value></data>
+  <data name="ChargeConsumption_zero" xml:space="preserve"><value>Нулевой расход.</value></data>
+  <data name="ChargeWarn_NoRate" xml:space="preserve"><value>На {0} нет действующей цены для «{1}» — добавьте цену в тарифе.</value></data>
+  <data name="ChargeWarn_MissingParameter" xml:space="preserve"><value>У параметра «{0}» нет значения на {1:d} — добавьте его в объекте.</value></data>
+  <data name="ChargeWarn_ReadingsMissing" xml:space="preserve"><value>Не хватает показаний: {0} — введите их в разделе «Показания».</value></data>
+  <data name="ChargeWarn_NoMeters" xml:space="preserve"><value>Для «{0}» не привязан счётчик — привяжите счётчик в договоре.</value></data>
+  <data name="ChargeWarn_UnknownVat" xml:space="preserve"><value>Код НДС «{0}» у «{1}» неизвестен или не имеет ставки на эту дату — исправьте его в тарифе или в ставках НДС.</value></data>
+  <data name="ChargeWarn_CurrencyMismatch" xml:space="preserve"><value>Цена «{0}» указана в {1}, а договор — в {2}.</value></data>
+  <data name="ChargeWarn_TierUsageUnknown" xml:space="preserve"><value>Для «{0}» неизвестен расход ранее в этом периоде; для ступенчатой цены принят ноль.</value></data>
+  <data name="ChargeWarn_InvalidTariff" xml:space="preserve"><value>Тариф «{0}» нельзя применить (ступенчатая цена у компонента «возврат в сеть»).</value></data>
+  <data name="ChargeWarn_ContractInactive" xml:space="preserve"><value>В этом месяце договор не действует.</value></data>
 </root>
