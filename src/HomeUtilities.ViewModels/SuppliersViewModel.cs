@@ -27,8 +27,9 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
         ILocalizer localizer,
         INavigationService navigation,
         ILayoutModeService layoutModeService,
+        ISectionSelectionMemory selectionMemory,
         Func<SupplierEditViewModel> editorFactory)
-        : base(navigation, layoutModeService, editorFactory, Routes.SupplierEdit)
+        : base(navigation, layoutModeService, editorFactory, Routes.SupplierEdit, selectionMemory)
     {
         _store = store;
         _localizer = localizer;
@@ -56,6 +57,8 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
         SearchPlaceholder = _localizer["SuppliersSearch"];
         RebuildItems();
     }
+
+    protected override bool ContainsItem(Guid id) => _suppliers.Any(x => x.Id == id);
 
     protected override void MarkSelectedItem()
     {

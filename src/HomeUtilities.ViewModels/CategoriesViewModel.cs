@@ -27,8 +27,9 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
         ILocalizer localizer,
         INavigationService navigation,
         ILayoutModeService layoutModeService,
+        ISectionSelectionMemory selectionMemory,
         Func<CategoryEditViewModel> editorFactory)
-        : base(navigation, layoutModeService, editorFactory, Routes.CategoryEdit)
+        : base(navigation, layoutModeService, editorFactory, Routes.CategoryEdit, selectionMemory)
     {
         _store = store;
         _localizer = localizer;
@@ -57,6 +58,8 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
         ShowArchivedText = _localizer["CategoriesShowArchived"];
         RebuildItems();
     }
+
+    protected override bool ContainsItem(Guid id) => _categories.Any(x => x.Id == id);
 
     protected override void MarkSelectedItem()
     {

@@ -71,6 +71,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IActiveEditorProvider, ShellActiveEditorProvider>();
         builder.Services.AddSingleton<INavigationGuard, NavigationGuard>();
+        builder.Services.AddSingleton<ISectionSelectionMemory, SectionSelectionMemory>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<ILauncherService, LauncherService>();
         builder.Services.AddSingleton<IMediaService, MediaService>();

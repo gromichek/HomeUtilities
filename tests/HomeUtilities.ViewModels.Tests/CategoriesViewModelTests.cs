@@ -9,6 +9,7 @@ public class CategoriesViewModelTests
     private readonly FakeCategoryStore _store = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeLayoutModeService _layout = new();
+    private readonly SectionSelectionMemory _memory = new();
     private readonly FakeDialogService _dialogs = new();
 
     [Fact]
@@ -149,7 +150,7 @@ public class CategoriesViewModelTests
     {
         var localizer = new FakeLocalizer(_language);
         return new CategoriesViewModel(
-            _store, localizer, _navigation, _layout,
+            _store, localizer, _navigation, _layout, _memory,
             () => new CategoryEditViewModel(_store, localizer, _dialogs, _navigation, new FakeToastService()));
     }
 }
