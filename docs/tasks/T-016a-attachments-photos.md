@@ -1,4 +1,4 @@
-# T-016a: Attachments infrastructure + meter / reading photos
+# T-016a: Attachments infrastructure + meter / reading photos + submit links on meter cards
 Phase: 3 · Depends on: T-016 · Size: M
 
 ## Goal
@@ -45,6 +45,19 @@ photo of the meter dial when entering a reading (Android camera / gallery, Windo
   Saving readings saves the attachment rows (`OwnerKind = MeterReading`) and sets `PhotoAttachmentId`.
 - Reading history: rows with a photo show a photo icon; tap → opens the photo in the system viewer. Edit dialog:
   add / replace / remove photo.
+
+### 5. Submit-readings links on meter cards (owner request 2026-10-24)
+"Wrote the readings, tap the link, submit them to the supplier right away."
+- On each meter card of the Readings screen: one button per **distinct URL** of the meter's active linked contracts
+  (`ContractMeter` active today): `IconOpenLink` + "Submit: {supplier name}". URL = the contract's effective link
+  (`Contract.GetEffectiveLinks(supplier)`) of kind `SubmitReadings`, else `CustomerPortal`; none → no button.
+  Hot water meter linked to water + heating contracts → up to two buttons; identical URLs → one button.
+- Tapping opens the browser (`ILauncherService`). When the page appears again (`OnAppearingAsync`) and readings
+  of that contract were saved in this session but are not yet marked submitted, ask
+  "Mark readings for {supplier} as submitted?" (Yes / No) → same logic as the existing "Mark submitted".
+- The contract banner's "Submit online" stays.
+- Tests: buttons per contract, SubmitReadings preferred over CustomerPortal, contract link overrides supplier
+  link, duplicates collapsed, no button without links, prompt only after a save and only once per contract.
 
 ## Scope — do NOT
 - No bill PDFs yet (T-019 uses this infrastructure). No sync of attachments (T-032). No file cleanup job.
