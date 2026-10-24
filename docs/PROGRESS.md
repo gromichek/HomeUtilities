@@ -44,7 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
-| T-018 | Charges screen | 2026-10-24, #81 | `ChargePeriodDefaults`; `ChargeLine.PriceIncludesVat`; pushed routes `ReadingsFor`/`ChargesFor`. Open question (VAT from rounded net) decided: yes → fix PR by a Sonnet helper. |
+| T-018 | Charges screen | 2026-10-24, #81 | `ChargePeriodDefaults`; `ChargeLine.PriceIncludesVat`; pushed routes `ReadingsFor`/`ChargesFor`. Open question (VAT from rounded net) decided: yes → #82 (Sonnet helper). |
 | T-017e | Fixes: VAT code reuse, reorder arrows, double tap | 2026-10-24, #79 | Unique indexes filtered on IsDeleted (migration); NavigationGate for pushes. |
 | T-017 | Tariff editor + VAT catalog screen | 2026-10-24, #74 | ~230 new tests. FromBill needs no price. Open question (replacement vs `MeterIds`) decided: a selected meter includes its replacement chain → fix PR by a Sonnet helper. |
 | T-017b | In-app help (user guide in the app) | 2026-10-24, #70 | Markdig; diagrams as SVG rendered from .mmd (scripts/render-guide-diagrams.sh). |
