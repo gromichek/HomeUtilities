@@ -27,7 +27,7 @@
             <CollectionView Grid.Row="2" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:CategoryItemViewModel">
-                        <Border Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" x:DataType="vm:CategoryItemViewModel" Binding="{Binding IsSelected}" Value="True">
                                     <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />

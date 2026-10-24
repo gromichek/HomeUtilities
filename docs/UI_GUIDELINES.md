@@ -87,6 +87,12 @@ Use these wordings everywhere (resx keys in brackets):
   **new** context — wrap it: `<ContentView IsVisible="{Binding HasSelection}"><views:Editor BindingContext="{Binding Selected}"/></ContentView>`.
 - Bundled fonts need `<MauiFont Include="Resources\Fonts\*.otf;Resources\Fonts\*.ttf" />` in the App csproj;
   missing glyphs show as empty boxes on Android only.
+- Selectable list items: give the `Border` an explicit base `Stroke` (Outline colour) and `StrokeThickness="1"`;
+  a selection trigger that reverts to a *null* stroke leaves the old highlight on Windows (owner screenshot
+  2026-10-24: all previously tapped items stayed highlighted).
+- Decimal input: every number field parses through `DecimalInput` (accepts both `,` and `.`, spaces as group
+  separators); values are stored as `decimal`, never as text. Android's numeric keyboard may offer only one of
+  the two separators depending on the keyboard app — both are accepted, so either works.
 - **Do not use `FlexLayout`** on Android: it clips the first item of each wrapped row (owner screenshot
   2026-10-23). Use fixed rows (`HorizontalStackLayout`s) or a `Grid`.
 - Only one "add" entry point per layout: FAB on phones, button above the list on tablet/desktop; the empty
