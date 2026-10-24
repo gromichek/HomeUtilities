@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-017e | Fixes: VAT code reuse, reorder arrows, double tap | Ready | | owner findings 2026-10-24 |
 | T-018 | Charges screen | Ready | | |
 
 ## Done
@@ -45,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
+| T-017e | Fixes: VAT code reuse, reorder arrows, double tap | 2026-10-24, #79 | Unique indexes filtered on IsDeleted (migration); NavigationGate for pushes. |
 | T-017 | Tariff editor + VAT catalog screen | 2026-10-24, #74 | ~230 new tests. FromBill needs no price. Open question (replacement vs `MeterIds`) decided: a selected meter includes its replacement chain → fix PR by a Sonnet helper. |
 | T-017b | In-app help (user guide in the app) | 2026-10-24, #70 | Markdig; diagrams as SVG rendered from .mmd (scripts/render-guide-diagrams.sh). |
 | T-017d | Two-pane screens keep the selection on return | 2026-10-24, #69 | Cause inferred (root page recreated); singleton selection memory. Lead fixed the App build (missing using) and a test after merging #70. |
@@ -70,7 +70,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
 - FlexLayout clips first item per row on Android — avoid it (UI_GUIDELINES §6a).
 - Attachment files of soft-deleted rows are never removed (cleanup job later); image shrinking only on Android.
-- Unique `VatRates.Code` / `Categories.SystemKey` include soft-deleted rows.
 
 ## Manual test log (owner)
 
@@ -88,6 +87,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
+| | #79 | T-017e: VAT code reuse, arrows, double tap | pending |
 | 2026-10-24 | #74 | T-017 tariffs + VAT rates | Presets, prices, VAT, steps, examples, help OK. **Bugs**: VAT code cannot be reused after delete (DbUpdateException, unique index incl. deleted rows); disabled reorder arrows look enabled and open the editor (Windows); double tap opens two editors (Android) → T-017e. VAT history check postponed to data import. |
 | 2026-10-24 | #69 + #70 | Selection kept on return; in-app help | OK |
 | 2026-10-24 | #66 | Restore on Windows and Android (save to Downloads, reinstall, restore incl. photos), bad file refused | OK |
