@@ -23,6 +23,7 @@ these rules; the Properties screen (after T-012a) is the reference implementatio
 | `IconOpenLink` | open in browser | `open_in_new` | `E8A7` OpenInNewWindow |
 | `IconCopy` | copy | `content_copy` | `E8C8` Copy |
 | `IconArchive` | archive | `archive` | `E7B8` Package |
+| `IconPhoto` | photo / camera | `photo_camera` | `E722` Camera |
 | `IconHistory` | history | `history` | `E81C` History |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` | `E70D` / `E70E` Chevron down/up |
 
