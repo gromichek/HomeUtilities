@@ -5,3 +5,9 @@ flowchart LR
     M -.->|linked to one or more| C
     M -->|has| R[Readings]
     K[Category<br/>colour, grouping] -.->|classifies| C
+    T[Tariff<br/>components with prices<br/>and VAT rate] -->|priced lines of| C
+    V[VAT rate<br/>percent over time] -.->|used by| T
+    M -.->|consumption| X
+    T -.->|prices| X
+    X[Charge<br/>readings × tariff<br/>for a month]
+    X -.->|expected cost of| C

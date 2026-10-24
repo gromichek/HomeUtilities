@@ -11,6 +11,7 @@ public class ShellViewModelTests
         Assert.Equal("SectionProperties [en]", vm.PropertiesTitle);
         Assert.Equal("SectionSuppliers [en]", vm.SuppliersTitle);
         Assert.Equal("SectionReadings [en]", vm.ReadingsTitle);
+        Assert.Equal("SectionCharges [en]", vm.ChargesTitle);
         Assert.Equal("SectionBills [en]", vm.BillsTitle);
         Assert.Equal("SectionPayments [en]", vm.PaymentsTitle);
         Assert.Equal("SectionReports [en]", vm.ReportsTitle);

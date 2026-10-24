@@ -6,7 +6,7 @@ public sealed class ShellNavigationService : INavigationService
 {
     private static readonly HashSet<string> SectionRoutes =
     [
-        Routes.Overview, Routes.Properties, Routes.Suppliers, Routes.Readings, Routes.Bills, Routes.Payments, Routes.Reports, Routes.Help, Routes.Settings,
+        Routes.Overview, Routes.Properties, Routes.Suppliers, Routes.Readings, Routes.Charges, Routes.Bills, Routes.Payments, Routes.Reports, Routes.Help, Routes.Settings,
     ];
 
     private readonly NavigationGate _pushGate = new();

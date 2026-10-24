@@ -216,6 +216,10 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
+
+                    <!-- Expected charge of this contract for a month (read-only; nothing is stored). -->
+                    <Button Text="{Binding ShowChargesText}" Command="{Binding ShowChargesCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
                 </VerticalStackLayout>
             </Border>
 

@@ -19,6 +19,7 @@ namespace HomeUtilities.Core.Charges;
 /// <param name="IsFromBill">True if the amount comes from the supplier bill instead of a calculation.</param>
 /// <param name="IsComplete">False if the line could not be calculated completely.</param>
 /// <param name="Consumption">Consumption results behind the quantity; empty for bases without readings.</param>
+/// <param name="PriceIncludesVat">True if <paramref name="UnitPrice"/> is a gross price (the rate includes VAT).</param>
 public sealed record ChargeLine(
     Guid ComponentId,
     string ComponentName,
@@ -33,4 +34,5 @@ public sealed record ChargeLine(
     decimal Gross,
     bool IsFromBill,
     bool IsComplete,
-    IReadOnlyList<ConsumptionResult> Consumption);
+    IReadOnlyList<ConsumptionResult> Consumption,
+    bool PriceIncludesVat = false);

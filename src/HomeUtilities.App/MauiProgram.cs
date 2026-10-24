@@ -98,6 +98,7 @@ public static class MauiProgram
         builder.Services.AddTransient<MeterEditViewModel>();
         builder.Services.AddTransient<Func<MeterEditViewModel>>(sp => () => sp.GetRequiredService<MeterEditViewModel>());
         builder.Services.AddTransient<ReadingsViewModel>();
+        builder.Services.AddTransient<ChargesViewModel>();
         builder.Services.AddTransient<ReadingHistoryViewModel>();
         builder.Services.AddTransient<Func<ReadingHistoryViewModel>>(sp => () => sp.GetRequiredService<ReadingHistoryViewModel>());
         builder.Services.AddTransient<CategoriesViewModel>();
@@ -116,6 +117,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ContractEditPage>();
         builder.Services.AddTransient<MeterEditPage>();
         builder.Services.AddTransient<ReadingsPage>();
+        builder.Services.AddTransient<ChargesPage>();
         builder.Services.AddTransient<ReadingHistoryPage>();
         builder.Services.AddTransient<SuppliersPage>();
         builder.Services.AddTransient<SupplierEditPage>();

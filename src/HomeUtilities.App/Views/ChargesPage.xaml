@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.ChargesPage"
+                x:DataType="vm:ChargesViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+    <views:PageBase.Resources>
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+        <conv:HexColorConverter x:Key="HexColor" />
+    </views:PageBase.Resources>
+
+    <ScrollView x:Name="Scroller">
+        <VerticalStackLayout Padding="12" Spacing="12">
+
+            <Label Text="{Binding NoPropertiesText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"
+                   IsVisible="{Binding ShowNoProperties}" />
+
+            <!-- Header: property, month with ‹ ›, totals of the month. -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding HasProperties}">
+                <VerticalStackLayout Spacing="8">
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMultipleProperties}">
+                        <Label Text="{Binding PropertyLabel}" Style="{StaticResource MutedLabel}" />
+                        <Picker ItemsSource="{Binding Properties}"
+                                ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                                SelectedIndex="{Binding SelectedPropertyIndex, Mode=TwoWay}" />
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding MonthLabel}" Style="{StaticResource MutedLabel}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                                Command="{Binding PreviousMonthCommand}"
+                                ToolTipProperties.Text="{Binding PreviousMonthText}"
+                                SemanticProperties.Description="{Binding PreviousMonthText}" />
+                        <!-- Tap to pick a month and year; only the month and year of the chosen date count. -->
+                        <DatePicker x:Name="MonthPicker" Grid.Column="1" Format="MMMM yyyy" HorizontalOptions="Center"
+                                    Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                                Command="{Binding NextMonthCommand}"
+                                ToolTipProperties.Text="{Binding NextMonthText}"
+                                SemanticProperties.Description="{Binding NextMonthText}" />
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="2" IsVisible="{Binding HasCards}">
+                        <Label Text="{Binding TotalsLabel}" Style="{StaticResource MutedLabel}" />
+                        <Label Text="{Binding TotalsText}" FontAttributes="Bold" />
+                        <Label Text="{Binding IncompleteText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding IsIncomplete}" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{Binding NoContractsText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"
+                   IsVisible="{Binding ShowNoContracts}" />
+
+            <!-- One card per contract active in the month. -->
+            <VerticalStackLayout x:Name="CardList" Spacing="12" BindableLayout.ItemsSource="{Binding Cards}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ChargeCardViewModel">
+                        <Border Style="{StaticResource SectionCard}" Padding="12">
+                            <VerticalStackLayout Spacing="8">
+
+                                <!-- Header: tap to expand / collapse. -->
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <Border Grid.Column="0" WidthRequest="16" HeightRequest="16" StrokeShape="RoundRectangle 8"
+                                            StrokeThickness="0" VerticalOptions="Center"
+                                            BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Text="{Binding SupplierName}" Style="{StaticResource MutedLabel}" />
+                                        <HorizontalStackLayout Spacing="4">
+                                            <Label Text="⚠" Style="{StaticResource WarningLabel}" IsVisible="{Binding ShowWarningIcon}" />
+                                            <Label Text="{Binding StatusText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2" Text="{Binding TotalText}" FontAttributes="Bold" VerticalOptions="Center"
+                                           IsVisible="{Binding HasTotal}" />
+                                    <Label Grid.Column="3" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                           FontSize="20" VerticalOptions="Center" Style="{StaticResource MutedLabel}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:ChargeCardViewModel" Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Text" Value="{StaticResource IconCollapse}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Grid>
+
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExpanded}">
+
+                                    <!-- No tariff: a muted line with a link to the contract. -->
+                                    <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowNoTariff}">
+                                        <Label Text="{Binding NoTariffText}" Style="{StaticResource MutedLabel}" />
+                                        <Button Text="{Binding NoTariffLinkText}" Command="{Binding NoTariffCommand}"
+                                                Style="{StaticResource TextButton}" HorizontalOptions="Start" />
+                                    </VerticalStackLayout>
+
+                                    <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding ShowError}" />
+
+                                    <!-- Lines; tap a metered line to see the readings behind it. -->
+                                    <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Lines}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ChargeLineViewModel">
+                                                <VerticalStackLayout Spacing="2">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                        <Grid.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding ToggleDetailCommand}" />
+                                                        </Grid.GestureRecognizers>
+                                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" />
+                                                        <Label Grid.Column="1" Text="{Binding TotalText}" FontAttributes="Bold" IsVisible="{Binding HasAmounts}" />
+                                                    </Grid>
+                                                    <Label Text="{Binding FromBillText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsFromBill}" />
+                                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasQuantity}">
+                                                        <Label Text="{Binding QuantityText}" />
+                                                        <Label Text="{Binding UnitPriceText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasUnitPrice}" />
+                                                    </HorizontalStackLayout>
+                                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasAmounts}">
+                                                        <Label Text="{Binding NetText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                                        <Label Text="{Binding VatPercentText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                                        <Label Text="{Binding VatText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                                    </HorizontalStackLayout>
+
+                                                    <!-- The readings behind the quantity. -->
+                                                    <VerticalStackLayout Spacing="6" Padding="12,4,0,4" IsVisible="{Binding IsDetailOpen}"
+                                                                         BindableLayout.ItemsSource="{Binding Details}">
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:ChargeReadingDetailViewModel">
+                                                                <VerticalStackLayout Spacing="2">
+                                                                    <Label Text="{Binding Header}" FontAttributes="Italic" FontSize="13" />
+                                                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Lines}">
+                                                                        <BindableLayout.ItemTemplate>
+                                                                            <DataTemplate x:DataType="x:String">
+                                                                                <Label Text="{Binding .}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                                                            </DataTemplate>
+                                                                        </BindableLayout.ItemTemplate>
+                                                                    </VerticalStackLayout>
+                                                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Notes}">
+                                                                        <BindableLayout.ItemTemplate>
+                                                                            <DataTemplate x:DataType="x:String">
+                                                                                <Label Text="{Binding .}" Style="{StaticResource WarningLabel}" />
+                                                                            </DataTemplate>
+                                                                        </BindableLayout.ItemTemplate>
+                                                                    </VerticalStackLayout>
+                                                                </VerticalStackLayout>
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </VerticalStackLayout>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
+                                    <!-- Totals of the contract. -->
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="12" IsVisible="{Binding ShowTotalsRow}">
+                                        <Label Grid.Column="1" Text="{Binding NetText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                        <Label Grid.Column="2" Text="{Binding VatText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                        <Label Grid.Column="3" Text="{Binding TotalText}" FontAttributes="Bold" />
+                                    </Grid>
+
+                                    <!-- Warnings, each with the screen that fixes it. -->
+                                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Warnings}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ChargeWarningViewModel">
+                                                <VerticalStackLayout Spacing="0">
+                                                    <Label Text="{Binding Message}" Style="{StaticResource WarningLabel}" />
+                                                    <Button Text="{Binding ActionText}" Command="{Binding ActionCommand}"
+                                                            Style="{StaticResource TextButton}" HorizontalOptions="Start"
+                                                            IsVisible="{Binding HasAction}" />
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:PageBase>

@@ -21,6 +21,8 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.Categories, typeof(CategoriesPage));
         Routing.RegisterRoute(Routes.CategoryEdit, typeof(CategoryEditPage));
         Routing.RegisterRoute(Routes.TariffComponentEdit, typeof(TariffComponentEditPage));
+        Routing.RegisterRoute(Routes.ChargesFor, typeof(ChargesPage));
+        Routing.RegisterRoute(Routes.ReadingsFor, typeof(ReadingsPage));
         Routing.RegisterRoute(Routes.VatRates, typeof(VatRatesPage));
         Routing.RegisterRoute(Routes.VatRateEdit, typeof(VatRateEditPage));
         BindingContext = viewModel;

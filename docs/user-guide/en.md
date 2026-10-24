@@ -23,6 +23,7 @@ information, so start here.
 | **Reading** | A value of a meter register on a date. Consumption is calculated from readings. | 01.10.2026: 1234.567 m³ |
 | **Category** | Your own grouping with a colour for reports (e.g. "Water", "Taxes"). Every contract has one. | "Water", blue |
 | **Tariff component** | One priced line of a contract's bill, with prices that change over time and a VAT rate. Several components make the **tariff** of a contract. | "Water supply" 1.41 €/m³ excl. VAT, "Sewerage" 0.86 €/m³ excl. VAT |
+| **Charge** | What a contract should cost for a month: the consumption from the readings × the prices of the tariff, with VAT. Calculated on demand, not stored. | Water, October: 5.500 m³ × 1.41 € = 7.76 € + VAT 21 % = 9.39 € |
 | **VAT rate** | A named VAT percentage that changes over time; tariff components point to it, so a change of the national rate is entered once. | "Standard rate": 21 % |
 
 **Order of setting things up:** properties → suppliers → contracts (in the property) → meters (in the property,
@@ -31,7 +32,7 @@ a bill should be. You can add a supplier directly from the contract editor ("＋
 
 ## 2. Screens and common behaviour
 
-**Menu:** Overview, Properties, Suppliers, Readings, Bills, Payments, Reports, Help, Settings. On a phone the menu opens
+**Menu:** Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Help, Settings. On a phone the menu opens
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
@@ -188,7 +189,54 @@ Invented example — a water contract: "Water supply" 1.41 and "Sewerage" 0.86, 
 rate*, valid from 01.01.2026. A heating contract: "Water heating" 4.56, *By consumption*, only the hot-water meters
 switched on, VAT *Reduced rate*; "Heating" *From the supplier's bill*.
 
-## 10. Settings
+## 10. Charges
+
+Menu **Charges**: what each contract **should** cost for a month, so you can check the supplier's bill. Nothing is
+stored here — the numbers are calculated every time you open the screen from your readings, tariffs and VAT rates, so
+they always follow the latest data. (Entering the supplier's bill and comparing it comes later.)
+
+**Where the numbers come from:** readings → consumption (end reading − start reading) → × price from the tariff →
+net amount → VAT → total. Area-based and per-resident lines use the property's parameters (area, declared residents)
+valid on the first day of the month; fixed lines are one month's price; a line *From the supplier's bill* has no
+calculation.
+
+**Choosing the month.** Pick the **property** and the **month** with ‹ › or by tapping the month. When you open the
+screen it shows the **current** month if the reading window of one of the property's contracts has already started
+this month (for example the window is 25–28 October: from 25 October the screen shows October), otherwise the
+**previous** month. The top of the screen shows the total of all contracts: net, VAT and total, and says
+*Incomplete* when some amount could not be calculated.
+
+**One card per contract** that is active in the month, with its category colour, supplier, status (*Complete*,
+*Incomplete*, *From the bill*, *No tariff*) and the month's total. Tap the header to expand it (on a phone the cards
+start collapsed, on a wide window expanded). A contract without a tariff shows *No tariff — add it in the contract*
+with a link to the contract.
+
+**Reading a line.** Each line shows the component, the quantity with its unit (*5,500 m³*, *52,30 m²*,
+*2 residents*, *1 month*), the unit price (*× 1,41 € excl. VAT* or *incl. VAT*, as the supplier quotes it), the net
+amount, the VAT percent and amount, and the line total. A stepped price shows one line per step. A line *Amount from
+the supplier's bill* has no amounts.
+
+**The readings behind a quantity.** Tap a metered line to see, per meter register, the start reading and the end
+reading with their dates and the consumption. If the meter was replaced in the month, both meters are shown:
+*old meter: 123,000 → final 125,500; new meter: initial 0,000 → 2,000*. Notes flag a roll-over of the dial, an
+estimated reading, a reading taken outside the reading window, and unusually high or zero consumption.
+
+**Warnings** are shown under the card, each with a button that opens the place where you fix it. When you come back
+(Back) the screen is recalculated and the warning is gone if the problem is fixed.
+
+| Warning | What it means | How to fix |
+|---|---|---|
+| *No price valid on … for «…»* | The component has no price for that date. | **Open tariff**, add a price with a *Valid from* date on or before it. |
+| *«…» has no value on …* | The area or residents used by the line are not entered for that date. | **Open property**, add the parameter value. |
+| *Readings missing for …* | The meter has no usable start or end reading. | **Open readings**, enter the missing reading. |
+| *No meter is linked for «…»* | The line counts meter consumption, but no meter of the contract fits. | **Open contract**, link a meter. |
+| VAT code unknown, currency differs, stepped price on a net export line | The tariff itself is wrong. | **Open tariff** or *Settings → VAT rates*. |
+| *The contract is not active in this month* | The contract ended or has not started yet. | Check the contract's dates. |
+
+In the contract editor the tariff card has a **Show charges** button that opens this screen for the contract's
+property, scrolled to that contract.
+
+## 11. Settings
 
 Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
@@ -225,8 +273,8 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
-## 11. Coming soon
+## 12. Coming soon
 
-Calculated monthly charges from the tariffs, bills with the "Paid" quick action, payments and
+Bills with the "Paid" quick action, payments and
 balances, equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.
