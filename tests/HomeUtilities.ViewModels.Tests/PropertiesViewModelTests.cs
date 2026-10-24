@@ -12,6 +12,7 @@ public class PropertiesViewModelTests
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeDialogService _dialogs = new();
     private readonly FakeLayoutModeService _layout = new();
+    private readonly SectionSelectionMemory _memory = new();
     private readonly TestClock _clock = new(Today);
 
     [Fact]
@@ -279,6 +280,7 @@ public class PropertiesViewModelTests
         new FakeLocalizer(_language),
         _navigation,
         _layout,
+        _memory,
         () => new PropertyEditViewModel(
             _store,
             new FakeContractStore(),

@@ -1,3 +1,4 @@
+using HomeUtilities.ViewModels.Common;
 using HomeUtilities.Core.Domain;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -122,6 +123,7 @@ public class PaneGuardTests
         new FakeLocalizer(_language),
         _navigation,
         _layout,
+        new SectionSelectionMemory(),
         () => new PropertyEditViewModel(
             _store,
             new FakeContractStore(),

@@ -9,6 +9,7 @@ public class SuppliersViewModelTests
     private readonly FakeSupplierStore _store = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeLayoutModeService _layout = new();
+    private readonly SectionSelectionMemory _memory = new();
     private readonly FakeDialogService _dialogs = new();
 
     [Fact]
@@ -169,6 +170,7 @@ public class SuppliersViewModelTests
             localizer,
             _navigation,
             _layout,
+            _memory,
             () => new SupplierEditViewModel(
                 _store, new TestClock(new DateOnly(2026, 10, 20)), localizer, _dialogs, _navigation,
                 new FakeLauncherService(), new FakeClipboardService(), new FakeToastService()));

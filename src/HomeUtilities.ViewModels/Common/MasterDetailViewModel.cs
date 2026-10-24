@@ -16,6 +16,7 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     private readonly ILayoutModeService _layoutModeService;
     private readonly Func<TEditor> _editorFactory;
     private readonly string _editRoute;
+    private readonly ISectionSelectionMemory _selectionMemory;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelection), nameof(ShowSelectHint))]
@@ -45,8 +46,10 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         INavigationService navigation,
         ILayoutModeService layoutModeService,
         Func<TEditor> editorFactory,
-        string editRoute)
+        string editRoute,
+        ISectionSelectionMemory selectionMemory)
     {
+        _selectionMemory = selectionMemory;
         _navigation = navigation;
         _layoutModeService = layoutModeService;
         _editorFactory = editorFactory;
@@ -118,6 +121,9 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     /// <summary>Loads the data from the store and rebuilds the items.</summary>
     public abstract Task ReloadAsync();
 
+    /// <summary>Whether the loaded list contains the item (archived items hidden by a filter are not contained).</summary>
+    protected abstract bool ContainsItem(Guid id);
+
     /// <summary>Highlights the list row of <see cref="SelectedEditor"/>.</summary>
     protected abstract void MarkSelectedItem();
 
@@ -130,6 +136,13 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         }
 
         await ReloadAsync();
+
+        // Back via the menu: the page and this view model may be new, the selection comes from the memory. Compact
+        // layout shows only the list (the menu rule of the navigation guard).
+        if (IsTwoPane && SelectedEditor is null)
+        {
+            await RestoreSelectionAsync();
+        }
     }
 
     [RelayCommand]
@@ -163,11 +176,10 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         }
 
         var compact = _layoutModeService.Current == LayoutMode.Compact;
-        var editor = _editorFactory();
-        editor.IsHostedInPage = compact;
-        editor.Finished = outcome => EditorFinishedAsync(editor, outcome);
+        var editor = CreateEditor(compact);
         await editor.LoadAsync(id);
         SelectedEditor = editor;
+        RememberSelection(editor);
 
         if (compact)
         {
@@ -175,12 +187,54 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         }
     }
 
+    private TEditor CreateEditor(bool hostedInPage)
+    {
+        var editor = _editorFactory();
+        editor.IsHostedInPage = hostedInPage;
+        editor.Finished = outcome => EditorFinishedAsync(editor, outcome);
+        return editor;
+    }
+
+    private async Task RestoreSelectionAsync()
+    {
+        if (_selectionMemory.Recall(_editRoute) is not { } id)
+        {
+            return;
+        }
+
+        if (!ContainsItem(id))
+        {
+            _selectionMemory.Remember(_editRoute, null);
+            return;
+        }
+
+        var editor = CreateEditor(false);
+        await editor.LoadAsync(id);
+        if (editor.IsNew)
+        {
+            // The item vanished from the store meanwhile.
+            editor.Finished = null;
+            _selectionMemory.Remember(_editRoute, null);
+            return;
+        }
+
+        SelectedEditor = editor;
+    }
+
+    /// <summary>Only a saved item is remembered; a new, unsaved one is not.</summary>
+    private void RememberSelection(TEditor editor) =>
+        _selectionMemory.Remember(_editRoute, editor.IsNew ? null : editor.EntityId);
+
     private async Task EditorFinishedAsync(TEditor editor, EditOutcome outcome)
     {
         // After a successful save the editor stays (pane or page); every other way out closes it.
         if (outcome != EditOutcome.Saved)
         {
             Detach(editor);
+        }
+        else if (ReferenceEquals(SelectedEditor, editor))
+        {
+            RememberSelection(editor);
         }
 
         await ReloadAsync();
@@ -192,6 +246,7 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         if (ReferenceEquals(SelectedEditor, editor))
         {
             SelectedEditor = null;
+            _selectionMemory.Remember(_editRoute, null);
         }
     }
 

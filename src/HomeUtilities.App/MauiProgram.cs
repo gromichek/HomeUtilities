@@ -7,6 +7,7 @@ using HomeUtilities.Core.Attachments;
 using HomeUtilities.Data.Backup;
 using HomeUtilities.Data;
 using HomeUtilities.ViewModels;
+using HomeUtilities.ViewModels.Common;
 using Microsoft.Extensions.Logging;
 #if WINDOWS
 using Microsoft.Maui.LifecycleEvents;
@@ -71,6 +72,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
         builder.Services.AddSingleton<IActiveEditorProvider, ShellActiveEditorProvider>();
         builder.Services.AddSingleton<INavigationGuard, NavigationGuard>();
+        builder.Services.AddSingleton<ISectionSelectionMemory, SectionSelectionMemory>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<ILauncherService, LauncherService>();
         builder.Services.AddSingleton<IAppAssetReader, AppAssetReader>();

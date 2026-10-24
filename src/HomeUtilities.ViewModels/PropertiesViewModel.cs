@@ -32,8 +32,9 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
         ILocalizer localizer,
         INavigationService navigation,
         ILayoutModeService layoutModeService,
+        ISectionSelectionMemory selectionMemory,
         Func<PropertyEditViewModel> editorFactory)
-        : base(navigation, layoutModeService, editorFactory, Routes.PropertyEdit)
+        : base(navigation, layoutModeService, editorFactory, Routes.PropertyEdit, selectionMemory)
     {
         _store = store;
         _clock = clock;
@@ -66,6 +67,8 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
         SelectHintText = _localizer["PropertySelectHint"];
         RebuildItems();
     }
+
+    protected override bool ContainsItem(Guid id) => _properties.Any(x => x.Id == id);
 
     protected override void MarkSelectedItem()
     {
