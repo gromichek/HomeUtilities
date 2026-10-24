@@ -51,6 +51,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
+- Windows wide: returning to Objects after leaving a pushed contract editor via the menu loses the property selection in the right pane (T-017a; cause not yet found — page recreated or editor detached). Minor; fix in a later hotfix.
+
 - `ViewModelBase` uses `WeakReferenceMessenger.RegisterAll` (reflection) — check Android release trimming; switch to explicit `Register<T>` if it breaks.
 - App icon and splash are placeholder SVGs (no MAUI template available offline).
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
@@ -82,5 +84,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-23 | #43 | Colour swatches | first swatch of each row clipped (FlexLayout on Android) → #46 |
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
-| | #60 | T-017a navigation guard: menu → section list, Save changes? on menu / Back / window ✕ | pending |
+| 2026-10-24 | #60 | T-017a navigation guard: menu → section list, Save changes? on menu / Back / window ✕ | OK, except: Windows wide, after contract → Readings → Objects the property is **not selected** any more (spec: stays selected) → known issue |
 | | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
