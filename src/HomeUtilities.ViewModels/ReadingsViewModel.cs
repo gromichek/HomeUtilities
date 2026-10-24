@@ -45,6 +45,9 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     private Guid? _selectedPropertyId;
 
     [ObservableProperty]
+    private string _helpText = string.Empty;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedPropertyIndex), nameof(HasMultipleProperties), nameof(HasProperties), nameof(ShowNoProperties), nameof(ShowNoMeters))]
     private IReadOnlyList<ChoiceOption> _properties = [];
 
@@ -213,6 +216,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     protected override void RefreshTexts()
     {
         Title = _localizer["SectionReadings"];
+        HelpText = _localizer["SectionHelp"];
         PropertyLabel = _localizer["ReadingsPropertyLabel"];
         DateLabel = _localizer["ReadingsDateLabel"];
         SaveAllText = _localizer["ReadingsSaveAll"];
@@ -267,6 +271,9 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         await LoadPropertyAsync();
         OnPropertyChanged(nameof(SelectedPropertyIndex));
     });
+
+    [RelayCommand]
+    private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, HelpTopic.Readings));
 
     [RelayCommand]
     private Task SaveAllAsync() => RunSafeAsync(async () =>

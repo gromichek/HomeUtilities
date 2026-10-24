@@ -66,6 +66,8 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   not only which buttons exist. Move items out of "Coming soon" when they are done.
 - Use exactly the UI wording from `AppResources.resx` / `AppResources.ru.resx`. The Russian file is the only
   place where non-English text is allowed in `docs/`; write natural Russian, not a word-by-word translation.
+- Diagrams are images: edit the source in `docs/user-guide/img/<name>.<lang>.mmd`, run `scripts/render-guide-diagrams.sh`
+  and commit the `.mmd` and the rendered `.svg` (the in-app help shows the SVG; Markdown references it).
 - Examples are invented (no real names, numbers or IBANs). Tasks without visible changes: write "n/a" in the PR.
 
 ## Tests

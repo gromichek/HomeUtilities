@@ -37,6 +37,9 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     private string _addText = string.Empty;
 
     [ObservableProperty]
+    private string _helpText = string.Empty;
+
+    [ObservableProperty]
     private string _selectHintText = string.Empty;
 
     protected MasterDetailViewModel(
@@ -53,6 +56,12 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         _editRoute = editRoute;
         _isTwoPane = layoutModeService.Current != LayoutMode.Compact;
     }
+
+    /// <summary>The user-guide section the "?" button of this screen opens.</summary>
+    protected abstract HelpTopic GuideTopic { get; }
+
+    [RelayCommand]
+    private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, GuideTopic));
 
     /// <summary>Only an editor in the side pane belongs to this screen; an editor page guards itself.</summary>
     bool IUnsavedChangesGuarded.HasUnsavedChanges => SelectedEditor is { IsHostedInPage: false, IsDirty: true };

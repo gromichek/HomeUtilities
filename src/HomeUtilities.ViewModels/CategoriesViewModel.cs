@@ -8,6 +8,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>The list of payment categories (built-in and own), ordered by sort order; two-pane like Properties.</summary>
 public sealed partial class CategoriesViewModel : MasterDetailViewModel<CategoryEditViewModel>
 {
+    protected override HelpTopic GuideTopic => HelpTopic.Categories;
+
     private readonly ICategoryStore _store;
     private readonly ILocalizer _localizer;
 
@@ -54,6 +56,7 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
         Title = _localizer["SectionCategories"];
         EmptyText = _localizer["CategoriesEmpty"];
         AddText = _localizer["CategoryAdd"];
+        HelpText = _localizer["SectionHelp"];
         SelectHintText = _localizer["CategorySelectHint"];
         ShowArchivedText = _localizer["CategoriesShowArchived"];
         RebuildItems();

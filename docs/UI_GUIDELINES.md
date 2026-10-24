@@ -24,6 +24,7 @@ these rules; the Properties screen (after T-012a) is the reference implementatio
 | `IconCopy` | copy | `content_copy` | `E8C8` Copy |
 | `IconArchive` | archive | `archive` | `E7B8` Package |
 | `IconPhoto` | photo / camera | `photo_camera` | `E722` Camera |
+| `IconHelp` | help (toolbar "?" opening the user guide at the screen's section) | `help_outline` | `E897` Help |
 | `IconHistory` | history | `history` | `E81C` History |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` | `E70D` / `E70E` Chevron down/up |
 

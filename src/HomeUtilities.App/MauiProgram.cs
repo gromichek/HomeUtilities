@@ -74,6 +74,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISectionSelectionMemory, SectionSelectionMemory>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<ILauncherService, LauncherService>();
+        builder.Services.AddSingleton<IAppAssetReader, AppAssetReader>();
+        builder.Services.AddSingleton<IHelpContentService, HelpContentService>();
         builder.Services.AddSingleton<IMediaService, MediaService>();
         builder.Services.AddSingleton<IFileViewer, FileViewer>();
         builder.Services.AddSingleton<IClipboardService, ClipboardService>();
@@ -83,6 +85,7 @@ public static class MauiProgram
         builder.Services.AddTransient<OverviewViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<PlaceholderViewModel>();
+        builder.Services.AddTransient<HelpViewModel>();
         builder.Services.AddTransient<PropertiesViewModel>();
         builder.Services.AddTransient<PropertyEditViewModel>();
         builder.Services.AddTransient<Func<PropertyEditViewModel>>(sp => () => sp.GetRequiredService<PropertyEditViewModel>());
@@ -102,6 +105,7 @@ public static class MauiProgram
         builder.Services.AddTransient<OverviewPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<PlaceholderPage>();
+        builder.Services.AddTransient<HelpPage>();
         builder.Services.AddTransient<PropertiesPage>();
         builder.Services.AddTransient<PropertyEditPage>();
         builder.Services.AddTransient<ContractEditPage>();

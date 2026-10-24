@@ -17,6 +17,8 @@
   <data name="SectionBills" xml:space="preserve"><value>Счета</value></data>
   <data name="SectionPayments" xml:space="preserve"><value>Платежи</value></data>
   <data name="SectionReports" xml:space="preserve"><value>Отчёты</value></data>
+  <data name="SectionHelp" xml:space="preserve"><value>Справка</value></data>
+  <data name="HelpUnavailable" xml:space="preserve"><value>Не удалось открыть руководство пользователя.</value></data>
   <data name="SectionSettings" xml:space="preserve"><value>Настройки</value></data>
   <data name="SettingsLanguage" xml:space="preserve"><value>Язык</value></data>
   <data name="SettingsTheme" xml:space="preserve"><value>Тема</value></data>

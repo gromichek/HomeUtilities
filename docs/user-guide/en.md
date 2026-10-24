@@ -11,15 +11,7 @@ built are listed at the end.
 The app is built around a few kinds of records. Most confusion comes from not knowing which record holds which
 information, so start here.
 
-```mermaid
-flowchart LR
-    S[Supplier<br/>company, links,<br/>payment details] -->|provides| C
-    P[Property<br/>flat, house, garage…<br/>parameters: area, residents] -->|has| C[Contract<br/>one service at one property]
-    P -->|has| M[Meter<br/>registers: day / night / total…]
-    M -.->|linked to one or more| C
-    M -->|has| R[Readings]
-    K[Category<br/>colour, grouping] -.->|classifies| C
-```
+![How suppliers, properties, contracts, meters, readings and categories relate](img/relations.en.svg)
 
 | Record | What it is | Example |
 |---|---|---|
@@ -36,8 +28,12 @@ linked to contracts) → readings. You can add a supplier directly from the cont
 
 ## 2. Screens and common behaviour
 
-**Menu:** Overview, Properties, Suppliers, Readings, Bills, Payments, Reports, Settings. On a phone the menu opens
+**Menu:** Overview, Properties, Suppliers, Readings, Bills, Payments, Reports, Help, Settings. On a phone the menu opens
 with ☰; on a wide window it is always visible.
+
+**Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
+item **Help**. Screens such as Properties, Suppliers, Readings, Categories and the contract and meter editors have a
+**?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
 left and the editor on the right. Settings shows the current layout (phone / tablet / desktop).

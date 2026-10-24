@@ -12,6 +12,9 @@ public static class Routes
     public const string Reports = "Reports";
     public const string Settings = "Settings";
 
+    /// <summary>The user guide as a menu section (opened at the top).</summary>
+    public const string Help = "Help";
+
     /// <summary>Pushed page (not a section): the property editor, query parameters <c>id</c> or <c>editor</c>.</summary>
     public const string PropertyEdit = "PropertyEdit";
 
@@ -41,4 +44,10 @@ public static class Routes
     /// <see cref="ReadingHistoryViewModel"/>) or <c>id</c> (the meter id).
     /// </summary>
     public const string ReadingHistory = "ReadingHistory";
+
+    /// <summary>
+    /// Pushed page (not a section): the user guide scrolled to a section, parameter <c>topic</c> (a help topic name).
+    /// Back returns to the screen that opened it.
+    /// </summary>
+    public const string HelpSection = "HelpSection";
 }
