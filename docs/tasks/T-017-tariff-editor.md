@@ -70,6 +70,14 @@ Update `docs/user-guide/en.md` and `ru.md`: new section "Tariffs" (what a tariff
 example each, VAT catalog vs custom %, prices with "valid from", stepped prices, presets) and "VAT rates" under
 Settings; extend the contract section with the Tariff card; remove tariffs/VAT from "Coming soon".
 
+### 6. Help and sample data (added 2026-10-24, after T-017b/T-017c)
+- `IconHelp` ("?") on the component editor and the VAT rates screen, opening new `HelpTopic`s for the new guide
+  sections (keep the anchor test green for both languages).
+- `SampleDataGenerator`: tariffs for the sample contracts — e.g. water supply 1,41 + sewerage 0,86 excl. VAT 21 %,
+  water heating 4,56 VAT 12 % (hot meters only) + heating from bill, maintenance 52,3 m² × 0,6711 incl. VAT,
+  waste per resident, internet 22,95 incl. VAT, electricity with a stepped price; one component with two prices
+  (a price change three months ago). Extend its tests.
+
 ## Scope — do NOT
 - No charge screen (T-018). No contract templates (T-025).
 
