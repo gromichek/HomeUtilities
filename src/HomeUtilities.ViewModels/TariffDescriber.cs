@@ -191,8 +191,20 @@ public sealed class TariffDescriber
             : _localizer["TariffParameterMissing"];
     }
 
-    /// <summary>The worked example with the newest price.</summary>
+    /// <summary>The worked example with the newest price; a hint instead when the numbers are too large to calculate.</summary>
     public TariffExample Example(TariffComponent component)
+    {
+        try
+        {
+            return CalculateExample(component);
+        }
+        catch (OverflowException)
+        {
+            return NoExample("TariffExampleInvalid");
+        }
+    }
+
+    private TariffExample CalculateExample(TariffComponent component)
     {
         if (component.Basis == ChargeBasis.FromBill)
         {

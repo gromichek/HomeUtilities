@@ -125,6 +125,18 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task OpenVatRates_NavigatesToTheVatRatesPage()
+    {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+
+        await vm.OpenVatRatesCommand.ExecuteAsync(null);
+
+        Assert.Equal(Routes.VatRates, Assert.Single(navigation.Visited).Route);
+        Assert.Equal("SectionVatRates [en]", vm.VatRatesText);
+    }
+
+    [Fact]
     public async Task OpenCategories_NavigatesToCategoriesPage()
     {
         var navigation = new FakeNavigationService();

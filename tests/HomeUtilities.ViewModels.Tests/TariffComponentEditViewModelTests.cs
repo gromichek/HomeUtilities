@@ -474,6 +474,18 @@ public class TariffComponentEditViewModelTests
     }
 
     [Fact]
+    public async Task Example_WithAnAbsurdAreaOfTheProperty_ExplainsInsteadOfCrashing()
+    {
+        _kit.Property.Parameters.Add(new PropertyParameter { PropertyId = _kit.Property.Id, Kind = PropertyParameterKind.TotalArea, Value = 79228162514264337593543950335m, ValidFrom = new DateOnly(2026, 1, 1) });
+        var vm = await NewEditorAsync();
+        vm.SelectedBasis = vm.Bases.Single(o => o.Value.Equals(ChargeBasis.PerArea));
+        await AddRateAsync(vm, new DateOnly(2026, 1, 1), "1000");
+
+        Assert.Equal("TariffExampleInvalid [en]", vm.ExampleText);
+        Assert.Null(vm.Example.Quantity);
+    }
+
+    [Fact]
     public async Task Example_FromBill_And_MissingPrice_ExplainWhy()
     {
         var vm = await NewEditorAsync();

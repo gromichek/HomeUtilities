@@ -9,6 +9,7 @@ namespace HomeUtilities.ViewModels;
 public sealed partial class TariffRateRowViewModel : ObservableObject
 {
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStepped))]
     private TariffRate _rate;
 
     [ObservableProperty]

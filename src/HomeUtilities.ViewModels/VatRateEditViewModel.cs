@@ -321,7 +321,7 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
             Id = _rate.Id,
             CreatedAt = _rate.CreatedAt,
             UpdatedAt = _rate.UpdatedAt,
-            Code = Code.Trim().ToUpperInvariant(),
+            Code = IsCodeReadOnly ? _rate.Code : Code.Trim().ToUpperInvariant(),
             Name = RateName.Trim(),
             Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
         };
