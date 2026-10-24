@@ -50,4 +50,16 @@ public static class Routes
     /// Back returns to the screen that opened it.
     /// </summary>
     public const string HelpSection = "HelpSection";
+
+    /// <summary>
+    /// Pushed page (not a section): the tariff component editor, parameters <c>contractId</c> plus optional <c>id</c>.
+    /// It is a page in every layout.
+    /// </summary>
+    public const string TariffComponentEdit = "TariffComponentEdit";
+
+    /// <summary>Pushed page opened from Settings: the VAT catalog.</summary>
+    public const string VatRates = "VatRates";
+
+    /// <summary>Pushed page (not a section): the VAT rate editor, same parameters as <see cref="PropertyEdit"/>.</summary>
+    public const string VatRateEdit = "VatRateEdit";
 }

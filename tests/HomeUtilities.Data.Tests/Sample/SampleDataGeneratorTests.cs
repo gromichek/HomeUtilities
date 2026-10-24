@@ -1,7 +1,9 @@
+using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Payments;
+using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Data.Sample;
 using HomeUtilities.Data.Stores;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +24,17 @@ public class SampleDataGeneratorTests
             Suppliers = new SupplierStore(_test.Factory);
             Contracts = new ContractStore(_test.Factory);
             Meters = new MeterStore(_test.Factory);
-            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, _test.Clock);
+            Tariffs = new TariffStore(_test.Factory);
+            VatRates = new VatRateStore(_test.Factory);
+            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, _test.Clock);
+            Loader = new ChargeInputLoader(_test.Factory);
         }
+
+        public TariffStore Tariffs { get; }
+
+        public VatRateStore VatRates { get; }
+
+        public ChargeInputLoader Loader { get; }
 
         public PropertyStore Properties { get; }
 
@@ -221,6 +232,98 @@ public class SampleDataGeneratorTests
         Assert.Contains(readings, r => r.SubmittedOn is not null);
         Assert.Contains(readings, r => r.SubmittedOn is null);
         Assert.Equal(readings.Select(r => r.Value).Order(), readings.Select(r => r.Value));
+    }
+
+    [Fact]
+    public async Task Tariffs_cover_every_basis_pass_the_validator_and_use_catalog_codes()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+
+        var components = await rig.Tariffs.ListAsync();
+        var catalog = await rig.VatRates.ListAsync();
+
+        Assert.Equal(12, components.Count);
+        foreach (var component in components)
+        {
+            Assert.True(TariffComponentValidator.Validate(component).IsValid, component.Name);
+            Assert.Contains(catalog, v => v.Code == component.VatCode);
+        }
+
+        Assert.Equal(Enum.GetValues<ChargeBasis>(), components.Select(c => c.Basis).Distinct().Order());
+    }
+
+    [Fact]
+    public async Task Water_has_two_prices_with_a_change_three_months_ago_and_heating_counts_only_hot_meters()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+        var flat = (await rig.Properties.ListAsync(true))[0];
+        var contracts = await rig.Contracts.ListByPropertyAsync(flat.Id);
+        var water = await rig.Tariffs.ListByContractAsync(contracts.Single(c => c.Service == ServiceKind.ColdWater).Id);
+        var heat = await rig.Tariffs.ListByContractAsync(contracts.Single(c => c.Service == ServiceKind.Heating).Id);
+
+        var supply = water.Single(c => c.Name == "Water supply");
+        Assert.Equal([1.32m, 1.41m], supply.Rates.Select(r => r.Price));
+        var changeMonth = YearMonth.From(rig.Clock.Today).AddMonths(-3);
+        Assert.Equal(new DateOnly(changeMonth.Year, changeMonth.Month, 1), supply.Rates[1].ValidFrom);
+        Assert.Equal(1.41m, supply.RateAt(rig.Clock.Today)!.Price);
+        Assert.Equal(0.86m, water.Single(c => c.Name == "Sewerage").Rates.Single().Price);
+
+        var hotIds = (await rig.Meters.ListByPropertyAsync(flat.Id))
+            .Where(m => m.Resource == MeterResource.HotWater).Select(m => m.Id).Order().ToList();
+        var heating = heat.Single(c => c.Name == "Water heating");
+        Assert.Equal(hotIds, heating.MeterIds.Order());
+        Assert.Equal("LV-REDUCED", heating.VatCode);
+        Assert.Equal(ChargeBasis.FromBill, heat.Single(c => c.Name == "Heating").Basis);
+    }
+
+    [Fact]
+    public async Task Electricity_has_a_stepped_price_and_the_prices_of_the_other_contracts_match_the_task()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+        var all = await rig.Tariffs.ListAsync();
+
+        var energy = all.Single(c => c.Name == "Energy");
+        var rate = energy.Rates.Single();
+        Assert.Equal([new TariffTier(100m, 0.1065m), new TariffTier(null, 0.0818m)], rate.Tiers);
+        Assert.Equal(TierPeriod.Month, rate.TierPeriod);
+
+        var maintenance = all.Single(c => c.Name == "Maintenance").Rates.Single();
+        Assert.Equal((0.6711m, true), (maintenance.Price, maintenance.PriceIncludesVat));
+        var internet = all.Single(c => c.Name == "Internet and TV").Rates.Single();
+        Assert.Equal((22.95m, true), (internet.Price, internet.PriceIncludesVat));
+        Assert.Equal(ChargeBasis.PerResident, all.Single(c => c.Name == "Waste").Basis);
+
+        Assert.Equal([RegisterKind.Day], all.Single(c => c.Name == "Energy, day").RegisterKinds);
+        Assert.Equal([RegisterKind.Export], all.Single(c => c.Name == "Solar export").RegisterKinds);
+    }
+
+    [Fact]
+    public async Task Charges_of_the_sample_contracts_are_calculated_without_tariff_warnings()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+        var period = YearMonth.From(rig.Clock.Today).AddMonths(-2);
+        var forbidden = new[]
+        {
+            ChargeWarningCodes.NoRateForDate, ChargeWarningCodes.UnknownVat, ChargeWarningCodes.InvalidTariff,
+            ChargeWarningCodes.CurrencyMismatch, ChargeWarningCodes.MissingParameter,
+        };
+
+        foreach (var contract in await rig.Contracts.ListAsync())
+        {
+            if (await rig.Tariffs.ListByContractAsync(contract.Id) is not { Count: > 0 })
+            {
+                continue;
+            }
+
+            var charge = ChargeCalculator.Calculate((await rig.Loader.LoadAsync(contract.Id, period))!);
+
+            Assert.DoesNotContain(charge.Warnings, w => forbidden.Contains(w.Code));
+            Assert.True(charge.Lines.Count > 0, contract.Title);
+        }
     }
 
     [Fact]

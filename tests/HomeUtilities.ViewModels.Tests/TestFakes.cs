@@ -4,6 +4,7 @@ using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Backup;
 using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
 
@@ -239,6 +240,74 @@ internal sealed class FakeCategoryStore : ICategoryStore
     {
         Deleted.Add(id);
         Stored.RemoveAll(c => c.Id == id);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeTariffStore : ITariffStore
+{
+    public List<TariffComponent> Stored { get; } = [];
+
+    public List<TariffComponent> Saved { get; } = [];
+
+    public List<Guid> Deleted { get; } = [];
+
+    public Task<IReadOnlyList<TariffComponent>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<TariffComponent>>([.. Stored.OrderBy(c => c.SortOrder)]);
+
+    public Task<IReadOnlyList<TariffComponent>> ListByContractAsync(Guid contractId, CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<TariffComponent>>([.. Stored.Where(c => c.ContractId == contractId).OrderBy(c => c.SortOrder)]);
+
+    public Task<TariffComponent?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(c => c.Id == id));
+
+    public Task SaveAsync(TariffComponent aggregate, CancellationToken ct = default)
+    {
+        Saved.Add(aggregate);
+        Stored.RemoveAll(c => c.Id == aggregate.Id);
+        Stored.Add(aggregate);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        Deleted.Add(id);
+        Stored.RemoveAll(c => c.Id == id);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeVatRateStore : IVatRateStore
+{
+    public FakeVatRateStore()
+    {
+        Stored.AddRange(LatvianVatDefaults.Create());
+    }
+
+    public List<VatRate> Stored { get; } = [];
+
+    public List<VatRate> Saved { get; } = [];
+
+    public List<Guid> Deleted { get; } = [];
+
+    public Task<IReadOnlyList<VatRate>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<VatRate>>([.. Stored.OrderBy(v => v.Code, StringComparer.Ordinal)]);
+
+    public Task<VatRate?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(v => v.Id == id));
+
+    public Task SaveAsync(VatRate aggregate, CancellationToken ct = default)
+    {
+        Saved.Add(aggregate);
+        Stored.RemoveAll(v => v.Id == aggregate.Id);
+        Stored.Add(aggregate);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        Deleted.Add(id);
+        Stored.RemoveAll(v => v.Id == id);
         return Task.CompletedTask;
     }
 }
@@ -546,6 +615,10 @@ internal sealed class ContractTestKit
 
     public FakeMeterStore Meters { get; } = new();
 
+    public FakeTariffStore Tariffs { get; } = new();
+
+    public FakeVatRateStore VatRates { get; } = new();
+
     public FakeSupplierStore Suppliers { get; } = new();
 
     public FakeCategoryStore Categories { get; } = new();
@@ -578,7 +651,16 @@ internal sealed class ContractTestKit
         new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast);
 
     public ContractEditViewModel CreateContractEditor() =>
-        new(Contracts, Suppliers, Categories, Properties, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
+
+    public TariffComponentEditViewModel CreateTariffEditor() =>
+        new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
+
+    public VatRateEditViewModel CreateVatRateEditor() =>
+        new(VatRates, Tariffs, Clock, Localizer, Dialogs, Navigation, Toast);
+
+    public VatRatesViewModel CreateVatRates(ISectionSelectionMemory? memory = null) =>
+        new(VatRates, Clock, Localizer, Navigation, Layout, memory ?? new SectionSelectionMemory(), CreateVatRateEditor);
 
     public PropertyEditViewModel CreatePropertyEditor() =>
         new(Properties, Contracts, Meters, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast, CreateContractEditor, CreateMeterEditor);

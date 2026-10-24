@@ -43,7 +43,7 @@ public static class TariffComponentValidator
         ValidateScope(component, errors);
 
         var rates = component.Rates.Where(r => !r.IsDeleted).ToList();
-        if (rates.Count == 0)
+        if (rates.Count == 0 && component.Basis != ChargeBasis.FromBill)
         {
             errors.Add(new(ErrorCodes.TariffRateRequired, nameof(TariffComponent.Rates)));
         }

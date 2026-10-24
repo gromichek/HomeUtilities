@@ -83,6 +83,13 @@ public class TariffComponentValidatorTests
     }
 
     [Fact]
+    public void From_bill_component_needs_no_rate()
+    {
+        var c = new TariffComponent { ContractId = Guid.CreateVersion7(), Name = "Heating", Basis = ChargeBasis.FromBill, VatCode = "LV-REDUCED" };
+        Assert.True(TariffComponentValidator.Validate(c).IsValid);
+    }
+
+    [Fact]
     public void Duplicate_valid_from_fails()
     {
         var c = Valid();

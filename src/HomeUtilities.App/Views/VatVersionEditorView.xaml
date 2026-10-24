@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.VatVersionEditorView"
+             x:DataType="vm:VatVersionEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+
+            <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
+            <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
+            <Label Text="{Binding ValidFromError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding ValidFromError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding PercentLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding PercentText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
+            <Label Text="{Binding PercentError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding PercentError, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

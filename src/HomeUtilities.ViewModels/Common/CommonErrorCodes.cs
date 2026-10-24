@@ -20,4 +20,22 @@ public static class CommonErrorCodes
 
     /// <summary>The "submitted on" date of a reading is before the reading date.</summary>
     public const string ReadingSubmittedBeforeDate = "reading_edit.submitted_before_date";
+
+    /// <summary>A number is larger than the editor accepts.</summary>
+    public const string NumberTooLarge = "common.number_too_large";
+
+    /// <summary>A price has more than six decimals.</summary>
+    public const string PriceTooManyDecimals = "tariff_editor.too_many_decimals";
+
+    /// <summary>A component that counts meters has all of them switched off.</summary>
+    public const string TariffNoMeterSelected = "tariff_editor.no_meter_selected";
+
+    /// <summary>A component that counts registers has all of them switched off.</summary>
+    public const string TariffNoRegisterSelected = "tariff_editor.no_register_selected";
+
+    /// <summary>The VAT code of a catalog entry is used by another entry.</summary>
+    public const string VatCodeDuplicate = "vat_editor.code_duplicate";
+
+    /// <summary>A VAT catalog entry has no percentage.</summary>
+    public const string VatVersionRequired = "vat_editor.version_required";
 }

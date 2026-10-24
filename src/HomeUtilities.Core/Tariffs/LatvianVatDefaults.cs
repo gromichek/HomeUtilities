@@ -14,6 +14,9 @@ public static class LatvianVatDefaults
         Rate("ZERO", "Zero / exempt", (new(1995, 1, 1), 0m)),
     ];
 
+    /// <summary>True for the codes of the seeded catalog entries; their code is not editable.</summary>
+    public static bool IsDefaultCode(string? code) => Create().Any(r => r.Code == code);
+
     private static VatRate Rate(string code, string name, params (DateOnly ValidFrom, decimal Percent)[] versions)
     {
         var rate = new VatRate { Code = code, Name = name };
