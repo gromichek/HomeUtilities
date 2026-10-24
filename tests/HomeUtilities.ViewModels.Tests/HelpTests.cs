@@ -329,7 +329,7 @@ public class HelpButtonTests
         var navigation = new FakeNavigationService();
         var clock = new TestClock(new DateOnly(2026, 10, 24));
         var vm = new PropertiesViewModel(
-            store, clock, new FakeLocalizer(language), navigation, new FakeLayoutModeService(),
+            store, clock, new FakeLocalizer(language), navigation, new FakeLayoutModeService(), new SectionSelectionMemory(),
             () => throw new InvalidOperationException("no editor expected"));
 
         await vm.OpenHelpCommand.ExecuteAsync(null);
