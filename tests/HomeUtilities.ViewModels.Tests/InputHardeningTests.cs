@@ -347,6 +347,36 @@ public class InputHardeningTests
         Assert.Single(kit.Categories.Saved);
     }
 
+    [Fact]
+    public async Task ChargesMonthPicker_ClampsExtremeDates_AndTheButtonsStopAtTheEnds()
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = kit.CreateCharges();
+        await vm.ReloadAsync();
+
+        foreach (var date in new[] { DateOnly.MinValue, new DateOnly(1, 1, 1), new DateOnly(1899, 12, 31), DateOnly.MaxValue, new DateOnly(9999, 12, 31), new DateOnly(2200, 12, 31), new DateOnly(1900, 1, 1) })
+        {
+            vm.PickerDate = date;
+            await vm.PendingMonthChange;
+            Assert.True(vm.Month >= ChargesViewModel.EarliestMonth && vm.Month <= ChargesViewModel.LatestMonth);
+            Assert.False(string.IsNullOrEmpty(vm.MonthText));
+        }
+
+        vm.PickerDate = DateOnly.MinValue;
+        await vm.PendingMonthChange;
+        Assert.Equal(new YearMonth(1900, 1), vm.Month);
+        Assert.False(vm.PreviousMonthCommand.CanExecute(null));
+        Assert.True(vm.NextMonthCommand.CanExecute(null));
+
+        vm.PickerDate = DateOnly.MaxValue;
+        await vm.PendingMonthChange;
+        Assert.Equal(new YearMonth(2200, 12), vm.Month);
+        Assert.False(vm.NextMonthCommand.CanExecute(null));
+        await vm.NextMonthCommand.ExecuteAsync(null);
+        Assert.Equal(new YearMonth(2200, 12), vm.Month);
+        ReadAll(vm);
+    }
+
     /// <summary>Sets each settable string property to <paramref name="input"/>, runs <paramref name="act"/> and reads all properties.</summary>
     private static async Task HammerAsync(object viewModel, string input, Func<Task> act)
     {

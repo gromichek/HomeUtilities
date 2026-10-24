@@ -347,6 +347,9 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private string _addTariffText = string.Empty;
 
     [ObservableProperty]
+    private string _showChargesText = string.Empty;
+
+    [ObservableProperty]
     private string _tariffPresetsLabel = string.Empty;
 
     [ObservableProperty]
@@ -609,6 +612,16 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             await LoadTariffAsync();
         }
     }
+
+    /// <summary>Opens the charges screen on this contract's property and the default month.</summary>
+    [RelayCommand(CanExecute = nameof(CanAddTariff))]
+    private Task ShowChargesAsync() => RunSafeAsync(() => _navigation.GoToAsync(
+        Routes.ChargesFor,
+        new Dictionary<string, object>
+        {
+            [EditorNavigation.PropertyIdParameter] = _contract.PropertyId,
+            [EditorNavigation.ContractIdParameter] = _contract.Id,
+        }));
 
     [RelayCommand(CanExecute = nameof(CanAddTariff))]
     private Task AddTariffAsync() => RunSafeAsync(() => OpenComponentAsync(null));
@@ -997,6 +1010,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             OnPropertyChanged(nameof(ShowTariffPresets));
             OnPropertyChanged(nameof(ShowTariffSaveFirst));
             AddTariffCommand.NotifyCanExecuteChanged();
+            ShowChargesCommand.NotifyCanExecuteChanged();
             if (!IsNew && !SuppressDirty && _components.Count == 0)
             {
                 _ = RunSafeAsync(LoadTariffAsync);
@@ -1087,6 +1101,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             TariffHeader = _localizer["ContractTariff"];
             TariffEmptyText = _localizer["ContractTariffEmpty"];
             AddTariffText = _localizer["ContractTariffAdd"];
+            ShowChargesText = _localizer["ContractShowCharges"];
             TariffPresetsLabel = _localizer["ContractTariffPresets"];
             TariffSaveFirstText = _localizer["ContractTariffSaveFirst"];
             RebuildTariff();

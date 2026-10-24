@@ -644,6 +644,25 @@ public class ContractEditViewModelTests
     private static EnumOption Option<TEnum>(IReadOnlyList<EnumOption> options, TEnum value)
         where TEnum : struct, Enum => options.First(o => o.Value.Equals(value));
 
+    [Fact]
+    public async Task TariffCard_ShowChargesOpensTheChargesOfTheContractsProperty_AndNeedsASavedContract()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        await vm.ShowChargesCommand.ExecuteAsync(null);
+
+        var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.Equal(Routes.ChargesFor, route);
+        Assert.Equal(contract.PropertyId, parameters![EditorNavigation.PropertyIdParameter]);
+        Assert.Equal(contract.Id, parameters[EditorNavigation.ContractIdParameter]);
+        Assert.Equal("ContractShowCharges [en]", vm.ShowChargesText);
+
+        var fresh = await FilledNewAsync();
+        Assert.False(fresh.ShowChargesCommand.CanExecute(null));
+    }
+
     private static ChoiceOption Supplier(Supplier supplier) => new(supplier.Id, supplier.Name, string.Empty);
 
     [Fact]

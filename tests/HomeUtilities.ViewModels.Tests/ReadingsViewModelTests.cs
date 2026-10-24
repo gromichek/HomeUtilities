@@ -126,6 +126,25 @@ public class ReadingsViewModelTests
         Assert.Equal(1, again.SelectedPropertyIndex);
     }
 
+    [Fact]
+    public async Task OpenFor_SelectsThatPropertyAndDate_AndRemembersTheProperty()
+    {
+        var second = new Property { Name = "Cottage", SortOrder = 5 };
+        _kit.Properties.Stored.Add(second);
+        var vm = _kit.CreateReadings();
+
+        vm.OpenFor(second.Id, new DateOnly(2026, 9, 30));
+        await vm.ReloadAsync();
+
+        Assert.Equal(second.Id, vm.SelectedPropertyId);
+        Assert.Equal(new DateOnly(2026, 9, 30), vm.ReadingDate);
+        Assert.Equal(second.Id.ToString(), _kit.Settings.Values[ReadingsViewModel.LastPropertyKey]);
+
+        // only the first load follows the request; a later reload keeps the user's current choice
+        await vm.ReloadAsync();
+        Assert.Equal(second.Id, vm.SelectedPropertyId);
+    }
+
     [Theory]
     [InlineData(2026, 10, 23, ReadingWindowState.Upcoming, "ReadingsWindowOpens ", "|2 [")]
     [InlineData(2026, 10, 24, ReadingWindowState.Upcoming, "ReadingsWindowOpensTomorrow ", "")]

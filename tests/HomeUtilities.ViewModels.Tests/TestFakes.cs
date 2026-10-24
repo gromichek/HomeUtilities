@@ -3,6 +3,7 @@ using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Backup;
+using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Core.Domain;
@@ -597,6 +598,7 @@ internal sealed class ContractTestKit
     {
         Clock = new TestClock(today);
         Localizer = new FakeLocalizer(Language);
+        ChargeLoader = new FakeChargeInputLoader(this);
         foreach (var category in BuiltInCategories.Create())
         {
             Categories.Stored.Add(category);
@@ -643,6 +645,10 @@ internal sealed class ContractTestKit
 
     public FakeMediaService Media { get; } = new();
 
+    public FakeErrorLog ErrorLog { get; } = new();
+
+    public FakeChargeInputLoader ChargeLoader { get; }
+
     public FakeFileViewer Viewer { get; } = new();
 
     public Property Property { get; } = new() { Name = "Sample flat", Kind = PropertyKind.Apartment };
@@ -673,7 +679,41 @@ internal sealed class ContractTestKit
     public ReadingsViewModel CreateReadings() =>
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, Layout, CreateHistory);
 
+    public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
+        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
+}
+
+/// <summary>Assembles the <see cref="ChargeInput"/> of a contract from the fake stores of a <see cref="ContractTestKit"/>.</summary>
+internal sealed class FakeChargeInputLoader(ContractTestKit kit) : IChargeInputLoader
+{
+    /// <summary>Contracts whose loading throws.</summary>
+    public Dictionary<Guid, Exception> Failures { get; } = [];
+
+    public Task<ChargeInput?> LoadAsync(Guid contractId, YearMonth period, CancellationToken ct = default)
+    {
+        if (Failures.TryGetValue(contractId, out var failure))
+        {
+            throw failure;
+        }
+
+        var contract = kit.Contracts.Stored.FirstOrDefault(c => c.Id == contractId);
+        var property = contract is null ? null : kit.Properties.Stored.FirstOrDefault(p => p.Id == contract.PropertyId);
+        if (contract is null || property is null)
+        {
+            return Task.FromResult<ChargeInput?>(null);
+        }
+
+        return Task.FromResult<ChargeInput?>(new ChargeInput(
+            contract,
+            property,
+            [.. kit.Tariffs.Stored.Where(t => t.ContractId == contractId)],
+            [.. kit.Contracts.Links.Where(l => l.ContractId == contractId)],
+            [.. kit.Meters.Stored.Where(m => m.PropertyId == contract.PropertyId)],
+            kit.VatRates.Stored,
+            period));
+    }
 }
 
 internal sealed class FakeErrorLog : IErrorLog

@@ -20,6 +20,9 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     /// <summary>Settings key of the last selected property.</summary>
     public const string LastPropertyKey = "readings.last_property";
 
+    /// <summary>Navigation parameter carrying the reading date (a <see cref="DateOnly"/>) when the screen is opened for a property.</summary>
+    public const string DateParameter = "date";
+
     private readonly IPropertyStore _propertyStore;
     private readonly IMeterStore _meterStore;
     private readonly IContractStore _contractStore;
@@ -43,6 +46,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly Dictionary<Guid, PickedFile> _photos = [];
     private readonly HashSet<Guid> _pendingSubmit = [];
     private Guid? _selectedPropertyId;
+    private Guid? _requestedPropertyId;
 
     [ObservableProperty]
     private string _helpText = string.Empty;
@@ -135,6 +139,13 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     /// <summary>The last property change started from the picker.</summary>
     public Task PendingPropertyChange { get; private set; } = Task.CompletedTask;
 
+    /// <summary>Opens the screen on a given property and reading date (from a warning on the charges screen).</summary>
+    public void OpenFor(Guid propertyId, DateOnly date)
+    {
+        _requestedPropertyId = propertyId;
+        ReadingDate = date;
+    }
+
     public bool HasProperties => Properties.Count > 0;
 
     /// <summary>The picker is shown only when there is something to choose from.</summary>
@@ -192,6 +203,13 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         Properties = [.. properties.Select(p => new ChoiceOption(p.Id, p.Name, string.Empty))];
 
         var remembered = Guid.TryParse(_settings.GetString(LastPropertyKey), out var saved) ? saved : (Guid?)null;
+        if (_requestedPropertyId is { } requested && Properties.Any(p => p.Id == requested))
+        {
+            _selectedPropertyId = requested;
+            _settings.SetString(LastPropertyKey, requested.ToString());
+        }
+
+        _requestedPropertyId = null;
         _selectedPropertyId =
             Properties.Any(p => p.Id == _selectedPropertyId) ? _selectedPropertyId
             : Properties.Any(p => p.Id == remembered) ? remembered

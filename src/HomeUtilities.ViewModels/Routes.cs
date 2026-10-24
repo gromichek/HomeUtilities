@@ -7,6 +7,7 @@ public static class Routes
     public const string Properties = "Properties";
     public const string Suppliers = "Suppliers";
     public const string Readings = "Readings";
+    public const string Charges = "Charges";
     public const string Bills = "Bills";
     public const string Payments = "Payments";
     public const string Reports = "Reports";
@@ -56,6 +57,18 @@ public static class Routes
     /// It is a page in every layout.
     /// </summary>
     public const string TariffComponentEdit = "TariffComponentEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the charges screen opened for a contract ("Show charges"), parameters <c>propertyId</c>
+    /// and optional <c>contractId</c>. Back returns to the caller.
+    /// </summary>
+    public const string ChargesFor = "ChargesFor";
+
+    /// <summary>
+    /// Pushed page (not a section): the readings screen opened from a charge warning, parameters <c>propertyId</c> and
+    /// <c>date</c> (a <see cref="DateOnly"/>). Back returns to the charges.
+    /// </summary>
+    public const string ReadingsFor = "ReadingsFor";
 
     /// <summary>Pushed page opened from Settings: the VAT catalog.</summary>
     public const string VatRates = "VatRates";
