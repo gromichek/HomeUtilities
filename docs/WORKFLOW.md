@@ -15,6 +15,7 @@
 5. Lead reviews code + CI. Either:
    - requests changes (a comment on the PR, which the owner passes to the coding session), or
    - squash-merges and tells the owner what to test manually.
+   The review includes the user guide (`docs/user-guide/en.md` + `ru.md`): both updated, consistent, readable.
 6. Owner pulls `main` in Visual Studio, tests, reports results. Bugs become new tasks;
    a broken merge is reverted.
 

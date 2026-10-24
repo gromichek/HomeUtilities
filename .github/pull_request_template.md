@@ -23,5 +23,8 @@ T-NNN: <title> — `docs/tasks/T-NNN-....md`
 ## Suggestions
 <!-- Things outside the scope worth doing later -->
 
+## User guide
+<!-- Which sections of docs/user-guide/en.md and ru.md were added/changed. "n/a" if nothing visible changed -->
+
 ## Manual test steps for the owner
 <!-- For UI changes: exact steps and expected result. "n/a" otherwise -->

@@ -39,6 +39,9 @@ menu does not ask about unsaved changes.
   Don't save, Cancel outcomes; re-entrancy (second request while dialog open → false).
 - Manual-test hooks: `ShellNavigationService` unit-testable parts behind interfaces where reasonable.
 
+- User guide: update §2 "Saving and leaving" in `docs/user-guide/en.md` and `ru.md` (menu always opens the
+  section's main screen; the Save changes? dialog also on menu and window close).
+
 ## Scope — do NOT
 - No draft autosave on Android backgrounding (later, if wanted).
 - No visual changes to pages.
