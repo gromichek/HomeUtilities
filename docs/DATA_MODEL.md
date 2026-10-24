@@ -224,7 +224,7 @@ the national rate is entered once. A bill or component can override with an expl
 | Notes | string? | |
 | Basis | ChargeBasis | see below |
 | RegisterKinds | set of RegisterKind? | for `PerUnit`: which registers are counted (e.g. Day only) |
-| MeterIds | set of Guid? | for `PerUnit`: which meters (default: all contract meters) |
+| MeterIds | set of Guid? | for `PerUnit`: which meters (default: all contract meters); a selected meter includes its replacements (meter chain) |
 | VatCode | string | |
 | Rates | list of **TariffRate** | time-versioned |
 | SortOrder | int | |

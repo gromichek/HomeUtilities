@@ -169,7 +169,8 @@ prices (you enter the prices afterwards): *Water + sewerage*, *Water heating + h
 
 - **What is counted:** for consumption-based components, switch the **meters** and **registers** the component
   counts. All meters on means "all meters of the contract, also those linked later". A hot-water meter that feeds
-  both the water and the heating contract can be counted by "Water heating" only. For *By area* and *Per resident* pick
+  both the water and the heating contract can be counted by "Water heating" only. After a meter replacement the new
+  meter is counted automatically, so you do not need to edit the tariff. For *By area* and *Per resident* pick
   the **parameter** of the property (total area, heated area, residents, or your own); the line "now: 52.3 m²" shows its
   current value — change it in the property (Parameters card).
 - **VAT:** choose a rate from the catalog (it shows the percent valid today, e.g. "Standard rate 21 %") or
