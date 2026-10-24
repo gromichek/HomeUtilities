@@ -8,7 +8,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
 | T-017 | Tariff editor + VAT catalog screen | Ready | | |
-| T-017a | Navigation guard, menu opens section root | Ready | | owner finding 2026-10-24 |
 | T-017c | Backup file / restore + sample data | Ready | | after T-017a |
 | T-017b | In-app help (user guide in the app) | Ready | | after T-017a |
 
@@ -47,6 +46,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
+| T-017a | Navigation guard, menu opens section root | 2026-10-24, #60 | 12 new VM tests. Lead fixed the Windows build (ambiguous `Window`) and a double dialog on root Back. Pop-to-root runs inside the Navigating deferral — watch for flicker. Only the topmost page is asked. |
 | T-016a | Attachments, meter/reading photos, submit links on meter cards | 2026-10-24, #54 | Image shrinking on Android only. Soft-deleted attachment files kept (cleanup later). |
 
 ## Known issues / tech debt
@@ -82,4 +82,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-23 | #43 | Colour swatches | first swatch of each row clipped (FlexLayout on Android) → #46 |
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
+| | #60 | T-017a navigation guard: menu → section list, Save changes? on menu / Back / window ✕ | pending |
 | | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
