@@ -80,4 +80,5 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-23 | #37 | Suppliers, categories | **Crash** on purpose template `{Period:mm.yyyy}`; Android: Save closes supplier editor (owner wants to stay); colour swatches cut off → T-014a |
 | 2026-10-23 | #43 | Colour swatches | first swatch of each row clipped (FlexLayout on Android) → #46 |
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
+| 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
