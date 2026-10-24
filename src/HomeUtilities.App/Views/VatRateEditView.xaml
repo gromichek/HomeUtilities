@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.VatRateEditView"
+             x:DataType="vm:VatRateEditViewModel">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding GeneralHeader}" Style="{StaticResource SectionHeader}" />
+
+                        <Label Text="{Binding NameLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding RateName}" MaxLength="{x:Static core:InputLimits.Name}" />
+                        <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding CodeLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Code}" MaxLength="32" IsReadOnly="{Binding IsCodeReadOnly}" />
+                        <Label Text="{Binding CodeHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <Label Text="{Binding CodeError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding CodeError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
+                        <Editor Text="{Binding Notes}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="60" />
+                        <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding VersionsHeader}" Style="{StaticResource SectionHeader}" />
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconAdd}" Command="{Binding AddVersionCommand}"
+                                    ToolTipProperties.Text="{Binding AddVersionText}"
+                                    SemanticProperties.Description="{Binding AddVersionText}" />
+                        </Grid>
+                        <Label Text="{Binding VersionsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoVersions}" />
+
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Versions}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:VatVersionRowViewModel">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                        </Grid.GestureRecognizers>
+                                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                            <Label Text="{Binding DisplayText}" FontAttributes="Bold" />
+                                            <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
+                                                Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                                ToolTipProperties.Text="{Binding DeleteText}"
+                                                SemanticProperties.Description="{Binding DeleteText}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label Text="{Binding VersionsError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding VersionsError, Converter={StaticResource HasText}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Phone: destructive action at the end of the form (not for the seeded rates). -->
+                <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
+                        IsVisible="{Binding ShowFormDelete}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
+                BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                        Style="{StaticResource PrimaryButton}" />
+                <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}" />
+                <Button Grid.Column="3" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}"
+                        IsVisible="{Binding CanShowDelete}" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

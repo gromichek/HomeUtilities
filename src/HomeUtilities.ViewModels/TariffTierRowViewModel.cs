@@ -22,6 +22,15 @@ public sealed partial class TariffTierRowViewModel : ObservableObject
     [ObservableProperty]
     private string _removeText = string.Empty;
 
+    /// <summary>Placeholder of the threshold entry ("Up to quantity").</summary>
+    public string UpToPlaceholder { get; set; } = string.Empty;
+
+    /// <summary>Placeholder of the price entry.</summary>
+    public string PricePlaceholder { get; set; } = string.Empty;
+
+    /// <summary>"and above", shown instead of the threshold entry on the last step.</summary>
+    public string AndAboveText { get; set; } = string.Empty;
+
     public bool IsNotLast => !IsLast;
 
     public IRelayCommand RemoveCommand { get; set; } = new RelayCommand(() => { });

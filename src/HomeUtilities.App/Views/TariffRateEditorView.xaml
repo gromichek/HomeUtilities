@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.TariffRateEditorView"
+             x:DataType="vm:TariffRateEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+
+            <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
+            <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
+            <Label Text="{Binding ValidFromError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding ValidFromError, Converter={StaticResource HasText}}" />
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowFlatPrice}">
+                <Label Text="{Binding PriceLabel}" Style="{StaticResource MutedLabel}" />
+                <Entry Text="{Binding PriceText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
+                <Label Text="{Binding PriceError}" Style="{StaticResource ErrorLabel}"
+                       IsVisible="{Binding PriceError, Converter={StaticResource HasText}}" />
+            </VerticalStackLayout>
+
+            <HorizontalStackLayout Spacing="8">
+                <Switch IsToggled="{Binding PriceIncludesVat}" />
+                <Label Text="{Binding PriceIncludesVatLabel}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" />
+            <Label Text="{Binding CurrencyText}" />
+
+            <HorizontalStackLayout Spacing="8" IsVisible="{Binding AllowTiers}">
+                <Switch IsToggled="{Binding IsStepped}" />
+                <Label Text="{Binding SteppedLabel}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStepped}">
+                <Label Text="{Binding TiersHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding TierRows}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TariffTierRowViewModel">
+                            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                                <Entry Grid.Column="0" Text="{Binding UpToText}" Keyboard="Text" IsVisible="{Binding IsNotLast}"
+                                       MaxLength="{x:Static core:InputLimits.Number}"
+                                       Placeholder="{Binding UpToPlaceholder}" />
+                                <Label Grid.Column="0" Text="{Binding AndAboveText}"
+                                       IsVisible="{Binding IsLast}" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                <Entry Grid.Column="1" Text="{Binding PriceText}" Keyboard="Text"
+                                       MaxLength="{x:Static core:InputLimits.Number}"
+                                       Placeholder="{Binding PricePlaceholder}" />
+                                <Button Grid.Column="2" Style="{StaticResource DestructiveIconButton}"
+                                        Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                        IsEnabled="{Binding CanRemove}"
+                                        ToolTipProperties.Text="{Binding RemoveText}"
+                                        SemanticProperties.Description="{Binding RemoveText}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <Button Text="{Binding AddTierText}" Command="{Binding AddTierCommand}"
+                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                <Label Text="{Binding TiersError}" Style="{StaticResource ErrorLabel}"
+                       IsVisible="{Binding TiersError, Converter={StaticResource HasText}}" />
+
+                <Label Text="{Binding TierPeriodLabel}" Style="{StaticResource MutedLabel}" />
+                <Picker ItemsSource="{Binding TierPeriods}"
+                        ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        SelectedIndex="{Binding SelectedTierPeriodIndex, Mode=TwoWay}" />
+                <Label Text="{Binding TierPeriodError}" Style="{StaticResource ErrorLabel}"
+                       IsVisible="{Binding TierPeriodError, Converter={StaticResource HasText}}" />
+            </VerticalStackLayout>
+
+            <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Notes}" MaxLength="{x:Static core:InputLimits.Notes}" />
+            <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

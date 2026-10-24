@@ -482,4 +482,149 @@
   <data name="TestDataDeleteConfirm" xml:space="preserve"><value>Delete ALL data and attachments? This cannot be undone.</value></data>
   <data name="TestDataDeleteAction" xml:space="preserve"><value>Delete</value></data>
   <data name="TestDataDeleteRestart" xml:space="preserve"><value>All data will be deleted when the app is reopened. Close the app now?</value></data>
+  <data name="Currency_Symbol_EUR" xml:space="preserve"><value>€</value></data>
+  <data name="Currency_Symbol_LVL" xml:space="preserve"><value>Ls</value></data>
+  <data name="Unit_Area" xml:space="preserve"><value>m²</value></data>
+  <data name="Unit_Resident" xml:space="preserve"><value>resident</value></data>
+  <data name="Unit_Month" xml:space="preserve"><value>month</value></data>
+  <data name="Unit_Units" xml:space="preserve"><value>units</value></data>
+  <data name="Enum_ChargeBasis_PerUnit" xml:space="preserve"><value>By consumption (meters)</value></data>
+  <data name="Enum_ChargeBasis_PerArea" xml:space="preserve"><value>By area</value></data>
+  <data name="Enum_ChargeBasis_PerResident" xml:space="preserve"><value>Per resident</value></data>
+  <data name="Enum_ChargeBasis_FixedMonthly" xml:space="preserve"><value>Fixed amount per month</value></data>
+  <data name="Enum_ChargeBasis_FromBill" xml:space="preserve"><value>From the supplier's bill</value></data>
+  <data name="Enum_ChargeBasis_NetExport" xml:space="preserve"><value>Net export (credit)</value></data>
+  <data name="Enum_TierPeriod_Month" xml:space="preserve"><value>Month</value></data>
+  <data name="Enum_TierPeriod_Year" xml:space="preserve"><value>Year</value></data>
+  <data name="TariffBasisHint_PerUnit" xml:space="preserve"><value>Consumption from the meters × price. For water, gas, electricity.</value></data>
+  <data name="TariffBasisHint_PerArea" xml:space="preserve"><value>Area of the property × price per m². For maintenance fees.</value></data>
+  <data name="TariffBasisHint_PerResident" xml:space="preserve"><value>Declared residents × price per resident. For waste collection.</value></data>
+  <data name="TariffBasisHint_FixedMonthly" xml:space="preserve"><value>The same amount every month. For internet, TV, subscription fees.</value></data>
+  <data name="TariffBasisHint_FromBill" xml:space="preserve"><value>No own calculation: the amount is taken from the supplier's bill. For heating by the building heat meter.</value></data>
+  <data name="TariffBasisHint_NetExport" xml:space="preserve"><value>Energy fed into the grid × price, counted as a credit. For solar panels.</value></data>
+  <data name="TariffPreset_WaterSewerage" xml:space="preserve"><value>Water + sewerage</value></data>
+  <data name="TariffPreset_WaterHeatingAndHeating" xml:space="preserve"><value>Water heating + heating</value></data>
+  <data name="TariffPreset_Electricity" xml:space="preserve"><value>Electricity</value></data>
+  <data name="TariffPreset_AreaFee" xml:space="preserve"><value>Area-based fee</value></data>
+  <data name="TariffPreset_PerResident" xml:space="preserve"><value>Per resident</value></data>
+  <data name="TariffPreset_FixedMonthly" xml:space="preserve"><value>Fixed monthly</value></data>
+  <data name="TariffPresetName_WaterSupply" xml:space="preserve"><value>Water supply</value></data>
+  <data name="TariffPresetName_Sewerage" xml:space="preserve"><value>Sewerage</value></data>
+  <data name="TariffPresetName_WaterHeating" xml:space="preserve"><value>Water heating</value></data>
+  <data name="TariffPresetName_Heating" xml:space="preserve"><value>Heating</value></data>
+  <data name="TariffPresetName_Energy" xml:space="preserve"><value>Energy</value></data>
+  <data name="TariffPresetName_Distribution" xml:space="preserve"><value>Distribution</value></data>
+  <data name="TariffPresetName_AreaFee" xml:space="preserve"><value>Area fee</value></data>
+  <data name="TariffPresetName_PerResident" xml:space="preserve"><value>Per resident</value></data>
+  <data name="TariffPresetName_FixedMonthly" xml:space="preserve"><value>Monthly fee</value></data>
+  <data name="ContractTariff" xml:space="preserve"><value>Tariff</value></data>
+  <data name="ContractTariffAdd" xml:space="preserve"><value>Add tariff component</value></data>
+  <data name="ContractTariffEmpty" xml:space="preserve"><value>No tariff yet — add the components of the bill (e.g. water supply, sewerage).</value></data>
+  <data name="ContractTariffPresets" xml:space="preserve"><value>Quick start:</value></data>
+  <data name="ContractTariffSaveFirst" xml:space="preserve"><value>Save the contract first, then add its tariff.</value></data>
+  <data name="TariffMoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="TariffMoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="TariffFromBill" xml:space="preserve"><value>from bill</value></data>
+  <data name="TariffNoPrice" xml:space="preserve"><value>no price yet</value></data>
+  <data name="TariffPriceLine" xml:space="preserve"><value>{0} {1}/{2} {3}</value></data>
+  <data name="TariffVatIncluded" xml:space="preserve"><value>incl. VAT</value></data>
+  <data name="TariffVatExcluded" xml:space="preserve"><value>excl. VAT</value></data>
+  <data name="TariffPriceStepped" xml:space="preserve"><value>stepped price, {0} steps, {1}</value></data>
+  <data name="TariffSummaryVat" xml:space="preserve"><value>{0} · VAT {1} %</value></data>
+  <data name="TariffQuantityTimes" xml:space="preserve"><value>{0} × {1}</value></data>
+  <data name="TariffParameterNow" xml:space="preserve"><value>now: {0}</value></data>
+  <data name="TariffParameterMissing" xml:space="preserve"><value>The property has no value for this parameter yet.</value></data>
+  <data name="TariffExampleHeader" xml:space="preserve"><value>Example</value></data>
+  <data name="TariffExampleFromBill" xml:space="preserve"><value>Amount is taken from the supplier's bill.</value></data>
+  <data name="TariffExampleNoPrice" xml:space="preserve"><value>Enter a price to see an example.</value></data>
+  <data name="TariffExampleNoVat" xml:space="preserve"><value>Choose a VAT rate to see an example.</value></data>
+  <data name="TariffExampleNoParameter" xml:space="preserve"><value>Enter this value in the property to see an example.</value></data>
+  <data name="TariffExampleInvalid" xml:space="preserve"><value>No example for this price.</value></data>
+  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
+  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + VAT {4} = {5} {6}</value></data>
+  <data name="TariffComponentNew" xml:space="preserve"><value>New tariff component</value></data>
+  <data name="TariffGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="TariffNameLabel" xml:space="preserve"><value>Name *</value></data>
+  <data name="TariffServiceLabel" xml:space="preserve"><value>Charge kind</value></data>
+  <data name="TariffCategoryLabel" xml:space="preserve"><value>Category</value></data>
+  <data name="TariffCategorySameAsContract" xml:space="preserve"><value>same as contract</value></data>
+  <data name="TariffChooseCategory" xml:space="preserve"><value>Choose category</value></data>
+  <data name="TariffBasisLabel" xml:space="preserve"><value>Basis *</value></data>
+  <data name="TariffNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="TariffDelete" xml:space="preserve"><value>Delete component</value></data>
+  <data name="TariffCountedHeader" xml:space="preserve"><value>What is counted</value></data>
+  <data name="TariffMetersLabel" xml:space="preserve"><value>Meters</value></data>
+  <data name="TariffNoMeters" xml:space="preserve"><value>No meters are linked to this contract yet (see the Meters card of the property). Meters linked later are counted too.</value></data>
+  <data name="TariffRegistersLabel" xml:space="preserve"><value>Registers</value></data>
+  <data name="TariffParameterLabel" xml:space="preserve"><value>Parameter of the property</value></data>
+  <data name="TariffCustomParameterLabel" xml:space="preserve"><value>Parameter name</value></data>
+  <data name="TariffMeterTitle" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="TariffVatHeader" xml:space="preserve"><value>VAT</value></data>
+  <data name="TariffVatPercentLabel" xml:space="preserve"><value>VAT, %</value></data>
+  <data name="TariffVatOption" xml:space="preserve"><value>{0} {1} %</value></data>
+  <data name="TariffVatCustom" xml:space="preserve"><value>Custom %</value></data>
+  <data name="TariffPricesHeader" xml:space="preserve"><value>Prices</value></data>
+  <data name="TariffPricesEmpty" xml:space="preserve"><value>No price yet — add the first price.</value></data>
+  <data name="TariffRateAdd" xml:space="preserve"><value>Add price</value></data>
+  <data name="TariffRateRow" xml:space="preserve"><value>from {0:d} — {1}</value></data>
+  <data name="TariffSteppedBadge" xml:space="preserve"><value>stepped</value></data>
+  <data name="TariffRateNew" xml:space="preserve"><value>New price</value></data>
+  <data name="TariffRateEdit" xml:space="preserve"><value>Edit price</value></data>
+  <data name="TariffRateValidFrom" xml:space="preserve"><value>Valid from *</value></data>
+  <data name="TariffRatePrice" xml:space="preserve"><value>Price *</value></data>
+  <data name="TariffRateIncludesVat" xml:space="preserve"><value>Price includes VAT</value></data>
+  <data name="TariffRateCurrency" xml:space="preserve"><value>Currency</value></data>
+  <data name="TariffRateStepped" xml:space="preserve"><value>Stepped price</value></data>
+  <data name="TariffRateTiersHint" xml:space="preserve"><value>Each step has its own price. The quantity is counted per period; the last step has no limit.</value></data>
+  <data name="TariffRateTierUpTo" xml:space="preserve"><value>Up to quantity</value></data>
+  <data name="TariffRateTierPrice" xml:space="preserve"><value>Price</value></data>
+  <data name="TariffRateTierAndAbove" xml:space="preserve"><value>and above</value></data>
+  <data name="TariffRateAddTier" xml:space="preserve"><value>Add step</value></data>
+  <data name="TariffRateTierPeriod" xml:space="preserve"><value>Tier period</value></data>
+  <data name="TariffRateNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="Error_common_number_too_large" xml:space="preserve"><value>The number is too large (maximum {0}).</value></data>
+  <data name="Error_tariff_editor_too_many_decimals" xml:space="preserve"><value>At most 6 decimals.</value></data>
+  <data name="Error_tariff_editor_no_meter_selected" xml:space="preserve"><value>Switch on at least one meter.</value></data>
+  <data name="Error_tariff_editor_no_register_selected" xml:space="preserve"><value>Switch on at least one register.</value></data>
+  <data name="Error_vat_editor_code_duplicate" xml:space="preserve"><value>This code is already used by another VAT rate.</value></data>
+  <data name="Error_vat_editor_version_required" xml:space="preserve"><value>Add at least one percentage.</value></data>
+  <data name="Error_vat_rate_code_invalid" xml:space="preserve"><value>Use 1–32 capital letters, digits or dashes.</value></data>
+  <data name="Error_vat_rate_name_required" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="Error_vat_percent_out_of_range" xml:space="preserve"><value>VAT must be between 0 and 100 %.</value></data>
+  <data name="Error_tariff_name_required" xml:space="preserve"><value>Enter a name.</value></data>
+  <data name="Error_tariff_name_too_long" xml:space="preserve"><value>The name is longer than 100 characters.</value></data>
+  <data name="Error_tariff_contract_required" xml:space="preserve"><value>The tariff must belong to a contract.</value></data>
+  <data name="Error_tariff_vat_required" xml:space="preserve"><value>Choose a VAT rate or enter a percent.</value></data>
+  <data name="Error_tariff_rate_required" xml:space="preserve"><value>Add at least one price.</value></data>
+  <data name="Error_tariff_price_negative" xml:space="preserve"><value>A price cannot be negative.</value></data>
+  <data name="Error_tariff_tier_period_required" xml:space="preserve"><value>Choose the tier period.</value></data>
+  <data name="Error_tariff_tier_last_not_unlimited" xml:space="preserve"><value>The last step must have no limit.</value></data>
+  <data name="Error_tariff_tier_order_invalid" xml:space="preserve"><value>Step limits must increase, and only the last step has no limit.</value></data>
+  <data name="Error_tariff_selection_not_allowed" xml:space="preserve"><value>Meters and registers cannot be chosen for this basis.</value></data>
+  <data name="Error_tariff_net_export_register" xml:space="preserve"><value>Net export counts the Export register only.</value></data>
+  <data name="Error_tariff_quantity_parameter_not_allowed" xml:space="preserve"><value>This basis does not use a property parameter.</value></data>
+  <data name="Error_tariff_quantity_parameter_name_required" xml:space="preserve"><value>Enter the name of the parameter.</value></data>
+  <data name="SectionVatRates" xml:space="preserve"><value>VAT rates</value></data>
+  <data name="VatRatesEmpty" xml:space="preserve"><value>No VAT rates.</value></data>
+  <data name="VatRateAdd" xml:space="preserve"><value>New VAT rate</value></data>
+  <data name="VatRateSelectHint" xml:space="preserve"><value>Select a VAT rate or add a new one.</value></data>
+  <data name="VatRatesBanner" xml:space="preserve"><value>Default Latvian rates — please check them against your bills.</value></data>
+  <data name="VatPercentValue" xml:space="preserve"><value>{0} %</value></data>
+  <data name="VatNoPercent" xml:space="preserve"><value>no percentage</value></data>
+  <data name="VatRateNew" xml:space="preserve"><value>New VAT rate</value></data>
+  <data name="VatGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="VatNameLabel" xml:space="preserve"><value>Name *</value></data>
+  <data name="VatCodeLabel" xml:space="preserve"><value>Code *</value></data>
+  <data name="VatCodeHint" xml:space="preserve"><value>Capital letters, digits and dashes. The code of the default rates cannot be changed.</value></data>
+  <data name="VatNotesLabel" xml:space="preserve"><value>Notes</value></data>
+  <data name="VatVersionsHeader" xml:space="preserve"><value>Percentages</value></data>
+  <data name="VatVersionsEmpty" xml:space="preserve"><value>No percentage yet — add the first one.</value></data>
+  <data name="VatVersionAdd" xml:space="preserve"><value>Add percentage</value></data>
+  <data name="VatVersionRow" xml:space="preserve"><value>from {0:d} — {1} %</value></data>
+  <data name="VatVersionNew" xml:space="preserve"><value>New percentage</value></data>
+  <data name="VatVersionEdit" xml:space="preserve"><value>Edit percentage</value></data>
+  <data name="VatVersionValidFrom" xml:space="preserve"><value>Valid from *</value></data>
+  <data name="VatVersionPercent" xml:space="preserve"><value>VAT, % *</value></data>
+  <data name="VatRateDelete" xml:space="preserve"><value>Delete VAT rate</value></data>
+  <data name="VatRateInUse" xml:space="preserve"><value>«{0}» is used by {1} tariff component(s) and cannot be deleted.</value></data>
 </root>

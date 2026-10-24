@@ -38,7 +38,4 @@ public static class CommonErrorCodes
 
     /// <summary>A VAT catalog entry has no percentage.</summary>
     public const string VatVersionRequired = "vat_editor.version_required";
-
-    /// <summary>The VAT rate is used by tariff components and cannot be deleted; the argument is how many.</summary>
-    public const string VatRateInUse = "vat_editor.in_use";
 }

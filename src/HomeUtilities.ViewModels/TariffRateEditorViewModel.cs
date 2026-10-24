@@ -77,15 +77,6 @@ public sealed partial class TariffRateEditorViewModel : EditorDialogViewModel
     private string _tiersHint = string.Empty;
 
     [ObservableProperty]
-    private string _tierUpToLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _tierPriceLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _tierAndAboveText = string.Empty;
-
-    [ObservableProperty]
     private string _addTierText = string.Empty;
 
     [ObservableProperty]
@@ -279,16 +270,21 @@ public sealed partial class TariffRateEditorViewModel : EditorDialogViewModel
         CurrencyText = EnumText.Get(_localizer, _currency);
         SteppedLabel = _localizer["TariffRateStepped"];
         TiersHint = _localizer["TariffRateTiersHint"];
-        TierUpToLabel = _localizer["TariffRateTierUpTo"];
-        TierPriceLabel = _localizer["TariffRateTierPrice"];
-        TierAndAboveText = _localizer["TariffRateTierAndAbove"];
         AddTierText = _localizer["TariffRateAddTier"];
         TierPeriodLabel = _localizer["TariffRateTierPeriod"];
         NotesLabel = _localizer["TariffRateNotes"];
         foreach (var row in _tiers)
         {
-            row.RemoveText = _localizer["Delete"];
+            Relabel(row);
         }
+    }
+
+    private void Relabel(TariffTierRowViewModel row)
+    {
+        row.RemoveText = _localizer["Delete"];
+        row.UpToPlaceholder = _localizer["TariffRateTierUpTo"];
+        row.PricePlaceholder = _localizer["TariffRateTierPrice"];
+        row.AndAboveText = _localizer["TariffRateTierAndAbove"];
     }
 
     private static string FormatNumber(decimal value) => DecimalInput.Format(value, CultureInfo.CurrentCulture, MaxDecimals);
@@ -297,7 +293,8 @@ public sealed partial class TariffRateEditorViewModel : EditorDialogViewModel
 
     private void AddTierRow(string upTo, string price)
     {
-        var row = new TariffTierRowViewModel { UpToText = upTo, PriceText = price, RemoveText = _localizer["Delete"] };
+        var row = new TariffTierRowViewModel { UpToText = upTo, PriceText = price };
+        Relabel(row);
         row.RemoveCommand = new RelayCommand(() => RemoveTier(row));
         _tiers.Add(row);
         RefreshTierRows();
