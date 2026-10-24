@@ -1,6 +1,7 @@
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
+using HomeUtilities.Data.Sample;
 using HomeUtilities.Data.Stores;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +51,7 @@ public static class ServiceCollectionExtensions
             provider.GetService<IImageProcessor>()));
         services.AddSingleton<IChargeInputLoader, ChargeInputLoader>();
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
+        services.AddSingleton<ISampleDataGenerator, SampleDataGenerator>();
         return services;
     }
 }

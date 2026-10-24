@@ -71,6 +71,7 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
 ## Tests
 
 - Every piece of domain or calculation logic gets unit tests (xUnit) in the matching test project.
+- When a task adds entities (tariffs, bills, payments…), it extends `SampleDataGenerator` (`HomeUtilities.Data/Sample`) and its tests.
 - Calculation tests use concrete numbers with the expected result written out, e.g.
   `5 m3 * 1.41 EUR = 7.05; VAT 21% = 1.48; total 8.53`.
 - All tests must pass locally before you open the PR: `dotnet test HomeUtilities.Tests.slnf`.
