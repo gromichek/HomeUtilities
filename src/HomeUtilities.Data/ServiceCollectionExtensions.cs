@@ -1,5 +1,6 @@
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Data.Stores;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -16,10 +17,12 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="databasePath">Full path of the SQLite file; its folder is created if missing.</param>
-    public static IServiceCollection AddHomeUtilitiesData(this IServiceCollection services, string databasePath)
+    /// <param name="attachmentsFolder">Folder of the attachment files; created when the first file is stored.</param>
+    public static IServiceCollection AddHomeUtilitiesData(this IServiceCollection services, string databasePath, string attachmentsFolder)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentException.ThrowIfNullOrWhiteSpace(databasePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(attachmentsFolder);
 
         var directory = Path.GetDirectoryName(Path.GetFullPath(databasePath));
         if (!string.IsNullOrEmpty(directory))
@@ -41,6 +44,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITariffStore, TariffStore>();
         services.AddSingleton<IBillStore, BillStore>();
         services.AddSingleton<IPaymentStore, PaymentStore>();
+        services.AddSingleton<IAttachmentStore>(provider => new AttachmentStore(
+            provider.GetRequiredService<IDbContextFactory<HomeUtilitiesDbContext>>(),
+            attachmentsFolder,
+            provider.GetService<IImageProcessor>()));
         services.AddSingleton<IChargeInputLoader, ChargeInputLoader>();
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
         return services;

@@ -140,5 +140,7 @@ public class SettingsViewModelTests
         public string DatabasePath => "/data/test.db";
 
         public string ErrorLogPath => "/data/logs/errors.log";
+
+        public string AttachmentsFolder => "/data/attachments";
     }
 }

@@ -22,6 +22,12 @@ public partial class ReadingsPage : PageBase
         {
             shell.Navigating += OnShellNavigating;
         }
+
+        // Coming back from the browser does not make the page appear again; the window is activated instead.
+        if (Window is { } window)
+        {
+            window.Activated += OnWindowActivated;
+        }
     }
 
     protected override void OnDisappearing()
@@ -30,6 +36,19 @@ public partial class ReadingsPage : PageBase
         if (Shell.Current is { } shell)
         {
             shell.Navigating -= OnShellNavigating;
+        }
+
+        if (Window is { } window)
+        {
+            window.Activated -= OnWindowActivated;
+        }
+    }
+
+    private async void OnWindowActivated(object? sender, EventArgs e)
+    {
+        if (BindingContext is ReadingsViewModel viewModel)
+        {
+            await viewModel.CheckReturnFromSubmitPageAsync();
         }
     }
 

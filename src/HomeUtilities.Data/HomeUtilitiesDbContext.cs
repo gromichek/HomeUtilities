@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
@@ -54,6 +55,8 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
     public DbSet<Payment> Payments => Set<Payment>();
 
     public DbSet<PaymentAllocation> PaymentAllocations => Set<PaymentAllocation>();
+
+    public DbSet<Attachment> Attachments => Set<Attachment>();
 
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

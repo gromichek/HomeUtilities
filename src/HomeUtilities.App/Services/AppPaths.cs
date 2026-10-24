@@ -7,4 +7,6 @@ public sealed class AppPaths : IAppPaths
     public string DatabasePath { get; } = Path.Combine(FileSystem.AppDataDirectory, "homeutilities.db");
 
     public string ErrorLogPath { get; } = Path.Combine(FileSystem.AppDataDirectory, "logs", "errors.log");
+
+    public string AttachmentsFolder { get; } = Path.Combine(FileSystem.AppDataDirectory, "attachments");
 }

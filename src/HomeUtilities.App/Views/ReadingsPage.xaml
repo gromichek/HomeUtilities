@@ -11,6 +11,7 @@
 
     <views:PageBase.Resources>
         <conv:DateOnlyConverter x:Key="DateOnly" />
+        <conv:StreamFactoryImageConverter x:Key="StreamImage" />
     </views:PageBase.Resources>
 
     <Grid x:Name="Root" ColumnDefinitions="*,0">
@@ -104,7 +105,7 @@
                                                     </Border.Triggers>
                                                     <VerticalStackLayout Spacing="8">
                                                         <!-- Tap the header to see the history of the meter. -->
-                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                                             <Grid.GestureRecognizers>
                                                                 <TapGestureRecognizer Command="{Binding OpenHistoryCommand}" />
                                                             </Grid.GestureRecognizers>
@@ -112,9 +113,39 @@
                                                                 <Label Text="{Binding Title}" FontAttributes="Bold" />
                                                                 <Label Text="{Binding SerialText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasSerial}" />
                                                             </VerticalStackLayout>
-                                                            <Label Grid.Column="1" Text="{StaticResource IconHistory}" FontFamily="{DynamicResource IconFontFamily}"
+                                                            <!-- Photo of the dial: camera / gallery on Android, file picker on Windows. -->
+                                                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                                                    Text="{StaticResource IconPhoto}" Command="{Binding PhotoCommand}"
+                                                                    ToolTipProperties.Text="{Binding PhotoTooltip}"
+                                                                    SemanticProperties.Description="{Binding PhotoTooltip}" />
+                                                            <Label Grid.Column="2" Text="{StaticResource IconHistory}" FontFamily="{DynamicResource IconFontFamily}"
                                                                    FontSize="20" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
                                                         </Grid>
+
+                                                        <!-- Thumbnail of the chosen photo with a remove (×) button. -->
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding HasPhoto}">
+                                                            <Image Grid.Column="0" Source="{Binding PhotoOpen, Converter={StaticResource StreamImage}}"
+                                                                   WidthRequest="72" HeightRequest="72" Aspect="AspectFill"
+                                                                   SemanticProperties.Description="{Binding PhotoName}" />
+                                                            <Label Grid.Column="1" Text="{Binding PhotoName}" Style="{StaticResource MutedLabel}"
+                                                                   VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+                                                            <Button Grid.Column="2" Style="{StaticResource IconButton}"
+                                                                    Text="{StaticResource IconClose}" Command="{Binding RemovePhotoCommand}"
+                                                                    ToolTipProperties.Text="{Binding RemovePhotoTooltip}"
+                                                                    SemanticProperties.Description="{Binding RemovePhotoTooltip}" />
+                                                        </Grid>
+
+                                                        <!-- One button per supplier page the meter's contracts accept readings on. -->
+                                                        <VerticalStackLayout Spacing="4" IsVisible="{Binding HasSubmitLinks}"
+                                                                             BindableLayout.ItemsSource="{Binding SubmitLinks}">
+                                                            <BindableLayout.ItemTemplate>
+                                                                <DataTemplate x:DataType="vm:SubmitLinkViewModel">
+                                                                    <Button Text="{Binding Text}" Command="{Binding Command}"
+                                                                            ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
+                                                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                                                </DataTemplate>
+                                                            </BindableLayout.ItemTemplate>
+                                                        </VerticalStackLayout>
 
                                                         <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Rows}">
                                                             <BindableLayout.ItemTemplate>

@@ -22,7 +22,7 @@
                                 <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Rows}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ReadingHistoryRowViewModel">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="0,4">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" Padding="0,4">
                                                 <Grid.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding EditCommand}" />
                                                 </Grid.GestureRecognizers>
@@ -39,7 +39,13 @@
                                                     </HorizontalStackLayout>
                                                     <Label Text="{Binding Note}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasNote}" />
                                                 </VerticalStackLayout>
-                                                <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
+                                                <!-- Tap the photo icon to see the picture in the system viewer. -->
+                                                <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                                        Text="{StaticResource IconPhoto}" Command="{Binding OpenPhotoCommand}"
+                                                        IsVisible="{Binding HasPhoto}"
+                                                        ToolTipProperties.Text="{Binding PhotoTooltip}"
+                                                        SemanticProperties.Description="{Binding PhotoTooltip}" />
+                                                <Button Grid.Column="2" Style="{StaticResource DestructiveIconButton}"
                                                         Text="{StaticResource IconDelete}" Command="{Binding DeleteCommand}"
                                                         IsVisible="{Binding CanDelete}"
                                                         ToolTipProperties.Text="{Binding DeleteTooltip}"

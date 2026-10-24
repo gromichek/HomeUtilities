@@ -50,6 +50,22 @@
                        IsVisible="{Binding SubmittedError, Converter={StaticResource HasText}}" />
             </VerticalStackLayout>
 
+            <!-- Photo of the dial: add, replace or remove. -->
+            <Label Text="{Binding PhotoLabel}" Style="{StaticResource MutedLabel}" />
+            <Label Text="{Binding PhotoText}" />
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="{Binding TakePhotoText}" Command="{Binding TakePhotoCommand}"
+                        Style="{StaticResource SecondaryButton}" IsVisible="{Binding CanTakePhoto}" />
+                <Button Text="{Binding ChoosePhotoText}" Command="{Binding ChoosePhotoCommand}"
+                        Style="{StaticResource SecondaryButton}" />
+                <Button Style="{StaticResource DestructiveIconButton}" Text="{StaticResource IconDelete}"
+                        Command="{Binding RemovePhotoCommand}" IsVisible="{Binding HasPhoto}"
+                        ToolTipProperties.Text="{Binding RemovePhotoText}"
+                        SemanticProperties.Description="{Binding RemovePhotoText}" />
+            </HorizontalStackLayout>
+            <Label Text="{Binding PhotoError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding PhotoError, Converter={StaticResource HasText}}" />
+
             <Label Text="{Binding NoteLabel}" Style="{StaticResource MutedLabel}" />
             <Editor Text="{Binding Note}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
             <Label Text="{Binding NoteError}" Style="{StaticResource ErrorLabel}"
