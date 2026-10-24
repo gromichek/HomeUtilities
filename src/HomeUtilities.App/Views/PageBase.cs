@@ -18,23 +18,17 @@ public abstract class PageBase : ContentPage
     // silently. On a pushed page Back pops it and the central guard in AppShell asks.
     protected override bool OnBackButtonPressed()
     {
-        if (BindingContext is IUnsavedChangesGuarded { HasUnsavedChanges: true } guarded
+        if (BindingContext is IUnsavedChangesGuarded { HasUnsavedChanges: true }
             && Shell.Current is { } shell
             && shell.CurrentItem?.CurrentItem?.Stack.Count is null or <= 1)
         {
-            LeaveSectionAsync(guarded, shell);
+            // The central guard in AppShell asks the question for this navigation (asking here as well would show
+            // the dialog twice after "Don't save").
+            _ = shell.GoToAsync($"//{Routes.Overview}");
             return true;
         }
 
         return base.OnBackButtonPressed();
-    }
-
-    private static async void LeaveSectionAsync(IUnsavedChangesGuarded guarded, Shell shell)
-    {
-        if (await guarded.CanLeaveAsync())
-        {
-            await shell.GoToAsync($"//{Routes.Overview}");
-        }
     }
 
     protected override async void OnDisappearing()

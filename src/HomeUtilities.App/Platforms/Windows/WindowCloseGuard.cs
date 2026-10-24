@@ -1,13 +1,12 @@
 using HomeUtilities.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.UI.Xaml;
 
 namespace HomeUtilities.App.WinUI;
 
 /// <summary>Asks the "Save changes?" question when the window is closed (✕) with unsaved input.</summary>
 internal static class WindowCloseGuard
 {
-    public static void Attach(Window window)
+    public static void Attach(Microsoft.UI.Xaml.Window window)
     {
         var closeConfirmed = false;
         window.AppWindow.Closing += async (_, args) =>
