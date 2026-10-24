@@ -151,8 +151,8 @@ inside the app. If you uninstall the app, they are deleted with it. A backup is 
 (`HomeUtilities-backup-YYYY-MM-DD-HHmm.zip`) that you keep outside the app and can restore later, also on another
 device (for example Windows → Android).
 
-- **Save backup…** — on Android the system share sheet opens: choose Drive, e-mail, or Files/Downloads. On Windows a
-  save dialog opens: choose a folder (if the dialog is not available, the file goes to
+- **Save backup…** — a save dialog opens: on Android choose a folder (for example Downloads; Drive if an account is set up),
+  on Windows choose a folder. If the dialog fails on Android, the share sheet opens instead (Drive, e-mail…); on Windows (if the dialog is not available, the file goes to
   `Documents\HomeUtilities\Backups` and the message shows the path). The line under the buttons shows when the last
   backup was made on this device.
 - **Restore from backup…** — pick a backup file. The app checks it and asks *Restore backup from … ?* Your current

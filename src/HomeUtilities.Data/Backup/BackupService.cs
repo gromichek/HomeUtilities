@@ -256,7 +256,9 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         var name = $"before-restore-{clock.UtcNow.ToLocalTime():yyyy-MM-dd-HHmm}.zip";
         using (var file = new FileStream(Path.Combine(options.BackupsFolder, name), FileMode.Create, FileAccess.Write, FileShare.None))
         {
-            CreateAsync(file).GetAwaiter().GetResult();
+            // Runs at app start on the UI thread: blocking on an async method there deadlocks (its continuations are
+            // posted to the blocked UI thread). Task.Run keeps the continuations on the thread pool.
+            Task.Run(() => CreateAsync(file)).GetAwaiter().GetResult();
         }
 
         var old = Directory.GetFiles(options.BackupsFolder, "before-restore-*.zip")

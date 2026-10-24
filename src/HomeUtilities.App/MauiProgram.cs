@@ -48,7 +48,8 @@ public static class MauiProgram
                 AppInfo.Current.VersionString,
                 DeviceInfo.Platform.ToString()),
             clock);
-        var restore = backup.ApplyPendingRestore();
+        // Off the UI thread: the restore blocks on async file work, which would deadlock on the UI thread.
+        var restore = Task.Run(backup.ApplyPendingRestore).GetAwaiter().GetResult();
         if (restore is { Succeeded: false })
         {
             errorLog.Append("Startup restore", restore.Exception ?? new InvalidOperationException(restore.Message));

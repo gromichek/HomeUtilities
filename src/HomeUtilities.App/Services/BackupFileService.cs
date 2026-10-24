@@ -4,8 +4,9 @@ using HomeUtilities.ViewModels;
 namespace HomeUtilities.App.Services;
 
 /// <summary>
-/// Android: the system share sheet (Drive, mail, Downloads…). Windows: the save dialog, falling back to
-/// <c>Documents\HomeUtilities\Backups</c> when the dialog is not available in the unpackaged app.
+/// Both platforms: the system save dialog (Android: choose a folder such as Downloads or Drive; Windows: the file
+/// dialog). Fallbacks when the dialog fails or is cancelled with an error: Android — the share sheet;
+/// Windows — <c>Documents\HomeUtilities\Backups</c>.
 /// </summary>
 public sealed class BackupFileService : IBackupFileService
 {
@@ -22,7 +23,6 @@ public sealed class BackupFileService : IBackupFileService
             await write(file);
         }
 
-#if WINDOWS
         try
         {
             await using var stream = new FileStream(cachePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -44,6 +44,7 @@ public sealed class BackupFileService : IBackupFileService
             System.Diagnostics.Debug.WriteLine($"Save dialog failed: {ex}");
         }
 
+#if WINDOWS
         var documents = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "HomeUtilities", "Backups");
         Directory.CreateDirectory(documents);
         var target = Path.Combine(documents, fileName);
