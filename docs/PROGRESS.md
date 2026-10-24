@@ -9,6 +9,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 |---|---|---|---|---|
 | T-017 | Tariff editor + VAT catalog screen | Ready | | |
 | T-017a | Navigation guard, menu opens section root | Ready | | owner finding 2026-10-24 |
+| T-017b | In-app help (user guide in the app) | Ready | | after T-017a |
 
 ## Done
 
