@@ -28,7 +28,7 @@ is written; the list below is the plan and will change.
 - T-014a Robustness: no crashes on bad input, global error handler + error log, stay in editor after Save, Android layout fixes
 - T-015 Meters: list + edit, replacement wizard, verification due
 - T-016 Readings entry (phone-first, tablet two-pane), history, warnings, submit-readings link, mark submitted
-- T-016a Attachments infrastructure (entity, file storage, migration) + meter/reading photos (camera on Android, file on Windows)
+- T-016a Attachments infrastructure (entity, file storage, migration) + meter/reading photos (camera on Android, file on Windows) + submit links on meter cards
 
 ## Phase 4 — Tariffs and charges
 - T-017 Tariff editor per contract (components, rates, VAT)
