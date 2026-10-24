@@ -19,6 +19,18 @@
 6. Owner pulls `main` in Visual Studio, tests, reports results. Bugs become new tasks;
    a broken merge is reverted.
 
+## Who fixes what (owner decision 2026-10-24)
+- **Trivial blockers** of a PR (missing `using`, a test broken by merging two parallel PRs, a typo): the lead
+  fixes them directly on the PR branch.
+- **Urgent breakage** on `main` (the app does not start, data loss): the lead fixes it at once as a hotfix PR.
+- **Everything else** (bugs from the owner's tests, anything that needs analysis and tests):
+  - PR still open → the lead writes a review comment; the owner tells the same session
+    "Fix the review comments on the PR";
+  - already merged → the lead writes a small fix task (`T-NNNx`), the owner runs it in a new session, **or**
+  - for small fixes the lead may start a helper agent itself, in its own worktree and branch, and reviews the
+    result like any PR. **Helpers always run on Sonnet** (coding sessions use Sonnet too: the worker is cheaper
+    than the lead). The lead never uses its own model for helpers.
+
 ## CI duration
 Code changes: ~4 min (tests ~25 s; Android build ~3 min and Windows MAUI install + build ~3 min run in
 parallel). Docs-only changes (`docs/**`, `*.md`): builds skipped, checks pass in seconds.
