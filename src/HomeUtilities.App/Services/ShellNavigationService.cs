@@ -9,12 +9,20 @@ public sealed class ShellNavigationService : INavigationService
         Routes.Overview, Routes.Properties, Routes.Suppliers, Routes.Readings, Routes.Bills, Routes.Payments, Routes.Reports, Routes.Help, Routes.Settings,
     ];
 
-    public Task GoToAsync(string route, IReadOnlyDictionary<string, object>? parameters = null)
+    private readonly NavigationGate _pushGate = new();
+
+    public async Task GoToAsync(string route, IReadOnlyDictionary<string, object>? parameters = null)
     {
-        var target = SectionRoutes.Contains(route) ? $"//{route}" : route;
-        return parameters is null
-            ? Shell.Current.GoToAsync(target)
-            : Shell.Current.GoToAsync(target, new Dictionary<string, object>(parameters));
+        if (SectionRoutes.Contains(route))
+        {
+            await Shell.Current.GoToAsync($"//{route}");
+            return;
+        }
+
+        // A quick double tap must not push the same page twice.
+        await _pushGate.TryRunAsync(() => parameters is null
+            ? Shell.Current.GoToAsync(route)
+            : Shell.Current.GoToAsync(route, new Dictionary<string, object>(parameters)));
     }
 
     public Task GoBackAsync() => Shell.Current.GoToAsync("..");
