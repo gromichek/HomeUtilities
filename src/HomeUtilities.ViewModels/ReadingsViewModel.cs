@@ -15,7 +15,7 @@ namespace HomeUtilities.ViewModels;
 /// The readings screen: pick a property, type the new value of every register, see consumption and warnings,
 /// save all at once, open the supplier's submit page and mark the readings as submitted.
 /// </summary>
-public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>
+public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>, IUnsavedChangesGuarded
 {
     /// <summary>Settings key of the last selected property.</summary>
     public const string LastPropertyKey = "readings.last_property";
@@ -150,6 +150,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     public bool ShowHistoryHint => IsTwoPane && SelectedHistory is null;
 
     /// <summary>True while a new value has been typed and not saved.</summary>
+    bool IUnsavedChangesGuarded.HasUnsavedChanges => HasUnsavedValues;
+
     public bool HasUnsavedValues => Groups.Any(g => g.Cards.Any(c => c.Rows.Any(r => r.HasInput)));
 
     public Guid? SelectedPropertyId => _selectedPropertyId;

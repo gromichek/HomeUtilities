@@ -45,6 +45,10 @@ left and the editor on the right. Settings shows the current layout (phone / tab
 **Saving and leaving**
 - ✓ / **Save** saves and **keeps you in the editor**. Only **Back** leaves.
 - Leaving with unsaved changes asks **Save changes?** — *Save*, *Don't save* or *Cancel* (stay where you are).
+  This also applies when you pick another item in the menu, use the Android back gesture, or close the Windows window.
+  If *Save* finds a mistake in the form, you stay and see the red message.
+- A menu item always opens the **main screen of its section** (the list), never a half-finished editor you left earlier.
+  On a wide window the list opens with the previously selected record and its editor on the right.
 - **Delete** hides the record; its history is kept. Many records can instead be **archived** — hidden from lists and
   pickers but still used in history. Use "Show archived" to see them again.
 - Fields marked * are required. A wrong value shows a red message under the field; the app does not save until

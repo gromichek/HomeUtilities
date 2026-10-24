@@ -1,0 +1,8 @@
+namespace HomeUtilities.ViewModels;
+
+/// <summary>Tells which view model is on screen right now and could hold unsaved changes.</summary>
+public interface IActiveEditorProvider
+{
+    /// <summary>The topmost page's view model (or the editor of a two-pane list); null when nothing can be unsaved.</summary>
+    IUnsavedChangesGuarded? Current { get; }
+}

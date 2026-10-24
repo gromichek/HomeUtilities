@@ -6,6 +6,9 @@ using HomeUtilities.Core.Attachments;
 using HomeUtilities.Data;
 using HomeUtilities.ViewModels;
 using Microsoft.Extensions.Logging;
+#if WINDOWS
+using Microsoft.Maui.LifecycleEvents;
+#endif
 
 namespace HomeUtilities.App;
 
@@ -18,6 +21,11 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
             .ConfigureFonts(fonts => fonts.AddFont("MaterialIconsOutlined-Regular.otf", "MaterialIcons"));
+
+#if WINDOWS
+        builder.ConfigureLifecycleEvents(events => events.AddWindows(windows =>
+            windows.OnWindowCreated(window => HomeUtilities.App.WinUI.WindowCloseGuard.Attach(window))));
+#endif
 
         var appPaths = new AppPaths();
         builder.Services.AddSingleton<IAppPaths>(appPaths);
@@ -36,6 +44,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<ILayoutModeService>(sp => sp.GetRequiredService<LayoutModeService>());
         builder.Services.AddSingleton<HomeUtilities.ViewModels.IAppInfo, AppInfoService>();
         builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+        builder.Services.AddSingleton<IActiveEditorProvider, ShellActiveEditorProvider>();
+        builder.Services.AddSingleton<INavigationGuard, NavigationGuard>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<ILauncherService, LauncherService>();
         builder.Services.AddSingleton<IMediaService, MediaService>();

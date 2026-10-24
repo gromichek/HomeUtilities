@@ -16,7 +16,7 @@ public enum EditOutcome
 /// Base of all edit screens: dirty tracking, validation errors for binding, Save / Cancel / Delete with the
 /// "Save changes?" and "Delete «name»?" dialogs of <c>docs/UI_GUIDELINES.md</c>. Subclasses implement validation, saving and deleting.
 /// </summary>
-public abstract partial class EditableViewModel : ViewModelBase
+public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChangesGuarded
 {
     private static readonly IReadOnlyDictionary<string, string> NoErrors = new Dictionary<string, string>();
 
@@ -50,6 +50,8 @@ public abstract partial class EditableViewModel : ViewModelBase
     }
 
     public bool HasErrors => Errors.Count > 0;
+
+    bool IUnsavedChangesGuarded.HasUnsavedChanges => IsDirty;
 
     protected IDialogService Dialogs => _dialogs;
 
