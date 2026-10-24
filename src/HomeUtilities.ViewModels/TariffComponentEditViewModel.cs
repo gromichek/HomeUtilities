@@ -704,7 +704,8 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         }
         else
         {
-            SelectedVatOption = options.FirstOrDefault(o => o.Code == code)
+            // The custom entry has an empty code too, so an empty code means "no choice yet": the standard rate.
+            SelectedVatOption = (code.Length > 0 ? options.FirstOrDefault(o => o.Code == code) : null)
                 ?? options.FirstOrDefault(o => o.Code == TariffPresets.StandardVatCode)
                 ?? options[0];
         }
