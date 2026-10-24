@@ -16,61 +16,114 @@ permissions:
   checks: write
 
 jobs:
-  linux:
+  # Decides whether anything besides documentation changed. Docs-only changes (task files, PROGRESS, *.md)
+  # skip the expensive app builds; the linux/windows jobs still run and report success, so the required
+  # status checks stay satisfied.
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diff
+        name: Detect code changes
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            files=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}")
+          elif [ "${{ github.event_name }}" = "push" ] && git rev-parse -q --verify HEAD~1 >/dev/null; then
+            files=$(git diff --name-only HEAD~1 HEAD)
+          else
+            echo "code=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "Changed files:"; echo "$files"
+          code=$(echo "$files" | grep -Ev '^docs/|\.md$' | grep -c . || true)
+          if [ "$code" -gt 0 ]; then echo "code=true" >> "$GITHUB_OUTPUT"; else echo "code=false" >> "$GITHUB_OUTPUT"; fi
+
+  linux:
+    needs: changes
+    runs-on: ubuntu-latest
+    env:
+      CODE: ${{ needs.changes.outputs.code }}
+    steps:
+      - name: Docs-only change — builds skipped
+        if: env.CODE != 'true'
+        run: echo "Only documentation changed; tests and app builds skipped."
+
+      - uses: actions/checkout@v4
+        if: env.CODE == 'true'
 
       - uses: actions/setup-dotnet@v4
+        if: env.CODE == 'true'
         with:
           global-json-file: global.json
           cache: true
           cache-dependency-path: Directory.Packages.props
 
       - name: Restore
+        if: env.CODE == 'true'
         run: dotnet restore HomeUtilities.Tests.slnf
 
       - name: Build
+        if: env.CODE == 'true'
         run: dotnet build HomeUtilities.Tests.slnf -c Release --no-restore
 
       - name: Test
+        if: env.CODE == 'true'
         run: dotnet test HomeUtilities.Tests.slnf -c Release --no-build --logger trx --results-directory TestResults
 
       - name: Report failed tests as annotations
-        if: failure()
+        if: failure() && env.CODE == 'true'
         run: python3 .github/scripts/report_trx.py TestResults
 
       - name: Upload test results
-        if: always()
+        if: always() && env.CODE == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: TestResults
 
       - uses: actions/setup-java@v4
+        if: env.CODE == 'true'
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Install MAUI Android workload
+        if: env.CODE == 'true'
         run: dotnet workload install maui-android
 
       - name: Build App (Android)
+        if: env.CODE == 'true'
         run: dotnet build src/HomeUtilities.App -c Release -f net10.0-android
 
   windows:
+    needs: changes
     runs-on: windows-latest
+    env:
+      CODE: ${{ needs.changes.outputs.code }}
     steps:
+      - name: Docs-only change — builds skipped
+        if: env.CODE != 'true'
+        run: echo "Only documentation changed; app build skipped."
+
       - uses: actions/checkout@v4
+        if: env.CODE == 'true'
 
       - uses: actions/setup-dotnet@v4
+        if: env.CODE == 'true'
         with:
           global-json-file: global.json
           cache: true
           cache-dependency-path: Directory.Packages.props
 
       - name: Install MAUI workload
+        if: env.CODE == 'true'
         run: dotnet workload install maui-windows
 
       - name: Build App (Windows)
+        if: env.CODE == 'true'
         run: dotnet build src/HomeUtilities.App -c Release -f net10.0-windows10.0.19041.0

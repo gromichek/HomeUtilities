@@ -18,6 +18,10 @@
 6. Owner pulls `main` in Visual Studio, tests, reports results. Bugs become new tasks;
    a broken merge is reverted.
 
+## CI duration
+Code changes: ~4 min (tests ~25 s; Android build ~3 min and Windows MAUI install + build ~3 min run in
+parallel). Docs-only changes (`docs/**`, `*.md`): builds skipped, checks pass in seconds.
+
 ## Diagnosing CI failures
 Failed tests appear as check-run annotations (`report_trx.py`):
 `gh api repos/gromichek/HomeUtilities/check-runs/<id>/annotations`. Compiler errors appear there too.
