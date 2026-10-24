@@ -453,4 +453,31 @@
   <data name="Error_attachment_empty" xml:space="preserve"><value>The file is empty.</value></data>
   <data name="Error_attachment_too_large" xml:space="preserve"><value>The file is larger than {0} MB.</value></data>
   <data name="Error_attachment_hash_invalid" xml:space="preserve"><value>The file could not be verified.</value></data>
+  <data name="SettingsBackup" xml:space="preserve"><value>Backup</value></data>
+  <data name="SettingsBackupHint" xml:space="preserve"><value>A backup is one file with all your data and attachments. Keep it outside the app (for example in Drive or on a computer): if you reinstall the app, you can restore everything from it. The file contains all your data, so keep it private.</value></data>
+  <data name="SettingsBackupSave" xml:space="preserve"><value>Save backup…</value></data>
+  <data name="SettingsBackupRestore" xml:space="preserve"><value>Restore from backup…</value></data>
+  <data name="SettingsBackupLast" xml:space="preserve"><value>Last backup made on this device: {0:g}</value></data>
+  <data name="SettingsBackupNever" xml:space="preserve"><value>No backup has been made on this device yet.</value></data>
+  <data name="BackupSaved" xml:space="preserve"><value>Backup saved.</value></data>
+  <data name="BackupSavedTo" xml:space="preserve"><value>Backup saved to {0}</value></data>
+  <data name="BackupRestoreTitle" xml:space="preserve"><value>Restore backup</value></data>
+  <data name="BackupRestoreConfirm" xml:space="preserve"><value>Restore backup from {0:g}? Your current data will be replaced. A copy of it is kept.</value></data>
+  <data name="BackupRestoreAction" xml:space="preserve"><value>Restore</value></data>
+  <data name="BackupRestartMessage" xml:space="preserve"><value>Close and reopen the app to finish restoring.</value></data>
+  <data name="BackupCloseApp" xml:space="preserve"><value>Close app</value></data>
+  <data name="BackupLater" xml:space="preserve"><value>Later</value></data>
+  <data name="BackupNotABackup" xml:space="preserve"><value>This file is not a HomeUtilities backup.</value></data>
+  <data name="BackupNewerVersion" xml:space="preserve"><value>This backup was made by a newer version of the app. Update the app first.</value></data>
+  <data name="BackupRestoreFailed" xml:space="preserve"><value>The backup could not be restored: {0}</value></data>
+  <data name="SettingsTestData" xml:space="preserve"><value>Test data</value></data>
+  <data name="SettingsTestDataFill" xml:space="preserve"><value>Fill with sample data</value></data>
+  <data name="SettingsTestDataDelete" xml:space="preserve"><value>Delete all data</value></data>
+  <data name="TestDataFillConfirm" xml:space="preserve"><value>Fill the app with invented sample data?</value></data>
+  <data name="TestDataFillAction" xml:space="preserve"><value>Fill</value></data>
+  <data name="TestDataFilled" xml:space="preserve"><value>Sample data added.</value></data>
+  <data name="TestDataNotEmpty" xml:space="preserve"><value>The app already contains data. Sample data can only be added to an empty app.</value></data>
+  <data name="TestDataDeleteConfirm" xml:space="preserve"><value>Delete ALL data and attachments? This cannot be undone.</value></data>
+  <data name="TestDataDeleteAction" xml:space="preserve"><value>Delete</value></data>
+  <data name="TestDataDeleteRestart" xml:space="preserve"><value>All data will be deleted when the app is reopened. Close the app now?</value></data>
 </root>

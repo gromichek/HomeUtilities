@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using HomeUtilities.Core;
+using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Backup;
 
 namespace HomeUtilities.ViewModels;
 
@@ -18,6 +21,13 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly IErrorLog _errorLog;
     private readonly IClipboardService _clipboard;
     private readonly IToastService _toast;
+    private readonly IBackupService _backup;
+    private readonly IBackupFileService _backupFiles;
+    private readonly IDialogService _dialogs;
+    private readonly IAppLifecycle _app;
+    private readonly ISettingsStore _settings;
+    private readonly ISampleDataGenerator _sampleData;
+    private readonly IClock _clock;
 
     private bool _refreshing;
 
@@ -63,6 +73,30 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     [ObservableProperty]
     private string _clearLogText = string.Empty;
 
+    [ObservableProperty]
+    private string _backupHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _backupHint = string.Empty;
+
+    [ObservableProperty]
+    private string _saveBackupText = string.Empty;
+
+    [ObservableProperty]
+    private string _restoreBackupText = string.Empty;
+
+    [ObservableProperty]
+    private string _lastBackupText = string.Empty;
+
+    [ObservableProperty]
+    private string _testDataHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _fillSampleDataText = string.Empty;
+
+    [ObservableProperty]
+    private string _deleteAllDataText = string.Empty;
+
     public SettingsViewModel(
         ILocalizer localizer,
         ILanguageService languageService,
@@ -73,8 +107,23 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         INavigationService navigation,
         IErrorLog errorLog,
         IClipboardService clipboard,
-        IToastService toast)
+        IToastService toast,
+        IBackupService backup,
+        IBackupFileService backupFiles,
+        IDialogService dialogs,
+        IAppLifecycle app,
+        ISettingsStore settings,
+        ISampleDataGenerator sampleData,
+        IClock clock)
     {
+        _backup = backup;
+        _backupFiles = backupFiles;
+        _dialogs = dialogs;
+        _app = app;
+        _settings = settings;
+        _sampleData = sampleData;
+        _clock = clock;
+        IsDebugBuild = appInfo.IsDebugBuild;
         _errorLog = errorLog;
         _clipboard = clipboard;
         _toast = toast;
@@ -91,6 +140,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     public string Version { get; }
 
     public string DatabasePath { get; }
+
+    /// <summary>Whether the test-data card is shown (debug builds only).</summary>
+    public bool IsDebugBuild { get; }
+
+    /// <summary>Settings key of the time the last backup was created on this device (ISO 8601).</summary>
+    public const string LastBackupKey = "LastBackupAt";
 
     [RelayCommand]
     private Task OpenCategoriesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Categories));
@@ -109,6 +164,122 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         await _clipboard.SetTextAsync(log);
         await _toast.ShowAsync(_localizer["Copied"]);
     });
+
+    /// <summary>Creates a backup zip and lets the owner put it somewhere outside the app.</summary>
+    [RelayCommand]
+    private Task SaveBackupAsync() => RunSafeAsync(async () =>
+    {
+        var result = await _backupFiles.SaveAsync(_backup.SuggestFileName(), stream => _backup.CreateAsync(stream));
+        if (!result.Saved)
+        {
+            return;
+        }
+
+        _settings.SetString(LastBackupKey, _clock.UtcNow.ToString("O", System.Globalization.CultureInfo.InvariantCulture));
+        RefreshLastBackupText();
+        await _toast.ShowAsync(result.Location is { } location ? _localizer.Get("BackupSavedTo", location) : _localizer["BackupSaved"]);
+    });
+
+    /// <summary>Picks a backup, checks it, asks for confirmation, stages it and asks to close the app to finish.</summary>
+    [RelayCommand]
+    private Task RestoreBackupAsync() => RunSafeAsync(async () =>
+    {
+        var stream = await _backupFiles.PickAsync();
+        if (stream is null)
+        {
+            return;
+        }
+
+        await using (stream)
+        {
+            var validation = await _backup.ValidateAsync(stream);
+            if (validation.Manifest is not { } manifest)
+            {
+                await ShowBackupErrorAsync(validation.Error);
+                return;
+            }
+
+            var title = _localizer["BackupRestoreTitle"];
+            var confirmed = await _dialogs.ConfirmAsync(
+                title,
+                _localizer.Get("BackupRestoreConfirm", manifest.CreatedAt.ToLocalTime()),
+                _localizer["BackupRestoreAction"],
+                _localizer["Cancel"]);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            var staged = await _backup.StageRestoreAsync(stream);
+            if (!staged.IsValid)
+            {
+                await ShowBackupErrorAsync(staged.Error);
+                return;
+            }
+        }
+
+        await AskToCloseAppAsync("BackupRestartMessage");
+    });
+
+    /// <summary>Debug builds only: fills an empty app with invented data.</summary>
+    [RelayCommand]
+    private Task FillSampleDataAsync() => RunSafeAsync(async () =>
+    {
+        if (!IsDebugBuild)
+        {
+            return;
+        }
+
+        var confirmed = await _dialogs.ConfirmAsync(
+            _localizer["SettingsTestData"], _localizer["TestDataFillConfirm"], _localizer["TestDataFillAction"], _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        if (await _sampleData.FillAsync())
+        {
+            await _toast.ShowAsync(_localizer["TestDataFilled"]);
+        }
+        else
+        {
+            await _dialogs.AlertAsync(_localizer["SettingsTestData"], _localizer["TestDataNotEmpty"]);
+        }
+    });
+
+    /// <summary>Debug builds only: deletes the database and the attachments at the next start.</summary>
+    [RelayCommand]
+    private Task DeleteAllDataAsync() => RunSafeAsync(async () =>
+    {
+        if (!IsDebugBuild)
+        {
+            return;
+        }
+
+        var confirmed = await _dialogs.ConfirmAsync(
+            _localizer["SettingsTestData"], _localizer["TestDataDeleteConfirm"], _localizer["TestDataDeleteAction"], _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        _backup.StageWipe();
+        await AskToCloseAppAsync("TestDataDeleteRestart");
+    });
+
+    private Task ShowBackupErrorAsync(BackupError? error) =>
+        _dialogs.AlertAsync(
+            _localizer["BackupRestoreTitle"],
+            _localizer[error == BackupError.NewerVersion ? "BackupNewerVersion" : "BackupNotABackup"]);
+
+    private async Task AskToCloseAppAsync(string messageKey)
+    {
+        var close = await _dialogs.ConfirmAsync(_localizer["BackupRestoreTitle"], _localizer[messageKey], _localizer["BackupCloseApp"], _localizer["BackupLater"]);
+        if (close)
+        {
+            _app.Quit();
+        }
+    }
 
     [RelayCommand]
     private void ClearLog() => _errorLog.Clear();
@@ -142,6 +313,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             ErrorLogHint = _localizer["SettingsErrorLogHint"];
             CopyLogText = _localizer["SettingsErrorLogCopy"];
             ClearLogText = _localizer["SettingsErrorLogClear"];
+            BackupHeader = _localizer["SettingsBackup"];
+            BackupHint = _localizer["SettingsBackupHint"];
+            SaveBackupText = _localizer["SettingsBackupSave"];
+            RestoreBackupText = _localizer["SettingsBackupRestore"];
+            TestDataHeader = _localizer["SettingsTestData"];
+            FillSampleDataText = _localizer["SettingsTestDataFill"];
+            DeleteAllDataText = _localizer["SettingsTestDataDelete"];
+            RefreshLastBackupText();
             LanguageLabel = _localizer["SettingsLanguage"];
             ThemeLabel = _localizer["SettingsTheme"];
             VersionText = _localizer.Get("SettingsVersion", Version);
@@ -160,6 +339,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             _refreshing = false;
         }
     }
+
+    private void RefreshLastBackupText() =>
+        LastBackupText = DateTimeOffset.TryParse(_settings.GetString(LastBackupKey), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out var last)
+            ? _localizer.Get("SettingsBackupLast", last.ToLocalTime())
+            : _localizer["SettingsBackupNever"];
 
     private void RefreshLayoutText() =>
         LayoutText = _localizer.Get("SettingsLayout", _localizer[$"Layout_{_layoutModeService.Current}"]);

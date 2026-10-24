@@ -2,7 +2,9 @@ using CommunityToolkit.Maui;
 using HomeUtilities.App.Services;
 using HomeUtilities.App.Views;
 using HomeUtilities.Core;
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
+using HomeUtilities.Data.Backup;
 using HomeUtilities.Data;
 using HomeUtilities.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -33,7 +35,29 @@ public static class MauiProgram
         GlobalErrorHandlers.Install(errorLog);
         builder.Services.AddSingleton<IErrorLog>(errorLog);
         builder.Services.AddSingleton<IErrorReporter, ErrorReporter>();
-        builder.Services.AddSingleton<IClock, SystemClock>();
+        var clock = new SystemClock();
+        builder.Services.AddSingleton<IClock>(clock);
+
+        // A staged restore (or wipe) replaces the database file, so it runs before anything can open the database.
+        var backup = new BackupService(
+            new BackupOptions(
+                appPaths.DatabasePath,
+                appPaths.AttachmentsFolder,
+                appPaths.RestoreFolder,
+                appPaths.BackupsFolder,
+                AppInfo.Current.VersionString,
+                DeviceInfo.Platform.ToString()),
+            clock);
+        var restore = backup.ApplyPendingRestore();
+        if (restore is { Succeeded: false })
+        {
+            errorLog.Append("Startup restore", restore.Exception ?? new InvalidOperationException(restore.Message));
+        }
+
+        builder.Services.AddSingleton(new StartupNotice { RestoreFailure = restore is { Succeeded: false } ? restore.Message : null });
+        builder.Services.AddSingleton<IBackupService>(backup);
+        builder.Services.AddSingleton<IBackupFileService, BackupFileService>();
+        builder.Services.AddSingleton<IAppLifecycle, AppLifecycle>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddSingleton<ILocalizer, ResxLocalizer>();
         builder.Services.AddSingleton<IImageProcessor, ImageProcessor>();

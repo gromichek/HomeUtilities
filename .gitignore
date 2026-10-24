@@ -282,6 +282,9 @@ Generated_Code/
 # because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
+# Our own Backup folders (backup service and its tests) are source code, not Visual Studio conversion leftovers.
+!src/**/Backup/
+!tests/**/Backup/
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/

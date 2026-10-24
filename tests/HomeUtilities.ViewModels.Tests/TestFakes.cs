@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
+using HomeUtilities.Core.Backup;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
@@ -76,6 +77,9 @@ internal sealed class FakeDialogService : IDialogService
 {
     public bool ConfirmResult { get; set; } = true;
 
+    /// <summary>Answers to the next confirmations, in order; when empty <see cref="ConfirmResult"/> is used.</summary>
+    public Queue<bool> ConfirmAnswers { get; } = new();
+
     public List<(string Title, string Message)> Confirmations { get; } = [];
 
     /// <summary>The answer to the "Save changes?" dialog.</summary>
@@ -102,7 +106,7 @@ internal sealed class FakeDialogService : IDialogService
     public Task<bool> ConfirmAsync(string title, string message, string accept, string cancel)
     {
         Confirmations.Add((title, message));
-        return Task.FromResult(ConfirmResult);
+        return Task.FromResult(ConfirmAnswers.Count > 0 ? ConfirmAnswers.Dequeue() : ConfirmResult);
     }
 
     public Task<string?> ChooseAsync(string title, IReadOnlyList<string> options) =>
@@ -693,4 +697,92 @@ internal sealed class FakeFileViewer : IFileViewer
         Opened.Add((path, contentType));
         return Task.CompletedTask;
     }
+}
+
+internal sealed class FakeBackupService : IBackupService
+{
+    public BackupValidation Validation { get; set; } = BackupValidation.Valid(
+        new BackupManifest(1, "1.0.0", "20261020125612_InitialCreate", new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero), "Test", 3, 10, 0));
+
+    public int Created { get; private set; }
+
+    public int Staged { get; private set; }
+
+    public int Wipes { get; private set; }
+
+    public string FileName { get; set; } = "backup.zip";
+
+    public string SuggestFileName() => FileName;
+
+    public async Task<BackupManifest> CreateAsync(Stream output, CancellationToken ct = default)
+    {
+        Created++;
+        await output.WriteAsync(new byte[] { 1, 2, 3 }, ct);
+        return Validation.Manifest!;
+    }
+
+    public Task<BackupValidation> ValidateAsync(Stream backup, CancellationToken ct = default) => Task.FromResult(Validation);
+
+    public Task<BackupValidation> StageRestoreAsync(Stream backup, CancellationToken ct = default)
+    {
+        if (Validation.IsValid)
+        {
+            Staged++;
+        }
+
+        return Task.FromResult(Validation);
+    }
+
+    public void StageWipe() => Wipes++;
+
+    public RestoreOutcome? ApplyPendingRestore() => null;
+}
+
+internal sealed class FakeBackupFileService : IBackupFileService
+{
+    public BackupSaveResult SaveResult { get; set; } = new(true, "C:\\Backups");
+
+    public Stream? Picked { get; set; }
+
+    public List<string> SavedNames { get; } = [];
+
+    public byte[] SavedBytes { get; private set; } = [];
+
+    public async Task<BackupSaveResult> SaveAsync(string fileName, Func<Stream, Task> write)
+    {
+        SavedNames.Add(fileName);
+        var buffer = new MemoryStream();
+        await write(buffer);
+        SavedBytes = buffer.ToArray();
+        return SaveResult;
+    }
+
+    public Task<Stream?> PickAsync() => Task.FromResult(Picked);
+}
+
+internal sealed class FakeAppLifecycle : IAppLifecycle
+{
+    public int QuitCalls { get; private set; }
+
+    public void Quit() => QuitCalls++;
+}
+
+internal sealed class FakeSampleDataGenerator : ISampleDataGenerator
+{
+    public bool Result { get; set; } = true;
+
+    public int Calls { get; private set; }
+
+    public Task<bool> FillAsync(CancellationToken ct = default)
+    {
+        Calls++;
+        return Task.FromResult(Result);
+    }
+}
+
+internal sealed class FixedClock : IClock
+{
+    public DateOnly Today => new(2026, 10, 24);
+
+    public DateTimeOffset UtcNow => new(2026, 10, 24, 9, 30, 0, TimeSpan.Zero);
 }
