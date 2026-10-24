@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
@@ -12,6 +13,9 @@ namespace HomeUtilities.ViewModels;
 public sealed partial class ReadingHistoryViewModel : ViewModelBase
 {
     private readonly IMeterStore _store;
+    private readonly IAttachmentStore _attachments;
+    private readonly IFileViewer _viewer;
+    private readonly IMediaService _media;
     private readonly ILocalizer _localizer;
     private readonly IDialogService _dialogs;
 
@@ -26,9 +30,18 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     [ObservableProperty]
     private string _emptyText = string.Empty;
 
-    public ReadingHistoryViewModel(IMeterStore store, ILocalizer localizer, IDialogService dialogs)
+    public ReadingHistoryViewModel(
+        IMeterStore store,
+        IAttachmentStore attachments,
+        IFileViewer viewer,
+        IMediaService media,
+        ILocalizer localizer,
+        IDialogService dialogs)
     {
         _store = store;
+        _attachments = attachments;
+        _viewer = viewer;
+        _media = media;
         _localizer = localizer;
         _dialogs = dialogs;
         RefreshTexts();
@@ -116,7 +129,8 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
                 consumption is { } q ? $"+ {DecimalInput.Format(q, CultureInfo.CurrentCulture, 3)} {unit}" : string.Empty,
                 _localizer,
                 new AsyncRelayCommand(() => RunSafeAsync(() => EditAsync(registerId, readingId))),
-                new AsyncRelayCommand(() => RunSafeAsync(() => DeleteAsync(registerId, readingId)))));
+                new AsyncRelayCommand(() => RunSafeAsync(() => DeleteAsync(registerId, readingId))),
+                new AsyncRelayCommand(() => RunSafeAsync(() => OpenPhotoAsync(reading.PhotoAttachmentId)))));
         }
 
         rows.Reverse();
@@ -135,14 +149,69 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
             return;
         }
 
-        var editor = new ReadingEditorViewModel(_localizer, meter, register, reading);
+        var editor = new ReadingEditorViewModel(_localizer, meter, register, reading, _media);
         if (!await _dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
         {
             return;
         }
 
-        await _store.UpdateReadingsAsync([result]);
+        var previousPhoto = reading.PhotoAttachmentId;
+        Guid? addedPhoto = null;
+        if (editor.NewPhoto is { } photo)
+        {
+            try
+            {
+                await using var content = await photo.OpenAsync();
+                var attachment = await _attachments.AddAsync(PhotoPicking.ToAttachment(photo, AttachmentOwnerKind.MeterReading, result.Id), content);
+                addedPhoto = attachment.Id;
+                result.PhotoAttachmentId = attachment.Id;
+            }
+            catch (AttachmentRejectedException ex)
+            {
+                await _dialogs.AlertAsync(_localizer["Dialog_Error_Title"], PhotoPicking.Describe(ex.Result.Errors, _localizer));
+                return;
+            }
+        }
+
+        try
+        {
+            await _store.UpdateReadingsAsync([result]);
+        }
+        catch
+        {
+            if (addedPhoto is { } added)
+            {
+                await _attachments.DeleteAsync(added);
+            }
+
+            throw;
+        }
+
+        // A replaced or removed photo is soft-deleted; its file stays for undo and sync.
+        if (previousPhoto is { } old && result.PhotoAttachmentId != old)
+        {
+            await _attachments.DeleteAsync(old);
+        }
+
         await ChangedAsync();
+    }
+
+    private async Task OpenPhotoAsync(Guid? attachmentId)
+    {
+        if (attachmentId is not { } id)
+        {
+            return;
+        }
+
+        var attachment = await _attachments.GetAsync(id);
+        var path = attachment is null ? null : await _attachments.GetFilePathAsync(id);
+        if (attachment is null || path is null)
+        {
+            await _dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["PhotoMissing"]);
+            return;
+        }
+
+        await _viewer.OpenAsync(path, attachment.ContentType);
     }
 
     private async Task DeleteAsync(Guid registerId, Guid readingId)
@@ -201,7 +270,8 @@ public sealed class ReadingHistoryRowViewModel
         string consumptionText,
         ILocalizer localizer,
         IAsyncRelayCommand editCommand,
-        IAsyncRelayCommand deleteCommand)
+        IAsyncRelayCommand deleteCommand,
+        IAsyncRelayCommand openPhotoCommand)
     {
         Id = reading.Id;
         Kind = reading.Kind;
@@ -217,6 +287,9 @@ public sealed class ReadingHistoryRowViewModel
         DeleteTooltip = localizer["Delete"];
         EditCommand = editCommand;
         DeleteCommand = deleteCommand;
+        HasPhoto = reading.PhotoAttachmentId is not null;
+        PhotoTooltip = localizer["PhotoOpenTooltip"];
+        OpenPhotoCommand = openPhotoCommand;
     }
 
     public Guid Id { get; }
@@ -254,4 +327,12 @@ public sealed class ReadingHistoryRowViewModel
     public IAsyncRelayCommand EditCommand { get; }
 
     public IAsyncRelayCommand DeleteCommand { get; }
+
+    /// <summary>The reading has a photo (photo icon in the row).</summary>
+    public bool HasPhoto { get; }
+
+    public string PhotoTooltip { get; }
+
+    /// <summary>Opens the photo in the system viewer.</summary>
+    public IAsyncRelayCommand OpenPhotoCommand { get; }
 }

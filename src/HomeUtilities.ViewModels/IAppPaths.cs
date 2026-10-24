@@ -8,4 +8,7 @@ public interface IAppPaths
 
     /// <summary>Full path of the error log (<c>logs/errors.log</c> in the app data folder).</summary>
     string ErrorLogPath { get; }
+
+    /// <summary>Folder of the attachment files (<c>attachments</c> in the app data folder).</summary>
+    string AttachmentsFolder { get; }
 }

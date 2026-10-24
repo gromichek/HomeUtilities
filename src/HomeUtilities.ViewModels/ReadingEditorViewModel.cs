@@ -1,5 +1,6 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
@@ -16,6 +17,7 @@ public sealed partial class ReadingEditorViewModel : EditorDialogViewModel
     private readonly Meter _meter;
     private readonly MeterRegister _register;
     private readonly MeterReading _original;
+    private readonly IMediaService _media;
 
     [ObservableProperty]
     private DateOnly _date;
@@ -51,10 +53,23 @@ public sealed partial class ReadingEditorViewModel : EditorDialogViewModel
     [NotifyPropertyChangedFor(nameof(SelectedKindIndex))]
     private EnumOption? _selectedKind;
 
-    public ReadingEditorViewModel(ILocalizer localizer, Meter meter, MeterRegister register, MeterReading original)
+    /// <summary>The photo chosen in this dialog; the caller stores it after Save. Null when the photo was kept or removed.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPhoto), nameof(PhotoText))]
+    private PickedFile? _newPhoto;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPhoto), nameof(PhotoText))]
+    private bool _photoRemoved;
+
+    [ObservableProperty]
+    private string _photoError = string.Empty;
+
+    public ReadingEditorViewModel(ILocalizer localizer, Meter meter, MeterRegister register, MeterReading original, IMediaService media)
         : base(localizer)
     {
         _localizer = localizer;
+        _media = media;
         _meter = meter;
         _register = register;
         _original = original;
@@ -80,6 +95,53 @@ public sealed partial class ReadingEditorViewModel : EditorDialogViewModel
         SubmittedLabel = localizer["ReadingSubmittedLabel"];
         SubmittedOnLabel = localizer["ReadingSubmittedOnLabel"];
         NoteLabel = localizer["ReadingNoteLabel"];
+        PhotoLabel = localizer["PhotoLabel"];
+        TakePhotoText = localizer["PhotoTake"];
+        ChoosePhotoText = localizer["PhotoChooseFile"];
+        RemovePhotoText = localizer["PhotoRemove"];
+    }
+
+    /// <summary>True while the reading has a photo: the stored one (not removed) or a newly chosen one.</summary>
+    public bool HasPhoto => NewPhoto is not null || (_original.PhotoAttachmentId is not null && !PhotoRemoved);
+
+    public bool CanTakePhoto => _media.IsCaptureSupported;
+
+    public string PhotoText => NewPhoto is { } photo
+        ? _localizer.Get("PhotoNew", photo.FileName)
+        : HasPhoto ? _localizer["PhotoAttached"] : _localizer["PhotoNone"];
+
+    public string PhotoLabel { get; }
+
+    public string TakePhotoText { get; }
+
+    public string ChoosePhotoText { get; }
+
+    public string RemovePhotoText { get; }
+
+    /// <summary>Takes a photo with the camera (Android).</summary>
+    [RelayCommand]
+    private Task TakePhotoAsync() => RunSafeAsync(() => PickAsync(_media.CapturePhotoAsync));
+
+    /// <summary>Picks an image from the gallery or the file system.</summary>
+    [RelayCommand]
+    private Task ChoosePhotoAsync() => RunSafeAsync(() => PickAsync(_media.PickPhotoAsync));
+
+    [RelayCommand]
+    private void RemovePhoto()
+    {
+        PhotoError = string.Empty;
+        NewPhoto = null;
+        PhotoRemoved = _original.PhotoAttachmentId is not null;
+    }
+
+    private async Task PickAsync(Func<Task<PickedFile?>> pick)
+    {
+        var (file, error) = await PhotoPicking.TryPickAsync(pick, _localizer);
+        PhotoError = error;
+        if (file is not null)
+        {
+            NewPhoto = file;
+        }
     }
 
     /// <summary>The edited reading after a successful Save.</summary>
@@ -142,7 +204,7 @@ public sealed partial class ReadingEditorViewModel : EditorDialogViewModel
             Value = value,
             Kind = IsKindEditable ? SelectedKind?.As<ReadingKind>() ?? _original.Kind : _original.Kind,
             SubmittedOn = HasSubmitted ? SubmittedOn : null,
-            PhotoAttachmentId = _original.PhotoAttachmentId,
+            PhotoAttachmentId = PhotoRemoved || NewPhoto is not null ? null : _original.PhotoAttachmentId,
             Note = string.IsNullOrWhiteSpace(Note) ? null : Note.Trim(),
         };
 

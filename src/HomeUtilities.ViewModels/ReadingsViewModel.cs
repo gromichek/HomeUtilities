@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
@@ -30,6 +31,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly IToastService _toast;
     private readonly ILauncherService _launcher;
     private readonly ISettingsStore _settings;
+    private readonly IAttachmentStore _attachments;
+    private readonly IMediaService _media;
     private readonly ILayoutModeService _layoutModeService;
     private readonly Func<ReadingHistoryViewModel> _historyFactory;
 
@@ -37,6 +40,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     private IReadOnlyList<ContractInfo> _contracts = [];
     private List<(Guid MeterId, MeterReading Reading)> _lastSaved = [];
     private List<Guid> _dismissedPrompts = [];
+    private readonly Dictionary<Guid, PickedFile> _photos = [];
+    private readonly HashSet<Guid> _pendingSubmit = [];
     private Guid? _selectedPropertyId;
 
     [ObservableProperty]
@@ -99,9 +104,13 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         IToastService toast,
         ILauncherService launcher,
         ISettingsStore settings,
+        IAttachmentStore attachments,
+        IMediaService media,
         ILayoutModeService layoutModeService,
         Func<ReadingHistoryViewModel> historyFactory)
     {
+        _attachments = attachments;
+        _media = media;
         _propertyStore = propertyStore;
         _meterStore = meterStore;
         _contractStore = contractStore;
@@ -159,7 +168,17 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         }
     }
 
-    public override Task OnAppearingAsync() => RunSafeAsync(ReloadAsync);
+    public override Task OnAppearingAsync() => RunSafeAsync(async () =>
+    {
+        await ReloadAsync();
+        await AskAboutReturnFromSubmitPageAsync();
+    });
+
+    /// <summary>
+    /// Called when the app or the page is in front again (also after the browser was open): for each submit page opened
+    /// from a meter card whose readings were saved in this session and are not yet marked, asks once whether to mark them.
+    /// </summary>
+    public Task CheckReturnFromSubmitPageAsync() => RunSafeAsync(AskAboutReturnFromSubmitPageAsync);
 
     /// <summary>Re-reads properties, meters and contracts; typed values are kept.</summary>
     public async Task ReloadAsync()
@@ -237,6 +256,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         }
 
         _selectedPropertyId = propertyId;
+        _photos.Clear();
+        _pendingSubmit.Clear();
         _settings.SetString(LastPropertyKey, propertyId.ToString());
         SelectedHistory = null;
         _lastSaved = [];
@@ -279,6 +300,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
                     row.Clear();
                 }
 
+                ClearPhotos();
                 OnPropertyChanged(nameof(HasUnsavedValues));
                 return true;
             default:
@@ -311,9 +333,29 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         }
 
         IsBusy = true;
+        var attachmentIds = new List<Guid>();
         try
         {
-            await _meterStore.AddReadingsAsync(items);
+            if (!await TryAttachPhotosAsync(saved, attachmentIds))
+            {
+                return false;
+            }
+
+            try
+            {
+                await _meterStore.AddReadingsAsync(items);
+            }
+            catch
+            {
+                await DiscardAttachmentsAsync(attachmentIds);
+                throw;
+            }
+
+            foreach (var meterId in saved.Select(s => s.MeterId).Distinct())
+            {
+                _photos.Remove(meterId);
+            }
+
             _lastSaved = saved;
             _dismissedPrompts = [];
             foreach (var row in Groups.SelectMany(g => g.Cards).SelectMany(c => c.Rows))
@@ -330,6 +372,97 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
 
         await _toast.ShowAsync(_localizer.Get("ReadingsSaved", items.Count));
         return true;
+    }
+
+    /// <summary>
+    /// Stores the photo of every meter that gets a reading and sets <see cref="MeterReading.PhotoAttachmentId"/> on the
+    /// first reading saved for the meter. A photo of a meter without a new value stays on its card. False (message
+    /// shown, nothing left behind) when a file is rejected.
+    /// </summary>
+    private async Task<bool> TryAttachPhotosAsync(List<(Guid MeterId, MeterReading Reading)> saved, List<Guid> attachmentIds)
+    {
+        foreach (var (meterId, photo) in _photos.ToList())
+        {
+            var target = saved.FirstOrDefault(s => s.MeterId == meterId).Reading;
+            if (target is null)
+            {
+                continue;
+            }
+
+            try
+            {
+                await using var content = await photo.OpenAsync();
+                var attachment = await _attachments.AddAsync(PhotoPicking.ToAttachment(photo, AttachmentOwnerKind.MeterReading, target.Id), content);
+                attachmentIds.Add(attachment.Id);
+                target.PhotoAttachmentId = attachment.Id;
+            }
+            catch (AttachmentRejectedException ex)
+            {
+                await DiscardAttachmentsAsync(attachmentIds);
+                _photos.Remove(meterId);
+                SetPhoto(meterId, null);
+                await _dialogs.AlertAsync(_localizer["Dialog_Error_Title"], PhotoPicking.Describe(ex.Result.Errors, _localizer));
+                return false;
+            }
+            catch
+            {
+                await DiscardAttachmentsAsync(attachmentIds);
+                throw;
+            }
+        }
+
+        return true;
+    }
+
+    private async Task DiscardAttachmentsAsync(List<Guid> attachmentIds)
+    {
+        foreach (var id in attachmentIds)
+        {
+            await _attachments.DeleteAsync(id);
+        }
+
+        attachmentIds.Clear();
+    }
+
+    private async Task PickPhotoAsync(Guid meterId)
+    {
+        var (file, error) = await PhotoPicking.ChooseAndPickAsync(_media, _dialogs, _localizer);
+        if (error.Length > 0)
+        {
+            await _dialogs.AlertAsync(_localizer["Dialog_Error_Title"], error);
+            return;
+        }
+
+        if (file is null)
+        {
+            return;
+        }
+
+        _photos[meterId] = file;
+        SetPhoto(meterId, file);
+    }
+
+    private void RemovePhoto(Guid meterId)
+    {
+        _photos.Remove(meterId);
+        SetPhoto(meterId, null);
+    }
+
+    private void ClearPhotos()
+    {
+        _photos.Clear();
+        foreach (var card in Groups.SelectMany(g => g.Cards))
+        {
+            card.Photo = null;
+        }
+    }
+
+    private void SetPhoto(Guid meterId, PickedFile? file)
+    {
+        foreach (var card in Groups.SelectMany(g => g.Cards).Where(c => c.MeterId == meterId))
+        {
+            card.Photo = file;
+        }
     }
 
     private async Task LoadPropertyAsync()
@@ -371,8 +504,10 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
                 suppliers[contract.SupplierId] = supplier;
             }
 
-            var link = supplier is null ? null : contract.GetEffectiveLinks(supplier).FirstOrDefault(l => l.Kind == LinkKind.SubmitReadings);
-            contracts.Add(new ContractInfo(contract, supplier, meterIds, link));
+            var links = supplier is null ? [] : contract.GetEffectiveLinks(supplier);
+            var link = links.FirstOrDefault(l => l.Kind == LinkKind.SubmitReadings);
+            var buttonLink = link ?? links.FirstOrDefault(l => l.Kind == LinkKind.CustomerPortal);
+            contracts.Add(new ContractInfo(contract, supplier, meterIds, link, buttonLink?.TryGetUri()));
         }
 
         _contracts = contracts;
@@ -402,7 +537,12 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
                 () => ReadingDate,
                 _localizer,
                 () => OnPropertyChanged(nameof(HasUnsavedValues)),
-                id => _ = RunSafeAsync(() => OpenHistoryAsync(id))))
+                id => _ = RunSafeAsync(() => OpenHistoryAsync(id)),
+                new MeterCardPhoto(
+                    _photos.GetValueOrDefault(m.Id),
+                    () => RunSafeAsync(() => PickPhotoAsync(m.Id)),
+                    () => RemovePhoto(m.Id)),
+                SubmitLinksOf(m)))
             .ToList();
         Groups =
         [
@@ -473,6 +613,82 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         return from.Year == to.Year && from.Month == to.Month
             ? $"{from.Day}–{to.ToString("d MMM", culture)}"
             : $"{from.ToString("d MMM", culture)}–{to.ToString("d MMM", culture)}";
+    }
+
+    /// <summary>One button per distinct page among the active contracts of the meter; contracts with the same page share a button.</summary>
+    private IReadOnlyList<SubmitLinkViewModel> SubmitLinksOf(Meter meter)
+    {
+        var pages = new List<(Uri Uri, List<ContractInfo> Contracts)>();
+        foreach (var info in _contracts.Where(c => c.MeterIds.Contains(meter.Id) && c.ButtonUri is not null))
+        {
+            var uri = info.ButtonUri!;
+            var page = pages.Find(p => string.Equals(p.Uri.AbsoluteUri, uri.AbsoluteUri, StringComparison.Ordinal));
+            if (page.Contracts is null)
+            {
+                pages.Add((uri, [info]));
+            }
+            else
+            {
+                page.Contracts.Add(info);
+            }
+        }
+
+        return
+        [
+            .. pages.Select(page =>
+            {
+                var contractIds = page.Contracts.Select(c => c.Contract.Id).ToHashSet();
+                var names = string.Join(", ", page.Contracts.Select(c => c.Supplier?.Name ?? c.Contract.Title).Distinct());
+                return new SubmitLinkViewModel(
+                    page.Uri,
+                    contractIds,
+                    _localizer.Get("ReadingsSubmitTo", names),
+                    new AsyncRelayCommand(() => RunSafeAsync(() => OpenSubmitLinkAsync(page.Uri, contractIds))));
+            }),
+        ];
+    }
+
+    private async Task OpenSubmitLinkAsync(Uri uri, IReadOnlySet<Guid> contractIds)
+    {
+        await _launcher.OpenAsync(uri);
+        _pendingSubmit.UnionWith(contractIds);
+    }
+
+    private async Task AskAboutReturnFromSubmitPageAsync()
+    {
+        if (_pendingSubmit.Count == 0)
+        {
+            return;
+        }
+
+        var opened = _pendingSubmit.ToList();
+        _pendingSubmit.Clear();
+        foreach (var contractId in opened)
+        {
+            var info = _contracts.FirstOrDefault(c => c.Contract.Id == contractId);
+            if (info is null)
+            {
+                continue;
+            }
+
+            var meterIds = info.MeterIds
+                .Where(id => _lastSaved.Any(s => s.MeterId == id && s.Reading.SubmittedOn is null))
+                .ToHashSet();
+            if (meterIds.Count == 0)
+            {
+                continue;
+            }
+
+            var confirmed = await _dialogs.ConfirmAsync(
+                _localizer["ReadingsMarkReturnTitle"],
+                _localizer.Get("ReadingsMarkReturnMessage", info.Supplier?.Name ?? info.Contract.Title),
+                _localizer["Yes"],
+                _localizer["No"]);
+            if (confirmed)
+            {
+                await MarkSubmittedAsync(contractId, meterIds);
+            }
+        }
     }
 
     private async Task OpenSubmitPageAsync(ContractInfo info)
@@ -564,5 +780,10 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     }
 
     /// <summary>A contract that uses installed meters of the property, with its supplier and effective submit link.</summary>
-    private sealed record ContractInfo(Contract Contract, Supplier? Supplier, IReadOnlySet<Guid> MeterIds, Link? SubmitLink);
+    /// <param name="Contract">The contract.</param>
+    /// <param name="Supplier">Its supplier.</param>
+    /// <param name="MeterIds">The installed meters of the property that are linked to it today.</param>
+    /// <param name="SubmitLink">The effective <see cref="LinkKind.SubmitReadings"/> link (reading window banner).</param>
+    /// <param name="ButtonUri">The page of the "Submit" button on the meter cards: the submit link, else the customer portal.</param>
+    private sealed record ContractInfo(Contract Contract, Supplier? Supplier, IReadOnlySet<Guid> MeterIds, Link? SubmitLink, Uri? ButtonUri);
 }

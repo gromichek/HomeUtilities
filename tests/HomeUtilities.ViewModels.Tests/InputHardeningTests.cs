@@ -224,7 +224,7 @@ public class InputHardeningTests
         var reading = new MeterReading { RegisterId = register.Id, Date = new DateOnly(2026, 9, 26), Value = 100m };
         register.Readings.Add(reading);
 
-        var dialog = new ReadingEditorViewModel(kit.Localizer, meter, register, reading);
+        var dialog = new ReadingEditorViewModel(kit.Localizer, meter, register, reading, kit.Media);
         await HammerAsync(dialog, input, () => { dialog.SaveCommand.Execute(null); return Task.CompletedTask; });
     }
 

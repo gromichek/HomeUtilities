@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
+using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
 
@@ -344,8 +346,16 @@ internal sealed class FakeMeterStore : IMeterStore
     public IEnumerable<MeterReading> ReadingsOf(Guid registerId) =>
         Stored.SelectMany(m => m.Registers).Where(r => r.Id == registerId).SelectMany(r => r.Readings);
 
+    /// <summary>When set, <see cref="AddReadingsAsync"/> throws it instead of storing.</summary>
+    public Exception? AddReadingsFailure { get; set; }
+
     public Task AddReadingsAsync(IEnumerable<(Guid RegisterId, MeterReading Reading)> readings, CancellationToken ct = default)
     {
+        if (AddReadingsFailure is { } failure)
+        {
+            throw failure;
+        }
+
         var list = readings.ToList();
         AddedBatches.Add(list);
         foreach (var (registerId, reading) in list)
@@ -368,6 +378,7 @@ internal sealed class FakeMeterStore : IMeterStore
             stored.Value = incoming.Value;
             stored.Kind = incoming.Kind;
             stored.SubmittedOn = incoming.SubmittedOn;
+            stored.PhotoAttachmentId = incoming.PhotoAttachmentId;
             stored.Note = incoming.Note;
         }
 
@@ -475,6 +486,7 @@ internal sealed class FakeMeterStore : IMeterStore
                     Value = reading.Value,
                     Kind = reading.Kind,
                     SubmittedOn = reading.SubmittedOn,
+                    PhotoAttachmentId = reading.PhotoAttachmentId,
                     Note = reading.Note,
                 });
             }
@@ -550,6 +562,12 @@ internal sealed class ContractTestKit
 
     public FakeLayoutModeService Layout { get; } = new();
 
+    public FakeAttachmentStore Attachments { get; } = new();
+
+    public FakeMediaService Media { get; } = new();
+
+    public FakeFileViewer Viewer { get; } = new();
+
     public Property Property { get; } = new() { Name = "Sample flat", Kind = PropertyKind.Apartment };
 
     public SupplierEditViewModel CreateSupplierEditor() =>
@@ -564,10 +582,10 @@ internal sealed class ContractTestKit
     public MeterEditViewModel CreateMeterEditor() =>
         new(Meters, Contracts, Clock, Localizer, Dialogs, Navigation, Toast, CreateMeterEditor);
 
-    public ReadingHistoryViewModel CreateHistory() => new(Meters, Localizer, Dialogs);
+    public ReadingHistoryViewModel CreateHistory() => new(Meters, Attachments, Viewer, Media, Localizer, Dialogs);
 
     public ReadingsViewModel CreateReadings() =>
-        new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Layout, CreateHistory);
+        new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, Layout, CreateHistory);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }
@@ -583,4 +601,96 @@ internal sealed class FakeErrorLog : IErrorLog
     public string ReadAll() => Text;
 
     public void Clear() => Text = string.Empty;
+}
+
+internal sealed class FakeAttachmentStore : IAttachmentStore
+{
+    /// <summary>The attachments added so far with the bytes they were given.</summary>
+    public List<(Attachment Meta, byte[] Content)> Added { get; } = [];
+
+    public List<Guid> Deleted { get; } = [];
+
+    /// <summary>When set, <see cref="AddAsync"/> rejects the file with these errors.</summary>
+    public ValidationResult? Rejection { get; set; }
+
+    /// <summary>Ids whose file is reported missing.</summary>
+    public HashSet<Guid> MissingFiles { get; } = [];
+
+    public async Task<Attachment> AddAsync(Attachment meta, Stream content, CancellationToken ct = default)
+    {
+        if (Rejection is { } rejection)
+        {
+            throw new AttachmentRejectedException(rejection);
+        }
+
+        using var copy = new MemoryStream();
+        await content.CopyToAsync(copy, ct);
+        meta.SizeBytes = copy.Length;
+        meta.Sha256 = new string('a', 64);
+        Added.Add((meta, copy.ToArray()));
+        return meta;
+    }
+
+    public Task<Attachment?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Added.Select(a => a.Meta).FirstOrDefault(a => a.Id == id && !Deleted.Contains(id)));
+
+    public Task<Stream?> OpenReadAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult<Stream?>(Added.FirstOrDefault(a => a.Meta.Id == id) is { Content: { } bytes } ? new MemoryStream(bytes) : null);
+
+    public Task<string?> GetFilePathAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult<string?>(MissingFiles.Contains(id) || Added.All(a => a.Meta.Id != id) ? null : $"/attachments/{id}.jpg");
+
+    public Task<IReadOnlyList<Attachment>> ListByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<Attachment>>([.. Added.Select(a => a.Meta).Where(a => a.OwnerKind == kind && a.OwnerId == ownerId && !Deleted.Contains(a.Id))]);
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        Deleted.Add(id);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeMediaService : IMediaService
+{
+    public bool IsCaptureSupported { get; set; } = true;
+
+    /// <summary>What the next camera / gallery call returns; null = the user cancelled.</summary>
+    public PickedFile? Next { get; set; }
+
+    /// <summary>When set, the next call throws it (e.g. <see cref="MediaPermissionDeniedException"/>).</summary>
+    public Exception? Failure { get; set; }
+
+    public int CaptureCalls { get; private set; }
+
+    public int PickCalls { get; private set; }
+
+    public static PickedFile Photo(string name = "dial.jpg", string contentType = "image/jpeg", params byte[] bytes) =>
+        new(name, contentType, () => Task.FromResult<Stream>(new MemoryStream(bytes.Length == 0 ? [1, 2, 3] : bytes)));
+
+    public Task<PickedFile?> CapturePhotoAsync()
+    {
+        CaptureCalls++;
+        return Result();
+    }
+
+    public Task<PickedFile?> PickPhotoAsync()
+    {
+        PickCalls++;
+        return Result();
+    }
+
+    public Task<PickedFile?> PickFileAsync(string[] contentTypes) => Result();
+
+    private Task<PickedFile?> Result() => Failure is { } failure ? Task.FromException<PickedFile?>(failure) : Task.FromResult(Next);
+}
+
+internal sealed class FakeFileViewer : IFileViewer
+{
+    public List<(string Path, string ContentType)> Opened { get; } = [];
+
+    public Task OpenAsync(string path, string contentType)
+    {
+        Opened.Add((path, contentType));
+        return Task.CompletedTask;
+    }
 }
