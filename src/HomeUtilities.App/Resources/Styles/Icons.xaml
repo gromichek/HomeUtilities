@@ -52,6 +52,11 @@
         <On Platform="Android" Value="&#xE889;" />
         <On Platform="WinUI" Value="&#xE81C;" />
     </OnPlatform>
+    <!-- Paid: the "mark as paid" quick action (Material task_alt / Segoe CheckMark). Proposed for the UI guidelines table. -->
+    <OnPlatform x:Key="IconPaid" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE2E6;" />
+        <On Platform="WinUI" Value="&#xE73E;" />
+    </OnPlatform>
     <OnPlatform x:Key="IconPhoto" x:TypeArguments="x:String">
         <On Platform="Android" Value="&#xE412;" />
         <On Platform="WinUI" Value="&#xE722;" />
@@ -79,6 +84,11 @@
     <FontImageSource x:Key="IconOpenLinkSource"
                      FontFamily="{StaticResource IconFontFamily}"
                      Glyph="{StaticResource IconOpenLink}"
+                     Size="20"
+                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+    <FontImageSource x:Key="IconPaidSource"
+                     FontFamily="{StaticResource IconFontFamily}"
+                     Glyph="{StaticResource IconPaid}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconHelpSource"

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+                xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.BillsPage"
+                x:DataType="vm:BillsViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+    <views:PageBase.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:HexColorConverter x:Key="HexColor" />
+    </views:PageBase.Resources>
+
+    <Grid x:Name="Root" ColumnDefinitions="*,0">
+
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*" Padding="12" RowSpacing="8">
+            <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
+                    ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                    HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
+
+            <!-- Filters: property, year with ‹ ›, status. -->
+            <Border Grid.Row="1" Style="{StaticResource SectionCard}" Padding="12" IsVisible="{Binding HasItems}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding Texts.PropertyFilterLabel}" Style="{StaticResource MutedLabel}" />
+                    <Border Padding="12,8" StrokeShape="RoundRectangle 8"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChoosePropertyFilterCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding PropertyFilterName}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        </Grid>
+                    </Border>
+
+                    <Label Text="{Binding Texts.YearLabel}" Style="{StaticResource MutedLabel}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                                Command="{Binding PreviousYearCommand}"
+                                ToolTipProperties.Text="{Binding Texts.PreviousYearText}"
+                                SemanticProperties.Description="{Binding Texts.PreviousYearText}" />
+                        <Label Grid.Column="1" Text="{Binding YearText}" FontAttributes="Bold"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                                Command="{Binding NextYearCommand}"
+                                ToolTipProperties.Text="{Binding Texts.NextYearText}"
+                                SemanticProperties.Description="{Binding Texts.NextYearText}" />
+                        <Button Grid.Column="3" Text="{Binding Texts.AllYearsText}" Command="{Binding ToggleAllYearsCommand}"
+                                Style="{StaticResource TextButton}" />
+                    </Grid>
+
+                    <Label Text="{Binding Texts.StatusFilterLabel}" Style="{StaticResource MutedLabel}" />
+                    <Border Padding="12,8" StrokeShape="RoundRectangle 8"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChooseStatusFilterCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding StatusFilterName}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Totals of the filtered list. -->
+                    <Label Text="{Binding TotalsText}" FontAttributes="Bold" IsVisible="{Binding TotalsText, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Grid.Row="2" Text="{Binding NothingFoundText}" Style="{StaticResource MutedLabel}"
+                   HorizontalTextAlignment="Center" IsVisible="{Binding ShowNothingFound}" />
+
+            <CollectionView Grid.Row="3" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:BillItemViewModel">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" x:DataType="vm:BillItemViewModel" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" x:DataType="vm:BillItemViewModel" Binding="{Binding IsHighlighted}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="2">
+                                <Border Grid.Column="0" Grid.Row="0" WidthRequest="14" HeightRequest="14" StrokeShape="RoundRectangle 7"
+                                        StrokeThickness="0" VerticalOptions="Center"
+                                        BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}" />
+                                <VerticalStackLayout Grid.Column="1" Grid.Row="0" Spacing="0">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                    <Label Text="{Binding SupplierName}" Style="{StaticResource MutedLabel}" FontSize="13" IsVisible="{Binding HasSupplier}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="2" Grid.Row="0" HorizontalOptions="End" Spacing="0">
+                                    <Label Text="{Binding TotalText}" FontAttributes="Bold" HorizontalTextAlignment="End" />
+                                    <Label Text="{Binding PeriodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalTextAlignment="End" />
+                                </VerticalStackLayout>
+
+                                <!-- Status badge: grey unpaid, yellow partially paid, red overdue, green paid. -->
+                                <Label Grid.Column="1" Grid.Row="1" Text="{Binding BadgeText}" FontAttributes="Bold" FontSize="13"
+                                       Style="{StaticResource MutedLabel}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgePaid}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgePartial}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgeOverdue}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="2" Grid.Row="1" Text="{Binding DifferenceText}" FontSize="13" HorizontalTextAlignment="End"
+                                       Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDifference}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding DifferenceHigher}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding DifferenceLower}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+
+                                <!-- Quick action on open bills. -->
+                                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Text="{Binding MarkPaidText}" Command="{Binding MarkPaidCommand}"
+                                        ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,6,0,0"
+                                        IsVisible="{Binding CanMarkPaid}"
+                                        ToolTipProperties.Text="{Binding MarkPaidText}"
+                                        SemanticProperties.Description="{Binding MarkPaidText}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout Grid.Row="3" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
+                                 IsVisible="{Binding IsEmpty}">
+                <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <!-- Phone layout: floating add button, bottom-right. -->
+            <Button Grid.Row="0" Grid.RowSpan="4" Style="{StaticResource FabButton}"
+                    Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
+                    HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
+                    IsVisible="{Binding ShowAddFab}"
+                    ToolTipProperties.Text="{Binding AddText}"
+                    SemanticProperties.Description="{Binding AddText}" />
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <!-- IsVisible must be evaluated on the page view model, not on the (possibly null) editor. -->
+            <ContentView IsVisible="{Binding HasSelection}">
+                <views:BillEditView BindingContext="{Binding SelectedEditor}" />
+            </ContentView>
+            <Label Text="{Binding SelectHintText}" Style="{StaticResource MutedLabel}"
+                   HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowSelectHint}" />
+        </Grid>
+    </Grid>
+
+</views:PageBase>

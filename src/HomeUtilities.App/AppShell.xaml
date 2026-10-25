@@ -52,7 +52,7 @@
         <FlyoutItem.Icon>
             <FontImageSource Glyph="☰" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
-        <ShellContent Title="{Binding BillsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+        <ShellContent Title="{Binding BillsTitle}" ContentTemplate="{DataTemplate views:BillsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding PaymentsTitle}" Route="Payments">

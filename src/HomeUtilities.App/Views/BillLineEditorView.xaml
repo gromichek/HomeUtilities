@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.BillLineEditorView"
+             x:DataType="vm:BillLineEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+
+            <Label Text="{Binding Texts.DescriptionLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Description}" MaxLength="{x:Static core:InputLimits.Text}" />
+            <Label Text="{Binding DescriptionError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding DescriptionError, Converter={StaticResource HasText}}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{Binding Texts.QuantityLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding QuantityText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{Binding Texts.UnitLabel}" Style="{StaticResource MutedLabel}" />
+                    <Entry Text="{Binding Unit}" MaxLength="{x:Static core:InputLimits.Code}" />
+                </VerticalStackLayout>
+            </Grid>
+            <Label Text="{Binding QuantityError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding QuantityError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding Texts.UnitPriceLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding UnitPriceText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+            <Label Text="{Binding UnitPriceError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding UnitPriceError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding Common.NetLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Amounts.NetText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+            <Label Text="{Binding NetError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding NetError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding Common.VatPercentLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Amounts.VatPercentText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+            <Label Text="{Binding VatPercentError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding VatPercentError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding Common.VatLabel}" Style="{StaticResource MutedLabel}" />
+            <Label Text="{Binding Amounts.VatText}" />
+
+            <Label Text="{Binding Common.GrossLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Amounts.GrossText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+            <Label Text="{Binding GrossError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding GrossError, Converter={StaticResource HasText}}" />
+            <Label Text="{Binding Common.AmountsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+
+            <Label Text="{Binding Texts.CategoryLabel}" Style="{StaticResource MutedLabel}" />
+            <Picker ItemsSource="{Binding CategoryChoices}"
+                    ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                    SelectedIndex="{Binding SelectedCategoryIndex, Mode=TwoWay}" />
+
+            <!-- Line-level custom fields of the contract. -->
+            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding FieldRows}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CustomFieldValueRowViewModel">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Name}" Style="{StaticResource MutedLabel}" />
+                            <Entry Text="{Binding Text}" MaxLength="500" IsVisible="{Binding IsText}" />
+                            <Entry Text="{Binding Text}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" IsVisible="{Binding IsNumber}" />
+                            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsDate}">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Switch IsToggled="{Binding HasDate}" />
+                                    <Label Text="{Binding DateSetText}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                                <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
+                            </VerticalStackLayout>
+                            <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Label Text="{Binding Texts.NoteLabel}" Style="{StaticResource MutedLabel}" />
+            <Editor Text="{Binding Note}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+            <Label Text="{Binding NoteError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding NoteError, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

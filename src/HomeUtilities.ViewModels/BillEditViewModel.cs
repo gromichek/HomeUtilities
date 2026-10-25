@@ -22,6 +22,12 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 {
     protected override HelpTopic? GuideTopic => HelpTopic.Bills;
 
+    /// <summary>Navigation parameter (<c>yyyy-MM</c>) with the period a new bill starts with.</summary>
+    public const string PeriodParameter = "period";
+
+    /// <summary>Navigation parameter (a <see cref="decimal"/>) with the calculated total shown as a hint in the Total field.</summary>
+    public const string GrossParameter = "gross";
+
     /// <summary>The properties that mark the editor dirty when the user changes them.</summary>
     private static readonly HashSet<string> DirtyFields =
     [
@@ -202,6 +208,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private string _statusText = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStatusPaid), nameof(IsStatusPartial), nameof(IsStatusOverdue))]
     private BillBadgeKind _statusKind;
 
     [ObservableProperty]
@@ -329,6 +336,12 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     public bool ShowComparisonNote => ComparisonNote.Length > 0;
 
     public bool HasLinesWarning => LinesWarning.Length > 0;
+
+    public bool IsStatusPaid => StatusKind is BillBadgeKind.Paid or BillBadgeKind.Prepaid;
+
+    public bool IsStatusPartial => StatusKind == BillBadgeKind.PartiallyPaid;
+
+    public bool IsStatusOverdue => StatusKind == BillBadgeKind.Overdue;
 
     public bool HasCategoryColor => SelectedCategoryColor.Length > 0;
 

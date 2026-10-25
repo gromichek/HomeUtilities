@@ -102,6 +102,11 @@ public static class MauiProgram
         builder.Services.AddTransient<ChargesViewModel>();
         builder.Services.AddTransient<ReadingHistoryViewModel>();
         builder.Services.AddTransient<Func<ReadingHistoryViewModel>>(sp => () => sp.GetRequiredService<ReadingHistoryViewModel>());
+        builder.Services.AddSingleton<QuickPayService>();
+        builder.Services.AddSingleton<BillFilterState>();
+        builder.Services.AddTransient<BillsViewModel>();
+        builder.Services.AddTransient<BillEditViewModel>();
+        builder.Services.AddTransient<Func<BillEditViewModel>>(sp => () => sp.GetRequiredService<BillEditViewModel>());
         builder.Services.AddTransient<CategoriesViewModel>();
         builder.Services.AddTransient<CategoryEditViewModel>();
         builder.Services.AddTransient<Func<CategoryEditViewModel>>(sp => () => sp.GetRequiredService<CategoryEditViewModel>());
@@ -122,6 +127,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ReadingHistoryPage>();
         builder.Services.AddTransient<SuppliersPage>();
         builder.Services.AddTransient<SupplierEditPage>();
+        builder.Services.AddTransient<BillsPage>();
+        builder.Services.AddTransient<BillEditPage>();
         builder.Services.AddTransient<CategoriesPage>();
         builder.Services.AddTransient<CategoryEditPage>();
         builder.Services.AddTransient<TariffComponentEditPage>();
