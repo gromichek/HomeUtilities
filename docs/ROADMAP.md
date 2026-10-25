@@ -41,6 +41,7 @@ is written; the list below is the plan and will change.
 ## Phase 5 — Bills, payments, balance
 - T-019 **In-app snackbar/toast control** (both platforms, also replaces the Windows no-op toast; needed for "Undo"), bill entry (total + optional lines + attachment), difference vs calculation, status badges, "Paid" quick action with Undo / Cancel payment (+ `Payment.CreatedByQuickAction` + migration)
 - T-020 Payments, allocation, prepayment, balance
+- T-020a "Quantity from the bill" basis (heating distributed by the supplier), VAT on the total
 - T-021 Equalized plans and annual settlement view; property tax installments
 - T-022 Dashboard: to-do (readings window, due bills, overdue, verification), balances
 
