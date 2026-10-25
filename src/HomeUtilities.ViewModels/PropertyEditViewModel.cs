@@ -137,10 +137,10 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        IToastService toast,
+        ISnackbarService snackbar,
         Func<ContractEditViewModel> contractEditorFactory,
         Func<MeterEditViewModel> meterEditorFactory)
-        : base(localizer, dialogs, navigation, toast)
+        : base(localizer, dialogs, navigation, snackbar)
     {
         _store = store;
         _contractStore = contractStore;

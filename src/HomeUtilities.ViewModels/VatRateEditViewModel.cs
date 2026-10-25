@@ -55,8 +55,8 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        IToastService toast)
-        : base(localizer, dialogs, navigation, toast)
+        ISnackbarService snackbar)
+        : base(localizer, dialogs, navigation, snackbar)
     {
         _store = store;
         _tariffStore = tariffStore;

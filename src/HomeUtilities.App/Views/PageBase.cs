@@ -5,6 +5,21 @@ namespace HomeUtilities.App.Views;
 /// <summary>Forwards the page lifecycle to the view model.</summary>
 public abstract class PageBase : ContentPage
 {
+    // Every page gets the in-app snackbar: a template with the page content and the snackbar host on top of it.
+    // (Not a system notification — those crash the unpackaged Windows app, see docs/UI_GUIDELINES.md §6a.)
+    protected PageBase()
+    {
+        ControlTemplate = new ControlTemplate(() =>
+        {
+            var host = new SnackbarHost();
+            var root = new Grid();
+            root.Children.Add(new ContentPresenter());
+            root.Children.Add(host);
+            root.SizeChanged += (_, _) => host.FitTo(root.Width);
+            return root;
+        });
+    }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();

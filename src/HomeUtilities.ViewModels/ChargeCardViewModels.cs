@@ -207,6 +207,22 @@ public sealed partial class ChargeCardViewModel : ObservableObject
 
     public bool ShowError => Status == ChargeCardStatus.Error;
 
+    /// <summary>"Bill: 46,02 € · +0,92 € · Paid ✓" when a bill exists for the month; empty otherwise.</summary>
+    public string BillText { get; set; } = string.Empty;
+
+    public bool HasBill => BillText.Length > 0;
+
+    /// <summary>Opens the bill.</summary>
+    public IRelayCommand? OpenBillCommand { get; set; }
+
+    /// <summary>"Enter bill": shown while the month has no bill for the contract.</summary>
+    public string EnterBillText { get; set; } = string.Empty;
+
+    public bool ShowEnterBill => !HasBill && EnterBillText.Length > 0;
+
+    /// <summary>Opens a new bill with the contract, the month and the calculated total as a suggestion.</summary>
+    public IRelayCommand? EnterBillCommand { get; set; }
+
     public string ErrorText { get; init; } = string.Empty;
 
     /// <summary>Totals row (Net · VAT · Total) at the end of the lines.</summary>

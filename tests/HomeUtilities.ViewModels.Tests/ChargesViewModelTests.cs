@@ -1,4 +1,6 @@
 using System.Globalization;
+using HomeUtilities.Core.Billing;
+using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
@@ -640,5 +642,86 @@ public class ChargesViewModelTests : IDisposable
         Assert.Equal(2, lines.Length);
         Assert.Contains(lines, l => l.Contains("12.10 Currency_Symbol_EUR"));
         Assert.Contains(lines, l => l.Contains("2.42 Currency_Symbol_LVL"));
+    }
+
+    // ---- Bills (T-019) --------------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task CardWithoutABill_OffersEnterBill_WithTheCalculatedTotalAsASuggestion()
+    {
+        // 5.500 m³ × 1.41 → total 9.39
+        var (contract, _, _) = AddWater();
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.False(card.HasBill);
+        Assert.True(card.ShowEnterBill);
+        Assert.Equal("ChargesEnterBill [en]", card.EnterBillText);
+
+        card.EnterBillCommand!.Execute(null);
+        await Task.Delay(50);
+
+        var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.Equal(Routes.BillEdit, route);
+        Assert.Equal(contract.Id, parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal(_kit.Property.Id, parameters[EditorNavigation.PropertyIdParameter]);
+        Assert.Equal("2026-10", parameters[BillEditViewModel.PeriodParameter]);
+        Assert.Equal(9.39m, parameters[BillEditViewModel.GrossParameter]);
+    }
+
+    [Fact]
+    public async Task CardWithoutATariff_OffersEnterBill_WithoutASuggestion()
+    {
+        AddContract("Waste", null, null);
+        var vm = await LoadAsync();
+
+        vm.Cards[0].EnterBillCommand!.Execute(null);
+        await Task.Delay(50);
+
+        var (_, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.False(parameters!.ContainsKey(BillEditViewModel.GrossParameter));
+    }
+
+    [Fact]
+    public async Task CardWithABill_ShowsTheBillTheDifferenceAndTheStatus_AndOpensTheBill()
+    {
+        var (contract, _, _) = AddWater();
+        var bill = Bill.CreateFor(contract, new YearMonth(2026, 10), _kit.Clock);
+        bill.Gross = 10.31m;
+        bill.DueOn = new DateOnly(2026, 11, 20);
+        bill.CalculatedSnapshot = new CalculatedCharge(
+            contract.Id, new YearMonth(2026, 10), Currency.EUR,
+            [new ChargeLine(Guid.NewGuid(), "Water", ServiceKind.ColdWater, contract.CategoryId, ChargeBasis.PerUnit, 5.5m, 1.41m, 7.76m, 21m, 1.63m, 9.39m, false, true, [])],
+            7.76m, 1.63m, 9.39m, true, []);
+        _kit.Bills.All.Add(bill);
+        var payment = new Payment { ContractId = contract.Id, PaidOn = Today, Amount = 10.31m };
+        payment.Allocations.Add(new PaymentAllocation { PaymentId = payment.Id, BillId = bill.Id, Amount = 10.31m });
+        _kit.Payments.Add(payment);
+
+        var vm = await LoadAsync();
+
+        // bill 10.31 against the calculated 9.39: +0.92
+        var card = Assert.Single(vm.Cards);
+        Assert.True(card.HasBill);
+        Assert.False(card.ShowEnterBill);
+        Assert.Equal("ChargesBillLine 10.31 Currency_Symbol_EUR [en] · +0.92 Currency_Symbol_EUR [en] · BillBadgePaid [en] [en]", card.BillText);
+
+        card.OpenBillCommand!.Execute(null);
+        await Task.Delay(50);
+
+        var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.Equal(Routes.BillEdit, route);
+        Assert.Equal(bill.Id, parameters![EditorNavigation.IdParameter]);
+    }
+
+    [Fact]
+    public async Task OpenFor_WithAMonth_ShowsThatMonth()
+    {
+        AddWater();
+        var vm = await LoadAsync();
+
+        await vm.OpenForAsync(_kit.Property.Id, null, new YearMonth(2026, 9));
+
+        Assert.Equal(new YearMonth(2026, 9), vm.Month);
     }
 }

@@ -8,7 +8,7 @@ public class SettingsViewModelTests
 
     private FakeClipboardService Clipboard { get; } = new();
 
-    private FakeToastService Toast { get; } = new();
+    private FakeSnackbarService Toast { get; } = new();
 
     private FakeBackupService Backup { get; } = new();
 

@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
@@ -26,11 +27,17 @@ public class SampleDataGeneratorTests
             Meters = new MeterStore(_test.Factory);
             Tariffs = new TariffStore(_test.Factory);
             VatRates = new VatRateStore(_test.Factory);
-            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, _test.Clock);
+            Bills = new BillStore(_test.Factory);
+            Payments = new PaymentStore(_test.Factory);
+            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, Bills, Payments, new ChargeInputLoader(_test.Factory), _test.Clock);
             Loader = new ChargeInputLoader(_test.Factory);
         }
 
         public TariffStore Tariffs { get; }
+
+        public BillStore Bills { get; }
+
+        public PaymentStore Payments { get; }
 
         public VatRateStore VatRates { get; }
 
@@ -403,6 +410,141 @@ public class SampleDataGeneratorTests
         var b = Snapshot(await AllMetersAsync(second));
         Assert.NotEmpty(a);
         Assert.Equal(a, b);
+    }
+
+    // ---- Bills ----------------------------------------------------------------------------------------------------
+
+    private static async Task<(List<Bill> Bills, List<Payment> Payments, Dictionary<Guid, Contract> Contracts)> LoadBillsAsync(Rig rig)
+    {
+        await rig.Generator.FillAsync();
+        var bills = (await rig.Bills.ListAsync()).ToList();
+        var payments = (await rig.Payments.ListAsync()).ToList();
+        var contracts = (await rig.Contracts.ListAsync()).ToDictionary(c => c.Id);
+        return (bills, payments, contracts);
+    }
+
+    [Fact]
+    public async Task Bills_a_year_of_the_flat_plus_a_one_off_expense_all_valid()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+
+        // 5 in-arrears contracts x 12 months + 12 internet bills (10 months back to next month) + 1 repair
+        Assert.Equal(5 * 12 + 12 + 1, bills.Count);
+        foreach (var bill in bills)
+        {
+            var contract = bill.ContractId is { } id ? contracts[id] : null;
+            var result = BillValidator.Validate(bill, contract);
+            Assert.True(result.IsValid, $"{bill.Number}: {string.Join(", ", result.Errors.Select(e => e.Code))}");
+        }
+
+        var byId = bills.ToDictionary(b => b.Id);
+        foreach (var payment in payments)
+        {
+            var result = PaymentValidator.Validate(payment, byId);
+            Assert.True(result.IsValid, $"{payment.Reference}: {string.Join(", ", result.Errors.Select(e => e.Code))}");
+        }
+
+        var oneOff = Assert.Single(bills, b => b.Kind == BillKind.OneOff);
+        Assert.Equal(("Boiler repair", null), (oneOff.Title, oneOff.ContractId));
+    }
+
+    [Fact]
+    public async Task Bills_cover_every_status_paid_partially_paid_overdue_unpaid_and_prepaid()
+    {
+        using var rig = new Rig();
+        var (bills, payments, _) = await LoadBillsAsync(rig);
+        var today = rig.Clock.Today;
+
+        var states = bills.Select(b => (Bill: b, State: BillStatus.Of(b, payments, today))).ToList();
+
+        Assert.Contains(states, s => s.State.IsPaid && !s.State.IsPrepaid);
+        var prepaid = Assert.Single(states, s => s.State.IsPrepaid);
+        Assert.Equal(YearMonth.From(today).AddMonths(1), prepaid.Bill.Period);
+        var partial = Assert.Single(states, s => s.State.Paid > 0 && s.State.Open > 0);
+        Assert.False(partial.State.IsOverdue);
+        Assert.Contains(states, s => s.State.IsOverdue);
+        Assert.Contains(states, s => s.State.Paid == 0 && !s.State.IsOverdue && !s.State.IsPaid);
+        Assert.All(states.Where(s => s.State.Paid > s.Bill.Gross), s => Assert.Fail("A bill is overpaid."));
+    }
+
+    [Fact]
+    public async Task Bills_are_mostly_paid_with_the_quick_action_one_payment_per_bill()
+    {
+        using var rig = new Rig();
+        var (bills, payments, _) = await LoadBillsAsync(rig);
+
+        var quick = payments.Where(p => p.CreatedByQuickAction).ToList();
+        Assert.True(quick.Count > bills.Count / 2);
+        Assert.All(quick, p =>
+        {
+            var allocation = Assert.Single(p.Allocations);
+            Assert.Equal(p.Amount, allocation.Amount);
+            Assert.Equal(PaymentMethod.BankTransfer, p.Method);
+            Assert.False(string.IsNullOrWhiteSpace(p.Reference));
+        });
+        Assert.Contains(payments, p => !p.CreatedByQuickAction);
+    }
+
+    [Fact]
+    public async Task Bills_water_has_the_quantity_on_the_bill_a_snapshot_and_differences_above_and_below_five_percent()
+    {
+        using var rig = new Rig();
+        var (bills, _, contracts) = await LoadBillsAsync(rig);
+        var water = bills.Where(b => b.ContractId is { } id && contracts[id].Service == ServiceKind.ColdWater).ToList();
+
+        Assert.Equal(12, water.Count);
+        Assert.All(water, b =>
+        {
+            Assert.NotNull(b.CalculatedSnapshot);
+            Assert.NotNull(b.ConsumptionOnBill);
+        });
+        var tones = water
+            .Select(b => BillComparison.ToneOf(BillComparison.Compare(b, b.CalculatedSnapshot, BillComparison.MeteredQuantity(b.CalculatedSnapshot)).DifferencePercent))
+            .ToList();
+        Assert.Contains(DifferenceTone.Higher, tones);
+        Assert.Contains(DifferenceTone.Lower, tones);
+        Assert.Contains(DifferenceTone.Neutral, tones);
+    }
+
+    [Fact]
+    public async Task Bills_one_electricity_bill_has_lines_that_add_up_and_a_custom_field_value()
+    {
+        using var rig = new Rig();
+        var (bills, _, contracts) = await LoadBillsAsync(rig);
+
+        var detailed = Assert.Single(bills, b => b.Lines.Count > 0);
+
+        Assert.Equal(ServiceKind.Electricity, contracts[detailed.ContractId!.Value].Service);
+        Assert.Empty(BillChecks.Warnings(detailed));
+        var field = Assert.Single(detailed.CustomFields);
+        Assert.Equal(("Supplier reference", CustomFieldKind.Text), (field.Name, field.Kind));
+        Assert.Equal(contracts[detailed.ContractId.Value].CustomFields.Single().Id, field.DefinitionId);
+    }
+
+    [Fact]
+    public async Task Bills_of_the_heating_contract_have_no_snapshot_because_part_of_the_amount_comes_from_the_bill()
+    {
+        using var rig = new Rig();
+        var (bills, _, contracts) = await LoadBillsAsync(rig);
+
+        var heating = bills.Where(b => b.ContractId is { } id && contracts[id].Service == ServiceKind.Heating).ToList();
+
+        Assert.Equal(12, heating.Count);
+        Assert.All(heating, b => Assert.Null(b.CalculatedSnapshot));
+    }
+
+    [Fact]
+    public async Task Bills_the_internet_contract_is_paid_in_advance_and_due_before_its_month()
+    {
+        using var rig = new Rig();
+        var (bills, _, contracts) = await LoadBillsAsync(rig);
+
+        var internet = bills.Where(b => b.ContractId is { } id && contracts[id].Service == ServiceKind.InternetTv).OrderBy(b => b.Period).ToList();
+
+        Assert.Equal(12, internet.Count);
+        Assert.All(internet, b => Assert.True(b.DueOn <= b.Period.FirstDay));
+        Assert.All(internet, b => Assert.Equal(22.95m, b.Gross));
     }
 
     private static async Task<List<Meter>> AllMetersAsync(Rig rig)

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using HomeUtilities.Core.Common;
 using HomeUtilities.ViewModels;
 using HomeUtilities.ViewModels.Common;
 
@@ -27,7 +28,10 @@ public partial class ChargesPage : PageBase, IQueryAttributable
         }
 
         Guid? contractId = TryGuid(query, EditorNavigation.ContractIdParameter, out var contract) ? contract : null;
-        _ = viewModel.OpenForAsync(propertyId, contractId);
+        YearMonth? month = query.TryGetValue(ChargesViewModel.MonthParameter, out var value) && value is string text && YearMonth.TryParse(text, out var parsed)
+            ? parsed
+            : null;
+        _ = viewModel.OpenForAsync(propertyId, contractId, month);
     }
 
     private static bool TryGuid(IDictionary<string, object> query, string key, out Guid id)

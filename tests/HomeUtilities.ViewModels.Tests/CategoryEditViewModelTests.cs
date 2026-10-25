@@ -162,7 +162,7 @@ public class CategoryEditViewModelTests
 
     private async Task<CategoryEditViewModel> LoadAsync(Category? category)
     {
-        var vm = new CategoryEditViewModel(_store, new FakeLocalizer(_language), _dialogs, _navigation, new FakeToastService());
+        var vm = new CategoryEditViewModel(_store, new FakeLocalizer(_language), _dialogs, _navigation, new FakeSnackbarService());
         await vm.LoadAsync(category?.Id);
         return vm;
     }

@@ -335,14 +335,22 @@ internal sealed class FakeClipboardService : IClipboardService
     }
 }
 
-internal sealed class FakeToastService : IToastService
+internal sealed class FakeSnackbarService : ISnackbarService
 {
+    /// <summary>The messages shown, in order.</summary>
     public List<string> Messages { get; } = [];
 
-    public Task ShowAsync(string message)
+    /// <summary>Every call with its action text and duration.</summary>
+    public List<(string Message, string? Action, TimeSpan? Duration)> Calls { get; } = [];
+
+    /// <summary>What a message with an action returns: true = the user tapped the action.</summary>
+    public Func<string, string?, bool> ActionResult { get; set; } = (_, _) => false;
+
+    public Task<bool> ShowAsync(string message, string? actionText = null, TimeSpan? duration = null)
     {
         Messages.Add(message);
-        return Task.CompletedTask;
+        Calls.Add((message, actionText, duration));
+        return Task.FromResult(actionText is not null && ActionResult(message, actionText));
     }
 }
 
@@ -605,6 +613,7 @@ internal sealed class ContractTestKit
         }
 
         Properties.Stored.Add(Property);
+        Payments.BillContractResolver = id => Bills.All.FirstOrDefault(b => b.Id == id)?.ContractId;
     }
 
     public FakeLanguageService Language { get; } = new();
@@ -635,7 +644,7 @@ internal sealed class ContractTestKit
 
     public FakeClipboardService Clipboard { get; } = new();
 
-    public FakeToastService Toast { get; } = new();
+    public FakeSnackbarService Toast { get; } = new();
 
     public FakeSettingsStore Settings { get; } = new();
 
@@ -647,6 +656,10 @@ internal sealed class ContractTestKit
 
     public FakeErrorLog ErrorLog { get; } = new();
 
+    public FakeBillStore Bills { get; } = new();
+
+    public FakePaymentStore Payments { get; } = new();
+
     public FakeChargeInputLoader ChargeLoader { get; }
 
     public FakeFileViewer Viewer { get; } = new();
@@ -657,7 +670,7 @@ internal sealed class ContractTestKit
         new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast);
 
     public ContractEditViewModel CreateContractEditor() =>
-        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
 
     public TariffComponentEditViewModel CreateTariffEditor() =>
         new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
@@ -680,7 +693,7 @@ internal sealed class ContractTestKit
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, Layout, CreateHistory);
 
     public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
-        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }

@@ -255,6 +255,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("CreatedByQuickAction")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Currency")
                         .HasColumnType("INTEGER");
 

@@ -682,4 +682,167 @@
   <data name="ChargeWarn_TierUsageUnknown" xml:space="preserve"><value>Earlier usage this period is unknown for «{0}»; zero was assumed for the stepped price.</value></data>
   <data name="ChargeWarn_InvalidTariff" xml:space="preserve"><value>The tariff of «{0}» cannot be applied (a stepped price on a net export component).</value></data>
   <data name="ChargeWarn_ContractInactive" xml:space="preserve"><value>The contract is not active in this month.</value></data>
+  <!-- T-019: bills, snackbar, quick payment -->
+  <data name="BillGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="BillTypeLabel" xml:space="preserve"><value>Bill for</value></data>
+  <data name="BillPropertyLabel" xml:space="preserve"><value>Property</value></data>
+  <data name="BillContractLabel" xml:space="preserve"><value>Contract</value></data>
+  <data name="BillPeriodLabel" xml:space="preserve"><value>Period (month of service)</value></data>
+  <data name="BillPeriodHint" xml:space="preserve"><value>The month the bill belongs to — the month of service or readings, not the month it was issued.</value></data>
+  <data name="BillPreviousPeriod" xml:space="preserve"><value>Previous month</value></data>
+  <data name="BillNextPeriod" xml:space="preserve"><value>Next month</value></data>
+  <data name="BillKindLabel" xml:space="preserve"><value>Kind</value></data>
+  <data name="BillTitleLabel" xml:space="preserve"><value>Title</value></data>
+  <data name="BillNumberLabel" xml:space="preserve"><value>Bill number</value></data>
+  <data name="BillHasIssuedOnLabel" xml:space="preserve"><value>Issue date known</value></data>
+  <data name="BillIssuedOnLabel" xml:space="preserve"><value>Issued on</value></data>
+  <data name="BillHasDueOnLabel" xml:space="preserve"><value>Due date known</value></data>
+  <data name="BillDueOnLabel" xml:space="preserve"><value>Due on</value></data>
+  <data name="BillHasServicePeriodLabel" xml:space="preserve"><value>The bill covers several months</value></data>
+  <data name="BillServiceFromLabel" xml:space="preserve"><value>Service from</value></data>
+  <data name="BillServiceToLabel" xml:space="preserve"><value>Service to</value></data>
+  <data name="BillCategoryLabel" xml:space="preserve"><value>Category</value></data>
+  <data name="BillSupplierLabel" xml:space="preserve"><value>Supplier</value></data>
+  <data name="BillAmounts" xml:space="preserve"><value>Amounts</value></data>
+  <data name="BillAmountsHint" xml:space="preserve"><value>Fill in any two of Amount excl. VAT, VAT % and Total — the rest is calculated. The Total alone is enough.</value></data>
+  <data name="BillNetLabel" xml:space="preserve"><value>Amount excl. VAT</value></data>
+  <data name="BillVatPercentLabel" xml:space="preserve"><value>VAT %</value></data>
+  <data name="BillVatLabel" xml:space="preserve"><value>VAT</value></data>
+  <data name="BillGrossLabel" xml:space="preserve"><value>Total</value></data>
+  <data name="BillComparison" xml:space="preserve"><value>Comparison with the calculation</value></data>
+  <data name="BillCalculatedLabel" xml:space="preserve"><value>Calculated total</value></data>
+  <data name="BillDifferenceLabel" xml:space="preserve"><value>Difference</value></data>
+  <data name="BillConsumptionLabel" xml:space="preserve"><value>Quantity on the bill</value></data>
+  <data name="BillMeteredLabel" xml:space="preserve"><value>Metered quantity</value></data>
+  <data name="BillLossesLabel" xml:space="preserve"><value>Water losses / difference</value></data>
+  <data name="BillShowCharges" xml:space="preserve"><value>Show charges</value></data>
+  <data name="BillUpdateSnapshot" xml:space="preserve"><value>Update snapshot</value></data>
+  <data name="BillNoCalculation" xml:space="preserve"><value>There is no calculation for this period yet.</value></data>
+  <data name="BillLines" xml:space="preserve"><value>Lines</value></data>
+  <data name="BillLineAdd" xml:space="preserve"><value>Add line</value></data>
+  <data name="BillLinesEmpty" xml:space="preserve"><value>No lines. Lines are optional detail; the total above is what counts.</value></data>
+  <data name="BillLinesShow" xml:space="preserve"><value>Show lines</value></data>
+  <data name="BillLinesHide" xml:space="preserve"><value>Hide lines</value></data>
+  <data name="BillLineDelete" xml:space="preserve"><value>Delete line</value></data>
+  <data name="BillFields" xml:space="preserve"><value>Custom fields</value></data>
+  <data name="BillFieldsEmpty" xml:space="preserve"><value>The contract has no custom fields for bills.</value></data>
+  <data name="BillFieldDateSet" xml:space="preserve"><value>Set a date</value></data>
+  <data name="BillAttachments" xml:space="preserve"><value>Bill document</value></data>
+  <data name="BillAttachmentAdd" xml:space="preserve"><value>Add PDF or photo</value></data>
+  <data name="BillAttachmentsEmpty" xml:space="preserve"><value>No document attached.</value></data>
+  <data name="BillAttachmentOpen" xml:space="preserve"><value>Open</value></data>
+  <data name="BillAttachmentRemove" xml:space="preserve"><value>Remove attachment</value></data>
+  <data name="BillPayment" xml:space="preserve"><value>Payment</value></data>
+  <data name="BillPaidAmountLabel" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillOpenAmountLabel" xml:space="preserve"><value>Open</value></data>
+  <data name="BillPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillPaymentsEmpty" xml:space="preserve"><value>No payments yet.</value></data>
+  <data name="BillRemovePayment" xml:space="preserve"><value>Remove payment</value></data>
+  <data name="BillPaymentsHint" xml:space="preserve"><value>The Paid button records a bank transfer for the open amount, dated today. Payments with several bills come later.</value></data>
+  <data name="BillNotesLabel" xml:space="preserve"><value>Comment</value></data>
+  <data name="BillDelete" xml:space="preserve"><value>Delete bill</value></data>
+  <data name="BillLineDescriptionLabel" xml:space="preserve"><value>Description</value></data>
+  <data name="BillLineQuantityLabel" xml:space="preserve"><value>Quantity</value></data>
+  <data name="BillLineUnitLabel" xml:space="preserve"><value>Unit</value></data>
+  <data name="BillLineUnitPriceLabel" xml:space="preserve"><value>Unit price</value></data>
+  <data name="BillLineCategoryLabel" xml:space="preserve"><value>Category</value></data>
+  <data name="BillLineNoteLabel" xml:space="preserve"><value>Note</value></data>
+  <data name="BillsPropertyFilter" xml:space="preserve"><value>Property</value></data>
+  <data name="BillsYearLabel" xml:space="preserve"><value>Year</value></data>
+  <data name="BillsPreviousYear" xml:space="preserve"><value>Previous year</value></data>
+  <data name="BillsNextYear" xml:space="preserve"><value>Next year</value></data>
+  <data name="BillsAllYears" xml:space="preserve"><value>All years</value></data>
+  <data name="BillsStatusFilter" xml:space="preserve"><value>Status</value></data>
+  <data name="BillsBilled" xml:space="preserve"><value>Billed</value></data>
+  <data name="BillsPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillsOpen" xml:space="preserve"><value>Open</value></data>
+  <data name="BillNewTitle" xml:space="preserve"><value>New bill</value></data>
+  <data name="BillEditTitle" xml:space="preserve"><value>Bill {0}</value></data>
+  <data name="BillOneOffTitle" xml:space="preserve"><value>Expense «{0}»</value></data>
+  <data name="BillTypeContract" xml:space="preserve"><value>For a contract</value></data>
+  <data name="BillTypeOneOff" xml:space="preserve"><value>One-off expense</value></data>
+  <data name="BillAllProperties" xml:space="preserve"><value>All properties</value></data>
+  <data name="BillChooseProperty" xml:space="preserve"><value>Choose a property</value></data>
+  <data name="BillChooseContract" xml:space="preserve"><value>Choose a contract</value></data>
+  <data name="BillChooseCategory" xml:space="preserve"><value>Choose a category</value></data>
+  <data name="BillChooseSupplier" xml:space="preserve"><value>Choose a supplier</value></data>
+  <data name="BillNoSupplier" xml:space="preserve"><value>No supplier</value></data>
+  <data name="BillNoContractsForProperty" xml:space="preserve"><value>This property has no contracts yet.</value></data>
+  <data name="BillLineSameCategory" xml:space="preserve"><value>Same as the bill</value></data>
+  <data name="BillLineNew" xml:space="preserve"><value>New line</value></data>
+  <data name="BillLineEdit" xml:space="preserve"><value>Edit line</value></data>
+  <data name="BillSnapshotChanged" xml:space="preserve"><value>The calculation changed since the bill was entered (snapshot {0} → now {1}).</value></data>
+  <data name="BillLinesMismatch" xml:space="preserve"><value>The lines add up to {0}, the bill total is {1}.</value></data>
+  <data name="BillStatusAll" xml:space="preserve"><value>All</value></data>
+  <data name="BillStatusOpen" xml:space="preserve"><value>Open</value></data>
+  <data name="BillStatusOverdue" xml:space="preserve"><value>Overdue</value></data>
+  <data name="BillStatusPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillBadgeUnpaid" xml:space="preserve"><value>Unpaid</value></data>
+  <data name="BillBadgePartial" xml:space="preserve"><value>Partially paid · open {0}</value></data>
+  <data name="BillBadgeOverdue" xml:space="preserve"><value>Overdue</value></data>
+  <data name="BillBadgePaid" xml:space="preserve"><value>Paid ✓</value></data>
+  <data name="BillBadgePrepaid" xml:space="preserve"><value>Prepaid ✓</value></data>
+  <data name="BillMarkPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillMarkPaidTooltip" xml:space="preserve"><value>Mark this bill as paid</value></data>
+  <data name="BillMarkedPaid" xml:space="preserve"><value>Bill marked as paid</value></data>
+  <data name="BillUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="BillSaveFirst" xml:space="preserve"><value>Save the bill first, then mark it as paid.</value></data>
+  <data name="BillsEmpty" xml:space="preserve"><value>There are no bills yet. Add the first one with the button below.</value></data>
+  <data name="BillsNothingFound" xml:space="preserve"><value>No bills match the filters.</value></data>
+  <data name="BillAdd" xml:space="preserve"><value>New bill</value></data>
+  <data name="BillSelectHint" xml:space="preserve"><value>Select a bill or add a new one.</value></data>
+  <data name="BillTotals" xml:space="preserve"><value>Billed {0} · Paid {1} · Open {2}</value></data>
+  <data name="BillPaymentRow" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
+  <data name="BillPaymentQuick" xml:space="preserve"><value>Paid button</value></data>
+  <data name="BillPaymentOfBill" xml:space="preserve"><value>{0} of {1} goes to this bill</value></data>
+  <data name="BillRemovePaymentTitle" xml:space="preserve"><value>Remove payment of {0} from {1}?</value></data>
+  <data name="BillRemovePaymentRest" xml:space="preserve"><value>The rest stays on the contract as prepayment.</value></data>
+  <data name="BillRemovePaymentHidden" xml:space="preserve"><value>The payment will be hidden; history is kept.</value></data>
+  <data name="BillPaymentRemoved" xml:space="preserve"><value>Payment removed</value></data>
+  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Payments for this bill stay on the contract as prepayment; a payment made with the Paid button for this bill alone is removed with it.</value></data>
+  <data name="BillAttachmentPending" xml:space="preserve"><value>{0} (will be saved with the bill)</value></data>
+  <data name="BillAttachmentMissing" xml:space="preserve"><value>The file of this attachment is missing.</value></data>
+  <data name="BillAttachmentChoose" xml:space="preserve"><value>Add a document</value></data>
+  <data name="BillAttachmentPdf" xml:space="preserve"><value>Choose a PDF file</value></data>
+  <data name="BillAttachmentImage" xml:space="preserve"><value>Choose a photo or image</value></data>
+  <data name="BillLineSummary" xml:space="preserve"><value>{0} × {1}</value></data>
+  <data name="BillContractNone" xml:space="preserve"><value>(none)</value></data>
+  <data name="BillCalculationFailed" xml:space="preserve"><value>The calculation for this period could not be made.</value></data>
+  <data name="BillCalculationIncomplete" xml:space="preserve"><value>The calculation is incomplete (missing readings or prices).</value></data>
+  <data name="BillBillsCardHeader" xml:space="preserve"><value>Bills</value></data>
+  <data name="BillBillsCardEmpty" xml:space="preserve"><value>No bills for this contract yet.</value></data>
+  <data name="BillBillsCardAll" xml:space="preserve"><value>All bills</value></data>
+  <data name="BillBillsCardAdd" xml:space="preserve"><value>New bill for this contract</value></data>
+  <data name="ChargesBillLine" xml:space="preserve"><value>Bill: {0}</value></data>
+  <data name="ChargesEnterBill" xml:space="preserve"><value>Enter bill</value></data>
+  <data name="ChargesBillOpen" xml:space="preserve"><value>Open the bill</value></data>
+  <data name="Error_amount_inconsistent" xml:space="preserve"><value>Amount excl. VAT, VAT % and Total do not match. Fill in only two of them.</value></data>
+  <data name="Error_amount_gross_required" xml:space="preserve"><value>Enter the Total, or the amount excl. VAT together with the VAT %.</value></data>
+  <data name="Error_amount_vat_percent_out_of_range" xml:space="preserve"><value>VAT % must be between 0 and 100.</value></data>
+  <data name="Error_bill_property_required" xml:space="preserve"><value>Choose a property.</value></data>
+  <data name="Error_bill_category_required" xml:space="preserve"><value>Choose a category.</value></data>
+  <data name="Error_bill_contract_kind_mismatch" xml:space="preserve"><value>A bill needs a contract unless it is a one-off expense.</value></data>
+  <data name="Error_bill_title_required" xml:space="preserve"><value>Enter a title for the expense.</value></data>
+  <data name="Error_bill_contract_mismatch" xml:space="preserve"><value>The bill belongs to another contract.</value></data>
+  <data name="Error_bill_property_mismatch" xml:space="preserve"><value>The property differs from the property of the contract.</value></data>
+  <data name="Error_bill_currency_mismatch" xml:space="preserve"><value>The currency differs from the currency of the contract.</value></data>
+  <data name="Error_bill_service_period_incomplete" xml:space="preserve"><value>Enter both dates of the service period.</value></data>
+  <data name="Error_bill_service_to_before_from" xml:space="preserve"><value>The end of the service period is before its start.</value></data>
+  <data name="Error_bill_due_before_issued" xml:space="preserve"><value>The due date is before the issue date.</value></data>
+  <data name="Error_bill_negative_not_allowed" xml:space="preserve"><value>Only a settlement or a correction may have a negative total.</value></data>
+  <data name="Error_bill_title_too_long" xml:space="preserve"><value>The title is longer than {0} characters.</value></data>
+  <data name="Error_bill_number_too_long" xml:space="preserve"><value>The number is longer than {0} characters.</value></data>
+  <data name="Error_bill_line_description_required" xml:space="preserve"><value>Enter a description.</value></data>
+  <data name="BillBadgeOverdueOpen" xml:space="preserve"><value>Overdue · open {0}</value></data>
+  <data name="Enum_BillKind_Regular" xml:space="preserve"><value>Regular bill</value></data>
+  <data name="Enum_BillKind_Equalized" xml:space="preserve"><value>Equalized payment</value></data>
+  <data name="Enum_BillKind_Settlement" xml:space="preserve"><value>Settlement (annual reconciliation)</value></data>
+  <data name="Enum_BillKind_Correction" xml:space="preserve"><value>Correction</value></data>
+  <data name="Enum_BillKind_TaxInstallment" xml:space="preserve"><value>Tax installment</value></data>
+  <data name="Enum_BillKind_OneOff" xml:space="preserve"><value>One-off expense</value></data>
+  <data name="Enum_PaymentMethod_BankTransfer" xml:space="preserve"><value>Bank transfer</value></data>
+  <data name="Enum_PaymentMethod_Card" xml:space="preserve"><value>Card</value></data>
+  <data name="Enum_PaymentMethod_Cash" xml:space="preserve"><value>Cash</value></data>
+  <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Direct debit</value></data>
+  <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Other</value></data>
 </root>

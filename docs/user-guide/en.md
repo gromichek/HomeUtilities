@@ -11,7 +11,7 @@ built are listed at the end.
 The app is built around a few kinds of records. Most confusion comes from not knowing which record holds which
 information, so start here.
 
-![How suppliers, properties, contracts, meters, readings and categories relate](img/relations.en.svg)
+![How suppliers, properties, contracts, meters, readings, charges, bills and payments relate](img/relations.en.svg)
 
 | Record | What it is | Example |
 |---|---|---|
@@ -25,10 +25,12 @@ information, so start here.
 | **Tariff component** | One priced line of a contract's bill, with prices that change over time and a VAT rate. Several components make the **tariff** of a contract. | "Water supply" 1.41 €/m³ excl. VAT, "Sewerage" 0.86 €/m³ excl. VAT |
 | **Charge** | What a contract should cost for a month: the consumption from the readings × the prices of the tariff, with VAT. Calculated on demand, not stored. | Water, October: 5.500 m³ × 1.41 € = 7.76 € + VAT 21 % = 9.39 € |
 | **VAT rate** | A named VAT percentage that changes over time; tariff components point to it, so a change of the national rate is entered once. | "Standard rate": 21 % |
+| **Bill** | What the supplier actually charged for one month (or any one-off expense without a contract). It is compared with the charge the app calculated. | Water, October: 46.02 €; the app expected 45.10 € |
+| **Payment** | Money you paid. It is allocated to a bill, so the bill is *Paid*; what is not allocated stays on the contract as prepayment. | 03.11.2026: 46.02 € by bank transfer |
 
 **Order of setting things up:** properties → suppliers → contracts (in the property) → meters (in the property,
-linked to contracts) → readings. Enter the **tariff** (prices) of a contract when you want the app to calculate what
-a bill should be. You can add a supplier directly from the contract editor ("＋ New supplier…").
+linked to contracts) → readings → bills. Enter the **tariff** (prices) of a contract when you want the app to calculate what
+a bill should be and to compare your bills with it. You can add a supplier directly from the contract editor ("＋ New supplier…").
 
 ## 2. Screens and common behaviour
 
@@ -36,7 +38,7 @@ a bill should be. You can add a supplier directly from the contract editor ("＋
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
-item **Help**. Screens such as Properties, Suppliers, Readings, Categories, VAT rates and the contract, meter and tariff component
+item **Help**. Screens such as Properties, Suppliers, Readings, Charges, Bills, Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
@@ -54,6 +56,10 @@ left and the editor on the right. Settings shows the current layout (phone / tab
 - Fields marked * are required. A wrong value shows a red message under the field; the app does not save until
   it is fixed.
 - Numbers accept both `,` and `.` as the decimal separator.
+
+**Short messages.** After *Save* or *Copy* a small bar with **Saved** or **Copied** appears at the bottom of the window for a few
+seconds. Some messages have a button, for example **Bill marked as paid · Undo** (it stays a bit longer). The bar does not
+block anything — just carry on.
 
 **Child rows** (parameters, links, registers, custom fields…): the card header has ＋ to add; tap a row to edit it
 in a dialog; the trash icon deletes it (with confirmation).
@@ -99,6 +105,9 @@ Open a property → card **Contracts** → **Add contract**.
   saved. Tap a row to edit it; the arrows change the order.
 - **Custom fields:** extra fields (text, number, amount, date) that will appear when you enter a bill or a bill line
   for this contract.
+- **Bills:** the last six bills of the contract with the month, the total and the status (*Unpaid*, *Paid ✓*…). Tap a
+  row to open the bill, **All bills** opens the Bills screen for this property with the contract highlighted, ＋ enters a
+  new bill for this contract. Available after the contract is saved. See [Bills](#11-bills).
 
 ## 6. Meters
 
@@ -193,7 +202,8 @@ switched on, VAT *Reduced rate*; "Heating" *From the supplier's bill*.
 
 Menu **Charges**: what each contract **should** cost for a month, so you can check the supplier's bill. Nothing is
 stored here — the numbers are calculated every time you open the screen from your readings, tariffs and VAT rates, so
-they always follow the latest data. (Entering the supplier's bill and comparing it comes later.)
+they always follow the latest data. The supplier's bill is entered on the [Bills](#11-bills) screen and compared with
+these numbers.
 
 **Where the numbers come from:** readings → consumption (end reading − start reading) → × price from the tariff →
 net amount → VAT → total. Area-based and per-resident lines use the property's parameters (area, declared residents)
@@ -237,7 +247,83 @@ estimated reading, a reading taken outside the reading window, and unusually hig
 In the contract editor the tariff card has a **Show charges** button that opens this screen for the contract's
 property, scrolled to that contract.
 
-## 11. Settings
+**The bill of the month.** Under the header of each card you see either the bill — *Bill: 46,02 € · +0,92 € · Paid ✓*
+(the total, the difference to the calculation, the status); tap it to open the bill — or the button **Enter bill**. It
+opens a new bill with the contract and the month already chosen, and the calculated total shown in the empty *Total*
+field as a hint (you still type the real amount from the supplier's bill).
+
+## 11. Bills
+
+Menu **Bills**: the invoices you receive from suppliers (and any one-off expense), how far each one is from the app's
+calculation, and whether it is paid. A **bill** is a record of its own: the *charge* (see [Charges](#10-charges)) is
+what the app expects, the bill is what the supplier asked for, the *payment* is what you paid.
+
+**The list.** At the top: filters **Property** (all or one), **Year** (‹ year › or *All years*) and **Status**
+(*All*, *Open*, *Overdue*, *Paid*); the filters are remembered until you close the app. Below them the totals of the
+list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
+category colour, the **total**, the **status badge** and — when the app has a calculation to compare with — the
+difference, for example *+2,15 € (+3,4 %)*: **red** when the bill is more than 5 % above the calculation, **green**
+when it is more than 5 % below, grey otherwise. Tap a row to open the bill. **New bill** (＋ on a phone) starts a new one.
+
+**Status badges** are never typed by hand — they follow the payments of the bill:
+
+| Badge | Meaning |
+|---|---|
+| *Unpaid* (grey) | Nothing paid yet. |
+| *Partially paid · open 26,02 €* (yellow) | Part of the total is paid. |
+| *Overdue* (red) | Something is open and the due date has passed. |
+| *Paid ✓* (green) | Everything is paid. |
+| *Prepaid ✓* (green) | Paid, and the month of the bill has not started yet (internet paid in October for November). |
+
+**Which month does a bill belong to?** To the month of the **service**, not to the month it was issued: readings of
+25–28 October, bill arrives in November → the bill is for **October**. Services paid **in advance** (internet, TV; set
+on the contract as *In advance*) belong to the month they are for: paid in October for November → **November**. The
+editor suggests the right month for the contract and you can change it with ‹ › or by tapping the month.
+
+### Entering a bill
+
+**New bill** asks first what it is for: **For a contract** (choose the property, then the contract) or **One-off
+expense** (a repair, a purchase — no contract; it needs a *Title* and a *Category*). The cards of the editor:
+
+1. **General** — period, kind (regular, equalized payment, settlement, correction, tax installment), title, bill
+   number, *Issued on*, *Due on* (suggested from the contract's payment due day), the service period if one bill covers
+   several months, category and supplier (both taken from the contract; change them if this bill differs). Once saved,
+   the contract cannot be changed.
+2. **Amounts** — *Amount excl. VAT*, *VAT %*, *VAT* and *Total*. **Fill in any two** of the amount excl. VAT, the VAT % and
+   the total; the app calculates the rest (the two you changed last count). The *Total* alone is enough. The VAT % starts
+   with the one of the contract's tariff.
+3. **Comparison with the calculation** (contracts with a tariff) — the calculated total for the month and the
+   **difference** to your bill. *Quantity on the bill* is what the supplier billed in m³; next to the metered quantity it
+   shows **Water losses / difference**, e.g. billed 12,500 m³, metered 12,150 m³ → 0,350 m³. **Show charges** opens the
+   charges of that month. When you save, the calculation of that moment is kept with the bill (a *snapshot*), so later
+   price changes do not rewrite history. If the calculation has changed since, the card says *The calculation changed
+   since the bill was entered (snapshot 45,10 € → now 46,02 €)* and **Update snapshot** takes the new one (save the bill
+   afterwards). The comparison always uses the snapshot.
+4. **Lines** (folded by default) — optional detail rows of the bill: description, quantity, unit, unit price, the
+   amounts (any two, as above), a category of their own and a note. If the lines do not add up to the total you see a
+   warning, not an error — suppliers round differently.
+5. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*).
+6. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
+   document to open it in the system viewer. The file is stored when you save the bill.
+7. **Payment** — the status, how much is paid and open, and the payments of this bill.
+8. **Comment.**
+
+Saving keeps you in the editor. Deleting a bill asks first; the money you paid for it stays on the contract as
+prepayment (a payment made with the **Paid** button for this bill alone is removed together with the bill).
+
+### Paid, Undo and Remove payment
+
+The **Paid** button (on a row of the list and in the *Payment* card) records that you paid the bill: one bank
+transfer for the **open amount**, dated **today**, with the payment purpose of the contract as its reference. The bill turns
+*Paid ✓* and a bar appears for a few seconds: **Bill marked as paid · Undo**. A wrong tap costs nothing — **Undo**
+removes that payment again.
+
+Later, in the *Payment* card of the bill, **Remove payment** takes a payment away (the dialog shows the amount and the
+date). A payment made with the **Paid** button for this bill alone is hidden completely; a payment that also covers other
+bills only loses this bill's share, and *the rest stays on the contract as prepayment*. Nothing is ever erased — the
+history is kept. (Detailed payments — a payment for several bills, other dates — come later.)
+
+## 12. Settings
 
 Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
@@ -274,8 +360,8 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
-## 12. Coming soon
+## 13. Coming soon
 
-Bills with the "Paid" quick action, payments and
+Payments screen and
 balances, equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.

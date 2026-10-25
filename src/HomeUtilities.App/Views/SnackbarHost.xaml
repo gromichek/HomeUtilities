@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.SnackbarHost"
+             x:DataType="vm:SnackbarService"
+             IsVisible="False"
+             HorizontalOptions="Center"
+             VerticalOptions="End"
+             Margin="16,0,16,88">
+
+    <!-- Non-modal bar at the bottom of the window (above the floating add button); the message is announced to screen readers by the code-behind. -->
+    <Border StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="16,6,8,6"
+            BackgroundColor="{AppThemeBinding Light={StaticResource SnackbarBackgroundLight}, Dark={StaticResource SnackbarBackgroundDark}}">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding DismissCommand}" />
+        </Border.GestureRecognizers>
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Label Grid.Column="0" Text="{Binding Message}" VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource SnackbarTextLight}, Dark={StaticResource SnackbarTextDark}}"
+                   SemanticProperties.Description="{Binding Message}" />
+            <Button Grid.Column="1" Text="{Binding ActionText}" Command="{Binding InvokeActionCommand}"
+                    IsVisible="{Binding HasAction}" Style="{StaticResource TextButton}" FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light={StaticResource PrimaryDark}, Dark={StaticResource PrimaryLight}}"
+                    SemanticProperties.Description="{Binding ActionText}" />
+        </Grid>
+    </Border>
+
+</ContentView>

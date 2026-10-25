@@ -11,3 +11,6 @@ flowchart LR
     T -.->|prices| X
     X[Charge<br/>readings × tariff<br/>for a month]
     X -.->|expected cost of| C
+    C -->|billed by| B[Bill<br/>what the supplier asked<br/>for a month]
+    B -.->|compared with| X
+    Y[Payment<br/>Paid button] -->|settles| B

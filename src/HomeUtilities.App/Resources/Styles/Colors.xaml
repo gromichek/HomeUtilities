@@ -19,6 +19,12 @@
     <Color x:Key="OnPrimaryLight">#FFFFFF</Color>
     <Color x:Key="OnPrimaryDark">#10243A</Color>
 
+    <!-- Snackbar: inverse surface (dark bar in the light theme, light bar in the dark theme). -->
+    <Color x:Key="SnackbarBackgroundLight">#2E3238</Color>
+    <Color x:Key="SnackbarBackgroundDark">#E3E6EB</Color>
+    <Color x:Key="SnackbarTextLight">#F4F5F7</Color>
+    <Color x:Key="SnackbarTextDark">#1B1D21</Color>
+
     <Color x:Key="CardLight">#FFFFFF</Color>
     <Color x:Key="CardDark">#25282D</Color>
     <Color x:Key="OutlineLight">#D0D5DD</Color>

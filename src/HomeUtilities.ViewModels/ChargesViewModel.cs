@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
@@ -20,6 +21,9 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     /// <summary>Settings key of the last selected property.</summary>
     public const string LastPropertyKey = "charges.last_property";
 
+    /// <summary>Navigation parameter (<c>yyyy-MM</c>) that opens the screen on a given month.</summary>
+    public const string MonthParameter = "month";
+
     /// <summary>The month the picker can reach at the earliest (the range of <see cref="YearMonth"/>).</summary>
     public static readonly YearMonth EarliestMonth = new(1900, 1);
 
@@ -33,6 +37,8 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     private readonly ISupplierStore _supplierStore;
     private readonly ICategoryStore _categoryStore;
     private readonly IChargeInputLoader _loader;
+    private readonly IBillStore _billStore;
+    private readonly IPaymentStore _paymentStore;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
@@ -43,6 +49,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     private readonly Dictionary<Guid, bool> _expanded = [];
 
     private IReadOnlyList<Calculated> _calculated = [];
+    private Dictionary<Guid, (Bill Bill, BillState State)> _billOfContract = [];
     private Guid? _selectedPropertyId;
     private Guid? _focusContractId;
     private bool _monthChosen;
@@ -109,6 +116,8 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         ISupplierStore supplierStore,
         ICategoryStore categoryStore,
         IChargeInputLoader loader,
+        IBillStore billStore,
+        IPaymentStore paymentStore,
         IClock clock,
         ILocalizer localizer,
         INavigationService navigation,
@@ -121,6 +130,8 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         _supplierStore = supplierStore;
         _categoryStore = categoryStore;
         _loader = loader;
+        _billStore = billStore;
+        _paymentStore = paymentStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
@@ -190,12 +201,20 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
     }
 
-    /// <summary>Opens the screen on a property (and a contract to scroll to) with the default month; used by "Show charges".</summary>
-    public Task OpenForAsync(Guid propertyId, Guid? contractId) => RunSafeAsync(async () =>
+    /// <summary>
+    /// Opens the screen on a property (and a contract to scroll to) with the given month, else the default one; used by
+    /// "Show charges".
+    /// </summary>
+    public Task OpenForAsync(Guid propertyId, Guid? contractId, YearMonth? month = null) => RunSafeAsync(async () =>
     {
         _selectedPropertyId = propertyId;
         _focusContractId = contractId;
-        _monthChosen = false;
+        _monthChosen = month is not null;
+        if (month is { } chosen)
+        {
+            Month = chosen;
+        }
+
         _settings.SetString(LastPropertyKey, propertyId.ToString());
         if (IsLoaded)
         {
@@ -324,6 +343,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         if (_selectedPropertyId is not { } propertyId)
         {
             _calculated = [];
+            _billOfContract = [];
             Rebuild();
             return;
         }
@@ -361,7 +381,29 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
 
         _calculated = results;
+        _billOfContract = await LoadBillsAsync(propertyId, period);
         Rebuild();
+    }
+
+    /// <summary>The bill of each contract for the month (the first one entered) with its payment state.</summary>
+    private async Task<Dictionary<Guid, (Bill Bill, BillState State)>> LoadBillsAsync(Guid propertyId, YearMonth period)
+    {
+        var result = new Dictionary<Guid, (Bill, BillState)>();
+        var bills = (await _billStore.ListByPropertyAsync(propertyId, period, period))
+            .Where(b => b.ContractId is not null)
+            .OrderBy(b => b.CreatedAt);
+        foreach (var bill in bills)
+        {
+            if (result.ContainsKey(bill.ContractId!.Value))
+            {
+                continue;
+            }
+
+            var payments = await _paymentStore.ListByBillAsync(bill.Id);
+            result[bill.ContractId.Value] = (bill, BillStatus.Of(bill, payments, _clock.Today));
+        }
+
+        return result;
     }
 
     /// <summary>Builds the cards and totals from the last calculation (also after a language change).</summary>
@@ -389,6 +431,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             }
 
             var id = item.Contract.Id;
+            ApplyBill(card, item.Contract, item.Charge);
             card.IsExpanded = _focusContractId == id || _expanded.GetValueOrDefault(id, IsWide);
             card.PropertyChanged += (_, e) =>
             {
@@ -403,6 +446,48 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         Cards = cards;
         FocusedCard = _focusContractId is { } focus ? cards.FirstOrDefault(c => c.ContractId == focus) : null;
         BuildTotals(cards);
+    }
+
+    /// <summary>The card's link to the month's bill, or the "Enter bill" button with the calculated total as a suggestion.</summary>
+    private void ApplyBill(ChargeCardViewModel card, Contract contract, CalculatedCharge? charge)
+    {
+        if (_billOfContract.TryGetValue(contract.Id, out var found))
+        {
+            var (bill, state) = found;
+            var symbol = _localizer["Currency_Symbol_" + bill.Currency];
+            var parts = new List<string> { BillText.Money(bill.Gross, symbol) };
+            var comparison = BillComparison.Compare(bill, bill.CalculatedSnapshot, null);
+            if (comparison.Difference is { } difference)
+            {
+                parts.Add(BillText.SignedMoney(difference, symbol));
+            }
+
+            parts.Add(BillBadge.TextOf(_localizer, state, symbol));
+            card.BillText = _localizer.Get("ChargesBillLine", string.Join(" · ", parts));
+            card.OpenBillCommand = new RelayCommand(() => _ = RunSafeAsync(() => _navigation.GoToAsync(
+                Routes.BillEdit,
+                new Dictionary<string, object> { [EditorNavigation.IdParameter] = bill.Id })));
+            return;
+        }
+
+        card.EnterBillText = _localizer["ChargesEnterBill"];
+        card.EnterBillCommand = new RelayCommand(() => _ = RunSafeAsync(() => EnterBillAsync(contract, charge)));
+    }
+
+    private Task EnterBillAsync(Contract contract, CalculatedCharge? charge)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            [EditorNavigation.ContractIdParameter] = contract.Id,
+            [EditorNavigation.PropertyIdParameter] = contract.PropertyId,
+            [BillEditViewModel.PeriodParameter] = Month.ToString(),
+        };
+        if (charge is { IsComplete: true, Lines.Count: > 0 } && charge.Lines.Any(l => !l.IsFromBill))
+        {
+            parameters[BillEditViewModel.GrossParameter] = charge.TotalGross;
+        }
+
+        return _navigation.GoToAsync(Routes.BillEdit, parameters);
     }
 
     private void BuildTotals(IReadOnlyList<ChargeCardViewModel> cards)

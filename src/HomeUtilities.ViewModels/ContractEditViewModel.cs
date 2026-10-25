@@ -47,7 +47,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private readonly INavigationService _navigation;
     private readonly ILauncherService _launcher;
     private readonly IClipboardService _clipboard;
-    private readonly IToastService _toast;
+    private readonly ISnackbarService _snackbar;
     private readonly Func<SupplierEditViewModel> _supplierEditorFactory;
     private readonly List<LinkRowViewModel> _linkRows = [];
     private readonly List<CustomFieldRowViewModel> _fieldRows = [];
@@ -363,15 +363,17 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         ITariffStore tariffStore,
         IVatRateStore vatStore,
         IMeterStore meterStore,
+        IBillStore billStore,
+        IPaymentStore paymentStore,
         IClock clock,
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
         ILauncherService launcher,
         IClipboardService clipboard,
-        IToastService toast,
+        ISnackbarService snackbar,
         Func<SupplierEditViewModel> supplierEditorFactory)
-        : base(localizer, dialogs, navigation, toast)
+        : base(localizer, dialogs, navigation, snackbar)
     {
         _store = store;
         _supplierStore = supplierStore;
@@ -380,12 +382,14 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _tariffStore = tariffStore;
         _vatStore = vatStore;
         _meterStore = meterStore;
+        _billStore = billStore;
+        _paymentStore = paymentStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
         _launcher = launcher;
         _clipboard = clipboard;
-        _toast = toast;
+        _snackbar = snackbar;
         _supplierEditorFactory = supplierEditorFactory;
         ValidFrom = clock.Today;
         ValidTo = clock.Today;
@@ -591,6 +595,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             }
 
             await LoadTariffAsync();
+            await LoadBillsAsync();
             ClearErrors();
             RebuildLinks();
             RebuildFields();
@@ -610,6 +615,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         if (!IsNew)
         {
             await LoadTariffAsync();
+            await LoadBillsAsync();
         }
     }
 
@@ -950,6 +956,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         IsNew = false;
         Title = TitleText();
         FormatIban();
+        await LoadBillsAsync();
     }
 
     protected override Task DeleteCoreAsync() => _store.DeleteAsync(_contract.Id);
@@ -1102,6 +1109,11 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             TariffEmptyText = _localizer["ContractTariffEmpty"];
             AddTariffText = _localizer["ContractTariffAdd"];
             ShowChargesText = _localizer["ContractShowCharges"];
+            BillsHeader = _localizer["BillBillsCardHeader"];
+            BillsEmptyText = _localizer["BillBillsCardEmpty"];
+            AllBillsText = _localizer["BillBillsCardAll"];
+            AddBillText = _localizer["BillBillsCardAdd"];
+            RebuildBills();
             TariffPresetsLabel = _localizer["ContractTariffPresets"];
             TariffSaveFirstText = _localizer["ContractTariffSaveFirst"];
             RebuildTariff();
@@ -1150,7 +1162,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         }
 
         await _clipboard.SetTextAsync(text);
-        await _toast.ShowAsync(_localizer["Copied"]);
+        _snackbar.Notify(_localizer["Copied"]);
     }
 
     private Task<bool> ConfirmRowDeleteAsync(string displayText) => Dialogs.ConfirmAsync(

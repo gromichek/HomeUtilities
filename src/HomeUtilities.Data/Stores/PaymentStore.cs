@@ -21,6 +21,17 @@ public sealed class PaymentStore(IDbContextFactory<HomeUtilitiesDbContext> facto
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Payment>> ListByBillAsync(Guid billId, CancellationToken ct = default)
+    {
+        await using var db = await Factory.CreateDbContextAsync(ct);
+        var result = await Query(db)
+            .Where(p => p.Allocations.Any(a => a.BillId == billId))
+            .OrderBy(p => p.PaidOn).ThenBy(p => p.CreatedAt)
+            .ToListAsync(ct);
+        return result;
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<Payment>> ListByPropertyAsync(Guid propertyId, CancellationToken ct = default)
     {
         await using var db = await Factory.CreateDbContextAsync(ct);

@@ -254,6 +254,54 @@ public class StoreTests
     }
 
     [Fact]
+    public async Task Payments_by_bill_return_only_payments_with_a_live_allocation_and_keep_the_quick_action_flag()
+    {
+        using var test = new TestDb();
+        var (propertyId, supplierId, categoryId) = await PrepareContractOwnersAsync(test);
+        var contracts = new ContractStore(test.Factory);
+        var contract = NewContract(propertyId, supplierId, categoryId, "Water");
+        await contracts.SaveAsync(contract);
+        var bills = new BillStore(test.Factory);
+        var bill = NewBill(propertyId, categoryId, new YearMonth(2026, 9), 30m);
+        bill.ContractId = contract.Id;
+        var otherBill = NewBill(propertyId, categoryId, new YearMonth(2026, 8), 40m);
+        otherBill.ContractId = contract.Id;
+        await bills.SaveAsync(bill);
+        await bills.SaveAsync(otherBill);
+
+        var store = new PaymentStore(test.Factory);
+        var quick = new Payment { ContractId = contract.Id, PaidOn = new DateOnly(2026, 10, 2), Amount = 30m, CreatedByQuickAction = true };
+        quick.Allocations.Add(new PaymentAllocation { PaymentId = quick.Id, BillId = bill.Id, Amount = 30m });
+        var shared = new Payment { ContractId = contract.Id, PaidOn = new DateOnly(2026, 10, 1), Amount = 50m };
+        shared.Allocations.Add(new PaymentAllocation { PaymentId = shared.Id, BillId = bill.Id, Amount = 10m });
+        shared.Allocations.Add(new PaymentAllocation { PaymentId = shared.Id, BillId = otherBill.Id, Amount = 40m });
+        var unrelated = new Payment { ContractId = contract.Id, PaidOn = new DateOnly(2026, 10, 3), Amount = 5m };
+        unrelated.Allocations.Add(new PaymentAllocation { PaymentId = unrelated.Id, BillId = otherBill.Id, Amount = 5m });
+        await store.SaveAsync(quick);
+        await store.SaveAsync(shared);
+        await store.SaveAsync(unrelated);
+
+        var forBill = await store.ListByBillAsync(bill.Id);
+        Assert.Equal([shared.Id, quick.Id], forBill.Select(p => p.Id));
+        Assert.False(forBill[0].CreatedByQuickAction);
+        Assert.True(forBill[1].CreatedByQuickAction);
+
+        // Removing the allocation (what "Remove payment" does for a shared payment) drops the payment from the bill's list.
+        var loaded = (await store.GetAsync(shared.Id))!;
+        loaded.Allocations.RemoveAll(a => a.BillId == bill.Id);
+        await store.SaveAsync(loaded);
+        Assert.Equal([quick.Id], (await store.ListByBillAsync(bill.Id)).Select(p => p.Id));
+        Assert.Equal(40m, Assert.Single((await store.GetAsync(shared.Id))!.Allocations).Amount);
+
+        // Undo of a quick payment soft-deletes it with its allocation; the rows stay in the database.
+        await store.DeleteAsync(quick.Id);
+        Assert.Empty(await store.ListByBillAsync(bill.Id));
+        await using var db = test.NewContext();
+        Assert.True((await db.Payments.IgnoreQueryFilters().SingleAsync(p => p.Id == quick.Id)).IsDeleted);
+        Assert.True((await db.PaymentAllocations.IgnoreQueryFilters().SingleAsync(a => a.PaymentId == quick.Id)).IsDeleted);
+    }
+
+    [Fact]
     public async Task Delete_soft_deletes_root_and_children()
     {
         using var test = new TestDb();
