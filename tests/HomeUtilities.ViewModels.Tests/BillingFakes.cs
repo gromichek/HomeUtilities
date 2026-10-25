@@ -179,6 +179,14 @@ internal sealed class BillTestKit
 
     public BillFilterState Filter { get; } = new();
 
+    public PaymentFilterState PaymentFilter { get; } = new();
+
+    public PaymentEditViewModel CreatePaymentEditor() => Kit.CreatePaymentEditor();
+
+    public PaymentsViewModel CreatePayments(ISectionSelectionMemory? memory = null) =>
+        new(Payments, Bills, Kit.Contracts, Kit.Properties, Kit.Dialogs, Kit.Clock, Kit.Localizer, Kit.Navigation, Kit.Layout,
+            memory ?? new SectionSelectionMemory(), PaymentFilter, CreatePaymentEditor);
+
     public Supplier Supplier { get; } = new()
     {
         Name = "Water utility Ltd",
@@ -187,7 +195,7 @@ internal sealed class BillTestKit
 
     public BillEditViewModel CreateEditor() =>
         new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, Kit.ChargeLoader, Kit.Attachments,
-            Kit.Media, Kit.Viewer, QuickPay, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog);
+            Kit.Media, Kit.Viewer, QuickPay, Kit.Prepayments, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog);
 
     public BillsViewModel CreateBills(ISectionSelectionMemory? memory = null) =>
         new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, QuickPay, Kit.Toast, Kit.Dialogs,

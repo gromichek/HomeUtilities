@@ -14,4 +14,7 @@ public static class EditorNavigation
 
     /// <summary>Carries the id of the contract a new tariff component belongs to.</summary>
     public const string ContractIdParameter = "contractId";
+
+    /// <summary>Carries the id of the bill a new payment starts with (allocated in full).</summary>
+    public const string BillIdParameter = "billId";
 }

@@ -15,8 +15,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>
 /// Editor of one bill (a supplier bill of a contract, or a one-off expense). Shown in the side pane of the Bills screen or
 /// as a page (<see cref="Routes.BillEdit"/>). The cards: General, Amounts, Comparison with the calculation, Lines,
-/// Custom fields, Document, Payment, Notes. The payment card does the "Paid" quick action and its undo; a detailed
-/// payment editor comes later.
+/// Custom fields, Document, Payment, Notes. The payment card does the "Paid" quick action and its undo, adds a payment in the
+/// payment editor and uses a prepayment of the contract.
 /// </summary>
 public sealed partial class BillEditViewModel : PaneEditorViewModel
 {
@@ -51,6 +51,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private readonly IMediaService _media;
     private readonly IFileViewer _viewer;
     private readonly QuickPayService _quickPay;
+    private readonly PrepaymentService _prepayments;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
@@ -224,6 +225,12 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     [ObservableProperty]
     private bool _canMarkPaid;
 
+    [ObservableProperty]
+    private bool _canUsePrepayment;
+
+    [ObservableProperty]
+    private string _usePrepaymentText = string.Empty;
+
     public BillEditViewModel(
         IBillStore bills,
         IPaymentStore paymentStore,
@@ -236,6 +243,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         IMediaService media,
         IFileViewer viewer,
         QuickPayService quickPay,
+        PrepaymentService prepayments,
         IClock clock,
         ILocalizer localizer,
         IDialogService dialogs,
@@ -255,6 +263,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         _media = media;
         _viewer = viewer;
         _quickPay = quickPay;
+        _prepayments = prepayments;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;

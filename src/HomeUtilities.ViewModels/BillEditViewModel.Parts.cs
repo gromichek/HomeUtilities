@@ -18,6 +18,7 @@ public sealed partial class BillEditViewModel
     private readonly List<PickedFile> _pendingFiles = [];
     private List<Attachment> _storedAttachments = [];
     private List<Payment> _paymentList = [];
+    private decimal _prepaymentAvailable;
     private bool _calculationFailed;
 
     // ---- Loading --------------------------------------------------------------------------------------------------
@@ -632,7 +633,21 @@ public sealed partial class BillEditViewModel
     private async Task RefreshPaymentsAsync()
     {
         _paymentList = IsNew ? [] : [.. await _paymentStore.ListByBillAsync(_bill.Id)];
+        _prepaymentAvailable = !IsNew && _bill.ContractId is { } contractId ? await _prepayments.AvailableAsync(contractId) : 0m;
         UpdatePaymentCard();
+    }
+
+    /// <summary>Re-reads the payments (back from the payment editor, which may have changed them).</summary>
+    public Task RefreshPaymentCardAsync() => RunSafeAsync(RefreshPaymentsAsync);
+
+    /// <summary>Back from the payment editor: the status, the amounts and the payment rows follow the payments.</summary>
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        if (!IsNew)
+        {
+            await RefreshPaymentCardAsync();
+        }
     }
 
     private void UpdatePaymentCard()
@@ -641,6 +656,8 @@ public sealed partial class BillEditViewModel
         {
             PaymentRows = [];
             CanMarkPaid = false;
+            CanUsePrepayment = false;
+            UsePrepaymentText = string.Empty;
             StatusText = string.Empty;
             PaidAmountText = string.Empty;
             OpenAmountText = string.Empty;
@@ -653,6 +670,8 @@ public sealed partial class BillEditViewModel
         PaidAmountText = Money(state.Paid);
         OpenAmountText = Money(state.Open);
         CanMarkPaid = state.Open != 0 && Math.Sign(state.Open) == Math.Sign(_bill.Gross);
+        CanUsePrepayment = state.Open > 0 && _prepaymentAvailable > 0;
+        UsePrepaymentText = _localizer.Get("BillUsePrepayment", Money(_prepaymentAvailable));
         PaymentRows =
         [
             .. _paymentList.Select(p =>
@@ -664,7 +683,7 @@ public sealed partial class BillEditViewModel
                     Money(share),
                     EnumText.Get(_localizer, p.Method) + (p.CreatedByQuickAction ? " · " + _localizer["BillPaymentQuick"] : string.Empty));
                 var detail = share != p.Amount ? _localizer.Get("BillPaymentOfBill", Money(share), Money(p.Amount)) : string.Empty;
-                return new BillPaymentRowViewModel(p.Id, text, detail, Texts.RemovePaymentText, () => _ = RemovePaymentAsync(p));
+                return new BillPaymentRowViewModel(p.Id, text, detail, Texts.RemovePaymentText, () => _ = OpenPaymentAsync(p.Id), () => _ = RemovePaymentAsync(p));
             }),
         ];
     }
@@ -694,6 +713,59 @@ public sealed partial class BillEditViewModel
         if (await _snackbar.ShowAsync(_localizer["BillMarkedPaid"], _localizer["BillUndo"]))
         {
             await _quickPay.UndoAsync(payment.Id);
+            await PaymentsChangedAsync();
+        }
+    });
+
+    /// <summary>"Add payment": the payment editor with this bill's contract, today, the open amount and the bill allocated.</summary>
+    [RelayCommand]
+    private Task AddPaymentAsync() => RunSafeAsync(async () =>
+    {
+        if (IsNew)
+        {
+            return;
+        }
+
+        if (IsDirty)
+        {
+            await Dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["BillSaveFirst"]);
+            return;
+        }
+
+        await _navigation.GoToAsync(
+            Routes.PaymentEdit,
+            new Dictionary<string, object> { [EditorNavigation.BillIdParameter] = _bill.Id });
+    });
+
+    private Task OpenPaymentAsync(Guid paymentId) => RunSafeAsync(() => _navigation.GoToAsync(
+        Routes.PaymentEdit,
+        new Dictionary<string, object> { [EditorNavigation.IdParameter] = paymentId }));
+
+    /// <summary>"Use prepayment": allocates the contract's unallocated money to this bill, then "Prepayment used · Undo".</summary>
+    [RelayCommand]
+    private Task UsePrepaymentAsync() => RunSafeAsync(async () =>
+    {
+        if (IsNew)
+        {
+            return;
+        }
+
+        if (IsDirty)
+        {
+            await Dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["BillSaveFirst"]);
+            return;
+        }
+
+        var result = await _prepayments.UseForBillAsync(_bill.Id);
+        await PaymentsChangedAsync();
+        if (result is null)
+        {
+            return;
+        }
+
+        if (await _snackbar.ShowAsync(_localizer["PrepaymentUsed"], _localizer["BillUndo"]))
+        {
+            await _prepayments.UndoAsync(result);
             await PaymentsChangedAsync();
         }
     });

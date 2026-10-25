@@ -660,6 +660,10 @@ internal sealed class ContractTestKit
 
     public FakePaymentStore Payments { get; } = new();
 
+    public PrepaymentService Prepayments => _prepayments ??= new PrepaymentService(Bills, Payments, Clock);
+
+    private PrepaymentService? _prepayments;
+
     public FakeChargeInputLoader ChargeLoader { get; }
 
     public FakeFileViewer Viewer { get; } = new();
@@ -670,7 +674,7 @@ internal sealed class ContractTestKit
         new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast);
 
     public ContractEditViewModel CreateContractEditor() =>
-        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, CreateSupplierEditor);
 
     public TariffComponentEditViewModel CreateTariffEditor() =>
         new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
@@ -694,6 +698,9 @@ internal sealed class ContractTestKit
 
     public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
         new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+
+    public PaymentEditViewModel CreatePaymentEditor() =>
+        new(Payments, Bills, Contracts, Suppliers, Properties, Clock, Localizer, Dialogs, Navigation, Toast);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }

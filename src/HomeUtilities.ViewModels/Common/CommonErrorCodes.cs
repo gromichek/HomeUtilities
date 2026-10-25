@@ -38,4 +38,13 @@ public static class CommonErrorCodes
 
     /// <summary>A VAT catalog entry has no percentage.</summary>
     public const string VatVersionRequired = "vat_editor.version_required";
+
+    /// <summary>A payment has neither a contract nor a property.</summary>
+    public const string PaymentPropertyRequired = "payment_edit.property_required";
+
+    /// <summary>An allocation is larger than what is open on its bill; the arguments are the allocated amount and the open amount.</summary>
+    public const string PaymentAllocationExceedsOpen = "payment_edit.allocation_exceeds_open";
+
+    /// <summary>The allocations take more than the payment; the argument is the excess.</summary>
+    public const string PaymentOverAllocatedBy = "payment_edit.over_allocated_by";
 }

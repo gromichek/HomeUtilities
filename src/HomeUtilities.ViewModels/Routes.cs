@@ -88,4 +88,16 @@ public static class Routes
     /// <c>propertyId</c> and optional <c>contractId</c> (highlighted). Back returns to the caller.
     /// </summary>
     public const string BillsFor = "BillsFor";
+
+    /// <summary>
+    /// Pushed page (not a section): the payment editor, parameters <c>editor</c> (a running editor) or <c>id</c> (absent = a new
+    /// payment), and for a new payment optionally <c>billId</c>, <c>contractId</c> or <c>propertyId</c>.
+    /// </summary>
+    public const string PaymentEdit = "PaymentEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the payments screen opened for a property and a contract ("All payments" in the contract
+    /// editor), parameters <c>propertyId</c> and <c>contractId</c>. Back returns to the caller.
+    /// </summary>
+    public const string PaymentsFor = "PaymentsFor";
 }
