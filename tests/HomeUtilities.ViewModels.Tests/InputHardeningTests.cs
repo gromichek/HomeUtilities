@@ -279,6 +279,71 @@ public class InputHardeningTests
 
     [Theory]
     [MemberData(nameof(Inputs))]
+    public async Task BillEditor_NeverThrows(string input)
+    {
+        var kit = new BillTestKit(new DateOnly(2026, 10, 27));
+        var contract = kit.AddWaterContract();
+        contract.CustomFields.Add(new HomeUtilities.Core.Billing.CustomFieldDefinition { OwnerId = contract.Id, Name = "Losses", Kind = HomeUtilities.Core.Billing.CustomFieldKind.Number, Target = HomeUtilities.Core.Billing.CustomFieldTarget.Bill });
+        contract.CustomFields.Add(new HomeUtilities.Core.Billing.CustomFieldDefinition { OwnerId = contract.Id, Name = "Reference", Kind = HomeUtilities.Core.Billing.CustomFieldKind.Text, Target = HomeUtilities.Core.Billing.CustomFieldTarget.Bill });
+        var vm = kit.CreateEditor();
+        await vm.LoadAsync(null);
+        kit.Kit.Dialogs.ChooseScript = o => o.Contains("Water") ? "Water" : o.FirstOrDefault();
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+        await vm.ChooseCategoryCommand.ExecuteAsync(null);
+
+        Func<Task> save = async () =>
+        {
+            await vm.SaveCommand.ExecuteAsync(null);
+            foreach (var row in vm.FieldRows)
+            {
+                row.Text = input;
+            }
+
+            await vm.SaveCommand.ExecuteAsync(null);
+        };
+        await HammerAsync(vm, input, save);
+        foreach (var amounts in new[] { "NetText", "VatPercentText", "GrossText" })
+        {
+            typeof(AmountEditor).GetProperty(amounts)!.SetValue(vm.Amounts, input);
+            await save();
+            ReadAll(vm);
+            ReadAll(vm.Amounts);
+        }
+
+        await vm.MarkPaidCommand.ExecuteAsync(null);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task BillLineDialog_NeverThrows(string input)
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 27));
+        var definitions = new[]
+        {
+            new HomeUtilities.Core.Billing.CustomFieldDefinition { Name = "Per line", Kind = HomeUtilities.Core.Billing.CustomFieldKind.Money, Target = HomeUtilities.Core.Billing.CustomFieldTarget.BillLine },
+        };
+        var dialog = new BillLineEditorViewModel(kit.Localizer, null, kit.Categories.Stored, definitions, new DateOnly(2026, 10, 27));
+
+        Func<Task> save = () =>
+        {
+            dialog.SaveCommand.Execute(null);
+            return Task.CompletedTask;
+        };
+        await HammerAsync(dialog, input, save);
+        foreach (var amounts in new[] { "NetText", "VatPercentText", "GrossText" })
+        {
+            typeof(AmountEditor).GetProperty(amounts)!.SetValue(dialog.Amounts, input);
+            await save();
+            ReadAll(dialog);
+        }
+
+        dialog.FieldRows[0].Text = input;
+        await save();
+        ReadAll(dialog);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
     public async Task ReadingsScreen_NeverThrows(string input)
     {
         var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
