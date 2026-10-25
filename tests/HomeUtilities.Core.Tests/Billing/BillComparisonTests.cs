@@ -56,6 +56,23 @@ public class BillComparisonTests
         Assert.Null(BillComparison.Compare(BillFor(Contract(), 59.49m), Charge(59.49m, fromBill: true), null).Difference);
 
     [Fact]
+    public void Calculation_with_a_line_taken_from_the_bill_gives_no_difference()
+    {
+        // heating (from the bill) + water heating (calculated 12.00): the bill total cannot be compared with 12.00
+        var calculated = new CalculatedCharge(
+            Guid.NewGuid(), new YearMonth(2026, 9), Currency.EUR,
+            [
+                new ChargeLine(Guid.NewGuid(), "Water heating", ServiceKind.WaterHeating, Guid.NewGuid(), ChargeBasis.PerUnit, 2m, 6m, 12m, 12m, 1.44m, 13.44m, false, true, []),
+                new ChargeLine(Guid.NewGuid(), "Heating", ServiceKind.Heating, Guid.NewGuid(), ChargeBasis.FromBill, null, null, 0m, 12m, 0m, 0m, true, true, []),
+            ],
+            12m, 1.44m, 13.44m, true, []);
+
+        var result = BillComparison.Compare(BillFor(Contract(), 60m), calculated, null);
+
+        Assert.Equal(new BillComparisonResult(null, null, null), result);
+    }
+
+    [Fact]
     public void Zero_calculated_total_gives_no_percent()
     {
         var result = BillComparison.Compare(BillFor(Contract(), 10m), Charge(0m), null);

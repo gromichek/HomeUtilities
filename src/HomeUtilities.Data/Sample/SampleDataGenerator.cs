@@ -3,6 +3,7 @@ using System.Numerics;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
+using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Payments;
@@ -11,7 +12,8 @@ using HomeUtilities.Core.Tariffs;
 namespace HomeUtilities.Data.Sample;
 
 /// <summary>
-/// Fills an empty database with invented data (three properties, suppliers, contracts, meters and a year of readings).
+/// Fills an empty database with invented data (three properties, suppliers, contracts, meters, a year of readings and a year
+/// of bills with their payments).
 /// Deterministic: a fixed random seed and dates relative to today. Everything here is fictitious: names, numbers,
 /// <c>example.com</c> addresses and IBANs with a valid checksum for a made-up bank code.
 /// </summary>
@@ -22,6 +24,9 @@ public sealed class SampleDataGenerator(
     IContractStore contracts,
     IMeterStore meters,
     ITariffStore tariffs,
+    IBillStore bills,
+    IPaymentStore payments,
+    IChargeInputLoader chargeLoader,
     IClock clock) : ISampleDataGenerator
 {
     /// <summary>Number of monthly readings generated per register.</summary>
@@ -70,6 +75,14 @@ public sealed class SampleDataGenerator(
         var cMaint = NewContract(flat, manager, ServiceKind.Maintenance, "Maintenance (per area)", BillingMode.Actual, $"CN-{++cn}", start, null, null);
         var cNet = NewContract(flat, net, ServiceKind.InternetTv, "Internet and TV", BillingMode.Fixed, $"CN-{++cn}", start, null, null);
         cNet.BillingTiming = BillingTiming.InAdvance;
+        cPowerFlat.CustomFields.Add(new CustomFieldDefinition
+        {
+            OwnerId = cPowerFlat.Id,
+            Name = "Supplier reference",
+            Kind = CustomFieldKind.Text,
+            Target = CustomFieldTarget.Bill,
+            SortOrder = 0,
+        });
         var cPowerCottage = NewContract(cottage, power, ServiceKind.Electricity, "Electricity (day/night, solar)", BillingMode.Actual, $"CN-{++cn}", start, 28, 3);
         var cLand = NewContract(cottage, tax, ServiceKind.PropertyTaxLand, "Land tax", BillingMode.Assessed, $"CN-{++cn}", start, null, null);
         var cPowerGarage = NewContract(garage, power, ServiceKind.Electricity, "Electricity (fixed)", BillingMode.Fixed, $"CN-{++cn}", start, null, null);
@@ -82,8 +95,243 @@ public sealed class SampleDataGenerator(
         var hotMeters = await AddFlatMetersAsync(flat, cWater, cHeat, cPowerFlat, ct);
         await AddCottageMeterAsync(cottage, cPowerCottage, ct);
         await AddTariffsAsync(cWater, cHeat, cPowerFlat, cWaste, cMaint, cNet, cPowerCottage, hotMeters, ct);
+        var supplierOf = new Dictionary<Guid, Supplier> { [water.Id] = water, [heat.Id] = heat, [power.Id] = power, [waste.Id] = waste, [manager.Id] = manager, [net.Id] = net };
+        await AddBillsAsync(flat, [cWater, cHeat, cPowerFlat, cWaste, cMaint], cNet, supplierOf, ct);
         return true;
     }
+
+    // ---- Bills ------------------------------------------------------------------------------------------------------
+
+    /// <summary>The month (months ago) whose bill of each contract is still unpaid, so the list shows unpaid and overdue bills.</summary>
+    private const int LatestBillsMonthsAgo = 1;
+
+    /// <summary>The month of the waste bill that stays unpaid for good: its due date passed long ago (overdue).</summary>
+    private const int OverdueWasteMonthsAgo = 3;
+
+    /// <summary>The month of the maintenance bill that is partly paid by a manual payment.</summary>
+    private const int PartlyPaidMonthsAgo = 2;
+
+    /// <summary>The month of the electricity bill with detail lines and a custom field.</summary>
+    private const int DetailedBillMonthsAgo = 2;
+
+    /// <summary>
+    /// A year of bills of the flat: the in-arrears contracts for the last twelve months, the prepaid internet for ten months back
+    /// to next month, and a one-off boiler repair. Totals are near the calculation (a few clearly above or below, water with
+    /// the quantity on the bill); nearly all are paid with the "Paid" quick action, one is partly paid, one is overdue and one
+    /// (next month's internet) is prepaid.
+    /// </summary>
+    private async Task AddBillsAsync(
+        Property flat, IReadOnlyList<Contract> inArrears, Contract internet, IReadOnlyDictionary<Guid, Supplier> supplierOf, CancellationToken ct)
+    {
+        var current = YearMonth.From(_today);
+        var counter = 0;
+        foreach (var monthsAgo in Enumerable.Range(1, 12).Reverse())
+        {
+            foreach (var contract in inArrears)
+            {
+                counter++;
+                await AddContractBillAsync(flat, contract, current.AddMonths(-monthsAgo), monthsAgo, counter, supplierOf, ct);
+            }
+        }
+
+        for (var offset = -10; offset <= 1; offset++)
+        {
+            counter++;
+            await AddContractBillAsync(flat, internet, current.AddMonths(offset), -offset, counter, supplierOf, ct);
+        }
+
+        await AddBoilerRepairAsync(flat, current.AddMonths(-4), ct);
+    }
+
+    private async Task AddContractBillAsync(
+        Property flat,
+        Contract contract,
+        YearMonth period,
+        int monthsAgo,
+        int counter,
+        IReadOnlyDictionary<Guid, Supplier> supplierOf,
+        CancellationToken ct)
+    {
+        var input = await chargeLoader.LoadAsync(contract.Id, period, ct);
+        var calculated = input is null ? null : ChargeCalculator.Calculate(input);
+        var hasCalculation = calculated is { IsComplete: true, Lines.Count: > 0 };
+        var vatPercent = calculated?.Lines.FirstOrDefault()?.VatPercent ?? 21m;
+
+        // What the supplier billed: the calculation with a small deviation; some contracts have no usable calculation.
+        var calculatedTotal = hasCalculation ? calculated!.TotalGross : 0m;
+        var total = contract.Service switch
+        {
+            ServiceKind.Heating => MoneyMath.Round(calculatedTotal + 46m + (decimal)_random.NextDouble() * 8m),
+            ServiceKind.Waste => MoneyMath.Round(13.9m + (decimal)_random.NextDouble() * 1.2m),
+            ServiceKind.InternetTv => 22.95m,
+            _ when !hasCalculation => MoneyMath.Round(30m + (decimal)_random.NextDouble() * 10m),
+            _ => MoneyMath.Round(calculatedTotal * (1m + Deviation(contract, monthsAgo))),
+        };
+
+        // The bill with detail lines bills exactly the calculated total, so its lines add up to it.
+        var detailed = contract.Service == ServiceKind.Electricity && monthsAgo == DetailedBillMonthsAgo && hasCalculation;
+        if (detailed)
+        {
+            total = calculatedTotal;
+        }
+
+        var bill = Bill.CreateFor(contract, period, clock);
+        bill.Number = $"INV-{period.Year}-{counter:0000}";
+        var issued = DayOf(contract.BillingTiming == BillingTiming.InAdvance ? period.AddMonths(-1) : period.AddMonths(1), contract.BillDay ?? 5);
+        bill.IssuedOn = issued > _today ? _today : issued;
+        var due = BillDefaults.DueDate(contract, period) ?? bill.IssuedOn.Value;
+        bill.DueOn = due < bill.IssuedOn ? bill.IssuedOn : due;
+        ApplyAmounts(bill, total, vatPercent);
+        if (hasCalculation && !calculated!.Lines.Any(l => l.IsFromBill))
+        {
+            bill.CalculatedSnapshot = calculated;
+        }
+
+        // Water: the quantity the supplier billed is a little above the metered one (losses in the building).
+        if (contract.Service == ServiceKind.ColdWater && calculated is not null)
+        {
+            var metered = BillComparison.MeteredQuantity(calculated);
+            if (metered is { } quantity)
+            {
+                bill.ConsumptionOnBill = MoneyMath.RoundQuantity(quantity + 0.2m + (decimal)_random.NextDouble() * 0.5m);
+            }
+        }
+
+        if (detailed)
+        {
+            AddDetailLines(bill, calculated!);
+            var reference = contract.CustomFields.First();
+            bill.CustomFields.Add(CustomFieldValue.From(reference, "REF-" + period.ToString().Replace("-", string.Empty, StringComparison.Ordinal)));
+        }
+
+        await bills.SaveAsync(bill, ct);
+
+        var overdueWaste = contract.Service == ServiceKind.Waste && monthsAgo == OverdueWasteMonthsAgo;
+        var latestUnpaid = monthsAgo == LatestBillsMonthsAgo && contract.BillingTiming == BillingTiming.InArrears;
+        var partlyPaid = contract.Service == ServiceKind.Maintenance && monthsAgo == PartlyPaidMonthsAgo;
+        if (overdueWaste || latestUnpaid)
+        {
+            return;
+        }
+
+        if (partlyPaid)
+        {
+            // Not yet due, so the badge shows "partially paid" (yellow) instead of "overdue".
+            bill.DueOn = _today.AddDays(10);
+            await bills.SaveAsync(bill, ct);
+            await payments.SaveAsync(NewPayment(bill, contract, supplierOf, MoneyMath.Round(total * 0.6m), quick: false), ct);
+            return;
+        }
+
+        await payments.SaveAsync(NewPayment(bill, contract, supplierOf, total, quick: true), ct);
+    }
+
+    /// <summary>A few bills clearly above (+9 %) or below (−7 %) the calculation; the rest within −1 % … +3 %.</summary>
+    private decimal Deviation(Contract contract, int monthsAgo)
+    {
+        if (contract.Service == ServiceKind.ColdWater)
+        {
+            if (monthsAgo == LatestBillsMonthsAgo)
+            {
+                return 0.09m;
+            }
+
+            if (monthsAgo == 4)
+            {
+                return -0.07m;
+            }
+        }
+
+        return -0.01m + (decimal)_random.NextDouble() * 0.04m;
+    }
+
+    private static void ApplyAmounts(Bill bill, decimal total, decimal vatPercent)
+    {
+        var split = MoneyMath.FromGross(total, vatPercent);
+        bill.Net = split.Net;
+        bill.VatPercent = vatPercent;
+        bill.Vat = split.Vat;
+        bill.Gross = split.Gross;
+    }
+
+    /// <summary>Lines of a bill that mirror the calculation (the bill total is the calculated total, so the lines add up).</summary>
+    private static void AddDetailLines(Bill bill, CalculatedCharge calculated)
+    {
+        var order = 0;
+        foreach (var line in calculated.Lines)
+        {
+            bill.Lines.Add(new BillLine
+            {
+                BillId = bill.Id,
+                Description = line.ComponentName,
+                Quantity = line.Quantity,
+                Unit = line.Quantity is null ? null : "kWh",
+                UnitPrice = line.UnitPrice,
+                Net = line.Net,
+                VatPercent = line.VatPercent,
+                Vat = line.Vat,
+                Gross = line.Gross,
+                SortOrder = order++,
+            });
+        }
+    }
+
+    private async Task AddBoilerRepairAsync(Property flat, YearMonth period, CancellationToken ct)
+    {
+        var bill = Bill.CreateOneOff(flat.Id, _categoryIds[ServiceKind.Maintenance], "Boiler repair", period, clock);
+        bill.Number = "REP-0042";
+        bill.IssuedOn = DayOf(period, 12);
+        bill.DueOn = DayOf(period, 26);
+        bill.Notes = "Invented sample expense: new thermostat and a service call.";
+        ApplyAmounts(bill, 186.45m, 21m);
+        await bills.SaveAsync(bill, ct);
+
+        var payment = new Payment
+        {
+            PropertyId = flat.Id,
+            PaidOn = DayOf(period, 14),
+            Amount = bill.Gross,
+            Currency = bill.Currency,
+            Method = PaymentMethod.Cash,
+            Reference = bill.Title,
+        };
+        payment.Allocations.Add(new PaymentAllocation { PaymentId = payment.Id, BillId = bill.Id, Amount = bill.Gross });
+        await payments.SaveAsync(payment, ct);
+    }
+
+    private Payment NewPayment(Bill bill, Contract contract, IReadOnlyDictionary<Guid, Supplier> supplierOf, decimal amount, bool quick)
+    {
+        var paidOn = (bill.DueOn ?? _today).AddDays(-3);
+        if (paidOn > _today)
+        {
+            paidOn = _today;
+        }
+
+        if (bill.IssuedOn is { } issued && paidOn < issued)
+        {
+            paidOn = issued;
+        }
+
+        var template = PaymentDetails.Effective(contract, supplierOf[contract.SupplierId]).PurposeTemplate;
+        var payment = new Payment
+        {
+            ContractId = contract.Id,
+            PropertyId = bill.PropertyId,
+            PaidOn = paidOn,
+            Amount = amount,
+            Currency = bill.Currency,
+            Method = PaymentMethod.BankTransfer,
+            Reference = template is null
+                ? null
+                : PaymentPurpose.Render(template, new PaymentPurposeContext(contract.CustomerNumber, contract.ContractNumber, bill.Number, bill.Period, amount, null)),
+            CreatedByQuickAction = quick,
+        };
+        payment.Allocations.Add(new PaymentAllocation { PaymentId = payment.Id, BillId = bill.Id, Amount = amount });
+        return payment;
+    }
+
+    private static DateOnly DayOf(YearMonth month, int day) =>
+        new(month.Year, month.Month, Math.Min(day, DateTime.DaysInMonth(month.Year, month.Month)));
 
     /// <summary>Tariffs of the sample contracts: all bases, a stepped price, hot meters only, one price change and one price that starts next month (a "no price" warning).</summary>
     private async Task AddTariffsAsync(

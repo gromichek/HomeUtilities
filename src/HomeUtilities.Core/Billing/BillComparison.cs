@@ -57,7 +57,7 @@ public static class BillComparison
 
     /// <summary>
     /// Compares the bill. The money difference is null when the calculation is missing, incomplete, has no
-    /// lines, or only takes its amounts from the bill itself.
+    /// lines, or takes any of its amounts from the bill itself (the calculated total is then not a full price to compare with).
     /// </summary>
     public static BillComparisonResult Compare(Bill bill, CalculatedCharge? calculated, decimal? meteredQuantity)
     {
@@ -65,7 +65,7 @@ public static class BillComparison
 
         decimal? difference = null;
         decimal? percent = null;
-        if (calculated is { IsComplete: true, Lines.Count: > 0 } && !calculated.Lines.All(l => l.IsFromBill))
+        if (calculated is { IsComplete: true, Lines.Count: > 0 } && !calculated.Lines.Any(l => l.IsFromBill))
         {
             difference = bill.Gross - calculated.TotalGross;
             if (calculated.TotalGross != 0)
