@@ -167,6 +167,7 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-20 | User-defined payment categories (ServiceKind stays technical) | non-utility payments, e.g. kindergarten |
 | 2026-10-20 | Payment details (IBAN, purpose template) with copy buttons | faster internet-bank payments |
 | 2026-10-20 | Free-text comment on every editable entity | user request |
+| 2026-10-25 | Only free open-source dependencies with permissive licences (MIT/Apache/BSD…) | owner decision; see CLAUDE.md |
 | 2026-10-20 | Bill period = service/readings month; prepaid services via `BillingTiming` | owner's billing practice |
 | 2026-10-20 | Bills without contract (one-off), BillTemplate with schedule (once / monthly / every N months / yearly) | non-monthly and one-off payments |
 | 2026-10-20 | Uniform amount fields Net / VatPercent / Vat / Gross | consistency |

@@ -88,8 +88,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
-| | #81 | T-018 charges screen (manual steps in PR #81) | pending |
-| | #79 | T-017e: VAT code reuse, arrows, double tap | pending |
+| 2026-10-25 | #81 + #82 | T-018 charges screen; VAT from rounded net | OK |
+| 2026-10-25 | #79 | T-017e: VAT code reuse, arrows, double tap | OK |
 | 2026-10-24 | #74 | T-017 tariffs + VAT rates | Presets, prices, VAT, steps, examples, help OK. **Bugs**: VAT code cannot be reused after delete (DbUpdateException, unique index incl. deleted rows); disabled reorder arrows look enabled and open the editor (Windows); double tap opens two editors (Android) → T-017e. VAT history check postponed to data import. |
 | 2026-10-24 | #69 + #70 | Selection kept on return; in-app help | OK |
 | 2026-10-24 | #66 | Restore on Windows and Android (save to Downloads, reinstall, restore incl. photos), bad file refused | OK |

@@ -57,6 +57,10 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   dictionaries. Services with startup side effects (language/culture, theme) are resolved in the `App`
   constructor **before** anything reads localized text. CI only builds the App; it never runs it.
 - Package versions are managed centrally in `Directory.Packages.props`.
+- **Only free, open-source dependencies with a permissive licence** (MIT, Apache-2.0, BSD, MS-PL and similar) —
+  owner decision 2026-10-25. No commercial, "community"/free-tier, non-commercial (PolyForm), dual-licensed or
+  copyleft (GPL/AGPL) packages, fonts or assets (e.g. not EPPlus, Syncfusion, DevExpress, Telerik, FluentAssertions 8+;
+  for Excel use ClosedXML/MiniExcel, for charts LiveCharts2/Microcharts). Name the package and its licence in the PR.
 
 ## User guide (EN + RU)
 
