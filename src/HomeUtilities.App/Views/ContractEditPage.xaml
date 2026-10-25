@@ -223,6 +223,52 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- 3b. Bills: the latest bills of the contract (a saved contract only). -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowBillsCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding BillsHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddBillCommand}"
+                                ToolTipProperties.Text="{Binding AddBillText}"
+                                SemanticProperties.Description="{Binding AddBillText}" />
+                    </Grid>
+
+                    <Label Text="{Binding BillsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoBills}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding BillRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ContractBillRowViewModel">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <Label Grid.Column="0" Text="{Binding PeriodText}" FontAttributes="Bold" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding BadgeText}" FontSize="13" VerticalOptions="Center"
+                                           Style="{StaticResource MutedLabel}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:ContractBillRowViewModel" Binding="{Binding IsBadgePaid}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:ContractBillRowViewModel" Binding="{Binding IsBadgePartial}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:ContractBillRowViewModel" Binding="{Binding IsBadgeOverdue}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label Grid.Column="2" Text="{Binding TotalText}" FontAttributes="Bold" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button Text="{Binding AllBillsText}" Command="{Binding OpenAllBillsCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- 4. Links: own links (edit on tap, open, delete) and the muted links inherited from the supplier. -->
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">

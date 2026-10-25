@@ -866,6 +866,74 @@ public class ContractEditViewModelTests
         return meter;
     }
 
+    // ---- Bills card (T-019) ---------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task BillsCard_ListsTheSixNewestBillsWithPeriodTotalAndStatus()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var bills = Enumerable.Range(1, 7)
+            .Select(month =>
+            {
+                var bill = Bill.CreateFor(contract, new YearMonth(2026, month), _kit.Clock);
+                bill.Gross = month * 10m;
+                bill.DueOn = new DateOnly(2026, month, 28).AddMonths(1);
+                _kit.Bills.All.Add(bill);
+                return bill;
+            })
+            .ToList();
+        var paid = new Payment { ContractId = contract.Id, PaidOn = new DateOnly(2026, 10, 1), Amount = 70m };
+        paid.Allocations.Add(new PaymentAllocation { PaymentId = paid.Id, BillId = bills[6].Id, Amount = 70m });
+        _kit.Payments.Add(paid);
+
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        Assert.True(vm.ShowBillsCard);
+        Assert.Equal(["07.2026", "06.2026", "05.2026", "04.2026", "03.2026", "02.2026"], vm.BillRows.Select(r => r.PeriodText));
+        Assert.Equal("70.00 Currency_Symbol_EUR [en]", vm.BillRows[0].TotalText);
+        Assert.Equal(BillBadgeKind.Paid, vm.BillRows[0].Badge);
+        // Today is 23 Oct 2026: the bill of June was due on 28 July, so it is overdue
+        Assert.Equal(BillBadgeKind.Overdue, vm.BillRows[1].Badge);
+        Assert.True(vm.HasBills);
+    }
+
+    [Fact]
+    public async Task BillsCard_TappingARowOpensTheBill_AllBillsOpensTheFilteredScreen_PlusAddsABill()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var bill = Bill.CreateFor(contract, new YearMonth(2026, 9), _kit.Clock);
+        bill.Gross = 30m;
+        _kit.Bills.All.Add(bill);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        vm.BillRows[0].OpenCommand.Execute(null);
+        await vm.OpenAllBillsCommand.ExecuteAsync(null);
+        await vm.AddBillCommand.ExecuteAsync(null);
+        await Task.Delay(50);
+
+        Assert.Equal(
+            [Routes.BillEdit, Routes.BillsFor, Routes.BillEdit],
+            _kit.Navigation.Visited.Select(v => v.Route));
+        Assert.Equal(bill.Id, _kit.Navigation.Visited[0].Parameters![EditorNavigation.IdParameter]);
+        Assert.Equal(contract.Id, _kit.Navigation.Visited[1].Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal(contract.PropertyId, _kit.Navigation.Visited[1].Parameters![EditorNavigation.PropertyIdParameter]);
+        Assert.Equal(contract.Id, _kit.Navigation.Visited[2].Parameters![EditorNavigation.ContractIdParameter]);
+    }
+
+    [Fact]
+    public async Task BillsCard_IsHiddenForANewContract_AndAppearsAfterTheFirstSave()
+    {
+        var vm = await FilledNewAsync();
+        Assert.False(vm.ShowBillsCard);
+        Assert.True(vm.HasNoBills);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(vm.ShowBillsCard);
+    }
+
     private Contract AddContract(ServiceKind kind)
     {
         var contract = new Contract

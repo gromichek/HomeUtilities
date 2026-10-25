@@ -363,6 +363,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         ITariffStore tariffStore,
         IVatRateStore vatStore,
         IMeterStore meterStore,
+        IBillStore billStore,
+        IPaymentStore paymentStore,
         IClock clock,
         ILocalizer localizer,
         IDialogService dialogs,
@@ -380,6 +382,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _tariffStore = tariffStore;
         _vatStore = vatStore;
         _meterStore = meterStore;
+        _billStore = billStore;
+        _paymentStore = paymentStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
@@ -591,6 +595,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             }
 
             await LoadTariffAsync();
+            await LoadBillsAsync();
             ClearErrors();
             RebuildLinks();
             RebuildFields();
@@ -610,6 +615,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         if (!IsNew)
         {
             await LoadTariffAsync();
+            await LoadBillsAsync();
         }
     }
 
@@ -950,6 +956,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         IsNew = false;
         Title = TitleText();
         FormatIban();
+        await LoadBillsAsync();
     }
 
     protected override Task DeleteCoreAsync() => _store.DeleteAsync(_contract.Id);
@@ -1102,6 +1109,11 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             TariffEmptyText = _localizer["ContractTariffEmpty"];
             AddTariffText = _localizer["ContractTariffAdd"];
             ShowChargesText = _localizer["ContractShowCharges"];
+            BillsHeader = _localizer["BillBillsCardHeader"];
+            BillsEmptyText = _localizer["BillBillsCardEmpty"];
+            AllBillsText = _localizer["BillBillsCardAll"];
+            AddBillText = _localizer["BillBillsCardAdd"];
+            RebuildBills();
             TariffPresetsLabel = _localizer["ContractTariffPresets"];
             TariffSaveFirstText = _localizer["ContractTariffSaveFirst"];
             RebuildTariff();

@@ -670,7 +670,7 @@ internal sealed class ContractTestKit
         new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast);
 
     public ContractEditViewModel CreateContractEditor() =>
-        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, CreateSupplierEditor);
 
     public TariffComponentEditViewModel CreateTariffEditor() =>
         new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
