@@ -135,8 +135,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
             _filter.PropertyId = null;
         }
 
-        RebuildItems();
         IsLoaded = true;
+        RebuildItems();
         RaiseItemsChanged();
     }
 
