@@ -127,6 +127,7 @@ Contract links override/add to supplier links (e.g. a contract-specific portal).
 | ReadingDayFrom / ReadingDayTo | int? | window for submitting readings (e.g. 20–26) |
 | BillDay | int? | usual day the bill arrives |
 | PaymentDueDay | int? | usual due day |
+| VatCalculation | VatCalculation | `OnTotal` (default: VAT on the total per VAT %) / `PerLine` |
 | Links | list of Link | |
 | Notes | string? | |
 | IsArchived | bool | |
@@ -226,6 +227,7 @@ the national rate is entered once. A bill or component can override with an expl
 | RegisterKinds | set of RegisterKind? | for `PerUnit`: which registers are counted (e.g. Day only) |
 | MeterIds | set of Guid? | for `PerUnit`: which meters (default: all contract meters); a selected meter includes its replacements (meter chain) |
 | VatCode | string | |
+| QuantityUnit | MeterUnit? | for `QuantityFromBill`: unit of the entered quantity (MWh, m³, kWh, Gcal) |
 | Rates | list of **TariffRate** | time-versioned |
 | SortOrder | int | |
 
@@ -234,7 +236,11 @@ the national rate is entered once. A bill or component can override with an expl
 - `PerArea` — area parameter × price (maintenance fee per m²).
 - `PerResident` — declared residents × price (waste).
 - `FixedMonthly` — fixed amount per month (internet, TV, meter fee, subscription fee).
-- `FromBill` — no own calculation; amount taken from the supplier bill (heating by building heat meter).
+- `FromBill` — no own calculation; amount taken from the supplier bill (one lump sum the app cannot check).
+- `QuantityFromBill` — the supplier distributes the quantity (e.g. heat MWh for heating/circulation from the
+  building meter, the flat's share of the building's hot-water difference in m³); the **quantity is entered from
+  the bill**, the price comes from the tariff: amount = quantity × price. Unit in `QuantityUnit`. (Decision
+  2026-10-25, owner's heating bill.)
 - `NetExport` — export register × price, negative line (solar net billing).
 
 ### TariffRate (time-versioned)
@@ -254,7 +260,14 @@ For contract C and period P, per component:
 2. Pick the rate valid on the period's reference date (first day of P; components with readings use the
    end reading date). Price changes inside a period are **not** split in v1 (documented limitation).
 3. Net = quantity × price (if price includes VAT: gross = quantity × price, net = gross / (1+vat)).
-4. Net is rounded to 0.01 first; VAT = Round(rounded Net × vat%), Gross = rounded Net + VAT.
+4. Net is rounded to 0.01 first. **VAT is calculated on the total** (decision 2026-10-25, as on the owner's
+   supplier invoices): lines are grouped by VAT %; per group VAT = Round(Σ rounded line Net × vat%) — if all
+   lines of the group are priced incl. VAT, the group is split from its gross sum instead
+   (VAT = ΣGross − Round(ΣGross / (1+vat%))). Line VAT values are shown for information (line VAT rounded per
+   line); the totals use the group VAT. `Contract.VatCalculation = OnTotal` (default) / `PerLine` (sum of the line
+   VATs) for a supplier that rounds per line.
+   Quantities of `QuantityFromBill` components come from `Bill.BillQuantities` of the bill for P; without a
+   bill the line is incomplete (warning `QuantityFromBill`).
 5. Result: `CalculatedCharge` with lines `{ ComponentId, Quantity, UnitPrice, Net, VatPercent, Vat, Gross }`
    and total. Calculated on demand; a snapshot is stored when a bill for P is entered (so later tariff
    edits do not silently change history), and can be recalculated explicitly.
@@ -287,6 +300,7 @@ is allowed (`Net`, `VatPercent`, `Vat` stay null). Invariant when all set: `Net 
 | Lines | list of **BillLine** | optional detail |
 | CustomFields | list of **CustomFieldValue** | optional, see below |
 | ConsumptionOnBill | decimal? | quantity the supplier billed (to compare with metered, e.g. water losses) |
+| BillQuantities | list `{ ComponentId, Quantity }` | quantities typed from the bill for `QuantityFromBill` components |
 | CalculatedSnapshot | CalculatedCharge? | app's calculation at entry time |
 | TemplateId | Guid? | the BillTemplate it was created from |
 | AttachmentIds | list of Guid | PDF / photo of the bill |

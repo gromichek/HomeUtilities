@@ -7,7 +7,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-020 | Payments, allocation, prepayment, balance | Ready | | |
+| T-020 | Payments, allocation, prepayment, balance | In progress | | |
+| T-020a | Quantity from the bill (heating), VAT on the total | Ready | | after T-020; owner decision 2026-10-25 |
 
 ## Done
 

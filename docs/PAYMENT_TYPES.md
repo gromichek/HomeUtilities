@@ -20,7 +20,8 @@ This file explains **what the user does** for each kind of payment; field-level 
 | Type | Calculation | Set up once | Enter each period | App computes |
 |---|---|---|---|---|
 | Water + sewerage | (all cold + hot m³) × (water + sewerage price) + VAT | meters (1..n cold, 1..n hot), 2 components, prices, VAT, reading window | readings; bill total | consumption, expected charge, difference (losses) |
-| Hot water heating + heating | hot m³ × heating price + VAT; heating = from bill | same hot meters linked to the heat contract | bill total | heating part = bill − water heating |
+| Hot water + heating (distributed by the supplier) | hot m³ (own meters) × price; heat MWh for heating/circulation **from the bill** × €/MWh; hot-water difference m³ **from the bill** × price; VAT 12 % on the total | hot meters linked to the heat contract, 3 components, prices | bill total + the two quantities from the bill | full expected charge, difference, MWh per month (decision 2026-10-25) |
+| Heating as one lump sum | from bill | — | bill total | nothing to check |
 | Electricity | kWh × (distribution + energy) + VAT; day/night; tiers | meter + registers, components, prices | readings; bill | consumption per register, expected charge |
 | Electricity, equalized (current) | fixed monthly amount, annual settlement | equalized plan (amount from date) | readings; bill (= plan) | actual charge in background, expected settlement |
 | Solar panels | consumption − export (credit line) | Export register | readings of both registers | export credit |
