@@ -828,6 +828,20 @@ public class PaymentEditViewModelTests : IDisposable
         Assert.Single(_kit.Payments.Stored);
     }
 
+    [Fact]
+    public async Task ChangingTheLanguage_DoesNotMakeThePaymentDirty_AndKeepsTheMethod()
+    {
+        var vm = await NewEditorAsync(contractId: _water.Id);
+        vm.SelectedMethod = vm.Methods.First(m => m.Value.Equals(PaymentMethod.Cash));
+        vm.IsDirty = false;
+
+        _kit.Kit.Language.SetLanguage("ru");
+
+        Assert.False(vm.IsDirty);
+        Assert.Equal(PaymentMethod.Cash, vm.SelectedMethod!.As<PaymentMethod>());
+        Assert.Contains("[ru]", vm.SelectedMethod.DisplayName, StringComparison.Ordinal);
+    }
+
     // ---- Opening and deleting -------------------------------------------------------------------------------------
 
     [Fact]

@@ -1119,6 +1119,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             BalanceBilledLabel = _localizer["ContractBalanceBilled"];
             BalancePaidLabel = _localizer["ContractBalancePaid"];
             UseForOpenBillsText = _localizer["ContractBalanceUse"];
+            PaymentsHeader = _localizer["ContractPaymentsHeader"];
             PaymentsEmptyText = _localizer["ContractPaymentsEmpty"];
             AllPaymentsText = _localizer["ContractPaymentsAll"];
             AddPaymentText = _localizer["ContractPaymentsAdd"];

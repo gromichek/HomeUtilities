@@ -62,6 +62,9 @@ public sealed partial class ContractEditViewModel
     private string _useForOpenBillsText = string.Empty;
 
     [ObservableProperty]
+    private string _paymentsHeader = string.Empty;
+
+    [ObservableProperty]
     private string _paymentsEmptyText = string.Empty;
 
     [ObservableProperty]

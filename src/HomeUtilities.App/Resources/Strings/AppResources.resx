@@ -738,7 +738,7 @@
   <data name="BillPaid" xml:space="preserve"><value>Paid</value></data>
   <data name="BillPaymentsEmpty" xml:space="preserve"><value>No payments yet.</value></data>
   <data name="BillRemovePayment" xml:space="preserve"><value>Remove payment</value></data>
-  <data name="BillPaymentsHint" xml:space="preserve"><value>The Paid button records a bank transfer for the open amount, dated today. Payments with several bills come later.</value></data>
+  <data name="BillPaymentsHint" xml:space="preserve"><value>The Paid button records a bank transfer for the open amount, dated today. Use Add payment for another date or amount, or for a payment that covers several bills.</value></data>
   <data name="BillNotesLabel" xml:space="preserve"><value>Comment</value></data>
   <data name="BillDelete" xml:space="preserve"><value>Delete bill</value></data>
   <data name="BillLineDescriptionLabel" xml:space="preserve"><value>Description</value></data>
@@ -845,4 +845,88 @@
   <data name="Enum_PaymentMethod_Cash" xml:space="preserve"><value>Cash</value></data>
   <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Direct debit</value></data>
   <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Other</value></data>
+  <data name="PaymentAdd" xml:space="preserve"><value>New payment</value></data>
+  <data name="PaymentSelectHint" xml:space="preserve"><value>Select a payment or add a new one.</value></data>
+  <data name="PaymentsEmpty" xml:space="preserve"><value>No payments yet. Add the first one with the button below.</value></data>
+  <data name="PaymentsNothingFound" xml:space="preserve"><value>No payments match the filters.</value></data>
+  <data name="PaymentsPropertyFilter" xml:space="preserve"><value>Property</value></data>
+  <data name="PaymentsAllProperties" xml:space="preserve"><value>All properties</value></data>
+  <data name="PaymentsContractFilter" xml:space="preserve"><value>Contract</value></data>
+  <data name="PaymentsAllContracts" xml:space="preserve"><value>All contracts</value></data>
+  <data name="PaymentsYearLabel" xml:space="preserve"><value>Year</value></data>
+  <data name="PaymentsPreviousYear" xml:space="preserve"><value>Previous year</value></data>
+  <data name="PaymentsNextYear" xml:space="preserve"><value>Next year</value></data>
+  <data name="PaymentsAllYears" xml:space="preserve"><value>All years</value></data>
+  <data name="PaymentsTotals" xml:space="preserve"><value>Paid {0} · of it unallocated (prepayment) {1}</value></data>
+  <data name="PaymentRefundAmount" xml:space="preserve"><value>−{0} refund</value></data>
+  <data name="PaymentSeveralContracts" xml:space="preserve"><value>Several contracts</value></data>
+  <data name="PaymentPaysMore" xml:space="preserve"><value>{0} +{1}</value></data>
+  <data name="PaymentPrepaymentBadge" xml:space="preserve"><value>Prepayment {0}</value></data>
+  <data name="PaymentQuickMarker" xml:space="preserve"><value>quick</value></data>
+  <data name="PaymentNewTitle" xml:space="preserve"><value>New payment</value></data>
+  <data name="PaymentEditTitle" xml:space="preserve"><value>Payment {0} · {1}</value></data>
+  <data name="PaymentGeneral" xml:space="preserve"><value>General</value></data>
+  <data name="PaymentPropertyLabel" xml:space="preserve"><value>Property</value></data>
+  <data name="PaymentContractLabel" xml:space="preserve"><value>Contract</value></data>
+  <data name="PaymentNoContract" xml:space="preserve"><value>No contract</value></data>
+  <data name="PaymentChooseProperty" xml:space="preserve"><value>Choose a property</value></data>
+  <data name="PaymentChooseContract" xml:space="preserve"><value>Choose a contract</value></data>
+  <data name="PaymentChoosePropertyFirst" xml:space="preserve"><value>Choose the property first.</value></data>
+  <data name="PaymentPaidOnLabel" xml:space="preserve"><value>Paid on</value></data>
+  <data name="PaymentAmountLabel" xml:space="preserve"><value>Amount *</value></data>
+  <data name="PaymentAmountHint" xml:space="preserve"><value>A negative amount is a refund you received.</value></data>
+  <data name="PaymentMethodLabel" xml:space="preserve"><value>Method</value></data>
+  <data name="PaymentReferenceLabel" xml:space="preserve"><value>Reference (payment purpose)</value></data>
+  <data name="PaymentFillReference" xml:space="preserve"><value>Fill from contract</value></data>
+  <data name="PaymentNotesLabel" xml:space="preserve"><value>Comment</value></data>
+  <data name="PaymentQuickNote" xml:space="preserve"><value>Created with the Paid button. If you turn it into a partial payment or add more bills, it becomes a normal payment.</value></data>
+  <data name="PaymentAllocations" xml:space="preserve"><value>Bills paid</value></data>
+  <data name="PaymentAllocationAdd" xml:space="preserve"><value>Add a bill</value></data>
+  <data name="PaymentAutoAllocate" xml:space="preserve"><value>Allocate automatically</value></data>
+  <data name="PaymentAllocationsEmpty" xml:space="preserve"><value>No bill is paid by this payment. The whole amount is a prepayment.</value></data>
+  <data name="PaymentAllocationsHint" xml:space="preserve"><value>Tap a row to change the amount. The part of the payment that pays no bill stays on the contract as a prepayment.</value></data>
+  <data name="PaymentAllocationRow" xml:space="preserve"><value>{0} · {1} · bill {2} — {3}</value></data>
+  <data name="PaymentAllocationBillMissing" xml:space="preserve"><value>(the bill no longer exists) — {0}</value></data>
+  <data name="PaymentBillOption" xml:space="preserve"><value>{0} · open {1}</value></data>
+  <data name="PaymentChooseBill" xml:space="preserve"><value>Choose a bill</value></data>
+  <data name="PaymentNoOpenBills" xml:space="preserve"><value>There are no open bills this payment could pay.</value></data>
+  <data name="PaymentEnterAmountFirst" xml:space="preserve"><value>Enter the amount first.</value></data>
+  <data name="PaymentNothingToAllocate" xml:space="preserve"><value>No open bills left to allocate.</value></data>
+  <data name="PaymentNoPurposeTemplate" xml:space="preserve"><value>Neither the contract nor its supplier has a payment purpose template.</value></data>
+  <data name="PaymentSummaryFull" xml:space="preserve"><value>Allocated {0}</value></data>
+  <data name="PaymentSummaryPrepayment" xml:space="preserve"><value>Allocated {0} · Prepayment {1}</value></data>
+  <data name="PaymentSummaryOver" xml:space="preserve"><value>Allocated {0} · Over-allocated by {1}</value></data>
+  <data name="PaymentSummaryRest" xml:space="preserve"><value>Allocated {0} · Not allocated {1}</value></data>
+  <data name="PaymentDelete" xml:space="preserve"><value>Delete payment</value></data>
+  <data name="PaymentDeleteWithBills" xml:space="preserve"><value>Bills it paid become unpaid again.</value></data>
+  <data name="PaymentAllocationEdit" xml:space="preserve"><value>Amount for the bill</value></data>
+  <data name="PaymentAllocationAmountLabel" xml:space="preserve"><value>Part of this payment that pays the bill</value></data>
+  <data name="PaymentAllocationNoteLabel" xml:space="preserve"><value>Comment</value></data>
+  <data name="PaymentAllocationOpen" xml:space="preserve"><value>Open on the bill: {0}</value></data>
+  <data name="PrepaymentUsed" xml:space="preserve"><value>Prepayment used</value></data>
+  <data name="BillUsePrepayment" xml:space="preserve"><value>Use prepayment {0}</value></data>
+  <data name="BillAddPayment" xml:space="preserve"><value>Add payment</value></data>
+  <data name="ContractBalanceHeader" xml:space="preserve"><value>Balance</value></data>
+  <data name="ContractBalanceBilled" xml:space="preserve"><value>Billed</value></data>
+  <data name="ContractBalancePaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="ContractBalanceDebt" xml:space="preserve"><value>Debt {0}</value></data>
+  <data name="ContractBalanceAdvance" xml:space="preserve"><value>Paid in advance {0}</value></data>
+  <data name="ContractBalanceSettled" xml:space="preserve"><value>Settled</value></data>
+  <data name="ContractBalanceUnallocated" xml:space="preserve"><value>Unallocated payments: {0}</value></data>
+  <data name="ContractBalanceUse" xml:space="preserve"><value>Use for open bills</value></data>
+  <data name="ContractBalanceNothingToUse" xml:space="preserve"><value>Nothing to allocate: there are no open bills.</value></data>
+  <data name="ContractPaymentsHeader" xml:space="preserve"><value>Latest payments</value></data>
+  <data name="ContractPaymentsEmpty" xml:space="preserve"><value>No payments yet.</value></data>
+  <data name="ContractPaymentsAll" xml:space="preserve"><value>All payments</value></data>
+  <data name="ContractPaymentsAdd" xml:space="preserve"><value>New payment for this contract</value></data>
+  <data name="Error_payment_amount_zero" xml:space="preserve"><value>Enter an amount other than zero.</value></data>
+  <data name="Error_payment_over_allocated" xml:space="preserve"><value>The bills take more than the payment amount.</value></data>
+  <data name="Error_payment_allocation_amount_zero" xml:space="preserve"><value>The amount for a bill may not be zero.</value></data>
+  <data name="Error_payment_allocation_sign_mismatch" xml:space="preserve"><value>The amount for a bill must have the same sign as the payment.</value></data>
+  <data name="Error_payment_allocation_bill_unknown" xml:space="preserve"><value>A bill of this payment no longer exists. Remove its row.</value></data>
+  <data name="Error_payment_allocation_currency_mismatch" xml:space="preserve"><value>A bill has another currency than the payment.</value></data>
+  <data name="Error_payment_allocation_duplicate_bill" xml:space="preserve"><value>The same bill is listed twice.</value></data>
+  <data name="Error_payment_edit_property_required" xml:space="preserve"><value>Choose a property.</value></data>
+  <data name="Error_payment_edit_allocation_exceeds_open" xml:space="preserve"><value>{0} is more than what is open on the bill ({1}).</value></data>
+  <data name="Error_payment_edit_over_allocated_by" xml:space="preserve"><value>The bills take {0} more than the payment amount.</value></data>
 </root>

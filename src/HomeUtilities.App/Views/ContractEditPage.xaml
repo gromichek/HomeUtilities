@@ -269,6 +269,71 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- 3c. Balance: billed, paid, debt / paid in advance, unallocated money and the latest payments (a saved contract only). -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowBalanceCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding BalanceHeader}" Style="{StaticResource SectionHeader}" />
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding BalanceBilledLabel}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding BalanceBilledText}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="{Binding BalancePaidLabel}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding BalancePaidText}" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Debt is red, paid in advance is green, settled is grey. -->
+                    <Label Text="{Binding BalanceResultText}" FontAttributes="Bold" FontSize="18" Style="{StaticResource MutedLabel}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" x:DataType="vm:ContractEditViewModel" Binding="{Binding IsBalanceDebt}" Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" x:DataType="vm:ContractEditViewModel" Binding="{Binding IsBalanceAdvance}" Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasUnallocated}">
+                        <Label Text="{Binding UnallocatedText}" Style="{StaticResource MutedLabel}" />
+                        <Button Text="{Binding UseForOpenBillsText}" Command="{Binding UseForOpenBillsCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                        <Label Grid.Column="0" Text="{Binding PaymentsHeader}" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddPaymentCommand}"
+                                ToolTipProperties.Text="{Binding AddPaymentText}"
+                                SemanticProperties.Description="{Binding AddPaymentText}" />
+                    </Grid>
+
+                    <Label Text="{Binding PaymentsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoPayments}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding PaymentRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ContractPaymentRowViewModel">
+                                <VerticalStackLayout Spacing="0">
+                                    <VerticalStackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                                    </VerticalStackLayout.GestureRecognizers>
+                                    <Label Text="{Binding Text}" />
+                                    <Label Text="{Binding PrepaymentText}" FontSize="13" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
+                                           IsVisible="{Binding HasPrepayment}" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button Text="{Binding AllPaymentsText}" Command="{Binding OpenAllPaymentsCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- 4. Links: own links (edit on tap, open, delete) and the muted links inherited from the supplier. -->
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">

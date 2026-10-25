@@ -289,8 +289,19 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
         Texts = new PaymentEditTexts(_localizer);
         DeleteWholeText = Texts.DeletePaymentText;
         var current = SelectedMethod?.Value;
-        Methods = EnumText.Options<PaymentMethod>(_localizer);
-        SelectedMethod = current is null ? Methods[0] : Methods.FirstOrDefault(m => m.Value.Equals(current)) ?? Methods[0];
+        var previous = SuppressDirty;
+        SuppressDirty = true;
+        try
+        {
+            // A new list of names is not an edit of the payment.
+            Methods = EnumText.Options<PaymentMethod>(_localizer);
+            SelectedMethod = current is null ? Methods[0] : Methods.FirstOrDefault(m => m.Value.Equals(current)) ?? Methods[0];
+        }
+        finally
+        {
+            SuppressDirty = previous;
+        }
+
         OnPropertyChanged(nameof(SelectedContractName));
         if (_payment.Id != Guid.Empty)
         {
