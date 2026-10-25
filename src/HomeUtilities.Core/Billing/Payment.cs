@@ -23,6 +23,12 @@ public class Payment : SyncEntity
     /// <summary>How the payment was made.</summary>
     public PaymentMethod Method { get; set; }
 
+    /// <summary>
+    /// True for a payment created by the "Paid" quick action of a bill. Such a payment covers exactly one bill, so
+    /// removing it later deletes the payment as a whole.
+    /// </summary>
+    public bool CreatedByQuickAction { get; set; }
+
     /// <summary>Payment reference or purpose text.</summary>
     public string? Reference { get; set; }
 
