@@ -934,6 +934,180 @@ public class ContractEditViewModelTests
         Assert.True(vm.ShowBillsCard);
     }
 
+    // ---- Balance card (T-020) -------------------------------------------------------------------------------------
+
+    private Contract ContractWithBills(int count, decimal gross = 46.02m)
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        for (var month = 6; month < 6 + count; month++)
+        {
+            var bill = Bill.CreateFor(contract, new YearMonth(2026, month), _kit.Clock);
+            bill.Gross = gross;
+            bill.DueOn = new DateOnly(2026, month, 28);
+            _kit.Bills.All.Add(bill);
+        }
+
+        return contract;
+    }
+
+    private Payment PayContract(Contract contract, decimal amount, int daysAgo = 3, params Bill[] settles)
+    {
+        var payment = new Payment { ContractId = contract.Id, PropertyId = contract.PropertyId, PaidOn = _kit.Clock.Today.AddDays(-daysAgo), Amount = amount };
+        var left = amount;
+        foreach (var bill in settles)
+        {
+            var take = Math.Min(left, bill.Gross);
+            payment.Allocations.Add(new PaymentAllocation { PaymentId = payment.Id, BillId = bill.Id, Amount = take });
+            left -= take;
+        }
+
+        _kit.Payments.Add(payment);
+        return payment;
+    }
+
+    [Fact]
+    public async Task BalanceCard_ThreeBillsAndLessPaid_ShowsTheDebt()
+    {
+        var contract = ContractWithBills(3);
+        PayContract(contract, 120m);
+
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        // billed 3 x 46.02 = 138.06; paid 120.00; debt 138.06 - 120.00 = 18.06
+        Assert.True(vm.ShowBalanceCard);
+        Assert.Equal("138.06 Currency_Symbol_EUR [en]", vm.BalanceBilledText);
+        Assert.Equal("120.00 Currency_Symbol_EUR [en]", vm.BalancePaidText);
+        Assert.Equal("ContractBalanceDebt 18.06 Currency_Symbol_EUR [en] [en]", vm.BalanceResultText);
+        Assert.Equal(BalanceKind.Debt, vm.BalanceKind);
+        Assert.True(vm.IsBalanceDebt);
+        Assert.False(vm.IsBalanceAdvance);
+    }
+
+    [Fact]
+    public async Task BalanceCard_PaidMoreThanBilled_ShowsPaidInAdvance()
+    {
+        var contract = ContractWithBills(3);
+        PayContract(contract, 150m);
+
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        // 150.00 - 138.06 = 11.94
+        Assert.Equal("ContractBalanceAdvance 11.94 Currency_Symbol_EUR [en] [en]", vm.BalanceResultText);
+        Assert.Equal(BalanceKind.PaidInAdvance, vm.BalanceKind);
+        Assert.True(vm.IsBalanceAdvance);
+    }
+
+    [Fact]
+    public async Task BalanceCard_PaidExactly_IsSettled()
+    {
+        var contract = ContractWithBills(3);
+        PayContract(contract, 138.06m);
+
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        Assert.Equal("ContractBalanceSettled [en]", vm.BalanceResultText);
+        Assert.Equal(BalanceKind.Settled, vm.BalanceKind);
+    }
+
+    [Fact]
+    public async Task BalanceCard_ShowsTheUnallocatedMoney_AndUseForOpenBillsSpreadsItOldestFirst()
+    {
+        var contract = ContractWithBills(3);
+        PayContract(contract, 150m);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.True(vm.HasUnallocated);
+        Assert.Equal("ContractBalanceUnallocated 150.00 Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
+
+        await vm.UseForOpenBillsCommand.ExecuteAsync(null);
+
+        // 150.00 -> 3 x 46.02 = 138.06 allocated, 11.94 stay unallocated
+        Assert.True(vm.HasUnallocated);
+        Assert.Equal("ContractBalanceUnallocated 11.94 Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
+        Assert.Equal(138.06m, _kit.Payments.Stored.Single().Allocations.Where(a => !a.IsDeleted).Sum(a => a.Amount));
+        Assert.Contains(_kit.Toast.Calls, c => c.Message == "PrepaymentUsed [en]" && c.Action == "BillUndo [en]");
+    }
+
+    [Fact]
+    public async Task BalanceCard_UseForOpenBills_CanBeUndone()
+    {
+        var contract = ContractWithBills(2);
+        PayContract(contract, 100m);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        _kit.Toast.ActionResult = (_, _) => true;
+
+        await vm.UseForOpenBillsCommand.ExecuteAsync(null);
+
+        Assert.DoesNotContain(_kit.Payments.Stored.Single().Allocations, a => !a.IsDeleted);
+        Assert.Equal("ContractBalanceUnallocated 100.00 Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
+    }
+
+    [Fact]
+    public async Task BalanceCard_UseForOpenBills_WithoutOpenBills_SaysThereIsNothing()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        PayContract(contract, 20m);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        await vm.UseForOpenBillsCommand.ExecuteAsync(null);
+
+        Assert.Contains("ContractBalanceNothingToUse [en]", _kit.Toast.Messages);
+    }
+
+    [Fact]
+    public async Task BalanceCard_NoUnallocatedMoney_HidesTheLine()
+    {
+        var contract = ContractWithBills(1);
+        var bill = _kit.Bills.All.Single();
+        PayContract(contract, 46.02m, 3, bill);
+
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        Assert.False(vm.HasUnallocated);
+    }
+
+    [Fact]
+    public async Task BalanceCard_ListsTheSixLatestPayments_WithPrepaymentAndNavigation()
+    {
+        var contract = ContractWithBills(1);
+        for (var i = 1; i <= 7; i++)
+        {
+            PayContract(contract, i, daysAgo: 10 - i);
+        }
+
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        Assert.Equal(6, vm.PaymentRows.Count);
+        Assert.StartsWith("BillPaymentRow 20.10.2026|7.00", vm.PaymentRows[0].Text, StringComparison.Ordinal);
+        Assert.True(vm.PaymentRows[0].HasPrepayment);
+        Assert.Equal("PaymentPrepaymentBadge 7.00 Currency_Symbol_EUR [en] [en]", vm.PaymentRows[0].PrepaymentText);
+
+        vm.PaymentRows[0].OpenCommand.Execute(null);
+        await vm.OpenAllPaymentsCommand.ExecuteAsync(null);
+        await vm.AddPaymentCommand.ExecuteAsync(null);
+        await Task.Delay(50);
+
+        Assert.Equal([Routes.PaymentEdit, Routes.PaymentsFor, Routes.PaymentEdit], _kit.Navigation.Visited.Select(v => v.Route));
+        Assert.Equal(contract.Id, _kit.Navigation.Visited[1].Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal(contract.PropertyId, _kit.Navigation.Visited[1].Parameters![EditorNavigation.PropertyIdParameter]);
+        Assert.Equal(contract.Id, _kit.Navigation.Visited[2].Parameters![EditorNavigation.ContractIdParameter]);
+    }
+
+    [Fact]
+    public async Task BalanceCard_IsHiddenForANewContract()
+    {
+        var vm = await FilledNewAsync();
+
+        Assert.False(vm.ShowBalanceCard);
+    }
+
     private Contract AddContract(ServiceKind kind)
     {
         var contract = new Contract

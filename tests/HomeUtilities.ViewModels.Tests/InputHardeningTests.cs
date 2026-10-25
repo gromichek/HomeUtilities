@@ -315,6 +315,68 @@ public class InputHardeningTests
 
     [Theory]
     [MemberData(nameof(Inputs))]
+    public async Task PaymentEditor_NeverThrows(string input)
+    {
+        var kit = new BillTestKit(new DateOnly(2026, 11, 3));
+        var contract = kit.AddWaterContract(tariff: false);
+        var bill = kit.AddBill(contract, new HomeUtilities.Core.Common.YearMonth(2026, 10), 46.02m);
+        kit.AddBill(contract, new HomeUtilities.Core.Common.YearMonth(2026, 9), 30m);
+        var vm = kit.CreatePaymentEditor();
+        vm.PresetBillId = bill.Id;
+        await vm.LoadAsync(null);
+
+        Func<Task> save = async () =>
+        {
+            await vm.SaveCommand.ExecuteAsync(null);
+            await vm.FillReferenceCommand.ExecuteAsync(null);
+            await vm.AutoAllocateCommand.ExecuteAsync(null);
+        };
+        await HammerAsync(vm, input, save);
+        vm.AmountText = input;
+        await save();
+        ReadAll(vm);
+
+        // the allocation dialog gets the same input
+        kit.Kit.Dialogs.ChooseScript = options => options.FirstOrDefault();
+        kit.Kit.Dialogs.EditorScript = editor =>
+        {
+            var dialog = (AllocationAmountEditorViewModel)editor;
+            dialog.AmountText = input;
+            dialog.Note = input;
+            dialog.SaveCommand.Execute(null);
+            ReadAll(dialog);
+        };
+        await vm.AddAllocationCommand.ExecuteAsync(null);
+        foreach (var row in vm.AllocationRows.ToList())
+        {
+            await row.EditCommand.ExecuteAsync(null);
+        }
+
+        await vm.SaveCommand.ExecuteAsync(null);
+        ReadAll(vm);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
+    public async Task PaymentsList_NeverThrows(string input)
+    {
+        var kit = new BillTestKit(new DateOnly(2026, 11, 3));
+        var contract = kit.AddWaterContract(tariff: false);
+        var bill = kit.AddBill(contract, new HomeUtilities.Core.Common.YearMonth(2026, 10), 46.02m);
+        kit.AddPayment(70m, (bill, 46.02m));
+        var vm = kit.CreatePayments();
+        await vm.ReloadAsync();
+        kit.Kit.Dialogs.ChooseScript = _ => input;
+
+        await vm.ChoosePropertyFilterCommand.ExecuteAsync(null);
+        await vm.ChooseContractFilterCommand.ExecuteAsync(null);
+        vm.PreviousYearCommand.Execute(null);
+        vm.ToggleAllYearsCommand.Execute(null);
+        ReadAll(vm);
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
     public async Task BillLineDialog_NeverThrows(string input)
     {
         var kit = new ContractTestKit(new DateOnly(2026, 10, 27));

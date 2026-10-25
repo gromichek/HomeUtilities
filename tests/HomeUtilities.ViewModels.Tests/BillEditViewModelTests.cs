@@ -754,6 +754,151 @@ public class BillEditViewModelTests : IDisposable
         Assert.Equal(BillBadgeKind.Unpaid, vm.StatusKind);
     }
 
+    // ---- Payments and prepayment (T-020) --------------------------------------------------------------------------
+
+    private Payment AddPrepayment(Contract contract, decimal amount, int daysAgo = 5)
+    {
+        var payment = new Payment { ContractId = contract.Id, PropertyId = contract.PropertyId, PaidOn = Today.AddDays(-daysAgo), Amount = amount };
+        _kit.Payments.Add(payment);
+        return payment;
+    }
+
+    [Fact]
+    public async Task AddPayment_OpensThePaymentEditorForThisBill()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
+        var vm = await OpenAsync(bill.Id);
+
+        await vm.AddPaymentCommand.ExecuteAsync(null);
+
+        var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
+        Assert.Equal(Routes.PaymentEdit, route);
+        Assert.Equal(bill.Id, parameters![EditorNavigation.BillIdParameter]);
+    }
+
+    [Fact]
+    public async Task AddPayment_WithUnsavedChanges_AsksToSaveFirst()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
+        var vm = await OpenAsync(bill.Id);
+        vm.Amounts.GrossText = "50";
+
+        await vm.AddPaymentCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Kit.Navigation.Visited);
+        Assert.Equal("BillSaveFirst [en]", Assert.Single(_kit.Kit.Dialogs.Alerts).Message);
+    }
+
+    [Fact]
+    public async Task PaymentRow_OpensThePaymentEditor()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
+        var payment = _kit.AddPayment(20m, (bill, 20m));
+        var vm = await OpenAsync(bill.Id);
+
+        vm.PaymentRows[0].OpenCommand.Execute(null);
+        await Task.Delay(50);
+
+        var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
+        Assert.Equal(Routes.PaymentEdit, route);
+        Assert.Equal(payment.Id, parameters![EditorNavigation.IdParameter]);
+    }
+
+    [Fact]
+    public async Task AppearingAgain_RefreshesTheStatusAfterThePaymentEditorChangedThePayments()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
+        var vm = await OpenAsync(bill.Id);
+        Assert.Equal(BillBadgeKind.Unpaid, vm.StatusKind);
+
+        _kit.AddPayment(46.02m, (bill, 46.02m));
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(BillBadgeKind.Paid, vm.StatusKind);
+        Assert.Single(vm.PaymentRows);
+    }
+
+    [Fact]
+    public async Task UsePrepayment_IsOfferedWithTheAmountWhenTheContractHasUnallocatedMoney()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var october = _kit.AddBill(contract, new YearMonth(2026, 10), 57.70m);
+        _kit.AddPayment(70m, (october, 57.70m)).ContractId = contract.Id;
+        var november = _kit.AddBill(contract, new YearMonth(2026, 11), 46.02m);
+
+        var vm = await OpenAsync(november.Id);
+
+        // 70.00 - 57.70 = 12.30 prepayment
+        Assert.True(vm.CanUsePrepayment);
+        Assert.Equal($"BillUsePrepayment 12.30 {Eur} [en]", vm.UsePrepaymentText);
+        Assert.False((await OpenAsync(october.Id)).CanUsePrepayment);
+    }
+
+    [Fact]
+    public async Task UsePrepayment_PartlyPaysTheBill_AndOffersUndo()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var october = _kit.AddBill(contract, new YearMonth(2026, 10), 57.70m);
+        _kit.AddPayment(70m, (october, 57.70m)).ContractId = contract.Id;
+        var november = _kit.AddBill(contract, new YearMonth(2026, 11), 46.02m);
+        var vm = await OpenAsync(november.Id);
+        _kit.Kit.Toast.ActionResult = (_, _) => false;
+
+        await vm.UsePrepaymentCommand.ExecuteAsync(null);
+
+        // 46.02 - 12.30 = 33.72 still open
+        Assert.Equal(BillBadgeKind.PartiallyPaid, vm.StatusKind);
+        Assert.Equal($"12.30 {Eur}", vm.PaidAmountText);
+        Assert.Equal($"33.72 {Eur}", vm.OpenAmountText);
+        Assert.False(vm.CanUsePrepayment);
+        var call = Assert.Single(_kit.Kit.Toast.Calls);
+        Assert.Equal(("PrepaymentUsed [en]", "BillUndo [en]"), (call.Message, call.Action));
+    }
+
+    [Fact]
+    public async Task UsePrepayment_Undo_RestoresTheOpenAmountAndThePrepayment()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        AddPrepayment(contract, 12.30m);
+        var november = _kit.AddBill(contract, new YearMonth(2026, 11), 46.02m);
+        var vm = await OpenAsync(november.Id);
+        _kit.Kit.Toast.ActionResult = (_, _) => true;
+
+        await vm.UsePrepaymentCommand.ExecuteAsync(null);
+
+        Assert.Equal(BillBadgeKind.Unpaid, vm.StatusKind);
+        Assert.True(vm.CanUsePrepayment);
+        Assert.Equal($"BillUsePrepayment 12.30 {Eur} [en]", vm.UsePrepaymentText);
+    }
+
+    [Fact]
+    public async Task UsePrepayment_WithUnsavedChanges_AsksToSaveFirst()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        AddPrepayment(contract, 12.30m);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 11), 46.02m);
+        var vm = await OpenAsync(bill.Id);
+        vm.Amounts.GrossText = "50";
+
+        await vm.UsePrepaymentCommand.ExecuteAsync(null);
+
+        Assert.Equal("BillSaveFirst [en]", Assert.Single(_kit.Kit.Dialogs.Alerts).Message);
+        Assert.Empty(_kit.Payments.Stored.Single().Allocations);
+    }
+
+    [Fact]
+    public async Task UsePrepayment_IsNotOfferedWithoutPrepayment()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 11), 46.02m);
+
+        Assert.False((await OpenAsync(bill.Id)).CanUsePrepayment);
+    }
+
     // ---- Documents ------------------------------------------------------------------------------------------------
 
     [Fact]
