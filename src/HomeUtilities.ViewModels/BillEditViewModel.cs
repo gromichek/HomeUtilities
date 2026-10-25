@@ -482,6 +482,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         await RefreshCalculationAsync();
         await RefreshPaymentsAsync();
         UpdateComparison();
+
+        // A page binds before the data arrives: have every binding read the loaded state.
+        OnPropertyChanged(string.Empty);
     }
 
     protected override IReadOnlyList<ValidationError> Validate()
@@ -657,7 +660,21 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             return;
         }
 
-        // A different kind of bill starts over: the contract and everything taken from it go.
+        // A different kind of bill starts over: the contract and everything taken from it go. A one-off expense belongs to
+        // the current month, a contract bill to the previous one until the contract says otherwise.
+        if (!_periodTouched)
+        {
+            _applying = true;
+            try
+            {
+                Period = YearMonth.From(_clock.Today).AddMonths(value ? 0 : -1);
+            }
+            finally
+            {
+                _applying = false;
+            }
+        }
+
         _contract = null;
         SelectedContract = null;
         _live = null;
@@ -668,6 +685,16 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             ? Kinds.First(k => k.Value.Equals(BillKind.OneOff))
             : Kinds.First(k => k.Value.Equals(BillKind.Regular));
         UpdateComparison();
+    }
+
+    partial void OnHasServicePeriodChanged(bool value)
+    {
+        if (value && !_loading && !_applying)
+        {
+            // The usual case: one bill for the months around the period; start from the period itself.
+            ServiceFrom = Period.FirstDay;
+            ServiceTo = Period.LastDay;
+        }
     }
 
     partial void OnPeriodChanged(YearMonth value)

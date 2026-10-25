@@ -20,7 +20,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly INavigationService _navigation;
     private readonly IErrorLog _errorLog;
     private readonly IClipboardService _clipboard;
-    private readonly ISnackbarService _toast;
+    private readonly ISnackbarService _snackbar;
     private readonly IBackupService _backup;
     private readonly IBackupFileService _backupFiles;
     private readonly IDialogService _dialogs;
@@ -110,7 +110,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         INavigationService navigation,
         IErrorLog errorLog,
         IClipboardService clipboard,
-        ISnackbarService toast,
+        ISnackbarService snackbar,
         IBackupService backup,
         IBackupFileService backupFiles,
         IDialogService dialogs,
@@ -129,7 +129,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         IsDebugBuild = appInfo.IsDebugBuild;
         _errorLog = errorLog;
         _clipboard = clipboard;
-        _toast = toast;
+        _snackbar = snackbar;
         _localizer = localizer;
         _languageService = languageService;
         _themeService = themeService;
@@ -163,12 +163,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         var log = _errorLog.ReadAll();
         if (log.Length == 0)
         {
-            _toast.Notify(_localizer["SettingsErrorLogEmpty"]);
+            _snackbar.Notify(_localizer["SettingsErrorLogEmpty"]);
             return;
         }
 
         await _clipboard.SetTextAsync(log);
-        _toast.Notify(_localizer["Copied"]);
+        _snackbar.Notify(_localizer["Copied"]);
     });
 
     /// <summary>Creates a backup zip and lets the owner put it somewhere outside the app.</summary>
@@ -183,7 +183,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
         _settings.SetString(LastBackupKey, _clock.UtcNow.ToString("O", System.Globalization.CultureInfo.InvariantCulture));
         RefreshLastBackupText();
-        _toast.Notify(result.Location is { } location ? _localizer.Get("BackupSavedTo", location) : _localizer["BackupSaved"]);
+        _snackbar.Notify(result.Location is { } location ? _localizer.Get("BackupSavedTo", location) : _localizer["BackupSaved"]);
     });
 
     /// <summary>Picks a backup, checks it, asks for confirmation, stages it and asks to close the app to finish.</summary>
@@ -245,7 +245,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
         if (await _sampleData.FillAsync())
         {
-            _toast.Notify(_localizer["TestDataFilled"]);
+            _snackbar.Notify(_localizer["TestDataFilled"]);
         }
         else
         {

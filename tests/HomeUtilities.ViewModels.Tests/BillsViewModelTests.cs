@@ -340,4 +340,24 @@ public class BillsViewModelTests : IDisposable
         Assert.Equal($"50.00 {Eur}", vm.Items[0].TotalText);
         Assert.True(vm.Items[0].IsSelected);
     }
+
+    [Fact]
+    public async Task HelpButton_OfTheListAndOfTheEditor_OpensTheBillsSection()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(water, new YearMonth(2026, 10), 46.02m);
+        var list = await LoadAsync();
+        var editor = _kit.CreateEditor();
+        await editor.LoadAsync(bill.Id);
+
+        await list.OpenHelpCommand.ExecuteAsync(null);
+        await editor.OpenHelpCommand.ExecuteAsync(null);
+
+        Assert.All(_kit.Kit.Navigation.Visited, visit =>
+        {
+            Assert.Equal(Routes.HelpSection, visit.Route);
+            Assert.Equal(HelpTopic.Bills, visit.Parameters![HelpNavigation.TopicParameter]);
+        });
+        Assert.Equal(2, _kit.Kit.Navigation.Visited.Count);
+    }
 }

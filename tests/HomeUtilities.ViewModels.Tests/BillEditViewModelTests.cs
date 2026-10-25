@@ -131,11 +131,22 @@ public class BillEditViewModelTests : IDisposable
         vm.SelectedTypeIndex = 1;
 
         Assert.True(vm.IsOneOff);
-        Assert.Equal(new YearMonth(2026, 9), vm.Period);
+        Assert.Equal(new YearMonth(2026, 10), vm.Period);
         Assert.Null(vm.SelectedCategory);
         Assert.Equal(BillKind.OneOff, vm.SelectedKind!.As<BillKind>());
         Assert.False(vm.IsKindEditable);
         Assert.False(vm.ShowComparison);
+    }
+
+    [Fact]
+    public async Task ServicePeriod_StartsWithTheMonthOfThePeriod()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var vm = await NewEditorAsync(contract);
+
+        vm.HasServicePeriod = true;
+
+        Assert.Equal((new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 31)), (vm.ServiceFrom, vm.ServiceTo));
     }
 
     [Fact]

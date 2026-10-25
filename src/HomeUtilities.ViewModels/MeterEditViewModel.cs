@@ -36,7 +36,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly INavigationService _navigation;
-    private readonly ISnackbarService _toast;
+    private readonly ISnackbarService _snackbar;
     private readonly Func<MeterEditViewModel> _editorFactory;
     private readonly List<RegisterRowViewModel> _registers = [];
 
@@ -112,16 +112,16 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        ISnackbarService toast,
+        ISnackbarService snackbar,
         Func<MeterEditViewModel> editorFactory)
-        : base(localizer, dialogs, navigation, toast)
+        : base(localizer, dialogs, navigation, snackbar)
     {
         _store = store;
         _contractStore = contractStore;
         _clock = clock;
         _localizer = localizer;
         _navigation = navigation;
-        _toast = toast;
+        _snackbar = snackbar;
         _editorFactory = editorFactory;
         _texts = new MeterEditTexts(localizer);
         InstalledOn = clock.Today;
@@ -482,7 +482,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         }
 
         IsDirty = false;
-        _toast.Notify(_localizer["MeterReplaced"]);
+        _snackbar.Notify(_localizer["MeterReplaced"]);
         await _navigation.GoBackAsync();
         if (Finished is { } finished)
         {

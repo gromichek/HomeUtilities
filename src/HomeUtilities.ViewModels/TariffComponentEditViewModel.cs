@@ -135,8 +135,8 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        ISnackbarService toast)
-        : base(localizer, dialogs, navigation, toast)
+        ISnackbarService snackbar)
+        : base(localizer, dialogs, navigation, snackbar)
     {
         _store = store;
         _contractStore = contractStore;

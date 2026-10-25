@@ -26,7 +26,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
     private readonly ILocalizer _localizer;
     private readonly ILauncherService _launcher;
     private readonly IClipboardService _clipboard;
-    private readonly ISnackbarService _toast;
+    private readonly ISnackbarService _snackbar;
     private readonly List<LinkRowViewModel> _rows = [];
 
     private Supplier _supplier = new();
@@ -142,15 +142,15 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         INavigationService navigation,
         ILauncherService launcher,
         IClipboardService clipboard,
-        ISnackbarService toast)
-        : base(localizer, dialogs, navigation, toast)
+        ISnackbarService snackbar)
+        : base(localizer, dialogs, navigation, snackbar)
     {
         _store = store;
         _clock = clock;
         _localizer = localizer;
         _launcher = launcher;
         _clipboard = clipboard;
-        _toast = toast;
+        _snackbar = snackbar;
         RefreshTexts();
     }
 
@@ -416,7 +416,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         }
 
         await _clipboard.SetTextAsync(text);
-        _toast.Notify(_localizer["Copied"]);
+        _snackbar.Notify(_localizer["Copied"]);
     }
 
     private LinkRowViewModel CreateRow(Link link)
