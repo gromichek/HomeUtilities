@@ -26,6 +26,7 @@ these rules; the Properties screen (after T-012a) is the reference implementatio
 | `IconPhoto` | photo / camera | `photo_camera` | `E722` Camera |
 | `IconHelp` | help (toolbar "?" opening the user guide at the screen's section) | `help_outline` | `E897` Help |
 | `IconHistory` | history | `history` | `E81C` History |
+| `IconPaid` | mark as paid | `task_alt` | `E73E` CheckMark |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` | `E70D` / `E70E` Chevron down/up |
 
 Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an accessibility name
@@ -103,9 +104,9 @@ Use these wordings everywhere (resx keys in brackets):
 - Only one "add" entry point per layout: FAB on phones, button above the list on tablet/desktop; the empty
   state shows text only.
 
-- CommunityToolkit `Toast`/`Snackbar` use system notifications on Windows and **crash the unpackaged
-  Windows app** — never call them directly; use `IToastService` (currently a no-op on Windows until the in-app
-  snackbar exists).
+- Do not use CommunityToolkit `Toast`/`Snackbar` — they use system notifications and crash the unpackaged
+  Windows app. Use `ISnackbarService` (`ShowAsync` with an optional action such as Undo; `Notify` for
+  fire-and-forget confirmations like "Saved", "Copied") — in-app bar on both platforms since T-019.
 
 ## 6b. Robustness
 - No user input may crash the app: every parser uses `TryParse`, every text field has `MaxLength` matching the
