@@ -47,7 +47,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private readonly INavigationService _navigation;
     private readonly ILauncherService _launcher;
     private readonly IClipboardService _clipboard;
-    private readonly IToastService _toast;
+    private readonly ISnackbarService _toast;
     private readonly Func<SupplierEditViewModel> _supplierEditorFactory;
     private readonly List<LinkRowViewModel> _linkRows = [];
     private readonly List<CustomFieldRowViewModel> _fieldRows = [];
@@ -369,7 +369,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         INavigationService navigation,
         ILauncherService launcher,
         IClipboardService clipboard,
-        IToastService toast,
+        ISnackbarService toast,
         Func<SupplierEditViewModel> supplierEditorFactory)
         : base(localizer, dialogs, navigation, toast)
     {
@@ -1150,7 +1150,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         }
 
         await _clipboard.SetTextAsync(text);
-        await _toast.ShowAsync(_localizer["Copied"]);
+        _toast.Notify(_localizer["Copied"]);
     }
 
     private Task<bool> ConfirmRowDeleteAsync(string displayText) => Dialogs.ConfirmAsync(

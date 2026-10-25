@@ -173,6 +173,6 @@ public class SuppliersViewModelTests
             _memory,
             () => new SupplierEditViewModel(
                 _store, new TestClock(new DateOnly(2026, 10, 20)), localizer, _dialogs, _navigation,
-                new FakeLauncherService(), new FakeClipboardService(), new FakeToastService()));
+                new FakeLauncherService(), new FakeClipboardService(), new FakeSnackbarService()));
     }
 }

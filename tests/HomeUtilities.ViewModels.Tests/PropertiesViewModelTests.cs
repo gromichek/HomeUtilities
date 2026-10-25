@@ -291,7 +291,7 @@ public class PropertiesViewModelTests
             new FakeLocalizer(_language),
             _dialogs,
             _navigation,
-            new FakeToastService(),
+            new FakeSnackbarService(),
             () => throw new NotSupportedException(),
             () => throw new NotSupportedException()));
 

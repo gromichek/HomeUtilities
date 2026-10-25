@@ -80,7 +80,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IMediaService, MediaService>();
         builder.Services.AddSingleton<IFileViewer, FileViewer>();
         builder.Services.AddSingleton<IClipboardService, ClipboardService>();
-        builder.Services.AddSingleton<IToastService, ToastService>();
+        builder.Services.AddSingleton<SnackbarService>();
+        builder.Services.AddSingleton<ISnackbarService>(sp => sp.GetRequiredService<SnackbarService>());
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();

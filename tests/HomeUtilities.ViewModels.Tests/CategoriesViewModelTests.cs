@@ -151,6 +151,6 @@ public class CategoriesViewModelTests
         var localizer = new FakeLocalizer(_language);
         return new CategoriesViewModel(
             _store, localizer, _navigation, _layout, _memory,
-            () => new CategoryEditViewModel(_store, localizer, _dialogs, _navigation, new FakeToastService()));
+            () => new CategoryEditViewModel(_store, localizer, _dialogs, _navigation, new FakeSnackbarService()));
     }
 }

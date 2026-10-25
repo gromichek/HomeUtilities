@@ -72,7 +72,7 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        IToastService toast)
+        ISnackbarService toast)
         : base(localizer, dialogs, navigation, toast)
     {
         _store = store;

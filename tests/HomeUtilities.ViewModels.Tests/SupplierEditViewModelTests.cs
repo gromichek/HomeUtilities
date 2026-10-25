@@ -15,7 +15,7 @@ public class SupplierEditViewModelTests
     private readonly FakeDialogService _dialogs = new();
     private readonly FakeLauncherService _launcher = new();
     private readonly FakeClipboardService _clipboard = new();
-    private readonly FakeToastService _toast = new();
+    private readonly FakeSnackbarService _toast = new();
     private readonly TestClock _clock = new(new DateOnly(2026, 10, 20));
 
     [Fact]

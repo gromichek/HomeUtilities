@@ -335,14 +335,22 @@ internal sealed class FakeClipboardService : IClipboardService
     }
 }
 
-internal sealed class FakeToastService : IToastService
+internal sealed class FakeSnackbarService : ISnackbarService
 {
+    /// <summary>The messages shown, in order.</summary>
     public List<string> Messages { get; } = [];
 
-    public Task ShowAsync(string message)
+    /// <summary>Every call with its action text and duration.</summary>
+    public List<(string Message, string? Action, TimeSpan? Duration)> Calls { get; } = [];
+
+    /// <summary>What a message with an action returns: true = the user tapped the action.</summary>
+    public Func<string, string?, bool> ActionResult { get; set; } = (_, _) => false;
+
+    public Task<bool> ShowAsync(string message, string? actionText = null, TimeSpan? duration = null)
     {
         Messages.Add(message);
-        return Task.CompletedTask;
+        Calls.Add((message, actionText, duration));
+        return Task.FromResult(actionText is not null && ActionResult(message, actionText));
     }
 }
 
@@ -635,7 +643,7 @@ internal sealed class ContractTestKit
 
     public FakeClipboardService Clipboard { get; } = new();
 
-    public FakeToastService Toast { get; } = new();
+    public FakeSnackbarService Toast { get; } = new();
 
     public FakeSettingsStore Settings { get; } = new();
 

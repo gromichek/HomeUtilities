@@ -31,7 +31,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly ILocalizer _localizer;
     private readonly IDialogService _dialogs;
     private readonly INavigationService _navigation;
-    private readonly IToastService _toast;
+    private readonly ISnackbarService _toast;
     private readonly ILauncherService _launcher;
     private readonly ISettingsStore _settings;
     private readonly IAttachmentStore _attachments;
@@ -108,7 +108,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        IToastService toast,
+        ISnackbarService toast,
         ILauncherService launcher,
         ISettingsStore settings,
         IAttachmentStore attachments,
@@ -303,7 +303,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
 
         if (!HasUnsavedValues)
         {
-            await _toast.ShowAsync(_localizer["ReadingsNothingToSave"]);
+            _toast.Notify(_localizer["ReadingsNothingToSave"]);
             return;
         }
 
@@ -397,7 +397,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
             IsBusy = false;
         }
 
-        await _toast.ShowAsync(_localizer.Get("ReadingsSaved", items.Count));
+        _toast.Notify(_localizer.Get("ReadingsSaved", items.Count));
         return true;
     }
 
@@ -774,7 +774,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
 
         await _meterStore.UpdateReadingsAsync(readings);
         Dismiss(contractId);
-        await _toast.ShowAsync(_localizer["ReadingsMarked"]);
+        _toast.Notify(_localizer["ReadingsMarked"]);
         if (SelectedHistory is { } history)
         {
             await history.ReloadAsync();
