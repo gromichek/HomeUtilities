@@ -613,6 +613,7 @@ internal sealed class ContractTestKit
         }
 
         Properties.Stored.Add(Property);
+        Payments.BillContractResolver = id => Bills.All.FirstOrDefault(b => b.Id == id)?.ContractId;
     }
 
     public FakeLanguageService Language { get; } = new();
@@ -655,6 +656,10 @@ internal sealed class ContractTestKit
 
     public FakeErrorLog ErrorLog { get; } = new();
 
+    public FakeBillStore Bills { get; } = new();
+
+    public FakePaymentStore Payments { get; } = new();
+
     public FakeChargeInputLoader ChargeLoader { get; }
 
     public FakeFileViewer Viewer { get; } = new();
@@ -688,7 +693,7 @@ internal sealed class ContractTestKit
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, Layout, CreateHistory);
 
     public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
-        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }

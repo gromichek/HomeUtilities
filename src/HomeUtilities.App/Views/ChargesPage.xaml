@@ -94,6 +94,16 @@
                                     </Label>
                                 </Grid>
 
+                                <!-- The bill of the month for this contract, or a button to enter it. -->
+                                <Label Text="{Binding BillText}" FontAttributes="Bold" IsVisible="{Binding HasBill}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenBillCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Button Text="{Binding EnterBillText}" Command="{Binding EnterBillCommand}"
+                                        Style="{StaticResource TextButton}" HorizontalOptions="Start"
+                                        IsVisible="{Binding ShowEnterBill}" />
+
                                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExpanded}">
 
                                     <!-- No tariff: a muted line with a link to the contract. -->

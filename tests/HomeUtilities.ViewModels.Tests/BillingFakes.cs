@@ -166,15 +166,14 @@ internal sealed class BillTestKit
     public BillTestKit(DateOnly today)
     {
         Kit = new ContractTestKit(today);
-        QuickPay = new QuickPayService(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Properties, Kit.Clock);
-        Payments.BillContractResolver = id => Bills.All.FirstOrDefault(b => b.Id == id)?.ContractId;
+        QuickPay = new QuickPayService(Kit.Bills, Kit.Payments, Kit.Contracts, Kit.Suppliers, Kit.Properties, Kit.Clock);
     }
 
     public ContractTestKit Kit { get; }
 
-    public FakeBillStore Bills { get; } = new();
+    public FakeBillStore Bills => Kit.Bills;
 
-    public FakePaymentStore Payments { get; } = new();
+    public FakePaymentStore Payments => Kit.Payments;
 
     public QuickPayService QuickPay { get; }
 
