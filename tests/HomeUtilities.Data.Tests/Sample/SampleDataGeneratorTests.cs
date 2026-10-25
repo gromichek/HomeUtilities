@@ -429,8 +429,8 @@ public class SampleDataGeneratorTests
         using var rig = new Rig();
         var (bills, payments, contracts) = await LoadBillsAsync(rig);
 
-        // 5 in-arrears contracts x 12 months + 12 internet bills (10 months back to next month) + 1 repair
-        Assert.Equal(5 * 12 + 12 + 1, bills.Count);
+        // 5 in-arrears contracts x 12 months + 12 internet bills (10 months back to next month) + 1 repair + 1 settlement
+        Assert.Equal(5 * 12 + 12 + 1 + 1, bills.Count);
         foreach (var bill in bills)
         {
             var contract = bill.ContractId is { } id ? contracts[id] : null;
@@ -545,6 +545,103 @@ public class SampleDataGeneratorTests
         Assert.Equal(12, internet.Count);
         Assert.All(internet, b => Assert.True(b.DueOn <= b.Period.FirstDay));
         Assert.All(internet, b => Assert.Equal(22.95m, b.Gross));
+    }
+
+    // ---- Payments, prepayment, refund, balances (T-020) ---------------------------------------------------------------
+
+    [Fact]
+    public async Task Payments_one_transfer_without_contract_pays_the_bills_of_two_contracts_of_the_flat()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+        var flat = (await rig.Properties.ListAsync(true))[0];
+
+        var transfer = Assert.Single(payments, p => p.ContractId is null && p.Allocations.Count == 2);
+
+        Assert.Equal(flat.Id, transfer.PropertyId);
+        Assert.False(transfer.CreatedByQuickAction);
+        Assert.Equal(2, transfer.Allocations.Count);
+        var paid = transfer.Allocations.Select(a => bills.Single(b => b.Id == a.BillId)).ToList();
+        Assert.Equal(
+            new[] { ServiceKind.Maintenance, ServiceKind.Waste }.Order(),
+            paid.Select(b => contracts[b.ContractId!.Value].Service).Order());
+        Assert.Equal(paid.Sum(b => b.Gross), transfer.Amount);
+        Assert.Equal(0m, PaymentRules.Unallocated(transfer));
+        Assert.All(paid, b => Assert.True(BillStatus.Of(b, payments, rig.Clock.Today).IsPaid));
+        Assert.All(paid, b => Assert.Equal(flat.Id, b.PropertyId));
+    }
+
+    [Fact]
+    public async Task Payments_the_internet_prepayment_is_not_allocated_and_the_bill_is_not_entered_yet()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+        var internet = contracts.Values.Single(c => c.Service == ServiceKind.InternetTv);
+
+        var prepayment = Assert.Single(payments, p => p.ContractId == internet.Id && p.Allocations.Count == 0);
+
+        Assert.Equal(22.95m, prepayment.Amount);
+        Assert.Equal(22.95m, PaymentRules.Unallocated(prepayment));
+        Assert.StartsWith("Internet ", prepayment.Reference, StringComparison.Ordinal);
+        var month = YearMonth.From(rig.Clock.Today).AddMonths(2);
+        Assert.EndsWith(month.FirstDay.ToString("MM.yyyy", System.Globalization.CultureInfo.InvariantCulture), prepayment.Reference, StringComparison.Ordinal);
+        Assert.DoesNotContain(bills, b => b.ContractId == internet.Id && b.Period >= month);
+    }
+
+    [Fact]
+    public async Task Payments_the_refund_is_negative_and_settles_a_negative_settlement_bill()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+
+        var settlement = Assert.Single(bills, b => b.Kind == BillKind.Settlement);
+        var refund = Assert.Single(payments, p => p.Amount < 0);
+
+        Assert.Equal(-12.40m, settlement.Gross);
+        Assert.Equal(ServiceKind.Maintenance, contracts[settlement.ContractId!.Value].Service);
+        Assert.Equal(-12.40m, refund.Amount);
+        Assert.Equal(refund.Amount, Assert.Single(refund.Allocations).Amount);
+        Assert.Equal(settlement.Id, refund.Allocations[0].BillId);
+        Assert.False(refund.CreatedByQuickAction);
+        var state = BillStatus.Of(settlement, payments, rig.Clock.Today);
+        Assert.True(state.IsPaid);
+        Assert.Equal(0m, state.Open);
+    }
+
+    [Fact]
+    public async Task Payments_one_bill_is_partly_paid_and_the_other_payments_are_quick_or_manual()
+    {
+        using var rig = new Rig();
+        var (bills, payments, _) = await LoadBillsAsync(rig);
+
+        var partial = Assert.Single(payments, p => p.Allocations.Count == 1 && p.Allocations[0].Amount < bills.Single(b => b.Id == p.Allocations[0].BillId).Gross);
+
+        Assert.False(partial.CreatedByQuickAction);
+        Assert.Equal(partial.Amount, partial.Allocations[0].Amount);
+    }
+
+    [Fact]
+    public async Task Balances_every_contract_has_one_and_the_sample_has_a_debt_and_a_prepayment()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+
+        var balances = contracts.Values
+            .Where(c => bills.Any(b => b.ContractId == c.Id) || payments.Any(p => p.ContractId == c.Id))
+            .ToDictionary(c => c.Service, c => ContractBalance.Of(c.Id, bills, payments, rig.Clock.Today));
+
+        // every balance adds up: paid - billed
+        Assert.All(balances.Values, b => Assert.Equal(b.Paid - b.Billed, b.Value));
+        Assert.Contains(balances.Values, b => b.Value < 0);
+        Assert.Contains(balances.Values, b => b.Value > 0);
+
+        // internet: all bills paid, plus the 22.95 prepayment
+        Assert.Equal(22.95m, balances[ServiceKind.InternetTv].Value);
+        // waste: three bills (the overdue one and ...) -> a debt, the latest one is paid by the transfer
+        Assert.True(balances[ServiceKind.Waste].Value < 0);
+        // heating and electricity: the latest bill is unpaid
+        Assert.True(balances[ServiceKind.Heating].Value < 0);
+        Assert.True(balances[ServiceKind.Electricity].Value < 0);
     }
 
     private static async Task<List<Meter>> AllMetersAsync(Rig rig)
