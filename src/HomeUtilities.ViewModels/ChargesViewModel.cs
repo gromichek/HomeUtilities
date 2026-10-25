@@ -20,6 +20,9 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     /// <summary>Settings key of the last selected property.</summary>
     public const string LastPropertyKey = "charges.last_property";
 
+    /// <summary>Navigation parameter (<c>yyyy-MM</c>) that opens the screen on a given month.</summary>
+    public const string MonthParameter = "month";
+
     /// <summary>The month the picker can reach at the earliest (the range of <see cref="YearMonth"/>).</summary>
     public static readonly YearMonth EarliestMonth = new(1900, 1);
 
@@ -190,12 +193,20 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
     }
 
-    /// <summary>Opens the screen on a property (and a contract to scroll to) with the default month; used by "Show charges".</summary>
-    public Task OpenForAsync(Guid propertyId, Guid? contractId) => RunSafeAsync(async () =>
+    /// <summary>
+    /// Opens the screen on a property (and a contract to scroll to) with the given month, else the default one; used by
+    /// "Show charges".
+    /// </summary>
+    public Task OpenForAsync(Guid propertyId, Guid? contractId, YearMonth? month = null) => RunSafeAsync(async () =>
     {
         _selectedPropertyId = propertyId;
         _focusContractId = contractId;
-        _monthChosen = false;
+        _monthChosen = month is not null;
+        if (month is { } chosen)
+        {
+            Month = chosen;
+        }
+
         _settings.SetString(LastPropertyKey, propertyId.ToString());
         if (IsLoaded)
         {

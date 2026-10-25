@@ -85,6 +85,9 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
     /// <summary>Name of the item shown in the "Delete «name»?" confirmation.</summary>
     protected abstract string DeleteName();
 
+    /// <summary>Message of the delete confirmation; the default is the standard "It will be hidden; history is kept."</summary>
+    protected virtual string DeleteMessage() => _editableLocalizer["Dialog_Delete_Message"];
+
     /// <summary>
     /// Called after the session ended: Cancelled / Deleted leave the editor; Saved does not (the editor stays open,
     /// owner rule 2026-10-23) — the subclass only refreshes the list and confirms.
@@ -206,7 +209,7 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
 
         var confirmed = await _dialogs.ConfirmAsync(
             _editableLocalizer.Get("Dialog_Delete_Title", DeleteName()),
-            _editableLocalizer["Dialog_Delete_Message"],
+            DeleteMessage(),
             _editableLocalizer["Delete"],
             _editableLocalizer["Cancel"]);
         if (!confirmed)

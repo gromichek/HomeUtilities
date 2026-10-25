@@ -75,4 +75,17 @@ public static class Routes
 
     /// <summary>Pushed page (not a section): the VAT rate editor, same parameters as <see cref="PropertyEdit"/>.</summary>
     public const string VatRateEdit = "VatRateEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the bill editor, parameters <c>editor</c> (a running editor) or <c>id</c> (absent = a new
+    /// bill), and for a new bill optionally <c>contractId</c>, <c>propertyId</c>, <c>period</c> (<c>yyyy-MM</c>) and <c>gross</c>
+    /// (the calculated total, shown as a hint).
+    /// </summary>
+    public const string BillEdit = "BillEdit";
+
+    /// <summary>
+    /// Pushed page (not a section): the bills screen opened for a property ("All bills" of a contract), parameters
+    /// <c>propertyId</c> and optional <c>contractId</c> (highlighted). Back returns to the caller.
+    /// </summary>
+    public const string BillsFor = "BillsFor";
 }
