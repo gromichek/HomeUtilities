@@ -884,6 +884,45 @@ namespace HomeUtilities.Data.Migrations
                     b.ToTable("Suppliers", (string)null);
                 });
 
+            modelBuilder.Entity("HomeUtilities.Core.Equalized.EqualizedPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("MonthlyAmount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.HasIndex("ContractId", "ValidFrom");
+
+                    b.ToTable("EqualizedPlans", (string)null);
+                });
+
             modelBuilder.Entity("HomeUtilities.Core.Tariffs.TariffComponent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1220,6 +1259,15 @@ namespace HomeUtilities.Data.Migrations
                         .WithMany("Parameters")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HomeUtilities.Core.Equalized.EqualizedPlan", b =>
+                {
+                    b.HasOne("HomeUtilities.Core.Domain.Contract", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

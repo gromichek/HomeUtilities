@@ -13,17 +13,18 @@ namespace HomeUtilities.Data.Sample;
 
 /// <summary>
 /// Fills an empty database with invented data (three properties, suppliers, contracts, meters, a year of readings and a year
-/// of bills with their payments).
+/// of bills with their payments, an equalized electricity contract and the property tax installments).
 /// Deterministic: a fixed random seed and dates relative to today. Everything here is fictitious: names, numbers,
 /// <c>example.com</c> addresses and IBANs with a valid checksum for a made-up bank code.
 /// </summary>
-public sealed class SampleDataGenerator(
+public sealed partial class SampleDataGenerator(
     IPropertyStore properties,
     ISupplierStore suppliers,
     ICategoryStore categories,
     IContractStore contracts,
     IMeterStore meters,
     ITariffStore tariffs,
+    IEqualizedPlanStore equalizedPlans,
     IBillStore bills,
     IPaymentStore payments,
     IChargeInputLoader chargeLoader,
@@ -84,7 +85,7 @@ public sealed class SampleDataGenerator(
             Target = CustomFieldTarget.Bill,
             SortOrder = 0,
         });
-        var cPowerCottage = NewContract(cottage, power, ServiceKind.Electricity, "Electricity (day/night, solar)", BillingMode.Actual, $"CN-{++cn}", start, 28, 3);
+        var cPowerCottage = NewContract(cottage, power, ServiceKind.Electricity, "Electricity (day/night, solar)", BillingMode.Equalized, $"CN-{++cn}", start, 28, 3);
         var cLand = NewContract(cottage, tax, ServiceKind.PropertyTaxLand, "Land tax", BillingMode.Assessed, $"CN-{++cn}", start, null, null);
         var cPowerGarage = NewContract(garage, power, ServiceKind.Electricity, "Electricity (fixed)", BillingMode.Fixed, $"CN-{++cn}", start, null, null);
         var cGarageTax = NewContract(garage, tax, ServiceKind.PropertyTaxBuilding, "Property tax", BillingMode.Assessed, $"CN-{++cn}", start, null, null);
@@ -96,8 +97,11 @@ public sealed class SampleDataGenerator(
         var hotMeters = await AddFlatMetersAsync(flat, cWater, cHeat, cPowerFlat, ct);
         await AddCottageMeterAsync(cottage, cPowerCottage, ct);
         await AddTariffsAsync(cWater, cHeat, cPowerFlat, cWaste, cMaint, cNet, cPowerCottage, hotMeters, ct);
-        var supplierOf = new Dictionary<Guid, Supplier> { [water.Id] = water, [heat.Id] = heat, [power.Id] = power, [waste.Id] = waste, [manager.Id] = manager, [net.Id] = net };
+        var supplierOf = new Dictionary<Guid, Supplier> { [water.Id] = water, [heat.Id] = heat, [power.Id] = power, [waste.Id] = waste, [manager.Id] = manager, [net.Id] = net, [tax.Id] = tax };
         await AddBillsAsync(flat, [cWater, cHeat, cPowerFlat, cWaste, cMaint], cNet, supplierOf, ct);
+        await AddEqualizedAsync(cPowerCottage, supplierOf, ct);
+        await AddTaxInstallmentsAsync(cGarageTax, 4, 96.40m, supplierOf, ct);
+        await AddTaxInstallmentsAsync(cLand, 2, 58.30m, supplierOf, ct);
         return true;
     }
 

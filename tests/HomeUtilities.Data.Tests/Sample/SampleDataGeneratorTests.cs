@@ -3,7 +3,9 @@ using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Payments;
+using HomeUtilities.Core.Taxes;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Data.Sample;
 using HomeUtilities.Data.Stores;
@@ -29,7 +31,7 @@ public class SampleDataGeneratorTests
             VatRates = new VatRateStore(_test.Factory);
             Bills = new BillStore(_test.Factory);
             Payments = new PaymentStore(_test.Factory);
-            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, Bills, Payments, new ChargeInputLoader(_test.Factory), _test.Clock);
+            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), Bills, Payments, new ChargeInputLoader(_test.Factory), _test.Clock);
             Loader = new ChargeInputLoader(_test.Factory);
         }
 
@@ -54,6 +56,8 @@ public class SampleDataGeneratorTests
         public SampleDataGenerator Generator { get; }
 
         public FakeClock Clock => _test.Clock;
+
+        public Microsoft.EntityFrameworkCore.IDbContextFactory<HomeUtilitiesDbContext> Factory => _test.Factory;
 
         public HomeUtilitiesDbContext NewContext() => _test.NewContext();
 
@@ -435,7 +439,8 @@ public class SampleDataGeneratorTests
         var (bills, payments, contracts) = await LoadBillsAsync(rig);
 
         // 5 in-arrears contracts x 12 months + 12 internet bills (10 months back to next month) + 1 repair + 1 settlement
-        Assert.Equal(5 * 12 + 12 + 1 + 1, bills.Count);
+        // + the cottage electricity (12 equalized + 1 settlement) + the taxes (4 garage + 2 land installments)
+        Assert.Equal(5 * 12 + 12 + 1 + 1 + (12 + 1) + (4 + 2), bills.Count);
         foreach (var bill in bills)
         {
             var contract = bill.ContractId is { } id ? contracts[id] : null;
@@ -612,7 +617,7 @@ public class SampleDataGeneratorTests
         using var rig = new Rig();
         var (bills, payments, contracts) = await LoadBillsAsync(rig);
 
-        var settlement = Assert.Single(bills, b => b.Kind == BillKind.Settlement);
+        var settlement = Assert.Single(bills, b => b.Kind == BillKind.Settlement && b.Gross < 0);
         var refund = Assert.Single(payments, p => p.Amount < 0);
 
         Assert.Equal(-12.40m, settlement.Gross);
@@ -645,6 +650,7 @@ public class SampleDataGeneratorTests
         var (bills, payments, contracts) = await LoadBillsAsync(rig);
 
         var balances = contracts.Values
+            .Where(c => c.BillingMode != BillingMode.Equalized)
             .Where(c => bills.Any(b => b.ContractId == c.Id) || payments.Any(p => p.ContractId == c.Id))
             .ToDictionary(c => c.Service, c => ContractBalance.Of(c.Id, bills, payments, rig.Clock.Today));
 
@@ -660,6 +666,85 @@ public class SampleDataGeneratorTests
         // heating and electricity: the latest bill is unpaid
         Assert.True(balances[ServiceKind.Heating].Value < 0);
         Assert.True(balances[ServiceKind.Electricity].Value < 0);
+    }
+
+    // ---- Equalized plans and property tax ---------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Equalized_the_cottage_electricity_has_two_plan_versions_and_twelve_paid_monthly_bills()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+        var contract = Assert.Single(contracts.Values, c => c.BillingMode == BillingMode.Equalized);
+        var plans = await new EqualizedPlanStore(rig.Factory).ListByContractAsync(contract.Id);
+        var current = YearMonth.From(rig.Clock.Today);
+
+        Assert.Equal(2, plans.Count);
+        Assert.True(EqualizedPlanValidator.ValidateSet(plans).IsValid);
+        Assert.True(plans[0].MonthlyAmount < plans[1].MonthlyAmount);
+        Assert.Null(plans[1].ValidTo);
+
+        var monthly = bills.Where(b => b.ContractId == contract.Id && b.Kind == BillKind.Equalized).OrderBy(b => b.Period).ToList();
+        Assert.Equal(Enumerable.Range(1, 12).Reverse().Select(ago => current.AddMonths(-ago)), monthly.Select(b => b.Period));
+        Assert.All(monthly, b => Assert.Equal(EqualizedPlans.AmountFor(plans, b.Period), b.Gross));
+        Assert.All(monthly, b => Assert.True(BillStatus.Of(b, payments, rig.Clock.Today).IsPaid, b.Number));
+        Assert.All(monthly, b => Assert.True(BillValidator.Validate(b, contract).IsValid, b.Number));
+
+        var settlement = Assert.Single(bills, b => b.ContractId == contract.Id && b.Kind == BillKind.Settlement);
+        Assert.Equal(current.AddMonths(-13), settlement.Period);
+        Assert.True(BillStatus.Of(settlement, payments, rig.Clock.Today).IsPaid);
+    }
+
+    [Fact]
+    public async Task Equalized_the_settlement_covers_twelve_months_after_the_settlement_bill_and_expects_a_surcharge()
+    {
+        using var rig = new Rig();
+        var (bills, _, contracts) = await LoadBillsAsync(rig);
+        var contract = Assert.Single(contracts.Values, c => c.BillingMode == BillingMode.Equalized);
+        var plans = await new EqualizedPlanStore(rig.Factory).ListByContractAsync(contract.Id);
+        var current = YearMonth.From(rig.Clock.Today);
+        var contractBills = bills.Where(b => b.ContractId == contract.Id).ToList();
+
+        var (from, to) = EqualizedSettlement.Range(plans, contractBills, current);
+        var charges = new Dictionary<YearMonth, HomeUtilities.Core.Charges.CalculatedCharge>();
+        for (var month = from; month <= to; month = month.AddMonths(1))
+        {
+            charges[month] = ChargeCalculator.Calculate((await rig.Loader.LoadAsync(contract.Id, month))!);
+        }
+
+        var result = EqualizedSettlement.Calculate(plans, contractBills, charges, from, to);
+
+        Assert.Equal((current.AddMonths(-12), current), (from, to));
+        Assert.Equal(13, result.Months.Count);
+        Assert.Equal(1, result.MissingMonths);
+        Assert.False(result.Months[^1].IsComplete);
+        Assert.True(result.Expected > 0, $"expected a surcharge, got {result.Expected}");
+        Assert.Equal(result.TotalActual - result.TotalBilled, result.Expected);
+    }
+
+    [Fact]
+    public async Task Taxes_the_garage_has_four_installments_with_the_default_dates_and_the_land_tax_one_overdue()
+    {
+        using var rig = new Rig();
+        var (bills, payments, contracts) = await LoadBillsAsync(rig);
+        var today = rig.Clock.Today;
+        var garage = Assert.Single(contracts.Values, c => c.Service == ServiceKind.PropertyTaxBuilding);
+        var land = Assert.Single(contracts.Values, c => c.Service == ServiceKind.PropertyTaxLand);
+
+        var garageBills = TaxInstallmentPlanner.ForYear(bills, garage.Id, today.Year);
+        Assert.Equal(TaxInstallmentPlanner.DefaultDueDates(today.Year, 4), garageBills.Select(b => b.DueOn!.Value));
+        Assert.Equal(96.40m, garageBills.Sum(b => b.Gross));
+        Assert.Equal([24.10m, 24.10m, 24.10m, 24.10m], garageBills.Select(b => b.Gross));
+        Assert.All(garageBills, b => Assert.True(BillValidator.Validate(b, garage).IsValid, b.Title));
+        Assert.Equal("Property tax 2026, installment 2 of 4", garageBills[1].Title);
+        Assert.Equal([true, true, true, false], garageBills.Select(b => BillStatus.Of(b, payments, today).IsPaid));
+        Assert.DoesNotContain(garageBills, b => BillStatus.Of(b, payments, today).IsOverdue);
+
+        var landBills = TaxInstallmentPlanner.ForYear(bills, land.Id, today.Year);
+        Assert.Equal(TaxInstallmentPlanner.DefaultDueDates(today.Year, 2), landBills.Select(b => b.DueOn!.Value));
+        Assert.Equal(58.30m, landBills.Sum(b => b.Gross));
+        Assert.True(BillStatus.Of(landBills[0], payments, today).IsPaid);
+        Assert.True(BillStatus.Of(landBills[1], payments, today).IsOverdue);
     }
 
     private static async Task<List<Meter>> AllMetersAsync(Rig rig)
