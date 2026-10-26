@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-021 | Equalized plans + settlement, tax installments | Ready | | |
+| T-022 | Overview: to-do and money | Ready | | |
 
 ## Done
 
@@ -45,6 +45,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-021 | Equalized plans + settlement, tax installments | 2026-10-26, #99 | Incomplete months excluded on both sides of the settlement; new plan auto-ends the previous one; replace keeps paid installments. Lead resolved resx merge conflict. |
 | — | Fix: bill due-date error + optional line amount for quantities from the bill | 2026-10-26, #95, #97 | Sonnet helpers. Due-date root cause not confirmed (stale error / empty date / converter) — all three fixed. |
 | — | Bills and Payments: period filter (all years / year / month) | 2026-10-26, #91 | Sonnet helper; shared `PeriodFilter`. |
 | T-020 | Payments, allocation, prepayment, balance | 2026-10-26, #89 | `PaymentRules` (quick flag cleared), `PrepaymentService` uses only the contract's own payments. |
@@ -93,6 +94,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
+| | #99 | T-021 equalized + tax installments (manual steps in PR #99) | pending |
 | | #93 | T-020a: heating preset with quantities from the bill (owner's real bill), VAT on total | pending |
 | | #91 | Month filter on Bills and Payments | pending |
 | 2026-10-26 | #89 | T-020 payments | OK |
