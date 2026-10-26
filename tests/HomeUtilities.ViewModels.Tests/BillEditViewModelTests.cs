@@ -1206,8 +1206,9 @@ public class BillEditViewModelTests : IDisposable
         var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
         var vm = await OpenAsync(bill.Id);
 
-        vm.HasDueOn = true;
+        vm.HasIssuedOn = true;
         vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
         vm.DueOn = Due;
         await vm.SaveCommand.ExecuteAsync(null);
 
