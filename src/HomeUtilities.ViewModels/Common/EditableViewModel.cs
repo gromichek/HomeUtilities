@@ -109,6 +109,18 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
 
     protected void ClearErrors() => SetErrors([]);
 
+    /// <summary>Removes the error of one field, e.g. when the user changed that field after a failed save.</summary>
+    protected void ClearError(string field)
+    {
+        if (!Errors.ContainsKey(field))
+        {
+            return;
+        }
+
+        Errors = Errors.Where(e => e.Key != field).ToDictionary(e => e.Key, e => e.Value);
+        OnErrorsChanged();
+    }
+
     /// <summary>
     /// True if the editor may be left: nothing is unsaved, or the user chose "Save" and it succeeded, or "Don't save".
     /// False if the user cancelled the dialog or the save failed (errors are shown). Does not close the editor.
