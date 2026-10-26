@@ -62,6 +62,7 @@ public sealed partial class ContractEditViewModel
         }
 
         RebuildBills();
+        await LoadBalanceAsync();
     }
 
     private void RebuildBills()

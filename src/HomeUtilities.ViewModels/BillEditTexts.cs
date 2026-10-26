@@ -61,6 +61,7 @@ public sealed class BillEditTexts
         PaymentsEmptyText = localizer["BillPaymentsEmpty"];
         RemovePaymentText = localizer["BillRemovePayment"];
         PaymentsHint = localizer["BillPaymentsHint"];
+        AddPaymentText = localizer["BillAddPayment"];
         NotesLabel = localizer["BillNotesLabel"];
         DeleteBillText = localizer["BillDelete"];
     }
@@ -176,6 +177,8 @@ public sealed class BillEditTexts
     public string RemovePaymentText { get; }
 
     public string PaymentsHint { get; }
+
+    public string AddPaymentText { get; }
 
     public string NotesLabel { get; }
 

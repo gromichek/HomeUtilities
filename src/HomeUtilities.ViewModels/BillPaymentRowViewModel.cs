@@ -5,12 +5,13 @@ namespace HomeUtilities.ViewModels;
 /// <summary>One payment allocated to the bill, in the bill editor's payment card.</summary>
 public sealed class BillPaymentRowViewModel
 {
-    public BillPaymentRowViewModel(Guid paymentId, string text, string detail, string removeText, Action remove)
+    public BillPaymentRowViewModel(Guid paymentId, string text, string detail, string removeText, Action open, Action remove)
     {
         PaymentId = paymentId;
         Text = text;
         Detail = detail;
         RemoveText = removeText;
+        OpenCommand = new RelayCommand(open);
         RemoveCommand = new RelayCommand(remove);
     }
 
@@ -25,6 +26,9 @@ public sealed class BillPaymentRowViewModel
     public bool HasDetail => Detail.Length > 0;
 
     public string RemoveText { get; }
+
+    /// <summary>Tap on the row: open the payment in the payment editor.</summary>
+    public IRelayCommand OpenCommand { get; }
 
     public IRelayCommand RemoveCommand { get; }
 }

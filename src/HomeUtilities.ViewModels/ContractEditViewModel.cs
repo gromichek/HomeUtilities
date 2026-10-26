@@ -372,6 +372,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         ILauncherService launcher,
         IClipboardService clipboard,
         ISnackbarService snackbar,
+        PrepaymentService prepayments,
         Func<SupplierEditViewModel> supplierEditorFactory)
         : base(localizer, dialogs, navigation, snackbar)
     {
@@ -390,6 +391,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _launcher = launcher;
         _clipboard = clipboard;
         _snackbar = snackbar;
+        _prepayments = prepayments;
         _supplierEditorFactory = supplierEditorFactory;
         ValidFrom = clock.Today;
         ValidTo = clock.Today;
@@ -1113,7 +1115,16 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             BillsEmptyText = _localizer["BillBillsCardEmpty"];
             AllBillsText = _localizer["BillBillsCardAll"];
             AddBillText = _localizer["BillBillsCardAdd"];
+            BalanceHeader = _localizer["ContractBalanceHeader"];
+            BalanceBilledLabel = _localizer["ContractBalanceBilled"];
+            BalancePaidLabel = _localizer["ContractBalancePaid"];
+            UseForOpenBillsText = _localizer["ContractBalanceUse"];
+            PaymentsHeader = _localizer["ContractPaymentsHeader"];
+            PaymentsEmptyText = _localizer["ContractPaymentsEmpty"];
+            AllPaymentsText = _localizer["ContractPaymentsAll"];
+            AddPaymentText = _localizer["ContractPaymentsAdd"];
             RebuildBills();
+            RebuildBalance();
             TariffPresetsLabel = _localizer["ContractTariffPresets"];
             TariffSaveFirstText = _localizer["ContractTariffSaveFirst"];
             RebuildTariff();

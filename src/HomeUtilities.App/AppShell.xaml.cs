@@ -27,6 +27,8 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.VatRateEdit, typeof(VatRateEditPage));
         Routing.RegisterRoute(Routes.BillEdit, typeof(BillEditPage));
         Routing.RegisterRoute(Routes.BillsFor, typeof(BillsPage));
+        Routing.RegisterRoute(Routes.PaymentEdit, typeof(PaymentEditPage));
+        Routing.RegisterRoute(Routes.PaymentsFor, typeof(PaymentsPage));
         BindingContext = viewModel;
         Navigating += OnNavigating;
     }

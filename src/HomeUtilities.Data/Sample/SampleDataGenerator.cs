@@ -35,6 +35,7 @@ public sealed class SampleDataGenerator(
     private const int ReplacementMonthsAgo = 5;
 
     private readonly Random _random = new(20261024);
+    private readonly List<Bill> _transferBills = [];
     private Dictionary<ServiceKind, Guid> _categoryIds = [];
     private DateOnly _today;
 
@@ -125,6 +126,7 @@ public sealed class SampleDataGenerator(
     {
         var current = YearMonth.From(_today);
         var counter = 0;
+        _transferBills.Clear();
         foreach (var monthsAgo in Enumerable.Range(1, 12).Reverse())
         {
             foreach (var contract in inArrears)
@@ -141,6 +143,92 @@ public sealed class SampleDataGenerator(
         }
 
         await AddBoilerRepairAsync(flat, current.AddMonths(-4), ct);
+        await AddTransferForTwoContractsAsync(flat, ct);
+        await AddInternetPrepaymentAsync(flat, internet, current.AddMonths(2), supplierOf, ct);
+        await AddMaintenanceRefundAsync(flat, inArrears.First(c => c.Service == ServiceKind.Maintenance), current.AddMonths(-5), ct);
+    }
+
+    /// <summary>
+    /// One bank transfer without a contract that pays the latest waste bill and the latest maintenance bill together
+    /// (the owner pays several bills of the flat at once).
+    /// </summary>
+    private async Task AddTransferForTwoContractsAsync(Property flat, CancellationToken ct)
+    {
+        if (_transferBills.Count == 0)
+        {
+            return;
+        }
+
+        var total = _transferBills.Sum(b => b.Gross);
+        var payment = new Payment
+        {
+            PropertyId = flat.Id,
+            PaidOn = _today,
+            Amount = total,
+            Currency = Currency.EUR,
+            Method = PaymentMethod.BankTransfer,
+            Reference = "Waste and maintenance " + BillText(_transferBills[0].Period),
+            Notes = "Invented sample payment: one transfer for the bills of two contracts.",
+        };
+        foreach (var bill in _transferBills)
+        {
+            payment.Allocations.Add(new PaymentAllocation { PaymentId = payment.Id, BillId = bill.Id, Amount = bill.Gross });
+        }
+
+        await payments.SaveAsync(payment, ct);
+    }
+
+    private static string BillText(YearMonth period) => period.FirstDay.ToString("MM.yyyy", CultureInfo.InvariantCulture);
+
+    /// <summary>A payment for the internet bill of a month that has not been entered yet: all of it is a prepayment.</summary>
+    private async Task AddInternetPrepaymentAsync(
+        Property flat, Contract internet, YearMonth month, IReadOnlyDictionary<Guid, Supplier> supplierOf, CancellationToken ct)
+    {
+        var template = PaymentDetails.Effective(internet, supplierOf[internet.SupplierId]).PurposeTemplate;
+        var amount = 22.95m;
+        var payment = new Payment
+        {
+            ContractId = internet.Id,
+            PropertyId = flat.Id,
+            PaidOn = _today,
+            Amount = amount,
+            Currency = Currency.EUR,
+            Method = PaymentMethod.BankTransfer,
+            Reference = template is null
+                ? null
+                : PaymentPurpose.Render(template, new PaymentPurposeContext(internet.CustomerNumber, internet.ContractNumber, null, month, amount, null)),
+            Notes = "Invented sample payment: paid before the bill arrived (prepayment).",
+        };
+        await payments.SaveAsync(payment, ct);
+    }
+
+    /// <summary>
+    /// An annual settlement of the maintenance contract that ends in the owner's favour (a negative bill) and the refund the
+    /// manager transferred (a negative payment allocated to it).
+    /// </summary>
+    private async Task AddMaintenanceRefundAsync(Property flat, Contract maintenance, YearMonth period, CancellationToken ct)
+    {
+        var bill = Bill.CreateFor(maintenance, period, clock);
+        bill.Kind = BillKind.Settlement;
+        bill.Number = $"SET-{period.Year}-0001";
+        bill.IssuedOn = DayOf(period.AddMonths(1), 10);
+        bill.DueOn = bill.IssuedOn;
+        bill.Notes = "Invented sample settlement: the yearly reconciliation returns money to the owner.";
+        ApplyAmounts(bill, -12.40m, 21m);
+        await bills.SaveAsync(bill, ct);
+
+        var refund = new Payment
+        {
+            ContractId = maintenance.Id,
+            PropertyId = flat.Id,
+            PaidOn = DayOf(period.AddMonths(1), 18),
+            Amount = bill.Gross,
+            Currency = bill.Currency,
+            Method = PaymentMethod.BankTransfer,
+            Reference = "Refund " + bill.Number,
+        };
+        refund.Allocations.Add(new PaymentAllocation { PaymentId = refund.Id, BillId = bill.Id, Amount = bill.Gross });
+        await payments.SaveAsync(refund, ct);
     }
 
     private async Task AddContractBillAsync(
@@ -209,6 +297,11 @@ public sealed class SampleDataGenerator(
         var overdueWaste = contract.Service == ServiceKind.Waste && monthsAgo == OverdueWasteMonthsAgo;
         var latestUnpaid = monthsAgo == LatestBillsMonthsAgo && contract.BillingTiming == BillingTiming.InArrears;
         var partlyPaid = contract.Service == ServiceKind.Maintenance && monthsAgo == PartlyPaidMonthsAgo;
+        if (latestUnpaid && contract.Service is ServiceKind.Waste or ServiceKind.Maintenance)
+        {
+            _transferBills.Add(bill);
+        }
+
         if (overdueWaste || latestUnpaid)
         {
             return;

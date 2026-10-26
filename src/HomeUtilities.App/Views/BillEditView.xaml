@@ -395,6 +395,12 @@
                                 ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
                                 Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
                                 IsVisible="{Binding CanMarkPaid}" />
+                        <Button Text="{Binding Texts.AddPaymentText}" Command="{Binding AddPaymentCommand}"
+                                ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                        <Button Text="{Binding UsePrepaymentText}" Command="{Binding UsePrepaymentCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                IsVisible="{Binding CanUsePrepayment}" />
 
                         <Label Text="{Binding Texts.PaymentsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoPayments}" />
                         <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding PaymentRows}">
@@ -402,6 +408,9 @@
                                 <DataTemplate x:DataType="vm:BillPaymentRowViewModel">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                                            </VerticalStackLayout.GestureRecognizers>
                                             <Label Text="{Binding Text}" />
                                             <Label Text="{Binding Detail}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDetail}" />
                                         </VerticalStackLayout>

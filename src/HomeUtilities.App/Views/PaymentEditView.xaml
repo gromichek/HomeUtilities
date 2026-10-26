@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.PaymentEditView"
+             x:DataType="vm:PaymentEditViewModel">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <toolkit:InvertedBoolConverter x:Key="Not" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <!-- 1. General -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
+                        <Label Text="{Binding Texts.QuickNote}" Style="{StaticResource MutedLabel}" FontSize="12"
+                               IsVisible="{Binding ShowQuickNote}" />
+
+                        <!-- Property: chosen for a new payment (when there are several), fixed afterwards. -->
+                        <Label Text="{Binding Texts.PropertyLabel}" Style="{StaticResource MutedLabel}" />
+                        <Border Padding="12,10" StrokeShape="RoundRectangle 8" IsVisible="{Binding ShowPropertyChooser}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChoosePropertyCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding SelectedPropertyName}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                       VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                            </Grid>
+                        </Border>
+                        <Label Text="{Binding SelectedPropertyName}" FontAttributes="Bold" IsVisible="{Binding IsPropertyReadOnly}" />
+                        <Label Text="{Binding PropertyError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding PropertyError, Converter={StaticResource HasText}}" />
+
+                        <!-- Contract: a contract of the property, or "No contract" for a payment that covers bills of several contracts. -->
+                        <Label Text="{Binding Texts.ContractLabel}" Style="{StaticResource MutedLabel}" />
+                        <Border Padding="12,10" StrokeShape="RoundRectangle 8" IsVisible="{Binding IsContractEditable}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChooseContractCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding SelectedContractName}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                       VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                            </Grid>
+                        </Border>
+                        <Label Text="{Binding SelectedContractName}" FontAttributes="Bold" IsVisible="{Binding IsContractReadOnly}" />
+
+                        <Label Text="{Binding Texts.PaidOnLabel}" Style="{StaticResource MutedLabel}" />
+                        <DatePicker Date="{Binding PaidOn, Converter={StaticResource DateOnly}}" />
+
+                        <!-- The numeric keyboard of MAUI is signed, so a refund (negative amount) can be typed. -->
+                        <Label Text="{Binding Texts.AmountLabel}" Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry Grid.Column="0" Text="{Binding AmountText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                            <Label Grid.Column="1" Text="{Binding CurrencySymbol}" VerticalOptions="Center" />
+                        </Grid>
+                        <Label Text="{Binding Texts.AmountHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <Label Text="{Binding AmountError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding AmountError, Converter={StaticResource HasText}}" />
+
+                        <Label Text="{Binding Texts.MethodLabel}" Style="{StaticResource MutedLabel}" />
+                        <Picker ItemsSource="{Binding Methods}"
+                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                                SelectedIndex="{Binding SelectedMethodIndex, Mode=TwoWay}" />
+
+                        <Label Text="{Binding Texts.ReferenceLabel}" Style="{StaticResource MutedLabel}" />
+                        <Entry Text="{Binding Reference}" MaxLength="{x:Static core:InputLimits.Notes}" />
+                        <Button Text="{Binding Texts.FillReferenceText}" Command="{Binding FillReferenceCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                IsVisible="{Binding ShowFillReference}" />
+                        <Label Text="{Binding ReferenceError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding ReferenceError, Converter={StaticResource HasText}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 2. Bills paid: the allocations of the payment. What is left of the amount is a prepayment. -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding Texts.AllocationsHeader}" Style="{StaticResource SectionHeader}" />
+                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                    Text="{StaticResource IconAdd}" Command="{Binding AddAllocationCommand}"
+                                    ToolTipProperties.Text="{Binding Texts.AddAllocationText}"
+                                    SemanticProperties.Description="{Binding Texts.AddAllocationText}" />
+                        </Grid>
+
+                        <Label Text="{Binding Texts.AllocationsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoAllocations}" />
+
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding AllocationRows}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PaymentAllocationRowViewModel">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                            </VerticalStackLayout.GestureRecognizers>
+                                            <Label Text="{Binding Text}" />
+                                            <Label Text="{Binding Note}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasNote}" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                                Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                                ToolTipProperties.Text="{Binding RemoveText}"
+                                                SemanticProperties.Description="{Binding RemoveText}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <Button Text="{Binding Texts.AutoAllocateText}" Command="{Binding AutoAllocateCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+
+                        <!-- "Allocated 58,32 € · Prepayment 12,30 €"; red when the bills take more than the payment. -->
+                        <Label Text="{Binding AllocationSummary}" FontAttributes="Bold"
+                               IsVisible="{Binding AllocationSummary, Converter={StaticResource HasText}}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" x:DataType="vm:PaymentEditViewModel" Binding="{Binding IsOverAllocated}" Value="True">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                        <Label Text="{Binding AllocationsError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding AllocationsError, Converter={StaticResource HasText}}" />
+                        <Label Text="{Binding Texts.AllocationsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 3. Notes -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding Texts.NotesLabel}" Style="{StaticResource SectionHeader}" />
+                        <Editor Text="{Binding Notes}" MaxLength="{x:Static core:InputLimits.Notes}" AutoSize="TextChanges" MinimumHeightRequest="80" />
+                        <Label Text="{Binding NotesError}" Style="{StaticResource ErrorLabel}"
+                               IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Phone: destructive action at the end of the form. -->
+                <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
+                        IsVisible="{Binding ShowFormDelete}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Tablet / desktop footer: Save (primary), Cancel (secondary), Delete (destructive) at the far end. -->
+        <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
+                BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                        Style="{StaticResource PrimaryButton}" />
+                <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
+                        Style="{StaticResource SecondaryButton}" />
+                <Button Grid.Column="3" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                        Style="{StaticResource DestructiveButton}"
+                        IsVisible="{Binding IsNew, Converter={StaticResource Not}}" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

@@ -140,6 +140,16 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         RaiseItemsChanged();
     }
 
+    /// <summary>Back from the payment editor: the bill open in the side pane shows the payments as they are now.</summary>
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        if (SelectedEditor is { IsNew: false, IsHostedInPage: false } editor)
+        {
+            await editor.RefreshPaymentCardAsync();
+        }
+    }
+
     /// <summary>Opens the screen for a property with the bills of every year; the contract's bills are highlighted ("All bills").</summary>
     public Task OpenForAsync(Guid propertyId, Guid? contractId) => RunSafeAsync(async () =>
     {

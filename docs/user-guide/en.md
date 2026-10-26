@@ -38,7 +38,7 @@ a bill should be and to compare your bills with it. You can add a supplier direc
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
-item **Help**. Screens such as Properties, Suppliers, Readings, Charges, Bills, Categories, VAT rates and the contract, meter and tariff component
+item **Help**. Screens such as Properties, Suppliers, Readings, Charges, Bills, Payments, Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
@@ -108,6 +108,9 @@ Open a property → card **Contracts** → **Add contract**.
 - **Bills:** the last six bills of the contract with the month, the total and the status (*Unpaid*, *Paid ✓*…). Tap a
   row to open the bill, **All bills** opens the Bills screen for this property with the contract highlighted, ＋ enters a
   new bill for this contract. Available after the contract is saved. See [Bills](#11-bills).
+- **Balance:** billed, paid and the result — *Debt*, *Paid in advance* or *Settled* — the money that pays no bill yet
+  (*Use for open bills*) and the latest payments with **All payments** and ＋ for a new payment. Available after the
+  contract is saved. See [Payments](#12-payments).
 
 ## 6. Meters
 
@@ -305,7 +308,9 @@ expense** (a repair, a purchase — no contract; it needs a *Title* and a *Categ
 5. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*).
 6. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
-7. **Payment** — the status, how much is paid and open, and the payments of this bill.
+7. **Payment** — the status, how much is paid and open, and the payments of this bill. **Paid** records the open amount
+   at once; **Add payment** opens the [payment editor](#12-payments) for this bill (tap a payment to open it);
+   **Use prepayment** appears when the contract has money that pays no bill yet.
 8. **Comment.**
 
 Saving keeps you in the editor. Deleting a bill asks first; the money you paid for it stays on the contract as
@@ -321,9 +326,80 @@ removes that payment again.
 Later, in the *Payment* card of the bill, **Remove payment** takes a payment away (the dialog shows the amount and the
 date). A payment made with the **Paid** button for this bill alone is hidden completely; a payment that also covers other
 bills only loses this bill's share, and *the rest stays on the contract as prepayment*. Nothing is ever erased — the
-history is kept. (Detailed payments — a payment for several bills, other dates — come later.)
+history is kept. Payments for another date or amount, or for several bills, are entered on the [Payments](#12-payments)
+screen.
 
-## 12. Settings
+## 12. Payments
+
+Menu **Payments**: the money you actually paid (or got back). The *bill* says what the supplier asked for, the *payment*
+says what left your account, and the **allocation** says which bill the money settles. There are two ways to record it:
+
+- **The Paid button** on a bill — one tap records a bank transfer for the open amount, dated today
+  (see [Bills](#11-bills)). It is enough for the usual case: one bill, one payment.
+- **A real payment** on this screen (or **Add payment** in a bill) — for another date or amount, one transfer that pays
+  several bills, money paid before the bill arrived, a partial payment or a refund.
+
+**The list.** At the top: filters **Property** (all or one), **Year** (‹ year › or *All years*) and **Contract**; they are
+remembered until you close the app. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Each row
+shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for
+example *Water 09.2026, Water 10.2026 +1* (two bills are named, then *+N*). A yellow badge **Prepayment 12,30 €** means that
+part of the payment pays no bill; a refund is shown in green as *−12,00 € refund*; the small word *quick* marks a
+payment made with the **Paid** button. **New payment** (＋ on a phone) starts a new one.
+
+### Entering a payment
+
+1. **General** — *Property* and *Contract* (choose *No contract* for a transfer that covers bills of several
+   contracts of the property), *Paid on* (today), *Amount* (a **negative amount is a refund** you received), *Method*
+   (bank transfer by default), *Reference* and a comment. **Fill from contract** writes the payment purpose of the
+   contract; when exactly one bill is listed below, its month and number are used. Once saved, the contract cannot be
+   changed.
+2. **Bills paid** — the bills this payment settles. ＋ offers the **open bills** of the contract (of the property when
+   there is no contract); the amount of a new row is the open amount of the bill or what is left of the payment,
+   whichever is smaller. Tap a row to change its amount, the trash can removes it. **Allocate automatically** spreads
+   what is left over the oldest open bills. The line below shows *Allocated 58,32 € · Prepayment 12,30 €*; if the bills
+   take more than the payment, it turns red (*Over-allocated by …*) and the payment cannot be saved. A bill never gets more
+   than is open on it.
+
+Examples (invented):
+
+- **One transfer for two bills:** 58,32 € without a contract → ＋ *Water 09.2026* (30,00 €) → ＋ *Waste 09.2026*
+  (28,32 €). Both bills turn *Paid ✓*. If you **delete** the payment, both become unpaid again.
+- **Prepayment:** you pay 70,00 € for a bill of 57,70 €. The payment shows *Prepayment 12,30 €*.
+- **Partial payment:** a bill of 46,02 €, you pay 20,00 € → the bill is *Partially paid · open 26,02 €*.
+- **Refund:** the manager returns 12,40 € after the yearly settlement. The settlement is a bill with a negative total;
+  record the refund as a payment of −12,40 € and allocate it to that bill.
+
+### Prepayment
+
+The part of a payment that pays no bill stays on the contract as a **prepayment**; it raises the balance of the contract.
+When the next bill arrives, open it: the card *Payment* offers **Use prepayment 12,30 €**. The money is allocated to the bill
+(never more than its open amount, oldest payments first), the bar *Prepayment used · Undo* appears, and **Undo** takes it
+back.
+
+### Balance of a contract
+
+The card **Balance** in the contract editor (after the contract is saved) compares what was billed with what was paid, up to
+today:
+
+| Result | Meaning |
+|---|---|
+| *Debt 45,00 €* (red) | The bills are more than the payments: you owe this amount. |
+| *Paid in advance 12,30 €* (green) | The payments are more than the bills: the supplier holds your money. |
+| *Settled* | Billed and paid are equal. |
+
+Example: three bills of 46,02 € = 138,06 €. Paid 120,00 € → *Debt 18,06 €*; paid 150,00 € → *Paid in advance 11,94 €*.
+
+If some payments have money no bill uses, the card shows *Unallocated payments: 12,30 €* and **Use for open bills**, which
+spreads that money over the open bills of the contract, oldest first (with **Undo**). Below you see the latest six
+payments (tap one to open it), **All payments** (this screen filtered to the contract) and ＋ (a new payment for the contract).
+
+### Changing and deleting
+
+Tap a payment to change its date, amount, method or bills. A payment made with the **Paid** button is an ordinary payment
+here; if you turn it into a partial payment or add other bills, it stops being a "Paid button" payment. **Delete** hides the
+payment — *the bills it paid become unpaid again* — and the history is kept.
+
+## 13. Settings
 
 Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
@@ -360,8 +436,7 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
-## 13. Coming soon
+## 14. Coming soon
 
-Payments screen and
-balances, equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
+Equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.

@@ -738,7 +738,7 @@
   <data name="BillPaid" xml:space="preserve"><value>Оплачено</value></data>
   <data name="BillPaymentsEmpty" xml:space="preserve"><value>Платежей пока нет.</value></data>
   <data name="BillRemovePayment" xml:space="preserve"><value>Отменить оплату</value></data>
-  <data name="BillPaymentsHint" xml:space="preserve"><value>Кнопка «Оплачено» записывает банковский перевод на оставшуюся сумму с сегодняшней датой. Платежи сразу за несколько счетов появятся позже.</value></data>
+  <data name="BillPaymentsHint" xml:space="preserve"><value>Кнопка «Оплачено» записывает банковский перевод на оставшуюся сумму с сегодняшней датой. «Добавить платёж» — для другой даты или суммы и для платежа сразу за несколько счетов.</value></data>
   <data name="BillNotesLabel" xml:space="preserve"><value>Комментарий</value></data>
   <data name="BillDelete" xml:space="preserve"><value>Удалить счёт</value></data>
   <data name="BillLineDescriptionLabel" xml:space="preserve"><value>Описание</value></data>
@@ -845,4 +845,88 @@
   <data name="Enum_PaymentMethod_Cash" xml:space="preserve"><value>Наличные</value></data>
   <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Прямое списание</value></data>
   <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Другое</value></data>
+  <data name="PaymentAdd" xml:space="preserve"><value>Новый платёж</value></data>
+  <data name="PaymentSelectHint" xml:space="preserve"><value>Выберите платёж или добавьте новый.</value></data>
+  <data name="PaymentsEmpty" xml:space="preserve"><value>Платежей пока нет. Добавьте первый кнопкой ниже.</value></data>
+  <data name="PaymentsNothingFound" xml:space="preserve"><value>По выбранным фильтрам платежей нет.</value></data>
+  <data name="PaymentsPropertyFilter" xml:space="preserve"><value>Объект</value></data>
+  <data name="PaymentsAllProperties" xml:space="preserve"><value>Все объекты</value></data>
+  <data name="PaymentsContractFilter" xml:space="preserve"><value>Договор</value></data>
+  <data name="PaymentsAllContracts" xml:space="preserve"><value>Все договоры</value></data>
+  <data name="PaymentsYearLabel" xml:space="preserve"><value>Год</value></data>
+  <data name="PaymentsPreviousYear" xml:space="preserve"><value>Предыдущий год</value></data>
+  <data name="PaymentsNextYear" xml:space="preserve"><value>Следующий год</value></data>
+  <data name="PaymentsAllYears" xml:space="preserve"><value>Все годы</value></data>
+  <data name="PaymentsTotals" xml:space="preserve"><value>Оплачено {0} · из них не распределено (предоплата) {1}</value></data>
+  <data name="PaymentRefundAmount" xml:space="preserve"><value>−{0} возврат</value></data>
+  <data name="PaymentSeveralContracts" xml:space="preserve"><value>Несколько договоров</value></data>
+  <data name="PaymentPaysMore" xml:space="preserve"><value>{0} +{1}</value></data>
+  <data name="PaymentPrepaymentBadge" xml:space="preserve"><value>Предоплата {0}</value></data>
+  <data name="PaymentQuickMarker" xml:space="preserve"><value>быстрый</value></data>
+  <data name="PaymentNewTitle" xml:space="preserve"><value>Новый платёж</value></data>
+  <data name="PaymentEditTitle" xml:space="preserve"><value>Платёж {0} · {1}</value></data>
+  <data name="PaymentGeneral" xml:space="preserve"><value>Основное</value></data>
+  <data name="PaymentPropertyLabel" xml:space="preserve"><value>Объект</value></data>
+  <data name="PaymentContractLabel" xml:space="preserve"><value>Договор</value></data>
+  <data name="PaymentNoContract" xml:space="preserve"><value>Без договора</value></data>
+  <data name="PaymentChooseProperty" xml:space="preserve"><value>Выберите объект</value></data>
+  <data name="PaymentChooseContract" xml:space="preserve"><value>Выберите договор</value></data>
+  <data name="PaymentChoosePropertyFirst" xml:space="preserve"><value>Сначала выберите объект.</value></data>
+  <data name="PaymentPaidOnLabel" xml:space="preserve"><value>Дата оплаты</value></data>
+  <data name="PaymentAmountLabel" xml:space="preserve"><value>Сумма *</value></data>
+  <data name="PaymentAmountHint" xml:space="preserve"><value>Отрицательная сумма — это возврат денег вам.</value></data>
+  <data name="PaymentMethodLabel" xml:space="preserve"><value>Способ оплаты</value></data>
+  <data name="PaymentReferenceLabel" xml:space="preserve"><value>Назначение платежа</value></data>
+  <data name="PaymentFillReference" xml:space="preserve"><value>Заполнить по договору</value></data>
+  <data name="PaymentNotesLabel" xml:space="preserve"><value>Комментарий</value></data>
+  <data name="PaymentQuickNote" xml:space="preserve"><value>Создан кнопкой «Оплачено». Если сделать его частичным или добавить другие счета, он станет обычным платежом.</value></data>
+  <data name="PaymentAllocations" xml:space="preserve"><value>Оплаченные счета</value></data>
+  <data name="PaymentAllocationAdd" xml:space="preserve"><value>Добавить счёт</value></data>
+  <data name="PaymentAutoAllocate" xml:space="preserve"><value>Распределить автоматически</value></data>
+  <data name="PaymentAllocationsEmpty" xml:space="preserve"><value>Этот платёж не закрывает ни одного счёта. Вся сумма — предоплата.</value></data>
+  <data name="PaymentAllocationsHint" xml:space="preserve"><value>Нажмите на строку, чтобы изменить сумму. Часть платежа, не закрывающая счета, остаётся на договоре как предоплата.</value></data>
+  <data name="PaymentAllocationRow" xml:space="preserve"><value>{0} · {1} · счёт {2} — {3}</value></data>
+  <data name="PaymentAllocationBillMissing" xml:space="preserve"><value>(счёта больше нет) — {0}</value></data>
+  <data name="PaymentBillOption" xml:space="preserve"><value>{0} · осталось {1}</value></data>
+  <data name="PaymentChooseBill" xml:space="preserve"><value>Выберите счёт</value></data>
+  <data name="PaymentNoOpenBills" xml:space="preserve"><value>Нет неоплаченных счетов, которые можно закрыть этим платежом.</value></data>
+  <data name="PaymentEnterAmountFirst" xml:space="preserve"><value>Сначала введите сумму.</value></data>
+  <data name="PaymentNothingToAllocate" xml:space="preserve"><value>Не осталось неоплаченных счетов для распределения.</value></data>
+  <data name="PaymentNoPurposeTemplate" xml:space="preserve"><value>Ни у договора, ни у поставщика нет шаблона назначения платежа.</value></data>
+  <data name="PaymentSummaryFull" xml:space="preserve"><value>Распределено {0}</value></data>
+  <data name="PaymentSummaryPrepayment" xml:space="preserve"><value>Распределено {0} · Предоплата {1}</value></data>
+  <data name="PaymentSummaryOver" xml:space="preserve"><value>Распределено {0} · Превышение на {1}</value></data>
+  <data name="PaymentSummaryRest" xml:space="preserve"><value>Распределено {0} · Не распределено {1}</value></data>
+  <data name="PaymentDelete" xml:space="preserve"><value>Удалить платёж</value></data>
+  <data name="PaymentDeleteWithBills" xml:space="preserve"><value>Счета, которые он закрывал, снова станут неоплаченными.</value></data>
+  <data name="PaymentAllocationEdit" xml:space="preserve"><value>Сумма по счёту</value></data>
+  <data name="PaymentAllocationAmountLabel" xml:space="preserve"><value>Часть этого платежа, закрывающая счёт</value></data>
+  <data name="PaymentAllocationNoteLabel" xml:space="preserve"><value>Комментарий</value></data>
+  <data name="PaymentAllocationOpen" xml:space="preserve"><value>Осталось по счёту: {0}</value></data>
+  <data name="PrepaymentUsed" xml:space="preserve"><value>Предоплата использована</value></data>
+  <data name="BillUsePrepayment" xml:space="preserve"><value>Использовать предоплату {0}</value></data>
+  <data name="BillAddPayment" xml:space="preserve"><value>Добавить платёж</value></data>
+  <data name="ContractBalanceHeader" xml:space="preserve"><value>Баланс</value></data>
+  <data name="ContractBalanceBilled" xml:space="preserve"><value>Выставлено</value></data>
+  <data name="ContractBalancePaid" xml:space="preserve"><value>Оплачено</value></data>
+  <data name="ContractBalanceDebt" xml:space="preserve"><value>Долг {0}</value></data>
+  <data name="ContractBalanceAdvance" xml:space="preserve"><value>Оплачено вперёд {0}</value></data>
+  <data name="ContractBalanceSettled" xml:space="preserve"><value>Расчёты закрыты</value></data>
+  <data name="ContractBalanceUnallocated" xml:space="preserve"><value>Не распределено по счетам: {0}</value></data>
+  <data name="ContractBalanceUse" xml:space="preserve"><value>Распределить на неоплаченные счета</value></data>
+  <data name="ContractBalanceNothingToUse" xml:space="preserve"><value>Распределять нечего: неоплаченных счетов нет.</value></data>
+  <data name="ContractPaymentsHeader" xml:space="preserve"><value>Последние платежи</value></data>
+  <data name="ContractPaymentsEmpty" xml:space="preserve"><value>Платежей пока нет.</value></data>
+  <data name="ContractPaymentsAll" xml:space="preserve"><value>Все платежи</value></data>
+  <data name="ContractPaymentsAdd" xml:space="preserve"><value>Новый платёж по этому договору</value></data>
+  <data name="Error_payment_amount_zero" xml:space="preserve"><value>Введите сумму, не равную нулю.</value></data>
+  <data name="Error_payment_over_allocated" xml:space="preserve"><value>Счета берут больше, чем сумма платежа.</value></data>
+  <data name="Error_payment_allocation_amount_zero" xml:space="preserve"><value>Сумма по счёту не может быть нулевой.</value></data>
+  <data name="Error_payment_allocation_sign_mismatch" xml:space="preserve"><value>Сумма по счёту должна быть того же знака, что и платёж.</value></data>
+  <data name="Error_payment_allocation_bill_unknown" xml:space="preserve"><value>Счёта этого платежа больше нет. Удалите его строку.</value></data>
+  <data name="Error_payment_allocation_currency_mismatch" xml:space="preserve"><value>Валюта счёта отличается от валюты платежа.</value></data>
+  <data name="Error_payment_allocation_duplicate_bill" xml:space="preserve"><value>Один и тот же счёт указан дважды.</value></data>
+  <data name="Error_payment_edit_property_required" xml:space="preserve"><value>Выберите объект.</value></data>
+  <data name="Error_payment_edit_allocation_exceeds_open" xml:space="preserve"><value>{0} — больше, чем осталось по счёту ({1}).</value></data>
+  <data name="Error_payment_edit_over_allocated_by" xml:space="preserve"><value>Счета берут на {0} больше, чем сумма платежа.</value></data>
 </root>
