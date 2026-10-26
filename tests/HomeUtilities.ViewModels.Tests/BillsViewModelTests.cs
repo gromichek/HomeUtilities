@@ -121,20 +121,90 @@ public class BillsViewModelTests : IDisposable
         var current = _kit.AddBill(water, new YearMonth(2026, 1), 31m, due: new DateOnly(2026, 2, 20));
         var vm = await LoadAsync();
 
-        Assert.Equal("2026", vm.YearText);
+        Assert.Equal("2026", vm.Period.Label);
         Assert.Equal([current.Id], vm.Items.Select(i => i.Id));
 
-        vm.PreviousYearCommand.Execute(null);
-        Assert.Equal("2025", vm.YearText);
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("2025", vm.Period.Label);
         Assert.Equal([old.Id], vm.Items.Select(i => i.Id));
 
-        vm.ToggleAllYearsCommand.Execute(null);
-        Assert.Equal("BillsAllYears [en]", vm.YearText);
+        vm.Period.ShowAllYearsCommand.Execute(null);
+        Assert.Equal("PeriodAllYears [en]", vm.Period.Label);
+        Assert.False(vm.Period.ShowStepper);
         Assert.Equal([current.Id, old.Id], vm.Items.Select(i => i.Id));
 
-        vm.NextYearCommand.Execute(null);
-        Assert.Equal("2026", vm.YearText);
+        vm.Period.ShowYearCommand.Execute(null);
+        vm.Period.NextCommand.Execute(null);
+        Assert.Equal("2026", vm.Period.Label);
         Assert.Equal([current.Id], vm.Items.Select(i => i.Id));
+    }
+
+    [Fact]
+    public async Task MonthFilter_ShowsTheBillsOfOnePeriod_ArrowsStepByMonth_TotalsFollow()
+    {
+        var (_, _, aug, sep, oct, _) = AddTypicalBills();
+        var vm = await LoadAsync();
+
+        // Year -> Month: today (27 Oct 2026) lies in the selected year -> October 2026.
+        vm.Period.ShowMonthCommand.Execute(null);
+        Assert.Equal("October 2026", vm.Period.Label);
+        Assert.Equal([oct.Id], vm.Items.Select(i => i.Id));
+        Assert.Equal($"BillTotals 60.00 {Eur}|0.00 {Eur}|60.00 {Eur} [en]", vm.TotalsText);
+
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("September 2026", vm.Period.Label);
+        Assert.Equal([sep.Id], vm.Items.Select(i => i.Id));
+        Assert.Equal($"BillTotals 50.00 {Eur}|20.00 {Eur}|30.00 {Eur} [en]", vm.TotalsText);
+
+        vm.Period.PreviousCommand.Execute(null);
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("July 2026", vm.Period.Label);
+        Assert.Empty(vm.Items);
+        Assert.True(vm.ShowNothingFound);
+
+        vm.Period.NextCommand.Execute(null);
+        Assert.Equal([aug.Id], vm.Items.Select(i => i.Id));
+
+        // Month -> Year keeps the year.
+        vm.Period.ShowYearCommand.Execute(null);
+        Assert.Equal("2026", vm.Period.Label);
+        Assert.Equal(4, vm.Items.Count);
+    }
+
+    [Fact]
+    public async Task MonthFilter_StepsAcrossTheYearBoundary()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var december = _kit.AddBill(water, new YearMonth(2025, 12), 30m);
+        var january = _kit.AddBill(water, new YearMonth(2026, 1), 31m);
+        var vm = await LoadAsync();
+        vm.Period.ShowMonthCommand.Execute(null);
+
+        for (var step = 0; step < 9; step++)
+        {
+            vm.Period.PreviousCommand.Execute(null);
+        }
+
+        Assert.Equal("January 2026", vm.Period.Label);
+        Assert.Equal([january.Id], vm.Items.Select(i => i.Id));
+
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("December 2025", vm.Period.Label);
+        Assert.Equal([december.Id], vm.Items.Select(i => i.Id));
+    }
+
+    [Fact]
+    public async Task MonthFilter_RespectsTheStatusFilter()
+    {
+        var (_, _, _, sep, _, _) = AddTypicalBills();
+        var vm = await LoadAsync();
+        vm.Period.ShowMonthCommand.Execute(null);
+        vm.Period.PreviousCommand.Execute(null);
+        _kit.Kit.Dialogs.ChooseScript = o => o.First(x => x.Contains("BillStatusOverdue", StringComparison.Ordinal));
+
+        await vm.ChooseStatusFilterCommand.ExecuteAsync(null);
+
+        Assert.Equal([sep.Id], vm.Items.Select(i => i.Id));
     }
 
     [Fact]
@@ -170,14 +240,15 @@ public class BillsViewModelTests : IDisposable
         var first = await LoadAsync();
         _kit.Kit.Dialogs.ChooseScript = o => o.First(x => x.Contains("BillStatusOverdue", StringComparison.Ordinal));
         await first.ChooseStatusFilterCommand.ExecuteAsync(null);
-        first.PreviousYearCommand.Execute(null);
+        first.Period.ShowMonthCommand.Execute(null);
+        first.Period.PreviousCommand.Execute(null);
 
         var second = await LoadAsync();
 
         Assert.Equal(BillStatusFilter.Overdue, second.StatusFilter);
-        Assert.Equal(2025, second.Year);
-        Assert.Empty(second.Items);
-        Assert.True(second.ShowNothingFound);
+        Assert.Equal(PeriodFilter.ForMonth(new YearMonth(2026, 9)), second.Period.Current);
+        Assert.Equal("September 2026", second.Period.Label);
+        Assert.Single(second.Items); // the overdue September bill
     }
 
     [Theory]
@@ -292,7 +363,7 @@ public class BillsViewModelTests : IDisposable
         await vm.OpenForAsync(_kit.Kit.Property.Id, water.Id);
 
         Assert.Equal(2, vm.Items.Count);
-        Assert.True(vm.AllYears);
+        Assert.Equal(PeriodScope.AllYears, vm.Period.Current.Scope);
         Assert.True(vm.Items.Single(i => i.Id == old.Id).IsHighlighted);
         Assert.False(vm.Items.Single(i => i.Id == other.Id).IsHighlighted);
     }

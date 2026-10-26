@@ -91,7 +91,7 @@ public class PaymentsViewModelTests : IDisposable
 
         // 20 Oct (transfer), 5 Oct (prepaid), 1 Oct (cottage), 15 Sep (refund)
         Assert.Equal(new[] { _transfer.Id, _prepaid.Id, _cottagePayment.Id, _refund.Id }, vm.Items.Select(i => i.Id));
-        Assert.Equal("2026", vm.YearText);
+        Assert.Equal("2026", vm.Period.Label);
         Assert.DoesNotContain(vm.Items, i => i.Id == _lastYear.Id);
     }
 
@@ -174,18 +174,77 @@ public class PaymentsViewModelTests : IDisposable
     {
         var vm = await LoadAsync();
 
-        vm.PreviousYearCommand.Execute(null);
-        Assert.Equal("2025", vm.YearText);
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("2025", vm.Period.Label);
         Assert.Equal([_lastYear.Id], vm.Items.Select(i => i.Id));
 
-        vm.ToggleAllYearsCommand.Execute(null);
-        Assert.Equal("PaymentsAllYears [en]", vm.YearText);
+        vm.Period.ShowAllYearsCommand.Execute(null);
+        Assert.Equal("PeriodAllYears [en]", vm.Period.Label);
         Assert.Equal(5, vm.Items.Count);
 
-        vm.ToggleAllYearsCommand.Execute(null);
-        vm.NextYearCommand.Execute(null);
-        Assert.Equal("2026", vm.YearText);
+        vm.Period.ShowYearCommand.Execute(null);
+        vm.Period.NextCommand.Execute(null);
+        Assert.Equal("2026", vm.Period.Label);
         Assert.Equal(4, vm.Items.Count);
+    }
+
+    [Fact]
+    public async Task MonthFilter_ShowsOneCalendarMonthOfPaidOn_ArrowsStep_TotalsFollow()
+    {
+        var vm = await LoadAsync();
+
+        // Year -> Month: today is 3 Nov 2026 -> November 2026 (no payments yet).
+        vm.Period.ShowMonthCommand.Execute(null);
+        Assert.Equal("November 2026", vm.Period.Label);
+        Assert.Empty(vm.Items);
+        Assert.True(vm.ShowNothingFound);
+
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("October 2026", vm.Period.Label);
+        Assert.Equal([_transfer.Id, _prepaid.Id, _cottagePayment.Id], vm.Items.Select(i => i.Id));
+        // 58.32 + 70.00 + 15.00 = 143.32 paid; unallocated 12.30 + 15.00 = 27.30
+        Assert.Equal($"PaymentsTotals {Money("143.32")}|{Money("27.30")} [en]", vm.TotalsText);
+
+        vm.Period.PreviousCommand.Execute(null);
+        Assert.Equal("September 2026", vm.Period.Label);
+        Assert.Equal([_refund.Id], vm.Items.Select(i => i.Id));
+
+        // Month -> Year keeps the year.
+        vm.Period.ShowYearCommand.Execute(null);
+        Assert.Equal("2026", vm.Period.Label);
+        Assert.Equal(4, vm.Items.Count);
+    }
+
+    [Fact]
+    public async Task MonthFilter_StepsAcrossTheYearBoundary()
+    {
+        var vm = await LoadAsync();
+        vm.Period.ShowMonthCommand.Execute(null);
+
+        for (var step = 0; step < 11; step++)
+        {
+            vm.Period.PreviousCommand.Execute(null);
+        }
+
+        Assert.Equal("December 2025", vm.Period.Label);
+        Assert.Equal([_lastYear.Id], vm.Items.Select(i => i.Id));
+
+        vm.Period.NextCommand.Execute(null);
+        Assert.Equal("January 2026", vm.Period.Label);
+        Assert.Empty(vm.Items);
+    }
+
+    [Fact]
+    public async Task MonthFilter_IsRememberedByTheNextScreenInstance()
+    {
+        var vm = await LoadAsync();
+        vm.Period.ShowMonthCommand.Execute(null);
+        vm.Period.PreviousCommand.Execute(null);
+
+        var again = await LoadAsync();
+
+        Assert.Equal("October 2026", again.Period.Label);
+        Assert.Equal(3, again.Items.Count);
     }
 
     [Fact]
@@ -255,7 +314,7 @@ public class PaymentsViewModelTests : IDisposable
 
         await vm.OpenForAsync(_kit.Kit.Property.Id, _water.Id);
 
-        Assert.True(vm.AllYears);
+        Assert.Equal(PeriodScope.AllYears, vm.Period.Current.Scope);
         Assert.Equal(_water.Id, vm.ContractFilterId);
         Assert.Equal([_transfer.Id, _prepaid.Id, _refund.Id, _lastYear.Id], vm.Items.Select(i => i.Id));
         Assert.All(vm.Items, i => Assert.True(i.IsHighlighted));
@@ -265,11 +324,11 @@ public class PaymentsViewModelTests : IDisposable
     public async Task Filters_AreRememberedByTheNextScreenInstance()
     {
         var vm = await LoadAsync();
-        vm.PreviousYearCommand.Execute(null);
+        vm.Period.PreviousCommand.Execute(null);
 
         var again = await LoadAsync();
 
-        Assert.Equal("2025", again.YearText);
+        Assert.Equal("2025", again.Period.Label);
     }
 
     [Fact]
@@ -281,8 +340,8 @@ public class PaymentsViewModelTests : IDisposable
         Assert.True(vm.IsEmpty);
 
         var filtered = await LoadAsync();
-        filtered.PreviousYearCommand.Execute(null);
-        filtered.PreviousYearCommand.Execute(null);
+        filtered.Period.PreviousCommand.Execute(null);
+        filtered.Period.PreviousCommand.Execute(null);
         Assert.False(filtered.IsEmpty);
         Assert.True(filtered.ShowNothingFound);
     }

@@ -748,10 +748,14 @@
   <data name="BillLineCategoryLabel" xml:space="preserve"><value>Категория</value></data>
   <data name="BillLineNoteLabel" xml:space="preserve"><value>Примечание</value></data>
   <data name="BillsPropertyFilter" xml:space="preserve"><value>Объект</value></data>
-  <data name="BillsYearLabel" xml:space="preserve"><value>Год</value></data>
-  <data name="BillsPreviousYear" xml:space="preserve"><value>Предыдущий год</value></data>
-  <data name="BillsNextYear" xml:space="preserve"><value>Следующий год</value></data>
-  <data name="BillsAllYears" xml:space="preserve"><value>Все годы</value></data>
+  <data name="PeriodLabel" xml:space="preserve"><value>Период</value></data>
+  <data name="PeriodAllYears" xml:space="preserve"><value>Все годы</value></data>
+  <data name="PeriodYear" xml:space="preserve"><value>Год</value></data>
+  <data name="PeriodMonth" xml:space="preserve"><value>Месяц</value></data>
+  <data name="PeriodPreviousYear" xml:space="preserve"><value>Предыдущий год</value></data>
+  <data name="PeriodNextYear" xml:space="preserve"><value>Следующий год</value></data>
+  <data name="PeriodPreviousMonth" xml:space="preserve"><value>Предыдущий месяц</value></data>
+  <data name="PeriodNextMonth" xml:space="preserve"><value>Следующий месяц</value></data>
   <data name="BillsStatusFilter" xml:space="preserve"><value>Статус</value></data>
   <data name="BillsBilled" xml:space="preserve"><value>Выставлено</value></data>
   <data name="BillsPaid" xml:space="preserve"><value>Оплачено</value></data>
@@ -853,10 +857,6 @@
   <data name="PaymentsAllProperties" xml:space="preserve"><value>Все объекты</value></data>
   <data name="PaymentsContractFilter" xml:space="preserve"><value>Договор</value></data>
   <data name="PaymentsAllContracts" xml:space="preserve"><value>Все договоры</value></data>
-  <data name="PaymentsYearLabel" xml:space="preserve"><value>Год</value></data>
-  <data name="PaymentsPreviousYear" xml:space="preserve"><value>Предыдущий год</value></data>
-  <data name="PaymentsNextYear" xml:space="preserve"><value>Следующий год</value></data>
-  <data name="PaymentsAllYears" xml:space="preserve"><value>Все годы</value></data>
   <data name="PaymentsTotals" xml:space="preserve"><value>Оплачено {0} · из них не распределено (предоплата) {1}</value></data>
   <data name="PaymentRefundAmount" xml:space="preserve"><value>−{0} возврат</value></data>
   <data name="PaymentSeveralContracts" xml:space="preserve"><value>Несколько договоров</value></data>

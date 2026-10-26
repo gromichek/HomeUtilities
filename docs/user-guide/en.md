@@ -261,8 +261,10 @@ Menu **Bills**: the invoices you receive from suppliers (and any one-off expense
 calculation, and whether it is paid. A **bill** is a record of its own: the *charge* (see [Charges](#10-charges)) is
 what the app expects, the bill is what the supplier asked for, the *payment* is what you paid.
 
-**The list.** At the top: filters **Property** (all or one), **Year** (‹ year › or *All years*) and **Status**
-(*All*, *Open*, *Overdue*, *Paid*); the filters are remembered until you close the app. Below them the totals of the
+**The list.** At the top: filters **Property** (all or one), **Period** and **Status**
+(*All*, *Open*, *Overdue*, *Paid*); the filters are remembered until you close the app. **Period** has three choices:
+*All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
+(a bill belongs to the month of its billing period), and the totals below follow the chosen period. Below them the totals of the
 list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
 category colour, the **total**, the **status badge** and — when the app has a calculation to compare with — the
 difference, for example *+2,15 € (+3,4 %)*: **red** when the bill is more than 5 % above the calculation, **green**
@@ -339,8 +341,10 @@ says what left your account, and the **allocation** says which bill the money se
 - **A real payment** on this screen (or **Add payment** in a bill) — for another date or amount, one transfer that pays
   several bills, money paid before the bill arrived, a partial payment or a refund.
 
-**The list.** At the top: filters **Property** (all or one), **Year** (‹ year › or *All years*) and **Contract**; they are
-remembered until you close the app. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Each row
+**The list.** At the top: filters **Property** (all or one), **Period** and **Contract**; they are
+remembered until you close the app. **Period** has three choices: *All years*, *Year* and *Month* (by the date of the
+payment); with *Year* or *Month* the ‹ › buttons step to the previous or next year or month, and the totals below follow
+the chosen period. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Each row
 shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for
 example *Water 09.2026, Water 10.2026 +1* (two bills are named, then *+N*). A yellow badge **Prepayment 12,30 €** means that
 part of the payment pays no bill; a refund is shown in green as *−12,00 € refund*; the small word *quick* marks a

@@ -9,11 +9,8 @@ public sealed class PaymentFilterState
     /// <summary>Only the payments of this property; null = all properties.</summary>
     public Guid? PropertyId { get; set; }
 
-    /// <summary>The year of the payment dates; null = the current year.</summary>
-    public int? Year { get; set; }
-
-    /// <summary>Show the payments of every year.</summary>
-    public bool AllYears { get; set; }
+    /// <summary>The period filter on the payment dates; null = the current year.</summary>
+    public PeriodFilter? Period { get; set; }
 
     /// <summary>Only the payments of this contract; null = all contracts.</summary>
     public Guid? ContractId { get; set; }
