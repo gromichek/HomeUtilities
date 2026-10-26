@@ -572,6 +572,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         for (var i = 0; i < QuantityRows.Count; i++)
         {
             QuantityRows[i].ErrorText = Errors.GetValueOrDefault(QuantityField(i), string.Empty);
+            QuantityRows[i].AmountErrorText = Errors.GetValueOrDefault(QuantityAmountField(i), string.Empty);
         }
     }
 
@@ -870,9 +871,16 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         var quantities = new List<BillQuantity>();
         for (var i = 0; i < QuantityRows.Count; i++)
         {
-            if (AmountEditor.ReadOptional(QuantityRows[i].Text, QuantityField(i), errors) is { } typed)
+            var typed = AmountEditor.ReadOptional(QuantityRows[i].Text, QuantityField(i), errors);
+            var amount = AmountEditor.ReadOptional(QuantityRows[i].AmountText, QuantityAmountField(i), errors);
+            if (typed is { } quantity)
             {
-                quantities.Add(new BillQuantity(QuantityRows[i].ComponentId, typed));
+                quantities.Add(new BillQuantity(QuantityRows[i].ComponentId, quantity, amount));
+            }
+            else if (amount is not null && string.IsNullOrWhiteSpace(QuantityRows[i].Text))
+            {
+                // The amount belongs to a quantity: without one it would be lost silently.
+                errors.Add(new(CommonErrorCodes.BillAmountNeedsQuantity, QuantityAmountField(i)));
             }
         }
 

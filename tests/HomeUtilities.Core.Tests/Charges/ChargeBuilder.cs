@@ -82,6 +82,9 @@ internal sealed class ChargeBuilder
     /// <summary>Quantities typed from the bill, by component id.</summary>
     public Dictionary<Guid, decimal> Quantities { get; } = [];
 
+    /// <summary>Optional line amounts typed from the bill, by component id.</summary>
+    public Dictionary<Guid, decimal> Amounts { get; } = [];
+
     public CalculatedCharge Calculate(YearMonth period) =>
-        ChargeCalculator.Calculate(new ChargeInput(Contract, Property, Components, Links, Meters, Vat, period, Quantities));
+        ChargeCalculator.Calculate(new ChargeInput(Contract, Property, Components, Links, Meters, Vat, period, Quantities, Amounts));
 }

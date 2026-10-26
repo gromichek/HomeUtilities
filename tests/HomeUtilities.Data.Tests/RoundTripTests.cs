@@ -311,7 +311,7 @@ public class RoundTripTests
             Vat = 1.48m,
             Gross = 8.53m,
             ConsumptionOnBill = 5.2m,
-            BillQuantities = [new BillQuantity(componentId, 0.210m)],
+            BillQuantities = [new BillQuantity(componentId, 0.210m, 14.72m)],
             CalculatedSnapshot = snapshot,
             AttachmentIds = [Guid.NewGuid(), Guid.NewGuid()],
         };
@@ -331,7 +331,7 @@ public class RoundTripTests
         Assert.Equal(new YearMonth(2026, 9), loaded.Period);
         Assert.Equal((new DateOnly(2026, 8, 15), new DateOnly(2026, 9, 14)), (loaded.ServiceFrom, loaded.ServiceTo));
         Assert.Equal(bill.AttachmentIds, loaded.AttachmentIds);
-        Assert.Equal(new BillQuantity(componentId, 0.210m), Assert.Single(loaded.BillQuantities));
+        Assert.Equal(new BillQuantity(componentId, 0.210m, 14.72m), Assert.Single(loaded.BillQuantities));
         Assert.Equal(0.2m, Assert.Single(loaded.CustomFields).AsDecimal());
         Assert.Equal("ok", Assert.Single(Assert.Single(loaded.Lines).CustomFields).Value);
         var loadedSnapshot = loaded.CalculatedSnapshot!;
@@ -341,6 +341,17 @@ public class RoundTripTests
         Assert.Empty(loadedLine.Consumption);
         Assert.Equal(ChargeWarningCodes.ContractInactive, Assert.Single(loadedSnapshot.Warnings).Code);
         Assert.Equal(new VatGroup(21m, 7.05m, 1.48m, 8.53m), Assert.Single(loadedSnapshot.VatGroups!));
+
+        // A bill saved before the line amount existed stores quantities without "Amount": it still loads, with a null amount.
+        var legacyJson = $"[{{\"ComponentId\":\"{componentId}\",\"Quantity\":0.21}}]";
+        await using (var legacy = test.NewContext())
+        {
+            await legacy.Database.ExecuteSqlRawAsync("UPDATE Bills SET BillQuantities = {0}", legacyJson);
+        }
+
+        await using var reread = test.NewContext();
+        var old = await reread.Bills.SingleAsync();
+        Assert.Equal(new BillQuantity(componentId, 0.21m, null), Assert.Single(old.BillQuantities));
     }
 
     [Fact]

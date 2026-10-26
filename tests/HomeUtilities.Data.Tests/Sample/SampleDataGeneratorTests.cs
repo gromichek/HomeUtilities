@@ -553,6 +553,32 @@ public class SampleDataGeneratorTests
     }
 
     [Fact]
+    public async Task Exactly_one_heating_bill_carries_a_line_amount_from_the_bill_that_differs_by_cents_and_still_equals_the_calculation()
+    {
+        using var rig = new Rig();
+        var (bills, _, contracts) = await LoadBillsAsync(rig);
+
+        var heating = bills.Where(b => b.ContractId is { } id && contracts[id].Service == ServiceKind.Heating).ToList();
+
+        var withAmount = Assert.Single(heating, b => b.BillQuantities.Any(q => q.Amount is not null));
+        var typed = Assert.Single(withAmount.BillQuantities, q => q.Amount is not null);
+        var input = await rig.Loader.LoadAsync(withAmount.ContractId!.Value, withAmount.Period);
+        Assert.Equal(typed.Amount, input!.AmountsFromBill![typed.ComponentId]);
+
+        var calculated = ChargeCalculator.Calculate(input);
+        Assert.True(calculated.IsComplete);
+        Assert.DoesNotContain(calculated.Warnings, w => w.Code == ChargeWarningCodes.AmountMismatch);
+        var line = Assert.Single(calculated.Lines, l => l.ComponentId == typed.ComponentId);
+        Assert.True(line.AmountFromBill);
+
+        // The amount is a few cents off quantity * price, yet the bill equals the calculation.
+        var difference = Math.Abs(typed.Amount!.Value - MoneyMath.Round(line.Quantity!.Value * line.UnitPrice!.Value));
+        Assert.InRange(difference, 0.01m, 0.05m);
+        Assert.Equal(0m, BillComparison.Compare(withAmount, calculated, null).Difference);
+        Assert.Equal(calculated.TotalGross, withAmount.Gross);
+    }
+
+    [Fact]
     public async Task Bills_the_internet_contract_is_paid_in_advance_and_due_before_its_month()
     {
         using var rig = new Rig();

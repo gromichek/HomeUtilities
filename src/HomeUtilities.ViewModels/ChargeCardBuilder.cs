@@ -108,7 +108,7 @@ public sealed class ChargeCardBuilder
             // The quantity is never measured here: say where it comes from (or that it is still missing).
             quantity = line.Quantity is null
                 ? _localizer["ChargeQuantityFromBill"]
-                : _localizer.Get("ChargeQuantityFromBillOf", quantity, BillText.Period(period));
+                : _localizer.Get(line.AmountFromBill ? "ChargeQuantityAmountFromBillOf" : "ChargeQuantityFromBillOf", quantity, BillText.Period(period));
         }
 
         var unitPrice = line.UnitPrice is { } price && !line.IsFromBill
@@ -288,6 +288,10 @@ public sealed class ChargeCardBuilder
                     break;
                 case ChargeWarningCodes.QuantityFromBill:
                     message = _localizer.Get("ChargeWarn_QuantityFromBill", name);
+                    break;
+                case ChargeWarningCodes.AmountMismatch:
+                    // No link: the bill is not part of the charge input, and the bill editor shows the same warning under the row.
+                    message = _localizer.Get("ChargeWarn_AmountMismatch", name);
                     break;
                 case ChargeWarningCodes.ContractInactive:
                     message = _localizer["ChargeWarn_ContractInactive"];

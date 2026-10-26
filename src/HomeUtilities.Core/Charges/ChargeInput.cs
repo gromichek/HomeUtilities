@@ -13,6 +13,7 @@ namespace HomeUtilities.Core.Charges;
 /// <param name="VatCatalog">The VAT catalog.</param>
 /// <param name="Period">The billing month.</param>
 /// <param name="QuantitiesFromBill">Quantities typed from the bill, by component id; null or missing = not known.</param>
+/// <param name="AmountsFromBill">Optional line amounts typed from the bill, by component id; null or missing = use quantity × price.</param>
 public sealed record ChargeInput(
     Contract Contract,
     Property Property,
@@ -21,4 +22,5 @@ public sealed record ChargeInput(
     IReadOnlyList<Meter> PropertyMeters,
     IReadOnlyCollection<VatRate> VatCatalog,
     YearMonth Period,
-    IReadOnlyDictionary<Guid, decimal>? QuantitiesFromBill = null);
+    IReadOnlyDictionary<Guid, decimal>? QuantitiesFromBill = null,
+    IReadOnlyDictionary<Guid, decimal>? AmountsFromBill = null);

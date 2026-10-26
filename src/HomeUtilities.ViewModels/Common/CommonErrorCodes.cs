@@ -21,6 +21,9 @@ public static class CommonErrorCodes
     /// <summary>The "submitted on" date of a reading is before the reading date.</summary>
     public const string ReadingSubmittedBeforeDate = "reading_edit.submitted_before_date";
 
+    /// <summary>A line amount from the bill was entered without the quantity it belongs to.</summary>
+    public const string BillAmountNeedsQuantity = "bill_edit.amount_needs_quantity";
+
     /// <summary>A number is larger than the editor accepts.</summary>
     public const string NumberTooLarge = "common.number_too_large";
 

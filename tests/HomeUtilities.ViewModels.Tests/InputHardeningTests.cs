@@ -315,6 +315,38 @@ public class InputHardeningTests
 
     [Theory]
     [MemberData(nameof(Inputs))]
+    public async Task BillEditor_QuantityAndAmountFromBill_NeverThrow(string input)
+    {
+        var kit = new BillTestKit(new DateOnly(2026, 10, 27));
+        var contract = kit.AddWaterContract();
+        var heat = new TariffComponent
+        {
+            ContractId = contract.Id, Name = "Heat", ChargeKind = ServiceKind.Heating, Basis = ChargeBasis.QuantityFromBill,
+            QuantityUnit = MeterUnit.MWh, VatCode = "LV-STANDARD", SortOrder = 5,
+        };
+        heat.Rates.Add(new TariffRate { ComponentId = heat.Id, ValidFrom = new DateOnly(2020, 1, 1), Price = 70m, Currency = Currency.EUR });
+        kit.Kit.Tariffs.Stored.Add(heat);
+        var vm = kit.CreateEditor();
+        await vm.LoadAsync(null);
+        kit.Kit.Dialogs.ChooseScript = o => o.Contains(contract.Title) ? contract.Title : o.FirstOrDefault();
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+        await vm.ChooseCategoryCommand.ExecuteAsync(null);
+        vm.Amounts.GrossText = "62,88";
+        var row = Assert.Single(vm.QuantityRows);
+
+        // Every combination of nasty text in the quantity and the amount field.
+        foreach (var (quantity, amount) in new[] { (input, input), (input, "14,71"), ("0,210", input), (string.Empty, input) })
+        {
+            row.Text = quantity;
+            row.AmountText = amount;
+            await vm.SaveCommand.ExecuteAsync(null);
+            ReadAll(vm);
+            ReadAll(row);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Inputs))]
     public async Task PaymentEditor_NeverThrows(string input)
     {
         var kit = new BillTestKit(new DateOnly(2026, 11, 3));

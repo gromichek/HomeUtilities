@@ -323,6 +323,7 @@ public sealed partial class BillEditViewModel
         _input = input;
         _live = live;
         QuantityRows = rows;
+        ApplyAmountWarnings(live);
         _calculationFailed = failed;
         HasTariff = input is not null && input.Components.Any(c => !c.IsDeleted);
         if (IsNew && string.IsNullOrWhiteSpace(Amounts.NetText) && string.IsNullOrWhiteSpace(Amounts.GrossText))
@@ -340,15 +341,17 @@ public sealed partial class BillEditViewModel
         foreach (var component in input.Components.Where(c => c is { IsDeleted: false, Basis: ChargeBasis.QuantityFromBill }).OrderBy(c => c.SortOrder))
         {
             var unit = component.QuantityUnit is { } u ? EnumText.Get(_localizer, u) : string.Empty;
-            var row = new BillQuantityRowViewModel(component.Id, component.Name, unit);
+            var row = new BillQuantityRowViewModel(component.Id, component.Name, unit, _localizer["BillQuantityAmount"], _localizer["BillQuantityAmountHint"]);
             var kept = QuantityRows.FirstOrDefault(r => r.ComponentId == component.Id);
             if (kept is not null)
             {
                 row.Text = kept.Text;
+                row.AmountText = kept.AmountText;
             }
             else if (!IsNew && _bill.BillQuantities.FirstOrDefault(q => q.ComponentId == component.Id) is { } stored)
             {
                 row.Text = DecimalInput.Format(stored.Quantity, CultureInfo.CurrentCulture, 4);
+                row.AmountText = stored.Amount is { } amount ? DecimalInput.Format(amount, CultureInfo.CurrentCulture, 2) : string.Empty;
             }
 
             row.Edited += OnQuantityEdited;
@@ -362,18 +365,39 @@ public sealed partial class BillEditViewModel
     private static ChargeInput WithTyped(ChargeInput input, IReadOnlyList<BillQuantityRowViewModel> rows)
     {
         var typed = new Dictionary<Guid, decimal>();
+        var amounts = new Dictionary<Guid, decimal>();
         foreach (var row in rows)
         {
             if (DecimalInput.TryParse(row.Text, CultureInfo.CurrentCulture, out var value))
             {
                 typed[row.ComponentId] = value;
+
+                // An amount without a quantity is ignored by the calculation (and rejected on save).
+                if (DecimalInput.TryParse(row.AmountText, CultureInfo.CurrentCulture, out var amount))
+                {
+                    amounts[row.ComponentId] = amount;
+                }
             }
         }
 
-        return input with { QuantitiesFromBill = typed };
+        return input with { QuantitiesFromBill = typed, AmountsFromBill = amounts };
+    }
+
+    /// <summary>Shows the "amount does not match quantity × price" warning of the calculation under the row it belongs to.</summary>
+    private void ApplyAmountWarnings(CalculatedCharge? calculation)
+    {
+        foreach (var row in QuantityRows)
+        {
+            row.WarningText = calculation is not null
+                && calculation.Warnings.Any(w => w.Code == ChargeWarningCodes.AmountMismatch && w.ComponentId == row.ComponentId)
+                    ? _localizer["BillAmountMismatch"]
+                    : string.Empty;
+        }
     }
 
     private static string QuantityField(int index) => $"{nameof(Bill.BillQuantities)}[{index}]";
+
+    private static string QuantityAmountField(int index) => $"{nameof(Bill.BillQuantities)}[{index}].Amount";
 
     /// <summary>A quantity changed: the calculation (and the snapshot, if the bill has one) follows live.</summary>
     private void OnQuantityEdited()
@@ -384,6 +408,7 @@ public sealed partial class BillEditViewModel
         }
 
         _live = ChargeCalculator.Calculate(WithTyped(_input, QuantityRows));
+        ApplyAmountWarnings(_live);
         if (_snapshot is not null)
         {
             _snapshot = _live;
