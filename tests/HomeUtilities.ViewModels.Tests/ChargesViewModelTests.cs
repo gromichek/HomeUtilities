@@ -243,6 +243,43 @@ public class ChargesViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task QuantityFromBill_WithAnAmountFromTheBill_UsesItAndSaysSo()
+    {
+        // Heat 0.210 MWh, amount 14.71 (quantity * price 14.70): net 24.00 + 14.71 + 0.48 = 39.19; VAT 12 % = 4.7028 -> 4.70; total 43.89
+        var (contract, heat, difference) = AddHeating();
+        var bill = Bill.CreateFor(contract, new YearMonth(2026, 10), _kit.Clock);
+        bill.Gross = 43.89m;
+        bill.BillQuantities = [new BillQuantity(heat.Id, 0.210m, 14.71m), new BillQuantity(difference.Id, 0.150m)];
+        _kit.Bills.All.Add(bill);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal(ChargeCardStatus.Complete, card.Status);
+        Assert.StartsWith("ChargeQuantityAmountFromBillOf 0.210 Enum_MeterUnit_MWh [en]|10.2026", card.Lines[1].QuantityText);
+        Assert.StartsWith("ChargeQuantityFromBillOf 0.150", card.Lines[2].QuantityText);
+        Assert.Equal("14.71 Currency_Symbol_EUR [en]", card.Lines[1].NetText);
+        Assert.Equal("43.89 Currency_Symbol_EUR [en]", card.TotalText);
+        Assert.DoesNotContain(card.Warnings, w => w.Message.StartsWith("ChargeWarn_AmountMismatch"));
+    }
+
+    [Fact]
+    public async Task QuantityFromBill_AmountFarFromQuantityTimesPrice_ShowsAWarningWithoutALink()
+    {
+        var (contract, heat, difference) = AddHeating();
+        var bill = Bill.CreateFor(contract, new YearMonth(2026, 10), _kit.Clock);
+        bill.Gross = 50m;
+        bill.BillQuantities = [new BillQuantity(heat.Id, 0.210m, 20.00m), new BillQuantity(difference.Id, 0.150m)];
+        _kit.Bills.All.Add(bill);
+
+        var vm = await LoadAsync();
+
+        var warning = Assert.Single(Assert.Single(vm.Cards).Warnings);
+        Assert.Equal("ChargeWarn_AmountMismatch Heat [en]", warning.Message);
+        Assert.False(warning.HasAction);
+    }
+
+    [Fact]
     public async Task VatPerLine_ShowsNoVatGroupLines()
     {
         AddWater().Contract.VatCalculation = VatCalculation.PerLine;

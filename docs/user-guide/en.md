@@ -195,7 +195,10 @@ prices (you enter the prices afterwards): *Water + sewerage*, *Heating as one su
   *incomplete*. Use it when the supplier distributes a building meter among the flats by its own formula, which the app
   cannot repeat — for example the heat for heating and circulation in MWh and the flat's share of the building's
   hot-water difference in m³. The app does not distribute building meters itself; if you want to keep the building
-  meter values, put them in a custom field of the contract.
+  meter values, put them in a custom field of the contract. Suppliers often print the quantity rounded to three
+  decimals but bill the unrounded one, so quantity × price can differ from the bill by a few cents (0,233 MWh ×
+  73,76 € = 17,19 €, the bill says 17,22 €). For that case the bill has an optional field *Amount on the bill
+  (excl. VAT)* next to each quantity — see [Bills](#11-bills).
 - **VAT:** choose a rate from the catalog (it shows the percent valid today, e.g. "Standard rate 21 %") or
   **Custom %** and type the percent yourself. See [VAT rates](#vat-rates).
 - **Prices:** a list of prices, newest first, each with **Valid from**. When a supplier changes a price, **add a new
@@ -271,6 +274,7 @@ estimated reading, a reading taken outside the reading window, and unusually hig
 | *No meter is linked for «…»* | The line counts meter consumption, but no meter of the contract fits. | **Open contract**, link a meter. |
 | VAT code unknown, currency differs, stepped price on a net export line | The tariff itself is wrong. | **Open tariff** or *Settings → VAT rates*. |
 | *Enter the quantity of «…» from the supplier's bill* | A *Quantity from the bill* line has no quantity yet. | Enter the bill of the month (**Enter bill**) and type the quantity in the card *Quantities from the bill*. |
+| *«…»: the amount on the bill does not match quantity × price — the price may have changed.* | The *Amount on the bill (excl. VAT)* typed for a *Quantity from the bill* line is not what the quantity and the tariff price give (more than rounding of the printed quantity explains). | Check the amount and the quantity in the bill, and the price in the tariff; if the supplier changed the price, add the new price with its *Valid from* date. The line still uses the amount from the bill. |
 | *The contract is not active in this month* | The contract ended or has not started yet. | Check the contract's dates. |
 
 In the contract editor the tariff card has a **Show charges** button that opens this screen for the contract's
@@ -327,6 +331,13 @@ expense** (a repair, a purchase — no contract; it needs a *Title* and a *Categ
    heat in MWh) — one field per component with its unit. Type what the supplier printed on the bill. The calculation
    below uses the numbers at once; they are saved with the bill and with its snapshot, and the *Charges* screen uses
    them for that month ("from bill 10.2026"). Without them the calculation is incomplete.
+   Under each quantity there is an optional field **Amount on the bill (excl. VAT)**. Leave it empty normally: the
+   line is then quantity × price. Enter it when the supplier prints the quantity rounded (for example 0,233 MWh) but
+   bills the exact one, so the line amount on the bill (17,22 €) differs from quantity × price (17,19 €) by a few
+   cents: the calculation then uses your amount for that line, and the *Difference* to the bill stays at 0,00. If the
+   price already includes VAT, type the line's total including VAT. If the amount is further from quantity × price
+   than the rounding of the quantity can explain, the card shows *The amount on the bill does not match quantity ×
+   price — the price may have changed.* — then check the price in the tariff. An amount needs its quantity.
 4. **Comparison with the calculation** (contracts with a tariff) — the calculated total for the month and the
    **difference** to your bill. *Quantity on the bill* is what the supplier billed in m³; next to the metered quantity it
    shows **Water losses / difference**, e.g. billed 12,500 m³, metered 12,150 m³ → 0,350 m³. **Show charges** opens the

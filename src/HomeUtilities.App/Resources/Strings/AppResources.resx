@@ -947,4 +947,10 @@
   <data name="ChargeQuantityFromBillOf" xml:space="preserve"><value>{0} (from bill {1})</value></data>
   <data name="ChargeVatGroup" xml:space="preserve"><value>VAT {0} % of {1} = {2}</value></data>
   <data name="ChargeWarn_QuantityFromBill" xml:space="preserve"><value>Enter the quantity of «{0}» from the supplier's bill (Bills → Quantities from the bill).</value></data>
+  <data name="BillQuantityAmount" xml:space="preserve"><value>Amount on the bill (excl. VAT)</value></data>
+  <data name="BillQuantityAmountHint" xml:space="preserve"><value>Optional — enter it if the supplier's amount differs from quantity × price.</value></data>
+  <data name="BillAmountMismatch" xml:space="preserve"><value>The amount on the bill does not match quantity × price — the price may have changed.</value></data>
+  <data name="ChargeQuantityAmountFromBillOf" xml:space="preserve"><value>{0} (quantity and amount from bill {1})</value></data>
+  <data name="ChargeWarn_AmountMismatch" xml:space="preserve"><value>«{0}»: the amount on the bill does not match quantity × price — the price may have changed.</value></data>
+  <data name="Error_bill_edit_amount_needs_quantity" xml:space="preserve"><value>Enter the quantity this amount belongs to.</value></data>
 </root>

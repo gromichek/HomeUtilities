@@ -290,6 +290,105 @@ public class BillEditViewModelTests : IDisposable
         Assert.True(vm.QuantityRows[0].HasError);
     }
 
+    [Fact]
+    public async Task QuantityAmount_IsSavedWithTheQuantity_UsedByTheCalculation_AndShownAgainWhenTheBillIsOpened()
+    {
+        // water 37.27 + heat amount 14.71 (0.210 MWh * 70.00 = 14.70) -> net 51.98; VAT 21% = 10.9158 -> 10.92; total 62.90
+        var contract = _kit.AddWaterContract();
+        var heat = AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,90";
+
+        vm.QuantityRows[0].Text = "0,210";
+        vm.QuantityRows[0].AmountText = "14,71";
+
+        Assert.Equal($"62.90 {Eur}", vm.CalculatedText);
+        Assert.False(vm.QuantityRows[0].HasWarning);
+        Assert.Equal($"0.00 {Eur} (0.0 %)", vm.DifferenceText);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal(new BillQuantity(heat.Id, 0.210m, 14.71m), Assert.Single(saved.BillQuantities));
+        Assert.Equal(62.90m, saved.CalculatedSnapshot!.TotalGross);
+
+        _kit.Bills.All.Add(saved);
+        var reopened = await OpenAsync(saved.Id);
+        Assert.Equal("0.21", reopened.QuantityRows[0].Text);
+        Assert.Equal("14.71", reopened.QuantityRows[0].AmountText);
+        Assert.Equal($"62.90 {Eur}", reopened.CalculatedText);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_ThatDoesNotMatchQuantityTimesPrice_ShowsAWarningUnderTheRow()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.QuantityRows[0].Text = "0,210";
+
+        vm.QuantityRows[0].AmountText = "18,00";
+
+        Assert.True(vm.QuantityRows[0].HasWarning);
+        Assert.Equal("BillAmountMismatch [en]", vm.QuantityRows[0].WarningText);
+
+        vm.QuantityRows[0].AmountText = "14,71";
+
+        Assert.False(vm.QuantityRows[0].HasWarning);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_BlankMeansNotEntered_AndAnOldBillOpensWithAnEmptyAmount()
+    {
+        var contract = _kit.AddWaterContract();
+        var heat = AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+        vm.QuantityRows[0].Text = "0,210";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal(new BillQuantity(heat.Id, 0.210m), Assert.Single(saved.BillQuantities));
+        Assert.Null(saved.BillQuantities[0].Amount);
+
+        _kit.Bills.All.Add(saved);
+        var reopened = await OpenAsync(saved.Id);
+        Assert.Equal(string.Empty, reopened.QuantityRows[0].AmountText);
+        Assert.Equal($"62.88 {Eur}", reopened.CalculatedText);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_WithoutAQuantity_IsAnErrorOnTheAmount_AndNothingIsSaved()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+
+        vm.QuantityRows[0].AmountText = "14,71";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Bills.Saved);
+        Assert.True(vm.QuantityRows[0].HasAmountError);
+        Assert.False(vm.QuantityRows[0].HasError);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_UnreadableText_IsAnErrorOnTheAmount_AndNothingIsSaved()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+        vm.QuantityRows[0].Text = "0,210";
+
+        vm.QuantityRows[0].AmountText = "abc";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Bills.Saved);
+        Assert.True(vm.QuantityRows[0].HasAmountError);
+    }
+
     // ---- Amounts --------------------------------------------------------------------------------------------------
 
     [Fact]

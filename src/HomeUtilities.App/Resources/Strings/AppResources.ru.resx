@@ -947,4 +947,10 @@
   <data name="ChargeQuantityFromBillOf" xml:space="preserve"><value>{0} (из счёта {1})</value></data>
   <data name="ChargeVatGroup" xml:space="preserve"><value>НДС {0} % от {1} = {2}</value></data>
   <data name="ChargeWarn_QuantityFromBill" xml:space="preserve"><value>Введите количество для «{0}» из счёта поставщика (Счета → Количества из счёта).</value></data>
+  <data name="BillQuantityAmount" xml:space="preserve"><value>Сумма по счёту (без НДС)</value></data>
+  <data name="BillQuantityAmountHint" xml:space="preserve"><value>Необязательно — введите, если сумма поставщика отличается от количества × цены.</value></data>
+  <data name="BillAmountMismatch" xml:space="preserve"><value>Сумма по счёту не совпадает с количеством × цена — возможно, цена изменилась.</value></data>
+  <data name="ChargeQuantityAmountFromBillOf" xml:space="preserve"><value>{0} (количество и сумма из счёта {1})</value></data>
+  <data name="ChargeWarn_AmountMismatch" xml:space="preserve"><value>«{0}»: сумма по счёту не совпадает с количеством × цена — возможно, цена изменилась.</value></data>
+  <data name="Error_bill_edit_amount_needs_quantity" xml:space="preserve"><value>Введите количество, к которому относится эта сумма.</value></data>
 </root>

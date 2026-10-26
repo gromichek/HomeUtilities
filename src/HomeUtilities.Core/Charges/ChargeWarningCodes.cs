@@ -30,6 +30,9 @@ public static class ChargeWarningCodes
     /// <summary>The quantity of a QuantityFromBill component has not been entered from the bill.</summary>
     public const string QuantityFromBill = "charge.quantity_from_bill";
 
+    /// <summary>The line amount typed from the bill does not match quantity × price (the price may have changed).</summary>
+    public const string AmountMismatch = "charge.amount_mismatch";
+
     /// <summary>The property parameter that gives the quantity has no value on the rate date.</summary>
     public const string MissingParameter = "charge.missing_parameter";
 }

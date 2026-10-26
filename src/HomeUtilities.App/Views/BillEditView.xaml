@@ -215,6 +215,12 @@
                                         <Label Text="{Binding Label}" Style="{StaticResource MutedLabel}" />
                                         <Entry Text="{Binding Text}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
                                         <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
+                                        <!-- Optional line amount: stacked under the quantity so it fits a phone. -->
+                                        <Label Text="{Binding AmountLabel}" Style="{StaticResource MutedLabel}" />
+                                        <Entry Text="{Binding AmountText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                                        <Label Text="{Binding AmountHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                        <Label Text="{Binding AmountErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasAmountError}" />
+                                        <Label Text="{Binding WarningText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasWarning}" />
                                     </VerticalStackLayout>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
