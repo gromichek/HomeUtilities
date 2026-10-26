@@ -18,6 +18,7 @@ public class TariffPresetsTests
     [InlineData(TariffPreset.AreaFee)]
     [InlineData(TariffPreset.PerResident)]
     [InlineData(TariffPreset.FixedMonthly)]
+    [InlineData(TariffPreset.HotWaterAndHeatingDistributed)]
     public void Every_preset_passes_the_validator_once_a_price_is_filled(TariffPreset preset)
     {
         foreach (var component in Create(preset))
@@ -61,6 +62,22 @@ public class TariffPresetsTests
         Assert.Equal("LV-REDUCED", components[0].VatCode);
         Assert.Equal(ChargeBasis.FromBill, components[1].Basis);
         Assert.Empty(components[1].MeterIds);
+    }
+
+    [Fact]
+    public void Hot_water_and_heating_distributed_has_hot_meters_and_two_quantities_from_the_bill()
+    {
+        var hot = new[] { Guid.CreateVersion7() };
+
+        var components = Create(TariffPreset.HotWaterAndHeatingDistributed, hot);
+
+        Assert.Equal(["name:HotWater", "name:HeatCirculation", "name:HotWaterDifference"], components.Select(c => c.Name));
+        Assert.Equal([ChargeBasis.PerUnit, ChargeBasis.QuantityFromBill, ChargeBasis.QuantityFromBill], components.Select(c => c.Basis));
+        Assert.Equal(hot, components[0].MeterIds);
+        Assert.Empty(components[1].MeterIds);
+        Assert.Equal([null, MeterUnit.MWh, MeterUnit.M3], components.Select(c => c.QuantityUnit));
+        Assert.All(components, c => Assert.Equal("LV-REDUCED", c.VatCode));
+        Assert.Equal([ServiceKind.WaterHeating, ServiceKind.Heating, ServiceKind.WaterHeating], components.Select(c => c.ChargeKind));
     }
 
     [Fact]

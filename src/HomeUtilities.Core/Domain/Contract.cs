@@ -43,6 +43,9 @@ public class Contract : SyncEntity
     /// <summary>How the contract is billed.</summary>
     public BillingMode BillingMode { get; set; }
 
+    /// <summary>Whether VAT is calculated on the total per VAT percent (default) or per line.</summary>
+    public VatCalculation VatCalculation { get; set; } = VatCalculation.OnTotal;
+
     /// <summary>First day of the month of the reading submission window.</summary>
     public int? ReadingDayFrom { get; set; }
 

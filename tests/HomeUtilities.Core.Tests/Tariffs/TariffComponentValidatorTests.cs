@@ -25,6 +25,49 @@ public class TariffComponentValidatorTests
     }
 
     [Fact]
+    public void Quantity_from_the_bill_needs_a_unit_and_a_price()
+    {
+        var c = Valid();
+        c.Basis = ChargeBasis.QuantityFromBill;
+        Assert.Equal([ErrorCodes.TariffQuantityUnitRequired], Codes(c));
+
+        c.QuantityUnit = MeterUnit.MWh;
+        Assert.True(TariffComponentValidator.Validate(c).IsValid);
+
+        c.Rates.Clear();
+        Assert.Equal([ErrorCodes.TariffRateRequired], Codes(c));
+    }
+
+    [Fact]
+    public void Quantity_from_the_bill_rejects_tiers_meters_registers_and_a_parameter()
+    {
+        var c = Valid();
+        c.Basis = ChargeBasis.QuantityFromBill;
+        c.QuantityUnit = MeterUnit.M3;
+        AddTiers(c, new TariffTier(10m, 1m), new TariffTier(null, 2m));
+        c.MeterIds = [Guid.CreateVersion7()];
+        c.RegisterKinds = [RegisterKind.Day];
+        c.QuantityParameter = PropertyParameterKind.TotalArea;
+
+        Assert.Equal(
+            new[]
+            {
+                ErrorCodes.TariffSelectionNotAllowed,
+                ErrorCodes.TariffTiersNotAllowed,
+                ErrorCodes.TariffQuantityParameterNotAllowed,
+            }.Order(),
+            Codes(c).Order());
+    }
+
+    [Fact]
+    public void A_unit_on_another_basis_fails()
+    {
+        var c = Valid();
+        c.QuantityUnit = MeterUnit.KWh;
+        Assert.Equal([ErrorCodes.TariffQuantityUnitNotAllowed], Codes(c));
+    }
+
+    [Fact]
     public void Valid_component_passes() => Assert.True(TariffComponentValidator.Validate(Valid()).IsValid);
 
     [Fact]

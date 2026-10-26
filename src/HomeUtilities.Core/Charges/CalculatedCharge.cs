@@ -7,11 +7,12 @@ namespace HomeUtilities.Core.Charges;
 /// <param name="Period">The billing month.</param>
 /// <param name="Currency">Currency of all amounts.</param>
 /// <param name="Lines">Charge lines ordered by component.</param>
-/// <param name="TotalNet">Sum of the net amounts of the lines.</param>
-/// <param name="TotalVat">Sum of the VAT amounts of the lines.</param>
-/// <param name="TotalGross">Sum of the gross amounts of the lines.</param>
+/// <param name="TotalNet">Total net amount.</param>
+/// <param name="TotalVat">Total VAT: the sum of the VAT of the groups (on the total) or of the lines.</param>
+/// <param name="TotalGross">Total gross amount.</param>
 /// <param name="IsComplete">True if every line could be calculated completely.</param>
 /// <param name="Warnings">Findings the user should look at.</param>
+/// <param name="VatGroups">Totals per VAT percent; the totals above are their sums.</param>
 public sealed record CalculatedCharge(
     Guid ContractId,
     YearMonth Period,
@@ -21,4 +22,5 @@ public sealed record CalculatedCharge(
     decimal TotalVat,
     decimal TotalGross,
     bool IsComplete,
-    IReadOnlyList<ChargeWarning> Warnings);
+    IReadOnlyList<ChargeWarning> Warnings,
+    IReadOnlyList<VatGroup>? VatGroups = null);

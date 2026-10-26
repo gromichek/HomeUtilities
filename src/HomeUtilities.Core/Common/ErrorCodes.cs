@@ -189,6 +189,15 @@ public static class ErrorCodes
     /// <summary>A custom quantity parameter has no name.</summary>
     public const string TariffQuantityParameterNameRequired = "tariff.quantity_parameter_name_required";
 
+    /// <summary>A QuantityFromBill component has no unit.</summary>
+    public const string TariffQuantityUnitRequired = "tariff.quantity_unit_required";
+
+    /// <summary>A quantity unit is set for a basis other than QuantityFromBill.</summary>
+    public const string TariffQuantityUnitNotAllowed = "tariff.quantity_unit_not_allowed";
+
+    /// <summary>A QuantityFromBill component has stepped prices.</summary>
+    public const string TariffTiersNotAllowed = "tariff.tiers_not_allowed";
+
     /// <summary>Net, VAT percent and total of an amount contradict each other.</summary>
     public const string AmountInconsistent = "amount.inconsistent";
 

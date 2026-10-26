@@ -22,6 +22,9 @@ public enum TariffPreset
 
     /// <summary>A fixed monthly amount, price including VAT.</summary>
     FixedMonthly = 5,
+
+    /// <summary>Hot water by the flat's meters plus heat and hot-water difference, whose quantities come from the bill.</summary>
+    HotWaterAndHeatingDistributed = 6,
 }
 
 /// <summary>
@@ -42,6 +45,9 @@ public static class TariffPresets
         public const string AreaFee = "AreaFee";
         public const string PerResident = "PerResident";
         public const string FixedMonthly = "FixedMonthly";
+        public const string HotWater = "HotWater";
+        public const string HeatCirculation = "HeatCirculation";
+        public const string HotWaterDifference = "HotWaterDifference";
     }
 
     /// <summary>Code of the standard VAT entry of the catalog.</summary>
@@ -68,8 +74,8 @@ public static class TariffPresets
         ArgumentNullException.ThrowIfNull(nameOf);
         ArgumentNullException.ThrowIfNull(hotMeterIds);
 
-        TariffComponent Component(string key, ServiceKind kind, ChargeBasis basis, string vat = StandardVatCode) =>
-            new() { ContractId = contractId, Name = nameOf(key), ChargeKind = kind, Basis = basis, VatCode = vat };
+        TariffComponent Component(string key, ServiceKind kind, ChargeBasis basis, string vat = StandardVatCode, MeterUnit? unit = null) =>
+            new() { ContractId = contractId, Name = nameOf(key), ChargeKind = kind, Basis = basis, VatCode = vat, QuantityUnit = unit };
 
         List<TariffComponent> components = preset switch
         {
@@ -83,6 +89,12 @@ public static class TariffPresets
                 Component(NameKeys.WaterHeating, ServiceKind.WaterHeating, ChargeBasis.PerUnit, ReducedVatCode),
                 Component(NameKeys.Heating, ServiceKind.Heating, ChargeBasis.FromBill, ReducedVatCode),
             ],
+            TariffPreset.HotWaterAndHeatingDistributed =>
+            [
+                Component(NameKeys.HotWater, ServiceKind.WaterHeating, ChargeBasis.PerUnit, ReducedVatCode),
+                Component(NameKeys.HeatCirculation, ServiceKind.Heating, ChargeBasis.QuantityFromBill, ReducedVatCode, MeterUnit.MWh),
+                Component(NameKeys.HotWaterDifference, ServiceKind.WaterHeating, ChargeBasis.QuantityFromBill, ReducedVatCode, MeterUnit.M3),
+            ],
             TariffPreset.Electricity =>
             [
                 Component(NameKeys.Energy, ServiceKind.Electricity, ChargeBasis.PerUnit),
@@ -94,7 +106,7 @@ public static class TariffPresets
             _ => throw new ArgumentOutOfRangeException(nameof(preset), preset, "Unknown tariff preset."),
         };
 
-        if (preset == TariffPreset.WaterHeatingAndHeating)
+        if (preset is TariffPreset.WaterHeatingAndHeating or TariffPreset.HotWaterAndHeatingDistributed)
         {
             components[0].MeterIds = [.. hotMeterIds];
         }
