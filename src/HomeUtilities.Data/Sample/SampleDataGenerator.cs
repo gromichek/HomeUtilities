@@ -119,6 +119,9 @@ public sealed partial class SampleDataGenerator(
     /// <summary>The month of the electricity bill with detail lines and a custom field.</summary>
     private const int DetailedBillMonthsAgo = 2;
 
+    /// <summary>The sample heating bill of this many months ago carries a line amount from the bill (a few cents off quantity × price).</summary>
+    private const int AmountFromBillMonthsAgo = 1;
+
     /// <summary>
     /// A year of bills of the flat: the in-arrears contracts for the last twelve months, the prepaid internet for ten months back
     /// to next month, and a one-off boiler repair. Totals are near the calculation (a few clearly above or below, water with
@@ -261,6 +264,23 @@ public sealed partial class SampleDataGenerator(
             if (billQuantities.Count > 0)
             {
                 input = input with { QuantitiesFromBill = billQuantities.ToDictionary(q => q.ComponentId, q => q.Quantity) };
+
+                // One sample bill shows the line amount: the supplier's amount differs from quantity × price by a few cents.
+                if (monthsAgo == AmountFromBillMonthsAgo)
+                {
+                    var first = billQuantities[0];
+                    var line = ChargeCalculator.Calculate(input).Lines.FirstOrDefault(l => l.ComponentId == first.ComponentId);
+                    if (line is { IsComplete: true })
+                    {
+                        var withAmount = first with { Amount = (line.PriceIncludesVat ? line.Gross : line.Net) + 0.02m };
+                        var candidate = input with { AmountsFromBill = new Dictionary<Guid, decimal> { [first.ComponentId] = withAmount.Amount!.Value } };
+                        if (!ChargeCalculator.Calculate(candidate).Warnings.Any(w => w.Code == ChargeWarningCodes.AmountMismatch))
+                        {
+                            billQuantities[0] = withAmount;
+                            input = candidate;
+                        }
+                    }
+                }
             }
         }
 

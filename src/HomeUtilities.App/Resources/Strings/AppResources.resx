@@ -1016,4 +1016,10 @@
   <data name="Error_tax_installment_count_invalid" xml:space="preserve"><value>Choose 1, 2 or 4 installments.</value></data>
   <data name="Error_tax_due_date_outside_year" xml:space="preserve"><value>The due date must be in {0}.</value></data>
   <data name="Error_tax_due_dates_not_ascending" xml:space="preserve"><value>Each due date must be later than the one before.</value></data>
+  <data name="BillQuantityAmount" xml:space="preserve"><value>Amount on the bill (excl. VAT)</value></data>
+  <data name="BillQuantityAmountHint" xml:space="preserve"><value>Optional — enter it if the supplier's amount differs from quantity × price.</value></data>
+  <data name="BillAmountMismatch" xml:space="preserve"><value>The amount on the bill does not match quantity × price — the price may have changed.</value></data>
+  <data name="ChargeQuantityAmountFromBillOf" xml:space="preserve"><value>{0} (quantity and amount from bill {1})</value></data>
+  <data name="ChargeWarn_AmountMismatch" xml:space="preserve"><value>«{0}»: the amount on the bill does not match quantity × price — the price may have changed.</value></data>
+  <data name="Error_bill_edit_amount_needs_quantity" xml:space="preserve"><value>Enter the quantity this amount belongs to.</value></data>
 </root>

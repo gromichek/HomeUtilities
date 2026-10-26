@@ -290,6 +290,105 @@ public class BillEditViewModelTests : IDisposable
         Assert.True(vm.QuantityRows[0].HasError);
     }
 
+    [Fact]
+    public async Task QuantityAmount_IsSavedWithTheQuantity_UsedByTheCalculation_AndShownAgainWhenTheBillIsOpened()
+    {
+        // water 37.27 + heat amount 14.71 (0.210 MWh * 70.00 = 14.70) -> net 51.98; VAT 21% = 10.9158 -> 10.92; total 62.90
+        var contract = _kit.AddWaterContract();
+        var heat = AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,90";
+
+        vm.QuantityRows[0].Text = "0,210";
+        vm.QuantityRows[0].AmountText = "14,71";
+
+        Assert.Equal($"62.90 {Eur}", vm.CalculatedText);
+        Assert.False(vm.QuantityRows[0].HasWarning);
+        Assert.Equal($"0.00 {Eur} (0.0 %)", vm.DifferenceText);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal(new BillQuantity(heat.Id, 0.210m, 14.71m), Assert.Single(saved.BillQuantities));
+        Assert.Equal(62.90m, saved.CalculatedSnapshot!.TotalGross);
+
+        _kit.Bills.All.Add(saved);
+        var reopened = await OpenAsync(saved.Id);
+        Assert.Equal("0.21", reopened.QuantityRows[0].Text);
+        Assert.Equal("14.71", reopened.QuantityRows[0].AmountText);
+        Assert.Equal($"62.90 {Eur}", reopened.CalculatedText);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_ThatDoesNotMatchQuantityTimesPrice_ShowsAWarningUnderTheRow()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.QuantityRows[0].Text = "0,210";
+
+        vm.QuantityRows[0].AmountText = "18,00";
+
+        Assert.True(vm.QuantityRows[0].HasWarning);
+        Assert.Equal("BillAmountMismatch [en]", vm.QuantityRows[0].WarningText);
+
+        vm.QuantityRows[0].AmountText = "14,71";
+
+        Assert.False(vm.QuantityRows[0].HasWarning);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_BlankMeansNotEntered_AndAnOldBillOpensWithAnEmptyAmount()
+    {
+        var contract = _kit.AddWaterContract();
+        var heat = AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+        vm.QuantityRows[0].Text = "0,210";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal(new BillQuantity(heat.Id, 0.210m), Assert.Single(saved.BillQuantities));
+        Assert.Null(saved.BillQuantities[0].Amount);
+
+        _kit.Bills.All.Add(saved);
+        var reopened = await OpenAsync(saved.Id);
+        Assert.Equal(string.Empty, reopened.QuantityRows[0].AmountText);
+        Assert.Equal($"62.88 {Eur}", reopened.CalculatedText);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_WithoutAQuantity_IsAnErrorOnTheAmount_AndNothingIsSaved()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+
+        vm.QuantityRows[0].AmountText = "14,71";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Bills.Saved);
+        Assert.True(vm.QuantityRows[0].HasAmountError);
+        Assert.False(vm.QuantityRows[0].HasError);
+    }
+
+    [Fact]
+    public async Task QuantityAmount_UnreadableText_IsAnErrorOnTheAmount_AndNothingIsSaved()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+        vm.QuantityRows[0].Text = "0,210";
+
+        vm.QuantityRows[0].AmountText = "abc";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Bills.Saved);
+        Assert.True(vm.QuantityRows[0].HasAmountError);
+    }
+
     // ---- Amounts --------------------------------------------------------------------------------------------------
 
     [Fact]
@@ -1073,6 +1172,182 @@ public class BillEditViewModelTests : IDisposable
 
         Assert.Equal("PhotoPermissionDenied [en]", vm.AttachmentError);
         Assert.Empty(vm.AttachmentRows);
+    }
+
+    // ---- Issue and due dates --------------------------------------------------------------------------------------
+
+    private static readonly DateOnly Issued = new(2026, 10, 1);
+    private static readonly DateOnly Due = new(2026, 10, 31);
+
+    private async Task AssertSavedWithOwnersDatesAsync(BillEditViewModel vm)
+    {
+        vm.Amounts.GrossText = "46,02";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.DueOnError);
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal((Issued, Due), (saved.IssuedOn, saved.DueOn));
+    }
+
+    [Fact]
+    public async Task Dates_IssuedThenDue_AreSaved_ForAContractWithADueDay()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_DueThenIssued_AreSaved()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+
+        vm.DueOn = Due;
+        vm.IssuedOn = Issued;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_ContractWithoutDueDay_SwitchingTheDueDateOnAfterPickingIssued_StartsWithAUsableDate()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false, dueDay: null));
+        Assert.False(vm.HasDueOn);
+
+        vm.IssuedOn = new DateOnly(2026, 11, 15);
+        vm.HasDueOn = true;
+
+        // the picker appears with a date that is not before the issue date (and never 01.01.0001)
+        Assert.Equal(new DateOnly(2026, 11, 15), vm.DueOn);
+
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_AnEmptyDueDate_IsReplacedByTheDueDateOfTheContract()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+
+        // 01.01.0001 would be shown as 01.01.1900 by the picker; the contract says the 20th of the month after the period
+        vm.DueOn = default;
+
+        Assert.Equal(new DateOnly(2026, 11, 20), vm.DueOn);
+    }
+
+    [Fact]
+    public async Task Dates_DueDateOfNoMeaning_IsReplacedBeforeItCanBeSaved()
+    {
+        var vm = await NewEditorAsync();
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+
+        vm.DueOn = default;
+        vm.IssuedOn = default;
+
+        Assert.Equal(Today, vm.IssuedOn);
+        Assert.True(vm.DueOn.Year >= 1900);
+    }
+
+    [Fact]
+    public async Task Dates_ChangingThePeriodAfterSettingThem_KeepsThem()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+
+        vm.PreviousPeriodCommand.Execute(null);
+        vm.NextPeriodCommand.Execute(null);
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_PickedBeforeTheContract_AreKeptWhenTheContractIsChosen()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var vm = await NewEditorAsync();
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+        vm.DueOn = Due;
+
+        _kit.Kit.Dialogs.ChooseScript = options => options.Contains(contract.Title) ? contract.Title : null;
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_OneOffExpense_AreSaved()
+    {
+        var vm = await NewEditorAsync();
+        vm.SelectedTypeIndex = 1;
+        _kit.Kit.Dialogs.ChooseScript = options => options.FirstOrDefault(o => o.Contains("ColdWater", StringComparison.Ordinal));
+        await vm.ChooseCategoryCommand.ExecuteAsync(null);
+        vm.BillTitle = "Boiler repair";
+
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+        vm.DueOn = Due;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_OfASavedBill_CanBeChangedAndSavedAgain()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
+        var vm = await OpenAsync(bill.Id);
+
+        vm.HasIssuedOn = true;
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+        vm.DueOn = Due;
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal((Issued, Due), (saved.IssuedOn, saved.DueOn));
+    }
+
+    [Fact]
+    public async Task Dates_DueBeforeIssued_IsAnError_AndItGoesWhenEitherDateIsCorrected()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+        vm.Amounts.GrossText = "46,02";
+        vm.IssuedOn = Issued;
+        vm.DueOn = new DateOnly(2026, 9, 30);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.NotEqual(string.Empty, vm.DueOnError);
+        Assert.Empty(_kit.Bills.Saved);
+
+        vm.DueOn = Due;
+
+        Assert.Equal(string.Empty, vm.DueOnError);
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.Equal(Due, Assert.Single(_kit.Bills.Saved).DueOn);
+    }
+
+    [Fact]
+    public async Task Dates_TheErrorAlsoGoes_WhenTheIssueDateIsCorrected()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+        vm.Amounts.GrossText = "46,02";
+        vm.IssuedOn = Issued;
+        vm.DueOn = new DateOnly(2026, 9, 30);
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.NotEqual(string.Empty, vm.DueOnError);
+
+        vm.IssuedOn = new DateOnly(2026, 9, 1);
+
+        Assert.Equal(string.Empty, vm.DueOnError);
     }
 
     // ---- Loading a saved bill -------------------------------------------------------------------------------------

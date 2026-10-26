@@ -80,6 +80,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private bool _applying;
     private bool _periodTouched;
     private bool _dueTouched;
+
+    /// <summary>True once the user picked the due date himself (as opposed to a default taken from the contract).</summary>
+    private bool _dueDatePicked;
     private bool _categoryTouched;
     private bool _supplierTouched;
     private int _calculationVersion;
@@ -497,6 +500,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             _categoryTouched = !IsNew;
             _supplierTouched = !IsNew;
             _dueTouched = !IsNew;
+            _dueDatePicked = false;
             _periodTouched = !IsNew;
 
             if (existing is null)
@@ -591,6 +595,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         for (var i = 0; i < QuantityRows.Count; i++)
         {
             QuantityRows[i].ErrorText = Errors.GetValueOrDefault(QuantityField(i), string.Empty);
+            QuantityRows[i].AmountErrorText = Errors.GetValueOrDefault(QuantityAmountField(i), string.Empty);
         }
     }
 
@@ -680,6 +685,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             {
                 case nameof(HasDueOn) or nameof(DueOn):
                     _dueTouched = true;
+                    _dueDatePicked |= name == nameof(DueOn);
                     break;
                 case nameof(SelectedCategory):
                     _categoryTouched = true;
@@ -751,6 +757,98 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         UpdateComparison();
     }
 
+    // The date pickers cannot show a date before 1900, so such a value is never one the user saw.
+    private static bool IsUsable(DateOnly date) => date.Year >= 1900;
+
+    // A failed save leaves "due before issue date" under the due date; it must not outlive the edit that fixes it.
+    partial void OnIssuedOnChanged(DateOnly value)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        if (!IsUsable(value))
+        {
+            IssuedOn = _clock.Today;
+            return;
+        }
+
+        ClearError(nameof(Bill.DueOn));
+    }
+
+    partial void OnHasIssuedOnChanged(bool value)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        if (value && !IsUsable(IssuedOn))
+        {
+            IssuedOn = _clock.Today;
+        }
+
+        ClearError(nameof(Bill.DueOn));
+    }
+
+    partial void OnDueOnChanged(DateOnly value)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        if (!IsUsable(value))
+        {
+            SetDueOnQuietly(DefaultDueOn());
+        }
+
+        ClearError(nameof(Bill.DueOn));
+    }
+
+    partial void OnHasDueOnChanged(bool value)
+    {
+        if (_loading || _applying)
+        {
+            return;
+        }
+
+        // The picker behind the switch shows DueOn from the moment it appears; make that value a sensible one: the date
+        // of the contract, else the issue date. A date the user already picked is kept.
+        if (value && (!IsUsable(DueOn) || (!_dueDatePicked && DueOn < IssuedOn)))
+        {
+            SetDueOnQuietly(DefaultDueOn());
+        }
+
+        ClearError(nameof(Bill.DueOn));
+    }
+
+    private DateOnly DefaultDueOn()
+    {
+        if (!IsOneOff && _contract is not null && BillDefaults.DueDate(_contract, Period) is { } contractDue)
+        {
+            return contractDue;
+        }
+
+        return HasIssuedOn && IsUsable(IssuedOn) ? IssuedOn : _clock.Today;
+    }
+
+    /// <summary>Sets the due date as a default: it does not count as the user's own choice.</summary>
+    private void SetDueOnQuietly(DateOnly date)
+    {
+        var wasApplying = _applying;
+        _applying = true;
+        try
+        {
+            DueOn = date;
+        }
+        finally
+        {
+            _applying = wasApplying;
+        }
+    }
+
     partial void OnHasServicePeriodChanged(bool value)
     {
         if (value && !_loading && !_applying)
@@ -816,9 +914,16 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         var quantities = new List<BillQuantity>();
         for (var i = 0; i < QuantityRows.Count; i++)
         {
-            if (AmountEditor.ReadOptional(QuantityRows[i].Text, QuantityField(i), errors) is { } typed)
+            var typed = AmountEditor.ReadOptional(QuantityRows[i].Text, QuantityField(i), errors);
+            var amount = AmountEditor.ReadOptional(QuantityRows[i].AmountText, QuantityAmountField(i), errors);
+            if (typed is { } quantity)
             {
-                quantities.Add(new BillQuantity(QuantityRows[i].ComponentId, typed));
+                quantities.Add(new BillQuantity(QuantityRows[i].ComponentId, quantity, amount));
+            }
+            else if (amount is not null && string.IsNullOrWhiteSpace(QuantityRows[i].Text))
+            {
+                // The amount belongs to a quantity: without one it would be lost silently.
+                errors.Add(new(CommonErrorCodes.BillAmountNeedsQuantity, QuantityAmountField(i)));
             }
         }
 

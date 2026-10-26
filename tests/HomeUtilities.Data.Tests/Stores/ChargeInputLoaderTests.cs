@@ -91,6 +91,50 @@ public class ChargeInputLoaderTests
     }
 
     [Fact]
+    public async Task Amounts_typed_on_the_bills_are_loaded_with_their_quantity_and_a_newer_bill_without_amount_drops_them()
+    {
+        // Heat 0.233 MWh * 70.00 = 16.31 net; the first bill says 16.35, the newer one has no amount again.
+        using var test = new TestDb();
+        var (propertyId, supplierId, categoryId) = await StoreTests.PrepareContractOwnersAsync(test);
+        var contract = StoreTests.NewContract(propertyId, supplierId, categoryId, "Heat");
+        await new ContractStore(test.Factory).SaveAsync(contract);
+        var heat = new TariffComponent
+        {
+            ContractId = contract.Id, Name = "Heat", ChargeKind = ServiceKind.Heating, Basis = ChargeBasis.QuantityFromBill,
+            QuantityUnit = MeterUnit.MWh, VatCode = "LV-REDUCED",
+        };
+        heat.Rates.Add(new TariffRate { ComponentId = heat.Id, ValidFrom = new DateOnly(2026, 1, 1), Price = 70m, Currency = Currency.EUR });
+        await new TariffStore(test.Factory).SaveAsync(heat);
+        await SeedVatAsync(test);
+        var bills = new BillStore(test.Factory);
+        var loader = new ChargeInputLoader(test.Factory);
+
+        var first = Bill.CreateFor(contract, Sep2026, test.Clock);
+        first.Gross = 10m;
+        first.BillQuantities = [new BillQuantity(heat.Id, 0.233m, 16.35m)];
+        await bills.SaveAsync(first);
+        test.Clock.UtcNow = test.Clock.UtcNow.AddMinutes(1);
+
+        var withAmount = await loader.LoadAsync(contract.Id, Sep2026);
+
+        Assert.Equal(0.233m, withAmount!.QuantitiesFromBill![heat.Id]);
+        Assert.Equal(16.35m, withAmount.AmountsFromBill![heat.Id]);
+        var charge = ChargeCalculator.Calculate(withAmount);
+        Assert.Empty(charge.Warnings);
+        Assert.Equal(16.35m, Assert.Single(charge.Lines).Net);
+
+        var second = Bill.CreateFor(contract, Sep2026, test.Clock);
+        second.Gross = 10m;
+        second.BillQuantities = [new BillQuantity(heat.Id, 0.233m)];
+        await bills.SaveAsync(second);
+
+        var withoutAmount = await loader.LoadAsync(contract.Id, Sep2026);
+
+        Assert.Empty(withoutAmount!.AmountsFromBill!);
+        Assert.Equal(16.31m, Assert.Single(ChargeCalculator.Calculate(withoutAmount).Lines).Net);
+    }
+
+    [Fact]
     public async Task Missing_contract_returns_null()
     {
         using var test = new TestDb();

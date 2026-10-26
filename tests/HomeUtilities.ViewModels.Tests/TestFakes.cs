@@ -790,7 +790,27 @@ internal sealed class FakeChargeInputLoader(ContractTestKit kit) : IChargeInputL
             [.. kit.Meters.Stored.Where(m => m.PropertyId == contract.PropertyId)],
             kit.VatRates.Stored,
             period,
-            QuantitiesOfBills(contractId, period)));
+            QuantitiesOfBills(contractId, period),
+            AmountsOfBills(contractId, period)));
+    }
+
+    /// <summary>What the real loader does: the line amounts of the newest bill that has the quantity; a newer bill without an amount drops it.</summary>
+    private Dictionary<Guid, decimal> AmountsOfBills(Guid contractId, YearMonth period)
+    {
+        var amounts = new Dictionary<Guid, decimal>();
+        foreach (var quantity in kit.Bills.All.Where(b => b.ContractId == contractId && b.Period == period).SelectMany(b => b.BillQuantities))
+        {
+            if (quantity.Amount is { } amount)
+            {
+                amounts[quantity.ComponentId] = amount;
+            }
+            else
+            {
+                amounts.Remove(quantity.ComponentId);
+            }
+        }
+
+        return amounts;
     }
 
     /// <summary>What the real loader does: the quantities typed on the contract's bills of the period, the newest bill winning.</summary>

@@ -47,10 +47,20 @@ public sealed class ChargeInputLoader(IDbContextFactory<HomeUtilitiesDbContext> 
             .Where(b => b.ContractId == contractId && b.Period == period)
             .OrderBy(b => b.CreatedAt)
             .ToListAsync(ct);
+        // The amount belongs to the quantity of the same bill, so a newer bill without an amount drops an older amount.
         var quantities = new Dictionary<Guid, decimal>();
+        var amounts = new Dictionary<Guid, decimal>();
         foreach (var quantity in quantityBills.SelectMany(b => b.BillQuantities))
         {
             quantities[quantity.ComponentId] = quantity.Quantity;
+            if (quantity.Amount is { } amount)
+            {
+                amounts[quantity.ComponentId] = amount;
+            }
+            else
+            {
+                amounts.Remove(quantity.ComponentId);
+            }
         }
 
         return new ChargeInput(
@@ -61,6 +71,7 @@ public sealed class ChargeInputLoader(IDbContextFactory<HomeUtilitiesDbContext> 
             [.. meters.Select(MeterStore.SortChildren)],
             vatCatalog,
             period,
-            quantities);
+            quantities,
+            amounts);
     }
 }

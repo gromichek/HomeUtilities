@@ -132,6 +132,7 @@ public static class ChargeCalculator
         }
 
         decimal quantity;
+        decimal? billAmount = null;
         var complete = true;
         switch (component.Basis)
         {
@@ -175,19 +176,51 @@ public static class ChargeCalculator
                 }
 
                 quantity = MoneyMath.RoundQuantity(typed);
+                if (input.AmountsFromBill is not null && input.AmountsFromBill.TryGetValue(component.Id, out var typedAmount))
+                {
+                    // The supplier prints the quantity rounded but bills the unrounded one: the printed amount wins.
+                    billAmount = typedAmount;
+                    if (!AmountMatches(typedAmount, quantity, rate.Price))
+                    {
+                        warnings.Add(new ChargeWarning(ChargeWarningCodes.AmountMismatch, component.Id));
+                    }
+                }
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(component), component.Basis, "Unsupported charge basis.");
         }
 
-        return [Priced(input, component, rate, quantity, rate.Price, vatPercent, complete, consumption)];
+        return [Priced(input, component, rate, quantity, rate.Price, vatPercent, complete, consumption, billAmount)];
     }
 
-    private static ChargeLine Priced(ChargeInput input, TariffComponent component, TariffRate rate, decimal quantity, decimal unitPrice, decimal vatPercent, bool complete, IReadOnlyList<ConsumptionResult> consumption)
+    /// <summary>
+    /// True if the amount typed from the bill is what quantity × price gives for any unrounded quantity within half a unit
+    /// of the last printed decimal (±0.0005), widened by one cent for rounding of the amount.
+    /// </summary>
+    private static bool AmountMatches(decimal amount, decimal quantity, decimal price)
     {
-        var amount = quantity * unitPrice;
+        const decimal HalfStep = 0.0005m;
+        const decimal Cent = 0.01m;
+        var a = (quantity - HalfStep) * price;
+        var b = (quantity + HalfStep) * price;
+        return amount >= Math.Min(a, b) - Cent && amount <= Math.Max(a, b) + Cent;
+    }
+
+    private static ChargeLine Priced(
+        ChargeInput input,
+        TariffComponent component,
+        TariffRate rate,
+        decimal quantity,
+        decimal unitPrice,
+        decimal vatPercent,
+        bool complete,
+        IReadOnlyList<ConsumptionResult> consumption,
+        decimal? billAmount = null)
+    {
+        var amount = billAmount ?? quantity * unitPrice;
         var split = rate.PriceIncludesVat ? MoneyMath.FromGross(amount, vatPercent) : MoneyMath.FromNet(amount, vatPercent);
-        return Line(input, component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption, rate.PriceIncludesVat);
+        return Line(input, component, quantity, unitPrice, split, vatPercent, fromBill: false, complete, consumption, rate.PriceIncludesVat, billAmount is not null);
     }
 
     private static ChargeLine Line(
@@ -200,7 +233,8 @@ public static class ChargeCalculator
         bool fromBill,
         bool complete,
         IReadOnlyList<ConsumptionResult> consumption,
-        bool priceIncludesVat = false) =>
+        bool priceIncludesVat = false,
+        bool amountFromBill = false) =>
         new(
             component.Id,
             component.Name,
@@ -216,7 +250,8 @@ public static class ChargeCalculator
             fromBill,
             complete,
             consumption,
-            priceIncludesVat);
+            priceIncludesVat,
+            amountFromBill);
 
     private static decimal? TryResolveVat(TariffComponent component, IReadOnlyCollection<VatRate> catalog, DateOnly date)
     {
