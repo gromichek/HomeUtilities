@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-020a | Quantity from the bill (heating), VAT on the total | Ready | | after T-020; owner decision 2026-10-25 |
+| T-021 | Equalized plans + settlement, tax installments | Ready | | |
 
 ## Done
 
@@ -44,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-015 | Meters screens, contract links, replacement wizard | 2026-10-23, #45 | 1128 tests. Replacement saved atomically; meter + links saved in two steps otherwise. |
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
+| T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
 | — | Bills and Payments: period filter (all years / year / month) | 2026-10-26, #91 | Sonnet helper; shared `PeriodFilter`. |
 | T-020 | Payments, allocation, prepayment, balance | 2026-10-26, #89 | `PaymentRules` (quick flag cleared), `PrepaymentService` uses only the contract's own payments. |
 | T-019 | Bills, comparison, Paid + Undo, in-app snackbar | 2026-10-25, #86 | Snackbar via page ControlTemplate (watch on devices; fallback: host in AppShell). Comparison skipped when any line is "from bill". Bill delete releases allocations (money stays as prepayment). |
@@ -90,7 +91,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #38–#48 | Readings, meters, contracts, suppliers (Windows + Android) | Works. **Bug**: list selection highlight stays on previously tapped items (Windows) → hotfix. Request: accept `,` and `.` everywhere — already the case via `DecimalInput`, documented. |
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
-| | #89 + #91 | T-020 payments; month filter on Bills and Payments | pending |
+| | #93 | T-020a: heating preset with quantities from the bill (owner's real bill), VAT on total | pending |
+| | #91 | Month filter on Bills and Payments | pending |
+| 2026-10-26 | #89 | T-020 payments | OK |
 | 2026-10-26 | #86 | T-019 bills, Paid + Undo, snackbar | OK. Request: month filter (plus whole year / all years) → Sonnet helper for Bills and Payments |
 | 2026-10-25 | #81 + #82 | T-018 charges screen; VAT from rounded net | OK |
 | 2026-10-25 | #79 | T-017e: VAT code reuse, arrows, double tap | OK |
