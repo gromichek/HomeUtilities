@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
@@ -47,6 +48,46 @@ public class ChargeInputLoaderTests
         Assert.True(charge.IsComplete);
         Assert.Empty(charge.Warnings);
         Assert.Equal((45.66m, 9.59m, 55.25m), (charge.TotalNet, charge.TotalVat, charge.TotalGross));
+    }
+
+    [Fact]
+    public async Task Quantities_typed_on_the_bills_of_the_period_are_loaded_and_the_newest_bill_wins()
+    {
+        // Heat 0.210 MWh * 70.00 = 14.70 net; VAT 12% = 1.764 -> 1.76; gross 16.46 (older bill said 0.100 MWh)
+        using var test = new TestDb();
+        var (propertyId, supplierId, categoryId) = await StoreTests.PrepareContractOwnersAsync(test);
+        var contract = StoreTests.NewContract(propertyId, supplierId, categoryId, "Heat");
+        await new ContractStore(test.Factory).SaveAsync(contract);
+        var heat = new TariffComponent
+        {
+            ContractId = contract.Id, Name = "Heat", ChargeKind = ServiceKind.Heating, Basis = ChargeBasis.QuantityFromBill,
+            QuantityUnit = MeterUnit.MWh, VatCode = "LV-REDUCED",
+        };
+        heat.Rates.Add(new TariffRate { ComponentId = heat.Id, ValidFrom = new DateOnly(2026, 1, 1), Price = 70m, Currency = Currency.EUR });
+        await new TariffStore(test.Factory).SaveAsync(heat);
+        await SeedVatAsync(test);
+
+        var bills = new BillStore(test.Factory);
+        foreach (var (quantity, period) in new[] { (0.100m, Sep2026), (0.210m, Sep2026), (0.500m, Sep2026.AddMonths(1)) })
+        {
+            var bill = Bill.CreateFor(contract, period, test.Clock);
+            bill.Gross = 10m;
+            bill.BillQuantities = [new BillQuantity(heat.Id, quantity)];
+            await bills.SaveAsync(bill);
+            test.Clock.UtcNow = test.Clock.UtcNow.AddMinutes(1);
+        }
+
+        var input = await new ChargeInputLoader(test.Factory).LoadAsync(contract.Id, Sep2026);
+
+        Assert.NotNull(input);
+        Assert.Equal(0.210m, input.QuantitiesFromBill![heat.Id]);
+        var charge = ChargeCalculator.Calculate(input);
+        Assert.True(charge.IsComplete);
+        Assert.Equal((14.70m, 1.76m, 16.46m), (charge.TotalNet, charge.TotalVat, charge.TotalGross));
+
+        var withoutBill = await new ChargeInputLoader(test.Factory).LoadAsync(contract.Id, Sep2026.AddMonths(-1));
+        Assert.Empty(withoutBill!.QuantitiesFromBill!);
+        Assert.False(ChargeCalculator.Calculate(withoutBill).IsComplete);
     }
 
     [Fact]

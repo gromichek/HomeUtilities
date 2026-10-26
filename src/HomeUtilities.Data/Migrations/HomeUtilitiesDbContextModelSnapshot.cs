@@ -78,6 +78,10 @@ namespace HomeUtilities.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BillQuantities")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CalculatedSnapshot")
                         .HasColumnType("TEXT");
 
@@ -468,6 +472,9 @@ namespace HomeUtilities.Data.Migrations
 
                     b.Property<DateOnly?>("ValidTo")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("VatCalculation")
+                        .HasColumnType("INTEGER");
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "PaymentDetails", "HomeUtilities.Core.Domain.Contract.PaymentDetails#PaymentDetails", b1 =>
                         {
@@ -919,6 +926,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<string>("QuantityParameterName")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("QuantityUnit")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("RegisterKinds")
                         .IsRequired()
