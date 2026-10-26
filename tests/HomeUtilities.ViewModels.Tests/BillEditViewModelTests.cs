@@ -1075,6 +1075,181 @@ public class BillEditViewModelTests : IDisposable
         Assert.Empty(vm.AttachmentRows);
     }
 
+    // ---- Issue and due dates --------------------------------------------------------------------------------------
+
+    private static readonly DateOnly Issued = new(2026, 10, 1);
+    private static readonly DateOnly Due = new(2026, 10, 31);
+
+    private async Task AssertSavedWithOwnersDatesAsync(BillEditViewModel vm)
+    {
+        vm.Amounts.GrossText = "46,02";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.DueOnError);
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal((Issued, Due), (saved.IssuedOn, saved.DueOn));
+    }
+
+    [Fact]
+    public async Task Dates_IssuedThenDue_AreSaved_ForAContractWithADueDay()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_DueThenIssued_AreSaved()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+
+        vm.DueOn = Due;
+        vm.IssuedOn = Issued;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_ContractWithoutDueDay_SwitchingTheDueDateOnAfterPickingIssued_StartsWithAUsableDate()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false, dueDay: null));
+        Assert.False(vm.HasDueOn);
+
+        vm.IssuedOn = new DateOnly(2026, 11, 15);
+        vm.HasDueOn = true;
+
+        // the picker appears with a date that is not before the issue date (and never 01.01.0001)
+        Assert.Equal(new DateOnly(2026, 11, 15), vm.DueOn);
+
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_AnEmptyDueDate_IsReplacedByTheDueDateOfTheContract()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+
+        // 01.01.0001 would be shown as 01.01.1900 by the picker; the contract says the 20th of the month after the period
+        vm.DueOn = default;
+
+        Assert.Equal(new DateOnly(2026, 11, 20), vm.DueOn);
+    }
+
+    [Fact]
+    public async Task Dates_DueDateOfNoMeaning_IsReplacedBeforeItCanBeSaved()
+    {
+        var vm = await NewEditorAsync();
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+
+        vm.DueOn = default;
+        vm.IssuedOn = default;
+
+        Assert.Equal(Today, vm.IssuedOn);
+        Assert.True(vm.DueOn.Year >= 1900);
+    }
+
+    [Fact]
+    public async Task Dates_ChangingThePeriodAfterSettingThem_KeepsThem()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+
+        vm.PreviousPeriodCommand.Execute(null);
+        vm.NextPeriodCommand.Execute(null);
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_PickedBeforeTheContract_AreKeptWhenTheContractIsChosen()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var vm = await NewEditorAsync();
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+        vm.DueOn = Due;
+
+        _kit.Kit.Dialogs.ChooseScript = options => options.Contains(contract.Title) ? contract.Title : null;
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_OneOffExpense_AreSaved()
+    {
+        var vm = await NewEditorAsync();
+        vm.SelectedTypeIndex = 1;
+        _kit.Kit.Dialogs.ChooseScript = options => options.FirstOrDefault(o => o.Contains("ColdWater", StringComparison.Ordinal));
+        await vm.ChooseCategoryCommand.ExecuteAsync(null);
+        vm.BillTitle = "Boiler repair";
+
+        vm.IssuedOn = Issued;
+        vm.HasDueOn = true;
+        vm.DueOn = Due;
+
+        await AssertSavedWithOwnersDatesAsync(vm);
+    }
+
+    [Fact]
+    public async Task Dates_OfASavedBill_CanBeChangedAndSavedAgain()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m);
+        var vm = await OpenAsync(bill.Id);
+
+        vm.HasDueOn = true;
+        vm.IssuedOn = Issued;
+        vm.DueOn = Due;
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal((Issued, Due), (saved.IssuedOn, saved.DueOn));
+    }
+
+    [Fact]
+    public async Task Dates_DueBeforeIssued_IsAnError_AndItGoesWhenEitherDateIsCorrected()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+        vm.Amounts.GrossText = "46,02";
+        vm.IssuedOn = Issued;
+        vm.DueOn = new DateOnly(2026, 9, 30);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.NotEqual(string.Empty, vm.DueOnError);
+        Assert.Empty(_kit.Bills.Saved);
+
+        vm.DueOn = Due;
+
+        Assert.Equal(string.Empty, vm.DueOnError);
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.Equal(Due, Assert.Single(_kit.Bills.Saved).DueOn);
+    }
+
+    [Fact]
+    public async Task Dates_TheErrorAlsoGoes_WhenTheIssueDateIsCorrected()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract(tariff: false));
+        vm.Amounts.GrossText = "46,02";
+        vm.IssuedOn = Issued;
+        vm.DueOn = new DateOnly(2026, 9, 30);
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.NotEqual(string.Empty, vm.DueOnError);
+
+        vm.IssuedOn = new DateOnly(2026, 9, 1);
+
+        Assert.Equal(string.Empty, vm.DueOnError);
+    }
+
     // ---- Loading a saved bill -------------------------------------------------------------------------------------
 
     [Fact]
