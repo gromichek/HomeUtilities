@@ -45,7 +45,7 @@ public static class EqualizedPlanValidator
         {
             if (active[i - 1].ValidTo is not { } previousEnd || previousEnd >= active[i].ValidFrom)
             {
-                errors.Add(new(ErrorCodes.EqualizedPlanOverlap, nameof(EqualizedPlan.ValidFrom), [active[i].ValidFrom]));
+                errors.Add(new(ErrorCodes.EqualizedPlanOverlap, nameof(EqualizedPlan.ValidFrom)));
             }
         }
 

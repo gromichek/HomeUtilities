@@ -17,7 +17,13 @@ namespace HomeUtilities.ViewModels;
 /// <summary>Editor of one contract of a property. It is a page in every layout; see <see cref="Routes.ContractEdit"/>.</summary>
 public sealed partial class ContractEditViewModel : PaneEditorViewModel
 {
-    protected override HelpTopic? GuideTopic => HelpTopic.Contracts;
+    /// <summary>The "?" opens the section of the billing mode: equalized payments, property tax, else the contracts.</summary>
+    protected override HelpTopic? GuideTopic => SelectedBillingMode?.Value switch
+    {
+        BillingMode.Equalized => HelpTopic.EqualizedPayments,
+        BillingMode.Assessed => HelpTopic.PropertyTax,
+        _ => HelpTopic.Contracts,
+    };
 
     private const string DetailsPrefix = "PaymentDetails.";
 

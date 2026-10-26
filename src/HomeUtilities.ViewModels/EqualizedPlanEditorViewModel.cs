@@ -64,7 +64,7 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
         ValidFrom = existing?.ValidFrom ?? YearMonth.From(clock.Today).AddMonths(1).FirstDay;
         HasValidTo = existing?.ValidTo is not null;
         ValidTo = existing?.ValidTo ?? ValidFrom;
-        AmountText = existing is null ? string.Empty : DecimalInput.Format(existing.MonthlyAmount, CultureInfo.CurrentCulture, 2);
+        AmountText = existing is null ? string.Empty : AmountEditor.FormatMoney(existing.MonthlyAmount);
         Note = existing?.Notes ?? string.Empty;
         RefreshTexts();
     }

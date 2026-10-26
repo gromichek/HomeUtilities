@@ -309,7 +309,7 @@ public static class ErrorCodes
     /// <summary>The end date of an equalized plan is before its start date.</summary>
     public const string EqualizedPlanValidToBeforeValidFrom = "equalized_plan.valid_to_before_valid_from";
 
-    /// <summary>An equalized plan overlaps the previous one; Args: the start date of the later plan.</summary>
+    /// <summary>An equalized plan overlaps the previous one; reported on the later plan.</summary>
     public const string EqualizedPlanOverlap = "equalized_plan.overlap";
 
     /// <summary>The yearly property tax is not above zero.</summary>

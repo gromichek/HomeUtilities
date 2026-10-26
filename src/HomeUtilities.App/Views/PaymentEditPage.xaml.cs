@@ -23,9 +23,7 @@ public partial class PaymentEditPage : EditorPageBase
         }
 
         payment.PresetBillId = ReadGuid(query, EditorNavigation.BillIdParameter);
-        payment.PresetBillIds = query.TryGetValue(EditorNavigation.BillIdsParameter, out var ids) && ids is string text
-            ? [.. text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(t => Guid.TryParse(t, out var id) ? id : Guid.Empty).Where(id => id != Guid.Empty)]
-            : [];
+        payment.PresetBillIds = ReadGuids(query, EditorNavigation.BillIdsParameter);
         payment.PresetContractId = ReadGuid(query, EditorNavigation.ContractIdParameter);
         payment.PresetPropertyId = ReadGuid(query, EditorNavigation.PropertyIdParameter);
     }
@@ -39,4 +37,11 @@ public partial class PaymentEditPage : EditorPageBase
                 _ => null,
             }
             : null;
+
+    private static List<Guid> ReadGuids(IDictionary<string, object> query, string key) =>
+        query.TryGetValue(key, out var value) && value is string text
+            ? [.. text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(part => Guid.TryParse(part, out var id) ? id : Guid.Empty)
+                .Where(id => id != Guid.Empty)]
+            : [];
 }
