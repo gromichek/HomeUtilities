@@ -194,7 +194,7 @@ internal sealed class BillTestKit
     };
 
     public BillEditViewModel CreateEditor() =>
-        new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, Kit.ChargeLoader, Kit.Attachments,
+        new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, Kit.ChargeLoader, Kit.Plans, Kit.Attachments,
             Kit.Media, Kit.Viewer, QuickPay, Kit.Prepayments, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog);
 
     public BillsViewModel CreateBills(ISectionSelectionMemory? memory = null) =>

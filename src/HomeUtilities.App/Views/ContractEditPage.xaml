@@ -229,6 +229,104 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- 3a2. Equalized plan: the fixed monthly amount over time and the settlement the readings lead to (billing mode Equalized). -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowEqualizedCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding PlanHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddPlanCommand}"
+                                ToolTipProperties.Text="{Binding AddPlanText}"
+                                SemanticProperties.Description="{Binding AddPlanText}" />
+                    </Grid>
+                    <Label Text="{Binding PlanHintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding PlanSaveFirstText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowPlanSaveFirst}" />
+                    <Label Text="{Binding PlanEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowPlanEmpty}" />
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding PlanRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EqualizedPlanRowViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding EditCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding DisplayText}" FontAttributes="Bold" />
+                                        <Label Text="{Binding NoteText}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasNote}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
+                                            Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                            ToolTipProperties.Text="{Binding DeleteText}"
+                                            SemanticProperties.Description="{Binding DeleteText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Label Text="{Binding PlanSummaryText}" FontAttributes="Bold" IsVisible="{Binding ShowSettlementSummary}" />
+                    <Button Text="{Binding ShowSettlementText}" Command="{Binding ShowSettlementCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            IsVisible="{Binding ShowSettlementSummary}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 3a3. Tax by year: the yearly property tax in installments (billing mode Assessed). -->
+            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowTaxCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding TaxHeader}" Style="{StaticResource SectionHeader}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddTaxYearCommand}"
+                                ToolTipProperties.Text="{Binding AddTaxYearText}"
+                                SemanticProperties.Description="{Binding AddTaxYearText}" />
+                    </Grid>
+                    <Label Text="{Binding TaxHintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding TaxSaveFirstText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowTaxSaveFirst}" />
+                    <Label Text="{Binding TaxEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowTaxEmpty}" />
+
+                    <VerticalStackLayout Spacing="16" BindableLayout.ItemsSource="{Binding TaxYears}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TaxYearViewModel">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding HeaderText}" FontAttributes="Bold" />
+                                    <Label Text="{Binding SummaryText}" Style="{StaticResource MutedLabel}" />
+                                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Installments}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:TaxInstallmentRowViewModel">
+                                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                                                    </Grid.GestureRecognizers>
+                                                    <Label Grid.Row="0" Grid.Column="0" Text="{Binding TitleText}" VerticalOptions="Center" />
+                                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding AmountText}" FontAttributes="Bold" VerticalOptions="Center" />
+                                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding BadgeText}" FontSize="13"
+                                                           Style="{StaticResource MutedLabel}">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" x:DataType="vm:TaxInstallmentRowViewModel" Binding="{Binding IsBadgePaid}" Value="True">
+                                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger TargetType="Label" x:DataType="vm:TaxInstallmentRowViewModel" Binding="{Binding IsBadgePartial}" Value="True">
+                                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger TargetType="Label" x:DataType="vm:TaxInstallmentRowViewModel" Binding="{Binding IsBadgeOverdue}" Value="True">
+                                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                    <Button Text="{Binding PayYearText}" Command="{Binding PayYearCommand}"
+                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                            IsVisible="{Binding CanPayYear}" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- 3b. Bills: the latest bills of the contract (a saved contract only). -->
             <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowBillsCard}">
                 <VerticalStackLayout Spacing="8">

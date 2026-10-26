@@ -93,4 +93,44 @@ public class EqualizedPlanTests
     [Fact]
     public void Deleted_plans_are_ignored_by_AmountFor() =>
         Assert.Null(EqualizedPlans.AmountFor([Plan("2026-06-01", 40m, deleted: true)], new YearMonth(2026, 7)));
+
+    [Fact]
+    public void A_new_plan_closes_the_open_ended_predecessor_the_day_before()
+    {
+        var current = Plan("2026-06-01", 40m);
+        var added = Plan("2026-12-01", 45m);
+
+        Assert.Equal([current.Id], EqualizedPlans.PredecessorsToClose([current], added).Select(p => p.Id));
+        Assert.True(EqualizedPlans.ValidateWith([current], added).IsValid);
+    }
+
+    [Fact]
+    public void A_predecessor_that_already_ended_earlier_stays_as_it_is()
+    {
+        var ended = Plan("2026-01-01", 35m, "2026-05-31");
+        var added = Plan("2026-06-01", 40m);
+
+        Assert.Empty(EqualizedPlans.PredecessorsToClose([ended], added));
+        Assert.True(EqualizedPlans.ValidateWith([ended], added).IsValid);
+    }
+
+    [Fact]
+    public void A_plan_starting_inside_a_later_plan_overlaps_it()
+    {
+        var later = Plan("2026-12-01", 45m);
+        var added = Plan("2026-06-01", 40m, "2026-12-31");
+
+        var error = Assert.Single(EqualizedPlans.ValidateWith([later], added).Errors);
+        Assert.Equal(ErrorCodes.EqualizedPlanOverlap, error.Code);
+    }
+
+    [Fact]
+    public void Editing_a_plan_ignores_its_own_old_version()
+    {
+        var existing = Plan("2026-06-01", 40m);
+        var edited = new EqualizedPlan { Id = existing.Id, ValidFrom = existing.ValidFrom, MonthlyAmount = 42m };
+
+        Assert.Empty(EqualizedPlans.PredecessorsToClose([existing], edited));
+        Assert.True(EqualizedPlans.ValidateWith([existing], edited).IsValid);
+    }
 }

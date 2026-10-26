@@ -7,6 +7,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
@@ -28,6 +29,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     /// <summary>Navigation parameter (a <see cref="decimal"/>) with the calculated total shown as a hint in the Total field.</summary>
     public const string GrossParameter = "gross";
 
+    /// <summary>Navigation parameter (a <see cref="BillKind"/> name) with the kind a new bill starts with, e.g. <c>Settlement</c>.</summary>
+    public const string KindParameter = "kind";
+
     /// <summary>The properties that mark the editor dirty when the user changes them.</summary>
     private static readonly HashSet<string> DirtyFields =
     [
@@ -47,6 +51,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private readonly ICategoryStore _categoryStore;
     private readonly IPropertyStore _propertyStore;
     private readonly IChargeInputLoader _chargeLoader;
+    private readonly IEqualizedPlanStore _planStore;
     private readonly IAttachmentStore _attachmentStore;
     private readonly IMediaService _media;
     private readonly IFileViewer _viewer;
@@ -68,6 +73,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private ChargeInput? _input;
     private CalculatedCharge? _live;
     private CalculatedCharge? _snapshot;
+    private IReadOnlyList<EqualizedPlan> _plans = [];
+    private decimal? _planAmount;
+    private string _planDefaultText = string.Empty;
     private bool _loading;
     private bool _applying;
     private bool _periodTouched;
@@ -162,6 +170,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private string _calculatedText = string.Empty;
 
     [ObservableProperty]
+    private string _actualInfoText = string.Empty;
+
+    [ObservableProperty]
     private string _differenceText = string.Empty;
 
     [ObservableProperty]
@@ -244,6 +255,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         ICategoryStore categoryStore,
         IPropertyStore propertyStore,
         IChargeInputLoader chargeLoader,
+        IEqualizedPlanStore planStore,
         IAttachmentStore attachmentStore,
         IMediaService media,
         IFileViewer viewer,
@@ -264,6 +276,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         _categoryStore = categoryStore;
         _propertyStore = propertyStore;
         _chargeLoader = chargeLoader;
+        _planStore = planStore;
         _attachmentStore = attachmentStore;
         _media = media;
         _viewer = viewer;
@@ -301,6 +314,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     /// <summary>The period a new bill starts with.</summary>
     public YearMonth? PresetPeriod { get; set; }
 
+    /// <summary>The kind a new bill of a contract starts with instead of the one its billing mode suggests.</summary>
+    public BillKind? PresetKind { get; set; }
+
     /// <summary>The calculated total shown as a hint in the empty Total field.</summary>
     public decimal? PresetGross { get; set; }
 
@@ -315,7 +331,14 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     public bool IsKindEditable => !IsOneOff;
 
-    public bool ShowComparison => !IsOneOff && HasTariff;
+    public bool ShowComparison => !IsOneOff && (HasTariff || PlanMode);
+
+    /// <summary>An equalized bill of a contract with a plan: it is compared with the plan, the calculation is information.</summary>
+    public bool PlanMode => _planAmount is not null;
+
+    public string BasisLabel => PlanMode ? Texts.PlanLabel : Texts.CalculatedLabel;
+
+    public bool ShowActualInfo => ActualInfoText.Length > 0;
 
     public bool ShowQuantities => !IsOneOff && QuantityRows.Count > 0;
 
@@ -622,6 +645,10 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         {
             OnPropertyChanged(nameof(ShowSnapshotChanged));
         }
+        else if (name == nameof(ActualInfoText))
+        {
+            OnPropertyChanged(nameof(ShowActualInfo));
+        }
         else if (name == nameof(ComparisonNote))
         {
             OnPropertyChanged(nameof(ShowComparisonNote));
@@ -673,6 +700,22 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     }
 
     partial void OnConsumptionTextChanged(string value) => UpdateComparison();
+
+    partial void OnSelectedKindChanged(EnumOption? value)
+    {
+        if (_loading)
+        {
+            return;
+        }
+
+        UpdatePlanAmount();
+        if (IsNew)
+        {
+            ApplyPlanDefault();
+        }
+
+        UpdateComparison();
+    }
 
     partial void OnIsOneOffChanged(bool value)
     {

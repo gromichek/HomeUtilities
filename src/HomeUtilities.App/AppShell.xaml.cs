@@ -29,6 +29,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.BillsFor, typeof(BillsPage));
         Routing.RegisterRoute(Routes.PaymentEdit, typeof(PaymentEditPage));
         Routing.RegisterRoute(Routes.PaymentsFor, typeof(PaymentsPage));
+        Routing.RegisterRoute(Routes.EqualizedSettlement, typeof(EqualizedSettlementPage));
         BindingContext = viewModel;
         Navigating += OnNavigating;
     }

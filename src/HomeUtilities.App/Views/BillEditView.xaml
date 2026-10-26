@@ -227,8 +227,9 @@
                     <VerticalStackLayout Spacing="8">
                         <Label Text="{Binding Texts.ComparisonHeader}" Style="{StaticResource SectionHeader}" />
 
-                        <Label Text="{Binding Texts.CalculatedLabel}" Style="{StaticResource MutedLabel}" />
+                        <Label Text="{Binding BasisLabel}" Style="{StaticResource MutedLabel}" />
                         <Label Text="{Binding CalculatedText}" FontAttributes="Bold" />
+                        <Label Text="{Binding ActualInfoText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowActualInfo}" />
 
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDifference}">
                             <Label Text="{Binding Texts.DifferenceLabel}" Style="{StaticResource MutedLabel}" />

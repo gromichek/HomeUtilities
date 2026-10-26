@@ -5,7 +5,7 @@ namespace HomeUtilities.App.Views;
 
 /// <summary>
 /// Compact-layout payment editor page, see <see cref="EditorPageBase"/>. A new payment can start from a bill (<c>billId</c>: its
-/// contract, the open amount, allocated in full), a contract (<c>contractId</c>) or a property (<c>propertyId</c>).
+/// contract, the open amount, allocated in full), several bills (<c>billIds</c>, comma-separated, "Pay whole year"), a contract (<c>contractId</c>) or a property (<c>propertyId</c>).
 /// </summary>
 public partial class PaymentEditPage : EditorPageBase
 {
@@ -23,6 +23,9 @@ public partial class PaymentEditPage : EditorPageBase
         }
 
         payment.PresetBillId = ReadGuid(query, EditorNavigation.BillIdParameter);
+        payment.PresetBillIds = query.TryGetValue(EditorNavigation.BillIdsParameter, out var ids) && ids is string text
+            ? [.. text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(t => Guid.TryParse(t, out var id) ? id : Guid.Empty).Where(id => id != Guid.Empty)]
+            : [];
         payment.PresetContractId = ReadGuid(query, EditorNavigation.ContractIdParameter);
         payment.PresetPropertyId = ReadGuid(query, EditorNavigation.PropertyIdParameter);
     }

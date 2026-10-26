@@ -8,6 +8,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
@@ -37,6 +38,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     private readonly ISupplierStore _supplierStore;
     private readonly ICategoryStore _categoryStore;
     private readonly IChargeInputLoader _loader;
+    private readonly EqualizedSettlementService _equalized;
     private readonly IBillStore _billStore;
     private readonly IPaymentStore _paymentStore;
     private readonly IClock _clock;
@@ -50,6 +52,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
 
     private IReadOnlyList<Calculated> _calculated = [];
     private Dictionary<Guid, (Bill Bill, BillState State)> _billOfContract = [];
+    private Dictionary<Guid, EqualizedReport> _equalizedOfContract = [];
     private Guid? _selectedPropertyId;
     private Guid? _focusContractId;
     private bool _monthChosen;
@@ -116,6 +119,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         ISupplierStore supplierStore,
         ICategoryStore categoryStore,
         IChargeInputLoader loader,
+        EqualizedSettlementService equalized,
         IBillStore billStore,
         IPaymentStore paymentStore,
         IClock clock,
@@ -130,6 +134,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         _supplierStore = supplierStore;
         _categoryStore = categoryStore;
         _loader = loader;
+        _equalized = equalized;
         _billStore = billStore;
         _paymentStore = paymentStore;
         _clock = clock;
@@ -344,6 +349,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         {
             _calculated = [];
             _billOfContract = [];
+            _equalizedOfContract = [];
             Rebuild();
             return;
         }
@@ -382,7 +388,27 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
 
         _calculated = results;
         _billOfContract = await LoadBillsAsync(propertyId, period);
+        _equalizedOfContract = await LoadEqualizedAsync(active);
         Rebuild();
+    }
+
+    /// <summary>The settlement report of each equalized contract; a failing one is logged and left out.</summary>
+    private async Task<Dictionary<Guid, EqualizedReport>> LoadEqualizedAsync(IEnumerable<Contract> contracts)
+    {
+        var result = new Dictionary<Guid, EqualizedReport>();
+        foreach (var contract in contracts.Where(c => c.BillingMode == BillingMode.Equalized))
+        {
+            try
+            {
+                result[contract.Id] = await _equalized.LoadAsync(contract.Id);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _errorLog.Append($"{nameof(ChargesViewModel)}.{nameof(LoadEqualizedAsync)} (contract {contract.Id})", ex);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>The bill of each contract for the month (the first one entered) with its payment state.</summary>
@@ -432,6 +458,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
 
             var id = item.Contract.Id;
             ApplyBill(card, item.Contract, item.Charge);
+            ApplyEqualized(card, item.Contract, item.Charge);
             card.IsExpanded = _focusContractId == id || _expanded.GetValueOrDefault(id, IsWide);
             card.PropertyChanged += (_, e) =>
             {
@@ -446,6 +473,23 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         Cards = cards;
         FocusedCard = _focusContractId is { } focus ? cards.FirstOrDefault(c => c.ContractId == focus) : null;
         BuildTotals(cards);
+    }
+
+    /// <summary>The plan, the actual charge and the running difference since the last settlement of an equalized contract.</summary>
+    private void ApplyEqualized(ChargeCardViewModel card, Contract contract, CalculatedCharge? charge)
+    {
+        if (!_equalizedOfContract.TryGetValue(contract.Id, out var report) || report.Plans.Count == 0)
+        {
+            return;
+        }
+
+        var symbol = _localizer["Currency_Symbol_" + contract.Currency];
+        var plan = EqualizedPlans.AmountFor(report.Plans, Month);
+        card.EqualizedText = _localizer.Get(
+            "ChargesEqualizedLine",
+            plan is { } p ? BillText.Money(p, symbol) : "–",
+            charge is { IsComplete: true } ? BillText.Money(charge.TotalGross, symbol) : "–",
+            BillText.SignedMoney(report.Settlement.Expected, symbol));
     }
 
     /// <summary>The card's link to the month's bill, or the "Enter bill" button with the calculated total as a suggestion.</summary>

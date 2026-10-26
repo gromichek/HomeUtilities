@@ -947,4 +947,73 @@
   <data name="ChargeQuantityFromBillOf" xml:space="preserve"><value>{0} (from bill {1})</value></data>
   <data name="ChargeVatGroup" xml:space="preserve"><value>VAT {0} % of {1} = {2}</value></data>
   <data name="ChargeWarn_QuantityFromBill" xml:space="preserve"><value>Enter the quantity of «{0}» from the supplier's bill (Bills → Quantities from the bill).</value></data>
+  <data name="BillPlanLabel" xml:space="preserve"><value>Plan amount (equalized)</value></data>
+  <data name="BillActualByReadings" xml:space="preserve"><value>Actual by readings: {0}</value></data>
+  <data name="EqPlanHeader" xml:space="preserve"><value>Equalized plan</value></data>
+  <data name="EqPlanHint" xml:space="preserve"><value>The supplier bills the same amount every month; the difference to the real consumption is settled once a year. Enter the monthly amount, and again whenever it changes.</value></data>
+  <data name="EqPlanEmpty" xml:space="preserve"><value>No plan yet. Add the monthly amount from the supplier's letter (＋).</value></data>
+  <data name="EqPlanAdd" xml:space="preserve"><value>Add plan</value></data>
+  <data name="EqPlanSaveFirst" xml:space="preserve"><value>Save the contract first, then add the plan.</value></data>
+  <data name="EqShowSettlement" xml:space="preserve"><value>Show settlement</value></data>
+  <data name="EqPlanRow" xml:space="preserve"><value>from {0} — {1}/month</value></data>
+  <data name="EqPlanRowTo" xml:space="preserve"><value>{0} – {1} — {2}/month</value></data>
+  <data name="EqSummarySurcharge" xml:space="preserve"><value>Expected settlement: +{0} (surcharge) for {1}–{2}.</value></data>
+  <data name="EqSummaryRefund" xml:space="preserve"><value>Expected settlement: −{0} (refund) for {1}–{2}.</value></data>
+  <data name="EqSummaryZero" xml:space="preserve"><value>Expected settlement: 0 for {1}–{2}.</value></data>
+  <data name="EqSummaryIncomplete" xml:space="preserve"><value>({0} months without readings are not counted.)</value></data>
+  <data name="EqPlanNew" xml:space="preserve"><value>New plan</value></data>
+  <data name="EqPlanEdit" xml:space="preserve"><value>Edit plan</value></data>
+  <data name="EqPlanValidFrom" xml:space="preserve"><value>Valid from</value></data>
+  <data name="EqPlanHasValidTo" xml:space="preserve"><value>Valid to (leave off if it has no end date)</value></data>
+  <data name="EqPlanValidTo" xml:space="preserve"><value>Valid to</value></data>
+  <data name="EqPlanAmount" xml:space="preserve"><value>Monthly amount (total with VAT)</value></data>
+  <data name="EqPlanNote" xml:space="preserve"><value>Notes</value></data>
+  <data name="EqSettlementTitle" xml:space="preserve"><value>Settlement</value></data>
+  <data name="EqSettlementPageTitle" xml:space="preserve"><value>Settlement · {0}</value></data>
+  <data name="EqSettlementPeriod" xml:space="preserve"><value>Since the last settlement: {0}–{1}</value></data>
+  <data name="EqSettlementEmpty" xml:space="preserve"><value>There are no months to show yet.</value></data>
+  <data name="EqSettlementHint" xml:space="preserve"><value>Actual = what the readings cost at the tariff of the contract. Months without complete readings are not counted.</value></data>
+  <data name="EqColMonth" xml:space="preserve"><value>Month</value></data>
+  <data name="EqColBilled" xml:space="preserve"><value>Billed</value></data>
+  <data name="EqColActual" xml:space="preserve"><value>Actual</value></data>
+  <data name="EqColDifference" xml:space="preserve"><value>Differ.</value></data>
+  <data name="EqColRunning" xml:space="preserve"><value>Total</value></data>
+  <data name="EqEnterSettlementBill" xml:space="preserve"><value>Enter settlement bill</value></data>
+  <data name="EqPlanShort" xml:space="preserve"><value>Plan {0}</value></data>
+  <data name="EqReadingsMissing" xml:space="preserve"><value>Readings missing — open readings</value></data>
+  <data name="EqTotals" xml:space="preserve"><value>Billed {0} · actual by readings {1}</value></data>
+  <data name="EqWordsSurcharge" xml:space="preserve"><value>You will probably pay about {0} extra.</value></data>
+  <data name="EqWordsRefund" xml:space="preserve"><value>You will probably get about {0} back.</value></data>
+  <data name="EqWordsZero" xml:space="preserve"><value>Billed and actual are equal: no settlement is expected.</value></data>
+  <data name="EqIncomplete" xml:space="preserve"><value>{0} months without readings or prices are not counted. Enter the readings to complete the picture.</value></data>
+  <data name="ChargesEqualizedLine" xml:space="preserve"><value>Plan {0} · actual {1} · since last settlement {2}</value></data>
+  <data name="TaxHeader" xml:space="preserve"><value>Tax by year</value></data>
+  <data name="TaxHint" xml:space="preserve"><value>The municipality assesses the tax once a year and you pay it in installments. Enter the yearly amount: the app creates one bill per installment.</value></data>
+  <data name="TaxEmpty" xml:space="preserve"><value>No tax entered yet. Use ＋ to enter the yearly tax.</value></data>
+  <data name="TaxAddYear" xml:space="preserve"><value>Enter yearly tax</value></data>
+  <data name="TaxSaveFirst" xml:space="preserve"><value>Save the contract first, then enter the tax.</value></data>
+  <data name="TaxYearNew" xml:space="preserve"><value>Enter yearly tax</value></data>
+  <data name="TaxYearLabel" xml:space="preserve"><value>Year</value></data>
+  <data name="TaxYearAmount" xml:space="preserve"><value>Yearly amount</value></data>
+  <data name="TaxYearCount" xml:space="preserve"><value>Number of installments</value></data>
+  <data name="TaxYearDueDates" xml:space="preserve"><value>Due dates</value></data>
+  <data name="TaxYearDueDatesHint" xml:space="preserve"><value>The usual dates are filled in: 31.03, 15.05, 15.08 and 15.11. Change them if your tax notice says otherwise. Changing the year or the number of installments puts the usual dates back.</value></data>
+  <data name="TaxYearInstallmentNumber" xml:space="preserve"><value>Installment {0}</value></data>
+  <data name="TaxInstallmentRow" xml:space="preserve"><value>{0}/{1} · due {2}</value></data>
+  <data name="TaxYearHeader" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="TaxYearSummary" xml:space="preserve"><value>Paid {0} · remaining {1}</value></data>
+  <data name="TaxPayYear" xml:space="preserve"><value>Pay whole year</value></data>
+  <data name="TaxNothingToCreate" xml:space="preserve"><value>The tax for {0} is already paid by the installments you have. Nothing to create.</value></data>
+  <data name="TaxReplaceTitle" xml:space="preserve"><value>Replace installments?</value></data>
+  <data name="TaxReplaceMessage" xml:space="preserve"><value>Installments for {0} exist. Replace the unpaid ones? Installments with a payment are kept.</value></data>
+  <data name="TaxReplace" xml:space="preserve"><value>Replace</value></data>
+  <data name="TaxInstallmentTitle" xml:space="preserve"><value>Property tax {0}, installment {1} of {2}</value></data>
+  <data name="TaxCreated" xml:space="preserve"><value>{0} installments created for {1}.</value></data>
+  <data name="Error_equalized_plan_amount_not_positive" xml:space="preserve"><value>Enter a monthly amount above zero.</value></data>
+  <data name="Error_equalized_plan_valid_to_before_valid_from" xml:space="preserve"><value>The end date is before the start date.</value></data>
+  <data name="Error_equalized_plan_overlap" xml:space="preserve"><value>Another plan is valid on these days. Plans may not overlap.</value></data>
+  <data name="Error_tax_yearly_amount_not_positive" xml:space="preserve"><value>Enter a yearly amount above zero.</value></data>
+  <data name="Error_tax_installment_count_invalid" xml:space="preserve"><value>Choose 1, 2 or 4 installments.</value></data>
+  <data name="Error_tax_due_date_outside_year" xml:space="preserve"><value>The due date must be in {0}.</value></data>
+  <data name="Error_tax_due_dates_not_ascending" xml:space="preserve"><value>Each due date must be later than the one before.</value></data>
 </root>

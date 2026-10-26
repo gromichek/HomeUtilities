@@ -35,6 +35,7 @@ public sealed class BillEditTexts
         QuantitiesHint = localizer["BillQuantitiesHint"];
         ComparisonHeader = localizer["BillComparison"];
         CalculatedLabel = localizer["BillCalculatedLabel"];
+        PlanLabel = localizer["BillPlanLabel"];
         DifferenceLabel = localizer["BillDifferenceLabel"];
         ConsumptionLabel = localizer["BillConsumptionLabel"];
         MeteredLabel = localizer["BillMeteredLabel"];
@@ -127,6 +128,8 @@ public sealed class BillEditTexts
     public string ComparisonHeader { get; }
 
     public string CalculatedLabel { get; }
+
+    public string PlanLabel { get; }
 
     public string DifferenceLabel { get; }
 

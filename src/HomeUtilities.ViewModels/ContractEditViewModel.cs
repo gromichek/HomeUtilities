@@ -372,6 +372,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         ITariffStore tariffStore,
         IVatRateStore vatStore,
         IMeterStore meterStore,
+        IEqualizedPlanStore planStore,
+        EqualizedSettlementService settlementService,
         IBillStore billStore,
         IPaymentStore paymentStore,
         IClock clock,
@@ -392,6 +394,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _tariffStore = tariffStore;
         _vatStore = vatStore;
         _meterStore = meterStore;
+        _planStore = planStore;
+        _settlementService = settlementService;
         _billStore = billStore;
         _paymentStore = paymentStore;
         _clock = clock;
@@ -608,6 +612,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
 
             await LoadTariffAsync();
             await LoadBillsAsync();
+            await LoadEqualizedAsync();
+            await LoadTaxAsync();
             ClearErrors();
             RebuildLinks();
             RebuildFields();
@@ -628,6 +634,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         {
             await LoadTariffAsync();
             await LoadBillsAsync();
+            await LoadEqualizedAsync();
+            await LoadTaxAsync();
         }
     }
 
@@ -969,6 +977,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         Title = TitleText();
         FormatIban();
         await LoadBillsAsync();
+        await LoadEqualizedAsync();
+        await LoadTaxAsync();
     }
 
     protected override Task DeleteCoreAsync() => _store.DeleteAsync(_contract.Id);
@@ -1023,8 +1033,20 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             MarkDirty();
         }
 
+        if (name == nameof(SelectedBillingMode))
+        {
+            OnPropertyChanged(nameof(ShowEqualizedCard));
+            OnPropertyChanged(nameof(ShowTaxCard));
+        }
+
         if (name == nameof(IsNew))
         {
+            OnPropertyChanged(nameof(CanEditPlans));
+            OnPropertyChanged(nameof(ShowPlanSaveFirst));
+            OnPropertyChanged(nameof(ShowPlanEmpty));
+            OnPropertyChanged(nameof(ShowTaxEmpty));
+            OnPropertyChanged(nameof(CanEditTax));
+            OnPropertyChanged(nameof(ShowTaxSaveFirst));
             OnPropertyChanged(nameof(CanAddTariff));
             OnPropertyChanged(nameof(ShowTariffPresets));
             OnPropertyChanged(nameof(ShowTariffSaveFirst));
@@ -1127,6 +1149,17 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             BillsEmptyText = _localizer["BillBillsCardEmpty"];
             AllBillsText = _localizer["BillBillsCardAll"];
             AddBillText = _localizer["BillBillsCardAdd"];
+            PlanHeader = _localizer["EqPlanHeader"];
+            PlanHintText = _localizer["EqPlanHint"];
+            PlanEmptyText = _localizer["EqPlanEmpty"];
+            AddPlanText = _localizer["EqPlanAdd"];
+            PlanSaveFirstText = _localizer["EqPlanSaveFirst"];
+            ShowSettlementText = _localizer["EqShowSettlement"];
+            TaxHeader = _localizer["TaxHeader"];
+            TaxHintText = _localizer["TaxHint"];
+            TaxEmptyText = _localizer["TaxEmpty"];
+            AddTaxYearText = _localizer["TaxAddYear"];
+            TaxSaveFirstText = _localizer["TaxSaveFirst"];
             BalanceHeader = _localizer["ContractBalanceHeader"];
             BalanceBilledLabel = _localizer["ContractBalanceBilled"];
             BalancePaidLabel = _localizer["ContractBalancePaid"];
@@ -1137,6 +1170,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             AddPaymentText = _localizer["ContractPaymentsAdd"];
             RebuildBills();
             RebuildBalance();
+            RebuildEqualized();
+            RebuildTax();
             TariffPresetsLabel = _localizer["ContractTariffPresets"];
             TariffSaveFirstText = _localizer["ContractTariffSaveFirst"];
             RebuildTariff();
