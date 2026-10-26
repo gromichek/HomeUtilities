@@ -25,11 +25,8 @@ public sealed class BillFilterState
     /// <summary>Only the bills of this property; null = all properties.</summary>
     public Guid? PropertyId { get; set; }
 
-    /// <summary>The year of the bills' periods; null = the current year.</summary>
-    public int? Year { get; set; }
-
-    /// <summary>Show the bills of every year.</summary>
-    public bool AllYears { get; set; }
+    /// <summary>The period filter on the bills' periods; null = the current year.</summary>
+    public PeriodFilter? Period { get; set; }
 
     /// <summary>The status filter.</summary>
     public BillStatusFilter Status { get; set; }

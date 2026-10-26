@@ -6,10 +6,6 @@ public sealed class BillsListTexts
     public BillsListTexts(ILocalizer localizer)
     {
         PropertyFilterLabel = localizer["BillsPropertyFilter"];
-        YearLabel = localizer["BillsYearLabel"];
-        PreviousYearText = localizer["BillsPreviousYear"];
-        NextYearText = localizer["BillsNextYear"];
-        AllYearsText = localizer["BillsAllYears"];
         StatusFilterLabel = localizer["BillsStatusFilter"];
         BilledLabel = localizer["BillsBilled"];
         PaidLabel = localizer["BillsPaid"];
@@ -17,14 +13,6 @@ public sealed class BillsListTexts
     }
 
     public string PropertyFilterLabel { get; }
-
-    public string YearLabel { get; }
-
-    public string PreviousYearText { get; }
-
-    public string NextYearText { get; }
-
-    public string AllYearsText { get; }
 
     public string StatusFilterLabel { get; }
 

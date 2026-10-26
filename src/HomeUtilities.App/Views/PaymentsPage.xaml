@@ -23,7 +23,7 @@
                     ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
                     HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
 
-            <!-- Filters: property, year with ‹ ›, contract. -->
+            <!-- Filters: property, period (all years / year / month) with ‹ ›, contract. -->
             <Border Grid.Row="1" Style="{StaticResource SectionCard}" Padding="12" IsVisible="{Binding HasItems}">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding Texts.PropertyFilterLabel}" Style="{StaticResource MutedLabel}" />
@@ -39,20 +39,47 @@
                         </Grid>
                     </Border>
 
-                    <Label Text="{Binding Texts.YearLabel}" Style="{StaticResource MutedLabel}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                    <Label Text="{Binding Period.PeriodLabel}" Style="{StaticResource MutedLabel}" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Button Grid.Column="0" Text="{Binding Period.AllYearsText}" Command="{Binding Period.ShowAllYearsCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="8,8">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding Period.IsAllYearsScope}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="1" Text="{Binding Period.YearText}" Command="{Binding Period.ShowYearCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="8,8">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding Period.IsYearScope}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button Grid.Column="2" Text="{Binding Period.MonthText}" Command="{Binding Period.ShowMonthCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="8,8">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding Period.IsMonthScope}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
                         <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
-                                Command="{Binding PreviousYearCommand}"
-                                ToolTipProperties.Text="{Binding Texts.PreviousYearText}"
-                                SemanticProperties.Description="{Binding Texts.PreviousYearText}" />
-                        <Label Grid.Column="1" Text="{Binding YearText}" FontAttributes="Bold"
+                                Command="{Binding Period.PreviousCommand}"
+                                ToolTipProperties.Text="{Binding Period.PreviousText}"
+                                SemanticProperties.Description="{Binding Period.PreviousText}" />
+                        <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold"
                                HorizontalOptions="Center" VerticalOptions="Center" />
                         <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
-                                Command="{Binding NextYearCommand}"
-                                ToolTipProperties.Text="{Binding Texts.NextYearText}"
-                                SemanticProperties.Description="{Binding Texts.NextYearText}" />
-                        <Button Grid.Column="3" Text="{Binding Texts.AllYearsText}" Command="{Binding ToggleAllYearsCommand}"
-                                Style="{StaticResource TextButton}" />
+                                Command="{Binding Period.NextCommand}"
+                                ToolTipProperties.Text="{Binding Period.NextText}"
+                                SemanticProperties.Description="{Binding Period.NextText}" />
                     </Grid>
 
                     <Label Text="{Binding Texts.ContractFilterLabel}" Style="{StaticResource MutedLabel}" />

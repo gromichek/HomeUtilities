@@ -370,8 +370,10 @@ public class InputHardeningTests
 
         await vm.ChoosePropertyFilterCommand.ExecuteAsync(null);
         await vm.ChooseContractFilterCommand.ExecuteAsync(null);
-        vm.PreviousYearCommand.Execute(null);
-        vm.ToggleAllYearsCommand.Execute(null);
+        vm.Period.PreviousCommand.Execute(null);
+        vm.Period.ShowMonthCommand.Execute(null);
+        vm.Period.PreviousCommand.Execute(null);
+        vm.Period.ShowAllYearsCommand.Execute(null);
         ReadAll(vm);
     }
 

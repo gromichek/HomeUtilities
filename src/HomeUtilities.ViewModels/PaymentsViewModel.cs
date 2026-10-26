@@ -1,4 +1,3 @@
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
@@ -10,7 +9,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>
-/// The Payments screen: the payments filtered by property, year and contract with what each one pays and its prepayment, and
+/// The Payments screen: the payments filtered by property, period (all years, year or month) and contract with what each one pays and its prepayment, and
 /// the totals of the list. Two-pane like Bills; the editor is <see cref="PaymentEditViewModel"/>.
 /// </summary>
 public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEditViewModel>
@@ -25,7 +24,6 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     private readonly IContractStore _contractStore;
     private readonly IPropertyStore _propertyStore;
     private readonly IDialogService _dialogs;
-    private readonly IClock _clock;
     private readonly ILocalizer _localizer;
     private readonly PaymentFilterState _filter;
 
@@ -46,9 +44,6 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     [ObservableProperty]
     private string _contractFilterName = string.Empty;
-
-    [ObservableProperty]
-    private string _yearText = string.Empty;
 
     [ObservableProperty]
     private string _totalsText = string.Empty;
@@ -79,17 +74,15 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         _contractStore = contractStore;
         _propertyStore = propertyStore;
         _dialogs = dialogs;
-        _clock = clock;
         _localizer = localizer;
         _filter = filter;
         _texts = new PaymentsListTexts(localizer);
+        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
         RefreshTexts();
     }
 
-    /// <summary>The year the filter shows (the current year until the user moves it).</summary>
-    public int Year => _filter.Year ?? _clock.Today.Year;
-
-    public bool AllYears => _filter.AllYears;
+    /// <summary>The period filter (all years / year / month) on the payment date; the current year until the user changes it.</summary>
+    public PeriodFilterViewModel Period { get; }
 
     public Guid? PropertyFilterId => _filter.PropertyId;
 
@@ -124,7 +117,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     {
         _filter.PropertyId = propertyId;
         _filter.ContractId = contractId;
-        _filter.AllYears = true;
+        Period.Set(PeriodFilter.ForAllYears(Period.Current.Year));
         _highlightContractId = contractId;
         if (IsLoaded)
         {
@@ -209,26 +202,6 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         ];
     }
 
-    [RelayCommand]
-    private void PreviousYear() => ChangeYear(Year - 1);
-
-    [RelayCommand]
-    private void NextYear() => ChangeYear(Year + 1);
-
-    [RelayCommand]
-    private void ToggleAllYears()
-    {
-        _filter.AllYears = !_filter.AllYears;
-        RebuildItems();
-    }
-
-    private void ChangeYear(int year)
-    {
-        _filter.Year = Math.Clamp(year, 1900, 2200);
-        _filter.AllYears = false;
-        RebuildItems();
-    }
-
     // ---- Rows and totals ------------------------------------------------------------------------------------------
 
     private void RebuildItems()
@@ -261,7 +234,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         ContractFilterName = _filter.ContractId is { } contractId && _contracts.TryGetValue(contractId, out var contract)
             ? contract.Title
             : _localizer["PaymentsAllContracts"];
-        YearText = _filter.AllYears ? _localizer["PaymentsAllYears"] : Year.ToString(CultureInfo.InvariantCulture);
+        Period.Refresh();
         TotalsText = BuildTotals(rows);
         ShowNothingFound = IsLoaded && _payments.Count > 0 && Items.Count == 0;
         MarkSelectedItem();
@@ -269,7 +242,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     private bool Matches(Payment payment)
     {
-        if (!_filter.AllYears && payment.PaidOn.Year != Year)
+        if (!Period.Current.Contains(payment.PaidOn))
         {
             return false;
         }

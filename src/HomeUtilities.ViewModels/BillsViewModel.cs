@@ -10,7 +10,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>
-/// The Bills screen: the bills filtered by property, year and status with their payment badge and the difference to the
+/// The Bills screen: the bills filtered by property, period (all years, year or month) and status with their payment badge and the difference to the
 /// calculation, the totals of the list, and the "Paid" quick action. Two-pane like Properties; the editor is
 /// <see cref="BillEditViewModel"/>.
 /// </summary>
@@ -47,9 +47,6 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     [ObservableProperty]
     private string _propertyFilterName = string.Empty;
-
-    [ObservableProperty]
-    private string _yearText = string.Empty;
 
     [ObservableProperty]
     private string _statusFilterName = string.Empty;
@@ -95,13 +92,12 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _localizer = localizer;
         _filter = filter;
         _texts = new BillsListTexts(localizer);
+        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
         RefreshTexts();
     }
 
-    /// <summary>The year the filter shows (the current year until the user moves it).</summary>
-    public int Year => _filter.Year ?? _clock.Today.Year;
-
-    public bool AllYears => _filter.AllYears;
+    /// <summary>The period filter (all years / year / month); the current year until the user changes it.</summary>
+    public PeriodFilterViewModel Period { get; }
 
     public BillStatusFilter StatusFilter => _filter.Status;
 
@@ -154,7 +150,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     public Task OpenForAsync(Guid propertyId, Guid? contractId) => RunSafeAsync(async () =>
     {
         _filter.PropertyId = propertyId;
-        _filter.AllYears = true;
+        Period.Set(PeriodFilter.ForAllYears(Period.Current.Year));
         _filter.Status = BillStatusFilter.All;
         _highlightContractId = contractId;
         if (IsLoaded)
@@ -201,26 +197,6 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _highlightContractId = null;
         RebuildItems();
     });
-
-    [RelayCommand]
-    private void PreviousYear() => ChangeYear(Year - 1);
-
-    [RelayCommand]
-    private void NextYear() => ChangeYear(Year + 1);
-
-    [RelayCommand]
-    private void ToggleAllYears()
-    {
-        _filter.AllYears = !_filter.AllYears;
-        RebuildItems();
-    }
-
-    private void ChangeYear(int year)
-    {
-        _filter.Year = Math.Clamp(year, 1900, 2200);
-        _filter.AllYears = false;
-        RebuildItems();
-    }
 
     [RelayCommand]
     private Task ChooseStatusFilterAsync() => RunSafeAsync(async () =>
@@ -270,7 +246,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
                 continue;
             }
 
-            if (!_filter.AllYears && bill.Period.Year != Year)
+            if (!Period.Current.Contains(bill.Period))
             {
                 continue;
             }
@@ -310,7 +286,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         PropertyFilterName = _filter.PropertyId is { } id
             ? _properties.FirstOrDefault(p => p.Id == id)?.Name ?? _localizer["BillAllProperties"]
             : _localizer["BillAllProperties"];
-        YearText = _filter.AllYears ? _localizer["BillsAllYears"] : Year.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        Period.Refresh();
         StatusFilterName = StatusName(_filter.Status);
         TotalsText = BuildTotals(rows);
         ShowNothingFound = IsLoaded && _bills.Count > 0 && Items.Count == 0;
