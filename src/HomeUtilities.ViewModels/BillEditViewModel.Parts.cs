@@ -295,6 +295,7 @@ public sealed partial class BillEditViewModel
         var period = Period;
         ChargeInput? input = null;
         CalculatedCharge? live = null;
+        IReadOnlyList<BillQuantityRowViewModel> rows = [];
         var failed = false;
         if (!IsOneOff && _contract is { } contract)
         {
@@ -303,7 +304,8 @@ public sealed partial class BillEditViewModel
                 input = await _chargeLoader.LoadAsync(contract.Id, period);
                 if (input is not null && input.Components.Any(c => !c.IsDeleted))
                 {
-                    live = ChargeCalculator.Calculate(input);
+                    rows = BuildQuantityRows(input);
+                    live = ChargeCalculator.Calculate(WithTyped(input, rows));
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -320,6 +322,7 @@ public sealed partial class BillEditViewModel
 
         _input = input;
         _live = live;
+        QuantityRows = rows;
         _calculationFailed = failed;
         HasTariff = input is not null && input.Components.Any(c => !c.IsDeleted);
         if (IsNew && string.IsNullOrWhiteSpace(Amounts.NetText) && string.IsNullOrWhiteSpace(Amounts.GrossText))
@@ -327,6 +330,66 @@ public sealed partial class BillEditViewModel
             Amounts.SetDefaultVatPercent(DefaultVatPercent(input));
         }
 
+        UpdateComparison();
+    }
+
+    /// <summary>One row per quantity-from-bill component; the text is kept from the rows shown before, else from the stored bill.</summary>
+    private IReadOnlyList<BillQuantityRowViewModel> BuildQuantityRows(ChargeInput input)
+    {
+        var rows = new List<BillQuantityRowViewModel>();
+        foreach (var component in input.Components.Where(c => c is { IsDeleted: false, Basis: ChargeBasis.QuantityFromBill }).OrderBy(c => c.SortOrder))
+        {
+            var unit = component.QuantityUnit is { } u ? EnumText.Get(_localizer, u) : string.Empty;
+            var row = new BillQuantityRowViewModel(component.Id, component.Name, unit);
+            var kept = QuantityRows.FirstOrDefault(r => r.ComponentId == component.Id);
+            if (kept is not null)
+            {
+                row.Text = kept.Text;
+            }
+            else if (!IsNew && _bill.BillQuantities.FirstOrDefault(q => q.ComponentId == component.Id) is { } stored)
+            {
+                row.Text = DecimalInput.Format(stored.Quantity, CultureInfo.CurrentCulture, 4);
+            }
+
+            row.Edited += OnQuantityEdited;
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+
+    /// <summary>The input with the quantities typed so far; unreadable or empty rows count as not entered.</summary>
+    private static ChargeInput WithTyped(ChargeInput input, IReadOnlyList<BillQuantityRowViewModel> rows)
+    {
+        var typed = new Dictionary<Guid, decimal>();
+        foreach (var row in rows)
+        {
+            if (DecimalInput.TryParse(row.Text, CultureInfo.CurrentCulture, out var value))
+            {
+                typed[row.ComponentId] = value;
+            }
+        }
+
+        return input with { QuantitiesFromBill = typed };
+    }
+
+    private static string QuantityField(int index) => $"{nameof(Bill.BillQuantities)}[{index}]";
+
+    /// <summary>A quantity changed: the calculation (and the snapshot, if the bill has one) follows live.</summary>
+    private void OnQuantityEdited()
+    {
+        if (_input is null || _loading)
+        {
+            return;
+        }
+
+        _live = ChargeCalculator.Calculate(WithTyped(_input, QuantityRows));
+        if (_snapshot is not null)
+        {
+            _snapshot = _live;
+        }
+
+        MarkDirty();
         UpdateComparison();
     }
 

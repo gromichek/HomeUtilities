@@ -2,6 +2,7 @@ using System.Globalization;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -167,6 +168,126 @@ public class BillEditViewModelTests : IDisposable
         Assert.Equal("45.10", vm.Amounts.GrossPlaceholder);
         Assert.Equal(string.Empty, vm.Amounts.GrossText);
         Assert.False(vm.IsDirty);
+    }
+
+    // ---- Quantities from the bill ---------------------------------------------------------------------------------
+
+    /// <summary>The water contract plus a heat component whose quantity (MWh) is typed from the bill: 0.210 MWh × 70.00 = 14.70.</summary>
+    private TariffComponent AddHeatFromBill(Contract contract)
+    {
+        var heat = new TariffComponent
+        {
+            ContractId = contract.Id,
+            Name = "Heat",
+            ChargeKind = ServiceKind.Heating,
+            Basis = ChargeBasis.QuantityFromBill,
+            QuantityUnit = MeterUnit.MWh,
+            VatCode = "LV-STANDARD",
+            SortOrder = 5,
+        };
+        heat.Rates.Add(new TariffRate { ComponentId = heat.Id, ValidFrom = new DateOnly(2020, 1, 1), Price = 70m, Currency = Currency.EUR });
+        _kit.Kit.Tariffs.Stored.Add(heat);
+        return heat;
+    }
+
+    [Fact]
+    public async Task Quantities_ContractWithoutQuantityComponents_HasNoQuantityCard()
+    {
+        var vm = await NewEditorAsync(_kit.AddWaterContract());
+
+        Assert.False(vm.ShowQuantities);
+        Assert.Empty(vm.QuantityRows);
+    }
+
+    [Fact]
+    public async Task Quantities_ACardRowPerComponent_AndTheCalculationWaitsForTheQuantity()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+
+        var vm = await NewEditorAsync(contract);
+
+        Assert.True(vm.ShowQuantities);
+        var row = Assert.Single(vm.QuantityRows);
+        Assert.Equal("Heat, Enum_MeterUnit_MWh [en]", row.Label);
+        Assert.Equal(string.Empty, row.Text);
+        Assert.Equal("BillCalculationIncomplete [en]", vm.ComparisonNote);
+    }
+
+    [Fact]
+    public async Task Quantities_TypingTheQuantity_CompletesTheCalculationLive()
+    {
+        // water 12.150 m3 * 3.0675 = 37.27 + heat 0.210 MWh * 70.00 = 14.70 -> net 51.97; VAT 21% = 10.9137 -> 10.91; total 62.88
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+
+        vm.QuantityRows[0].Text = "0,210";
+
+        Assert.Equal($"62.88 {Eur}", vm.CalculatedText);
+        Assert.Equal(string.Empty, vm.ComparisonNote);
+        Assert.Equal($"0.00 {Eur} (0.0 %)", vm.DifferenceText);
+        Assert.True(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Quantities_AreSavedWithTheBillAndTheSnapshot_AndShownAgainWhenTheBillIsOpened()
+    {
+        var contract = _kit.AddWaterContract();
+        var heat = AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+        vm.QuantityRows[0].Text = "0,210";
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal(new BillQuantity(heat.Id, 0.210m), Assert.Single(saved.BillQuantities));
+        Assert.NotNull(saved.CalculatedSnapshot);
+        Assert.True(saved.CalculatedSnapshot.IsComplete);
+        Assert.Equal(62.88m, saved.CalculatedSnapshot.TotalGross);
+
+        _kit.Bills.All.Add(saved);
+        var reopened = await OpenAsync(saved.Id);
+        Assert.Equal("0.21", reopened.QuantityRows[0].Text);
+        Assert.Equal($"62.88 {Eur}", reopened.CalculatedText);
+    }
+
+    [Fact]
+    public async Task Quantities_ChangingAQuantityOfASavedBill_UpdatesItsSnapshot()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+        vm.QuantityRows[0].Text = "0,210";
+        await vm.SaveCommand.ExecuteAsync(null);
+        _kit.Bills.All.Add(_kit.Bills.Saved[0]);
+        var reopened = await OpenAsync(_kit.Bills.Saved[0].Id);
+
+        // 0.300 MWh * 70.00 = 21.00; net 58.27; VAT 12.2367 -> 12.24; total 70.51
+        reopened.QuantityRows[0].Text = "0,300";
+        await reopened.SaveCommand.ExecuteAsync(null);
+
+        var saved = _kit.Bills.Saved[^1];
+        Assert.Equal(0.300m, Assert.Single(saved.BillQuantities).Quantity);
+        Assert.Equal(70.51m, saved.CalculatedSnapshot!.TotalGross);
+    }
+
+    [Fact]
+    public async Task Quantities_UnreadableText_IsAnErrorOnTheRow_AndNothingIsSaved()
+    {
+        var contract = _kit.AddWaterContract();
+        AddHeatFromBill(contract);
+        var vm = await NewEditorAsync(contract);
+        vm.Amounts.GrossText = "62,88";
+
+        vm.QuantityRows[0].Text = "abc";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Bills.Saved);
+        Assert.True(vm.QuantityRows[0].HasError);
     }
 
     // ---- Amounts --------------------------------------------------------------------------------------------------

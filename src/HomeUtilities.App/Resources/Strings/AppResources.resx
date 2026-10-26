@@ -503,7 +503,7 @@
   <data name="TariffBasisHint_FromBill" xml:space="preserve"><value>No own calculation: the amount is taken from the supplier's bill. For heating by the building heat meter.</value></data>
   <data name="TariffBasisHint_NetExport" xml:space="preserve"><value>Energy fed into the grid × price, counted as a credit. For solar panels.</value></data>
   <data name="TariffPreset_WaterSewerage" xml:space="preserve"><value>Water + sewerage</value></data>
-  <data name="TariffPreset_WaterHeatingAndHeating" xml:space="preserve"><value>Water heating + heating</value></data>
+  <data name="TariffPreset_WaterHeatingAndHeating" xml:space="preserve"><value>Heating as one sum</value></data>
   <data name="TariffPreset_Electricity" xml:space="preserve"><value>Electricity</value></data>
   <data name="TariffPreset_AreaFee" xml:space="preserve"><value>Area-based fee</value></data>
   <data name="TariffPreset_PerResident" xml:space="preserve"><value>Per resident</value></data>
@@ -929,4 +929,22 @@
   <data name="Error_payment_edit_property_required" xml:space="preserve"><value>Choose a property.</value></data>
   <data name="Error_payment_edit_allocation_exceeds_open" xml:space="preserve"><value>{0} is more than what is open on the bill ({1}).</value></data>
   <data name="Error_payment_edit_over_allocated_by" xml:space="preserve"><value>The bills take {0} more than the payment amount.</value></data>
+  <data name="Enum_ChargeBasis_QuantityFromBill" xml:space="preserve"><value>Quantity from the bill</value></data>
+  <data name="TariffBasisHint_QuantityFromBill" xml:space="preserve"><value>The supplier tells the quantity on the bill (e.g. heat MWh); you type it when you enter the bill.</value></data>
+  <data name="TariffUnitLabel" xml:space="preserve"><value>Unit of the quantity</value></data>
+  <data name="TariffPreset_HotWaterAndHeatingDistributed" xml:space="preserve"><value>Hot water + heating (distributed)</value></data>
+  <data name="TariffPresetName_HotWater" xml:space="preserve"><value>Hot water</value></data>
+  <data name="TariffPresetName_HeatCirculation" xml:space="preserve"><value>Heat for heating/circulation</value></data>
+  <data name="TariffPresetName_HotWaterDifference" xml:space="preserve"><value>Hot water difference</value></data>
+  <data name="Error_tariff_quantity_unit_required" xml:space="preserve"><value>Choose the unit of the quantity.</value></data>
+  <data name="Error_tariff_quantity_unit_not_allowed" xml:space="preserve"><value>Only a quantity-from-the-bill component has a unit.</value></data>
+  <data name="Error_tariff_tiers_not_allowed" xml:space="preserve"><value>A quantity from the bill cannot have a stepped price.</value></data>
+  <data name="ContractVatOnTotal" xml:space="preserve"><value>VAT is calculated on the bill total</value></data>
+  <data name="ContractVatOnTotalHint" xml:space="preserve"><value>Off only if the supplier rounds VAT per line.</value></data>
+  <data name="BillQuantities" xml:space="preserve"><value>Quantities from the bill</value></data>
+  <data name="BillQuantitiesHint" xml:space="preserve"><value>Type the quantities the supplier printed on the bill; the calculation below uses them.</value></data>
+  <data name="ChargeQuantityFromBill" xml:space="preserve"><value>quantity from the bill</value></data>
+  <data name="ChargeQuantityFromBillOf" xml:space="preserve"><value>{0} (from bill {1})</value></data>
+  <data name="ChargeVatGroup" xml:space="preserve"><value>VAT {0} % of {1} = {2}</value></data>
+  <data name="ChargeWarn_QuantityFromBill" xml:space="preserve"><value>Enter the quantity of «{0}» from the supplier's bill (Bills → Quantities from the bill).</value></data>
 </root>

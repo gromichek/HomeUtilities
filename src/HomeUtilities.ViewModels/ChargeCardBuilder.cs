@@ -67,7 +67,7 @@ public sealed class ChargeCardBuilder
         foreach (var line in charge.Lines)
         {
             var details = detailShown.Add(line.ComponentId) ? Details(line, registers) : [];
-            lines.Add(Line(line, input.Components.FirstOrDefault(c => c.Id == line.ComponentId), describer, symbol, details));
+            lines.Add(Line(line, input.Components.FirstOrDefault(c => c.Id == line.ComponentId), describer, symbol, details, charge.Period));
         }
 
         var card = new ChargeCardViewModel(
@@ -82,6 +82,10 @@ public sealed class ChargeCardBuilder
             Money(charge.TotalVat, symbol))
         {
             Lines = lines,
+            VatGroupTexts = hasAmounts && contract.VatCalculation == VatCalculation.OnTotal
+                ? [.. (charge.VatGroups ?? []).Select(g => _localizer.Get(
+                    "ChargeVatGroup", TariffDescriber.FormatQuantity(g.VatPercent), Money(g.Net, symbol), Money(g.Vat, symbol)))]
+                : [],
             Warnings = Warnings(input, charge, registers),
             NoTariffText = _localizer["ChargeNoTariff"],
             NoTariffLinkText = _localizer["ChargeOpenContract"],
@@ -95,9 +99,18 @@ public sealed class ChargeCardBuilder
 
     private static string Money(decimal amount, string symbol) => $"{TariffDescriber.FormatMoney(amount)} {symbol}";
 
-    private ChargeLineViewModel Line(ChargeLine line, TariffComponent? component, TariffDescriber describer, string symbol, IReadOnlyList<ChargeReadingDetailViewModel> details)
+    private ChargeLineViewModel Line(
+        ChargeLine line, TariffComponent? component, TariffDescriber describer, string symbol, IReadOnlyList<ChargeReadingDetailViewModel> details, YearMonth period)
     {
         var quantity = line.Quantity is { } q ? QuantityText(line.Basis, q, component, describer) : string.Empty;
+        if (line.Basis == ChargeBasis.QuantityFromBill)
+        {
+            // The quantity is never measured here: say where it comes from (or that it is still missing).
+            quantity = line.Quantity is null
+                ? _localizer["ChargeQuantityFromBill"]
+                : _localizer.Get("ChargeQuantityFromBillOf", quantity, BillText.Period(period));
+        }
+
         var unitPrice = line.UnitPrice is { } price && !line.IsFromBill
             ? _localizer.Get("ChargeUnitPrice", TariffDescriber.FormatPrice(price), symbol, _localizer[line.PriceIncludesVat ? "TariffVatIncluded" : "TariffVatExcluded"])
             : string.Empty;
@@ -272,6 +285,9 @@ public sealed class ChargeCardBuilder
                     message = _localizer.Get("ChargeWarn_InvalidTariff", name);
                     actionText = _localizer["ChargeOpenTariff"];
                     action = () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty);
+                    break;
+                case ChargeWarningCodes.QuantityFromBill:
+                    message = _localizer.Get("ChargeWarn_QuantityFromBill", name);
                     break;
                 case ChargeWarningCodes.ContractInactive:
                     message = _localizer["ChargeWarn_ContractInactive"];

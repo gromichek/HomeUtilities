@@ -29,7 +29,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     [
         nameof(ContractTitle), nameof(SelectedService), nameof(SelectedCategory), nameof(SelectedSupplier), nameof(SelectedCurrency),
         nameof(IsArchived), nameof(CustomerNumber), nameof(ContractNumber), nameof(PortalLogin), nameof(ValidFrom),
-        nameof(HasEndDate), nameof(ValidTo), nameof(SelectedBillingMode), nameof(SelectedBillingTiming), nameof(HasReadingWindow),
+        nameof(HasEndDate), nameof(ValidTo), nameof(SelectedBillingMode), nameof(SelectedBillingTiming), nameof(VatOnTotal), nameof(HasReadingWindow),
         nameof(ReadingDayFromText), nameof(ReadingDayToText), nameof(BillDayText), nameof(PaymentDueDayText),
         nameof(RecipientName), nameof(RecipientRegistrationNumber), nameof(IbanText), nameof(Bic), nameof(BankName),
         nameof(PurposeTemplate), nameof(Notes),
@@ -135,6 +135,9 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedBillingTimingIndex), nameof(BillingTimingHint), nameof(EffectivePurpose), nameof(HasEffectivePurpose))]
     private EnumOption? _selectedBillingTiming;
+
+    [ObservableProperty]
+    private bool _vatOnTotal = true;
 
     [ObservableProperty]
     private bool _hasReadingWindow;
@@ -251,6 +254,12 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
 
     [ObservableProperty]
     private string _readingWindowHint = string.Empty;
+
+    [ObservableProperty]
+    private string _vatOnTotalLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _vatOnTotalHint = string.Empty;
 
     [ObservableProperty]
     private string _billDayLabel = string.Empty;
@@ -569,6 +578,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             ValidFrom = _contract.ValidFrom;
             HasEndDate = _contract.ValidTo is not null;
             ValidTo = _contract.ValidTo ?? (_contract.ValidFrom > _clock.Today ? _contract.ValidFrom : _clock.Today);
+            VatOnTotal = _contract.VatCalculation == VatCalculation.OnTotal;
             HasReadingWindow = _contract.ReadingDayFrom is not null || _contract.ReadingDayTo is not null;
             ReadingDayFromText = _contract.ReadingDayFrom?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
             ReadingDayToText = _contract.ReadingDayTo?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
@@ -1077,6 +1087,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             BillingHeader = _localizer["ContractBilling"];
             BillingModeLabel = _localizer["ContractBillingModeLabel"];
             BillingTimingLabel = _localizer["ContractBillingTimingLabel"];
+            VatOnTotalLabel = _localizer["ContractVatOnTotal"];
+            VatOnTotalHint = _localizer["ContractVatOnTotalHint"];
             ReadingWindowLabel = _localizer["ContractReadingWindow"];
             ReadingFromLabel = _localizer["ContractReadingFrom"];
             ReadingToLabel = _localizer["ContractReadingTo"];
@@ -1383,6 +1395,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             Currency = SelectedCurrency?.As<Currency>() ?? Currency.EUR,
             BillingMode = SelectedBillingMode?.As<BillingMode>() ?? BillingMode.Actual,
             BillingTiming = SelectedBillingTiming?.As<BillingTiming>() ?? BillingTiming.InArrears,
+            VatCalculation = VatOnTotal ? VatCalculation.OnTotal : VatCalculation.PerLine,
             ReadingDayFrom = HasReadingWindow ? ParseDay(ReadingDayFromText, nameof(Contract.ReadingDayFrom)) : null,
             ReadingDayTo = HasReadingWindow ? ParseDay(ReadingDayToText, nameof(Contract.ReadingDayTo)) : null,
             BillDay = ParseDay(BillDayText, nameof(Contract.BillDay)),

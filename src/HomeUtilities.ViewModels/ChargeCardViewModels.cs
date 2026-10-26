@@ -191,6 +191,11 @@ public sealed partial class ChargeCardViewModel : ObservableObject
 
     public IReadOnlyList<ChargeLineViewModel> Lines { get; init; } = [];
 
+    /// <summary>"VAT 12 % of 39,18 € = 4,70 €" per VAT percent when VAT is calculated on the total.</summary>
+    public IReadOnlyList<string> VatGroupTexts { get; init; } = [];
+
+    public bool HasVatGroups => VatGroupTexts.Count > 0;
+
     public IReadOnlyList<ChargeWarningViewModel> Warnings { get; init; } = [];
 
     public bool HasLines => Lines.Count > 0;

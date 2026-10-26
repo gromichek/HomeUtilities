@@ -203,6 +203,25 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- 2b. Quantities typed from the bill (tariff components of the basis "quantity from the bill"). -->
+                <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowQuantities}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding Texts.QuantitiesHeader}" Style="{StaticResource SectionHeader}" />
+                        <Label Text="{Binding Texts.QuantitiesHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding QuantityRows}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BillQuantityRowViewModel">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Label}" Style="{StaticResource MutedLabel}" />
+                                        <Entry Text="{Binding Text}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                                        <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- 3. Comparison with the calculation (contracts with a tariff). -->
                 <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowComparison}">
                     <VerticalStackLayout Spacing="8">

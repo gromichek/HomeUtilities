@@ -503,7 +503,7 @@
   <data name="TariffBasisHint_FromBill" xml:space="preserve"><value>Собственного расчёта нет: сумма берётся из счёта поставщика. Для отопления по общедомовому счётчику.</value></data>
   <data name="TariffBasisHint_NetExport" xml:space="preserve"><value>Энергия, отданная в сеть × цена, учитывается как зачёт. Для солнечных панелей.</value></data>
   <data name="TariffPreset_WaterSewerage" xml:space="preserve"><value>Вода + канализация</value></data>
-  <data name="TariffPreset_WaterHeatingAndHeating" xml:space="preserve"><value>Подогрев воды + отопление</value></data>
+  <data name="TariffPreset_WaterHeatingAndHeating" xml:space="preserve"><value>Отопление одной суммой</value></data>
   <data name="TariffPreset_Electricity" xml:space="preserve"><value>Электричество</value></data>
   <data name="TariffPreset_AreaFee" xml:space="preserve"><value>Плата по площади</value></data>
   <data name="TariffPreset_PerResident" xml:space="preserve"><value>На жильца</value></data>
@@ -929,4 +929,22 @@
   <data name="Error_payment_edit_property_required" xml:space="preserve"><value>Выберите объект.</value></data>
   <data name="Error_payment_edit_allocation_exceeds_open" xml:space="preserve"><value>{0} — больше, чем осталось по счёту ({1}).</value></data>
   <data name="Error_payment_edit_over_allocated_by" xml:space="preserve"><value>Счета берут на {0} больше, чем сумма платежа.</value></data>
+  <data name="Enum_ChargeBasis_QuantityFromBill" xml:space="preserve"><value>Количество из счёта</value></data>
+  <data name="TariffBasisHint_QuantityFromBill" xml:space="preserve"><value>Поставщик указывает количество в счёте (например, тепло в МВт·ч); вы вводите его при вводе счёта.</value></data>
+  <data name="TariffUnitLabel" xml:space="preserve"><value>Единица количества</value></data>
+  <data name="TariffPreset_HotWaterAndHeatingDistributed" xml:space="preserve"><value>Горячая вода + отопление (распределённое)</value></data>
+  <data name="TariffPresetName_HotWater" xml:space="preserve"><value>Горячая вода</value></data>
+  <data name="TariffPresetName_HeatCirculation" xml:space="preserve"><value>Тепло на отопление/циркуляцию</value></data>
+  <data name="TariffPresetName_HotWaterDifference" xml:space="preserve"><value>Разница горячей воды</value></data>
+  <data name="Error_tariff_quantity_unit_required" xml:space="preserve"><value>Выберите единицу количества.</value></data>
+  <data name="Error_tariff_quantity_unit_not_allowed" xml:space="preserve"><value>Единица есть только у компонента «Количество из счёта».</value></data>
+  <data name="Error_tariff_tiers_not_allowed" xml:space="preserve"><value>У количества из счёта не может быть ступенчатой цены.</value></data>
+  <data name="ContractVatOnTotal" xml:space="preserve"><value>НДС считается от итога счёта</value></data>
+  <data name="ContractVatOnTotalHint" xml:space="preserve"><value>Выключайте, только если поставщик округляет НДС по строкам.</value></data>
+  <data name="BillQuantities" xml:space="preserve"><value>Количества из счёта</value></data>
+  <data name="BillQuantitiesHint" xml:space="preserve"><value>Введите количества, указанные поставщиком в счёте; расчёт ниже использует их.</value></data>
+  <data name="ChargeQuantityFromBill" xml:space="preserve"><value>количество из счёта</value></data>
+  <data name="ChargeQuantityFromBillOf" xml:space="preserve"><value>{0} (из счёта {1})</value></data>
+  <data name="ChargeVatGroup" xml:space="preserve"><value>НДС {0} % от {1} = {2}</value></data>
+  <data name="ChargeWarn_QuantityFromBill" xml:space="preserve"><value>Введите количество для «{0}» из счёта поставщика (Счета → Количества из счёта).</value></data>
 </root>

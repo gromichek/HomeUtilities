@@ -148,6 +148,11 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     [ObservableProperty]
     private string _notes = string.Empty;
 
+    // Quantities from the bill card.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowQuantities))]
+    private IReadOnlyList<BillQuantityRowViewModel> _quantityRows = [];
+
     // Comparison card.
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowComparison))]
@@ -311,6 +316,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     public bool IsKindEditable => !IsOneOff;
 
     public bool ShowComparison => !IsOneOff && HasTariff;
+
+    public bool ShowQuantities => !IsOneOff && QuantityRows.Count > 0;
 
     public bool ShowPaymentCard => !IsNew;
 
@@ -557,6 +564,11 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         {
             FieldRows[i].ErrorText = Errors.GetValueOrDefault($"CustomFields[{i}].Value", string.Empty);
         }
+
+        for (var i = 0; i < QuantityRows.Count; i++)
+        {
+            QuantityRows[i].ErrorText = Errors.GetValueOrDefault(QuantityField(i), string.Empty);
+        }
     }
 
     protected override void RefreshTexts()
@@ -758,6 +770,14 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         var amountErrors = Amounts.TryRead(out var amounts);
         errors.AddRange(amountErrors);
         var consumption = AmountEditor.ReadOptional(ConsumptionText, nameof(Bill.ConsumptionOnBill), errors);
+        var quantities = new List<BillQuantity>();
+        for (var i = 0; i < QuantityRows.Count; i++)
+        {
+            if (AmountEditor.ReadOptional(QuantityRows[i].Text, QuantityField(i), errors) is { } typed)
+            {
+                quantities.Add(new BillQuantity(QuantityRows[i].ComponentId, typed));
+            }
+        }
 
         var values = CustomFieldValueRowViewModel.Read(FieldRows, errors, "CustomFields", out var rowOfValue);
         _rowOfValue = rowOfValue;
@@ -786,6 +806,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             Gross = amounts?.Gross ?? 0m,
             Currency = _bill.Currency,
             ConsumptionOnBill = consumption,
+            BillQuantities = IsOneOff ? [] : quantities,
             CustomFields = values,
             CalculatedSnapshot = IsOneOff ? null : _snapshot ?? (HasTariff ? _live : null),
             Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),

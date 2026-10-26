@@ -745,6 +745,86 @@ public class TariffComponentEditViewModelTests
         return vm;
     }
 
+    [Fact]
+    public async Task QuantityFromBill_ShowsTheUnitPickerAndPricesButNoMeters()
+    {
+        var vm = await NewEditorAsync();
+
+        vm.SelectedBasis = vm.Bases.Single(o => o.Value.Equals(ChargeBasis.QuantityFromBill));
+
+        Assert.True(vm.ShowUnit);
+        Assert.True(vm.ShowCountedCard);
+        Assert.True(vm.ShowPrices);
+        Assert.False(vm.ShowMeterSelection);
+        Assert.False(vm.ShowParameter);
+        Assert.Equal("TariffBasisHint_QuantityFromBill [en]", vm.BasisHint);
+        Assert.Equal(Enum.GetValues<MeterUnit>().Cast<object>(), vm.Units.Select(u => u.Value).ToList());
+        Assert.Equal(MeterUnit.MWh, vm.SelectedUnit!.Value);
+    }
+
+    [Fact]
+    public async Task QuantityFromBill_SavesTheChosenUnit_AndAnotherBasisDropsIt()
+    {
+        var vm = await FilledAsync(ChargeBasis.QuantityFromBill);
+        vm.SelectedUnit = vm.Units.Single(u => u.Value.Equals(MeterUnit.Gcal));
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Tariffs.Saved);
+        Assert.Equal((ChargeBasis.QuantityFromBill, MeterUnit.Gcal), (saved.Basis, saved.QuantityUnit));
+
+        vm.SelectedBasis = vm.Bases.Single(o => o.Value.Equals(ChargeBasis.PerUnit));
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.Null(_kit.Tariffs.Saved[^1].QuantityUnit);
+    }
+
+    [Fact]
+    public async Task QuantityFromBill_ExistingComponentLoadsItsUnit()
+    {
+        var component = new TariffComponent
+        {
+            ContractId = _contract.Id, Name = "Hot water difference", ChargeKind = ServiceKind.WaterHeating,
+            Basis = ChargeBasis.QuantityFromBill, QuantityUnit = MeterUnit.M3, VatCode = "LV-REDUCED",
+        };
+        component.Rates.Add(new TariffRate { ComponentId = component.Id, ValidFrom = new DateOnly(2026, 1, 1), Price = 3.20m });
+        _kit.Tariffs.Stored.Add(component);
+        var vm = _kit.CreateTariffEditor();
+        vm.ContractId = _contract.Id;
+        vm.IsHostedInPage = true;
+
+        await vm.LoadAsync(component.Id);
+
+        Assert.Equal(MeterUnit.M3, vm.SelectedUnit!.Value);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task Example_QuantityFromBill_UsesOneMegawattHourAtTheNewestPrice()
+    {
+        // 1 MWh * 70.00 EUR = 70.00; VAT 21% = 14.70; total 84.70
+        var vm = await NewEditorAsync();
+        vm.SelectedBasis = vm.Bases.Single(o => o.Value.Equals(ChargeBasis.QuantityFromBill));
+        await AddRateAsync(vm, new DateOnly(2026, 1, 1), "70");
+
+        var example = vm.Example;
+
+        Assert.Equal(1m, example.Quantity);
+        Assert.Equal((70.00m, 21m, 14.70m, 84.70m), (example.Net, example.VatPercent, example.Vat, example.Gross));
+        Assert.Contains("MWh", vm.ExampleText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task QuantityFromBill_ChangingTheUnitMarksTheEditorDirty()
+    {
+        var vm = await FilledAsync(ChargeBasis.QuantityFromBill);
+        await vm.SaveCommand.ExecuteAsync(null);
+        Assert.False(vm.IsDirty);
+
+        vm.SelectedUnit = vm.Units.Single(u => u.Value.Equals(MeterUnit.KWh));
+
+        Assert.True(vm.IsDirty);
+    }
+
     /// <summary>A new, valid "Water supply" component with one price.</summary>
     private async Task<TariffComponentEditViewModel> FilledAsync(ChargeBasis basis = ChargeBasis.PerUnit)
     {

@@ -138,6 +138,12 @@
                     <Label Text="{Binding BillingTimingHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 
                     <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding VatOnTotal}" />
+                        <Label Text="{Binding VatOnTotalLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding VatOnTotalHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+
+                    <HorizontalStackLayout Spacing="8">
                         <Switch IsToggled="{Binding HasReadingWindow}" />
                         <Label Text="{Binding ReadingWindowLabel}" VerticalOptions="Center" />
                     </HorizontalStackLayout>

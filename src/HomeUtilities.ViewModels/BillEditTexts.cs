@@ -31,6 +31,8 @@ public sealed class BillEditTexts
         VatPercentLabel = localizer["BillVatPercentLabel"];
         VatLabel = localizer["BillVatLabel"];
         GrossLabel = localizer["BillGrossLabel"];
+        QuantitiesHeader = localizer["BillQuantities"];
+        QuantitiesHint = localizer["BillQuantitiesHint"];
         ComparisonHeader = localizer["BillComparison"];
         CalculatedLabel = localizer["BillCalculatedLabel"];
         DifferenceLabel = localizer["BillDifferenceLabel"];
@@ -117,6 +119,10 @@ public sealed class BillEditTexts
     public string VatLabel { get; }
 
     public string GrossLabel { get; }
+
+    public string QuantitiesHeader { get; }
+
+    public string QuantitiesHint { get; }
 
     public string ComparisonHeader { get; }
 

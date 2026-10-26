@@ -85,6 +85,8 @@ public sealed class TariffDescriber
                 return _localizer["Unit_Month"];
             case ChargeBasis.FromBill:
                 return string.Empty;
+            case ChargeBasis.QuantityFromBill:
+                return component.QuantityUnit is { } unit ? EnumText.Get(_localizer, unit) : _localizer["Unit_Units"];
         }
 
         var selected = component.MeterIds.Count == 0 ? _meters : [.. _meters.Where(m => component.MeterIds.Contains(m.Id))];
@@ -238,6 +240,10 @@ public sealed class TariffDescriber
                 break;
             case ChargeBasis.NetExport:
                 quantity = -ExampleUnits;
+                break;
+            case ChargeBasis.QuantityFromBill:
+                // Thermal units are small numbers on a bill; one unit keeps the example readable.
+                quantity = component.QuantityUnit is MeterUnit.MWh or MeterUnit.Gcal ? 1m : ExampleUnits;
                 break;
             default:
                 quantity = ExampleUnits;
