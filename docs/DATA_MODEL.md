@@ -300,7 +300,7 @@ is allowed (`Net`, `VatPercent`, `Vat` stay null). Invariant when all set: `Net 
 | Lines | list of **BillLine** | optional detail |
 | CustomFields | list of **CustomFieldValue** | optional, see below |
 | ConsumptionOnBill | decimal? | quantity the supplier billed (to compare with metered, e.g. water losses) |
-| BillQuantities | list `{ ComponentId, Quantity }` | quantities typed from the bill for `QuantityFromBill` components |
+| BillQuantities | list `{ ComponentId, Quantity, Amount? }` | quantities typed from the bill for `QuantityFromBill` components; optional `Amount` = the line's net on the bill (decision 2026-10-26: suppliers print the quantity rounded to 3 decimals but bill the unrounded one, e.g. 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill). If `Amount` is set the line net = Amount; warning `AmountMismatch` when it lies outside (qty ± 0.0005) × price ± 0.01 |
 | CalculatedSnapshot | CalculatedCharge? | app's calculation at entry time |
 | TemplateId | Guid? | the BillTemplate it was created from |
 | AttachmentIds | list of Guid | PDF / photo of the bill |
