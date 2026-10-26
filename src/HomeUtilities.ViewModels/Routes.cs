@@ -100,4 +100,10 @@ public static class Routes
     /// editor), parameters <c>propertyId</c> and <c>contractId</c>. Back returns to the caller.
     /// </summary>
     public const string PaymentsFor = "PaymentsFor";
+
+    /// <summary>
+    /// Pushed page (not a section): the settlement of an equalized contract (month table and the expected result), parameter
+    /// <c>contractId</c>. Back returns to the contract editor.
+    /// </summary>
+    public const string EqualizedSettlement = "EqualizedSettlement";
 }

@@ -215,6 +215,11 @@ public sealed partial class ChargeCardViewModel : ObservableObject
     /// <summary>"Bill: 46,02 € · +0,92 € · Paid ✓" when a bill exists for the month; empty otherwise.</summary>
     public string BillText { get; set; } = string.Empty;
 
+    /// <summary>"Plan 40,00 € · actual 35,20 € · since last settlement +9,50 €" for an equalized contract.</summary>
+    public string EqualizedText { get; set; } = string.Empty;
+
+    public bool HasEqualizedText => EqualizedText.Length > 0;
+
     public bool HasBill => BillText.Length > 0;
 
     /// <summary>Opens the bill.</summary>

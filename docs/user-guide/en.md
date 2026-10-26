@@ -111,6 +111,10 @@ Open a property → card **Contracts** → **Add contract**.
 - **Bills:** the last six bills of the contract with the month, the total and the status (*Unpaid*, *Paid ✓*…). Tap a
   row to open the bill, **All bills** opens the Bills screen for this property with the contract highlighted, ＋ enters a
   new bill for this contract. Available after the contract is saved. See [Bills](#11-bills).
+- **Equalized plan** (billing mode *Equalized payments*): the monthly amount the supplier bills, one row per version, and
+  the *Expected settlement* with **Show settlement**. See [Equalized payments](#13-equalized-payments).
+- **Tax by year** (billing mode *Tax (annual amount)*): the yearly tax with its installments. See
+  [Property tax](#14-property-tax).
 - **Balance:** billed, paid and the result — *Debt*, *Paid in advance* or *Settled* — the money that pays no bill yet
   (*Use for open bills*) and the latest payments with **All payments** and ＋ for a new payment. Available after the
   contract is saved. See [Payments](#12-payments).
@@ -234,6 +238,10 @@ valid on the first day of the month; fixed lines are one month's price; a line *
 calculation. As on a supplier's invoice, the net amount is rounded to 0.01 first and the VAT is
 calculated from that rounded amount (6.500 m³ × 1.41 € = 9.165 → 9.17 €; VAT 21 % = 1.93 €; total 11.10 €).
 
+**Equalized contracts.** The card of a contract with equalized payments has one more line under the bill:
+*Plan 40,00 € · actual 35,20 € · since last settlement +9,50 €* — the plan amount of the month, what the readings cost
+and how much the settlement is expected to be so far (see [Equalized payments](#13-equalized-payments)).
+
 **VAT on the total.** Suppliers do not round VAT line by line: they add the net amounts of all lines with the same VAT
 rate and calculate VAT once on that sum. The app does the same (the contract switch *VAT is calculated on the bill
 total* is on by default). The lines still show their own VAT for information, and under the lines of the card you see
@@ -345,6 +353,10 @@ expense** (a repair, a purchase — no contract; it needs a *Title* and a *Categ
    price changes do not rewrite history. If the calculation has changed since, the card says *The calculation changed
    since the bill was entered (snapshot 45,10 € → now 46,02 €)* and **Update snapshot** takes the new one (save the bill
    afterwards). The comparison always uses the snapshot.
+   For a bill of an **equalized** contract the card compares the bill with the **plan** (the monthly amount), not with the
+   calculation, and shows the calculation as information: *Actual by readings: 35,20 €*. A new bill of such a contract
+   starts as kind *Equalized payment* with the *Total* already filled in with the plan amount of its month (change it if
+   the supplier billed something else). See [Equalized payments](#13-equalized-payments).
 5. **Lines** (folded by default) — optional detail rows of the bill: description, quantity, unit, unit price, the
    amounts (any two, as above), a category of their own and a note. If the lines do not add up to the total you see a
    warning, not an error — suppliers round differently.
@@ -444,7 +456,62 @@ Tap a payment to change its date, amount, method or bills. A payment made with t
 here; if you turn it into a partial payment or add other bills, it stops being a "Paid button" payment. **Delete** hides the
 payment — *the bills it paid become unpaid again* — and the history is kept.
 
-## 13. Settings
+## 13. Equalized payments
+
+Some suppliers (often electricity or gas) bill **the same amount every month** — the *plan* — and settle the difference to
+the real consumption **once a year** with a settlement bill. During the year you do not see how big that settlement will
+be. The app shows it: it keeps calculating what your readings cost (as in [Charges](#10-charges)), compares it with what
+you were billed, and adds the differences up.
+
+**Set up.** In the contract choose the billing mode **Equalized payments**, save the contract and use the card
+**Equalized plan**: ＋ adds a version with *Valid from*, an optional *Valid to* and the *Monthly amount* (the total
+with VAT, as on the supplier's letter). When the supplier changes the amount, add a new version from the new month: the
+version that was running ends the day before it automatically, so the plans never overlap. Tap a row to change it, the
+trash can deletes it. Enter the **tariff** of the contract as well (see [Tariffs](#9-tariffs)) — without prices and
+readings the app cannot say what the real consumption costs.
+
+**Each month.** Enter the bill as usual ([Bills](#11-bills)): the kind is *Equalized payment* and the *Total* is the
+plan amount of the month. The bill is compared with the plan; the cost of the readings is shown next to it as information.
+
+**The settlement.** The card shows *Expected settlement: +9,50 € (surcharge) for 06.2026–11.2026*. **Show settlement**
+opens the page with one row per month since the last settlement bill (or since the first plan): the plan, what was
+**billed**, what the readings cost (**actual**), the **difference** and the running **total**. Example (invented): the plan is
+40,00 € for six months = 240,00 € billed; the readings cost 35,20 + 31,10 + 38,40 + 44,90 + 52,30 + 47,60 = 249,50 €;
+the expected settlement is 249,50 − 240,00 = **+9,50 €**, and the page says *You will probably pay about 9,50 € extra*.
+A negative result is a refund: *You will probably get about 12,00 € back*. A month without complete readings (or prices) is
+marked *Readings missing* with a link to the Readings screen and is **not counted** on either side until it is complete;
+the page tells you how many months are missing, so a result with missing months is only a rough guide.
+
+When the supplier sends the settlement, press **Enter settlement bill**: a new bill of kind *Settlement (annual reconciliation)* for the current
+month opens, with the expected amount as a hint in the empty *Total* field (it is not filled in — type what the supplier
+billed; a refund is a negative amount). After you save it, the next settlement period starts with the following month.
+
+## 14. Property tax
+
+Property tax (land, building) is assessed **once a year** and paid in **installments** with fixed due dates. Make a contract
+with the municipality, service *Property tax, building* (or *Property tax, land*) and billing mode **Tax (annual amount)**, save it and use the card
+**Tax by year**.
+
+**Enter yearly tax** (＋): the *Year* (this year by default), the *Yearly amount* and the *Number of installments* — 1, 2 or
+4 (4 by default). The due dates are filled in with the usual Latvian ones — **31.03, 15.05, 15.08, 15.11** (with 2
+installments 31.03 and 15.08, with 1 installment 31.03) — and you can change each date. The amount is split evenly; the
+remaining cents go to the first installment (101,00 € → 25,25 € × 4; 100,03 € → 25,03 € + 25,00 € × 3). The app creates one
+bill per installment, titled for example *Property tax 2026, installment 2 of 4*: its month is the month of the due date,
+and its service period is the whole year, so reports can spread the tax over the year.
+
+The card lists every year with the yearly total, the installments (due date, amount, status: *Unpaid*, *Overdue*, *Paid ✓*…),
+how much is paid and what remains. Tap an installment to open its bill; pay it with **Paid** or in the payment editor like
+any other bill ([Payments](#12-payments)).
+
+**Paying the whole year at once.** **Pay whole year** opens the payment editor with all unpaid installments of that year
+already allocated — one payment, one transfer, every installment becomes *Paid ✓*. You can also pay one installment after
+the other.
+
+**Entering a year again** (for example the tax was reassessed): the app asks *Installments for 2026 exist. Replace the
+unpaid ones?* **Replace** removes the installments that have no payment and creates the new ones; installments that
+already have a payment are **kept**, and the rest of the new yearly amount is split over the remaining due dates.
+
+## 15. Settings
 
 Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
@@ -481,7 +548,7 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
-## 14. Coming soon
+## 16. Coming soon
 
-Equalized-payment settlement and property tax installments, overview of what to do, reports and charts,
+Overview of what to do, reports and charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.

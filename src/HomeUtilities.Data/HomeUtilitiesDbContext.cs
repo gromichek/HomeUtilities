@@ -3,6 +3,7 @@ using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Data.Conversion;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,8 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
     public DbSet<TariffComponent> TariffComponents => Set<TariffComponent>();
 
     public DbSet<TariffRate> TariffRates => Set<TariffRate>();
+
+    public DbSet<EqualizedPlan> EqualizedPlans => Set<EqualizedPlan>();
 
     public DbSet<Bill> Bills => Set<Bill>();
 

@@ -7,6 +7,7 @@ using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -276,6 +277,56 @@ internal sealed class FakeTariffStore : ITariffStore
         Stored.RemoveAll(c => c.Id == id);
         return Task.CompletedTask;
     }
+}
+
+internal sealed class FakeEqualizedPlanStore : IEqualizedPlanStore
+{
+    /// <summary>Every plan ever stored, deleted ones included (nothing is hard-deleted).</summary>
+    public List<EqualizedPlan> All { get; } = [];
+
+    public List<EqualizedPlan> Saved { get; } = [];
+
+    public IEnumerable<EqualizedPlan> Stored => All.Where(p => !p.IsDeleted);
+
+    public Task<IReadOnlyList<EqualizedPlan>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<EqualizedPlan>>([.. Stored.Select(Copy).OrderBy(p => p.ValidFrom)]);
+
+    public Task<IReadOnlyList<EqualizedPlan>> ListByContractAsync(Guid contractId, CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<EqualizedPlan>>([.. Stored.Where(p => p.ContractId == contractId).Select(Copy).OrderBy(p => p.ValidFrom)]);
+
+    public Task<EqualizedPlan?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(p => p.Id == id) is { } plan ? Copy(plan) : null);
+
+    public Task SaveAsync(EqualizedPlan aggregate, CancellationToken ct = default)
+    {
+        Saved.Add(Copy(aggregate));
+        All.RemoveAll(p => p.Id == aggregate.Id);
+        All.Add(Copy(aggregate));
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        foreach (var plan in All.Where(p => p.Id == id))
+        {
+            plan.IsDeleted = true;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static EqualizedPlan Copy(EqualizedPlan plan) => new()
+    {
+        Id = plan.Id,
+        CreatedAt = plan.CreatedAt,
+        UpdatedAt = plan.UpdatedAt,
+        IsDeleted = plan.IsDeleted,
+        ContractId = plan.ContractId,
+        ValidFrom = plan.ValidFrom,
+        ValidTo = plan.ValidTo,
+        MonthlyAmount = plan.MonthlyAmount,
+        Notes = plan.Notes,
+    };
 }
 
 internal sealed class FakeVatRateStore : IVatRateStore
@@ -628,6 +679,8 @@ internal sealed class ContractTestKit
 
     public FakeTariffStore Tariffs { get; } = new();
 
+    public FakeEqualizedPlanStore Plans { get; } = new();
+
     public FakeVatRateStore VatRates { get; } = new();
 
     public FakeSupplierStore Suppliers { get; } = new();
@@ -664,6 +717,10 @@ internal sealed class ContractTestKit
 
     private PrepaymentService? _prepayments;
 
+    public EqualizedSettlementService Settlement => _settlement ??= new EqualizedSettlementService(Plans, Bills, ChargeLoader, Clock);
+
+    private EqualizedSettlementService? _settlement;
+
     public FakeChargeInputLoader ChargeLoader { get; }
 
     public FakeFileViewer Viewer { get; } = new();
@@ -674,7 +731,7 @@ internal sealed class ContractTestKit
         new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast);
 
     public ContractEditViewModel CreateContractEditor() =>
-        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, CreateSupplierEditor);
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Plans, Settlement, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, CreateSupplierEditor);
 
     public TariffComponentEditViewModel CreateTariffEditor() =>
         new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
@@ -697,7 +754,7 @@ internal sealed class ContractTestKit
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, Layout, CreateHistory);
 
     public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
-        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Settlement, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
 
     public PaymentEditViewModel CreatePaymentEditor() =>
         new(Payments, Bills, Contracts, Suppliers, Properties, Clock, Localizer, Dialogs, Navigation, Toast);

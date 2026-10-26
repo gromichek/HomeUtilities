@@ -947,6 +947,75 @@
   <data name="ChargeQuantityFromBillOf" xml:space="preserve"><value>{0} (из счёта {1})</value></data>
   <data name="ChargeVatGroup" xml:space="preserve"><value>НДС {0} % от {1} = {2}</value></data>
   <data name="ChargeWarn_QuantityFromBill" xml:space="preserve"><value>Введите количество для «{0}» из счёта поставщика (Счета → Количества из счёта).</value></data>
+  <data name="BillPlanLabel" xml:space="preserve"><value>Сумма по плану (равномерный платёж)</value></data>
+  <data name="BillActualByReadings" xml:space="preserve"><value>Фактически по показаниям: {0}</value></data>
+  <data name="EqPlanHeader" xml:space="preserve"><value>План равномерных платежей</value></data>
+  <data name="EqPlanHint" xml:space="preserve"><value>Поставщик выставляет одну и ту же сумму каждый месяц, а разница с реальным потреблением рассчитывается раз в год. Введите месячную сумму и вводите заново, когда она меняется.</value></data>
+  <data name="EqPlanEmpty" xml:space="preserve"><value>Плана пока нет. Добавьте месячную сумму из письма поставщика (＋).</value></data>
+  <data name="EqPlanAdd" xml:space="preserve"><value>Добавить план</value></data>
+  <data name="EqPlanSaveFirst" xml:space="preserve"><value>Сначала сохраните договор, потом добавьте план.</value></data>
+  <data name="EqShowSettlement" xml:space="preserve"><value>Показать расчёт</value></data>
+  <data name="EqPlanRow" xml:space="preserve"><value>с {0} — {1}/мес.</value></data>
+  <data name="EqPlanRowTo" xml:space="preserve"><value>{0} – {1} — {2}/мес.</value></data>
+  <data name="EqSummarySurcharge" xml:space="preserve"><value>Ожидаемый перерасчёт: +{0} (доплата) за {1}–{2}.</value></data>
+  <data name="EqSummaryRefund" xml:space="preserve"><value>Ожидаемый перерасчёт: −{0} (возврат) за {1}–{2}.</value></data>
+  <data name="EqSummaryZero" xml:space="preserve"><value>Ожидаемый перерасчёт: 0 за {1}–{2}.</value></data>
+  <data name="EqSummaryIncomplete" xml:space="preserve"><value>(Месяцы без показаний в расчёте не учтены: {0}.)</value></data>
+  <data name="EqPlanNew" xml:space="preserve"><value>Новый план</value></data>
+  <data name="EqPlanEdit" xml:space="preserve"><value>Изменить план</value></data>
+  <data name="EqPlanValidFrom" xml:space="preserve"><value>Действует с</value></data>
+  <data name="EqPlanHasValidTo" xml:space="preserve"><value>Действует по (выключите, если срока окончания нет)</value></data>
+  <data name="EqPlanValidTo" xml:space="preserve"><value>Действует по</value></data>
+  <data name="EqPlanAmount" xml:space="preserve"><value>Месячная сумма (всего с НДС)</value></data>
+  <data name="EqPlanNote" xml:space="preserve"><value>Заметки</value></data>
+  <data name="EqSettlementTitle" xml:space="preserve"><value>Перерасчёт</value></data>
+  <data name="EqSettlementPageTitle" xml:space="preserve"><value>Перерасчёт · {0}</value></data>
+  <data name="EqSettlementPeriod" xml:space="preserve"><value>С последнего перерасчёта: {0}–{1}</value></data>
+  <data name="EqSettlementEmpty" xml:space="preserve"><value>Пока нет месяцев для показа.</value></data>
+  <data name="EqSettlementHint" xml:space="preserve"><value>Фактически = сколько стоят показания по тарифу договора. Месяцы без полных показаний не учитываются.</value></data>
+  <data name="EqColMonth" xml:space="preserve"><value>Месяц</value></data>
+  <data name="EqColBilled" xml:space="preserve"><value>Счета</value></data>
+  <data name="EqColActual" xml:space="preserve"><value>Факт</value></data>
+  <data name="EqColDifference" xml:space="preserve"><value>Разн.</value></data>
+  <data name="EqColRunning" xml:space="preserve"><value>Итого</value></data>
+  <data name="EqEnterSettlementBill" xml:space="preserve"><value>Ввести счёт-перерасчёт</value></data>
+  <data name="EqPlanShort" xml:space="preserve"><value>План {0}</value></data>
+  <data name="EqReadingsMissing" xml:space="preserve"><value>Нет показаний — открыть показания</value></data>
+  <data name="EqTotals" xml:space="preserve"><value>Выставлено {0} · фактически по показаниям {1}</value></data>
+  <data name="EqWordsSurcharge" xml:space="preserve"><value>Вероятно, придётся доплатить около {0}.</value></data>
+  <data name="EqWordsRefund" xml:space="preserve"><value>Вероятно, вам вернут около {0}.</value></data>
+  <data name="EqWordsZero" xml:space="preserve"><value>Выставленное и фактическое совпадают: перерасчёта не ожидается.</value></data>
+  <data name="EqIncomplete" xml:space="preserve"><value>Месяцы без показаний или цен не учтены: {0}. Введите показания, чтобы картина была полной.</value></data>
+  <data name="ChargesEqualizedLine" xml:space="preserve"><value>План {0} · факт {1} · с прошлого перерасчёта {2}</value></data>
+  <data name="TaxHeader" xml:space="preserve"><value>Налог по годам</value></data>
+  <data name="TaxHint" xml:space="preserve"><value>Самоуправление начисляет налог раз в год, а вы платите его частями. Введите сумму за год: приложение создаст по одному счёту на каждый взнос.</value></data>
+  <data name="TaxEmpty" xml:space="preserve"><value>Налог ещё не введён. Нажмите ＋, чтобы ввести налог за год.</value></data>
+  <data name="TaxAddYear" xml:space="preserve"><value>Ввести налог за год</value></data>
+  <data name="TaxSaveFirst" xml:space="preserve"><value>Сначала сохраните договор, потом вводите налог.</value></data>
+  <data name="TaxYearNew" xml:space="preserve"><value>Налог за год</value></data>
+  <data name="TaxYearLabel" xml:space="preserve"><value>Год</value></data>
+  <data name="TaxYearAmount" xml:space="preserve"><value>Сумма за год</value></data>
+  <data name="TaxYearCount" xml:space="preserve"><value>Количество взносов</value></data>
+  <data name="TaxYearDueDates" xml:space="preserve"><value>Сроки оплаты</value></data>
+  <data name="TaxYearDueDatesHint" xml:space="preserve"><value>Подставлены обычные сроки: 31.03, 15.05, 15.08 и 15.11. Измените их, если в налоговом уведомлении указано иначе. При смене года или количества взносов обычные сроки подставляются снова.</value></data>
+  <data name="TaxYearInstallmentNumber" xml:space="preserve"><value>Взнос {0}</value></data>
+  <data name="TaxInstallmentRow" xml:space="preserve"><value>{0}/{1} · до {2}</value></data>
+  <data name="TaxYearHeader" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="TaxYearSummary" xml:space="preserve"><value>Оплачено {0} · осталось {1}</value></data>
+  <data name="TaxPayYear" xml:space="preserve"><value>Оплатить весь год</value></data>
+  <data name="TaxNothingToCreate" xml:space="preserve"><value>Налог за {0} уже покрыт оплаченными взносами. Создавать нечего.</value></data>
+  <data name="TaxReplaceTitle" xml:space="preserve"><value>Заменить взносы?</value></data>
+  <data name="TaxReplaceMessage" xml:space="preserve"><value>Взносы за {0} уже есть. Заменить неоплаченные? Взносы с оплатой останутся.</value></data>
+  <data name="TaxReplace" xml:space="preserve"><value>Заменить</value></data>
+  <data name="TaxInstallmentTitle" xml:space="preserve"><value>Налог на недвижимость {0}, взнос {1} из {2}</value></data>
+  <data name="TaxCreated" xml:space="preserve"><value>Создано взносов: {0} (за {1}).</value></data>
+  <data name="Error_equalized_plan_amount_not_positive" xml:space="preserve"><value>Введите месячную сумму больше нуля.</value></data>
+  <data name="Error_equalized_plan_valid_to_before_valid_from" xml:space="preserve"><value>Дата окончания раньше даты начала.</value></data>
+  <data name="Error_equalized_plan_overlap" xml:space="preserve"><value>В эти дни действует другой план. Планы не могут пересекаться.</value></data>
+  <data name="Error_tax_yearly_amount_not_positive" xml:space="preserve"><value>Введите сумму за год больше нуля.</value></data>
+  <data name="Error_tax_installment_count_invalid" xml:space="preserve"><value>Выберите 1, 2 или 4 взноса.</value></data>
+  <data name="Error_tax_due_date_outside_year" xml:space="preserve"><value>Срок оплаты должен быть в {0} году.</value></data>
+  <data name="Error_tax_due_dates_not_ascending" xml:space="preserve"><value>Каждый срок должен быть позже предыдущего.</value></data>
   <data name="BillQuantityAmount" xml:space="preserve"><value>Сумма по счёту (без НДС)</value></data>
   <data name="BillQuantityAmountHint" xml:space="preserve"><value>Необязательно — введите, если сумма поставщика отличается от количества × цены.</value></data>
   <data name="BillAmountMismatch" xml:space="preserve"><value>Сумма по счёту не совпадает с количеством × цена — возможно, цена изменилась.</value></data>

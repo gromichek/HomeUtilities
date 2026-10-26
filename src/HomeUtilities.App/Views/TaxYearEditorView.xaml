@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             xmlns:common="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.TaxYearEditorView"
+             x:DataType="vm:TaxYearEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
+    </ContentView.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+
+            <Label Text="{Binding YearLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding YearText}" MaxLength="4" Keyboard="Numeric" />
+            <Label Text="{Binding YearError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding YearError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding AmountLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding AmountText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
+            <Label Text="{Binding AmountError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding AmountError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding CountLabel}" Style="{StaticResource MutedLabel}" />
+            <Picker ItemsSource="{Binding Counts}"
+                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    SelectedIndex="{Binding SelectedCountIndex, Mode=TwoWay}" />
+            <Label Text="{Binding CountError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding CountError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding DueDatesLabel}" Style="{StaticResource MutedLabel}" />
+            <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding DueDates}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TaxDueDateRowViewModel">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding Label}" FontSize="12" Style="{StaticResource MutedLabel}" />
+                            <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" />
+                            <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
+                                   IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+            <Label Text="{Binding DueDatesHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+            <Label Text="{Binding PreviewText}" FontAttributes="Bold" IsVisible="{Binding PreviewText, Converter={StaticResource HasText}}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

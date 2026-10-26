@@ -124,6 +124,9 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
     /// <summary>The bill a new payment starts with: its contract, the open amount, allocated in full.</summary>
     public Guid? PresetBillId { get; set; }
 
+    /// <summary>Several bills a new payment starts with ("Pay whole year"): each allocated in full, the amount is their open sum.</summary>
+    public IReadOnlyList<Guid> PresetBillIds { get; set; } = [];
+
     /// <summary>The contract a new payment starts with.</summary>
     public Guid? PresetContractId { get; set; }
 
@@ -349,7 +352,10 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
         SelectedContract = null;
         SelectedMethod = Methods.First(m => m.Value.Equals(PaymentMethod.BankTransfer));
 
-        var bill = PresetBillId is { } billId && _billsById.TryGetValue(billId, out var found) ? found : null;
+        var presetBills = PresetBillIds.Select(id => _billsById.GetValueOrDefault(id)).OfType<Bill>().ToList();
+        var bill = presetBills.Count > 0
+            ? presetBills[0]
+            : PresetBillId is { } billId && _billsById.TryGetValue(billId, out var found) ? found : null;
         var contract = bill?.ContractId is { } billContract
             ? _contractsById.GetValueOrDefault(billContract)
             : PresetContractId is { } contractId ? _contractsById.GetValueOrDefault(contractId) : null;
@@ -365,11 +371,20 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
         if (bill is not null)
         {
             _currency = bill.Currency;
-            var open = OpenOf(bill);
-            if (open != 0)
+            var total = 0m;
+            foreach (var preset in presetBills.Count > 0 ? presetBills : [bill])
             {
-                AmountText = PaymentText.Field(open);
-                _allocations.Add(new PaymentAllocation { PaymentId = _payment.Id, BillId = bill.Id, Amount = open });
+                var open = OpenOf(preset);
+                if (open != 0)
+                {
+                    _allocations.Add(new PaymentAllocation { PaymentId = _payment.Id, BillId = preset.Id, Amount = open });
+                    total += open;
+                }
+            }
+
+            if (total != 0)
+            {
+                AmountText = PaymentText.Field(total);
             }
 
             if (contract is not null && await PurposeAsync(contract) is { } purpose)

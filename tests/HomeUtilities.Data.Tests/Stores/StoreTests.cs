@@ -1,6 +1,7 @@
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Data.Stores;
 using Microsoft.EntityFrameworkCore;
@@ -142,6 +143,31 @@ public class StoreTests
         Assert.Equal(["Water supply", "Sewerage"], list.Select(t => t.Name));
         Assert.Equal([1.30m, 1.41m], list[0].Rates.Select(r => r.Price));
         Assert.Empty(await store.ListByContractAsync(Guid.CreateVersion7()));
+    }
+
+    [Fact]
+    public async Task EqualizedPlan_round_trip_list_by_contract_oldest_first_without_deleted()
+    {
+        using var test = new TestDb();
+        var (propertyId, supplierId, categoryId) = await PrepareContractOwnersAsync(test);
+        var contract = NewContract(propertyId, supplierId, categoryId, "Electricity");
+        var other = NewContract(propertyId, supplierId, categoryId, "Gas");
+        await new ContractStore(test.Factory).SaveAsync(contract);
+        await new ContractStore(test.Factory).SaveAsync(other);
+        var store = new EqualizedPlanStore(test.Factory);
+        await store.SaveAsync(new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2026, 6, 1), MonthlyAmount = 45.50m, Notes = "new price" });
+        await store.SaveAsync(new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2025, 6, 1), ValidTo = new DateOnly(2026, 5, 31), MonthlyAmount = 40m });
+        await store.SaveAsync(new EqualizedPlan { ContractId = other.Id, ValidFrom = new DateOnly(2026, 1, 1), MonthlyAmount = 12m });
+        var removed = new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2024, 1, 1), MonthlyAmount = 1m };
+        await store.SaveAsync(removed);
+        await store.DeleteAsync(removed.Id);
+
+        var list = await store.ListByContractAsync(contract.Id);
+        Assert.Equal([new DateOnly(2025, 6, 1), new DateOnly(2026, 6, 1)], list.Select(p => p.ValidFrom));
+        Assert.Equal([new DateOnly(2026, 5, 31), null], list.Select(p => p.ValidTo));
+        Assert.Equal([40m, 45.50m], list.Select(p => p.MonthlyAmount));
+        Assert.Equal("new price", list[1].Notes);
+        Assert.Single(await store.ListByContractAsync(other.Id));
     }
 
     [Fact]

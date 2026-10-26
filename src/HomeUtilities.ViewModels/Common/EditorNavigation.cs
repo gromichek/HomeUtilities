@@ -17,4 +17,7 @@ public static class EditorNavigation
 
     /// <summary>Carries the id of the bill a new payment starts with (allocated in full).</summary>
     public const string BillIdParameter = "billId";
+
+    /// <summary>Carries the ids (comma-separated) of several bills a new payment starts with, each allocated in full.</summary>
+    public const string BillIdsParameter = "billIds";
 }

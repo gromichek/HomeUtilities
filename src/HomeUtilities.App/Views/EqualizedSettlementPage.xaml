@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.EqualizedSettlementPage"
+                x:DataType="vm:EqualizedSettlementViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+    <views:PageBase.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+    </views:PageBase.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="12">
+
+            <!-- The result in words, red for a surcharge and green for a refund. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding PeriodText}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding ResultText}" FontAttributes="Bold" FontSize="18" Style="{StaticResource MutedLabel}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" x:DataType="vm:EqualizedSettlementViewModel" Binding="{Binding IsSurcharge}" Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" x:DataType="vm:EqualizedSettlementViewModel" Binding="{Binding IsRefund}" Value="True">
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="{Binding TotalsText}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding IncompleteText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasIncompleteText}" />
+                    <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Button Text="{Binding EnterBillText}" Command="{Binding EnterSettlementBillCommand}"
+                            Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Month table: plan under the month, billed, actual by readings, difference, running total. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsEmpty}" />
+
+                    <Grid ColumnDefinitions="1.2*,*,*,*,*" ColumnSpacing="4" IsVisible="{Binding HasRows}">
+                        <Label Grid.Column="0" Text="{Binding MonthHeader}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <Label Grid.Column="1" Text="{Binding BilledHeader}" Style="{StaticResource MutedLabel}" FontSize="12" HorizontalTextAlignment="End" />
+                        <Label Grid.Column="2" Text="{Binding ActualHeader}" Style="{StaticResource MutedLabel}" FontSize="12" HorizontalTextAlignment="End" />
+                        <Label Grid.Column="3" Text="{Binding DifferenceHeader}" Style="{StaticResource MutedLabel}" FontSize="12" HorizontalTextAlignment="End" />
+                        <Label Grid.Column="4" Text="{Binding RunningHeader}" Style="{StaticResource MutedLabel}" FontSize="12" HorizontalTextAlignment="End" />
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Rows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EqualizedSettlementRowViewModel">
+                                <VerticalStackLayout Spacing="2">
+                                    <Grid ColumnDefinitions="1.2*,*,*,*,*" ColumnSpacing="4">
+                                        <VerticalStackLayout Grid.Column="0">
+                                            <Label Text="{Binding PeriodText}" FontAttributes="Bold" FontSize="13" />
+                                            <Label Text="{Binding PlanText}" Style="{StaticResource MutedLabel}" FontSize="11" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1" Text="{Binding BilledText}" FontSize="13" HorizontalTextAlignment="End" />
+                                        <Label Grid.Column="2" Text="{Binding ActualText}" FontSize="13" HorizontalTextAlignment="End" />
+                                        <Label Grid.Column="3" Text="{Binding DifferenceText}" FontSize="13" HorizontalTextAlignment="End">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" x:DataType="vm:EqualizedSettlementRowViewModel" Binding="{Binding IsSurcharge}" Value="True">
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" x:DataType="vm:EqualizedSettlementRowViewModel" Binding="{Binding IsRefund}" Value="True">
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <Label Grid.Column="4" Text="{Binding RunningText}" FontSize="13" FontAttributes="Bold" HorizontalTextAlignment="End" />
+                                    </Grid>
+                                    <Button Text="{Binding MissingText}" Command="{Binding OpenReadingsCommand}"
+                                            Style="{StaticResource TextButton}" HorizontalOptions="Start"
+                                            IsVisible="{Binding IsIncomplete}" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</views:PageBase>

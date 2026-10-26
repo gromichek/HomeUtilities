@@ -74,6 +74,32 @@ public sealed partial class AmountEditor : ObservableObject
         }
     }
 
+    /// <summary>Sets the Total a new bill starts with (an equalized plan amount); it counts as filled in but is not an edit by the user.</summary>
+    public void SetDefaultGross(decimal? gross)
+    {
+        _updating = true;
+        try
+        {
+            GrossText = gross is { } value ? FormatMoney(value) : string.Empty;
+        }
+        finally
+        {
+            _updating = false;
+        }
+
+        _manual.Remove(nameof(GrossText));
+        if (gross is not null)
+        {
+            _manual.Insert(0, nameof(GrossText));
+            if (_manual.Count > 2)
+            {
+                _manual.RemoveRange(2, _manual.Count - 2);
+            }
+        }
+
+        Recompute();
+    }
+
     /// <summary>Sets the VAT % a new bill starts with (the contract's); it counts as filled in, so Net or Total alone completes the amount.</summary>
     public void SetDefaultVatPercent(decimal? percent)
     {

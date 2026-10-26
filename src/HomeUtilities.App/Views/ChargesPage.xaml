@@ -104,6 +104,9 @@
                                         Style="{StaticResource TextButton}" HorizontalOptions="Start"
                                         IsVisible="{Binding ShowEnterBill}" />
 
+                                <!-- Equalized contract: plan, actual charge and the running difference since the last settlement. -->
+                                <Label Text="{Binding EqualizedText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasEqualizedText}" />
+
                                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExpanded}">
 
                                     <!-- No tariff: a muted line with a link to the contract. -->

@@ -5,6 +5,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
@@ -67,6 +68,10 @@ public sealed partial class BillEditViewModel
         if (preset is not null && preset.PropertyId == propertyId)
         {
             ApplyContract(preset);
+            if (PresetKind is { } presetKind && Kinds.FirstOrDefault(k => k.Value.Equals(presetKind)) is { } kindOption)
+            {
+                SelectedKind = kindOption;
+            }
         }
 
         RebuildAttachmentRows();
@@ -295,6 +300,7 @@ public sealed partial class BillEditViewModel
         var period = Period;
         ChargeInput? input = null;
         CalculatedCharge? live = null;
+        IReadOnlyList<EqualizedPlan> plans = [];
         IReadOnlyList<BillQuantityRowViewModel> rows = [];
         var failed = false;
         if (!IsOneOff && _contract is { } contract)
@@ -302,6 +308,11 @@ public sealed partial class BillEditViewModel
             try
             {
                 input = await _chargeLoader.LoadAsync(contract.Id, period);
+                if (contract.BillingMode == BillingMode.Equalized)
+                {
+                    plans = await _planStore.ListByContractAsync(contract.Id);
+                }
+
                 if (input is not null && input.Components.Any(c => !c.IsDeleted))
                 {
                     rows = BuildQuantityRows(input);
@@ -322,6 +333,7 @@ public sealed partial class BillEditViewModel
 
         _input = input;
         _live = live;
+        _plans = plans;
         QuantityRows = rows;
         ApplyAmountWarnings(live);
         _calculationFailed = failed;
@@ -331,7 +343,48 @@ public sealed partial class BillEditViewModel
             Amounts.SetDefaultVatPercent(DefaultVatPercent(input));
         }
 
+        UpdatePlanAmount();
+        if (IsNew)
+        {
+            ApplyPlanDefault();
+        }
+
         UpdateComparison();
+    }
+
+    /// <summary>The plan amount of the bill's period, when the bill is an equalized one of a contract with a plan.</summary>
+    private void UpdatePlanAmount()
+    {
+        _planAmount = !IsOneOff && SelectedKind?.Value is BillKind.Equalized ? EqualizedPlans.AmountFor(_plans, Period) : null;
+        OnPropertyChanged(nameof(PlanMode));
+        OnPropertyChanged(nameof(ShowComparison));
+        OnPropertyChanged(nameof(BasisLabel));
+    }
+
+    /// <summary>
+    /// A new equalized bill starts with the plan amount of its period as the Total. A Total the user typed is kept; one that
+    /// is still the earlier default follows the period.
+    /// </summary>
+    private void ApplyPlanDefault()
+    {
+        var current = Amounts.GrossText;
+        var isDefault = string.IsNullOrWhiteSpace(current) || current == _planDefaultText;
+        if (_planAmount is not { } amount)
+        {
+            if (current == _planDefaultText && _planDefaultText.Length > 0)
+            {
+                Amounts.SetDefaultGross(null);
+            }
+
+            _planDefaultText = string.Empty;
+            return;
+        }
+
+        if (isDefault)
+        {
+            Amounts.SetDefaultGross(amount);
+            _planDefaultText = Amounts.GrossText;
+        }
     }
 
     /// <summary>One row per quantity-from-bill component; the text is kept from the rows shown before, else from the stored bill.</summary>
@@ -445,9 +498,27 @@ public sealed partial class BillEditViewModel
         var result = BillComparison.Compare(new Bill { Gross = gross ?? 0m, ConsumptionOnBill = consumption }, calculation, metered);
         var hasLines = calculation is { Lines.Count: > 0 };
 
-        CalculatedText = hasLines ? Money(calculation!.TotalGross) : string.Empty;
-        var difference = gross is null ? null : result.Difference;
-        var percent = gross is null ? null : result.DifferencePercent;
+        decimal? difference;
+        decimal? percent;
+        if (_planAmount is { } plan)
+        {
+            // An equalized bill is compared with the plan; the calculation by readings is shown as information.
+            CalculatedText = Money(plan);
+            difference = gross is null ? null : gross.Value - plan;
+            percent = difference is { } d0 && plan != 0 ? Math.Round(d0 / plan * 100, 1, MidpointRounding.AwayFromZero) : null;
+            ActualInfoText = calculation is { IsComplete: true, Lines.Count: > 0 }
+                ? _localizer.Get("BillActualByReadings", Money(calculation.TotalGross))
+                : string.Empty;
+        }
+        else
+        {
+            CalculatedText = hasLines ? Money(calculation!.TotalGross) : string.Empty;
+            difference = gross is null ? null : result.Difference;
+            percent = gross is null ? null : result.DifferencePercent;
+            ActualInfoText = string.Empty;
+        }
+
+        OnPropertyChanged(nameof(BasisLabel));
         DifferenceText = difference is { } d ? BillText.Difference(d, percent, CurrencySymbol) : string.Empty;
         var tone = BillComparison.ToneOf(percent);
         DifferenceHigher = tone == DifferenceTone.Higher;

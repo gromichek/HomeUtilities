@@ -302,4 +302,25 @@ public static class ErrorCodes
 
     /// <summary>The SHA-256 is not 64 hex characters.</summary>
     public const string AttachmentHashInvalid = "attachment.hash_invalid";
+
+    /// <summary>The monthly amount of an equalized plan is not above zero.</summary>
+    public const string EqualizedPlanAmountNotPositive = "equalized_plan.amount_not_positive";
+
+    /// <summary>The end date of an equalized plan is before its start date.</summary>
+    public const string EqualizedPlanValidToBeforeValidFrom = "equalized_plan.valid_to_before_valid_from";
+
+    /// <summary>An equalized plan overlaps the previous one; reported on the later plan.</summary>
+    public const string EqualizedPlanOverlap = "equalized_plan.overlap";
+
+    /// <summary>The yearly property tax is not above zero.</summary>
+    public const string TaxYearlyAmountNotPositive = "tax.yearly_amount_not_positive";
+
+    /// <summary>The number of installments is not 1, 2 or 4.</summary>
+    public const string TaxInstallmentCountInvalid = "tax.installment_count_invalid";
+
+    /// <summary>A due date lies outside the tax year; Args: the year.</summary>
+    public const string TaxDueDateOutsideYear = "tax.due_date_outside_year";
+
+    /// <summary>A due date is not after the previous one.</summary>
+    public const string TaxDueDatesNotAscending = "tax.due_dates_not_ascending";
 }
