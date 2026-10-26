@@ -42,6 +42,17 @@ public sealed class ChargeInputLoader(IDbContextFactory<HomeUtilitiesDbContext> 
             .OrderBy(v => v.Code)
             .AsSplitQuery().ToListAsync(ct);
 
+        // Quantities typed from the bill(s) of the period; the newest bill wins per component.
+        var quantityBills = await db.Bills.AsNoTracking()
+            .Where(b => b.ContractId == contractId && b.Period == period)
+            .OrderBy(b => b.CreatedAt)
+            .ToListAsync(ct);
+        var quantities = new Dictionary<Guid, decimal>();
+        foreach (var quantity in quantityBills.SelectMany(b => b.BillQuantities))
+        {
+            quantities[quantity.ComponentId] = quantity.Quantity;
+        }
+
         return new ChargeInput(
             contract,
             property,
@@ -49,6 +60,7 @@ public sealed class ChargeInputLoader(IDbContextFactory<HomeUtilitiesDbContext> 
             contractMeters,
             [.. meters.Select(MeterStore.SortChildren)],
             vatCatalog,
-            period);
+            period,
+            quantities);
     }
 }

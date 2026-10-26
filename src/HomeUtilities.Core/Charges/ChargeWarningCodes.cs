@@ -27,6 +27,9 @@ public static class ChargeWarningCodes
     /// <summary>The rate cannot be applied to the component (tiers on a net export component).</summary>
     public const string InvalidTariff = "charge.invalid_tariff";
 
+    /// <summary>The quantity of a QuantityFromBill component has not been entered from the bill.</summary>
+    public const string QuantityFromBill = "charge.quantity_from_bill";
+
     /// <summary>The property parameter that gives the quantity has no value on the rate date.</summary>
     public const string MissingParameter = "charge.missing_parameter";
 }

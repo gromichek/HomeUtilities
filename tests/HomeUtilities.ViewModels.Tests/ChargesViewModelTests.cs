@@ -190,6 +190,68 @@ public class ChargesViewModelTests : IDisposable
         Assert.Equal(string.Empty, vm.TotalsText);
     }
 
+    /// <summary>Hot water 7.500 m³ × 3.20, heat 0.210 MWh and difference 0.150 m³ at 12 % VAT, as on the supplier's bill.</summary>
+    private (Contract Contract, TariffComponent Heat, TariffComponent Difference) AddHeating()
+    {
+        var contract = AddContract("Heating");
+        var hot = AddMeter(contract, "Bathroom hot");
+        Read(hot, new DateOnly(2026, 9, 26), 100m);
+        Read(hot, new DateOnly(2026, 10, 26), 107.5m);
+        AddComponent(contract, "Hot water", ChargeBasis.PerUnit, 3.20m, vat: "LV-REDUCED", order: 0);
+        var heat = AddComponent(contract, "Heat", ChargeBasis.QuantityFromBill, 70m, vat: "LV-REDUCED", order: 1);
+        heat.QuantityUnit = MeterUnit.MWh;
+        var difference = AddComponent(contract, "Hot water difference", ChargeBasis.QuantityFromBill, 3.20m, vat: "LV-REDUCED", order: 2);
+        difference.QuantityUnit = MeterUnit.M3;
+        return (contract, heat, difference);
+    }
+
+    [Fact]
+    public async Task QuantityFromBill_WithoutABill_ShowsTheMissingQuantityAndAWarning()
+    {
+        var (_, _, difference) = AddHeating();
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal(ChargeCardStatus.Incomplete, card.Status);
+        Assert.Equal("ChargeQuantityFromBill [en]", card.Lines[1].QuantityText);
+        Assert.False(card.Lines[1].HasAmounts);
+        Assert.Contains(card.Warnings, w => w.Message == "ChargeWarn_QuantityFromBill Heat [en]");
+        Assert.Contains(card.Warnings, w => w.Message == "ChargeWarn_QuantityFromBill Hot water difference [en]");
+        Assert.NotNull(difference);
+    }
+
+    [Fact]
+    public async Task QuantityFromBill_UsesTheQuantitiesOfTheBillOfTheMonth_AndShowsVatOnTheTotal()
+    {
+        // 24.00 + 0.210 MWh * 70.00 = 14.70 + 0.150 m3 * 3.20 = 0.48 -> net 39.18; VAT 12 % of 39.18 = 4.70; total 43.88
+        var (contract, heat, difference) = AddHeating();
+        var bill = Bill.CreateFor(contract, new YearMonth(2026, 10), _kit.Clock);
+        bill.Gross = 43.88m;
+        bill.BillQuantities = [new BillQuantity(heat.Id, 0.210m), new BillQuantity(difference.Id, 0.150m)];
+        _kit.Bills.All.Add(bill);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal(ChargeCardStatus.Complete, card.Status);
+        Assert.StartsWith("ChargeQuantityFromBillOf 0.210 Enum_MeterUnit_MWh [en]|10.2026", card.Lines[1].QuantityText);
+        Assert.Equal("14.70 Currency_Symbol_EUR [en]", card.Lines[1].NetText);
+        Assert.Equal("43.88 Currency_Symbol_EUR [en]", card.TotalText);
+        var group = Assert.Single(card.VatGroupTexts);
+        Assert.Equal("ChargeVatGroup 12|39.18 Currency_Symbol_EUR [en]|4.70 Currency_Symbol_EUR [en] [en]", group);
+    }
+
+    [Fact]
+    public async Task VatPerLine_ShowsNoVatGroupLines()
+    {
+        AddWater().Contract.VatCalculation = VatCalculation.PerLine;
+
+        var vm = await LoadAsync();
+
+        Assert.Empty(Assert.Single(vm.Cards).VatGroupTexts);
+    }
+
     [Fact]
     public async Task SteppedPrice_ShowsOneLinePerSlice()
     {

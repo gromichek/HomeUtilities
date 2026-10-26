@@ -241,6 +241,25 @@ public sealed class SampleDataGenerator(
         CancellationToken ct)
     {
         var input = await chargeLoader.LoadAsync(contract.Id, period, ct);
+
+        // Heating: the supplier prints the quantities of its share; the sample bill carries them (invented values).
+        var billQuantities = new List<BillQuantity>();
+        if (input is not null)
+        {
+            foreach (var component in input.Components.Where(c => c.Basis == ChargeBasis.QuantityFromBill).OrderBy(c => c.SortOrder))
+            {
+                var quantity = component.QuantityUnit == MeterUnit.MWh
+                    ? 0.18m + period.Month % 4 * 0.01m
+                    : 0.10m + period.Month % 3 * 0.05m;
+                billQuantities.Add(new BillQuantity(component.Id, quantity));
+            }
+
+            if (billQuantities.Count > 0)
+            {
+                input = input with { QuantitiesFromBill = billQuantities.ToDictionary(q => q.ComponentId, q => q.Quantity) };
+            }
+        }
+
         var calculated = input is null ? null : ChargeCalculator.Calculate(input);
         var hasCalculation = calculated is { IsComplete: true, Lines.Count: > 0 };
         var vatPercent = calculated?.Lines.FirstOrDefault()?.VatPercent ?? 21m;
@@ -249,6 +268,7 @@ public sealed class SampleDataGenerator(
         var calculatedTotal = hasCalculation ? calculated!.TotalGross : 0m;
         var total = contract.Service switch
         {
+            ServiceKind.Heating when billQuantities.Count > 0 && hasCalculation => calculatedTotal,
             ServiceKind.Heating => MoneyMath.Round(calculatedTotal + 46m + (decimal)_random.NextDouble() * 8m),
             ServiceKind.Waste => MoneyMath.Round(13.9m + (decimal)_random.NextDouble() * 1.2m),
             ServiceKind.InternetTv => 22.95m,
@@ -270,6 +290,7 @@ public sealed class SampleDataGenerator(
         var due = BillDefaults.DueDate(contract, period) ?? bill.IssuedOn.Value;
         bill.DueOn = due < bill.IssuedOn ? bill.IssuedOn : due;
         ApplyAmounts(bill, total, vatPercent);
+        bill.BillQuantities = billQuantities;
         if (hasCalculation && !calculated!.Lines.Any(l => l.IsFromBill))
         {
             bill.CalculatedSnapshot = calculated;
@@ -442,8 +463,12 @@ public sealed class SampleDataGenerator(
         var changeMonth = YearMonth.From(_today).AddMonths(-3);
         var changeDate = new DateOnly(changeMonth.Year, changeMonth.Month, 1);
         var nextMonth = YearMonth.From(_today).AddMonths(1).FirstDay;
-        var waterHeating = Component(heat, "Water heating", ServiceKind.WaterHeating, ChargeBasis.PerUnit, 0, "LV-REDUCED", Rate(start, 4.56m));
+        var waterHeating = Component(heat, "Hot water", ServiceKind.WaterHeating, ChargeBasis.PerUnit, 0, "LV-REDUCED", Rate(start, 3.20m));
         waterHeating.MeterIds = [.. hotMeters.Select(m => m.Id)];
+        var heatCirculation = Component(heat, "Heat for heating/circulation", ServiceKind.Heating, ChargeBasis.QuantityFromBill, 1, "LV-REDUCED", Rate(start, 70m));
+        heatCirculation.QuantityUnit = MeterUnit.MWh;
+        var hotWaterDifference = Component(heat, "Hot water difference", ServiceKind.WaterHeating, ChargeBasis.QuantityFromBill, 2, "LV-REDUCED", Rate(start, 3.20m));
+        hotWaterDifference.QuantityUnit = MeterUnit.M3;
         var day = Component(cottagePower, "Energy, day", ServiceKind.Electricity, ChargeBasis.PerUnit, 0, Rate(start, 0.1245m));
         day.RegisterKinds = [RegisterKind.Day];
         var night = Component(cottagePower, "Energy, night", ServiceKind.Electricity, ChargeBasis.PerUnit, 1, Rate(start, 0.0733m));
@@ -457,7 +482,8 @@ public sealed class SampleDataGenerator(
             Component(water, "Water supply", ServiceKind.ColdWater, ChargeBasis.PerUnit, 0, Rate(start, 1.32m), Rate(changeDate, 1.41m)),
             Component(water, "Sewerage", ServiceKind.Sewerage, ChargeBasis.PerUnit, 1, Rate(start, 0.86m)),
             waterHeating,
-            Component(heat, "Heating", ServiceKind.Heating, ChargeBasis.FromBill, 1, "LV-REDUCED"),
+            heatCirculation,
+            hotWaterDifference,
             Component(maintenance, "Maintenance", ServiceKind.Maintenance, ChargeBasis.PerArea, 0, Rate(start, 0.6711m, includesVat: true)),
             Component(waste, "Waste", ServiceKind.Waste, ChargeBasis.PerResident, 0, Rate(start, 5.4m)),
 
@@ -469,6 +495,9 @@ public sealed class SampleDataGenerator(
             day,
             night,
             export,
+
+            // The supplier adds a lump sum the app cannot check (the only "amount from the bill" component).
+            Component(cottagePower, "Grid fee, as billed", ServiceKind.Electricity, ChargeBasis.FromBill, 3),
         ];
 
         foreach (var component in components)

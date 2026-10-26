@@ -67,6 +67,9 @@ public class Bill : SyncEntity
     /// <summary>Quantity the supplier billed, to compare with the metered one (water losses).</summary>
     public decimal? ConsumptionOnBill { get; set; }
 
+    /// <summary>Quantities typed from the bill for the QuantityFromBill components of the contract.</summary>
+    public List<BillQuantity> BillQuantities { get; set; } = [];
+
     /// <summary>The app's own calculation at the time the bill was entered.</summary>
     public CalculatedCharge? CalculatedSnapshot { get; set; }
 

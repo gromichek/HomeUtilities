@@ -32,13 +32,13 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     private static readonly HashSet<string> DirtyFields =
     [
         nameof(ComponentName), nameof(SelectedService), nameof(SelectedCategory), nameof(SelectedBasis), nameof(Notes),
-        nameof(SelectedVatOption), nameof(VatPercentText), nameof(SelectedParameter), nameof(CustomParameterName),
+        nameof(SelectedVatOption), nameof(VatPercentText), nameof(SelectedParameter), nameof(CustomParameterName), nameof(SelectedUnit),
     ];
 
     /// <summary>The properties whose change can change the worked example or the "now" line.</summary>
     private static readonly HashSet<string> ExampleFields =
     [
-        nameof(SelectedBasis), nameof(SelectedVatOption), nameof(VatPercentText), nameof(SelectedParameter), nameof(CustomParameterName),
+        nameof(SelectedBasis), nameof(SelectedVatOption), nameof(VatPercentText), nameof(SelectedParameter), nameof(CustomParameterName), nameof(SelectedUnit),
     ];
 
     private readonly ITariffStore _store;
@@ -85,7 +85,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(
         nameof(SelectedBasisIndex), nameof(BasisHint), nameof(ShowMeterSelection), nameof(ShowParameter), nameof(ShowCountedCard),
-        nameof(ShowPrices), nameof(ShowRegisterSelection))]
+        nameof(ShowPrices), nameof(ShowRegisterSelection), nameof(ShowUnit))]
     private EnumOption? _selectedBasis;
 
     [ObservableProperty]
@@ -108,6 +108,14 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
 
     [ObservableProperty]
     private string _customParameterName = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedUnitIndex))]
+    private IReadOnlyList<EnumOption> _units = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedUnitIndex))]
+    private EnumOption? _selectedUnit;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedVatIndex))]
@@ -171,7 +179,10 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     public bool ShowParameter => Basis is ChargeBasis.PerArea or ChargeBasis.PerResident;
 
     /// <summary>The "What is counted" card is shown for every basis that counts something.</summary>
-    public bool ShowCountedCard => ShowMeterSelection || ShowParameter;
+    public bool ShowCountedCard => ShowMeterSelection || ShowParameter || ShowUnit;
+
+    /// <summary>The unit of the quantity typed from the bill is chosen for the quantity-from-bill basis.</summary>
+    public bool ShowUnit => Basis == ChargeBasis.QuantityFromBill;
 
     /// <summary>A bill-based component has no price of its own.</summary>
     public bool ShowPrices => Basis != ChargeBasis.FromBill;
@@ -200,6 +211,12 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     {
         get => IndexOf(Parameters, SelectedParameter);
         set => SelectedParameter = Pick(Parameters, value) ?? SelectedParameter;
+    }
+
+    public int SelectedUnitIndex
+    {
+        get => IndexOf(Units, SelectedUnit);
+        set => SelectedUnit = Pick(Units, value) ?? SelectedUnit;
     }
 
     public int SelectedVatIndex
@@ -235,7 +252,8 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         Lookup(nameof(TariffComponent.RegisterKinds)),
         Lookup(nameof(TariffComponent.MeterIds)),
         Lookup(nameof(TariffComponent.QuantityParameter)),
-        Lookup(nameof(TariffComponent.QuantityParameterName)));
+        Lookup(nameof(TariffComponent.QuantityParameterName)),
+        Lookup(nameof(TariffComponent.QuantityUnit)));
 
     public string RatesError => Lookup(nameof(TariffComponent.Rates));
 
@@ -263,6 +281,8 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     public string ParameterLabel => _localizer["TariffParameterLabel"];
 
     public string CustomParameterLabel => _localizer["TariffCustomParameterLabel"];
+
+    public string UnitLabel => _localizer["TariffUnitLabel"];
 
     public string VatHeader => _localizer["TariffVatHeader"];
 
@@ -311,6 +331,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
             _registerSwitches.Clear();
             RebuildRegisters();
             RebuildParameters();
+            RebuildUnits();
             RebuildVatOptions();
             RebuildRates();
 
@@ -486,6 +507,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
 
         RebuildRegisters();
         RebuildParameters();
+        RebuildUnits();
         RebuildRates();
     }
 
@@ -499,6 +521,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
             var service = SelectedService?.Value;
             var basis = SelectedBasis?.Value;
             var parameter = SelectedParameter?.Value;
+            var unit = SelectedUnit?.Value;
             var vat = SelectedVatOption?.Code;
             var vatCustom = SelectedVatOption?.IsCustom == true;
 
@@ -510,6 +533,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
             if (SelectedBasis is not null)
             {
                 RebuildParameters(parameter);
+                RebuildUnits(unit);
                 RebuildVatOptions(vat, vatCustom);
                 RebuildRates();
                 RelabelMeterAndRegisterSwitches();
@@ -520,7 +544,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
             {
                 nameof(SelectedCategoryName), nameof(BasisHint), nameof(GeneralHeader), nameof(NameLabel), nameof(ServiceLabel), nameof(CategoryLabel),
                 nameof(BasisLabel), nameof(NotesHeader), nameof(CountedHeader), nameof(MetersLabel), nameof(NoMetersText), nameof(RegistersLabel),
-                nameof(ParameterLabel), nameof(CustomParameterLabel), nameof(VatHeader), nameof(VatPercentLabel), nameof(PricesHeader),
+                nameof(ParameterLabel), nameof(CustomParameterLabel), nameof(UnitLabel), nameof(VatHeader), nameof(VatPercentLabel), nameof(PricesHeader),
                 nameof(PricesEmptyText), nameof(AddRateText), nameof(ExampleHeader),
             })
             {
@@ -670,6 +694,15 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         }
     }
 
+    private void RebuildUnits(object? keep = null)
+    {
+        Units = EnumText.Options<MeterUnit>(_localizer);
+        var wanted = keep as MeterUnit?
+            ?? (Basis == _component.Basis ? _component.QuantityUnit : null)
+            ?? MeterUnit.MWh;
+        SelectedUnit = Units.FirstOrDefault(o => o.Value.Equals(wanted)) ?? Units[0];
+    }
+
     private void RebuildVatOptions(string? keepCode = null, bool keepCustom = false)
     {
         var today = _clock.Today;
@@ -804,6 +837,11 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
             {
                 component.QuantityParameterName = CustomParameterName.Trim();
             }
+        }
+
+        if (basis == ChargeBasis.QuantityFromBill)
+        {
+            component.QuantityUnit = SelectedUnit?.As<MeterUnit>() ?? MeterUnit.MWh;
         }
 
         _buildOrder = [.. _rateRows.OrderBy(r => r.Rate.ValidFrom)];

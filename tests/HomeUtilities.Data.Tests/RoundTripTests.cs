@@ -115,6 +115,7 @@ public class RoundTripTests
             BillDay = 10,
             PaymentDueDay = 20,
             BillingTiming = BillingTiming.InAdvance,
+            VatCalculation = VatCalculation.PerLine,
             PaymentDetails = Details,
         };
         contract.Links.Add(new Link { OwnerId = contract.Id, Kind = LinkKind.SubmitReadings, Url = "https://example.test/readings" });
@@ -137,6 +138,7 @@ public class RoundTripTests
         var loaded = await read.Contracts.SingleAsync();
         Assert.Equal(Currency.LVL, loaded.Currency);
         Assert.Equal(BillingTiming.InAdvance, loaded.BillingTiming);
+        Assert.Equal(VatCalculation.PerLine, loaded.VatCalculation);
         Assert.Equal(new DateOnly(2030, 12, 31), loaded.ValidTo);
         Assert.Equal((25, 3), (loaded.ReadingDayFrom, loaded.ReadingDayTo));
         Assert.Equal(Details, loaded.PaymentDetails);
@@ -207,6 +209,29 @@ public class RoundTripTests
     }
 
     [Fact]
+    public async Task TariffComponent_keeps_the_unit_of_a_quantity_from_the_bill()
+    {
+        using var test = new TestDb();
+        var (property, supplier, category) = (NewProperty(), new Supplier { Name = "S" }, NewCategory());
+        var contract = new Contract { PropertyId = property.Id, SupplierId = supplier.Id, CategoryId = category.Id, Title = "Heat" };
+        var heat = new TariffComponent
+        {
+            ContractId = contract.Id, Name = "Heat", ChargeKind = ServiceKind.Heating, Basis = ChargeBasis.QuantityFromBill,
+            QuantityUnit = MeterUnit.MWh, VatCode = "LV-REDUCED",
+        };
+        var plain = new TariffComponent { ContractId = contract.Id, Name = "Plain", ChargeKind = ServiceKind.Heating, Basis = ChargeBasis.FixedMonthly, VatCode = "LV-REDUCED" };
+        await using (var db = test.NewContext())
+        {
+            db.AddRange(property, supplier, category, contract, heat, plain);
+            await db.SaveChangesAsync();
+        }
+
+        await using var read = test.NewContext();
+        var loaded = await read.TariffComponents.OrderBy(c => c.Name).ToListAsync();
+        Assert.Equal([MeterUnit.MWh, null], loaded.OrderBy(c => c.Name == "Plain").Select(c => c.QuantityUnit));
+    }
+
+    [Fact]
     public async Task TariffComponent_with_rates_and_tiers()
     {
         using var test = new TestDb();
@@ -269,7 +294,8 @@ public class RoundTripTests
             1.48m,
             8.53m,
             true,
-            [new ChargeWarning(ChargeWarningCodes.ContractInactive, componentId)]);
+            [new ChargeWarning(ChargeWarningCodes.ContractInactive, componentId)],
+            [new VatGroup(21m, 7.05m, 1.48m, 8.53m)]);
         var bill = new Bill
         {
             PropertyId = property.Id,
@@ -285,6 +311,7 @@ public class RoundTripTests
             Vat = 1.48m,
             Gross = 8.53m,
             ConsumptionOnBill = 5.2m,
+            BillQuantities = [new BillQuantity(componentId, 0.210m)],
             CalculatedSnapshot = snapshot,
             AttachmentIds = [Guid.NewGuid(), Guid.NewGuid()],
         };
@@ -304,6 +331,7 @@ public class RoundTripTests
         Assert.Equal(new YearMonth(2026, 9), loaded.Period);
         Assert.Equal((new DateOnly(2026, 8, 15), new DateOnly(2026, 9, 14)), (loaded.ServiceFrom, loaded.ServiceTo));
         Assert.Equal(bill.AttachmentIds, loaded.AttachmentIds);
+        Assert.Equal(new BillQuantity(componentId, 0.210m), Assert.Single(loaded.BillQuantities));
         Assert.Equal(0.2m, Assert.Single(loaded.CustomFields).AsDecimal());
         Assert.Equal("ok", Assert.Single(Assert.Single(loaded.Lines).CustomFields).Value);
         var loadedSnapshot = loaded.CalculatedSnapshot!;
@@ -312,6 +340,7 @@ public class RoundTripTests
         Assert.Equal((componentId, 5m, 1.41m, 8.53m), (loadedLine.ComponentId, loadedLine.Quantity, loadedLine.UnitPrice, loadedLine.Gross));
         Assert.Empty(loadedLine.Consumption);
         Assert.Equal(ChargeWarningCodes.ContractInactive, Assert.Single(loadedSnapshot.Warnings).Code);
+        Assert.Equal(new VatGroup(21m, 7.05m, 1.48m, 8.53m), Assert.Single(loadedSnapshot.VatGroups!));
     }
 
     [Fact]

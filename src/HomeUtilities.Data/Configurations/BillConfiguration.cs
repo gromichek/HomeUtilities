@@ -15,6 +15,7 @@ internal sealed class BillConfiguration : IEntityTypeConfiguration<Bill>, IEntit
         builder.Property(b => b.Notes).HasMaxLength(ConfigurationExtensions.NotesLength);
         builder.Property(b => b.CustomFields).HasJsonColumn();
         builder.Property(b => b.AttachmentIds).HasJsonColumn();
+        builder.Property(b => b.BillQuantities).HasJsonColumn();
         builder.Property(b => b.CalculatedSnapshot).HasJsonColumn();
 
         builder.HasReference<Bill, Property>(b => b.PropertyId);

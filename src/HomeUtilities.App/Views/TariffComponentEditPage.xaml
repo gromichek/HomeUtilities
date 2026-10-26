@@ -113,6 +113,13 @@
                         <Label Text="{Binding ParameterNowText}" Style="{StaticResource MutedLabel}" />
                     </VerticalStackLayout>
 
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowUnit}">
+                        <Label Text="{Binding UnitLabel}" Style="{StaticResource MutedLabel}" />
+                        <Picker ItemsSource="{Binding Units}"
+                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                                SelectedIndex="{Binding SelectedUnitIndex, Mode=TwoWay}" />
+                    </VerticalStackLayout>
+
                     <Label Text="{Binding CountedError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding CountedError, Converter={StaticResource HasText}}" />
                 </VerticalStackLayout>

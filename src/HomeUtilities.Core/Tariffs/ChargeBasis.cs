@@ -20,4 +20,7 @@ public enum ChargeBasis
 
     /// <summary>Export register × price, a negative line.</summary>
     NetExport = 5,
+
+    /// <summary>The supplier distributes the quantity: it is typed from the bill, the price comes from the tariff.</summary>
+    QuantityFromBill = 6,
 }

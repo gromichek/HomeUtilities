@@ -97,6 +97,9 @@ Open a property → card **Contracts** → **Add contract**.
   - *Billing timing* — **In arrears** (the bill comes after the month of service: water, electricity) or
     **In advance** (paid before the month: internet, TV).
   - Usual bill day, payment due day, currency.
+  - *VAT is calculated on the bill total* (on by default) — most suppliers add up the net amounts of all lines with the
+    same VAT rate and calculate VAT once on that sum. Switch it off only if your supplier rounds the VAT of every line
+    and adds the rounded values (a difference of a cent or two). See [Charges](#10-charges).
 - **Reading submission window:** the days of the month when the supplier accepts readings, e.g. 25–28. A window
   like 28–3 continues into the next month. The Readings screen uses it to show "open now / opens in N days".
 - **Payment details / Links:** leave a field empty to use the supplier's value. "Effective payment details" shows
@@ -163,8 +166,8 @@ multiplied by the price), a **VAT rate** and one or more **prices**, each valid 
 Open a saved contract → card **Tariff**. The card lists the components with their current price, for example
 "1.41 €/m³ excl. VAT · VAT 21 %" or "52.30 m² × 0.6711 €/m² incl. VAT". Tap a row to edit it, ＋ adds a component, the
 arrows reorder the lines. While the card is empty, **quick-start presets** create ready-made components without
-prices (you enter the prices afterwards): *Water + sewerage*, *Water heating + heating*, *Electricity*,
-*Area-based fee*, *Per resident*, *Fixed monthly*.
+prices (you enter the prices afterwards): *Water + sewerage*, *Heating as one sum*, *Hot water + heating
+(distributed)*, *Electricity*, *Area-based fee*, *Per resident*, *Fixed monthly*.
 
 **Component editor**
 - **General:** name, *charge kind* (what the line counts toward in reports; the contract's service by default),
@@ -177,7 +180,8 @@ prices (you enter the prices afterwards): *Water + sewerage*, *Water heating + h
 | **By area** | area of the property (a parameter of the property) | Maintenance 52.3 m² × 0.6711 € |
 | **Per resident** | declared residents | Waste 3 residents × 5.40 € |
 | **Fixed amount per month** | 1 | Internet 22.95 € a month |
-| **From the supplier's bill** | no own calculation; the amount is taken from the bill | Heating by the building heat meter |
+| **From the supplier's bill** | no own calculation; the amount is taken from the bill | Heating as one lump sum |
+| **Quantity from the bill** | the supplier tells the quantity on the bill, you type it when you enter the bill; the price comes from the tariff | Heat 0.210 MWh × 70.00 € |
 | **Net export (credit)** | energy fed into the grid (Export register), counted as a credit | Solar panels |
 
 - **What is counted:** for consumption-based components, switch the **meters** and **registers** the component
@@ -186,6 +190,12 @@ prices (you enter the prices afterwards): *Water + sewerage*, *Water heating + h
   meter is counted automatically, so you do not need to edit the tariff. For *By area* and *Per resident* pick
   the **parameter** of the property (total area, heated area, residents, or your own); the line "now: 52.3 m²" shows its
   current value — change it in the property (Parameters card).
+- **Quantity from the bill:** for this basis pick the **unit** of the quantity (m³, kWh, MWh or Gcal) and enter the
+  prices as usual. The quantity itself is typed in the bill (see [Bills](#11-bills)); until it is typed the line is
+  *incomplete*. Use it when the supplier distributes a building meter among the flats by its own formula, which the app
+  cannot repeat — for example the heat for heating and circulation in MWh and the flat's share of the building's
+  hot-water difference in m³. The app does not distribute building meters itself; if you want to keep the building
+  meter values, put them in a custom field of the contract.
 - **VAT:** choose a rate from the catalog (it shows the percent valid today, e.g. "Standard rate 21 %") or
   **Custom %** and type the percent yourself. See [VAT rates](#vat-rates).
 - **Prices:** a list of prices, newest first, each with **Valid from**. When a supplier changes a price, **add a new
@@ -201,6 +211,13 @@ Invented example — a water contract: "Water supply" 1.41 and "Sewerage" 0.86, 
 rate*, valid from 01.01.2026. A heating contract: "Water heating" 4.56, *By consumption*, only the hot-water meters
 switched on, VAT *Reduced rate*; "Heating" *From the supplier's bill*.
 
+**Which heating preset?** *Heating as one sum* (hot-water heating by your meters plus one lump sum *From the bill*) is
+for a supplier whose bill you cannot reproduce — the app then cannot check the total. *Hot water + heating
+(distributed)* is for a bill that lists quantities and prices: **Hot water** by your hot-water meters, **Heat for
+heating/circulation** and **Hot water difference** with the quantities *from the bill*, all with the reduced VAT rate.
+Enter the prices from the bill; when the supplier changes a price, add a new price with its date. With the quantities
+typed from the bill, the app reproduces the supplier's total, so the comparison shows a difference of 0,00.
+
 ## 10. Charges
 
 Menu **Charges**: what each contract **should** cost for a month, so you can check the supplier's bill. Nothing is
@@ -214,6 +231,13 @@ valid on the first day of the month; fixed lines are one month's price; a line *
 calculation. As on a supplier's invoice, the net amount is rounded to 0.01 first and the VAT is
 calculated from that rounded amount (6.500 m³ × 1.41 € = 9.165 → 9.17 €; VAT 21 % = 1.93 €; total 11.10 €).
 
+**VAT on the total.** Suppliers do not round VAT line by line: they add the net amounts of all lines with the same VAT
+rate and calculate VAT once on that sum. The app does the same (the contract switch *VAT is calculated on the bill
+total* is on by default). The lines still show their own VAT for information, and under the lines of the card you see
+one row per rate: *VAT 12 % of 39,18 € = 4,70 €*. Example (invented): hot water 24,00 + heat 14,70 + hot-water
+difference 0,48 = 39,18 net; VAT 12 % = 4,7016 → 4,70; total 43,88 €. When all lines of a rate are priced including VAT,
+the VAT is split out of their sum instead. With the switch off, the rounded VAT of each line is added up.
+
 **Choosing the month.** Pick the **property** and the **month** with ‹ › or by tapping the month. When you open the
 screen it shows the **current** month if the reading window of one of the property's contracts has already started
 this month (for example the window is 25–28 October: from 25 October the screen shows October), otherwise the
@@ -226,7 +250,8 @@ start collapsed, on a wide window expanded). A contract without a tariff shows *
 with a link to the contract.
 
 **Reading a line.** Each line shows the component, the quantity with its unit (*5,500 m³*, *52,30 m²*,
-*2 residents*, *1 month*), the unit price (*× 1,41 € excl. VAT* or *incl. VAT*, as the supplier quotes it), the net
+*2 residents*, *1 month*; for a quantity from the bill *0,210 MWh (from bill 10.2026)* or *quantity from the bill* while it
+is missing), the unit price (*× 1,41 € excl. VAT* or *incl. VAT*, as the supplier quotes it), the net
 amount, the VAT percent and amount, and the line total. A stepped price shows one line per step. A line *Amount from
 the supplier's bill* has no amounts.
 
@@ -245,6 +270,7 @@ estimated reading, a reading taken outside the reading window, and unusually hig
 | *Readings missing for …* | The meter has no usable start or end reading. | **Open readings**, enter the missing reading. |
 | *No meter is linked for «…»* | The line counts meter consumption, but no meter of the contract fits. | **Open contract**, link a meter. |
 | VAT code unknown, currency differs, stepped price on a net export line | The tariff itself is wrong. | **Open tariff** or *Settings → VAT rates*. |
+| *Enter the quantity of «…» from the supplier's bill* | A *Quantity from the bill* line has no quantity yet. | Enter the bill of the month (**Enter bill**) and type the quantity in the card *Quantities from the bill*. |
 | *The contract is not active in this month* | The contract ended or has not started yet. | Check the contract's dates. |
 
 In the contract editor the tariff card has a **Show charges** button that opens this screen for the contract's
@@ -297,23 +323,27 @@ expense** (a repair, a purchase — no contract; it needs a *Title* and a *Categ
 2. **Amounts** — *Amount excl. VAT*, *VAT %*, *VAT* and *Total*. **Fill in any two** of the amount excl. VAT, the VAT % and
    the total; the app calculates the rest (the two you changed last count). The *Total* alone is enough. The VAT % starts
    with the one of the contract's tariff.
-3. **Comparison with the calculation** (contracts with a tariff) — the calculated total for the month and the
+3. **Quantities from the bill** (only for contracts whose tariff has *Quantity from the bill* components, for example
+   heat in MWh) — one field per component with its unit. Type what the supplier printed on the bill. The calculation
+   below uses the numbers at once; they are saved with the bill and with its snapshot, and the *Charges* screen uses
+   them for that month ("from bill 10.2026"). Without them the calculation is incomplete.
+4. **Comparison with the calculation** (contracts with a tariff) — the calculated total for the month and the
    **difference** to your bill. *Quantity on the bill* is what the supplier billed in m³; next to the metered quantity it
    shows **Water losses / difference**, e.g. billed 12,500 m³, metered 12,150 m³ → 0,350 m³. **Show charges** opens the
    charges of that month. When you save, the calculation of that moment is kept with the bill (a *snapshot*), so later
    price changes do not rewrite history. If the calculation has changed since, the card says *The calculation changed
    since the bill was entered (snapshot 45,10 € → now 46,02 €)* and **Update snapshot** takes the new one (save the bill
    afterwards). The comparison always uses the snapshot.
-4. **Lines** (folded by default) — optional detail rows of the bill: description, quantity, unit, unit price, the
+5. **Lines** (folded by default) — optional detail rows of the bill: description, quantity, unit, unit price, the
    amounts (any two, as above), a category of their own and a note. If the lines do not add up to the total you see a
    warning, not an error — suppliers round differently.
-5. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*).
-6. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
+6. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*).
+7. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
-7. **Payment** — the status, how much is paid and open, and the payments of this bill. **Paid** records the open amount
+8. **Payment** — the status, how much is paid and open, and the payments of this bill. **Paid** records the open amount
    at once; **Add payment** opens the [payment editor](#12-payments) for this bill (tap a payment to open it);
    **Use prepayment** appears when the contract has money that pays no bill yet.
-8. **Comment.**
+9. **Comment.**
 
 Saving keeps you in the editor. Deleting a bill asks first; the money you paid for it stays on the contract as
 prepayment (a payment made with the **Paid** button for this bill alone is removed together with the bill).

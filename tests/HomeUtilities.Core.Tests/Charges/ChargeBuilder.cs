@@ -79,6 +79,9 @@ internal sealed class ChargeBuilder
     public static TariffRate Rate(TariffComponent component, DateOnly validFrom, decimal price, bool includesVat = false) =>
         new() { ComponentId = component.Id, ValidFrom = validFrom, Price = price, PriceIncludesVat = includesVat, Currency = Currency.EUR };
 
+    /// <summary>Quantities typed from the bill, by component id.</summary>
+    public Dictionary<Guid, decimal> Quantities { get; } = [];
+
     public CalculatedCharge Calculate(YearMonth period) =>
-        ChargeCalculator.Calculate(new ChargeInput(Contract, Property, Components, Links, Meters, Vat, period));
+        ChargeCalculator.Calculate(new ChargeInput(Contract, Property, Components, Links, Meters, Vat, period, Quantities));
 }

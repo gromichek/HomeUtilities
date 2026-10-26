@@ -499,6 +499,33 @@ public class ContractEditViewModelTests
     }
 
     [Fact]
+    public async Task VatOnTotal_IsOnForANewContract_AndSavesAsOnTotal()
+    {
+        var vm = await FilledNewAsync();
+
+        Assert.True(vm.VatOnTotal);
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(VatCalculation.OnTotal, Assert.Single(_kit.Contracts.Saved).VatCalculation);
+    }
+
+    [Fact]
+    public async Task VatOnTotal_SwitchedOff_SavesPerLine_AndMarksTheEditorDirty()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.True(vm.VatOnTotal);
+        Assert.False(vm.IsDirty);
+
+        vm.VatOnTotal = false;
+        Assert.True(vm.IsDirty);
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(VatCalculation.PerLine, Assert.Single(_kit.Contracts.Saved).VatCalculation);
+    }
+
+    [Fact]
     public async Task Load_ExistingContract_FillsAllFields()
     {
         var contract = AddContract(ServiceKind.ColdWater);
@@ -507,6 +534,7 @@ public class ContractEditViewModelTests
         contract.ReadingDayFrom = 25;
         contract.ReadingDayTo = 28;
         contract.BillingTiming = BillingTiming.InAdvance;
+        contract.VatCalculation = VatCalculation.PerLine;
         contract.Links = [new Link { Kind = LinkKind.CustomerPortal, Url = "https://example.com/my", Title = "Portal" }];
         contract.CustomFields = [new CustomFieldDefinition { Name = "Losses", Kind = CustomFieldKind.Number }];
         var vm = _kit.CreateContractEditor();
@@ -522,6 +550,7 @@ public class ContractEditViewModelTests
         Assert.True(vm.HasReadingWindow);
         Assert.Equal(("25", "28"), (vm.ReadingDayFromText, vm.ReadingDayToText));
         Assert.Equal(BillingTiming.InAdvance, vm.SelectedBillingTiming!.As<BillingTiming>());
+        Assert.False(vm.VatOnTotal);
         Assert.Equal("Water utility", vm.SelectedSupplierName);
         Assert.Equal(_kit.CategoryIdFor(ServiceKind.ColdWater), vm.SelectedCategory!.Id);
         Assert.Equal(vm.SelectedServiceIndex, vm.Services.ToList().IndexOf(Option(vm.Services, ServiceKind.ColdWater)));
@@ -682,7 +711,7 @@ public class ContractEditViewModelTests
         Assert.True(vm.AddTariffCommand.CanExecute(null));
         Assert.False(vm.ShowTariffSaveFirst);
         Assert.True(vm.ShowTariffPresets);
-        Assert.Equal(6, vm.TariffPresetRows.Count);
+        Assert.Equal(7, vm.TariffPresetRows.Count);
     }
 
     [Fact]

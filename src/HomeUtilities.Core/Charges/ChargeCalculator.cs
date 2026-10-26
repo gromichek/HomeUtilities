@@ -50,17 +50,50 @@ public static class ChargeCalculator
         return Totals(input, lines, warnings);
     }
 
-    private static CalculatedCharge Totals(ChargeInput input, List<ChargeLine> lines, List<ChargeWarning> warnings) =>
-        new(
+    private static CalculatedCharge Totals(ChargeInput input, List<ChargeLine> lines, List<ChargeWarning> warnings)
+    {
+        var groups = VatGroups(lines, input.Contract.VatCalculation);
+        return new CalculatedCharge(
             input.Contract.Id,
             input.Period,
             input.Contract.Currency,
             lines,
-            lines.Sum(l => l.Net),
-            lines.Sum(l => l.Vat),
-            lines.Sum(l => l.Gross),
+            groups.Sum(g => g.Net),
+            groups.Sum(g => g.Vat),
+            groups.Sum(g => g.Gross),
             lines.All(l => l.IsComplete),
-            warnings);
+            warnings,
+            groups);
+    }
+
+    /// <summary>
+    /// Totals per VAT percent. <see cref="VatCalculation.OnTotal"/>: VAT = Round(Σ rounded line net × percent); a group
+    /// whose lines are all priced including VAT is split from its gross sum instead. <see cref="VatCalculation.PerLine"/>:
+    /// the sums of the line values. Lines without any amount (from the bill, incomplete) do not form groups.
+    /// </summary>
+    private static List<VatGroup> VatGroups(IReadOnlyList<ChargeLine> lines, VatCalculation mode)
+    {
+        var groups = new List<VatGroup>();
+        foreach (var group in lines.Where(l => l.Net != 0 || l.Vat != 0 || l.Gross != 0).GroupBy(l => l.VatPercent).OrderBy(g => g.Key))
+        {
+            if (mode == VatCalculation.PerLine)
+            {
+                groups.Add(new VatGroup(group.Key, group.Sum(l => l.Net), group.Sum(l => l.Vat), group.Sum(l => l.Gross)));
+            }
+            else if (group.All(l => l.PriceIncludesVat))
+            {
+                var (net, vat, gross) = MoneyMath.FromGross(group.Sum(l => l.Gross), group.Key);
+                groups.Add(new VatGroup(group.Key, net, vat, gross));
+            }
+            else
+            {
+                var (net, vat, gross) = MoneyMath.FromNet(group.Sum(l => l.Net), group.Key);
+                groups.Add(new VatGroup(group.Key, net, vat, gross));
+            }
+        }
+
+        return groups;
+    }
 
     private static List<ChargeLine> CalculateComponent(ChargeInput input, TariffComponent component, List<ChargeWarning> warnings)
     {
@@ -129,6 +162,19 @@ public static class ChargeCalculator
                 break;
             case ChargeBasis.FixedMonthly:
                 quantity = 1m;
+                break;
+            case ChargeBasis.QuantityFromBill:
+                if (input.QuantitiesFromBill is null || !input.QuantitiesFromBill.TryGetValue(component.Id, out var typed))
+                {
+                    return Failed(ChargeWarningCodes.QuantityFromBill);
+                }
+
+                if (rate.Tiers.Count > 0)
+                {
+                    return Failed(ChargeWarningCodes.InvalidTariff);
+                }
+
+                quantity = MoneyMath.RoundQuantity(typed);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(component), component.Basis, "Unsupported charge basis.");

@@ -175,6 +175,15 @@
                                         <Label Grid.Column="3" Text="{Binding TotalText}" FontAttributes="Bold" />
                                     </Grid>
 
+                                    <!-- VAT on the total, per VAT percent. -->
+                                    <VerticalStackLayout Spacing="2" IsVisible="{Binding HasVatGroups}" BindableLayout.ItemsSource="{Binding VatGroupTexts}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Label Text="{Binding .}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalTextAlignment="End" />
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
                                     <!-- Warnings, each with the screen that fixes it. -->
                                     <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Warnings}">
                                         <BindableLayout.ItemTemplate>

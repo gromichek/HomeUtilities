@@ -36,6 +36,9 @@ public class TariffComponent : SyncEntity
     /// <summary>Name of the custom parameter; required when <see cref="QuantityParameter"/> is <see cref="PropertyParameterKind.Custom"/>.</summary>
     public string? QuantityParameterName { get; set; }
 
+    /// <summary>Unit of the quantity typed from the bill. Required for QuantityFromBill, null otherwise.</summary>
+    public MeterUnit? QuantityUnit { get; set; }
+
     /// <summary>Code of the VAT catalog entry; may be empty when <see cref="VatPercentOverride"/> is set.</summary>
     public string VatCode { get; set; } = string.Empty;
 

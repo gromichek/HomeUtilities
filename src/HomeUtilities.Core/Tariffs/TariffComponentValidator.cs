@@ -76,6 +76,23 @@ public static class TariffComponentValidator
             errors.Add(new(ErrorCodes.TariffNetExportRegister, nameof(TariffComponent.RegisterKinds)));
         }
 
+        if (component.Basis == ChargeBasis.QuantityFromBill)
+        {
+            if (component.QuantityUnit is null)
+            {
+                errors.Add(new(ErrorCodes.TariffQuantityUnitRequired, nameof(TariffComponent.QuantityUnit)));
+            }
+
+            if (component.Rates.Any(r => !r.IsDeleted && r.Tiers.Count > 0))
+            {
+                errors.Add(new(ErrorCodes.TariffTiersNotAllowed, nameof(TariffComponent.Rates)));
+            }
+        }
+        else if (component.QuantityUnit is not null)
+        {
+            errors.Add(new(ErrorCodes.TariffQuantityUnitNotAllowed, nameof(TariffComponent.QuantityUnit)));
+        }
+
         if (component.QuantityParameter is not { } parameter)
         {
             return;

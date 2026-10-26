@@ -250,7 +250,7 @@ public class SampleDataGeneratorTests
         var components = await rig.Tariffs.ListAsync();
         var catalog = await rig.VatRates.ListAsync();
 
-        Assert.Equal(13, components.Count);
+        Assert.Equal(15, components.Count);
         foreach (var component in components)
         {
             Assert.True(TariffComponentValidator.Validate(component).IsValid, component.Name);
@@ -279,10 +279,15 @@ public class SampleDataGeneratorTests
 
         var hotIds = (await rig.Meters.ListByPropertyAsync(flat.Id))
             .Where(m => m.Resource == MeterResource.HotWater).Select(m => m.Id).Order().ToList();
-        var heating = heat.Single(c => c.Name == "Water heating");
+        var heating = heat.Single(c => c.Name == "Hot water");
         Assert.Equal(hotIds, heating.MeterIds.Order());
         Assert.Equal("LV-REDUCED", heating.VatCode);
-        Assert.Equal(ChargeBasis.FromBill, heat.Single(c => c.Name == "Heating").Basis);
+        Assert.Equal(3.20m, heating.Rates.Single().Price);
+
+        var heatShare = heat.Single(c => c.Name == "Heat for heating/circulation");
+        Assert.Equal((ChargeBasis.QuantityFromBill, MeterUnit.MWh, 70m), (heatShare.Basis, heatShare.QuantityUnit, heatShare.Rates.Single().Price));
+        var difference = heat.Single(c => c.Name == "Hot water difference");
+        Assert.Equal((ChargeBasis.QuantityFromBill, MeterUnit.M3, 3.20m), (difference.Basis, difference.QuantityUnit, difference.Rates.Single().Price));
     }
 
     [Fact]
@@ -523,7 +528,7 @@ public class SampleDataGeneratorTests
     }
 
     [Fact]
-    public async Task Bills_of_the_heating_contract_have_no_snapshot_because_part_of_the_amount_comes_from_the_bill()
+    public async Task Bills_of_the_heating_contract_carry_the_quantities_and_equal_the_complete_calculation()
     {
         using var rig = new Rig();
         var (bills, _, contracts) = await LoadBillsAsync(rig);
@@ -531,7 +536,20 @@ public class SampleDataGeneratorTests
         var heating = bills.Where(b => b.ContractId is { } id && contracts[id].Service == ServiceKind.Heating).ToList();
 
         Assert.Equal(12, heating.Count);
-        Assert.All(heating, b => Assert.Null(b.CalculatedSnapshot));
+        foreach (var bill in heating)
+        {
+            Assert.Equal(2, bill.BillQuantities.Count);
+            var snapshot = bill.CalculatedSnapshot;
+            Assert.NotNull(snapshot);
+            Assert.True(snapshot.IsComplete);
+            Assert.Equal(snapshot.TotalGross, bill.Gross);
+
+            // The stored quantities reproduce the snapshot: the difference to the calculation is 0.00.
+            var input = await rig.Loader.LoadAsync(bill.ContractId!.Value, bill.Period);
+            var calculated = ChargeCalculator.Calculate(input!);
+            Assert.True(calculated.IsComplete);
+            Assert.Equal(0m, BillComparison.Compare(bill, calculated, null).Difference);
+        }
     }
 
     [Fact]
