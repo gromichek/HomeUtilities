@@ -27,6 +27,9 @@ these rules; the Properties screen (after T-012a) is the reference implementatio
 | `IconHelp` | help (toolbar "?" opening the user guide at the screen's section) | `help_outline` | `E897` Help |
 | `IconHistory` | history | `history` | `E81C` History |
 | `IconPaid` | mark as paid | `task_alt` | `E73E` CheckMark |
+| `IconHelp` | help | `help_outline` | `E897` Help |
+| `IconTodoReadings` / `Due` / `Missing` / `Verification` / `Settlement` | Overview to-do kinds | `speed` / `event` / `note_add` / `build` / `balance` | `E9D9` / `E787` / `E8A5` / `E7BA` / `E8EF` |
+| `IconChevron` | open / go to | `chevron_right` | `E76C` ChevronRight |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` | `E70D` / `E70E` Chevron down/up |
 
 Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an accessibility name
