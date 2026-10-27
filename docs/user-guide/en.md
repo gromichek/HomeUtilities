@@ -29,7 +29,7 @@ information, so start here.
 | **Payment** | Money you paid. It is allocated to a bill, so the bill is *Paid*; what is not allocated stays on the contract as prepayment. | 03.11.2026: 46.02 € by bank transfer |
 
 **Order of setting things up:** properties → suppliers → contracts (in the property) → meters (in the property,
-linked to contracts) → readings → bills. Enter the **tariff** (prices) of a contract when you want the app to calculate what
+linked to contracts) → readings → bills. Then open **Overview** first every day: it shows what to do next. Enter the **tariff** (prices) of a contract when you want the app to calculate what
 a bill should be and to compare your bills with it. You can add a supplier directly from the contract editor ("＋ New supplier…").
 
 ## 2. Screens and common behaviour
@@ -38,7 +38,7 @@ a bill should be and to compare your bills with it. You can add a supplier direc
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
-item **Help**. Screens such as Properties, Suppliers, Readings, Charges, Bills, Payments, Categories, VAT rates and the contract, meter and tariff component
+item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
@@ -63,6 +63,48 @@ block anything — just carry on.
 
 **Child rows** (parameters, links, registers, custom fields…): the card header has ＋ to add; tap a row to edit it
 in a dialog; the trash icon deletes it (with confirmation).
+
+## Overview
+
+Menu **Overview** is the start screen: it opens first and answers two questions — *what do I have to do now?* and *where does
+my money stand?* It reads the records you keep elsewhere (contracts, meters, readings, bills, payments) and adds nothing of
+its own, so it is only as good as the data behind it. Pull down to refresh on a phone; the screen also refreshes every time you
+come back to it, for example after entering readings or a bill.
+
+With more than one property a **Property** filter at the top limits all three cards to one property (or *All properties*);
+the app remembers your choice. On a phone the cards are one below the other; on a tablet or a wide window **To do** is on the
+left and **Money** and **This year** on the right. **?** opens this section.
+
+### To do
+
+One row per task, ordered by urgency: overdue first (red), then today, then coming up (amber), then information. Tap a row to
+open the matching screen; **Back** returns to the Overview and the row is gone if you have done the task.
+
+| Row | When it appears | When it disappears | Tap / button |
+|---|---|---|---|
+| **Submit readings: Water, Heating** | A contract's *reading window* (set on the contract, e.g. 25–28) is open, opens within the next 3 days, or ended less than 4 days ago — and none of the contract's meters has a reading dated inside that window. Contracts with the same window share one row. | You save a reading of the meter inside the window, or 3 days after the window ended. | Opens **Readings** of that property for today. |
+| **Pay {contract} for {month}** (a bill, and **Pay Property tax …** for a tax installment) | An open bill whose due date is within the next 7 days, is today, or has passed. The amount is what is still open. | The bill is paid in full. | Tap opens the bill. **Paid** (the ✓ button) marks the open amount as paid today and shows **Bill marked as paid · Undo**; **Undo** takes it back and the row returns. |
+| **Bill for {month} from {contract} not entered yet** | A contract with a *bill day* has no bill for its expected month yet: the **previous** month for a contract billed in arrears, the **next** month for a prepaid one — and today is on or after the bill day (in the month after the period, or in the month before it when prepaid). Tax contracts are not checked. | You enter a bill for that contract and month. | **Enter bill** opens a new bill with the contract and the month filled in. |
+| **Verify meter …** | A meter in use has its verification due within 60 days, or it is overdue. | The verification date of the meter is moved forward. | Opens the meter. |
+| **Expected settlement: {contract}** | An equalized contract (see "Equalized payments") expects a settlement of 1.00 € or more, either way (surcharge or refund). Information only. | The settlement bill is entered, or the amount falls below 1.00 €. | Opens the settlement page. |
+
+The thresholds (3 days, 7 days, 60 days, 1.00 €) are fixed in this version. If there is nothing to do you see
+**Nothing to do — all readings submitted and bills paid.**
+
+### Money
+
+For each property: **Open bills** (everything still unpaid, as on the Bills screen with the status *Open*), **Overdue** (the
+part past its due date), **Prepayments** (money you paid that no bill uses yet, as on the Payments screen) and the **balance** of
+all the property's contracts — **Debt …** in red or **Paid in advance …** in green, the same figure as the *Balance* card of each
+contract added up. Equalized contracts add a line **Expected settlement, {contract}: surcharge / refund …**. Tap a line to open
+the Bills screen (filtered to open or overdue bills), the Payments screen, or the settlement page.
+
+### This year
+
+For each property the gross total of the bills of this year, counted by the bill's month from January up to the current month,
+next to the same months of last year: *2026: 1,245.30 € · 2025 same period: 1,180.10 € (+5.5 %)*. A bill for a later month
+(for example internet paid in advance) is counted when its month comes. Tap to open the Bills screen for that year.
+Charts come later.
 
 ## 3. Properties
 
@@ -550,5 +592,5 @@ again. The backup file contains **all your data and is not encrypted** — keep 
 
 ## 16. Coming soon
 
-Overview of what to do, reports and charts,
+Reports and charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.
