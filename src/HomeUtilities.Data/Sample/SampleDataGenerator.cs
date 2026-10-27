@@ -89,6 +89,12 @@ public sealed partial class SampleDataGenerator(
         var cLand = NewContract(cottage, tax, ServiceKind.PropertyTaxLand, "Land tax", BillingMode.Assessed, $"CN-{++cn}", start, null, null);
         var cPowerGarage = NewContract(garage, power, ServiceKind.Electricity, "Electricity (fixed)", BillingMode.Fixed, $"CN-{++cn}", start, null, null);
         var cGarageTax = NewContract(garage, tax, ServiceKind.PropertyTaxBuilding, "Property tax", BillingMode.Assessed, $"CN-{++cn}", start, null, null);
+
+        // The cottage reading window contains the generation day, so the Overview always lists "submit readings"; the garage
+        // bill has never been entered and is expected from the 1st, so it always lists "enter the bill".
+        cPowerCottage.ReadingDayFrom = Math.Min(_today.Day, 28);
+        cPowerCottage.ReadingDayTo = cPowerCottage.ReadingDayFrom + 3;
+        cPowerGarage.BillDay = 1;
         foreach (var contract in new[] { cWater, cHeat, cPowerFlat, cWaste, cMaint, cNet, cPowerCottage, cLand, cPowerGarage, cGarageTax })
         {
             await contracts.SaveAsync(contract, ct);
@@ -115,6 +121,9 @@ public sealed partial class SampleDataGenerator(
 
     /// <summary>The month of the maintenance bill that is partly paid by a manual payment.</summary>
     private const int PartlyPaidMonthsAgo = 2;
+
+    /// <summary>The partly paid maintenance bill falls due in this many days (inside the Overview's look-ahead).</summary>
+    private const int DueSoonInDays = 5;
 
     /// <summary>The month of the electricity bill with detail lines and a custom field.</summary>
     private const int DetailedBillMonthsAgo = 2;
@@ -354,8 +363,9 @@ public sealed partial class SampleDataGenerator(
 
         if (partlyPaid)
         {
-            // Not yet due, so the badge shows "partially paid" (yellow) instead of "overdue".
-            bill.DueOn = _today.AddDays(10);
+            // Not yet due, so the badge shows "partially paid" (yellow) instead of "overdue"; due within a week, so the
+            // Overview lists it as "due soon".
+            bill.DueOn = _today.AddDays(DueSoonInDays);
             await bills.SaveAsync(bill, ct);
             await payments.SaveAsync(NewPayment(bill, contract, supplierOf, MoneyMath.Round(total * 0.6m), quick: false), ct);
             return;

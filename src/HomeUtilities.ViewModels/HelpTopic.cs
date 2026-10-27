@@ -3,6 +3,7 @@ namespace HomeUtilities.ViewModels;
 /// <summary>A section of the user guide that a screen's "?" button opens.</summary>
 public enum HelpTopic
 {
+    Overview,
     Properties,
     Suppliers,
     Contracts,
@@ -24,6 +25,7 @@ public static class HelpTopics
     // Anchors follow the numbered headings of docs/user-guide/*.md; HelpContentServiceTests checks that they exist.
     private static readonly Dictionary<HelpTopic, (string En, string Ru)> Anchors = new()
     {
+        [HelpTopic.Overview] = ("overview", "обзор"),
         [HelpTopic.Properties] = ("3-properties", "3-объекты"),
         [HelpTopic.Suppliers] = ("4-suppliers", "4-поставщики"),
         [HelpTopic.Contracts] = ("5-contracts", "5-договоры"),

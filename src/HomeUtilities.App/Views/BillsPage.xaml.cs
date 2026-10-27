@@ -24,7 +24,11 @@ public partial class BillsPage : PageBase, IQueryAttributable
         }
 
         Guid? contractId = TryGuid(query, EditorNavigation.ContractIdParameter, out var contract) ? contract : null;
-        _ = viewModel.OpenForAsync(propertyId, contractId);
+        var status = query.TryGetValue(BillsViewModel.StatusParameter, out var name) && name is string text && Enum.TryParse<BillStatusFilter>(text, out var parsed)
+            ? parsed
+            : BillStatusFilter.All;
+        int? year = query.TryGetValue(BillsViewModel.YearParameter, out var shown) && shown is int value ? value : null;
+        _ = viewModel.OpenForAsync(propertyId, contractId, status, year);
     }
 
     private static bool TryGuid(IDictionary<string, object> query, string key, out Guid id)

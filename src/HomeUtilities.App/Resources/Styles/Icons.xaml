@@ -75,6 +75,33 @@
         <On Platform="WinUI" Value="&#xE70E;" />
     </OnPlatform>
 
+    <!-- Overview to-do rows (proposed for the UI guidelines table): readings = speed / Diagnostic, due bill = event / Calendar,
+         missing bill = note_add / Document, verification = build / Warning, settlement = balance / Calculator, chevron = chevron_right. -->
+    <OnPlatform x:Key="IconTodoReadings" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE9E4;" />
+        <On Platform="WinUI" Value="&#xE9D9;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconTodoDue" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE878;" />
+        <On Platform="WinUI" Value="&#xE787;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconTodoMissing" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE89C;" />
+        <On Platform="WinUI" Value="&#xE8A5;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconTodoVerification" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE869;" />
+        <On Platform="WinUI" Value="&#xE7BA;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconTodoSettlement" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xEAF6;" />
+        <On Platform="WinUI" Value="&#xE8EF;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconChevron" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE5CC;" />
+        <On Platform="WinUI" Value="&#xE76C;" />
+    </OnPlatform>
+
     <!-- Image sources for toolbar items and buttons with an icon next to the text. -->
     <FontImageSource x:Key="IconAddSource"
                      FontFamily="{StaticResource IconFontFamily}"

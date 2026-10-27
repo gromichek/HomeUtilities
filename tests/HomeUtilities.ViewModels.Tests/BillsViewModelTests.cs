@@ -369,6 +369,38 @@ public class BillsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task OpenFor_FromTheOverview_AppliesTheStatusFilter()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var paid = _kit.AddBill(water, new YearMonth(2026, 8), 40m, due: new DateOnly(2026, 9, 20));
+        var overdue = _kit.AddBill(water, new YearMonth(2026, 9), 50m, due: new DateOnly(2026, 10, 20));
+        var open = _kit.AddBill(water, new YearMonth(2026, 10), 60m, due: new DateOnly(2026, 11, 20));
+        _kit.AddPayment(40m, (paid, 40m));
+        var vm = await LoadAsync();
+
+        await vm.OpenForAsync(_kit.Kit.Property.Id, null, BillStatusFilter.Overdue);
+        Assert.Equal([overdue.Id], vm.Items.Select(i => i.Id));
+
+        await vm.OpenForAsync(_kit.Kit.Property.Id, null, BillStatusFilter.Open);
+        Assert.Equal([open.Id, overdue.Id], vm.Items.Select(i => i.Id));
+    }
+
+    [Fact]
+    public async Task OpenFor_FromTheOverview_CanShowOneYear()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var last = _kit.AddBill(water, new YearMonth(2025, 5), 30m);
+        var current = _kit.AddBill(water, new YearMonth(2026, 5), 20m);
+        var vm = await LoadAsync();
+
+        await vm.OpenForAsync(_kit.Kit.Property.Id, null, BillStatusFilter.All, 2025);
+
+        Assert.Equal((PeriodScope.Year, 2025), (vm.Period.Current.Scope, vm.Period.Current.Year));
+        Assert.Equal([last.Id], vm.Items.Select(i => i.Id));
+        Assert.NotEqual(current.Id, last.Id);
+    }
+
+    [Fact]
     public async Task EmptyList_ShowsTheEmptyState()
     {
         var vm = await LoadAsync();

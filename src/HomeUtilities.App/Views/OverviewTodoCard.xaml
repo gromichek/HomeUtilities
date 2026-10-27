@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.OverviewTodoCard"
+             x:DataType="vm:OverviewViewModel">
+
+    <!-- "To do": one row per item, icon by kind, coloured by severity, with the action of the item. -->
+    <Border Style="{StaticResource SectionCard}">
+        <VerticalStackLayout Spacing="8">
+            <Label Text="{Binding TodoHeader}" Style="{StaticResource SectionHeader}" />
+
+            <Label Text="{Binding TodoEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowTodoEmpty}" />
+
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding TodoRows}" Spacing="6" IsVisible="{Binding HasTodo}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TodoRowViewModel">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                                StrokeThickness="1" Padding="10,8" StrokeShape="RoundRectangle 8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
+                                       Text="{StaticResource IconTodoDue}"
+                                       TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsReadings}" Value="True">
+                                            <Setter Property="Text" Value="{StaticResource IconTodoReadings}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsMissing}" Value="True">
+                                            <Setter Property="Text" Value="{StaticResource IconTodoMissing}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsVerification}" Value="True">
+                                            <Setter Property="Text" Value="{StaticResource IconTodoVerification}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsSettlement}" Value="True">
+                                            <Setter Property="Text" Value="{StaticResource IconTodoSettlement}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsOverdue}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsToday}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsSoon}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Text}" FontAttributes="Bold" />
+                                    <Label Text="{Binding DetailText}" FontSize="13" Style="{StaticResource MutedLabel}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsOverdue}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsToday}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </VerticalStackLayout>
+
+                                <Label Grid.Column="2" Text="{Binding AmountText}" FontAttributes="Bold" VerticalOptions="Center"
+                                       IsVisible="{Binding HasAmount}" />
+
+                                <!-- Paid: the quick action of a bill that is due. Enter bill: a bill that has not been entered yet. -->
+                                <Button Grid.Column="3" Style="{StaticResource IconButton}" Text="{StaticResource IconPaid}"
+                                        Command="{Binding PayCommand}" IsVisible="{Binding CanPay}" VerticalOptions="Center"
+                                        ToolTipProperties.Text="{Binding PayText}"
+                                        SemanticProperties.Description="{Binding PayText}" />
+                                <Button Grid.Column="3" Text="{Binding EnterText}" Style="{StaticResource SecondaryButton}"
+                                        Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>
