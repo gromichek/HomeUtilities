@@ -5,10 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppTitle" xml:space="preserve"><value>Коммунальные платежи</value></data>
-  <data name="StartPageHint" xml:space="preserve"><value>Здесь пока пусто.</value></data>
   <data name="TodayIs" xml:space="preserve"><value>Сегодня {0:d}</value></data>
-  <data name="DatabaseStarting" xml:space="preserve"><value>Открываю базу данных…</value></data>
-  <data name="DatabaseReady" xml:space="preserve"><value>База данных готова: категорий {0}, ставок НДС {1}</value></data>
   <data name="DatabaseError" xml:space="preserve"><value>Ошибка базы данных: {0}</value></data>
   <data name="ComingSoon" xml:space="preserve"><value>Скоро будет</value></data>
   <data name="SectionOverview" xml:space="preserve"><value>Обзор</value></data>
@@ -1022,4 +1019,38 @@
   <data name="ChargeQuantityAmountFromBillOf" xml:space="preserve"><value>{0} (количество и сумма из счёта {1})</value></data>
   <data name="ChargeWarn_AmountMismatch" xml:space="preserve"><value>«{0}»: сумма по счёту не совпадает с количеством × цена — возможно, цена изменилась.</value></data>
   <data name="Error_bill_edit_amount_needs_quantity" xml:space="preserve"><value>Введите количество, к которому относится эта сумма.</value></data>
+  <data name="OverviewPropertyFilter" xml:space="preserve"><value>Объект</value></data>
+  <data name="OverviewTodoHeader" xml:space="preserve"><value>Что сделать</value></data>
+  <data name="OverviewTodoEmpty" xml:space="preserve"><value>Делать нечего — показания переданы, счета оплачены.</value></data>
+  <data name="OverviewMoneyHeader" xml:space="preserve"><value>Деньги</value></data>
+  <data name="OverviewMoneyEmpty" xml:space="preserve"><value>Счетов и платежей пока нет.</value></data>
+  <data name="OverviewYearHeader" xml:space="preserve"><value>Этот год</value></data>
+  <data name="OverviewYearEmpty" xml:space="preserve"><value>Счетов за этот год пока нет.</value></data>
+  <data name="OverviewOpenBills" xml:space="preserve"><value>Неоплаченные счета {0}</value></data>
+  <data name="OverviewOverdueBills" xml:space="preserve"><value>Просрочено {0}</value></data>
+  <data name="OverviewPrepayments" xml:space="preserve"><value>Предоплата {0}</value></data>
+  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: доплата {1}</value></data>
+  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: возврат {1}</value></data>
+  <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3} ({4})</value></data>
+  <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3}</value></data>
+  <data name="TodoReadings" xml:space="preserve"><value>Передать показания: {0}</value></data>
+  <data name="TodoReadingsOpen" xml:space="preserve"><value>Окно {0} — открыто сейчас</value></data>
+  <data name="TodoReadingsOpensTomorrow" xml:space="preserve"><value>Окно {0} — откроется завтра</value></data>
+  <data name="TodoReadingsOpensIn" xml:space="preserve"><value>Окно {0} — откроется через дней: {1}</value></data>
+  <data name="TodoReadingsMissed" xml:space="preserve"><value>Окно {0} закрылось — передайте показания сейчас</value></data>
+  <data name="TodoBillDue" xml:space="preserve"><value>Оплатить {0} за {1}</value></data>
+  <data name="TodoTaxDue" xml:space="preserve"><value>Оплатить: {0}</value></data>
+  <data name="TodoDueOverdue" xml:space="preserve"><value>Просрочено с {0} (дней: {1})</value></data>
+  <data name="TodoDueToday" xml:space="preserve"><value>Срок оплаты — сегодня</value></data>
+  <data name="TodoDueTomorrow" xml:space="preserve"><value>Срок оплаты — завтра, {0}</value></data>
+  <data name="TodoDueIn" xml:space="preserve"><value>Срок оплаты {0} (дней до срока: {1})</value></data>
+  <data name="TodoBillMissing" xml:space="preserve"><value>Счёт за {0} от «{1}» ещё не внесён</value></data>
+  <data name="TodoBillMissingDetail" xml:space="preserve"><value>Обычно приходит {0}</value></data>
+  <data name="TodoEnterBill" xml:space="preserve"><value>Внести счёт</value></data>
+  <data name="TodoVerification" xml:space="preserve"><value>Поверка счётчика {0}</value></data>
+  <data name="TodoVerificationOverdue" xml:space="preserve"><value>Поверка была нужна до {0}</value></data>
+  <data name="TodoVerificationDue" xml:space="preserve"><value>Поверка до {0} (дней: {1})</value></data>
+  <data name="TodoSettlement" xml:space="preserve"><value>Ожидаемый перерасчёт: {0}</value></data>
+  <data name="TodoSettlementSurcharge" xml:space="preserve"><value>Ожидается доплата</value></data>
+  <data name="TodoSettlementRefund" xml:space="preserve"><value>Ожидается возврат</value></data>
 </root>

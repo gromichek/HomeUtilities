@@ -1,22 +1,62 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                 xmlns:views="clr-namespace:HomeUtilities.App.Views"
                 xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
                 x:Class="HomeUtilities.App.Views.OverviewPage"
                 x:DataType="vm:OverviewViewModel"
                 Title="{Binding Title}">
 
-    <VerticalStackLayout Padding="30,0" Spacing="25" VerticalOptions="Center">
-        <Label Text="{Binding Title}"
-               FontSize="32"
-               HorizontalOptions="Center" />
-        <Label Text="{Binding TodayText}"
-               HorizontalOptions="Center" />
-        <Label Text="{Binding Hint}"
-               HorizontalOptions="Center" />
-        <Label Text="{Binding DatabaseStatusText}"
-               HorizontalOptions="Center" />
-    </VerticalStackLayout>
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
 
+    <views:PageBase.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+    </views:PageBase.Resources>
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+        <ScrollView>
+            <VerticalStackLayout Padding="12" Spacing="12">
+
+                <!-- Header: today and the property filter (remembered). -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding TodayText}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding DatabaseStatusText}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding DatabaseStatusText, Converter={StaticResource HasText}}" />
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowPropertyFilter}">
+                        <Label Text="{Binding PropertyFilterLabel}" Style="{StaticResource MutedLabel}" />
+                        <Border Padding="12,8" StrokeShape="RoundRectangle 8"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ChoosePropertyFilterCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding PropertyFilterName}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                       VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Phone: one column. -->
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsCompact}">
+                    <views:OverviewTodoCard />
+                    <views:OverviewMoneyCard />
+                    <views:OverviewYearCard />
+                </VerticalStackLayout>
+
+                <!-- Tablet / desktop: to do on the left (wider), money and this year on the right. -->
+                <Grid ColumnDefinitions="3*,2*" ColumnSpacing="12" IsVisible="{Binding IsWide}">
+                    <views:OverviewTodoCard Grid.Column="0" VerticalOptions="Start" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Start">
+                        <views:OverviewMoneyCard />
+                        <views:OverviewYearCard />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
 </views:PageBase>

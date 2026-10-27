@@ -5,10 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="AppTitle" xml:space="preserve"><value>Home utilities</value></data>
-  <data name="StartPageHint" xml:space="preserve"><value>Nothing here yet.</value></data>
   <data name="TodayIs" xml:space="preserve"><value>Today is {0:d}</value></data>
-  <data name="DatabaseStarting" xml:space="preserve"><value>Opening database…</value></data>
-  <data name="DatabaseReady" xml:space="preserve"><value>Database ready: {0} categories, {1} VAT rates</value></data>
   <data name="DatabaseError" xml:space="preserve"><value>Database error: {0}</value></data>
   <data name="ComingSoon" xml:space="preserve"><value>Coming soon</value></data>
   <data name="SectionOverview" xml:space="preserve"><value>Overview</value></data>
@@ -1022,4 +1019,38 @@
   <data name="ChargeQuantityAmountFromBillOf" xml:space="preserve"><value>{0} (quantity and amount from bill {1})</value></data>
   <data name="ChargeWarn_AmountMismatch" xml:space="preserve"><value>«{0}»: the amount on the bill does not match quantity × price — the price may have changed.</value></data>
   <data name="Error_bill_edit_amount_needs_quantity" xml:space="preserve"><value>Enter the quantity this amount belongs to.</value></data>
+  <data name="OverviewPropertyFilter" xml:space="preserve"><value>Property</value></data>
+  <data name="OverviewTodoHeader" xml:space="preserve"><value>To do</value></data>
+  <data name="OverviewTodoEmpty" xml:space="preserve"><value>Nothing to do — all readings submitted and bills paid.</value></data>
+  <data name="OverviewMoneyHeader" xml:space="preserve"><value>Money</value></data>
+  <data name="OverviewMoneyEmpty" xml:space="preserve"><value>No bills or payments yet.</value></data>
+  <data name="OverviewYearHeader" xml:space="preserve"><value>This year</value></data>
+  <data name="OverviewYearEmpty" xml:space="preserve"><value>No bills this year yet.</value></data>
+  <data name="OverviewOpenBills" xml:space="preserve"><value>Open bills {0}</value></data>
+  <data name="OverviewOverdueBills" xml:space="preserve"><value>Overdue {0}</value></data>
+  <data name="OverviewPrepayments" xml:space="preserve"><value>Prepayments {0}</value></data>
+  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Expected settlement, {0}: surcharge {1}</value></data>
+  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Expected settlement, {0}: refund {1}</value></data>
+  <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} same period: {3} ({4})</value></data>
+  <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} same period: {3}</value></data>
+  <data name="TodoReadings" xml:space="preserve"><value>Submit readings: {0}</value></data>
+  <data name="TodoReadingsOpen" xml:space="preserve"><value>Window {0} — open now</value></data>
+  <data name="TodoReadingsOpensTomorrow" xml:space="preserve"><value>Window {0} — opens tomorrow</value></data>
+  <data name="TodoReadingsOpensIn" xml:space="preserve"><value>Window {0} — opens in {1} days</value></data>
+  <data name="TodoReadingsMissed" xml:space="preserve"><value>Window {0} has passed — submit now</value></data>
+  <data name="TodoBillDue" xml:space="preserve"><value>Pay {0} for {1}</value></data>
+  <data name="TodoTaxDue" xml:space="preserve"><value>Pay {0}</value></data>
+  <data name="TodoDueOverdue" xml:space="preserve"><value>Overdue since {0} ({1} days)</value></data>
+  <data name="TodoDueToday" xml:space="preserve"><value>Due today</value></data>
+  <data name="TodoDueTomorrow" xml:space="preserve"><value>Due tomorrow, {0}</value></data>
+  <data name="TodoDueIn" xml:space="preserve"><value>Due {0} (in {1} days)</value></data>
+  <data name="TodoBillMissing" xml:space="preserve"><value>Bill for {0} from {1} not entered yet</value></data>
+  <data name="TodoBillMissingDetail" xml:space="preserve"><value>Usually arrives on {0}</value></data>
+  <data name="TodoEnterBill" xml:space="preserve"><value>Enter bill</value></data>
+  <data name="TodoVerification" xml:space="preserve"><value>Verify meter {0}</value></data>
+  <data name="TodoVerificationOverdue" xml:space="preserve"><value>Verification was due {0}</value></data>
+  <data name="TodoVerificationDue" xml:space="preserve"><value>Verification due {0} (in {1} days)</value></data>
+  <data name="TodoSettlement" xml:space="preserve"><value>Expected settlement: {0}</value></data>
+  <data name="TodoSettlementSurcharge" xml:space="preserve"><value>Surcharge expected</value></data>
+  <data name="TodoSettlementRefund" xml:space="preserve"><value>Refund expected</value></data>
 </root>
