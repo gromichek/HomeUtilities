@@ -634,7 +634,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
             command);
     }
 
-    private static string FormatRange(DateOnly from, DateOnly to)
+    internal static string FormatRange(DateOnly from, DateOnly to)
     {
         var culture = CultureInfo.CurrentCulture;
         return from.Year == to.Year && from.Month == to.Month

@@ -146,12 +146,21 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         }
     }
 
-    /// <summary>Opens the screen for a property with the bills of every year; the contract's bills are highlighted ("All bills").</summary>
-    public Task OpenForAsync(Guid propertyId, Guid? contractId) => RunSafeAsync(async () =>
+    /// <summary>Navigation parameter carrying a <see cref="BillStatusFilter"/> name when the screen is opened from the Overview.</summary>
+    public const string StatusParameter = "status";
+
+    /// <summary>Navigation parameter carrying a calendar year (shown instead of every year) when the screen is opened from the Overview.</summary>
+    public const string YearParameter = "year";
+
+    /// <summary>
+    /// Opens the screen for a property with the bills of every year (or of one <paramref name="year"/>) and the given status; the
+    /// contract's bills are highlighted ("All bills").
+    /// </summary>
+    public Task OpenForAsync(Guid propertyId, Guid? contractId, BillStatusFilter status = BillStatusFilter.All, int? year = null) => RunSafeAsync(async () =>
     {
         _filter.PropertyId = propertyId;
-        Period.Set(PeriodFilter.ForAllYears(Period.Current.Year));
-        _filter.Status = BillStatusFilter.All;
+        Period.Set(year is { } shown ? PeriodFilter.ForYear(shown) : PeriodFilter.ForAllYears(Period.Current.Year));
+        _filter.Status = status;
         _highlightContractId = contractId;
         if (IsLoaded)
         {
