@@ -31,6 +31,12 @@
     result like any PR. **Helpers always run on Sonnet** (coding sessions use Sonnet too: the worker is cheaper
     than the lead). The lead never uses its own model for helpers.
 
+## Owner troubleshooting
+- **Android shows boxes instead of icons** (or other resources look old) although `main` is fine: a stale local
+  build. Build → Clean Solution, close Visual Studio, delete `src/HomeUtilities.App/bin` and `obj`, rebuild. If that
+  is not enough, a fresh clone helps (2026-10-27). Data on the device is kept unless the app is uninstalled — make a
+  backup first (Settings → Backup).
+
 ## CI duration
 Code changes: ~4 min (tests ~25 s; Android build ~3 min and Windows MAUI install + build ~3 min run in
 parallel). Docs-only changes (`docs/**`, `*.md`): builds skipped, checks pass in seconds.
