@@ -61,6 +61,7 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   owner decision 2026-10-25. No commercial, "community"/free-tier, non-commercial (PolyForm), dual-licensed or
   copyleft (GPL/AGPL) packages, fonts or assets (e.g. not EPPlus, Syncfusion, DevExpress, Telerik, FluentAssertions 8+;
   for Excel use ClosedXML/MiniExcel, for charts LiveCharts2/Microcharts). Name the package and its licence in the PR.
+  Check transitive licences too; keep `SixLabors.*` at 1.x (2.x+ uses the non-permissive Six Labors Split License).
 
 ## User guide (EN + RU)
 
