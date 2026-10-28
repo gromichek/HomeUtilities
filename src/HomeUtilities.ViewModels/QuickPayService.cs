@@ -41,8 +41,9 @@ public sealed class QuickPayService(
         try
         {
             var bill = await bills.GetAsync(billId, ct);
-            if (bill is null)
+            if (bill is null || bill.IsDraft)
             {
+                // A draft is confirmed first; nothing is paid on it.
                 return null;
             }
 

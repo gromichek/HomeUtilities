@@ -25,6 +25,7 @@ public sealed partial class SampleDataGenerator(
     IMeterStore meters,
     ITariffStore tariffs,
     IEqualizedPlanStore equalizedPlans,
+    IBillTemplateStore billTemplates,
     IBillStore bills,
     IPaymentStore payments,
     IChargeInputLoader chargeLoader,
@@ -104,10 +105,13 @@ public sealed partial class SampleDataGenerator(
         await AddCottageMeterAsync(cottage, cPowerCottage, ct);
         await AddTariffsAsync(cWater, cHeat, cPowerFlat, cWaste, cMaint, cNet, cPowerCottage, hotMeters, ct);
         var supplierOf = new Dictionary<Guid, Supplier> { [water.Id] = water, [heat.Id] = heat, [power.Id] = power, [waste.Id] = waste, [manager.Id] = manager, [net.Id] = net, [tax.Id] = tax };
+        await AddInternetTemplateAsync(flat, cNet, net, ct);
         await AddBillsAsync(flat, [cWater, cHeat, cPowerFlat, cWaste, cMaint], cNet, supplierOf, ct);
         await AddEqualizedAsync(cPowerCottage, supplierOf, ct);
         await AddTaxInstallmentsAsync(cGarageTax, 4, 96.40m, supplierOf, ct);
         await AddTaxInstallmentsAsync(cLand, 2, 58.30m, supplierOf, ct);
+        await AddOtherTemplatesAsync(flat, cottage, ct);
+        await CreateDraftsAsync(ct);
         return true;
     }
 
@@ -155,6 +159,13 @@ public sealed partial class SampleDataGenerator(
         for (var offset = -10; offset <= 1; offset++)
         {
             counter++;
+
+            // The previous and the current period of the prepaid internet are left to the template (drafts).
+            if (offset is -DraftMonthsAgo or 0)
+            {
+                continue;
+            }
+
             await AddContractBillAsync(flat, internet, current.AddMonths(offset), -offset, counter, supplierOf, ct);
         }
 
@@ -317,6 +328,7 @@ public sealed partial class SampleDataGenerator(
         }
 
         var bill = Bill.CreateFor(contract, period, clock);
+        bill.TemplateId = contract.Service == ServiceKind.InternetTv ? _internetTemplate?.Id : null;
         bill.Number = $"INV-{period.Year}-{counter:0000}";
         var issued = DayOf(contract.BillingTiming == BillingTiming.InAdvance ? period.AddMonths(-1) : period.AddMonths(1), contract.BillDay ?? 5);
         bill.IssuedOn = issued > _today ? _today : issued;

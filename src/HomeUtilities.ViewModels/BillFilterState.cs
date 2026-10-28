@@ -14,6 +14,9 @@ public enum BillStatusFilter
 
     /// <summary>Bills with nothing open (paid and prepaid).</summary>
     Paid,
+
+    /// <summary>Only the draft bills created from templates.</summary>
+    Drafts,
 }
 
 /// <summary>

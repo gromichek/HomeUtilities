@@ -56,6 +56,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private string _vatRatesText = string.Empty;
 
     [ObservableProperty]
+    private string _billTemplatesText = string.Empty;
+
+    [ObservableProperty]
     private string _versionText = string.Empty;
 
     [ObservableProperty]
@@ -152,6 +155,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     [RelayCommand]
     private Task OpenCategoriesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Categories));
+
+    [RelayCommand]
+    private Task OpenBillTemplatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.BillTemplates));
 
     [RelayCommand]
     private Task OpenVatRatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.VatRates));
@@ -316,6 +322,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             Title = _localizer["SectionSettings"];
             CategoriesText = _localizer["SectionCategories"];
             VatRatesText = _localizer["SectionVatRates"];
+            BillTemplatesText = _localizer["SectionBillTemplates"];
             ErrorLogHeader = _localizer["SettingsErrorLog"];
             ErrorLogHint = _localizer["SettingsErrorLogHint"];
             CopyLogText = _localizer["SettingsErrorLogCopy"];

@@ -13,7 +13,7 @@ public static class ContractBalance
         ArgumentNullException.ThrowIfNull(bills);
         ArgumentNullException.ThrowIfNull(payments);
 
-        var contractBills = bills.Where(b => !b.IsDeleted && b.ContractId == contractId).ToList();
+        var contractBills = bills.Where(b => !b.IsDeleted && !b.IsDraft && b.ContractId == contractId).ToList();
         var billIds = contractBills.Select(b => b.Id).ToHashSet();
         var billed = contractBills
             .Where(b => (b.IssuedOn ?? b.Period.FirstDay) <= date)

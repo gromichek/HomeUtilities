@@ -76,6 +76,12 @@ public class Bill : SyncEntity
     /// <summary>The bill template the bill was created from.</summary>
     public Guid? TemplateId { get; set; }
 
+    /// <summary>
+    /// True while the bill was created from a template and the owner has not confirmed it yet. Drafts do not count in
+    /// statuses, balances, payments, reports or the Overview money.
+    /// </summary>
+    public bool IsDraft { get; set; }
+
     /// <summary>Attached documents (PDF, photo).</summary>
     public List<Guid> AttachmentIds { get; set; } = [];
 

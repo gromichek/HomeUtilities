@@ -70,8 +70,8 @@ public sealed class AdaptiveFieldGrid : Grid
 
             for (var i = 0; i < visible.Count; i++)
             {
-                SetRow(visible[i], i / columns);
-                SetColumn(visible[i], i % columns);
+                SetRow((IView)visible[i], i / columns);
+                SetColumn((IView)visible[i], i % columns);
             }
         }
         finally

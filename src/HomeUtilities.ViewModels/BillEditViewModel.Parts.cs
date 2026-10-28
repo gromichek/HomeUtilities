@@ -35,6 +35,10 @@ public sealed partial class BillEditViewModel
         _snapshot = null;
         _bill.Currency = Currency.EUR;
         CurrencySymbol = _localizer["Currency_Symbol_" + _bill.Currency];
+        IsDraft = false;
+        _templateSource = null;
+        _templateDatesEdited = false;
+        CanUseTemplate = (await _templateStore.ListAsync()).Any(t => t.IsActive);
 
         var preset = PresetContractId is { } contractId ? await _contractStore.GetAsync(contractId) : null;
         Guid? propertyId = preset?.PropertyId ?? PresetPropertyId ?? (_properties.Count == 1 ? _properties[0].Id : null);
@@ -86,6 +90,10 @@ public sealed partial class BillEditViewModel
         _pendingFiles.Clear();
         _snapshot = existing.CalculatedSnapshot;
         _live = null;
+        IsDraft = existing.IsDraft;
+        _templateDatesEdited = true;
+        _templateSource = existing.TemplateId is { } templateId ? await _templateStore.GetAsync(templateId) : null;
+        OnPropertyChanged(nameof(DraftBannerText));
         IsOneOff = existing.Kind == BillKind.OneOff || existing.ContractId is null;
         _contract = existing.ContractId is { } contractId ? await _contractStore.GetAsync(contractId) : null;
         _contracts = existing.PropertyId == Guid.Empty ? [] : await _contractStore.ListByPropertyAsync(existing.PropertyId);
@@ -181,7 +189,7 @@ public sealed partial class BillEditViewModel
     private IReadOnlyList<CustomFieldValueRowViewModel> BuildFieldRows(IEnumerable<CustomFieldValue> stored)
     {
         var rows = CustomFieldValueRowViewModel.Build(
-            _contract?.CustomFields.Where(d => d.Target == CustomFieldTarget.Bill) ?? [],
+            FieldDefinitions().Where(d => d.Target == CustomFieldTarget.Bill),
             stored,
             _clock.Today,
             _localizer["BillFieldDateSet"]);
@@ -192,6 +200,12 @@ public sealed partial class BillEditViewModel
 
         return rows;
     }
+
+    /// <summary>The custom fields the bill carries: those of its template, else those of its contract.</summary>
+    private IEnumerable<CustomFieldDefinition> FieldDefinitions() =>
+        _templateSource is { } template && template.CustomFields.Any(d => !d.IsDeleted)
+            ? template.CustomFields
+            : _contract?.CustomFields ?? [];
 
     private ChoiceOption PropertyOption(Property property) => new(property.Id, property.Name, string.Empty);
 
@@ -591,7 +605,7 @@ public sealed partial class BillEditViewModel
 
     private async Task EditLineAsync(BillLine? line)
     {
-        var definitions = _contract?.CustomFields.Where(d => d.Target == CustomFieldTarget.BillLine) ?? [];
+        var definitions = FieldDefinitions().Where(d => d.Target == CustomFieldTarget.BillLine);
         var dialog = new BillLineEditorViewModel(_localizer, line, _categories, definitions, _clock.Today);
         if (!await Dialogs.ShowEditorAsync(dialog) || dialog.Result is not { } result)
         {
@@ -954,6 +968,170 @@ public sealed partial class BillEditViewModel
         if (Finished is { } finished)
         {
             await finished(EditOutcome.Saved);
+        }
+    }
+
+    // ---- Drafts and templates ---------------------------------------------------------------------------------------
+
+    /// <summary>Confirm button of a draft: saves the form as a normal bill (an amount is required).</summary>
+    [RelayCommand]
+    private Task ConfirmDraftAsync() => RunSafeAsync(async () =>
+    {
+        if (!IsDraft || IsNew)
+        {
+            return;
+        }
+
+        _confirming = true;
+        try
+        {
+            await SaveCommand.ExecuteAsync(null);
+        }
+        finally
+        {
+            _confirming = false;
+        }
+
+        if (!IsDraft)
+        {
+            _snackbar.Notify(_localizer["BillConfirmed"]);
+        }
+    });
+
+    /// <summary>"Save as template": opens the template editor with this bill's content. The bill has to be saved first.</summary>
+    [RelayCommand]
+    private Task SaveAsTemplateAsync() => RunSafeAsync(async () =>
+    {
+        if (IsNew || IsDirty)
+        {
+            await Dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["BillSaveBeforeTemplate"]);
+            return;
+        }
+
+        await _templateLauncher.FromBillAsync(_bill.Id);
+    });
+
+    /// <summary>"From template…": picks one of the active templates and fills the new bill from it.</summary>
+    [RelayCommand]
+    private Task FromTemplateAsync() => RunSafeAsync(async () =>
+    {
+        if (!IsNew)
+        {
+            return;
+        }
+
+        var templates = (await _templateStore.ListAsync()).Where(t => t.IsActive).OrderBy(t => t.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        if (templates.Count == 0)
+        {
+            CanUseTemplate = false;
+            return;
+        }
+
+        var names = _properties.ToDictionary(p => p.Id, p => p.Name);
+        string Label(BillTemplate t) => _properties.Count > 1 && names.TryGetValue(t.PropertyId, out var property)
+            ? _localizer.Get("BillTemplateOption", t.Name, property)
+            : t.Name;
+        var labels = templates.Select(Label).ToList();
+        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseTemplate"], labels);
+        if (picked is null || labels.IndexOf(picked) is var index && index < 0)
+        {
+            return;
+        }
+
+        await ApplyTemplateAsync(templates[index]);
+    });
+
+    /// <summary>Fills the new bill from a template: property, contract, category, supplier, title, amounts, lines, fields, dates.</summary>
+    private async Task ApplyTemplateAsync(BillTemplate template)
+    {
+        _templateSource = template;
+        _templateDatesEdited = false;
+        _bill.TemplateId = template.Id;
+        _categoryTouched = true;
+        _supplierTouched = true;
+        _dueTouched = true;
+
+        IsOneOff = template.ContractId is null;
+        if (_properties.All(p => p.Id != template.PropertyId) && await _propertyStore.GetAsync(template.PropertyId) is { } own)
+        {
+            _properties = [.. _properties, own];
+        }
+
+        await SelectPropertyCoreAsync(template.PropertyId);
+        if (template.ContractId is { } contractId
+            && (_contracts.FirstOrDefault(c => c.Id == contractId) ?? await _contractStore.GetAsync(contractId)) is { } contract)
+        {
+            ApplyContract(contract);
+        }
+
+        // Prepaid templates default to next month, the others to the month that just ended; a one-time purchase is of this month.
+        _applying = true;
+        try
+        {
+            var offset = template.ContractId is null && template.Schedule.Kind == ScheduleKind.Once
+                ? 0
+                : template.Timing == BillingTiming.InAdvance ? 1 : -1;
+            Period = YearMonth.From(_clock.Today).AddMonths(offset);
+            _periodTouched = true;
+            SelectedCategory = CategoryOptions().FirstOrDefault(c => c.Id == template.CategoryId);
+            SelectedSupplier = template.SupplierId is { } supplierId ? SupplierOptions().FirstOrDefault(s => s.Id == supplierId) : null;
+            BillTitle = string.IsNullOrWhiteSpace(template.Title) ? (IsOneOff ? template.Name : string.Empty) : template.Title;
+            Notes = template.Notes ?? string.Empty;
+        }
+        finally
+        {
+            _applying = false;
+        }
+
+        if (template.Net is null && template.VatPercent is null && template.Gross is null)
+        {
+            Amounts.Clear();
+        }
+        else if (Core.Billing.Amounts.Complete(template.Net, template.VatPercent, template.Gross).Result is { } amounts)
+        {
+            Amounts.Load(amounts);
+        }
+
+        _lines.Clear();
+        _lines.AddRange(template.Lines.Select((l, i) => l.ToBillLine(_bill.Id, i)));
+        RebuildLines();
+        FieldRows = BuildFieldRows([]);
+        ApplyTemplateDates();
+        OnPropertyChanged(nameof(DraftBannerText));
+        MarkDirty();
+        PendingRefresh = RefreshCalculationAsync();
+        await PendingRefresh;
+    }
+
+    /// <summary>Issue and due date of the template for the bill's period (none when the template has no issue day).</summary>
+    private void ApplyTemplateDates()
+    {
+        if (_templateSource is not { } template)
+        {
+            return;
+        }
+
+        var issued = BillTemplateScheduler.IssueDate(template, Period);
+        var due = BillTemplateScheduler.DueDate(template, Period);
+        var wasApplying = _applying;
+        _applying = true;
+        try
+        {
+            HasIssuedOn = issued is not null;
+            if (issued is { } issuedOn)
+            {
+                IssuedOn = issuedOn;
+            }
+
+            HasDueOn = due is not null;
+            if (due is { } dueOn)
+            {
+                DueOn = dueOn;
+            }
+        }
+        finally
+        {
+            _applying = wasApplying;
         }
     }
 }

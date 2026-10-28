@@ -16,7 +16,7 @@ public static class BillQuantitySelection
 
         var quantities = new Dictionary<Guid, decimal>();
         var amounts = new Dictionary<Guid, decimal>();
-        foreach (var quantity in billsOfPeriod.SelectMany(b => b.BillQuantities))
+        foreach (var quantity in billsOfPeriod.Where(b => !b.IsDraft).SelectMany(b => b.BillQuantities))
         {
             quantities[quantity.ComponentId] = quantity.Quantity;
             if (quantity.Amount is { } amount)

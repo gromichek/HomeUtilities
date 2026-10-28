@@ -130,6 +130,9 @@
                                     <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
                                     <Setter Property="StrokeThickness" Value="2" />
                                 </DataTrigger>
+                                <DataTrigger TargetType="Border" x:DataType="vm:BillItemViewModel" Binding="{Binding IsDraft}" Value="True">
+                                    <Setter Property="Opacity" Value="0.75" />
+                                </DataTrigger>
                                 <DataTrigger TargetType="Border" x:DataType="vm:BillItemViewModel" Binding="{Binding IsHighlighted}" Value="True">
                                     <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
                                     <Setter Property="StrokeThickness" Value="2" />
@@ -185,6 +188,14 @@
                                         IsVisible="{Binding CanMarkPaid}"
                                         ToolTipProperties.Text="{Binding MarkPaidText}"
                                         SemanticProperties.Description="{Binding MarkPaidText}" />
+
+                                <!-- Quick action on drafts: confirm (opens the editor when the amount is still missing). -->
+                                <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Text="{Binding ConfirmText}" Command="{Binding ConfirmCommand}"
+                                        ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,6,0,0"
+                                        IsVisible="{Binding IsDraft}"
+                                        ToolTipProperties.Text="{Binding ConfirmText}"
+                                        SemanticProperties.Description="{Binding ConfirmText}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

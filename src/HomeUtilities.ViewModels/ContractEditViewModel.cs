@@ -390,6 +390,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         IClipboardService clipboard,
         ISnackbarService snackbar,
         PrepaymentService prepayments,
+        BillTemplateLauncher templateLauncher,
         Func<SupplierEditViewModel> supplierEditorFactory)
         : base(localizer, dialogs, navigation, snackbar)
     {
@@ -411,6 +412,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         _clipboard = clipboard;
         _snackbar = snackbar;
         _prepayments = prepayments;
+        _templateLauncher = templateLauncher;
         _supplierEditorFactory = supplierEditorFactory;
         ValidFrom = clock.Today;
         ValidTo = clock.Today;
@@ -1155,6 +1157,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             BillsEmptyText = _localizer["BillBillsCardEmpty"];
             AllBillsText = _localizer["BillBillsCardAll"];
             AddBillText = _localizer["BillBillsCardAdd"];
+            TemplateFromContractText = _localizer["BillTemplateFromContract"];
             PlanHeader = _localizer["EqPlanHeader"];
             PlanHintText = _localizer["EqPlanHint"];
             PlanEmptyText = _localizer["EqPlanEmpty"];

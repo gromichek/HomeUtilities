@@ -196,7 +196,8 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 
             _contracts = await _contractStore.ListAsync();
             _contractsById = _contracts.ToDictionary(c => c.Id);
-            _billsById = (await _bills.ListAsync()).ToDictionary(b => b.Id);
+            // Drafts are not bills yet: a payment cannot be allocated to one.
+            _billsById = (await _bills.ListAsync()).Where(b => !b.IsDraft).ToDictionary(b => b.Id);
             _properties = await _propertyStore.ListAsync(false);
             if (existing is not null)
             {

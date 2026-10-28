@@ -56,6 +56,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private readonly IMediaService _media;
     private readonly IFileViewer _viewer;
     private readonly QuickPayService _quickPay;
+    private readonly IBillTemplateStore _templateStore;
+    private readonly BillTemplateLauncher _templateLauncher;
     private readonly PrepaymentService _prepayments;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
@@ -70,6 +72,15 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private IReadOnlyList<Supplier> _suppliers = [];
     private IReadOnlyList<Category> _categories = [];
     private Contract? _contract;
+
+    /// <summary>The template the bill comes from (a draft, or a bill made with "From template"); null for any other bill.</summary>
+    private BillTemplate? _templateSource;
+
+    /// <summary>True while the draft is being confirmed through Save.</summary>
+    private bool _confirming;
+
+    /// <summary>True once the user typed an issue or due date himself, so a period change no longer recomputes the template's dates.</summary>
+    private bool _templateDatesEdited;
     private ChargeInput? _input;
     private CalculatedCharge? _live;
     private CalculatedCharge? _snapshot;
@@ -90,6 +101,16 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     [ObservableProperty]
     private BillEditTexts _texts;
+
+    /// <summary>A draft created from a template: shown with a banner and a Confirm button; no payment card until confirmed.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPaymentCard), nameof(ShowDraftBanner), nameof(DraftBannerText))]
+    private bool _isDraft;
+
+    /// <summary>True when a new bill can start from a template (there is at least one active template).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowFromTemplate))]
+    private bool _canUseTemplate;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedTypeIndex), nameof(ShowContractRow), nameof(IsKindEditable), nameof(ShowComparison), nameof(TitleRequiredMark))]
@@ -263,6 +284,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         IMediaService media,
         IFileViewer viewer,
         QuickPayService quickPay,
+        IBillTemplateStore templateStore,
+        BillTemplateLauncher templateLauncher,
         PrepaymentService prepayments,
         IClock clock,
         ILocalizer localizer,
@@ -284,6 +307,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         _media = media;
         _viewer = viewer;
         _quickPay = quickPay;
+        _templateStore = templateStore;
+        _templateLauncher = templateLauncher;
         _prepayments = prepayments;
         _clock = clock;
         _localizer = localizer;
@@ -330,6 +355,9 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     public bool ShowTypePicker => IsNew;
 
+    /// <summary>The "From template…" button of a new bill.</summary>
+    public bool ShowFromTemplate => IsNew && CanUseTemplate;
+
     public bool ShowContractRow => !IsOneOff;
 
     public bool IsKindEditable => !IsOneOff;
@@ -345,7 +373,17 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     public bool ShowQuantities => !IsOneOff && QuantityRows.Count > 0;
 
-    public bool ShowPaymentCard => !IsNew;
+    public bool ShowPaymentCard => !IsNew && !IsDraft;
+
+    public bool ShowDraftBanner => IsDraft && !IsNew;
+
+    /// <summary>"Draft from template «Internet + TV» — check and confirm".</summary>
+    public string DraftBannerText => _templateSource is { } template
+        ? _localizer.Get("BillDraftBanner", template.Name)
+        : _localizer["BillDraftBannerNoTemplate"];
+
+    /// <summary>"Save as template" and the Confirm button are offered for a saved bill only.</summary>
+    public bool CanSaveAsTemplate => !IsNew;
 
     public bool ShowPropertyChooser => IsNew && _properties.Count > 1;
 
@@ -536,6 +574,13 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         var bill = BuildBill(errors);
         var contract = IsOneOff ? null : _contract;
         errors.AddRange(BillValidator.Validate(bill, contract).Errors.Select(MapRowIndex));
+
+        // A draft is confirmed with an amount only.
+        if (_confirming && errors.Count == 0 && bill.Gross == 0)
+        {
+            errors.Add(new(ErrorCodes.BillDraftAmountRequired, "Gross"));
+        }
+
         _pending = bill;
         return errors;
     }
@@ -555,6 +600,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         _removedAttachments.Clear();
         _pendingFiles.Clear();
         _bill = bill;
+        IsDraft = bill.IsDraft;
         _snapshot = bill.CalculatedSnapshot;
         IsNew = false;
         Title = TitleText();
@@ -667,7 +713,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             foreach (var derived in new[]
             {
                 nameof(ShowTypePicker), nameof(ShowPaymentCard), nameof(ShowPropertyChooser), nameof(IsPropertyReadOnly),
-                nameof(IsContractEditable), nameof(IsContractReadOnly),
+                nameof(IsContractEditable), nameof(IsContractReadOnly), nameof(ShowDraftBanner), nameof(CanSaveAsTemplate), nameof(ShowFromTemplate),
             })
             {
                 OnPropertyChanged(derived);
@@ -686,6 +732,10 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
                 case nameof(HasDueOn) or nameof(DueOn):
                     _dueTouched = true;
                     _dueDatePicked |= name == nameof(DueOn);
+                    _templateDatesEdited = true;
+                    break;
+                case nameof(HasIssuedOn) or nameof(IssuedOn):
+                    _templateDatesEdited = true;
                     break;
                 case nameof(SelectedCategory):
                     _categoryTouched = true;
@@ -872,7 +922,11 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             _snapshot = null;
         }
 
-        if (!_dueTouched)
+        if (_templateSource is not null && IsNew && !_templateDatesEdited)
+        {
+            ApplyTemplateDates();
+        }
+        else if (!_dueTouched)
         {
             ApplyDefaultDue();
         }
@@ -936,6 +990,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
             CreatedAt = _bill.CreatedAt,
             UpdatedAt = _bill.UpdatedAt,
             TemplateId = _bill.TemplateId,
+            IsDraft = _bill.IsDraft && !_confirming,
             PropertyId = SelectedProperty?.Id ?? Guid.Empty,
             CategoryId = SelectedCategory?.Id ?? Guid.Empty,
             ContractId = IsOneOff ? null : _contract?.Id,
@@ -980,7 +1035,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     private void ApplyDefaultDue()
     {
-        if (_contract is null)
+        if (_contract is null || _templateSource is not null)
         {
             return;
         }

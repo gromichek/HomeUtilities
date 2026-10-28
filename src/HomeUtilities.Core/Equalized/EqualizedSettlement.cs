@@ -58,7 +58,7 @@ public static class EqualizedSettlement
         ArgumentNullException.ThrowIfNull(plans);
         ArgumentNullException.ThrowIfNull(bills);
 
-        var billList = bills.Where(b => !b.IsDeleted).ToList();
+        var billList = bills.Where(b => !b.IsDeleted && !b.IsDraft).ToList();
         YearMonth from;
         var settlements = billList.Where(b => b.Kind == BillKind.Settlement).Select(b => b.Period).ToList();
         if (settlements.Count > 0)
@@ -93,7 +93,7 @@ public static class EqualizedSettlement
 
         var planList = plans.ToList();
         var billed = bills
-            .Where(b => !b.IsDeleted && b.Kind == BillKind.Equalized)
+            .Where(b => !b.IsDeleted && !b.IsDraft && b.Kind == BillKind.Equalized)
             .GroupBy(b => b.Period)
             .ToDictionary(g => g.Key, g => g.Sum(b => b.Gross));
 
