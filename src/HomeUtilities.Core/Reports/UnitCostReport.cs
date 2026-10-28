@@ -24,7 +24,7 @@ internal static class UnitCostReport
 
         var months = filter.Months();
         var billsByContract = data.Bills
-            .Where(b => b.ContractId is not null && b.Kind is BillKind.Regular or BillKind.Correction)
+            .Where(b => !b.IsDraft && b.ContractId is not null && b.Kind is BillKind.Regular or BillKind.Correction)
             .ToLookup(b => b.ContractId!.Value);
         var meterUnits = data.Meters.ToDictionary(m => m.Id, m => m.Unit);
 

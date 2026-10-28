@@ -30,7 +30,9 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
             .Include(m => m.Registers).ThenInclude(r => r.Readings.Where(x => x.Date >= cutoff))
             .AsSplitQuery()
             .ToListAsync(ct);
-        var bills = await db.Bills.AsNoTracking().ToListAsync(ct);
+        var allBills = await db.Bills.AsNoTracking().ToListAsync(ct);
+        var bills = allBills.Where(b => !b.IsDraft).ToList();
+        var drafts = allBills.Where(b => b.IsDraft).ToList();
         var payments = await db.Payments.AsNoTracking().Include(p => p.Allocations).AsSplitQuery().ToListAsync(ct);
         var plans = await db.EqualizedPlans.AsNoTracking().ToListAsync(ct);
 
@@ -54,6 +56,6 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
             settlements[contract.Id] = EqualizedSettlement.Calculate(contractPlans, contractBills, charges, from, to).Expected;
         }
 
-        return new OverviewData(properties, contracts, contractMeters, meters, bills, payments, settlements);
+        return new OverviewData(properties, contracts, contractMeters, meters, bills, payments, settlements, drafts);
     }
 }

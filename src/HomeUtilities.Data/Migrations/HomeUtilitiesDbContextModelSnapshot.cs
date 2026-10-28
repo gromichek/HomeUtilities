@@ -113,6 +113,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsDraft")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateOnly?>("IssuedOn")
                         .HasColumnType("TEXT");
 
@@ -166,6 +169,8 @@ namespace HomeUtilities.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("SupplierId");
+
+                    b.HasIndex("TemplateId");
 
                     b.HasIndex("UpdatedAt");
 
@@ -243,6 +248,96 @@ namespace HomeUtilities.Data.Migrations
                     b.HasIndex("UpdatedAt");
 
                     b.ToTable("BillLines", (string)null);
+                });
+
+            modelBuilder.Entity("HomeUtilities.Core.Billing.BillTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CustomFields")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DueDayOffset")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("Gross")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("LastGeneratedPeriod")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Lines")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Net")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("RemindDaysBefore")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Schedule")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("SupplierId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Timing")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("VatPercent")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ContractId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("BillTemplates", (string)null);
                 });
 
             modelBuilder.Entity("HomeUtilities.Core.Billing.Payment", b =>
@@ -1154,6 +1249,31 @@ namespace HomeUtilities.Data.Migrations
                     b.HasOne("HomeUtilities.Core.Domain.Category", null)
                         .WithMany()
                         .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("HomeUtilities.Core.Billing.BillTemplate", b =>
+                {
+                    b.HasOne("HomeUtilities.Core.Domain.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HomeUtilities.Core.Domain.Contract", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HomeUtilities.Core.Domain.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HomeUtilities.Core.Domain.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
