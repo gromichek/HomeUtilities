@@ -31,6 +31,9 @@
                                         <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsMissing}" Value="True">
                                             <Setter Property="Text" Value="{StaticResource IconTodoMissing}" />
                                         </DataTrigger>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsDrafts}" Value="True">
+                                            <Setter Property="Text" Value="{StaticResource IconTodoMissing}" />
+                                        </DataTrigger>
                                         <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsVerification}" Value="True">
                                             <Setter Property="Text" Value="{StaticResource IconTodoVerification}" />
                                         </DataTrigger>

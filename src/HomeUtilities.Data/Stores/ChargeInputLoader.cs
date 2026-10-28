@@ -44,7 +44,7 @@ public sealed class ChargeInputLoader(IDbContextFactory<HomeUtilitiesDbContext> 
 
         // Quantities typed from the bill(s) of the period; the newest bill wins per component.
         var quantityBills = await db.Bills.AsNoTracking()
-            .Where(b => b.ContractId == contractId && b.Period == period)
+            .Where(b => b.ContractId == contractId && b.Period == period && !b.IsDraft)
             .OrderBy(b => b.CreatedAt)
             .ToListAsync(ct);
         var (quantities, amounts) = BillQuantitySelection.From(quantityBills);

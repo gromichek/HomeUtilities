@@ -22,7 +22,7 @@ public static class BillStatus
             .Sum(a => a.Amount);
         var open = bill.Gross - paid;
         var isPaid = open == 0;
-        var isOverdue = open > 0 && bill.DueOn is { } due && due < today;
+        var isOverdue = !bill.IsDraft && open > 0 && bill.DueOn is { } due && due < today;
         var isPrepaid = isPaid && bill.Period > YearMonth.From(today);
         return new(paid, open, isPaid, isOverdue, isPrepaid);
     }

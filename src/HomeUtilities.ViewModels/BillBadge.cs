@@ -19,6 +19,9 @@ public enum BillBadgeKind
 
     /// <summary>Paid before the service month started (green ✓).</summary>
     Prepaid,
+
+    /// <summary>Created from a template and not confirmed yet (muted); counts nowhere until confirmed.</summary>
+    Draft,
 }
 
 /// <summary>Maps a <see cref="BillState"/> to the badge and its text.</summary>

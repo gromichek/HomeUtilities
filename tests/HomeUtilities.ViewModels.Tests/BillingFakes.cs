@@ -32,6 +32,15 @@ internal static class Copies
         return copy;
     }
 
+    public static BillTemplate Of(BillTemplate template)
+    {
+        var copy = Shallow(template);
+        copy.Lines = [.. template.Lines.Select(Shallow)];
+        copy.CustomFields = [.. template.CustomFields.Select(Shallow)];
+        copy.Schedule = template.Schedule.Clone();
+        return copy;
+    }
+
     public static Payment Of(Payment payment)
     {
         var copy = Shallow(payment);
@@ -55,11 +64,11 @@ internal sealed class FakeBillStore : IBillStore
         Task.FromResult<IReadOnlyList<Bill>>([.. Stored.Select(Copies.Of).OrderBy(b => b.Period)]);
 
     public Task<IReadOnlyList<Bill>> ListByContractAsync(Guid contractId, CancellationToken ct = default) =>
-        Task.FromResult<IReadOnlyList<Bill>>([.. Stored.Where(b => b.ContractId == contractId).Select(Copies.Of).OrderBy(b => b.Period)]);
+        Task.FromResult<IReadOnlyList<Bill>>([.. Stored.Where(b => b.ContractId == contractId && !b.IsDraft).Select(Copies.Of).OrderBy(b => b.Period)]);
 
     public Task<IReadOnlyList<Bill>> ListByPropertyAsync(Guid propertyId, YearMonth? from, YearMonth? to, CancellationToken ct = default) =>
         Task.FromResult<IReadOnlyList<Bill>>([.. Stored
-            .Where(b => b.PropertyId == propertyId && (from is null || b.Period >= from) && (to is null || b.Period <= to))
+            .Where(b => b.PropertyId == propertyId && !b.IsDraft && (from is null || b.Period >= from) && (to is null || b.Period <= to))
             .Select(Copies.Of).OrderBy(b => b.Period)]);
 
     public Task<Bill?> GetAsync(Guid id, CancellationToken ct = default) =>
@@ -160,6 +169,46 @@ internal sealed class FakePaymentStore : IPaymentStore
     private Guid? BillContract(Guid billId) => BillContractResolver(billId);
 }
 
+/// <summary>An in-memory bill template store; generation is not simulated (tests add drafts themselves).</summary>
+internal sealed class FakeBillTemplateStore : IBillTemplateStore
+{
+    public List<BillTemplate> All { get; } = [];
+
+    public IEnumerable<BillTemplate> Stored => All.Where(t => !t.IsDeleted);
+
+    /// <summary>The days <see cref="GenerateDraftsAsync"/> was called with.</summary>
+    public List<DateOnly> Generated { get; } = [];
+
+    public Task<IReadOnlyList<BillTemplate>> ListAsync(CancellationToken ct = default) =>
+        Task.FromResult<IReadOnlyList<BillTemplate>>([.. Stored.Select(Copies.Of).OrderBy(t => t.Name)]);
+
+    public Task<BillTemplate?> GetAsync(Guid id, CancellationToken ct = default) =>
+        Task.FromResult(Stored.FirstOrDefault(t => t.Id == id) is { } template ? Copies.Of(template) : null);
+
+    public Task SaveAsync(BillTemplate aggregate, CancellationToken ct = default)
+    {
+        All.RemoveAll(t => t.Id == aggregate.Id);
+        All.Add(Copies.Of(aggregate));
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        foreach (var template in All.Where(t => t.Id == id))
+        {
+            template.IsDeleted = true;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<int> GenerateDraftsAsync(DateOnly today, CancellationToken ct = default)
+    {
+        Generated.Add(today);
+        return Task.FromResult(0);
+    }
+}
+
 /// <summary>Everything a bill editor or the bills list needs, on top of the contract test kit (one property, built-in categories).</summary>
 internal sealed class BillTestKit
 {
@@ -167,6 +216,7 @@ internal sealed class BillTestKit
     {
         Kit = new ContractTestKit(today);
         QuickPay = new QuickPayService(Kit.Bills, Kit.Payments, Kit.Contracts, Kit.Suppliers, Kit.Properties, Kit.Clock);
+        Drafts = new DraftService(Kit.Bills, Kit.Contracts);
     }
 
     public ContractTestKit Kit { get; }
@@ -175,7 +225,13 @@ internal sealed class BillTestKit
 
     public FakePaymentStore Payments => Kit.Payments;
 
+    public FakeBillTemplateStore Templates => Kit.Templates;
+
     public QuickPayService QuickPay { get; }
+
+    public DraftService Drafts { get; }
+
+    public BillTemplateLauncher TemplateLauncher => Kit.TemplateLauncher;
 
     public BillFilterState Filter { get; } = new();
 
@@ -195,10 +251,10 @@ internal sealed class BillTestKit
 
     public BillEditViewModel CreateEditor() =>
         new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, Kit.ChargeLoader, Kit.Plans, Kit.Attachments,
-            Kit.Media, Kit.Viewer, QuickPay, Kit.Prepayments, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog);
+            Kit.Media, Kit.Viewer, QuickPay, Templates, TemplateLauncher, Kit.Prepayments, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog);
 
     public BillsViewModel CreateBills(ISectionSelectionMemory? memory = null) =>
-        new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, QuickPay, Kit.Toast, Kit.Dialogs,
+        new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, QuickPay, Drafts, Templates, Kit.Toast, Kit.Dialogs,
             Kit.Clock, Kit.Localizer, Kit.Navigation, Kit.Layout, memory ?? new SectionSelectionMemory(), Filter, CreateEditor);
 
     /// <summary>

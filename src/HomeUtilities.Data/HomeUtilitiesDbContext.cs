@@ -55,6 +55,8 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
 
     public DbSet<BillLine> BillLines => Set<BillLine>();
 
+    public DbSet<BillTemplate> BillTemplates => Set<BillTemplate>();
+
     public DbSet<Payment> Payments => Set<Payment>();
 
     public DbSet<PaymentAllocation> PaymentAllocations => Set<PaymentAllocation>();
@@ -76,6 +78,8 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
         modelBuilder.Ignore<CustomFieldDefinition>();
         modelBuilder.Ignore<CustomFieldValue>();
         modelBuilder.Ignore<TariffTier>();
+        modelBuilder.Ignore<BillTemplateLine>();
+        modelBuilder.Ignore<Schedule>();
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(HomeUtilitiesDbContext).Assembly);
 

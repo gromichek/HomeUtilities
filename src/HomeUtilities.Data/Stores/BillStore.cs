@@ -10,14 +10,14 @@ public sealed class BillStore(IDbContextFactory<HomeUtilitiesDbContext> factory)
 {
     /// <inheritdoc />
     public Task<IReadOnlyList<Bill>> ListByContractAsync(Guid contractId, CancellationToken ct = default) =>
-        ListAsync(q => q.Where(b => b.ContractId == contractId), ct);
+        ListAsync(q => q.Where(b => b.ContractId == contractId && !b.IsDraft), ct);
 
     /// <inheritdoc />
     public Task<IReadOnlyList<Bill>> ListByPropertyAsync(Guid propertyId, YearMonth? from, YearMonth? to, CancellationToken ct = default) =>
         ListAsync(
             q =>
             {
-                q = q.Where(b => b.PropertyId == propertyId);
+                q = q.Where(b => b.PropertyId == propertyId && !b.IsDraft);
                 if (from is { } start)
                 {
                     q = q.Where(b => b.Period >= start);

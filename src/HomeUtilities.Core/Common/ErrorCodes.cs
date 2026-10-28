@@ -323,4 +323,43 @@ public static class ErrorCodes
 
     /// <summary>A due date is not after the previous one.</summary>
     public const string TaxDueDatesNotAscending = "tax.due_dates_not_ascending";
+
+    /// <summary>The bill template name is blank.</summary>
+    public const string BillTemplateNameRequired = "bill_template.name_required";
+
+    /// <summary>The bill template name is longer than 100 characters.</summary>
+    public const string BillTemplateNameTooLong = "bill_template.name_too_long";
+
+    /// <summary>The bill template has no property.</summary>
+    public const string BillTemplatePropertyRequired = "bill_template.property_required";
+
+    /// <summary>The bill template has no category.</summary>
+    public const string BillTemplateCategoryRequired = "bill_template.category_required";
+
+    /// <summary>The bill template title is longer than 100 characters.</summary>
+    public const string BillTemplateTitleTooLong = "bill_template.title_too_long";
+
+    /// <summary>A scheduled bill template has no start month.</summary>
+    public const string ScheduleStartRequired = "schedule.start_required";
+
+    /// <summary>The number of months between bills is not within 2–24.</summary>
+    public const string ScheduleEveryMonthsOutOfRange = "schedule.every_months_out_of_range";
+
+    /// <summary>The number of months is set for a schedule that is not "every N months".</summary>
+    public const string ScheduleEveryMonthsNotAllowed = "schedule.every_months_not_allowed";
+
+    /// <summary>The issue day is not within 1–31.</summary>
+    public const string ScheduleDayOutOfRange = "schedule.day_out_of_range";
+
+    /// <summary>The end month is before the start month.</summary>
+    public const string ScheduleEndBeforeStart = "schedule.end_before_start";
+
+    /// <summary>A "once" schedule has start month, end month or issue day.</summary>
+    public const string ScheduleOnceHasPeriod = "schedule.once_has_period";
+
+    /// <summary>Due-after days or remind-before days are not within 0–365.</summary>
+    public const string BillTemplateDaysOutOfRange = "bill_template.days_out_of_range";
+
+    /// <summary>A draft bill cannot be confirmed while its total is 0.</summary>
+    public const string BillDraftAmountRequired = "bill.draft_amount_required";
 }

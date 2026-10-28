@@ -25,6 +25,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     private readonly IClock _clock;
     private readonly IDatabaseInitializer _databaseInitializer;
     private readonly IOverviewDataLoader _loader;
+    private readonly IBillTemplateStore _templateStore;
     private readonly QuickPayService _quickPay;
     private readonly ISnackbarService _snackbar;
     private readonly INavigationService _navigation;
@@ -103,6 +104,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         IClock clock,
         IDatabaseInitializer databaseInitializer,
         IOverviewDataLoader loader,
+        IBillTemplateStore templateStore,
         QuickPayService quickPay,
         ISnackbarService snackbar,
         INavigationService navigation,
@@ -114,6 +116,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         _clock = clock;
         _databaseInitializer = databaseInitializer;
         _loader = loader;
+        _templateStore = templateStore;
         _quickPay = quickPay;
         _snackbar = snackbar;
         _navigation = navigation;
@@ -164,6 +167,8 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
             return;
         }
 
+        // Drafts of the templates that came due since the last visit are created before the data is read.
+        await _templateStore.GenerateDraftsAsync(_clock.Today);
         _data = await _loader.LoadAsync(_clock.Today);
         _todo = TodoBuilder.Build(_data, _clock.Today);
         PropertyCount = _data.Properties.Count;
@@ -310,6 +315,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
                 _localizer.Get("TodoBillMissing", BillText.Period(item.Period!.Value), item.Args[0]),
                 _localizer.Get("TodoBillMissingDetail", Day(item.Date))),
             TodoKind.VerificationDue => (_localizer.Get("TodoVerification", item.Args[0]), VerificationDetail(item, today)),
+            TodoKind.DraftsToConfirm => (_localizer.Get("TodoDrafts", item.Count), _localizer["TodoDraftsDetail"]),
             _ => (
                 _localizer.Get("TodoSettlement", item.Args[0]),
                 _localizer[item.Amount > 0 ? "TodoSettlementSurcharge" : "TodoSettlementRefund"]),
@@ -385,6 +391,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
                 [EditorNavigation.PropertyIdParameter] = item.PropertyId,
                 [BillEditViewModel.PeriodParameter] = item.Period!.Value.ToString(),
             }),
+        TodoKind.DraftsToConfirm => OpenBillsAsync(item.PropertyId, BillStatusFilter.Drafts),
         TodoKind.VerificationDue => _navigation.GoToAsync(
             Routes.MeterEdit,
             new Dictionary<string, object>

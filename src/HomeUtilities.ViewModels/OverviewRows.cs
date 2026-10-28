@@ -72,6 +72,8 @@ public sealed class TodoRowViewModel
 
     public bool IsSettlement => Kind == TodoKind.SettlementExpected;
 
+    public bool IsDrafts => Kind == TodoKind.DraftsToConfirm;
+
     public bool IsOverdue => Severity == TodoSeverity.Overdue;
 
     public bool IsToday => Severity == TodoSeverity.Today;

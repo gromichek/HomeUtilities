@@ -37,6 +37,7 @@ public static class TodoBuilder
         items.AddRange(BillMissingItems(data, today));
         items.AddRange(VerificationItems(data, today));
         items.AddRange(SettlementItems(data, today));
+        items.AddRange(DraftItems(data, today));
 
         return
         [
@@ -138,7 +139,7 @@ public static class TodoBuilder
     {
         var contracts = data.Contracts.ToDictionary(c => c.Id);
         var payments = PaymentsByBill(data.Payments);
-        foreach (var bill in data.Bills.Where(b => !b.IsDeleted && b.DueOn is not null))
+        foreach (var bill in data.Bills.Where(b => !b.IsDeleted && !b.IsDraft && b.DueOn is not null))
         {
             var due = bill.DueOn!.Value;
             var open = BillStatus.Of(bill, payments.GetValueOrDefault(bill.Id) ?? [], today).Open;
@@ -186,7 +187,8 @@ public static class TodoBuilder
 
     private static IEnumerable<TodoItem> BillMissingItems(OverviewData data, DateOnly today)
     {
-        var entered = data.Bills
+        // A draft counts as entered: it already has its own to-do item, so the bill is not reported as missing too.
+        var entered = data.Bills.Concat(data.Drafts)
             .Where(b => !b.IsDeleted && b.ContractId is not null && b.Kind is not (BillKind.Settlement or BillKind.Correction))
             .Select(b => (b.ContractId!.Value, b.Period))
             .ToHashSet();
@@ -253,6 +255,15 @@ public static class TodoBuilder
                     TodoKind.SettlementExpected, TodoSeverity.Info, today, contract.PropertyId, contract.Id, null, null, expected,
                     [contract.Title], Currency: contract.Currency);
             }
+        }
+    }
+
+    private static IEnumerable<TodoItem> DraftItems(OverviewData data, DateOnly today)
+    {
+        foreach (var group in data.Drafts.Where(b => !b.IsDeleted && b.IsDraft).GroupBy(b => b.PropertyId))
+        {
+            yield return new TodoItem(
+                TodoKind.DraftsToConfirm, TodoSeverity.Info, today, group.Key, null, null, null, null, [], Count: group.Count());
         }
     }
 }

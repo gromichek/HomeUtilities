@@ -26,6 +26,7 @@ information, so start here.
 | **Charge** | What a contract should cost for a month: the consumption from the readings × the prices of the tariff, with VAT. Calculated on demand, not stored. | Water, October: 5.500 m³ × 1.41 € = 7.76 € + VAT 21 % = 9.39 € |
 | **VAT rate** | A named VAT percentage that changes over time; tariff components point to it, so a change of the national rate is entered once. | "Standard rate": 21 % |
 | **Bill** | What the supplier actually charged for one month (or any one-off expense without a contract). It is compared with the charge the app calculated. | Water, October: 46.02 €; the app expected 45.10 € |
+| **Bill template** | How a payment *without a meter* looks and when it comes (internet, insurance, chimney cleaning, a yearly fee). The app creates a **draft** bill for each due month from it. See [Bill templates and drafts](#bill-templates-and-drafts). | "Home insurance": yearly in March, 120,00 € |
 | **Payment** | Money you paid. It is allocated to a bill, so the bill is *Paid*; what is not allocated stays on the contract as prepayment. | 03.11.2026: 46.02 € by bank transfer |
 
 **Order of setting things up:** properties → suppliers → contracts (in the property) → meters (in the property,
@@ -85,6 +86,7 @@ open the matching screen; **Back** returns to the Overview and the row is gone i
 | **Submit readings: Water, Heating** | A contract's *reading window* (set on the contract, e.g. 25–28) is open, opens within the next 3 days, or ended less than 4 days ago — and none of the contract's meters has a reading dated inside that window. Contracts with the same window share one row. | You save a reading of the meter inside the window, or 3 days after the window ended. | Opens **Readings** of that property for today. |
 | **Pay {contract} for {month}** (a bill, and **Pay Property tax …** for a tax installment) | An open bill whose due date is within the next 7 days, is today, or has passed. The amount is what is still open. | The bill is paid in full. | Tap opens the bill. **Paid** (the ✓ button) marks the open amount as paid today and shows **Bill marked as paid · Undo**; **Undo** takes it back and the row returns. |
 | **Bill for {month} from {contract} not entered yet** | A contract with a *bill day* has no bill for its expected month yet: the **previous** month for a contract billed in arrears, the **next** month for a prepaid one — and today is on or after the bill day (in the month after the period, or in the month before it when prepaid). Tax contracts are not checked. | You enter a bill for that contract and month. | **Enter bill** opens a new bill with the contract and the month filled in. |
+| **Draft bills to confirm: 3** | One or more **draft bills** created from your bill templates wait for you (one row per property). Information only. | You confirm or delete the drafts. | Opens **Bills** of that property, filtered to **Drafts**. |
 | **Verify meter …** | A meter in use has its verification due within 60 days, or it is overdue. | The verification date of the meter is moved forward. | Opens the meter. |
 | **Expected settlement: {contract}** | An equalized contract (see "Equalized payments") expects a settlement of 1.00 € or more, either way (surcharge or refund). Information only. | The settlement bill is entered, or the amount falls below 1.00 €. | Opens the settlement page. |
 
@@ -342,7 +344,7 @@ calculation, and whether it is paid. A **bill** is a record of its own: the *cha
 what the app expects, the bill is what the supplier asked for, the *payment* is what you paid.
 
 **The list.** At the top: filters **Property** (all or one), **Period**, **Category** (*All categories* or one
-category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *Paid*); the filters are remembered until you close the app. **Period** has three choices:
+category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *Paid*, *Drafts*); the filters are remembered until you close the app. **Period** has three choices:
 *All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
 (a bill belongs to the month of its billing period), and the totals below follow the chosen period. Below them the totals of the
 list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
@@ -361,6 +363,7 @@ the list shows only the bills of that category, that property and that month.
 | *Overdue* (red) | Something is open and the due date has passed. |
 | *Paid ✓* (green) | Everything is paid. |
 | *Prepaid ✓* (green) | Paid, and the month of the bill has not started yet (internet paid in October for November). |
+| *Draft* (muted row) | Created from a [bill template](#bill-templates-and-drafts) and not confirmed yet. It has a **Confirm** button instead of **Paid**, and it counts nowhere (not in the totals, balances, reports or the Overview) until you confirm it. *Draft · enter the amount* means the template has no amount. |
 
 **Which month does a bill belong to?** To the month of the **service**, not to the month it was issued: readings of
 25–28 October, bill arrives in November → the bill is for **October**. Services paid **in advance** (internet, TV; set
@@ -370,7 +373,10 @@ editor suggests the right month for the contract and you can change it with ‹ 
 ### Entering a bill
 
 **New bill** asks first what it is for: **For a contract** (choose the property, then the contract) or **One-off
-expense** (a repair, a purchase — no contract; it needs a *Title* and a *Category*). The cards of the editor:
+expense** (a repair, a purchase — no contract; it needs a *Title* and a *Category*). **From template…** (only when you
+have an active [bill template](#bill-templates-and-drafts)) fills the new bill from a template instead — property, contract,
+category, supplier, title, amounts, lines and custom fields — and sets the month and the issue and due dates; you only
+check it, change the month with ‹ › if needed, and save. The cards of the editor:
 
 1. **General** — period, kind (regular, equalized payment, settlement, correction, tax installment), title, bill
    number, *Issued on*, *Due on* (suggested from the contract's payment due day), the service period if one bill covers
@@ -412,6 +418,11 @@ expense** (a repair, a purchase — no contract; it needs a *Title* and a *Categ
    **Use prepayment** appears when the contract has money that pays no bill yet.
 9. **Comment.**
 
+**Save as template** (at the end of the form, for a saved bill) opens the template editor with this bill's content, so a
+payment you typed once can become a template. A **draft** bill shows a banner *Draft from template «…» — check and confirm*
+with a **Confirm** button; **Save** keeps it a draft, **Confirm** saves it as a normal bill (it needs a total above 0). A draft has no
+*Payment* card.
+
 Saving keeps you in the editor. Deleting a bill asks first; the money you paid for it stays on the contract as
 prepayment (a payment made with the **Paid** button for this bill alone is removed together with the bill).
 
@@ -427,6 +438,59 @@ date). A payment made with the **Paid** button for this bill alone is hidden com
 bills only loses this bill's share, and *the rest stays on the contract as prepayment*. Nothing is ever erased — the
 history is kept. Payments for another date or amount, or for several bills, are entered on the [Payments](#12-payments)
 screen.
+
+## Bill templates and drafts
+
+Some payments have no meter and no tariff, but they come again and again: internet and TV, insurance, a yearly chimney
+cleaning, a garage fee — or you buy the same thing now and then. Typing each one from scratch is tedious, so you describe it
+once as a **bill template**. The app then prepares a **draft bill** for every month the payment is due, and you confirm it with
+one tap (or fix the amount first).
+
+**Template or contract with a tariff?** A *contract* with a tariff is for a service the app should **calculate** from meters and
+prices (water, heating, electricity). A *template* is for a payment whose amount you simply know or read from the invoice. A
+template can also point to a contract (internet with the FiberNet contract) so the bills show up under it.
+
+**Settings → Bill templates** is the list. Open a template to see its cards:
+
+- **General** — *Name*, *Active*, *Property*, *Contract* (optional; only the contracts of the chosen property; choosing one
+  takes its category, supplier and billing timing), *Category*, *Supplier* (optional) and the *Title* every bill gets.
+- **Schedule** — *How often*: **Once (by hand)**, **Every month**, **Every N months** (3 = quarterly, 6 = twice a year, 2–24)
+  or **Every year**; the *First period* (the month the schedule counts from — a yearly template starts in the month the
+  payment falls, for example March), an optional *Last period*, and the *Issue day of the month* (1–31; 31 in February
+  becomes 28 or 29). *Billing timing*: **In advance** (a prepaid bill is issued in the month **before** its period, as internet paid
+  in October for November) or **In arrears** (issued in the month **after** it). *Due after … days* counts from the issue day;
+  *Remind … days before* is kept for the reminders that come later. A line **Next drafts** shows the next three periods with
+  their issue and due dates, for example *10.2026 (issued 05.11.2026, due 19.11.2026)*.
+- **Default amount** — any two of *Amount excl. VAT*, *VAT %* and *Total*, as in a bill. It may stay **empty** when the amount is
+  different every time (the chimney sweep): the draft then says *Draft · enter the amount*.
+- **Lines** and **Custom fields** — as in a bill. The lines are copied into each bill; the custom fields appear in each bill with an
+  empty value.
+- **Comment.**
+
+**How drafts appear.** Every time you open **Overview** or **Bills** the app creates the drafts that are due and not made yet:
+a monthly template in arrears has a draft for every month up to the **previous** month; one in advance up to the **next** month.
+When you save a template whose first period lies in the past, the drafts of those months appear at once. Nothing is created
+twice: a draft you **delete** does not come back, and re-opening the app adds nothing new. An inactive template creates no drafts.
+
+**What a draft contains:** the month, property, category, contract and supplier, the title, the amounts and lines of the template,
+empty values for the custom fields, and the issue and due dates from the schedule.
+
+**Confirming.** Drafts are listed on **Bills** (muted, badge *Draft*; filter *Status → Drafts*) and on **Overview** (*Draft bills to
+confirm: N*, one row per property). **Confirm** on a row makes it a normal bill at once; if the amount is missing, the bill opens
+instead so you can type it. In the editor use **Confirm** after you have checked the draft. A confirmed bill behaves like any other:
+**Paid**, balances, reports.
+
+**What drafts do not affect.** Until you confirm them, drafts are not counted in the *Billed / Paid / Open* totals, bill status
+and *Overdue*, contract balances, payment allocation, the Charges comparison, the reports or the *Money* and *This year* cards of the
+Overview, and **Paid** is not offered.
+
+**Once templates.** A template with *Once (by hand)* never creates drafts. Use it for something you buy now and then, for example
+*Water meter replacement*: **Bills → New bill → From template…**, pick it, and you get a normal bill (not a draft) filled in for the month
+that fits.
+
+**Other ways to make a template.** In the contract editor, the *Bills* card has **＋ Template from this contract** (it takes
+the property, category, supplier, timing, custom fields and the amount of the newest bill). In a bill, **Save as template** does the
+same from that bill. Both open the template editor: check it and **Save**.
 
 ## 12. Payments
 
@@ -659,7 +723,7 @@ opens (Drive, e-mail…). The message at the bottom shows where the file went.
 
 ## 16. Settings
 
-Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
+Language (English / Русский), theme (system / light / dark), categories, VAT rates, [bill templates](#bill-templates-and-drafts), version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
 
 ### VAT rates
@@ -697,4 +761,4 @@ again. The backup file contains **all your data and is not encrypted** — keep 
 ## 17. Coming soon
 
 Charts on the Overview,
-bill templates, Excel import, reminders, automatic backups and Google Drive sync.
+Excel import, reminders, automatic backups and Google Drive sync.

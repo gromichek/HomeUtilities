@@ -22,6 +22,9 @@ public enum TodoKind
 
     /// <summary>An equalized contract expects a noticeable settlement (information only).</summary>
     SettlementExpected = 5,
+
+    /// <summary>Draft bills created from templates wait for confirmation (information only).</summary>
+    DraftsToConfirm = 6,
 }
 
 /// <summary>How urgent a to-do item is; the order of the values is the order of the list.</summary>
@@ -56,6 +59,7 @@ public enum TodoSeverity
 /// <param name="EndDate">The end of the reading window.</param>
 /// <param name="Period">The billing period a missing bill is for.</param>
 /// <param name="Currency">Currency of <paramref name="Amount"/>.</param>
+/// <param name="Count">The number of drafts of a drafts item.</param>
 public sealed record TodoItem(
     TodoKind Kind,
     TodoSeverity Severity,
@@ -68,4 +72,5 @@ public sealed record TodoItem(
     IReadOnlyList<string> Args,
     DateOnly? EndDate = null,
     YearMonth? Period = null,
-    Currency Currency = Currency.EUR);
+    Currency Currency = Currency.EUR,
+    int Count = 0);

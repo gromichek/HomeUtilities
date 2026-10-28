@@ -21,10 +21,24 @@
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Padding="16" Spacing="16">
 
+                <!-- Draft from a template: check the content, then confirm. -->
+                <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowDraftBanner}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding DraftBannerText}" FontAttributes="Bold" />
+                        <Button Text="{Binding Texts.ConfirmText}" Command="{Binding ConfirmDraftCommand}"
+                                ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
+                                Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- 1. General -->
                 <Border Style="{StaticResource SectionCard}">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
+
+                        <Button Text="{Binding Texts.FromTemplateText}" Command="{Binding FromTemplateCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                IsVisible="{Binding ShowFromTemplate}" />
 
                         <!-- First choice of a new bill: for a contract, or a one-off expense. -->
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowTypePicker}">
@@ -459,6 +473,10 @@
                                IsVisible="{Binding NotesError, Converter={StaticResource HasText}}" />
                     </VerticalStackLayout>
                 </Border>
+
+                <Button Text="{Binding Texts.SaveAsTemplateText}" Command="{Binding SaveAsTemplateCommand}"
+                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                        IsVisible="{Binding CanSaveAsTemplate}" />
 
                 <!-- Phone: destructive action at the end of the form. -->
                 <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"

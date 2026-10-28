@@ -31,7 +31,7 @@ public static class PaymentAllocator
 
         var taken = existing.Select(a => a.BillId).ToHashSet();
         var ordered = candidates
-            .Where(b => !b.IsDeleted && b.Currency == payment.Currency && !taken.Contains(b.Id))
+            .Where(b => !b.IsDeleted && !b.IsDraft && b.Currency == payment.Currency && !taken.Contains(b.Id))
             .Where(b => payment.ContractId is { } contractId
                 ? b.ContractId == contractId
                 : payment.PropertyId is not { } propertyId || b.PropertyId == propertyId)

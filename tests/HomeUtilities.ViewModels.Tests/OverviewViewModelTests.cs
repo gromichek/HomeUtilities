@@ -29,7 +29,7 @@ public class OverviewViewModelTests : IDisposable
     public void Dispose() => CultureInfo.CurrentCulture = _culture;
 
     private OverviewViewModel Create() =>
-        new(_kit.Kit.Localizer, _kit.Kit.Clock, _initializer, _loader, _kit.QuickPay, _kit.Kit.Toast, _kit.Kit.Navigation, _kit.Kit.Dialogs,
+        new(_kit.Kit.Localizer, _kit.Kit.Clock, _initializer, _loader, _kit.Templates, _kit.QuickPay, _kit.Kit.Toast, _kit.Kit.Navigation, _kit.Kit.Dialogs,
             _kit.Kit.Settings, _kit.Kit.Layout);
 
     private async Task<OverviewViewModel> LoadAsync()
@@ -242,6 +242,57 @@ public class OverviewViewModelTests : IDisposable
         Assert.Equal(Routes.ReadingsFor, route);
         Assert.Equal(_kit.Kit.Property.Id, parameters![EditorNavigation.PropertyIdParameter]);
         Assert.Equal(Today, parameters[ReadingsViewModel.DateParameter]);
+    }
+
+    [Fact]
+    public async Task Loading_asks_the_templates_for_drafts_before_reading_the_data()
+    {
+        await LoadAsync();
+
+        Assert.Equal([Today], _kit.Templates.Generated);
+    }
+
+    [Fact]
+    public async Task Drafts_are_one_row_per_property_that_opens_the_bills_filtered_to_drafts()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        for (var month = 8; month <= 10; month++)
+        {
+            var draft = Bill.CreateFor(water, new YearMonth(2026, month), _kit.Kit.Clock);
+            draft.IsDraft = true;
+            _kit.Bills.All.Add(draft);
+        }
+
+        var vm = await LoadAsync();
+
+        var row = Assert.Single(vm.TodoRows, r => r.IsDrafts);
+        Assert.Equal("TodoDrafts 3 [en]", row.Text);
+        Assert.True(row.IsInfo);
+        Assert.False(row.CanPay);
+
+        row.OpenCommand.Execute(null);
+        await Task.Delay(50);
+
+        var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
+        Assert.Equal(Routes.BillsFor, route);
+        Assert.Equal(nameof(BillStatusFilter.Drafts), parameters![BillsViewModel.StatusParameter]);
+        Assert.Equal(_kit.Kit.Property.Id, parameters[EditorNavigation.PropertyIdParameter]);
+    }
+
+    [Fact]
+    public async Task Drafts_do_not_count_in_the_money_card()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var draft = Bill.CreateFor(water, new YearMonth(2026, 10), _kit.Kit.Clock);
+        draft.IsDraft = true;
+        draft.Gross = 500m;
+        draft.DueOn = new DateOnly(2026, 9, 1);
+        _kit.Bills.All.Add(draft);
+
+        var vm = await LoadAsync();
+
+        Assert.DoesNotContain(vm.TodoRows, r => r.IsDue);
+        Assert.DoesNotContain(vm.MoneyBlocks.SelectMany(b => b.Lines), l => l.Text.Contains("500", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -566,9 +617,10 @@ public class OverviewViewModelTests : IDisposable
                 [.. kit.Contracts.Stored],
                 [.. kit.Contracts.Links],
                 [.. kit.Meters.Stored],
-                [.. kit.Bills.Stored.Select(Copies.Of)],
+                [.. kit.Bills.Stored.Where(b => !b.IsDraft).Select(Copies.Of)],
                 [.. kit.Payments.Stored.Select(Copies.Of)],
-                new Dictionary<Guid, decimal>(Settlements)));
+                new Dictionary<Guid, decimal>(Settlements),
+                [.. kit.Bills.Stored.Where(b => b.IsDraft).Select(Copies.Of)]));
         }
     }
 

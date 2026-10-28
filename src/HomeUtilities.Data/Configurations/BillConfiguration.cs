@@ -26,6 +26,7 @@ internal sealed class BillConfiguration : IEntityTypeConfiguration<Bill>, IEntit
 
         builder.HasIndex(b => new { b.ContractId, b.Period });
         builder.HasIndex(b => new { b.PropertyId, b.Period });
+        builder.HasIndex(b => b.TemplateId);
     }
 
     public void Configure(EntityTypeBuilder<BillLine> builder)

@@ -66,6 +66,9 @@ public sealed class BillEditTexts
         PaymentsHint = localizer["BillPaymentsHint"];
         AddPaymentText = localizer["BillAddPayment"];
         NotesLabel = localizer["BillNotesLabel"];
+        ConfirmText = localizer["BillConfirm"];
+        FromTemplateText = localizer["BillFromTemplate"];
+        SaveAsTemplateText = localizer["BillSaveAsTemplate"];
         DeleteBillText = localizer["BillDelete"];
     }
 
@@ -192,4 +195,10 @@ public sealed class BillEditTexts
     public string NotesLabel { get; }
 
     public string DeleteBillText { get; }
+
+    public string ConfirmText { get; }
+
+    public string FromTemplateText { get; }
+
+    public string SaveAsTemplateText { get; }
 }

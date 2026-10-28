@@ -14,6 +14,7 @@ public sealed partial class ContractEditViewModel
 
     private readonly IBillStore _billStore;
     private readonly IPaymentStore _paymentStore;
+    private readonly BillTemplateLauncher _templateLauncher;
     private IReadOnlyList<(Bill Bill, BillState State)> _recentBills = [];
 
     [ObservableProperty]
@@ -30,6 +31,9 @@ public sealed partial class ContractEditViewModel
 
     [ObservableProperty]
     private string _addBillText = string.Empty;
+
+    [ObservableProperty]
+    private string _templateFromContractText = string.Empty;
 
     /// <summary>The card is shown for a saved contract.</summary>
     public bool ShowBillsCard => !IsNew;
@@ -103,4 +107,22 @@ public sealed partial class ContractEditViewModel
             [EditorNavigation.ContractIdParameter] = _contract.Id,
             [EditorNavigation.PropertyIdParameter] = _contract.PropertyId,
         }));
+
+    /// <summary>"＋ Template from this contract": a new bill template that starts from this contract.</summary>
+    [RelayCommand]
+    private Task TemplateFromContractAsync() => RunSafeAsync(async () =>
+    {
+        if (IsNew)
+        {
+            return;
+        }
+
+        if (IsDirty)
+        {
+            await Dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["BillSaveBeforeTemplate"]);
+            return;
+        }
+
+        await _templateLauncher.FromContractAsync(_contract.Id);
+    });
 }

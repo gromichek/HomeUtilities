@@ -952,6 +952,37 @@ public class ContractEditViewModelTests
     }
 
     [Fact]
+    public async Task BillsCard_TemplateFromThisContract_OpensTheTemplateEditorWithTheContract()
+    {
+        var contract = AddContract(ServiceKind.InternetTv);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        await vm.TemplateFromContractCommand.ExecuteAsync(null);
+
+        var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.Equal(Routes.BillTemplateEdit, route);
+        var editor = Assert.IsType<BillTemplateEditViewModel>(parameters![EditorNavigation.EditorParameter]);
+        Assert.True(editor.IsNew);
+        Assert.True(editor.IsHostedInPage);
+        Assert.Equal(contract.Id, editor.SelectedContract!.Id);
+    }
+
+    [Fact]
+    public async Task BillsCard_TemplateFromThisContract_AsksToSaveFirstWhenThereAreChanges()
+    {
+        var contract = AddContract(ServiceKind.InternetTv);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        vm.ContractTitle = "Changed";
+
+        await vm.TemplateFromContractCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Navigation.Visited);
+        Assert.Single(_kit.Dialogs.Alerts);
+    }
+
+    [Fact]
     public async Task BillsCard_IsHiddenForANewContract_AndAppearsAfterTheFirstSave()
     {
         var vm = await FilledNewAsync();

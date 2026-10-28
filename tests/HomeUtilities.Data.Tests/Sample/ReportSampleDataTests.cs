@@ -22,7 +22,7 @@ public class ReportSampleDataTests
         var factory = test.Factory;
         var generator = new SampleDataGenerator(
             new PropertyStore(factory), new SupplierStore(factory), new CategoryStore(factory), new ContractStore(factory),
-            new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillStore(factory),
+            new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillTemplateStore(factory, test.Clock), new BillStore(factory),
             new PaymentStore(factory), new ChargeInputLoader(factory), test.Clock);
         Assert.True(await generator.FillAsync());
 
@@ -47,6 +47,19 @@ public class ReportSampleDataTests
         public ReportMeasure Measure { get; set; }
 
         public bool PerMeter { get; set; }
+    }
+
+    [Fact]
+    public async Task Reports_contain_no_draft_bills()
+    {
+        var (data, today) = await LoadAsync(new DateTimeOffset(2026, 10, 20, 8, 0, 0, TimeSpan.Zero));
+
+        Assert.NotEmpty(data.Bills);
+        Assert.All(data.Bills, b => Assert.False(b.IsDraft));
+
+        // the prepaid internet: the drafts of the previous and the current month are not costs yet
+        var internet = data.Contracts.Single(c => c.Service == ServiceKind.InternetTv);
+        Assert.DoesNotContain(data.Bills, b => b.ContractId == internet.Id && (b.Period == today || b.Period == today.AddMonths(-1)));
     }
 
     [Fact]

@@ -21,7 +21,7 @@ public class OverviewSampleDataTests
         var factory = test.Factory;
         var generator = new SampleDataGenerator(
             new PropertyStore(factory), new SupplierStore(factory), new CategoryStore(factory), new ContractStore(factory),
-            new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillStore(factory),
+            new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillTemplateStore(factory, test.Clock), new BillStore(factory),
             new PaymentStore(factory), new ChargeInputLoader(factory), test.Clock);
         Assert.True(await generator.FillAsync());
 
@@ -66,6 +66,23 @@ public class OverviewSampleDataTests
 
         Assert.Contains(todo, i => i is { Kind: TodoKind.BillDue, Severity: TodoSeverity.Overdue });
         Assert.Contains(todo, i => i is { Kind: TodoKind.BillDue, Severity: TodoSeverity.Soon });
+    }
+
+    [Theory]
+    [InlineData(2026, 10, 20)]
+    [InlineData(2026, 3, 5)]
+    [InlineData(2027, 1, 31)]
+    public async Task Drafts_of_the_templates_are_listed_per_property_and_are_not_in_the_bills(int year, int month, int day)
+    {
+        var (data, todo, _) = await LoadAsync(new DateTimeOffset(year, month, day, 8, 0, 0, TimeSpan.Zero));
+
+        // the two newest prepaid internet periods (flat) and the chimney cleaning (cottage)
+        Assert.All(data.Drafts, d => Assert.True(d.IsDraft));
+        Assert.All(data.Bills, b => Assert.False(b.IsDraft));
+        var items = todo.Where(i => i.Kind == TodoKind.DraftsToConfirm).ToList();
+        Assert.Equal(2, items.Count);
+        Assert.Equal(data.Drafts.Count, items.Sum(i => i.Count));
+        Assert.Equal(2, items.Single(i => i.PropertyId == data.Properties[0].Id).Count);
     }
 
     [Fact]

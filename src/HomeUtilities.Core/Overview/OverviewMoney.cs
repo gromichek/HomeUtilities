@@ -44,7 +44,7 @@ public static class OverviewMoney
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        var bills = data.Bills.Where(b => !b.IsDeleted).ToList();
+        var bills = data.Bills.Where(b => !b.IsDeleted && !b.IsDraft).ToList();
         var payments = data.Payments.Where(p => !p.IsDeleted).ToList();
         var contracts = data.Contracts.Where(c => !c.IsDeleted).ToList();
         var contractProperty = contracts.ToDictionary(c => c.Id, c => c.PropertyId);
@@ -118,7 +118,7 @@ public static class OverviewMoney
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        var bills = data.Bills.Where(b => !b.IsDeleted && b.Period.Month <= today.Month).ToList();
+        var bills = data.Bills.Where(b => !b.IsDeleted && !b.IsDraft && b.Period.Month <= today.Month).ToList();
         var result = new List<YearComparison>();
         foreach (var property in data.Properties.Where(p => !p.IsDeleted))
         {

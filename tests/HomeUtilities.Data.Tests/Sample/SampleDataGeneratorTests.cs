@@ -31,7 +31,7 @@ public class SampleDataGeneratorTests
             VatRates = new VatRateStore(_test.Factory);
             Bills = new BillStore(_test.Factory);
             Payments = new PaymentStore(_test.Factory);
-            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), Bills, Payments, new ChargeInputLoader(_test.Factory), _test.Clock);
+            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), new BillTemplateStore(_test.Factory, _test.Clock), Bills, Payments, new ChargeInputLoader(_test.Factory), _test.Clock);
             Loader = new ChargeInputLoader(_test.Factory);
         }
 
@@ -440,7 +440,8 @@ public class SampleDataGeneratorTests
 
         // 5 in-arrears contracts x 12 months + 12 internet bills (10 months back to next month) + 1 repair + 1 settlement
         // + the cottage electricity (12 equalized + 1 settlement) + the taxes (4 garage + 2 land installments)
-        Assert.Equal(5 * 12 + 12 + 1 + 1 + (12 + 1) + (4 + 2), bills.Count);
+        // + the chimney cleaning draft (2 of the 12 internet bills are drafts of the template)
+        Assert.Equal(5 * 12 + 12 + 1 + 1 + (12 + 1) + (4 + 2) + 1, bills.Count);
         foreach (var bill in bills)
         {
             var contract = bill.ContractId is { } id ? contracts[id] : null;
@@ -455,7 +456,7 @@ public class SampleDataGeneratorTests
             Assert.True(result.IsValid, $"{payment.Reference}: {string.Join(", ", result.Errors.Select(e => e.Code))}");
         }
 
-        var oneOff = Assert.Single(bills, b => b.Kind == BillKind.OneOff);
+        var oneOff = Assert.Single(bills, b => b.Kind == BillKind.OneOff && !b.IsDraft);
         Assert.Equal(("Boiler repair", null), (oneOff.Title, oneOff.ContractId));
     }
 

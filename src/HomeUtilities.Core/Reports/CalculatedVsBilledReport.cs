@@ -31,7 +31,7 @@ internal static class CalculatedVsBilledReport
 
         var months = filter.Months();
         var billsByContract = data.Bills
-            .Where(b => b.ContractId is not null && b.Kind == BillKind.Regular)
+            .Where(b => !b.IsDraft && b.ContractId is not null && b.Kind == BillKind.Regular)
             .ToLookup(b => b.ContractId!.Value);
         var meterUnits = data.Meters.ToDictionary(m => m.Id, m => m.Unit);
 

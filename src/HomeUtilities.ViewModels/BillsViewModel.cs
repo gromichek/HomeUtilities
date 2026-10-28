@@ -25,6 +25,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private readonly ICategoryStore _categoryStore;
     private readonly IPropertyStore _propertyStore;
     private readonly QuickPayService _quickPay;
+    private readonly DraftService _drafts;
+    private readonly IBillTemplateStore _templateStore;
     private readonly ISnackbarService _snackbar;
     private readonly IDialogService _dialogs;
     private readonly IClock _clock;
@@ -78,6 +80,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         ICategoryStore categoryStore,
         IPropertyStore propertyStore,
         QuickPayService quickPay,
+        DraftService drafts,
+        IBillTemplateStore templateStore,
         ISnackbarService snackbar,
         IDialogService dialogs,
         IClock clock,
@@ -96,6 +100,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _categoryStore = categoryStore;
         _propertyStore = propertyStore;
         _quickPay = quickPay;
+        _drafts = drafts;
+        _templateStore = templateStore;
         _snackbar = snackbar;
         _dialogs = dialogs;
         _clock = clock;
@@ -119,6 +125,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     public override async Task ReloadAsync()
     {
+        // Drafts of the templates that came due since the last visit appear before the list is read.
+        await _templateStore.GenerateDraftsAsync(_clock.Today);
         _bills = await _billStore.ListAsync();
         _properties = await _propertyStore.ListAsync(true);
         _contracts = (await _contractStore.ListAsync()).ToDictionary(c => c.Id);
@@ -296,6 +304,29 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         }
     });
 
+    // ---- Drafts ---------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The Confirm button of a draft row: confirms it when it has an amount and is valid; a draft that still needs an amount
+    /// (or a fix) is opened in the editor instead.
+    /// </summary>
+    public Task ConfirmDraftAsync(Guid billId) => RunSafeAsync(async () =>
+    {
+        switch (await _drafts.ConfirmAsync(billId))
+        {
+            case DraftConfirmResult.Confirmed:
+                await ReloadAsync();
+                _snackbar.Notify(_localizer["BillConfirmed"]);
+                break;
+            case DraftConfirmResult.AmountRequired or DraftConfirmResult.Invalid:
+                await SelectCommand.ExecuteAsync(billId);
+                break;
+            default:
+                await ReloadAsync();
+                break;
+        }
+    });
+
     // ---- Rows and totals ------------------------------------------------------------------------------------------
 
     private void RebuildItems()
@@ -322,9 +353,10 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
             var state = BillStatus.Of(bill, _paymentsByBill.GetValueOrDefault(bill.Id) ?? [], today);
             var include = _filter.Status switch
             {
-                BillStatusFilter.Open => !state.IsPaid,
-                BillStatusFilter.Overdue => state.IsOverdue,
-                BillStatusFilter.Paid => state.IsPaid,
+                BillStatusFilter.Open => !bill.IsDraft && !state.IsPaid,
+                BillStatusFilter.Overdue => !bill.IsDraft && state.IsOverdue,
+                BillStatusFilter.Paid => !bill.IsDraft && state.IsPaid,
+                BillStatusFilter.Drafts => bill.IsDraft,
                 _ => true,
             };
             if (include)
@@ -348,7 +380,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
                     _localizer,
                     _highlightContractId is { } highlighted && r.Bill.ContractId == highlighted,
                     id => SelectCommand.Execute(id),
-                    id => _ = MarkPaidAsync(id))),
+                    id => _ = MarkPaidAsync(id),
+                    id => _ = ConfirmDraftAsync(id))),
         ];
 
         PropertyFilterName = _filter.PropertyId is { } id
@@ -373,7 +406,9 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     /// <summary>"Billed 1 234,56 € · Paid 1 000,00 € · Open 234,56 €" per currency.</summary>
     private string BuildTotals(List<(Bill Bill, BillState State)> rows)
     {
+        // Drafts are not bills yet: they are in the list but not in the totals.
         var lines = rows
+            .Where(r => !r.Bill.IsDraft)
             .GroupBy(r => r.Bill.Currency)
             .OrderBy(g => g.Key)
             .Select(g =>

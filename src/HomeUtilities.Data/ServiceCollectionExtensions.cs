@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITariffStore, TariffStore>();
         services.AddSingleton<IEqualizedPlanStore, EqualizedPlanStore>();
         services.AddSingleton<IBillStore, BillStore>();
+        services.AddSingleton<IBillTemplateStore, BillTemplateStore>();
         services.AddSingleton<IPaymentStore, PaymentStore>();
         services.AddSingleton<IAttachmentStore>(provider => new AttachmentStore(
             provider.GetRequiredService<IDbContextFactory<HomeUtilitiesDbContext>>(),

@@ -26,7 +26,7 @@ internal static class CostsReport
         var order = properties.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
         var groups = new Dictionary<string, Group>();
 
-        foreach (var bill in data.Bills)
+        foreach (var bill in data.Bills.Where(b => !b.IsDraft))
         {
             if (!order.ContainsKey(bill.PropertyId) || (filter.CategoryIds is { Count: > 0 } ids && !ids.Contains(bill.CategoryId)))
             {
