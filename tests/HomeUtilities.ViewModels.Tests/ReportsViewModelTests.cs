@@ -287,6 +287,14 @@ public class ReportsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Each_property_is_its_own_column_group_and_the_grand_total_has_no_group()
+    {
+        var vm = await LoadAsync();
+
+        Assert.Equal([("Flat", 1, 0), ("Cottage", 1, 1), ("", 1, -1)], vm.TableView.Groups.Select(g => (g.Text, g.Span, g.Index)));
+    }
+
+    [Fact]
     public async Task An_archived_property_is_not_selected_until_the_owner_asks_for_it()
     {
         _cottage.IsArchived = true;

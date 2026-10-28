@@ -563,7 +563,7 @@ app calculated. The numbers come from the records you already keep — **bills**
 used) and the **tariffs** of the [contracts](#5-contracts) — so a report is only as complete as those are. Every amount
 is shown in euro (old amounts in lats are converted at the official rate).
 
-Pick the report at the top, set the filters under it, and read the table. Everything below the buttons is a **table**:
+Pick the report at the top, set the filters under it, and read the table. Everything below the filters is a **table**:
 the period stays on the left while the columns scroll sideways inside the table; the last row is the **total** of the
 whole period. Tap a number to see what is behind it: for costs and for unit cost and calculated vs billed the
 [Bills](#11-bills) screen opens for that property and month (for costs grouped by category, only the bills of that category are
@@ -571,13 +571,29 @@ shown; for a contract, its bills are highlighted), for
 consumption the [Readings](#7-readings) screen opens; **Back** returns to the report.
 
 **Filters (the same for all reports)**
-- **Period** — the buttons *This year* (January to December), *Last 12 months*, *Last year* and *All* (from your first
-  record to today or your last bill), or the ‹ › buttons next to *From* and *To* to move the start and the end month by month.
-- **Properties** — tap a property to include or exclude it; at least one stays on. A property you archived is off at first —
-  tap it to include its history.
-- **Rows** — one row per **month** or per **year**.
-- **Year over year** — instead of one long list, the twelve months of the year are the rows and every year is its own
-  column, so you can compare October 2026 with October 2025 at a glance. Available for costs and consumption.
+
+The filters are **fields**: each shows its current value, and a tap opens a picker. On a wide window they sit in three
+columns, on a tablet in two, on a phone in one; nothing scrolls sideways. The arrow at the right of the filter header
+**collapses** the panel into one line that sums up the choices ("This year · All properties · All categories · Category ·
+Gross (incl. VAT)") so the table moves up; tap the line or the arrow to open it again. The panel is collapsed on a phone
+by default and stays as you left it while the app runs. The exports are in the **⋯** menu at the top (*Export to Excel*,
+*Export to CSV*).
+
+- **Period** — the field shows the choice with its months, for example *This year (01.2026–12.2026)*. The dialog offers
+  *This year* (January to December), *Last 12 months*, *Last year*, *All* (from your first record to today or your last
+  bill) and *Custom…*, which adds a *From* and a *To* month list. The end cannot be before the start.
+- **Properties** and **Categories** — a dialog with a check box per item (categories with their colour), the buttons
+  *All* and *None* at the top and *OK* / *Cancel*. The field shows *All (3)*, the names (*Flat in town, Cottage*) or *4 of 15*.
+  At least one item must stay checked, otherwise *OK* is disabled. A property you archived is off at first — check it to
+  include its history. Categories apply to the costs report only.
+- **Group by**, **Show**, **Rows** — a list to choose from. *Rows*: one row per **month** or per **year**.
+- **Year over year** — a switch. Instead of one long list, the twelve months of the year are the rows and every year is its
+  own column, so you can compare October 2026 with October 2025 at a glance. Available for costs and consumption.
+
+**Reading a table with several properties.** Each property has its own block of columns: a **coloured stripe** over the
+property name, a **thick vertical line** before the block, every second block lightly shaded, and the block's **Total**
+column in bold on a tinted background. The last block (with no property name) is the **grand total** of the row across all
+properties. Column names wrap only between words; hover a header (Windows) to see its full name.
 
 ### Costs
 
@@ -589,7 +605,7 @@ the totals on the **Bills** screen for the same property and period (bills are c
 - **Group by** — columns per *Category* (default), per *Service* (a one-off expense counts under the service of its
   category), per *Contract* (one-off expenses get their own column) or one column per *Property*.
 - **Show** — *Gross (incl. VAT)*, *Net (excl. VAT)* or *VAT*. If a bill has only a total, the net equals the total and the VAT is 0.
-- **Categories** — tap to leave some out.
+- **Categories** — choose which categories to include (see the filters above).
 - With several properties each property has a **Total** column; the last column is the total of the row.
 
 ### Consumption

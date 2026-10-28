@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
+             x:Class="HomeUtilities.App.Views.ReportFilterField">
+
+    <!-- A filter field: caption above, the current value in a bordered box with a chevron; a tap runs the command (opens a dialog). -->
+    <VerticalStackLayout x:Name="Field" Spacing="2" x:DataType="views:ReportFilterField">
+        <Label Text="{Binding Caption}" Style="{StaticResource MutedLabel}" />
+        <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                StrokeThickness="1" Padding="12,10" StrokeShape="RoundRectangle 8"
+                SemanticProperties.Description="{Binding Caption}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Command}" />
+            </Border.GestureRecognizers>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Label Grid.Column="0" Text="{Binding Value}" LineBreakMode="TailTruncation" MaxLines="1" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}" FontSize="20" VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+            </Grid>
+        </Border>
+    </VerticalStackLayout>
+</ContentView>
