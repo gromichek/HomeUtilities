@@ -7,6 +7,7 @@ public sealed class BillsListTexts
     {
         PropertyFilterLabel = localizer["BillsPropertyFilter"];
         StatusFilterLabel = localizer["BillsStatusFilter"];
+        CategoryFilterLabel = localizer["BillsCategoryFilter"];
         BilledLabel = localizer["BillsBilled"];
         PaidLabel = localizer["BillsPaid"];
         OpenLabel = localizer["BillsOpen"];
@@ -15,6 +16,8 @@ public sealed class BillsListTexts
     public string PropertyFilterLabel { get; }
 
     public string StatusFilterLabel { get; }
+
+    public string CategoryFilterLabel { get; }
 
     public string BilledLabel { get; }
 

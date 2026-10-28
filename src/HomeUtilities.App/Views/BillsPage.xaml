@@ -84,6 +84,22 @@
                                 SemanticProperties.Description="{Binding Period.NextText}" />
                     </Grid>
 
+                    <Label Text="{Binding Texts.CategoryFilterLabel}" Style="{StaticResource MutedLabel}" />
+                    <Border Padding="12,8" StrokeShape="RoundRectangle 8"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChooseCategoryFilterCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                            <BoxView Grid.Column="0" WidthRequest="12" HeightRequest="12" CornerRadius="6" VerticalOptions="Center"
+                                     IsVisible="{Binding HasCategoryFilterColor}"
+                                     BackgroundColor="{Binding CategoryFilterColor, Converter={StaticResource HexColor}}" />
+                            <Label Grid.Column="1" Text="{Binding CategoryFilterName}" VerticalOptions="Center" />
+                            <Label Grid.Column="2" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        </Grid>
+                    </Border>
+
                     <Label Text="{Binding Texts.StatusFilterLabel}" Style="{StaticResource MutedLabel}" />
                     <Border Padding="12,8" StrokeShape="RoundRectangle 8"
                             Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
