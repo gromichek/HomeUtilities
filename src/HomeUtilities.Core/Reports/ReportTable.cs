@@ -39,6 +39,7 @@ public sealed record ReportCell(decimal? Value, bool IsApproximate = false, Repo
 /// <param name="ValueKind">The kind of number.</param>
 /// <param name="Year">Year-over-year: the year of the column.</param>
 /// <param name="IsSubtotal">True for the total of a property's columns.</param>
+/// <param name="CategoryId">The category of a category column (its colour is used in charts).</param>
 public sealed record ReportColumn(
     string Key,
     Guid PropertyId,
@@ -52,7 +53,8 @@ public sealed record ReportColumn(
     ReportMeasure Measure,
     ReportValueKind ValueKind,
     int? Year = null,
-    bool IsSubtotal = false);
+    bool IsSubtotal = false,
+    Guid? CategoryId = null);
 
 /// <summary>A row of a report.</summary>
 /// <param name="Kind">Month, year, month of the year or totals.</param>

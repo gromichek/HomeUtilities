@@ -53,6 +53,7 @@ public static class ReportBuilder
         ServiceKind? service = null,
         MeterResource? resource = null,
         MeterUnit? unit = null,
-        RegisterKind? register = null) =>
-        new(key, property.Id, property.Name, subject, name, service, resource, unit, register, measure, kind);
+        RegisterKind? register = null,
+        Guid? categoryId = null) =>
+        new(key, property.Id, property.Name, subject, name, service, resource, unit, register, measure, kind, CategoryId: categoryId);
 }
