@@ -38,7 +38,7 @@ a bill should be and to compare your bills with it. You can add a supplier direc
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
-item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Categories, VAT rates and the contract, meter and tariff component
+item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
@@ -553,7 +553,87 @@ the other.
 unpaid ones?* **Replace** removes the installments that have no payment and creates the new ones; installments that
 already have a payment are **kept**, and the rest of the new yearly amount is split over the remaining due dates.
 
-## 15. Settings
+## 15. Reports
+
+**Reports** answers the questions you ask over months and years: what each property costs, how much water, electricity
+or heat was used, what one cubic metre or kilowatt-hour really costs, and how far the supplier's bills are from what the
+app calculated. The numbers come from the records you already keep — **bills** (what was paid), **readings** (what was
+used) and the **tariffs** of the [contracts](#5-contracts) — so a report is only as complete as those are. Every amount
+is shown in euro (old amounts in lats are converted at the official rate).
+
+Pick the report at the top, set the filters under it, and read the table. Everything below the buttons is a **table**:
+the period stays on the left while the columns scroll sideways inside the table; the last row is the **total** of the
+whole period. Tap a number to see what is behind it: for costs and for unit cost and calculated vs billed the
+[Bills](#11-bills) screen opens for that property and month (the bills of that contract or category are highlighted), for
+consumption the [Readings](#7-readings) screen opens; **Back** returns to the report.
+
+**Filters (the same for all reports)**
+- **Period** — the buttons *This year* (January to December), *Last 12 months*, *Last year* and *All* (from your first
+  record to today or your last bill), or the ‹ › buttons next to *From* and *To* to move the start and the end month by month.
+- **Properties** — tap a property to include or exclude it; at least one stays on. A property you archived is off at first —
+  tap it to include its history.
+- **Rows** — one row per **month** or per **year**.
+- **Year over year** — instead of one long list, the twelve months of the year are the rows and every year is its own
+  column, so you can compare October 2026 with October 2025 at a glance. Available for costs and consumption.
+
+### Costs
+
+What each property cost per month or year, from the **bills**. A bill that covers several months (it has a *service
+period*) is split over those months by days; the split always adds up to the bill. **One-off expenses** are included, an
+*Equalized payment* counts as the amount billed, and a *Settlement* counts in its month — so the totals agree with
+the totals on the **Bills** screen for the same property and period (bills are counted in the month they belong to).
+
+- **Group by** — columns per *Category* (default), per *Service* (a one-off expense counts under the service of its
+  category), per *Contract* (one-off expenses get their own column) or one column per *Property*.
+- **Show** — *Gross (incl. VAT)*, *Net (excl. VAT)* or *VAT*. If a bill has only a total, the net equals the total and the VAT is 0.
+- **Categories** — tap to leave some out.
+- With several properties each property has a **Total** column; the last column is the total of the row.
+
+### Consumption
+
+How much of each resource was used, from the **readings**: cold and hot water in m³, electricity in kWh (with *Day* and
+*Night* columns if the meter has them), heat in MWh. The month is chosen the same way as in [Charges](#10-charges): the
+latest reading in the reading window of the contract that bills the meter. A meter that was **replaced** counts as one
+meter, so the replacement month shows no dip. **One column per meter** shows every meter separately.
+
+A month in which the consumption cannot be determined — there is no reading for it — shows **≈** and no number; it is
+**not zero**. The next month then also covers the gap and carries a **≈**.
+
+### Unit cost
+
+What one unit really costs: the **bill** of the month divided by the **metered quantity** of the contract (for example
+46.02 € ÷ 12.150 m³ = 3.79 €/m³). *Gross* includes VAT, *Net* does not. In a month without a bill the calculation is used
+and the number carries a **≈**. Only contracts billed by consumption appear (not fixed fees, per-area, per-resident,
+equalized or tax contracts). A row of a whole year divides the year's money by the year's quantity.
+
+### Calculated vs billed
+
+For each contract and month: what the app **calculated** (the calculation stored with the bill when you entered it, else
+the calculation as it is now), what the supplier **billed**, and the **difference**. *Show* switches between *Difference, €*,
+*Difference, %*, *Calculated*, *Billed* and **Quantity difference (losses)** — the quantity printed on the bill minus the
+quantity you metered, for example the water the building lost between its main meter and your meters. A positive value
+means the supplier billed more than you used. Months without a bill, or where the calculation cannot be made (missing
+reading, prices taken from the bill), are marked **≈**.
+
+### What does ≈ mean?
+
+A number with **≈** rests on incomplete data and is shown in a muted colour: a reading is missing or is only an
+estimate, an amount was calculated because there is no bill yet, or a bill was spread over several months. Check the
+readings and bills behind it when it matters.
+
+### Export to Excel and CSV
+
+**Export to Excel** saves what you see — the filters in a header block, then the table with the totals — as a file
+`HomeUtilities-<report>-<from>-<to>.xlsx` (for example `HomeUtilities-costs-2026-01-2026-12.xlsx`). Numbers are real
+numbers (2 decimals for money, 3 for quantities), months are real dates, so you can add them up or make your own charts in
+Excel or LibreOffice. **Export to CSV** makes a lightweight text file with `;` between the columns that Latvian and
+Russian Excel open directly (numbers with ≈ get a leading ≈ there).
+
+On **Windows** a save dialog opens; if it is not available the file goes to `Documents\HomeUtilities\Reports`. On
+**Android** a save dialog opens where you choose a folder (for example Downloads or Drive); if it fails, the share sheet
+opens (Drive, e-mail…). The message at the bottom shows where the file went.
+
+## 16. Settings
 
 Language (English / Русский), theme (system / light / dark), categories, VAT rates, version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
@@ -590,7 +670,7 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
-## 16. Coming soon
+## 17. Coming soon
 
-Reports and charts,
+Charts,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.
