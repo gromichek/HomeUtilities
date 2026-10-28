@@ -370,6 +370,8 @@
 
                     <Button Text="{Binding AllBillsText}" Command="{Binding OpenAllBillsCommand}"
                             Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    <Button Text="{Binding TemplateFromContractText}" Command="{Binding TemplateFromContractCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
                 </VerticalStackLayout>
             </Border>
 

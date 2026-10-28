@@ -1107,4 +1107,74 @@
   <data name="ReportSheetReport" xml:space="preserve"><value>Отчёт</value></data>
   <data name="ReportSheetPeriod" xml:space="preserve"><value>Период</value></data>
   <data name="ReportSheetCreated" xml:space="preserve"><value>Создан</value></data>
+  <data name="BillBadgeDraft" xml:space="preserve"><value>Черновик</value></data>
+  <data name="BillBadgeDraftAmount" xml:space="preserve"><value>Черновик · укажите сумму</value></data>
+  <data name="BillStatusDrafts" xml:space="preserve"><value>Черновики</value></data>
+  <data name="BillConfirm" xml:space="preserve"><value>Подтвердить</value></data>
+  <data name="BillConfirmed" xml:space="preserve"><value>Счёт подтверждён</value></data>
+  <data name="BillDraftBanner" xml:space="preserve"><value>Черновик по шаблону «{0}» — проверьте и подтвердите</value></data>
+  <data name="BillDraftBannerNoTemplate" xml:space="preserve"><value>Черновик счёта — проверьте и подтвердите</value></data>
+  <data name="BillFromTemplate" xml:space="preserve"><value>Из шаблона…</value></data>
+  <data name="BillChooseTemplate" xml:space="preserve"><value>Выберите шаблон</value></data>
+  <data name="BillTemplateOption" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="BillSaveAsTemplate" xml:space="preserve"><value>Сохранить как шаблон</value></data>
+  <data name="BillSaveBeforeTemplate" xml:space="preserve"><value>Сначала сохраните изменения, затем создайте шаблон.</value></data>
+  <data name="BillTemplateFromContract" xml:space="preserve"><value>＋ Шаблон из этого договора</value></data>
+  <data name="TodoDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению: {0}</value></data>
+  <data name="TodoDraftsDetail" xml:space="preserve"><value>Созданы по шаблонам</value></data>
+  <data name="SectionBillTemplates" xml:space="preserve"><value>Шаблоны счетов</value></data>
+  <data name="BillTemplatesEmpty" xml:space="preserve"><value>Шаблонов пока нет. Шаблон описывает платёж, который приходит регулярно или повторяется, чтобы не вводить его каждый раз заново.</value></data>
+  <data name="BillTemplateAdd" xml:space="preserve"><value>Новый шаблон</value></data>
+  <data name="BillTemplateSelectHint" xml:space="preserve"><value>Выберите шаблон или добавьте новый</value></data>
+  <data name="BillTemplateInactiveBadge" xml:space="preserve"><value>Не активен — черновики не создаются</value></data>
+  <data name="BillTemplateScheduleOnce" xml:space="preserve"><value>Вручную (Новый счёт › Из шаблона)</value></data>
+  <data name="BillTemplateScheduleMonthly" xml:space="preserve"><value>Каждый месяц, начиная с {0}</value></data>
+  <data name="BillTemplateScheduleEvery" xml:space="preserve"><value>Каждые {0} мес., начиная с {1}</value></data>
+  <data name="BillTemplateScheduleYearly" xml:space="preserve"><value>Раз в год, начиная с {0}</value></data>
+  <data name="BillTemplateNewTitle" xml:space="preserve"><value>Новый шаблон</value></data>
+  <data name="BillTemplateEditTitle" xml:space="preserve"><value>Шаблон {0}</value></data>
+  <data name="BillTemplateDelete" xml:space="preserve"><value>Удалить шаблон</value></data>
+  <data name="BillTemplateDeleteMessage" xml:space="preserve"><value>Шаблон будет скрыт и больше не создаёт черновики. Счета, созданные по нему, останутся.</value></data>
+  <data name="BillTemplateChoosePropertyFirst" xml:space="preserve"><value>Сначала выберите объект.</value></data>
+  <data name="BillTemplateGeneral" xml:space="preserve"><value>Основное</value></data>
+  <data name="BillTemplateNameLabel" xml:space="preserve"><value>Название шаблона</value></data>
+  <data name="BillTemplateIsActive" xml:space="preserve"><value>Активен (создаёт черновики и предлагается в «Новый счёт»)</value></data>
+  <data name="BillTemplateAmounts" xml:space="preserve"><value>Сумма по умолчанию</value></data>
+  <data name="BillTemplateAmountsHint" xml:space="preserve"><value>Необязательно. Введите любые два значения из: сумма без НДС, НДС %, итого. Оставьте пустым, если сумма каждый раз другая: черновик попросит её ввести.</value></data>
+  <data name="BillTemplateLinesEmpty" xml:space="preserve"><value>Строк по умолчанию нет</value></data>
+  <data name="BillTemplateFieldsHint" xml:space="preserve"><value>Поля, которые есть в каждом счёте этого шаблона; в новом счёте значения пустые.</value></data>
+  <data name="BillTemplateSchedule" xml:space="preserve"><value>Расписание</value></data>
+  <data name="BillTemplateKindLabel" xml:space="preserve"><value>Как часто</value></data>
+  <data name="BillTemplateEveryMonthsLabel" xml:space="preserve"><value>Каждые … мес. (2–24)</value></data>
+  <data name="BillTemplateStartLabel" xml:space="preserve"><value>Первый период</value></data>
+  <data name="BillTemplateHasEndLabel" xml:space="preserve"><value>Заканчивается после периода</value></data>
+  <data name="BillTemplateEndLabel" xml:space="preserve"><value>Последний период</value></data>
+  <data name="BillTemplateDayLabel" xml:space="preserve"><value>День месяца выставления счёта (1–31)</value></data>
+  <data name="BillTemplateDayHint" xml:space="preserve"><value>Необязательно. По нему считаются даты выставления и оплаты черновиков; 31-е в коротком месяце становится последним днём.</value></data>
+  <data name="BillTemplateTimingHint" xml:space="preserve"><value>Вперёд: счёт выставляется в месяце перед периодом. После периода: в месяце после него.</value></data>
+  <data name="BillTemplateDueOffsetLabel" xml:space="preserve"><value>Оплатить через … дн.</value></data>
+  <data name="BillTemplateRemindLabel" xml:space="preserve"><value>Напомнить за … дн. до оплаты</value></data>
+  <data name="BillTemplatePreviewHeader" xml:space="preserve"><value>Ближайшие черновики</value></data>
+  <data name="BillTemplatePreview" xml:space="preserve"><value>Ближайшие черновики: {0}</value></data>
+  <data name="BillTemplatePreviewIssuedDue" xml:space="preserve"><value>{0} (выставлен {1}, оплатить до {2})</value></data>
+  <data name="BillTemplatePreviewIssued" xml:space="preserve"><value>{0} (выставлен {1})</value></data>
+  <data name="BillTemplatePreviewOnce" xml:space="preserve"><value>Черновики не создаются: используйте «Новый счёт» › «Из шаблона», когда нужно.</value></data>
+  <data name="BillTemplatePreviewNone" xml:space="preserve"><value>Больше черновиков не будет: расписание закончилось.</value></data>
+  <data name="Enum_ScheduleKind_Once" xml:space="preserve"><value>Разовый (вручную)</value></data>
+  <data name="Enum_ScheduleKind_Monthly" xml:space="preserve"><value>Каждый месяц</value></data>
+  <data name="Enum_ScheduleKind_EveryNMonths" xml:space="preserve"><value>Каждые N месяцев</value></data>
+  <data name="Enum_ScheduleKind_Yearly" xml:space="preserve"><value>Раз в год</value></data>
+  <data name="Error_bill_template_name_required" xml:space="preserve"><value>Введите название.</value></data>
+  <data name="Error_bill_template_name_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
+  <data name="Error_bill_template_property_required" xml:space="preserve"><value>Выберите объект.</value></data>
+  <data name="Error_bill_template_category_required" xml:space="preserve"><value>Выберите категорию.</value></data>
+  <data name="Error_bill_template_title_too_long" xml:space="preserve"><value>Заголовок длиннее {0} символов.</value></data>
+  <data name="Error_bill_template_days_out_of_range" xml:space="preserve"><value>Введите число дней от 0 до {0}.</value></data>
+  <data name="Error_schedule_start_required" xml:space="preserve"><value>Выберите первый период.</value></data>
+  <data name="Error_schedule_every_months_out_of_range" xml:space="preserve"><value>Введите число месяцев от {0} до {1}.</value></data>
+  <data name="Error_schedule_every_months_not_allowed" xml:space="preserve"><value>Число месяцев нужно только для «Каждые N месяцев».</value></data>
+  <data name="Error_schedule_day_out_of_range" xml:space="preserve"><value>Введите день от 1 до 31.</value></data>
+  <data name="Error_schedule_end_before_start" xml:space="preserve"><value>Последний период раньше первого.</value></data>
+  <data name="Error_schedule_once_has_period" xml:space="preserve"><value>У разового шаблона нет периодов.</value></data>
+  <data name="Error_bill_draft_amount_required" xml:space="preserve"><value>Чтобы подтвердить счёт, укажите сумму.</value></data>
 </root>

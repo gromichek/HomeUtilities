@@ -991,7 +991,9 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     partial void OnPreviewTextChanged(string value) => OnPropertyChanged(nameof(HasPreview));
 
     private static YearMonth Clamp(DateOnly date) =>
-        date.Year < 2000 ? new YearMonth(2000, 1) : date.Year > 2100 ? new YearMonth(2100, 12) : YearMonth.From(date);
+        date.Year < ChargesViewModel.EarliestMonth.Year ? ChargesViewModel.EarliestMonth
+        : date.Year > ChargesViewModel.LatestMonth.Year ? ChargesViewModel.LatestMonth
+        : YearMonth.From(date);
 
     private string ErrorOf(string field) => Errors.GetValueOrDefault(field, string.Empty);
 
