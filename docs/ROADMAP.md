@@ -51,7 +51,8 @@ is written; the list below is the plan and will change.
 - T-024 Charts (bar, grouped by property), year-over-year, unit cost; export to Excel
 
 ## Phase 7 — Templates and import
-- T-025 Contract templates, bill templates with schedules (once / monthly / every N months / yearly), drafts
+- T-025 Bill templates with schedules (once / monthly / every N months / yearly), draft bills
+- T-025b Contract templates (optional)
 - T-026 Excel import framework (column mapping, preview, dry run)
 - T-027 Import profile for the owner's legacy workbook (synthetic fixture in tests); `***` → payment = bill total
 
