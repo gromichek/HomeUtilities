@@ -1107,4 +1107,14 @@
   <data name="ReportSheetReport" xml:space="preserve"><value>Отчёт</value></data>
   <data name="ReportSheetPeriod" xml:space="preserve"><value>Период</value></data>
   <data name="ReportSheetCreated" xml:space="preserve"><value>Создан</value></data>
+  <data name="ReportSelectAll" xml:space="preserve"><value>Все</value></data>
+  <data name="ReportSelectNone" xml:space="preserve"><value>Ни одного</value></data>
+  <data name="ReportPresetCustom" xml:space="preserve"><value>Свой период…</value></data>
+  <data name="ReportPeriodInvalid" xml:space="preserve"><value>Конечный месяц раньше начального.</value></data>
+  <data name="ReportFieldAll" xml:space="preserve"><value>Все ({0})</value></data>
+  <data name="ReportFieldSome" xml:space="preserve"><value>{0} из {1}</value></data>
+  <data name="ReportFiltersTitle" xml:space="preserve"><value>Фильтры</value></data>
+  <data name="ReportFiltersExpand" xml:space="preserve"><value>Показать фильтры</value></data>
+  <data name="ReportFiltersCollapse" xml:space="preserve"><value>Скрыть фильтры</value></data>
+  <data name="ReportExportMenu" xml:space="preserve"><value>Экспорт</value></data>
 </root>
