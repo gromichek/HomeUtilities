@@ -7,8 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-023a | Reports: drop-down filters, grouped table, Android spinner | Ready | | owner findings 2026-10-28 |
-| T-025 | Bill templates with schedules, draft bills | Ready | | can run in parallel with T-023a |
+| T-026 | Excel import wizard, profiles, undo | Ready | | |
 
 ## Done
 
@@ -46,6 +45,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-025 | Bill templates with schedules, draft bills | 2026-10-28, #111 | Drafts excluded from per-contract/per-property lists and loaders; `ListAsync` still returns them. Draft counts as entered for BillMissing. |
+| T-023a | Reports: compact filters, grouped table, Android spinner | 2026-10-28, #110 | Spinner cause not reproducible — busy counter + IsVisible-bound indicator. Lead fixed the build (ambiguous Grid.SetRow) and a resx merge conflict. |
 | T-024 | Charts; category filter on Bills | 2026-10-28, #108 | No chart package: drawn with Microsoft.Maui.Graphics (`GraphicsView`); `ChartModel` library-free, LiveCharts can be adopted later. |
 | T-023 | Reports: tables + Excel/CSV export | 2026-10-28, #105 | ClosedXML 0.105.0 (MIT; SixLabors.Fonts 1.0.0 Apache-2.0 — newer SixLabors versions use the Split licence: do not upgrade it). New project HomeUtilities.Import. All reports in EUR (LVL converted). |
 | T-022 | Overview: to-do and money | 2026-10-27, #102 | `TodoBuilder` + `OverviewMoney` in Core, `OverviewDataLoader`. "This year" = year to date vs same months last year. Settlement calc duplicated in loader (extract later). |
@@ -100,7 +101,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
-| | #108 | T-024 charts (manual steps in PR #108; drawing never run before) | pending |
+| | #110 + #111 | T-023a report filters; T-025 templates and drafts (manual steps in the PRs) | pending |
+| 2026-10-28 | #108 | T-024 charts | OK |
 | 2026-10-28 | #105 | T-023 reports | 6 steps OK. **Usability**: filter buttons do not fit (Windows), want drop-downs with check boxes; multi-property columns hard to assign; Android spinner keeps turning on first open → T-023a |
 | 2026-10-28 | #102 | T-022 overview | OK. Somewhere a text does not wrap (emulator) — to collect on a real phone/tablet in the polish pass |
 | 2026-10-27 | #95 + #97 + #99 | T-021 equalized + tax; line amount from the bill (owner's heating bill matches to the cent) | OK. Android icons shown as boxes — stale local build; fixed by a fresh clone (no code issue) |
