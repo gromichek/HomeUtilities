@@ -713,6 +713,12 @@ internal sealed class ContractTestKit
 
     public FakePaymentStore Payments { get; } = new();
 
+    public FakeBillTemplateStore Templates { get; } = new();
+
+    public BillTemplateLauncher TemplateLauncher => _templateLauncher ??= new BillTemplateLauncher(CreateTemplateEditor, Navigation);
+
+    private BillTemplateLauncher? _templateLauncher;
+
     public PrepaymentService Prepayments => _prepayments ??= new PrepaymentService(Bills, Payments, Clock);
 
     private PrepaymentService? _prepayments;
@@ -731,7 +737,7 @@ internal sealed class ContractTestKit
         new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast);
 
     public ContractEditViewModel CreateContractEditor() =>
-        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Plans, Settlement, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, CreateSupplierEditor);
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Plans, Settlement, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, TemplateLauncher, CreateSupplierEditor);
 
     public TariffComponentEditViewModel CreateTariffEditor() =>
         new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
@@ -755,6 +761,12 @@ internal sealed class ContractTestKit
 
     public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
         new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Settlement, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+
+    public BillTemplateEditViewModel CreateTemplateEditor() =>
+        new(Templates, Bills, Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
+
+    public BillTemplatesViewModel CreateTemplates(ISectionSelectionMemory? memory = null) =>
+        new(Templates, Properties, Categories, Localizer, Navigation, Layout, memory ?? new SectionSelectionMemory(), CreateTemplateEditor);
 
     public PaymentEditViewModel CreatePaymentEditor() =>
         new(Payments, Bills, Contracts, Suppliers, Properties, Clock, Localizer, Dialogs, Navigation, Toast);

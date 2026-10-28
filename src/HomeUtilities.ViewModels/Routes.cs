@@ -83,6 +83,15 @@ public static class Routes
     /// </summary>
     public const string BillEdit = "BillEdit";
 
+    /// <summary>Pushed page opened from Settings: the list of bill templates.</summary>
+    public const string BillTemplates = "BillTemplates";
+
+    /// <summary>
+    /// Pushed page (not a section): the bill template editor, same parameters as <see cref="PropertyEdit"/>; a running editor
+    /// is handed over by <see cref="BillTemplateLauncher"/> ("Template from this contract", "Save as template").
+    /// </summary>
+    public const string BillTemplateEdit = "BillTemplateEdit";
+
     /// <summary>
     /// Pushed page (not a section): the bills screen opened for a property ("All bills" of a contract), parameters
     /// <c>propertyId</c> and optional <c>contractId</c> (highlighted). Back returns to the caller.

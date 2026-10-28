@@ -20,7 +20,8 @@ public sealed partial class BillItemViewModel : ObservableObject
         ILocalizer localizer,
         bool isHighlighted,
         Action<Guid> select,
-        Action<Guid> markPaid)
+        Action<Guid> markPaid,
+        Action<Guid>? confirm = null)
     {
         Id = bill.Id;
         ContractId = bill.ContractId;
@@ -29,11 +30,15 @@ public sealed partial class BillItemViewModel : ObservableObject
         SupplierName = supplierName;
         Color = color;
         TotalText = BillText.Money(bill.Gross, currencySymbol);
-        Badge = BillBadge.KindOf(state);
-        BadgeText = BillBadge.TextOf(localizer, state, currencySymbol);
+        IsDraft = bill.IsDraft;
+        Badge = IsDraft ? BillBadgeKind.Draft : BillBadge.KindOf(state);
+        BadgeText = IsDraft
+            ? (bill.Gross > 0 ? localizer["BillBadgeDraft"] : localizer["BillBadgeDraftAmount"])
+            : BillBadge.TextOf(localizer, state, currencySymbol);
         IsHighlighted = isHighlighted;
-        CanMarkPaid = state.Open != 0 && Math.Sign(state.Open) == Math.Sign(bill.Gross);
+        CanMarkPaid = !IsDraft && state.Open != 0 && Math.Sign(state.Open) == Math.Sign(bill.Gross);
         MarkPaidText = localizer["BillMarkPaid"];
+        ConfirmText = localizer["BillConfirm"];
 
         var comparison = BillComparison.Compare(bill, bill.CalculatedSnapshot, BillComparison.MeteredQuantity(bill.CalculatedSnapshot));
         if (comparison.Difference is { } difference)
@@ -46,6 +51,7 @@ public sealed partial class BillItemViewModel : ObservableObject
 
         SelectCommand = new RelayCommand(() => select(Id));
         MarkPaidCommand = new RelayCommand(() => markPaid(Id));
+        ConfirmCommand = new RelayCommand(() => (confirm ?? select)(Id));
     }
 
     public Guid Id { get; }
@@ -71,6 +77,15 @@ public sealed partial class BillItemViewModel : ObservableObject
     public BillBadgeKind Badge { get; }
 
     public string BadgeText { get; }
+
+    /// <summary>A draft from a template: shown muted, with a Confirm button instead of Paid.</summary>
+    public bool IsDraft { get; }
+
+    /// <summary>Text of the Confirm button of a draft.</summary>
+    public string ConfirmText { get; }
+
+    /// <summary>Confirms the draft (or opens it when it still needs an amount).</summary>
+    public IRelayCommand ConfirmCommand { get; }
 
     public bool IsBadgePaid => Badge is BillBadgeKind.Paid or BillBadgeKind.Prepaid;
 
