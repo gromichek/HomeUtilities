@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Common;
 using HomeUtilities.ViewModels;
 using HomeUtilities.ViewModels.Common;
 
@@ -28,7 +29,11 @@ public partial class BillsPage : PageBase, IQueryAttributable
             ? parsed
             : BillStatusFilter.All;
         int? year = query.TryGetValue(BillsViewModel.YearParameter, out var shown) && shown is int value ? value : null;
-        _ = viewModel.OpenForAsync(propertyId, contractId, status, year);
+        YearMonth? month = query.TryGetValue(BillsViewModel.MonthParameter, out var shownMonth) && shownMonth is string monthText && YearMonth.TryParse(monthText, out var parsedMonth)
+            ? parsedMonth
+            : null;
+        Guid? categoryId = TryGuid(query, BillsViewModel.CategoryParameter, out var category) ? category : null;
+        _ = viewModel.OpenForAsync(propertyId, contractId, status, year, month, categoryId);
     }
 
     private static bool TryGuid(IDictionary<string, object> query, string key, out Guid id)

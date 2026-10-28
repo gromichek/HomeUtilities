@@ -44,6 +44,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HomeUtilities.Core\HomeUtilities.Core.csproj" />
     <ProjectReference Include="..\HomeUtilities.Data\HomeUtilities.Data.csproj" />
+    <ProjectReference Include="..\HomeUtilities.Import\HomeUtilities.Import.csproj" />
     <ProjectReference Include="..\HomeUtilities.ViewModels\HomeUtilities.ViewModels.csproj" />
   </ItemGroup>
 

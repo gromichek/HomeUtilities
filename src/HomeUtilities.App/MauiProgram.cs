@@ -6,6 +6,8 @@ using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
 using HomeUtilities.Data.Backup;
 using HomeUtilities.Data;
+using HomeUtilities.Core.Reports;
+using HomeUtilities.Import;
 using HomeUtilities.ViewModels;
 using HomeUtilities.ViewModels.Common;
 using Microsoft.Extensions.Logging;
@@ -58,6 +60,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton(new StartupNotice { RestoreFailure = restore is { Succeeded: false } ? restore.Message : null });
         builder.Services.AddSingleton<IBackupService>(backup);
+        builder.Services.AddSingleton<IFileSaveService, FileSaveService>();
         builder.Services.AddSingleton<IBackupFileService, BackupFileService>();
         builder.Services.AddSingleton<IAppLifecycle, AppLifecycle>();
         builder.Services.AddSingleton<ILanguageService, LanguageService>();
@@ -84,6 +87,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISnackbarService>(sp => sp.GetRequiredService<SnackbarService>());
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
         builder.Services.AddSingleton<ShellViewModel>();
+        builder.Services.AddSingleton<ReportFilterState>();
+        builder.Services.AddSingleton<IReportWorkbookWriter, ClosedXmlReportWriter>();
+        builder.Services.AddTransient<ReportsViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<PlaceholderViewModel>();
@@ -121,6 +127,7 @@ public static class MauiProgram
         builder.Services.AddTransient<VatRatesViewModel>();
         builder.Services.AddTransient<VatRateEditViewModel>();
         builder.Services.AddTransient<Func<VatRateEditViewModel>>(sp => () => sp.GetRequiredService<VatRateEditViewModel>());
+        builder.Services.AddTransient<ReportsPage>();
         builder.Services.AddTransient<OverviewPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<PlaceholderPage>();

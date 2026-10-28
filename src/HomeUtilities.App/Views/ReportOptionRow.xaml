@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.ReportOptionRow">
+
+    <!-- A row of buttons or chips in its own horizontal scroll area (a row of many properties never widens the page).
+         The selected option is filled with the accent colour. -->
+    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+        <HorizontalStackLayout x:Name="Row" Spacing="8">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="vm:ReportOptionViewModel">
+                    <Button Text="{Binding Text}" Command="{Binding ChooseCommand}"
+                            Style="{StaticResource SecondaryButton}" Padding="12,6" MinimumHeightRequest="36">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+    </ScrollView>
+</ContentView>
