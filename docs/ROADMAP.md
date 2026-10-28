@@ -47,6 +47,7 @@ is written; the list below is the plan and will change.
 
 ## Phase 6 — Reports and charts
 - T-023 Report queries in Core (by property/service/period, multi-property)
+- T-023a Reports usability: drop-down filters, grouped multi-property table, Android spinner fix
 - T-024 Charts (bar, grouped by property), year-over-year, unit cost; export to Excel
 
 ## Phase 7 — Templates and import
