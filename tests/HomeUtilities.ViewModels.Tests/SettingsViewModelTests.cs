@@ -167,7 +167,7 @@ public class SettingsViewModelTests
     [Fact]
     public async Task SaveBackup_after_sharing_says_saved_without_a_location()
     {
-        BackupFiles.SaveResult = new BackupSaveResult(true, null);
+        BackupFiles.SaveResult = new FileSaveResult(true, null);
         var vm = Create(out _, out _, out _);
 
         await vm.SaveBackupCommand.ExecuteAsync(null);
@@ -178,7 +178,7 @@ public class SettingsViewModelTests
     [Fact]
     public async Task SaveBackup_cancelled_stores_nothing()
     {
-        BackupFiles.SaveResult = new BackupSaveResult(false, null);
+        BackupFiles.SaveResult = new FileSaveResult(false, null);
         var vm = Create(out _, out _, out _);
 
         await vm.SaveBackupCommand.ExecuteAsync(null);

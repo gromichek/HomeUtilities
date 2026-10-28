@@ -38,6 +38,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private Dictionary<Guid, string> _categoryColors = [];
     private Dictionary<Guid, List<Payment>> _paymentsByBill = [];
     private Guid? _highlightContractId;
+    private Guid? _highlightCategoryId;
 
     [ObservableProperty]
     private IReadOnlyList<BillItemViewModel> _items = [];
@@ -152,16 +153,31 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     /// <summary>Navigation parameter carrying a calendar year (shown instead of every year) when the screen is opened from the Overview.</summary>
     public const string YearParameter = "year";
 
+    /// <summary>Navigation parameter carrying a month (<c>yyyy-MM</c>) shown instead of every year when the screen is opened from a report.</summary>
+    public const string MonthParameter = "month";
+
+    /// <summary>Navigation parameter carrying the id of a category whose bills are highlighted when the screen is opened from a report.</summary>
+    public const string CategoryParameter = "categoryId";
+
     /// <summary>
-    /// Opens the screen for a property with the bills of every year (or of one <paramref name="year"/>) and the given status; the
-    /// contract's bills are highlighted ("All bills").
+    /// Opens the screen for a property with the bills of every year (or of one <paramref name="year"/> or <paramref name="month"/>)
+    /// and the given status; the contract's bills (or the category's) are highlighted ("All bills", a number of a report).
     /// </summary>
-    public Task OpenForAsync(Guid propertyId, Guid? contractId, BillStatusFilter status = BillStatusFilter.All, int? year = null) => RunSafeAsync(async () =>
+    public Task OpenForAsync(
+        Guid propertyId,
+        Guid? contractId,
+        BillStatusFilter status = BillStatusFilter.All,
+        int? year = null,
+        YearMonth? month = null,
+        Guid? categoryId = null) => RunSafeAsync(async () =>
     {
         _filter.PropertyId = propertyId;
-        Period.Set(year is { } shown ? PeriodFilter.ForYear(shown) : PeriodFilter.ForAllYears(Period.Current.Year));
+        Period.Set(month is { } shownMonth
+            ? PeriodFilter.ForMonth(shownMonth)
+            : year is { } shown ? PeriodFilter.ForYear(shown) : PeriodFilter.ForAllYears(Period.Current.Year));
         _filter.Status = status;
         _highlightContractId = contractId;
+        _highlightCategoryId = categoryId;
         if (IsLoaded)
         {
             await ReloadAsync();
@@ -287,7 +303,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
                     r.State,
                     _localizer["Currency_Symbol_" + r.Bill.Currency],
                     _localizer,
-                    _highlightContractId is { } highlighted && r.Bill.ContractId == highlighted,
+                    (_highlightContractId is { } highlighted && r.Bill.ContractId == highlighted)
+                        || (_highlightCategoryId is { } category && r.Bill.CategoryId == category),
                     id => SelectCommand.Execute(id),
                     id => _ = MarkPaidAsync(id))),
         ];

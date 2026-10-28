@@ -972,7 +972,7 @@ internal sealed class FakeBackupService : IBackupService
 
 internal sealed class FakeBackupFileService : IBackupFileService
 {
-    public BackupSaveResult SaveResult { get; set; } = new(true, "C:\\Backups");
+    public FileSaveResult SaveResult { get; set; } = new(true, "C:\\Backups");
 
     public Stream? Picked { get; set; }
 
@@ -980,7 +980,7 @@ internal sealed class FakeBackupFileService : IBackupFileService
 
     public byte[] SavedBytes { get; private set; } = [];
 
-    public async Task<BackupSaveResult> SaveAsync(string fileName, Func<Stream, Task> write)
+    public async Task<FileSaveResult> SaveAsync(string fileName, Func<Stream, Task> write)
     {
         SavedNames.Add(fileName);
         var buffer = new MemoryStream();

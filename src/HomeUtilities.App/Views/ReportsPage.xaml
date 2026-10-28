@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.ReportsPage"
+                x:DataType="vm:ReportsViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="12">
+
+            <!-- Which report -->
+            <views:ReportOptionRow Items="{Binding Kinds}" />
+
+            <!-- Filters -->
+            <Border Style="{StaticResource SectionCard}" Padding="12">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding PeriodLabel}" Style="{StaticResource MutedLabel}" />
+                    <views:ReportOptionRow Items="{Binding Presets}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,*,Auto" ColumnSpacing="4">
+                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                                Command="{Binding PreviousFromCommand}"
+                                ToolTipProperties.Text="{Binding PreviousMonthText}"
+                                SemanticProperties.Description="{Binding PreviousMonthText}" />
+                        <Label Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding FromLabel}" TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+                                    <Span Text=" " />
+                                    <Span Text="{Binding FromText}" FontAttributes="Bold" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                                Command="{Binding NextFromCommand}"
+                                ToolTipProperties.Text="{Binding NextMonthText}"
+                                SemanticProperties.Description="{Binding NextMonthText}" />
+                        <Button Grid.Column="3" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                                Command="{Binding PreviousToCommand}"
+                                ToolTipProperties.Text="{Binding PreviousMonthText}"
+                                SemanticProperties.Description="{Binding PreviousMonthText}" />
+                        <Label Grid.Column="4" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding ToLabel}" TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+                                    <Span Text=" " />
+                                    <Span Text="{Binding ToText}" FontAttributes="Bold" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Button Grid.Column="5" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                                Command="{Binding NextToCommand}"
+                                ToolTipProperties.Text="{Binding NextMonthText}"
+                                SemanticProperties.Description="{Binding NextMonthText}" />
+                    </Grid>
+
+                    <Label Text="{Binding PropertiesLabel}" Style="{StaticResource MutedLabel}" />
+                    <views:ReportOptionRow Items="{Binding PropertyChoices}" />
+
+                    <ContentView IsVisible="{Binding ShowCategories}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding CategoriesLabel}" Style="{StaticResource MutedLabel}" />
+                            <views:ReportOptionRow Items="{Binding CategoryChoices}" />
+                        </VerticalStackLayout>
+                    </ContentView>
+
+                    <ContentView IsVisible="{Binding ShowGrouping}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding GroupingLabel}" Style="{StaticResource MutedLabel}" />
+                            <views:ReportOptionRow Items="{Binding Groupings}" />
+                        </VerticalStackLayout>
+                    </ContentView>
+
+                    <ContentView IsVisible="{Binding ShowMeasure}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding MeasureLabel}" Style="{StaticResource MutedLabel}" />
+                            <views:ReportOptionRow Items="{Binding Measures}" />
+                        </VerticalStackLayout>
+                    </ContentView>
+
+                    <ContentView IsVisible="{Binding ShowRowModes}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding RowsLabel}" Style="{StaticResource MutedLabel}" />
+                            <views:ReportOptionRow Items="{Binding RowModes}" />
+                        </VerticalStackLayout>
+                    </ContentView>
+
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowYearOverYear}">
+                        <Label Grid.Column="0" Text="{Binding YearOverYearText}" VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding YearOverYear}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowPerMeter}">
+                        <Label Grid.Column="0" Text="{Binding PerMeterText}" VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding PerMeter}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Export -->
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="{Binding ExportExcelText}" Command="{Binding ExportExcelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding ExportCsvText}" Command="{Binding ExportCsvCommand}" Style="{StaticResource SecondaryButton}" />
+            </HorizontalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+
+            <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowEmpty}" />
+
+            <views:ReportTableView Table="{Binding TableView}" IsVisible="{Binding ShowTable}" />
+
+            <Label Text="{Binding LegendText}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding ShowLegend}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</views:PageBase>

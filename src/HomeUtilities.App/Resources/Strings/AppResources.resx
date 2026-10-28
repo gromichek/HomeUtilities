@@ -1053,4 +1053,50 @@
   <data name="TodoSettlement" xml:space="preserve"><value>Expected settlement: {0}</value></data>
   <data name="TodoSettlementSurcharge" xml:space="preserve"><value>Surcharge expected</value></data>
   <data name="TodoSettlementRefund" xml:space="preserve"><value>Refund expected</value></data>
+  <data name="ReportKindCosts" xml:space="preserve"><value>Costs</value></data>
+  <data name="ReportKindConsumption" xml:space="preserve"><value>Consumption</value></data>
+  <data name="ReportKindUnitCost" xml:space="preserve"><value>Unit cost</value></data>
+  <data name="ReportKindCalculatedVsBilled" xml:space="preserve"><value>Calculated vs billed</value></data>
+  <data name="ReportPresetThisYear" xml:space="preserve"><value>This year</value></data>
+  <data name="ReportPresetLast12Months" xml:space="preserve"><value>Last 12 months</value></data>
+  <data name="ReportPresetLastYear" xml:space="preserve"><value>Last year</value></data>
+  <data name="ReportPresetAll" xml:space="preserve"><value>All</value></data>
+  <data name="ReportFromLabel" xml:space="preserve"><value>From</value></data>
+  <data name="ReportToLabel" xml:space="preserve"><value>To</value></data>
+  <data name="ReportPropertiesLabel" xml:space="preserve"><value>Properties</value></data>
+  <data name="ReportCategoriesLabel" xml:space="preserve"><value>Categories</value></data>
+  <data name="ReportGroupingLabel" xml:space="preserve"><value>Group by</value></data>
+  <data name="ReportGroupCategory" xml:space="preserve"><value>Category</value></data>
+  <data name="ReportGroupService" xml:space="preserve"><value>Service</value></data>
+  <data name="ReportGroupContract" xml:space="preserve"><value>Contract</value></data>
+  <data name="ReportGroupProperty" xml:space="preserve"><value>Property</value></data>
+  <data name="ReportMeasureLabel" xml:space="preserve"><value>Show</value></data>
+  <data name="ReportMeasureGross" xml:space="preserve"><value>Gross (incl. VAT)</value></data>
+  <data name="ReportMeasureNet" xml:space="preserve"><value>Net (excl. VAT)</value></data>
+  <data name="ReportMeasureVat" xml:space="preserve"><value>VAT</value></data>
+  <data name="ReportMeasureQuantity" xml:space="preserve"><value>Quantity</value></data>
+  <data name="ReportMeasureDifference" xml:space="preserve"><value>Difference, €</value></data>
+  <data name="ReportMeasureDifferencePercent" xml:space="preserve"><value>Difference, %</value></data>
+  <data name="ReportMeasureCalculated" xml:space="preserve"><value>Calculated</value></data>
+  <data name="ReportMeasureBilled" xml:space="preserve"><value>Billed</value></data>
+  <data name="ReportMeasureQuantityDifference" xml:space="preserve"><value>Quantity difference (losses)</value></data>
+  <data name="ReportRowsLabel" xml:space="preserve"><value>Rows</value></data>
+  <data name="ReportRowsMonths" xml:space="preserve"><value>Months</value></data>
+  <data name="ReportRowsYears" xml:space="preserve"><value>Years</value></data>
+  <data name="ReportYearOverYear" xml:space="preserve"><value>Year over year</value></data>
+  <data name="ReportPerMeter" xml:space="preserve"><value>One column per meter</value></data>
+  <data name="ReportTotal" xml:space="preserve"><value>Total</value></data>
+  <data name="ReportOneOff" xml:space="preserve"><value>One-off expenses</value></data>
+  <data name="ReportPeriodColumn" xml:space="preserve"><value>Period</value></data>
+  <data name="ReportLegend" xml:space="preserve"><value>≈ — based on incomplete data: a reading is missing or estimated, an amount is calculated because there is no bill yet, or a bill is spread over several months.</value></data>
+  <data name="ReportEmpty" xml:space="preserve"><value>No data for these filters.</value></data>
+  <data name="ReportExportExcel" xml:space="preserve"><value>Export to Excel</value></data>
+  <data name="ReportExportCsv" xml:space="preserve"><value>Export to CSV</value></data>
+  <data name="ReportSaved" xml:space="preserve"><value>Report saved.</value></data>
+  <data name="ReportSavedTo" xml:space="preserve"><value>Report saved to {0}</value></data>
+  <data name="ReportAllProperties" xml:space="preserve"><value>All properties</value></data>
+  <data name="ReportAllCategories" xml:space="preserve"><value>All categories</value></data>
+  <data name="ReportSheetReport" xml:space="preserve"><value>Report</value></data>
+  <data name="ReportSheetPeriod" xml:space="preserve"><value>Period</value></data>
+  <data name="ReportSheetCreated" xml:space="preserve"><value>Created</value></data>
 </root>

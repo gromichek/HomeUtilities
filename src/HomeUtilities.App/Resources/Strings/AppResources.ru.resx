@@ -1053,4 +1053,50 @@
   <data name="TodoSettlement" xml:space="preserve"><value>Ожидаемый перерасчёт: {0}</value></data>
   <data name="TodoSettlementSurcharge" xml:space="preserve"><value>Ожидается доплата</value></data>
   <data name="TodoSettlementRefund" xml:space="preserve"><value>Ожидается возврат</value></data>
+  <data name="ReportKindCosts" xml:space="preserve"><value>Расходы</value></data>
+  <data name="ReportKindConsumption" xml:space="preserve"><value>Потребление</value></data>
+  <data name="ReportKindUnitCost" xml:space="preserve"><value>Стоимость единицы</value></data>
+  <data name="ReportKindCalculatedVsBilled" xml:space="preserve"><value>Расчёт и счета</value></data>
+  <data name="ReportPresetThisYear" xml:space="preserve"><value>Этот год</value></data>
+  <data name="ReportPresetLast12Months" xml:space="preserve"><value>Последние 12 месяцев</value></data>
+  <data name="ReportPresetLastYear" xml:space="preserve"><value>Прошлый год</value></data>
+  <data name="ReportPresetAll" xml:space="preserve"><value>Всё время</value></data>
+  <data name="ReportFromLabel" xml:space="preserve"><value>С</value></data>
+  <data name="ReportToLabel" xml:space="preserve"><value>По</value></data>
+  <data name="ReportPropertiesLabel" xml:space="preserve"><value>Объекты</value></data>
+  <data name="ReportCategoriesLabel" xml:space="preserve"><value>Категории</value></data>
+  <data name="ReportGroupingLabel" xml:space="preserve"><value>Группировать по</value></data>
+  <data name="ReportGroupCategory" xml:space="preserve"><value>Категории</value></data>
+  <data name="ReportGroupService" xml:space="preserve"><value>Услуге</value></data>
+  <data name="ReportGroupContract" xml:space="preserve"><value>Договору</value></data>
+  <data name="ReportGroupProperty" xml:space="preserve"><value>Объекту</value></data>
+  <data name="ReportMeasureLabel" xml:space="preserve"><value>Показывать</value></data>
+  <data name="ReportMeasureGross" xml:space="preserve"><value>С НДС</value></data>
+  <data name="ReportMeasureNet" xml:space="preserve"><value>Без НДС</value></data>
+  <data name="ReportMeasureVat" xml:space="preserve"><value>НДС</value></data>
+  <data name="ReportMeasureQuantity" xml:space="preserve"><value>Количество</value></data>
+  <data name="ReportMeasureDifference" xml:space="preserve"><value>Разница, €</value></data>
+  <data name="ReportMeasureDifferencePercent" xml:space="preserve"><value>Разница, %</value></data>
+  <data name="ReportMeasureCalculated" xml:space="preserve"><value>Расчёт</value></data>
+  <data name="ReportMeasureBilled" xml:space="preserve"><value>По счёту</value></data>
+  <data name="ReportMeasureQuantityDifference" xml:space="preserve"><value>Разница в количестве (потери)</value></data>
+  <data name="ReportRowsLabel" xml:space="preserve"><value>Строки</value></data>
+  <data name="ReportRowsMonths" xml:space="preserve"><value>Месяцы</value></data>
+  <data name="ReportRowsYears" xml:space="preserve"><value>Годы</value></data>
+  <data name="ReportYearOverYear" xml:space="preserve"><value>Сравнение по годам</value></data>
+  <data name="ReportPerMeter" xml:space="preserve"><value>Отдельный столбец для каждого счётчика</value></data>
+  <data name="ReportTotal" xml:space="preserve"><value>Итого</value></data>
+  <data name="ReportOneOff" xml:space="preserve"><value>Разовые расходы</value></data>
+  <data name="ReportPeriodColumn" xml:space="preserve"><value>Период</value></data>
+  <data name="ReportLegend" xml:space="preserve"><value>≈ — по неполным данным: нет показания или оно оценочное, сумма рассчитана, потому что счёта ещё нет, или счёт разнесён на несколько месяцев.</value></data>
+  <data name="ReportEmpty" xml:space="preserve"><value>Нет данных для выбранных фильтров.</value></data>
+  <data name="ReportExportExcel" xml:space="preserve"><value>Экспорт в Excel</value></data>
+  <data name="ReportExportCsv" xml:space="preserve"><value>Экспорт в CSV</value></data>
+  <data name="ReportSaved" xml:space="preserve"><value>Отчёт сохранён.</value></data>
+  <data name="ReportSavedTo" xml:space="preserve"><value>Отчёт сохранён: {0}</value></data>
+  <data name="ReportAllProperties" xml:space="preserve"><value>Все объекты</value></data>
+  <data name="ReportAllCategories" xml:space="preserve"><value>Все категории</value></data>
+  <data name="ReportSheetReport" xml:space="preserve"><value>Отчёт</value></data>
+  <data name="ReportSheetPeriod" xml:space="preserve"><value>Период</value></data>
+  <data name="ReportSheetCreated" xml:space="preserve"><value>Создан</value></data>
 </root>

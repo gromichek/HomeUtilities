@@ -66,7 +66,7 @@
         <FlyoutItem.Icon>
             <FontImageSource Glyph="▤" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
-        <ShellContent Title="{Binding ReportsTitle}" ContentTemplate="{DataTemplate views:PlaceholderPage}" />
+        <ShellContent Title="{Binding ReportsTitle}" ContentTemplate="{DataTemplate views:ReportsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding HelpTitle}" Route="Help">

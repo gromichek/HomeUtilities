@@ -52,6 +52,7 @@ public static class ServiceCollectionExtensions
             provider.GetService<IImageProcessor>()));
         services.AddSingleton<IChargeInputLoader, ChargeInputLoader>();
         services.AddSingleton<IOverviewDataLoader, OverviewDataLoader>();
+        services.AddSingleton<IReportDataLoader, ReportDataLoader>();
         services.AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
         services.AddSingleton<ISampleDataGenerator, SampleDataGenerator>();
         return services;
