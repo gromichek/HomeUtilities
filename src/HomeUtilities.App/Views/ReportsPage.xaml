@@ -7,7 +7,10 @@
                 x:DataType="vm:ReportsViewModel"
                 Title="{Binding Title}">
 
+    <!-- Help, and the exports in the overflow ("⋯") menu: they are rare, the table needs the room. -->
     <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding ExportExcelText}" Order="Secondary" Command="{Binding ExportExcelCommand}" />
+        <ToolbarItem Text="{Binding ExportCsvText}" Order="Secondary" Command="{Binding ExportCsvCommand}" />
         <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
     </views:PageBase.ToolbarItems>
 
@@ -17,98 +20,67 @@
             <!-- Which report -->
             <views:ReportOptionRow Items="{Binding Kinds}" />
 
-            <!-- Filters -->
+            <!-- Filters: fields that open pickers; one summary line when collapsed. -->
             <Border Style="{StaticResource SectionCard}" Padding="12">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding PeriodLabel}" Style="{StaticResource MutedLabel}" />
-                    <views:ReportOptionRow Items="{Binding Presets}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,*,Auto" ColumnSpacing="4">
-                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
-                                Command="{Binding PreviousFromCommand}"
-                                ToolTipProperties.Text="{Binding PreviousMonthText}"
-                                SemanticProperties.Description="{Binding PreviousMonthText}" />
-                        <Label Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="{Binding FromLabel}" TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
-                                    <Span Text=" " />
-                                    <Span Text="{Binding FromText}" FontAttributes="Bold" />
-                                </FormattedString>
-                            </Label.FormattedText>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FiltersTitle}" Style="{StaticResource SectionHeader}"
+                               IsVisible="{Binding FiltersExpanded}" />
+                        <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding SummaryText}" LineBreakMode="TailTruncation" MaxLines="2"
+                               IsVisible="{Binding ShowFilterSummary}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleFiltersCommand}" />
+                            </Label.GestureRecognizers>
                         </Label>
-                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
-                                Command="{Binding NextFromCommand}"
-                                ToolTipProperties.Text="{Binding NextMonthText}"
-                                SemanticProperties.Description="{Binding NextMonthText}" />
-                        <Button Grid.Column="3" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
-                                Command="{Binding PreviousToCommand}"
-                                ToolTipProperties.Text="{Binding PreviousMonthText}"
-                                SemanticProperties.Description="{Binding PreviousMonthText}" />
-                        <Label Grid.Column="4" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="{Binding ToLabel}" TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
-                                    <Span Text=" " />
-                                    <Span Text="{Binding ToText}" FontAttributes="Bold" />
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                        <Button Grid.Column="5" Style="{StaticResource IconButton}" Text="›" FontSize="24"
-                                Command="{Binding NextToCommand}"
-                                ToolTipProperties.Text="{Binding NextMonthText}"
-                                SemanticProperties.Description="{Binding NextMonthText}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconCollapse}"
+                                Command="{Binding ToggleFiltersCommand}" IsVisible="{Binding FiltersExpanded}"
+                                ToolTipProperties.Text="{Binding FiltersToggleText}"
+                                SemanticProperties.Description="{Binding FiltersToggleText}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconExpand}"
+                                Command="{Binding ToggleFiltersCommand}" IsVisible="{Binding ShowFilterSummary}"
+                                ToolTipProperties.Text="{Binding FiltersToggleText}"
+                                SemanticProperties.Description="{Binding FiltersToggleText}" />
                     </Grid>
 
-                    <Label Text="{Binding PropertiesLabel}" Style="{StaticResource MutedLabel}" />
-                    <views:ReportOptionRow Items="{Binding PropertyChoices}" />
+                    <views:AdaptiveFieldGrid Columns="{Binding FilterColumns}" IsVisible="{Binding FiltersExpanded}">
+                        <views:ReportFilterField Caption="{Binding PeriodLabel}" Value="{Binding PeriodFieldText}" Command="{Binding ChoosePeriodCommand}" />
+                        <views:ReportFilterField Caption="{Binding PropertiesLabel}" Value="{Binding PropertiesFieldText}" Command="{Binding ChoosePropertiesCommand}" />
+                        <views:ReportFilterField Caption="{Binding CategoriesLabel}" Value="{Binding CategoriesFieldText}" Command="{Binding ChooseCategoriesCommand}"
+                                                 IsVisible="{Binding ShowCategories}" />
 
-                    <ContentView IsVisible="{Binding ShowCategories}">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="{Binding CategoriesLabel}" Style="{StaticResource MutedLabel}" />
-                            <views:ReportOptionRow Items="{Binding CategoryChoices}" />
-                        </VerticalStackLayout>
-                    </ContentView>
-
-                    <ContentView IsVisible="{Binding ShowGrouping}">
-                        <VerticalStackLayout Spacing="8">
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowGrouping}">
                             <Label Text="{Binding GroupingLabel}" Style="{StaticResource MutedLabel}" />
-                            <views:ReportOptionRow Items="{Binding Groupings}" />
+                            <Picker ItemsSource="{Binding Groupings}" ItemDisplayBinding="{Binding Text, x:DataType=vm:ReportOptionViewModel}"
+                                    SelectedIndex="{Binding GroupingIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
-                    </ContentView>
 
-                    <ContentView IsVisible="{Binding ShowMeasure}">
-                        <VerticalStackLayout Spacing="8">
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowMeasure}">
                             <Label Text="{Binding MeasureLabel}" Style="{StaticResource MutedLabel}" />
-                            <views:ReportOptionRow Items="{Binding Measures}" />
+                            <Picker ItemsSource="{Binding Measures}" ItemDisplayBinding="{Binding Text, x:DataType=vm:ReportOptionViewModel}"
+                                    SelectedIndex="{Binding MeasureIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
-                    </ContentView>
 
-                    <ContentView IsVisible="{Binding ShowRowModes}">
-                        <VerticalStackLayout Spacing="8">
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowRowModes}">
                             <Label Text="{Binding RowsLabel}" Style="{StaticResource MutedLabel}" />
-                            <views:ReportOptionRow Items="{Binding RowModes}" />
+                            <Picker ItemsSource="{Binding RowModes}" ItemDisplayBinding="{Binding Text, x:DataType=vm:ReportOptionViewModel}"
+                                    SelectedIndex="{Binding RowModeIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
-                    </ContentView>
 
-                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowYearOverYear}">
-                        <Label Grid.Column="0" Text="{Binding YearOverYearText}" VerticalOptions="Center" />
-                        <Switch Grid.Column="1" IsToggled="{Binding YearOverYear}" />
-                    </Grid>
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowYearOverYear}">
+                            <Label Grid.Column="0" Text="{Binding YearOverYearText}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding YearOverYear}" />
+                        </Grid>
 
-                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowPerMeter}">
-                        <Label Grid.Column="0" Text="{Binding PerMeterText}" VerticalOptions="Center" />
-                        <Switch Grid.Column="1" IsToggled="{Binding PerMeter}" />
-                    </Grid>
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowPerMeter}">
+                            <Label Grid.Column="0" Text="{Binding PerMeterText}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding PerMeter}" />
+                        </Grid>
+                    </views:AdaptiveFieldGrid>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Export -->
-            <HorizontalStackLayout Spacing="8">
-                <Button Text="{Binding ExportExcelText}" Command="{Binding ExportExcelCommand}" Style="{StaticResource SecondaryButton}" />
-                <Button Text="{Binding ExportCsvText}" Command="{Binding ExportCsvCommand}" Style="{StaticResource SecondaryButton}" />
-            </HorizontalStackLayout>
-
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+            <!-- Always running when visible: toggling IsRunning as well left the Android spinner turning after the first load. -->
+            <ActivityIndicator IsRunning="True" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
 
             <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowEmpty}" />
 

@@ -7,7 +7,8 @@ namespace HomeUtilities.ViewModels;
 /// <summary>The property name above a run of columns.</summary>
 /// <param name="Text">The property name.</param>
 /// <param name="Span">How many columns it covers.</param>
-public sealed record ReportHeaderGroup(string Text, int Span);
+/// <param name="Index">0, 1, 2… per property in order (used to tint every other group); -1 for the grand total column.</param>
+public sealed record ReportHeaderGroup(string Text, int Span, int Index = -1);
 
 /// <summary>A number of the table as shown.</summary>
 public sealed class ReportCellViewModel
@@ -75,21 +76,23 @@ public sealed record ReportTableViewModel(
         }
 
         var groups = new List<ReportHeaderGroup>();
+        var groupIds = new List<Guid>();
         foreach (var column in table.Columns)
         {
-            if (groups.Count > 0 && groups[^1].Text == column.PropertyName)
+            if (groups.Count > 0 && groupIds[^1] == column.PropertyId)
             {
                 groups[^1] = groups[^1] with { Span = groups[^1].Span + 1 };
             }
             else
             {
-                groups.Add(new ReportHeaderGroup(column.PropertyName, 1));
+                groups.Add(new ReportHeaderGroup(column.PropertyName, 1, groups.Count));
+                groupIds.Add(column.PropertyId);
             }
         }
 
         if (table.HasRowTotals)
         {
-            groups.Add(new ReportHeaderGroup(string.Empty, 1));
+            groups.Add(new ReportHeaderGroup(string.Empty, 1, -1));
         }
 
         ReportCellViewModel Make(ReportCell cell, ReportColumn column) => new(

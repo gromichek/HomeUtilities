@@ -54,7 +54,7 @@ public class ReportsViewModelTests : IDisposable
     private readonly FakeLayoutModeService _layout = new();
 
     private ReportsViewModel Create() =>
-        new(_loader, _excel, _files, _kit.Clock, _kit.Localizer, _kit.Navigation, _kit.Toast, _state, _layout);
+        new(_loader, _excel, _files, _kit.Clock, _kit.Localizer, _kit.Navigation, _kit.Toast, _state, _layout, _kit.Dialogs);
 
     private async Task<ReportsViewModel> LoadAsync()
     {
@@ -169,68 +169,129 @@ public class ReportsViewModelTests : IDisposable
         Assert.False(vm.ShowYearOverYear);
     }
 
+    /// <summary>Runs a filter dialog: <paramref name="script"/> changes it, then it is confirmed.</summary>
+    private async Task RunDialogAsync<T>(ReportsViewModel vm, Func<Task> open, Action<T> script)
+        where T : EditorDialogViewModel
+    {
+        _kit.Dialogs.EditorScript = editor =>
+        {
+            var dialog = Assert.IsType<T>(editor);
+            script(dialog);
+            (dialog as MultiSelectDialogViewModel)?.ConfirmCommand.Execute(null);
+            (dialog as ReportPeriodDialogViewModel)?.ConfirmCommand.Execute(null);
+        };
+        await open();
+        await Settled(vm);
+    }
+
+    private Task ChoosePreset(ReportsViewModel vm, ReportPreset preset) =>
+        RunDialogAsync<ReportPeriodDialogViewModel>(vm, () => vm.ChoosePeriodCommand.ExecuteAsync(null), d => d.Presets[(int)preset].ChooseCommand.Execute(null));
+
     [Fact]
-    public async Task Presets_set_the_months_and_the_month_buttons_make_a_custom_range()
+    public async Task Presets_set_the_months_and_the_period_field_shows_them()
     {
         var vm = await LoadAsync();
+        Assert.Equal("ReportPresetThisYear [en] (01.2026–12.2026)", vm.PeriodFieldText);
 
-        vm.Presets[1].ChooseCommand.Execute(null);
-        await Settled(vm);
+        await ChoosePreset(vm, ReportPreset.Last12Months);
         Assert.Equal(["11.2025", "10.2026"], [vm.FromText, vm.ToText]);
-        Assert.True(vm.Presets[1].IsSelected);
+        Assert.Equal("ReportPresetLast12Months [en] (11.2025–10.2026)", vm.PeriodFieldText);
 
-        vm.Presets[2].ChooseCommand.Execute(null);
-        await Settled(vm);
+        await ChoosePreset(vm, ReportPreset.LastYear);
         Assert.Equal(["01.2025", "12.2025"], [vm.FromText, vm.ToText]);
 
-        vm.Presets[3].ChooseCommand.Execute(null);
-        await Settled(vm);
+        await ChoosePreset(vm, ReportPreset.All);
         // The first month with data to the current month (the bills end in February).
         Assert.Equal(["01.2026", "10.2026"], [vm.FromText, vm.ToText]);
         Assert.Equal(11, vm.TableView.Rows.Count);
-
-        await vm.NextFromCommand.ExecuteAsync(null);
-        Assert.Equal(["02.2026", "10.2026"], [vm.FromText, vm.ToText]);
-        Assert.All(vm.Presets, p => Assert.False(p.IsSelected));
-        Assert.Equal(10, vm.TableView.Rows.Count);
     }
 
     [Fact]
-    public async Task The_start_cannot_pass_the_end()
+    public async Task A_custom_range_is_picked_from_the_month_lists()
     {
         var vm = await LoadAsync();
-        vm.Presets[0].ChooseCommand.Execute(null);
-        await Settled(vm);
 
-        await vm.PreviousToCommand.ExecuteAsync(null);
-        await vm.PreviousToCommand.ExecuteAsync(null);
-        for (var i = 0; i < 12; i++)
+        await RunDialogAsync<ReportPeriodDialogViewModel>(vm, () => vm.ChoosePeriodCommand.ExecuteAsync(null), d =>
         {
-            await vm.NextFromCommand.ExecuteAsync(null);
-        }
+            Assert.False(d.IsCustom);
+            d.Presets[(int)ReportPreset.Custom].ChooseCommand.Execute(null);
+            Assert.True(d.IsCustom);
+            d.FromIndex = d.MonthTexts.ToList().IndexOf("02.2026");
+            d.ToIndex = d.MonthTexts.ToList().IndexOf("04.2026");
+        });
 
-        // Start moved to January 2027: the end follows it.
-        Assert.Equal(["01.2027", "01.2027"], [vm.FromText, vm.ToText]);
+        Assert.Equal(["02.2026", "04.2026"], [vm.FromText, vm.ToText]);
+        Assert.Equal("02.2026–04.2026", vm.PeriodFieldText);
+        Assert.Equal(4, vm.TableView.Rows.Count);
     }
 
     [Fact]
-    public async Task Properties_are_chips_and_one_stays_selected()
+    public async Task A_custom_range_that_ends_before_it_starts_is_refused_in_the_dialog()
+    {
+        var vm = await LoadAsync();
+        var (from, to) = (new YearMonth(2026, 1), new YearMonth(2026, 12));
+        var dialog = new ReportPeriodDialogViewModel(_kit.Localizer, ReportPreset.Custom, from, to, from, to)
+        {
+            FromIndex = 5,
+            ToIndex = 2,
+        };
+
+        dialog.ConfirmCommand.Execute(null);
+
+        Assert.False(dialog.Saved);
+        Assert.Equal("ReportPeriodInvalid [en]", dialog.Error);
+        Assert.NotNull(vm);
+    }
+
+    [Fact]
+    public async Task Cancelling_the_period_dialog_changes_nothing()
+    {
+        var vm = await LoadAsync();
+        _kit.Dialogs.EditorScript = editor => ((ReportPeriodDialogViewModel)editor).Presets[2].ChooseCommand.Execute(null);
+
+        await vm.ChoosePeriodCommand.ExecuteAsync(null);
+
+        Assert.Equal(ReportPreset.ThisYear, _state.Preset);
+        Assert.Equal(["01.2026", "12.2026"], [vm.FromText, vm.ToText]);
+    }
+
+    [Fact]
+    public async Task Properties_are_picked_with_check_boxes_and_the_field_shows_the_choice()
     {
         var vm = await LoadAsync();
         Assert.Equal(["Flat", "Cottage"], vm.PropertyChoices.Select(p => p.Text));
+        Assert.Equal("ReportFieldAll 2 [en]", vm.PropertiesFieldText);
+
+        await RunDialogAsync<MultiSelectDialogViewModel>(vm, () => vm.ChoosePropertiesCommand.ExecuteAsync(null), d =>
+        {
+            Assert.All(d.Items, i => Assert.True(i.IsSelected));
+            d.Items[1].IsSelected = false;
+        });
+
+        Assert.Equal(["Flat", ""], vm.TableView.Groups.Select(g => g.Text));
+        Assert.Equal("Flat", vm.PropertiesFieldText);
+        Assert.Equal([true, false], vm.PropertyChoices.Select(p => p.IsSelected));
+        Assert.Contains("Flat", vm.SummaryText);
+    }
+
+    [Fact]
+    public async Task Cancelling_a_multi_select_dialog_leaves_the_choices_untouched()
+    {
+        var vm = await LoadAsync();
+        _kit.Dialogs.EditorScript = editor => ((MultiSelectDialogViewModel)editor).SelectNoneCommand.Execute(null);
+
+        await vm.ChoosePropertiesCommand.ExecuteAsync(null);
+
         Assert.All(vm.PropertyChoices, p => Assert.True(p.IsSelected));
+        Assert.Equal(["Flat", "Cottage", ""], vm.TableView.Groups.Select(g => g.Text));
+    }
 
-        vm.PropertyChoices[1].ChooseCommand.Execute(null);
-        await Settled(vm);
+    [Fact]
+    public async Task Each_property_is_its_own_column_group_and_the_grand_total_has_no_group()
+    {
+        var vm = await LoadAsync();
 
-        Assert.False(vm.PropertyChoices[1].IsSelected);
-        Assert.Equal(["Flat", ""], vm.TableView.Groups.Select(g => g.Text));
-
-        vm.PropertyChoices[0].ChooseCommand.Execute(null);
-        await Settled(vm);
-
-        Assert.True(vm.PropertyChoices[0].IsSelected);
-        Assert.Equal(["Flat", ""], vm.TableView.Groups.Select(g => g.Text));
+        Assert.Equal([("Flat", 1, 0), ("Cottage", 1, 1), ("", 1, -1)], vm.TableView.Groups.Select(g => (g.Text, g.Span, g.Index)));
     }
 
     [Fact]
@@ -251,11 +312,156 @@ public class ReportsViewModelTests : IDisposable
         var vm = await LoadAsync();
         Assert.True(vm.ShowCategories);
 
-        vm.CategoryChoices[1].ChooseCommand.Execute(null);
-        await Settled(vm);
+        await RunDialogAsync<MultiSelectDialogViewModel>(vm, () => vm.ChooseCategoriesCommand.ExecuteAsync(null), d => d.Items[1].IsSelected = false);
 
         Assert.False(vm.CategoryChoices[1].IsSelected);
         Assert.Equal("50.00", vm.TableView.Rows[^1].Total!.Text);
+        Assert.Equal("Enum_ServiceKind_ColdWater [en]", vm.CategoriesFieldText);
+    }
+
+    [Fact]
+    public void Selection_summaries_are_all_the_names_or_a_count()
+    {
+        MultiSelectItemViewModel[] Items(int count, params int[] selected) =>
+            [.. Enumerable.Range(0, count).Select(i => new MultiSelectItemViewModel(Guid.NewGuid(), "Item " + i, string.Empty, selected.Contains(i)))];
+
+        Assert.Equal("ReportFieldAll 3 [en]", ReportsViewModel.SummarizeSelection(_kit.Localizer, Items(3, 0, 1, 2)));
+        Assert.Equal("Item 0, Item 2", ReportsViewModel.SummarizeSelection(_kit.Localizer, Items(3, 0, 2)));
+        Assert.Equal("ReportFieldSome 4|15 [en]", ReportsViewModel.SummarizeSelection(_kit.Localizer, Items(15, 0, 1, 2, 3)));
+    }
+
+    [Fact]
+    public async Task The_filter_panel_is_collapsed_by_default_on_phones_and_the_choice_is_remembered()
+    {
+        _layout.Change(LayoutMode.Compact);
+        var phone = await LoadAsync();
+        Assert.False(phone.FiltersExpanded);
+        Assert.True(phone.ShowFilterSummary);
+        Assert.Equal("ReportPresetThisYear [en] · ReportAllProperties [en] · ReportAllCategories [en] · ReportGroupCategory [en] · ReportMeasureGross [en]", phone.SummaryText);
+
+        phone.ToggleFiltersCommand.Execute(null);
+
+        Assert.True(phone.FiltersExpanded);
+        Assert.True(_state.FiltersExpanded);
+
+        // Leaving the screen and coming back creates a new view model over the same state.
+        var again = Create();
+        Assert.True(again.FiltersExpanded);
+    }
+
+    [Fact]
+    public async Task The_filter_panel_is_open_by_default_on_wide_windows_and_has_more_columns()
+    {
+        _layout.Change(LayoutMode.Expanded);
+        var vm = await LoadAsync();
+        Assert.True(vm.FiltersExpanded);
+        Assert.Equal(3, vm.FilterColumns);
+
+        _layout.Change(LayoutMode.Medium);
+        Assert.Equal(2, vm.FilterColumns);
+
+        _layout.Change(LayoutMode.Compact);
+        Assert.Equal(1, vm.FilterColumns);
+        Assert.False(vm.FiltersExpanded);
+    }
+
+    [Fact]
+    public async Task Picker_indexes_choose_the_option()
+    {
+        var vm = await LoadAsync();
+        Assert.Equal((int)CostGrouping.Category, vm.GroupingIndex);
+
+        vm.GroupingIndex = (int)CostGrouping.Property;
+        await Settled(vm);
+        Assert.Equal(CostGrouping.Property, _state.Grouping);
+        Assert.Equal((int)CostGrouping.Property, vm.GroupingIndex);
+
+        vm.GroupingIndex = -1;
+        await Settled(vm);
+        Assert.Equal(CostGrouping.Property, _state.Grouping);
+
+        vm.MeasureIndex = 1;
+        await Settled(vm);
+        Assert.Equal(ReportMeasure.Net, _state.CostMeasure);
+    }
+
+    // ---- The spinner ----------------------------------------------------------------------------------------------
+
+    [Fact]
+    public async Task The_spinner_is_on_during_the_first_load_and_off_after_it()
+    {
+        var vm = Create();
+        var gate = new TaskCompletionSource();
+        _loader.Gate = gate.Task;
+
+        var appearing = vm.OnAppearingAsync();
+        Assert.True(vm.IsBusy);
+
+        gate.SetResult();
+        await appearing;
+
+        Assert.False(vm.IsBusy);
+        Assert.True(vm.ShowTable);
+    }
+
+    [Fact]
+    public async Task Overlapping_loads_do_not_leave_the_spinner_on()
+    {
+        var vm = Create();
+        var first = new TaskCompletionSource();
+        _loader.Gate = first.Task;
+        var one = vm.OnAppearingAsync();
+        var two = vm.ReloadAsync();
+        Assert.True(vm.IsBusy);
+
+        first.SetResult();
+        await Task.WhenAll(one, two);
+
+        Assert.False(vm.IsBusy);
+    }
+
+    [Fact]
+    public async Task A_failing_load_stops_the_spinner_and_reports_the_error()
+    {
+        var reporter = new RecordingErrorReporter();
+        var previous = ViewModelBase.ErrorReporter;
+        ViewModelBase.ErrorReporter = reporter;
+        try
+        {
+            _loader.Failure = new InvalidOperationException("boom");
+            var vm = Create();
+
+            await vm.OnAppearingAsync();
+
+            Assert.False(vm.IsBusy);
+            Assert.Equal("boom", Assert.Single(reporter.Errors).Message);
+        }
+        finally
+        {
+            ViewModelBase.ErrorReporter = previous;
+        }
+    }
+
+    [Fact]
+    public async Task Without_an_error_reporter_a_failing_load_still_stops_the_spinner()
+    {
+        _loader.Failure = new InvalidOperationException("boom");
+        var vm = Create();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(vm.OnAppearingAsync);
+
+        Assert.False(vm.IsBusy);
+    }
+
+    private sealed class RecordingErrorReporter : IErrorReporter
+    {
+        public List<Exception> Errors { get; } = [];
+
+        public Task ReportAsync(string source, Exception exception)
+        {
+            Errors.Add(exception);
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -263,11 +469,11 @@ public class ReportsViewModelTests : IDisposable
     {
         var vm = await LoadAsync();
 
-        vm.Groupings[(int)CostGrouping.Property].ChooseCommand.Execute(null);
+        vm.GroupingIndex = (int)CostGrouping.Property;
         await Settled(vm);
         Assert.Equal(["ReportMeasureGross [en]", "ReportMeasureGross [en]"], vm.TableView.ColumnHeaders);
 
-        vm.RowModes[1].ChooseCommand.Execute(null);
+        vm.RowModeIndex = 1;
         await Settled(vm);
         Assert.Equal(["2026", "ReportTotal [en]"], vm.TableView.Rows.Select(r => r.Label));
 
@@ -285,8 +491,7 @@ public class ReportsViewModelTests : IDisposable
     {
         var vm = await LoadAsync();
 
-        vm.Presets[2].ChooseCommand.Execute(null);
-        await Settled(vm);
+        await ChoosePreset(vm, ReportPreset.LastYear);
 
         Assert.True(vm.ShowEmpty);
         Assert.False(vm.ShowTable);
@@ -468,10 +673,21 @@ public class ReportsViewModelTests : IDisposable
 
         public int Loads { get; private set; }
 
-        public Task<ReportData> LoadAsync(CancellationToken ct = default)
+        /// <summary>When set, the load completes only after this task.</summary>
+        public Task? Gate { get; set; }
+
+        /// <summary>When set, the load throws it.</summary>
+        public Exception? Failure { get; set; }
+
+        public async Task<ReportData> LoadAsync(CancellationToken ct = default)
         {
             Loads++;
-            return Task.FromResult(Data);
+            if (Gate is not null)
+            {
+                await Gate;
+            }
+
+            return Failure is null ? Data : throw Failure;
         }
     }
 

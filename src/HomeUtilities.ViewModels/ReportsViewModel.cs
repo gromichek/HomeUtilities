@@ -30,6 +30,8 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     private readonly ISnackbarService _snackbar;
     private readonly ReportFilterState _state;
     private readonly ILayoutModeService _layout;
+    private readonly IDialogService _dialogs;
+    private int _busyCount;
     private readonly SemaphoreSlim _calculation = new(1, 1);
 
     private ReportData? _data;
@@ -45,13 +47,13 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     private IReadOnlyList<ReportOptionViewModel> _kinds = [];
 
     [ObservableProperty]
-    private IReadOnlyList<ReportOptionViewModel> _presets = [];
+    private IReadOnlyList<MultiSelectItemViewModel> _propertyChoices = [];
 
     [ObservableProperty]
-    private IReadOnlyList<ReportOptionViewModel> _propertyChoices = [];
+    private IReadOnlyList<MultiSelectItemViewModel> _categoryChoices = [];
 
     [ObservableProperty]
-    private IReadOnlyList<ReportOptionViewModel> _categoryChoices = [];
+    private bool _filtersExpanded;
 
     [ObservableProperty]
     private IReadOnlyList<ReportOptionViewModel> _groupings = [];
@@ -67,6 +69,18 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
 
     [ObservableProperty]
     private string _toText = string.Empty;
+
+    [ObservableProperty]
+    private string _periodFieldText = string.Empty;
+
+    [ObservableProperty]
+    private string _propertiesFieldText = string.Empty;
+
+    [ObservableProperty]
+    private string _categoriesFieldText = string.Empty;
+
+    [ObservableProperty]
+    private string _summaryText = string.Empty;
 
     [ObservableProperty]
     private string _helpText = string.Empty;
@@ -104,7 +118,8 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         INavigationService navigation,
         ISnackbarService snackbar,
         ReportFilterState state,
-        ILayoutModeService layout)
+        ILayoutModeService layout,
+        IDialogService dialogs)
     {
         _loader = loader;
         _excel = excel;
@@ -115,20 +130,28 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         _snackbar = snackbar;
         _state = state;
         _layout = layout;
+        _dialogs = dialogs;
+        _filtersExpanded = state.FiltersExpanded ?? layout.Current != LayoutMode.Compact;
         _yearOverYear = state.YearOverYear;
         _perMeter = state.PerMeter;
         RefreshTexts();
     }
 
-    public string FromLabel => _localizer["ReportFromLabel"];
-
-    public string ToLabel => _localizer["ReportToLabel"];
-
     public string PeriodLabel => _localizer["PeriodLabel"];
 
-    public string PreviousMonthText => _localizer["PeriodPreviousMonth"];
+    /// <summary>Columns of the filter field grid: 3 on expanded, 2 on medium, 1 on compact layouts.</summary>
+    public int FilterColumns => _layout.Current switch
+    {
+        LayoutMode.Expanded => 3,
+        LayoutMode.Medium => 2,
+        _ => 1,
+    };
 
-    public string NextMonthText => _localizer["PeriodNextMonth"];
+    public bool ShowFilterSummary => !FiltersExpanded;
+
+    public string FiltersToggleText => _localizer[FiltersExpanded ? "ReportFiltersCollapse" : "ReportFiltersExpand"];
+
+    public string FiltersTitle => _localizer["ReportFiltersTitle"];
 
     public string PropertiesLabel => _localizer["ReportPropertiesLabel"];
 
@@ -187,6 +210,8 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     /// <summary>Loads the data again (the screen appears, or the owner changed something elsewhere) and recalculates the table.</summary>
     public async Task ReloadAsync()
     {
+        // A counter, not a flag: two overlapping loads (appearing + language change) must not leave the spinner on.
+        _busyCount++;
         IsBusy = true;
         try
         {
@@ -196,7 +221,11 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         }
         finally
         {
-            IsBusy = false;
+            if (--_busyCount <= 0)
+            {
+                _busyCount = 0;
+                IsBusy = false;
+            }
         }
     }
 
@@ -215,21 +244,147 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         }
     }
 
-    void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) => OnPropertyChanged(string.Empty);
+    void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message)
+    {
+        if (_state.FiltersExpanded is null)
+        {
+            FiltersExpanded = _layout.Current != LayoutMode.Compact;
+        }
+
+        OnPropertyChanged(string.Empty);
+    }
 
     // ---- Filters --------------------------------------------------------------------------------------------------
 
     [RelayCommand]
-    private Task PreviousFromAsync() => ShiftAsync(from: true, -1);
+    private void ToggleFilters()
+    {
+        FiltersExpanded = !FiltersExpanded;
+    }
+
+    partial void OnFiltersExpandedChanged(bool value)
+    {
+        _state.FiltersExpanded = value;
+        OnPropertyChanged(nameof(ShowFilterSummary));
+        OnPropertyChanged(nameof(FiltersToggleText));
+    }
 
     [RelayCommand]
-    private Task NextFromAsync() => ShiftAsync(from: true, 1);
+    private Task ChoosePeriodAsync() => RunSafeAsync(async () =>
+    {
+        if (_data is null)
+        {
+            return;
+        }
+
+        var (from, to) = CurrentRange();
+        var dialog = new ReportPeriodDialogViewModel(
+            _localizer,
+            _state.Preset,
+            from,
+            to,
+            _data.EarliestMonth ?? from,
+            _data.LatestMonth ?? to);
+        if (!await _dialogs.ShowEditorAsync(dialog))
+        {
+            return;
+        }
+
+        _state.Preset = dialog.Preset;
+        if (dialog.Preset == ReportPreset.Custom)
+        {
+            (_state.From, _state.To) = dialog.Range;
+        }
+
+        await RebuildAsync();
+    });
 
     [RelayCommand]
-    private Task PreviousToAsync() => ShiftAsync(from: false, -1);
+    private Task ChoosePropertiesAsync() => RunSafeAsync(async () =>
+    {
+        if (_data is null)
+        {
+            return;
+        }
+
+        var dialog = new MultiSelectDialogViewModel(_localizer, PropertiesLabel, Copy(PropertyChoices), SelectedPropertyIds());
+        if (!await _dialogs.ShowEditorAsync(dialog))
+        {
+            return;
+        }
+
+        _state.Properties = dialog.SelectedIds;
+        BuildChoices();
+        await RebuildAsync();
+    });
 
     [RelayCommand]
-    private Task NextToAsync() => ShiftAsync(from: false, 1);
+    private Task ChooseCategoriesAsync() => RunSafeAsync(async () =>
+    {
+        if (_data is null)
+        {
+            return;
+        }
+
+        var all = _data.Categories.Select(c => c.Id).ToHashSet();
+        var dialog = new MultiSelectDialogViewModel(_localizer, CategoriesLabel, Copy(CategoryChoices), _state.Categories ?? all);
+        if (!await _dialogs.ShowEditorAsync(dialog))
+        {
+            return;
+        }
+
+        var selected = dialog.SelectedIds;
+        _state.Categories = selected.SetEquals(all) ? null : selected;
+        BuildChoices();
+        await RebuildAsync();
+    });
+
+    // The dialog works on copies: Cancel must leave the screen's choices untouched.
+    private static IEnumerable<MultiSelectItemViewModel> Copy(IEnumerable<MultiSelectItemViewModel> items) =>
+        items.Select(i => new MultiSelectItemViewModel(i.Id, i.Text, i.Color, i.IsSelected));
+
+    /// <summary>The index of the chosen "group by" option (bound to a picker).</summary>
+    public int GroupingIndex
+    {
+        get => IndexOf(Groupings);
+        set => ChooseAt(Groupings, value);
+    }
+
+    /// <summary>The index of the chosen "show" option (bound to a picker).</summary>
+    public int MeasureIndex
+    {
+        get => IndexOf(Measures);
+        set => ChooseAt(Measures, value);
+    }
+
+    /// <summary>The index of the chosen "rows" option (bound to a picker).</summary>
+    public int RowModeIndex
+    {
+        get => IndexOf(RowModes);
+        set => ChooseAt(RowModes, value);
+    }
+
+    private static int IndexOf(IReadOnlyList<ReportOptionViewModel> options)
+    {
+        for (var i = 0; i < options.Count; i++)
+        {
+            if (options[i].IsSelected)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    // A picker reports -1 while its items are replaced, and the index it already shows when it is bound: ignore both.
+    private static void ChooseAt(IReadOnlyList<ReportOptionViewModel> options, int index)
+    {
+        if (index >= 0 && index < options.Count && !options[index].IsSelected)
+        {
+            options[index].ChooseCommand.Execute(null);
+        }
+    }
 
     partial void OnYearOverYearChanged(bool value)
     {
@@ -252,32 +407,6 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
 
     [RelayCommand]
     private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, HelpTopic.Reports));
-
-    private Task ShiftAsync(bool from, int months) => RunSafeAsync(async () =>
-    {
-        var (start, end) = CurrentRange();
-        if (from)
-        {
-            start = start.AddMonths(months);
-            if (start > end)
-            {
-                end = start;
-            }
-        }
-        else
-        {
-            end = end.AddMonths(months);
-            if (end < start)
-            {
-                start = end;
-            }
-        }
-
-        _state.Preset = ReportPreset.Custom;
-        _state.From = start;
-        _state.To = end;
-        await RebuildAsync();
-    });
 
     private void Choose(ReportKind kind) => _last = RunSafeAsync(async () =>
     {
@@ -325,54 +454,6 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     private void Choose(ReportRows rows) => _last = RunSafeAsync(async () =>
     {
         _state.Rows = rows;
-        await RebuildAsync();
-    });
-
-    private void ToggleProperty(ReportOptionViewModel option) => _last = RunSafeAsync(async () =>
-    {
-        var id = (Guid)option.Value!;
-        var selected = SelectedPropertyIds();
-        if (!selected.Remove(id))
-        {
-            selected.Add(id);
-        }
-
-        // At least one property stays selected.
-        if (selected.Count == 0)
-        {
-            selected.Add(id);
-        }
-
-        _state.Properties = selected;
-        foreach (var choice in PropertyChoices)
-        {
-            choice.IsSelected = selected.Contains((Guid)choice.Value!);
-        }
-
-        await RebuildAsync();
-    });
-
-    private void ToggleCategory(ReportOptionViewModel option) => _last = RunSafeAsync(async () =>
-    {
-        var id = (Guid)option.Value!;
-        var all = _data!.Categories.Select(c => c.Id).ToHashSet();
-        HashSet<Guid> selected = [.. _state.Categories ?? all];
-        if (!selected.Remove(id))
-        {
-            selected.Add(id);
-        }
-
-        if (selected.Count == 0)
-        {
-            selected.Add(id);
-        }
-
-        _state.Categories = selected.SetEquals(all) ? null : selected;
-        foreach (var choice in CategoryChoices)
-        {
-            choice.IsSelected = selected.Contains((Guid)choice.Value!);
-        }
-
         await RebuildAsync();
     });
 
@@ -457,6 +538,8 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         FromText = BillText.Period(from);
         ToText = BillText.Period(to);
         BuildOptions();
+        BuildChoices();
+        BuildFieldTexts(from, to);
         OnPropertyChanged(string.Empty);
         ExportExcelCommand.NotifyCanExecuteChanged();
         ExportCsvCommand.NotifyCanExecuteChanged();
@@ -466,13 +549,6 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     {
         var labels = new ReportLabels(_localizer);
         Kinds = [.. Enum.GetValues<ReportKind>().Select(k => new ReportOptionViewModel(labels.KindName(k), k == Kind, o => Choose((ReportKind)o.Value!)) { Value = k })];
-
-        var current = _state.Preset;
-        Presets =
-        [
-            .. new[] { ReportPreset.ThisYear, ReportPreset.Last12Months, ReportPreset.LastYear, ReportPreset.All }
-                .Select(p => new ReportOptionViewModel(_localizer["ReportPreset" + p], p == current, o => Choose((ReportPreset)o.Value!)) { Value = p }),
-        ];
 
         ViewModes =
         [
@@ -517,7 +593,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         PropertyChoices =
         [
             .. _data.Properties.OrderBy(p => p.IsArchived).ThenBy(p => p.SortOrder).ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(p => new ReportOptionViewModel(p.Name, selected.Contains(p.Id), ToggleProperty) { Value = p.Id }),
+                .Select(p => new MultiSelectItemViewModel(p.Id, p.Name, string.Empty, selected.Contains(p.Id))),
         ];
 
         var categories = _state.Categories;
@@ -525,11 +601,56 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         CategoryChoices =
         [
             .. _data.Categories.OrderBy(c => c.SortOrder).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(c => new ReportOptionViewModel(
+                .Select(c => new MultiSelectItemViewModel(
+                    c.Id,
                     c.Name ?? (c.SystemKey is { } key ? labels.ServiceName(key) : "—"),
-                    categories is null || categories.Contains(c.Id),
-                    ToggleCategory) { Value = c.Id }),
+                    c.Color,
+                    categories is null || categories.Contains(c.Id))),
         ];
+    }
+
+    /// <summary>"All (3)", the names when they are few, else "4 of 15".</summary>
+    public static string SummarizeSelection(ILocalizer localizer, IReadOnlyList<MultiSelectItemViewModel> choices)
+    {
+        var selected = choices.Where(c => c.IsSelected).Select(c => c.Text).ToList();
+        if (selected.Count == choices.Count)
+        {
+            return localizer.Get("ReportFieldAll", choices.Count);
+        }
+
+        var names = string.Join(", ", selected);
+        return selected.Count <= 2 && names.Length <= 32 ? names : localizer.Get("ReportFieldSome", selected.Count, choices.Count);
+    }
+
+    private void BuildFieldTexts(YearMonth from, YearMonth to)
+    {
+        var range = $"{BillText.Period(from)}–{BillText.Period(to)}";
+        var presetName = _state.Preset == ReportPreset.Custom ? null : _localizer["ReportPreset" + _state.Preset];
+        PeriodFieldText = presetName is null ? range : $"{presetName} ({range})";
+        PropertiesFieldText = SummarizeSelection(_localizer, PropertyChoices);
+        CategoriesFieldText = SummarizeSelection(_localizer, CategoryChoices);
+
+        var parts = new List<string>
+        {
+            presetName ?? range,
+            PropertyChoices.All(c => c.IsSelected) ? _localizer["ReportAllProperties"] : PropertiesFieldText,
+        };
+        if (ShowCategories)
+        {
+            parts.Add(CategoryChoices.All(c => c.IsSelected) ? _localizer["ReportAllCategories"] : CategoriesFieldText);
+        }
+
+        if (ShowGrouping && Groupings.FirstOrDefault(g => g.IsSelected) is { } grouping)
+        {
+            parts.Add(grouping.Text);
+        }
+
+        if (ShowMeasure && Measures.FirstOrDefault(m => m.IsSelected) is { } measure)
+        {
+            parts.Add(measure.Text);
+        }
+
+        SummaryText = string.Join(" · ", parts);
     }
 
     // ---- Opening what is behind a number ---------------------------------------------------------------------------

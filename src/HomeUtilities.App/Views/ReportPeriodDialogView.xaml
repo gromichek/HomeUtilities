@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.ReportPeriodDialogView"
+             x:DataType="vm:ReportPeriodDialogViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+    </ContentView.Resources>
+
+    <!-- A preset, or "Custom…" with a from and a to month picker. -->
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+
+            <views:ReportOptionRow Items="{Binding Presets}" />
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustom}">
+                <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" />
+                <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding FromIndex, Mode=TwoWay}" />
+                <Label Text="{Binding ToLabel}" Style="{StaticResource MutedLabel}" />
+                <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding ToIndex, Mode=TwoWay}" />
+                <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
+                       IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
+            </VerticalStackLayout>
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding OkText}" Command="{Binding ConfirmCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

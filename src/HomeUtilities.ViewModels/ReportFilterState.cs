@@ -86,6 +86,9 @@ public sealed class ReportFilterState
     /// <summary>True = the chart is shown instead of the table (on narrow screens; wide screens show both).</summary>
     public bool ShowChart { get; set; }
 
+    /// <summary>True = the filter panel is open; null = not chosen yet (open except on phones).</summary>
+    public bool? FiltersExpanded { get; set; }
+
     /// <summary>Consumption: one column per meter.</summary>
     public bool PerMeter { get; set; }
 }

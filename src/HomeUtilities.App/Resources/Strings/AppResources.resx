@@ -1107,6 +1107,16 @@
   <data name="ReportSheetReport" xml:space="preserve"><value>Report</value></data>
   <data name="ReportSheetPeriod" xml:space="preserve"><value>Period</value></data>
   <data name="ReportSheetCreated" xml:space="preserve"><value>Created</value></data>
+  <data name="ReportSelectAll" xml:space="preserve"><value>All</value></data>
+  <data name="ReportSelectNone" xml:space="preserve"><value>None</value></data>
+  <data name="ReportPresetCustom" xml:space="preserve"><value>Custom…</value></data>
+  <data name="ReportPeriodInvalid" xml:space="preserve"><value>The end month is before the start month.</value></data>
+  <data name="ReportFieldAll" xml:space="preserve"><value>All ({0})</value></data>
+  <data name="ReportFieldSome" xml:space="preserve"><value>{0} of {1}</value></data>
+  <data name="ReportFiltersTitle" xml:space="preserve"><value>Filters</value></data>
+  <data name="ReportFiltersExpand" xml:space="preserve"><value>Show filters</value></data>
+  <data name="ReportFiltersCollapse" xml:space="preserve"><value>Hide filters</value></data>
+  <data name="ReportExportMenu" xml:space="preserve"><value>Export</value></data>
   <data name="BillBadgeDraft" xml:space="preserve"><value>Draft</value></data>
   <data name="BillBadgeDraftAmount" xml:space="preserve"><value>Draft · enter the amount</value></data>
   <data name="BillStatusDrafts" xml:space="preserve"><value>Drafts</value></data>
