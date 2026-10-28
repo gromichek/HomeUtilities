@@ -112,6 +112,14 @@
 
             <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowEmpty}" />
 
+            <!-- Table / Chart switch (narrow screens; wide screens show the chart above the table). -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowViewSwitch}">
+                <Label Text="{Binding ViewLabel}" Style="{StaticResource MutedLabel}" />
+                <views:ReportOptionRow Items="{Binding ViewModes}" />
+            </VerticalStackLayout>
+
+            <views:ReportChartsView Charts="{Binding Charts}" Hint="{Binding ChartHintText}" IsVisible="{Binding ShowChart}" />
+
             <views:ReportTableView Table="{Binding TableView}" IsVisible="{Binding ShowTable}" />
 
             <Label Text="{Binding LegendText}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding ShowLegend}" />

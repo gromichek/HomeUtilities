@@ -753,6 +753,8 @@
   <data name="PeriodNextYear" xml:space="preserve"><value>Next year</value></data>
   <data name="PeriodPreviousMonth" xml:space="preserve"><value>Previous month</value></data>
   <data name="PeriodNextMonth" xml:space="preserve"><value>Next month</value></data>
+  <data name="BillsCategoryFilter" xml:space="preserve"><value>Category</value></data>
+  <data name="BillAllCategories" xml:space="preserve"><value>All categories</value></data>
   <data name="BillsStatusFilter" xml:space="preserve"><value>Status</value></data>
   <data name="BillsBilled" xml:space="preserve"><value>Billed</value></data>
   <data name="BillsPaid" xml:space="preserve"><value>Paid</value></data>
@@ -1089,6 +1091,12 @@
   <data name="ReportOneOff" xml:space="preserve"><value>One-off expenses</value></data>
   <data name="ReportPeriodColumn" xml:space="preserve"><value>Period</value></data>
   <data name="ReportLegend" xml:space="preserve"><value>≈ — based on incomplete data: a reading is missing or estimated, an amount is calculated because there is no bill yet, or a bill is spread over several months.</value></data>
+  <data name="ReportViewLabel" xml:space="preserve"><value>View</value></data>
+  <data name="ReportViewTable" xml:space="preserve"><value>Table</value></data>
+  <data name="ReportViewChart" xml:space="preserve"><value>Chart</value></data>
+  <data name="ReportChartHint" xml:space="preserve"><value>Tap a bar or a point to see its value.</value></data>
+  <data name="ReportChartOther" xml:space="preserve"><value>Other</value></data>
+  <data name="ReportChartApproximate" xml:space="preserve"><value>Muted bars and hollow points (≈) rest on incomplete data.</value></data>
   <data name="ReportEmpty" xml:space="preserve"><value>No data for these filters.</value></data>
   <data name="ReportExportExcel" xml:space="preserve"><value>Export to Excel</value></data>
   <data name="ReportExportCsv" xml:space="preserve"><value>Export to CSV</value></data>

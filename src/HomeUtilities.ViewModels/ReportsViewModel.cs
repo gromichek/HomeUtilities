@@ -1,5 +1,6 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
@@ -12,9 +13,10 @@ namespace HomeUtilities.ViewModels;
 /// <summary>
 /// The Reports screen: costs, consumption, unit cost and calculated vs billed as tables over a period, with filters and an
 /// export to Excel and CSV. The data is loaded once when the screen appears; every change of a filter recalculates the table
-/// from it. A tap on a number opens the bills or readings behind it.
+/// from it. A tap on a number opens the bills or readings behind it. The same numbers can be shown as charts (instead of the table
+/// on narrow screens, above it on wide ones).
 /// </summary>
-public sealed partial class ReportsViewModel : ViewModelBase
+public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>
 {
     /// <summary>Content type of an .xlsx file.</summary>
     public const string ExcelContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -27,10 +29,12 @@ public sealed partial class ReportsViewModel : ViewModelBase
     private readonly INavigationService _navigation;
     private readonly ISnackbarService _snackbar;
     private readonly ReportFilterState _state;
+    private readonly ILayoutModeService _layout;
     private readonly SemaphoreSlim _calculation = new(1, 1);
 
     private ReportData? _data;
     private ReportTable? _table;
+    private bool _hasData;
     private int _version;
     private Task _last = Task.CompletedTask;
 
@@ -77,7 +81,10 @@ public sealed partial class ReportsViewModel : ViewModelBase
     private bool _showEmpty;
 
     [ObservableProperty]
-    private bool _showTable;
+    private IReadOnlyList<ChartModel> _charts = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<ReportOptionViewModel> _viewModes = [];
 
     [ObservableProperty]
     private bool _showLegend;
@@ -96,7 +103,8 @@ public sealed partial class ReportsViewModel : ViewModelBase
         ILocalizer localizer,
         INavigationService navigation,
         ISnackbarService snackbar,
-        ReportFilterState state)
+        ReportFilterState state,
+        ILayoutModeService layout)
     {
         _loader = loader;
         _excel = excel;
@@ -106,6 +114,7 @@ public sealed partial class ReportsViewModel : ViewModelBase
         _navigation = navigation;
         _snackbar = snackbar;
         _state = state;
+        _layout = layout;
         _yearOverYear = state.YearOverYear;
         _perMeter = state.PerMeter;
         RefreshTexts();
@@ -153,6 +162,17 @@ public sealed partial class ReportsViewModel : ViewModelBase
 
     public bool ShowPerMeter => Kind == ReportKind.Consumption;
 
+    /// <summary>True on narrow screens, where the owner picks the table or the chart; wide screens show both.</summary>
+    public bool ShowViewSwitch => _hasData && _layout.Current != LayoutMode.Expanded;
+
+    public bool ShowTable => _hasData && (_layout.Current == LayoutMode.Expanded || !_state.ShowChart || Charts.Count == 0);
+
+    public bool ShowChart => _hasData && Charts.Count > 0 && (_layout.Current == LayoutMode.Expanded || _state.ShowChart);
+
+    public string ViewLabel => _localizer["ReportViewLabel"];
+
+    public string ChartHintText => _localizer["ReportChartHint"];
+
     public bool CanExport => _table is { IsEmpty: false };
 
     /// <summary>Completes when the recalculation started by the last button tap or language change has finished.</summary>
@@ -194,6 +214,8 @@ public sealed partial class ReportsViewModel : ViewModelBase
             _last = RunSafeAsync(RebuildAsync);
         }
     }
+
+    void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) => OnPropertyChanged(string.Empty);
 
     // ---- Filters --------------------------------------------------------------------------------------------------
 
@@ -262,6 +284,17 @@ public sealed partial class ReportsViewModel : ViewModelBase
         _state.Kind = kind;
         await RebuildAsync();
     });
+
+    private void ChooseView(bool chart)
+    {
+        _state.ShowChart = chart;
+        foreach (var mode in ViewModes)
+        {
+            mode.IsSelected = (bool)mode.Value! == chart;
+        }
+
+        OnPropertyChanged(string.Empty);
+    }
 
     private void Choose(ReportPreset preset) => _last = RunSafeAsync(async () =>
     {
@@ -414,9 +447,11 @@ public sealed partial class ReportsViewModel : ViewModelBase
         }
 
         _table = table;
-        TableView = ReportTableViewModel.From(table, new ReportLabels(_localizer), OpenDrill);
+        var labels = new ReportLabels(_localizer);
+        TableView = ReportTableViewModel.From(table, labels, OpenDrill);
+        _hasData = !table.IsEmpty;
+        Charts = ReportChartBuilder.Build(table, labels, _localizer, data.Categories.ToDictionary(c => c.Id, c => c.Color));
         ShowEmpty = table.IsEmpty;
-        ShowTable = !table.IsEmpty;
         ShowLegend = !table.IsEmpty;
         var (from, to) = (filter.From, filter.To);
         FromText = BillText.Period(from);
@@ -437,6 +472,12 @@ public sealed partial class ReportsViewModel : ViewModelBase
         [
             .. new[] { ReportPreset.ThisYear, ReportPreset.Last12Months, ReportPreset.LastYear, ReportPreset.All }
                 .Select(p => new ReportOptionViewModel(_localizer["ReportPreset" + p], p == current, o => Choose((ReportPreset)o.Value!)) { Value = p }),
+        ];
+
+        ViewModes =
+        [
+            new ReportOptionViewModel(_localizer["ReportViewTable"], !_state.ShowChart, o => ChooseView((bool)o.Value!)) { Value = false },
+            new ReportOptionViewModel(_localizer["ReportViewChart"], _state.ShowChart, o => ChooseView((bool)o.Value!)) { Value = true },
         ];
 
         Groupings =

@@ -83,6 +83,9 @@ public sealed class ReportFilterState
     /// <summary>Calculated vs billed: the figure shown.</summary>
     public ReportMeasure CompareMeasure { get; set; } = ReportMeasure.Difference;
 
+    /// <summary>True = the chart is shown instead of the table (on narrow screens; wide screens show both).</summary>
+    public bool ShowChart { get; set; }
+
     /// <summary>Consumption: one column per meter.</summary>
     public bool PerMeter { get; set; }
 }
