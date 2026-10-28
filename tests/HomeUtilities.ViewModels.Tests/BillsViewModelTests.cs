@@ -400,6 +400,101 @@ public class BillsViewModelTests : IDisposable
         Assert.NotEqual(current.Id, last.Id);
     }
 
+    /// <summary>Water (built-in category, default colour) and a user category "Kindergarten" (#112233), one bill each in October 2026.</summary>
+    private (Bill Water, Bill Kindergarten, Category Category) AddTwoCategories()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var kindergarten = _kit.AddWaterContract("Kindergarten", tariff: false);
+        var category = new Category { Name = "Kindergarten", Color = "#112233", SortOrder = 99 };
+        _kit.Kit.Categories.Stored.Add(category);
+        kindergarten.CategoryId = category.Id;
+        var waterBill = _kit.AddBill(water, new YearMonth(2026, 10), 60m);
+        var otherBill = _kit.AddBill(kindergarten, new YearMonth(2026, 10), 90m);
+        return (waterBill, otherBill, category);
+    }
+
+    [Fact]
+    public async Task CategoryFilter_ShowsOnlyTheBillsOfTheCategory_AndTheTotalsFollow()
+    {
+        var (water, kindergarten, category) = AddTwoCategories();
+        var vm = await LoadAsync();
+        Assert.Equal(2, vm.Items.Count);
+        Assert.Equal("BillAllCategories [en]", vm.CategoryFilterName);
+        Assert.False(vm.HasCategoryFilterColor);
+
+        _kit.Kit.Dialogs.ChooseScript = options => options.Single(o => o == "Kindergarten");
+        await vm.ChooseCategoryFilterCommand.ExecuteAsync(null);
+
+        Assert.Equal([kindergarten.Id], vm.Items.Select(i => i.Id));
+        Assert.Equal(category.Id, vm.CategoryFilterId);
+        Assert.Equal("Kindergarten", vm.CategoryFilterName);
+        Assert.Equal("#112233", vm.CategoryFilterColor);
+        Assert.True(vm.HasCategoryFilterColor);
+        Assert.Contains("90.00", vm.TotalsText);
+        Assert.DoesNotContain("150.00", vm.TotalsText);
+
+        _kit.Kit.Dialogs.ChooseScript = options => options[0];
+        await vm.ChooseCategoryFilterCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, vm.Items.Count);
+        Assert.Null(vm.CategoryFilterId);
+        Assert.NotEqual(water.Id, kindergarten.Id);
+    }
+
+    [Fact]
+    public async Task CategoryFilter_OffersAllAndTheCategories_AndCancelKeepsTheFilter()
+    {
+        AddTwoCategories();
+        var vm = await LoadAsync();
+        IReadOnlyList<string>? offered = null;
+        _kit.Kit.Dialogs.ChooseScript = options =>
+        {
+            offered = options;
+            return null;
+        };
+
+        await vm.ChooseCategoryFilterCommand.ExecuteAsync(null);
+
+        Assert.NotNull(offered);
+        Assert.Equal("BillAllCategories [en]", offered[0]);
+        Assert.Contains("Kindergarten", offered);
+        Assert.Null(vm.CategoryFilterId);
+        Assert.Equal(2, vm.Items.Count);
+    }
+
+    [Fact]
+    public async Task CategoryFilter_IsRememberedWithTheOtherFilters()
+    {
+        var (_, kindergarten, _) = AddTwoCategories();
+        var vm = await LoadAsync();
+        _kit.Kit.Dialogs.ChooseScript = options => "Kindergarten";
+        await vm.ChooseCategoryFilterCommand.ExecuteAsync(null);
+
+        var again = await LoadAsync();
+
+        Assert.Equal([kindergarten.Id], again.Items.Select(i => i.Id));
+        Assert.Equal("Kindergarten", again.CategoryFilterName);
+    }
+
+    [Fact]
+    public async Task OpenFor_WithACategory_FiltersByPropertyMonthAndCategory()
+    {
+        var (water, kindergarten, category) = AddTwoCategories();
+        var earlier = _kit.AddBill(_kit.Kit.Contracts.Stored.Single(c => c.Title == "Kindergarten"), new YearMonth(2026, 9), 80m);
+        var vm = await LoadAsync();
+
+        await vm.OpenForAsync(_kit.Kit.Property.Id, null, month: new YearMonth(2026, 10), categoryId: category.Id);
+
+        Assert.Equal([kindergarten.Id], vm.Items.Select(i => i.Id));
+        Assert.Equal(category.Id, vm.CategoryFilterId);
+        Assert.NotEqual(earlier.Id, water.Id);
+
+        // Opened again without a category (from the Overview): the category filter is cleared.
+        await vm.OpenForAsync(_kit.Kit.Property.Id, null, month: new YearMonth(2026, 10));
+        Assert.Equal(2, vm.Items.Count);
+        Assert.Null(vm.CategoryFilterId);
+    }
+
     [Fact]
     public async Task EmptyList_ShowsTheEmptyState()
     {

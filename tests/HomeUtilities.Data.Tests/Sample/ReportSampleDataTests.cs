@@ -3,6 +3,7 @@ using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Reports;
 using HomeUtilities.Data.Sample;
 using HomeUtilities.Data.Stores;
+using HomeUtilities.ViewModels;
 
 namespace HomeUtilities.Data.Tests.Sample;
 
@@ -140,6 +141,76 @@ public class ReportSampleDataTests
                 }
             }
         }
+    }
+
+    private sealed class KeyLocalizer : ILocalizer
+    {
+        public string this[string key] => key;
+
+        public string Get(string key, params object[] args) => key;
+
+        public bool TryGet(string key, out string value)
+        {
+            value = key;
+            return true;
+        }
+    }
+
+    [Fact]
+    public async Task Every_report_has_a_chart_with_the_numbers_of_its_table_over_the_sample_data()
+    {
+        var (data, today) = await LoadAsync(new DateTimeOffset(2026, 10, 20, 8, 0, 0, TimeSpan.Zero));
+        var all = data.EarliestMonth!.Value;
+        var localizer = new KeyLocalizer();
+        var labels = new ReportLabels(localizer, System.Globalization.CultureInfo.InvariantCulture);
+        var colors = data.Categories.ToDictionary(c => c.Id, c => c.Color);
+        var chartsSeen = new HashSet<ReportKind>();
+
+        foreach (var kind in Enum.GetValues<ReportKind>())
+        {
+            ReportMeasure[] measures = kind switch
+            {
+                ReportKind.CalculatedVsBilled => [ReportMeasure.Difference, ReportMeasure.Calculated, ReportMeasure.Billed, ReportMeasure.QuantityDifference],
+                ReportKind.Consumption => [ReportMeasure.Quantity],
+                _ => [ReportMeasure.Gross, ReportMeasure.Net],
+            };
+            foreach (var measure in measures)
+            {
+                foreach (var yoy in new[] { false, true })
+                {
+                    if (yoy && kind is ReportKind.UnitCost or ReportKind.CalculatedVsBilled)
+                    {
+                        continue;
+                    }
+
+                    var table = ReportBuilder.Build(kind, data, Filter(all, today, o =>
+                    {
+                        o.YearOverYear = yoy;
+                        o.Measure = measure;
+                    }));
+                    var charts = ReportChartBuilder.Build(table, labels, localizer, colors);
+
+                    foreach (var chart in charts)
+                    {
+                        chartsSeen.Add(kind);
+                        Assert.InRange(chart.Series.Count, 1, ReportChartBuilder.MaxSeries);
+                        Assert.All(chart.Series, s => Assert.Equal(chart.Periods.Count, s.Points.Count));
+                        Assert.All(chart.Series, s => Assert.Matches("^#[0-9A-Fa-f]{6}$", s.Color));
+                    }
+
+                    // The chart shows what the table shows: the numbers of the columns that are not subtotals add up the same.
+                    // (Year over year charts add up the total registers of a year only, so they are compared for costs.)
+                    if (kind is ReportKind.Costs or ReportKind.CalculatedVsBilled && !yoy && measure != ReportMeasure.QuantityDifference)
+                    {
+                        var inTable = table.Rows.SelectMany(r => r.Cells.Where((_, i) => !table.Columns[i].IsSubtotal)).Sum(c => c.Value ?? 0m);
+                        var inCharts = charts.SelectMany(c => c.Series).SelectMany(s => s.Points).Sum(p => p.Value ?? 0m);
+                        Assert.Equal(inTable, inCharts);
+                    }
+                }
+            }
+        }
+
+        Assert.Equal(Enum.GetValues<ReportKind>().Length, chartsSeen.Count);
     }
 
     [Fact]

@@ -36,9 +36,9 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private Dictionary<Guid, Contract> _contracts = [];
     private Dictionary<Guid, string> _supplierNames = [];
     private Dictionary<Guid, string> _categoryColors = [];
+    private IReadOnlyList<Category> _categories = [];
     private Dictionary<Guid, List<Payment>> _paymentsByBill = [];
     private Guid? _highlightContractId;
-    private Guid? _highlightCategoryId;
 
     [ObservableProperty]
     private IReadOnlyList<BillItemViewModel> _items = [];
@@ -48,6 +48,15 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     [ObservableProperty]
     private string _propertyFilterName = string.Empty;
+
+    [ObservableProperty]
+    private string _categoryFilterName = string.Empty;
+
+    [ObservableProperty]
+    private string _categoryFilterColor = "#808080";
+
+    [ObservableProperty]
+    private bool _hasCategoryFilterColor;
 
     [ObservableProperty]
     private string _statusFilterName = string.Empty;
@@ -104,6 +113,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     public Guid? PropertyFilterId => _filter.PropertyId;
 
+    public Guid? CategoryFilterId => _filter.CategoryId;
+
     protected override int TotalCount => _bills.Count;
 
     public override async Task ReloadAsync()
@@ -112,7 +123,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _properties = await _propertyStore.ListAsync(true);
         _contracts = (await _contractStore.ListAsync()).ToDictionary(c => c.Id);
         _supplierNames = (await _supplierStore.ListAsync()).ToDictionary(s => s.Id, s => s.Name);
-        _categoryColors = (await _categoryStore.ListAsync()).ToDictionary(c => c.Id, c => c.Color);
+        _categories = await _categoryStore.ListAsync();
+        _categoryColors = _categories.ToDictionary(c => c.Id, c => c.Color);
         _paymentsByBill = [];
         foreach (var payment in await _paymentStore.ListAsync())
         {
@@ -130,6 +142,11 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         if (_filter.PropertyId is { } filtered && _properties.All(p => p.Id != filtered))
         {
             _filter.PropertyId = null;
+        }
+
+        if (_filter.CategoryId is { } filteredCategory && _categories.All(c => c.Id != filteredCategory))
+        {
+            _filter.CategoryId = null;
         }
 
         IsLoaded = true;
@@ -156,12 +173,13 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     /// <summary>Navigation parameter carrying a month (<c>yyyy-MM</c>) shown instead of every year when the screen is opened from a report.</summary>
     public const string MonthParameter = "month";
 
-    /// <summary>Navigation parameter carrying the id of a category whose bills are highlighted when the screen is opened from a report.</summary>
+    /// <summary>Navigation parameter carrying the id of a category whose bills are shown when the screen is opened from a report.</summary>
     public const string CategoryParameter = "categoryId";
 
     /// <summary>
     /// Opens the screen for a property with the bills of every year (or of one <paramref name="year"/> or <paramref name="month"/>)
-    /// and the given status; the contract's bills (or the category's) are highlighted ("All bills", a number of a report).
+    /// and the given status; the contract's bills are highlighted and only the <paramref name="categoryId"/>'s bills are shown
+    /// ("All bills", a number of a report).
     /// </summary>
     public Task OpenForAsync(
         Guid propertyId,
@@ -176,8 +194,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
             ? PeriodFilter.ForMonth(shownMonth)
             : year is { } shown ? PeriodFilter.ForYear(shown) : PeriodFilter.ForAllYears(Period.Current.Year));
         _filter.Status = status;
+        _filter.CategoryId = categoryId;
         _highlightContractId = contractId;
-        _highlightCategoryId = categoryId;
         if (IsLoaded)
         {
             await ReloadAsync();
@@ -237,6 +255,26 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         RebuildItems();
     });
 
+    [RelayCommand]
+    private Task ChooseCategoryFilterAsync() => RunSafeAsync(async () =>
+    {
+        var all = _localizer["BillAllCategories"];
+        var options = _categories
+            .Where(c => !c.IsArchived || c.Id == _filter.CategoryId)
+            .OrderBy(c => c.SortOrder)
+            .ThenBy(c => CategoryNames.DisplayName(c, _localizer), StringComparer.CurrentCultureIgnoreCase)
+            .Select(c => (c.Id, Name: CategoryNames.DisplayName(c, _localizer)))
+            .ToList();
+        var picked = await _dialogs.ChooseAsync(_localizer["BillsCategoryFilter"], [all, .. options.Select(o => o.Name)]);
+        if (picked is null)
+        {
+            return;
+        }
+
+        _filter.CategoryId = picked == all ? null : options.FirstOrDefault(o => o.Name == picked) is { Name: not null } option ? option.Id : _filter.CategoryId;
+        RebuildItems();
+    });
+
     private string StatusName(BillStatusFilter status) => _localizer["BillStatus" + status];
 
     // ---- "Paid" quick action --------------------------------------------------------------------------------------
@@ -267,6 +305,11 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         foreach (var bill in _bills)
         {
             if (_filter.PropertyId is { } property && bill.PropertyId != property)
+            {
+                continue;
+            }
+
+            if (_filter.CategoryId is { } category && bill.CategoryId != category)
             {
                 continue;
             }
@@ -303,8 +346,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
                     r.State,
                     _localizer["Currency_Symbol_" + r.Bill.Currency],
                     _localizer,
-                    (_highlightContractId is { } highlighted && r.Bill.ContractId == highlighted)
-                        || (_highlightCategoryId is { } category && r.Bill.CategoryId == category),
+                    _highlightContractId is { } highlighted && r.Bill.ContractId == highlighted,
                     id => SelectCommand.Execute(id),
                     id => _ = MarkPaidAsync(id))),
         ];
@@ -312,6 +354,10 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         PropertyFilterName = _filter.PropertyId is { } id
             ? _properties.FirstOrDefault(p => p.Id == id)?.Name ?? _localizer["BillAllProperties"]
             : _localizer["BillAllProperties"];
+        var chosenCategory = _filter.CategoryId is { } categoryId ? _categories.FirstOrDefault(c => c.Id == categoryId) : null;
+        CategoryFilterName = chosenCategory is null ? _localizer["BillAllCategories"] : CategoryNames.DisplayName(chosenCategory, _localizer);
+        CategoryFilterColor = chosenCategory?.Color ?? "#808080";
+        HasCategoryFilterColor = chosenCategory is not null;
         Period.Refresh();
         StatusFilterName = StatusName(_filter.Status);
         TotalsText = BuildTotals(rows);

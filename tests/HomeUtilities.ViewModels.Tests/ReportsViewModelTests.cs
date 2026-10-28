@@ -51,8 +51,10 @@ public class ReportsViewModelTests : IDisposable
         Kind = BillKind.Regular,
     };
 
+    private readonly FakeLayoutModeService _layout = new();
+
     private ReportsViewModel Create() =>
-        new(_loader, _excel, _files, _kit.Clock, _kit.Localizer, _kit.Navigation, _kit.Toast, _state);
+        new(_loader, _excel, _files, _kit.Clock, _kit.Localizer, _kit.Navigation, _kit.Toast, _state, _layout);
 
     private async Task<ReportsViewModel> LoadAsync()
     {
@@ -62,6 +64,59 @@ public class ReportsViewModelTests : IDisposable
     }
 
     private static string[] Texts(ReportRowViewModel row) => [.. row.Cells.Select(c => c.Text)];
+
+    [Fact]
+    public async Task The_chart_is_built_from_the_table_and_the_phone_shows_either_of_them()
+    {
+        var vm = await LoadAsync();
+
+        Assert.True(vm.ShowViewSwitch);
+        Assert.True(vm.ShowTable);
+        Assert.False(vm.ShowChart);
+        var chart = Assert.Single(vm.Charts);
+        Assert.Equal(90m, chart.Series.Sum(s => s.Points.Sum(p => p.Value ?? 0m)));
+
+        vm.ViewModes[1].ChooseCommand.Execute(null);
+
+        Assert.True(_state.ShowChart);
+        Assert.True(vm.ShowChart);
+        Assert.False(vm.ShowTable);
+        Assert.True(vm.ViewModes[1].IsSelected);
+        Assert.False(vm.ViewModes[0].IsSelected);
+
+        vm.ViewModes[0].ChooseCommand.Execute(null);
+
+        Assert.True(vm.ShowTable);
+        Assert.False(vm.ShowChart);
+    }
+
+    [Fact]
+    public async Task The_chart_choice_is_remembered_and_wide_windows_show_chart_and_table_together()
+    {
+        _state.ShowChart = true;
+        var vm = await LoadAsync();
+        Assert.True(vm.ShowChart);
+        Assert.False(vm.ShowTable);
+
+        _layout.Change(LayoutMode.Expanded);
+
+        Assert.True(vm.ShowChart);
+        Assert.True(vm.ShowTable);
+        Assert.False(vm.ShowViewSwitch);
+    }
+
+    [Fact]
+    public async Task Without_data_there_is_no_chart_and_no_switch()
+    {
+        _loader.Data = new ReportData([_flat], [_water], [], [], [], [], [], []);
+        var vm = await LoadAsync();
+
+        Assert.Empty(vm.Charts);
+        Assert.False(vm.ShowChart);
+        Assert.False(vm.ShowTable);
+        Assert.False(vm.ShowViewSwitch);
+        Assert.True(vm.ShowEmpty);
+    }
 
     [Fact]
     public async Task The_costs_of_this_year_by_category_are_shown_when_the_screen_appears()

@@ -104,7 +104,7 @@ the Bills screen (filtered to open or overdue bills), the Payments screen, or th
 For each property the gross total of the bills of this year, counted by the bill's month from January up to the current month,
 next to the same months of last year: *2026: 1,245.30 € · 2025 same period: 1,180.10 € (+5.5 %)*. A bill for a later month
 (for example internet paid in advance) is counted when its month comes. Tap to open the Bills screen for that year.
-Charts come later.
+Charts on this screen come later.
 
 ## 3. Properties
 
@@ -341,14 +341,16 @@ Menu **Bills**: the invoices you receive from suppliers (and any one-off expense
 calculation, and whether it is paid. A **bill** is a record of its own: the *charge* (see [Charges](#10-charges)) is
 what the app expects, the bill is what the supplier asked for, the *payment* is what you paid.
 
-**The list.** At the top: filters **Property** (all or one), **Period** and **Status**
-(*All*, *Open*, *Overdue*, *Paid*); the filters are remembered until you close the app. **Period** has three choices:
+**The list.** At the top: filters **Property** (all or one), **Period**, **Category** (*All categories* or one
+category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *Paid*); the filters are remembered until you close the app. **Period** has three choices:
 *All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
 (a bill belongs to the month of its billing period), and the totals below follow the chosen period. Below them the totals of the
 list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
 category colour, the **total**, the **status badge** and — when the app has a calculation to compare with — the
 difference, for example *+2,15 € (+3,4 %)*: **red** when the bill is more than 5 % above the calculation, **green**
 when it is more than 5 % below, grey otherwise. Tap a row to open the bill. **New bill** (＋ on a phone) starts a new one.
+The **Category** filter is what a number in the [Costs report](#costs) leads to: tap a cell of a report grouped by category and
+the list shows only the bills of that category, that property and that month.
 
 **Status badges** are never typed by hand — they follow the payments of the bill:
 
@@ -564,7 +566,8 @@ is shown in euro (old amounts in lats are converted at the official rate).
 Pick the report at the top, set the filters under it, and read the table. Everything below the buttons is a **table**:
 the period stays on the left while the columns scroll sideways inside the table; the last row is the **total** of the
 whole period. Tap a number to see what is behind it: for costs and for unit cost and calculated vs billed the
-[Bills](#11-bills) screen opens for that property and month (the bills of that contract or category are highlighted), for
+[Bills](#11-bills) screen opens for that property and month (for costs grouped by category, only the bills of that category are
+shown; for a contract, its bills are highlighted), for
 consumption the [Readings](#7-readings) screen opens; **Back** returns to the report.
 
 **Filters (the same for all reports)**
@@ -614,6 +617,27 @@ the calculation as it is now), what the supplier **billed**, and the **differenc
 quantity you metered, for example the water the building lost between its main meter and your meters. A positive value
 means the supplier billed more than you used. Months without a bill, or where the calculation cannot be made (missing
 reading, prices taken from the bill), are marked **≈**.
+
+### Charts
+
+The same numbers can be drawn as **charts**. On a phone or a narrow window the buttons **View: Table / Chart** switch between
+the two (your choice is remembered); on a wide window or a tablet in landscape the chart is shown above the table. Tap a bar or
+a point to see its period and value under the chart; the legend below lists the colours. The month names on the horizontal axis
+follow the app language.
+
+- **Costs** — bars per month. When the columns are parts of a whole (grouped by category, service or contract) the bars are
+  **stacked**, so the height of a bar is the total of the month; the colours are the colours of your
+  [categories](#8-categories). Grouped by property, the properties stand side by side. The same category of two properties
+  is one colour with the sum. With **Year over year** every year is one colour and the months January to December are side by side.
+- **Consumption** — one line per resource, and one chart for each unit: one for m³ (cold and hot water), one for kWh, one for MWh.
+- **Unit cost** — one line per contract (€ per m³ or kWh), one chart per unit.
+- **Calculated vs billed** — the difference as bars around the zero line: above zero the supplier billed more than the app
+  calculated, below zero less. *Quantity difference (losses)* is drawn as a line in m³ because it is not money.
+- **Other** — a chart shows at most eight series. If there are more (many contracts or categories), the seven largest stay and the
+  rest of the money or quantities are added up as *Other* in grey. For unit cost and percentages (which cannot be added up)
+  the smaller series are left out of the chart; the table still shows them.
+- **≈ points** — numbers that rest on incomplete data (see below) are drawn muted: pale bars with a dashed outline, hollow dots
+  on a dashed line. A gap means there is nothing for that month.
 
 ### What does ≈ mean?
 
@@ -672,5 +696,5 @@ again. The backup file contains **all your data and is not encrypted** — keep 
 
 ## 17. Coming soon
 
-Charts,
+Charts on the Overview,
 bill templates, Excel import, reminders, automatic backups and Google Drive sync.

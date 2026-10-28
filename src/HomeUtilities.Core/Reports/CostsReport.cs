@@ -122,7 +122,7 @@ internal static class CostsReport
             default:
                 key = $"{property.Id}|category|{bill.CategoryId}";
                 sort = $"{category?.SortOrder ?? int.MaxValue:D10}{category?.Name}";
-                column = ReportBuilder.Column(key, property, ColumnSubject.Category, measure, ReportValueKind.Money, category?.Name, category?.SystemKey);
+                column = ReportBuilder.Column(key, property, ColumnSubject.Category, measure, ReportValueKind.Money, category?.Name, category?.SystemKey, categoryId: bill.CategoryId);
                 categoryId = bill.CategoryId;
                 break;
         }

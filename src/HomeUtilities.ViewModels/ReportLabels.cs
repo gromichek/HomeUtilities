@@ -49,6 +49,34 @@ public sealed class ReportLabels(ILocalizer localizer, CultureInfo? culture = nu
         _ => Total,
     };
 
+    /// <summary>The label of a row on a chart axis: "Jan 26" for a month, "2026" for a year, "Jan" for a month of the year.</summary>
+    public string ChartRow(ReportRow row) => row.Kind switch
+    {
+        ReportRowKind.Month => $"{ShortMonthName(row.Month)} {(row.Year % 100).ToString("00", CultureInfo.InvariantCulture)}",
+        ReportRowKind.Year => row.Year.ToString(CultureInfo.InvariantCulture),
+        ReportRowKind.MonthOfYear => ShortMonthName(row.Month),
+        _ => Total,
+    };
+
+    /// <summary>The short month name ("Jan").</summary>
+    public string ShortMonthName(int month)
+    {
+        var name = new DateOnly(2001, month, 1).ToString("MMM", Culture).TrimEnd('.');
+        return name.Length == 0 ? name : char.ToUpper(name[0], Culture) + name[1..];
+    }
+
+    /// <summary>The name of a chart series: the category, service, contract or property; <paramref name="withProperty"/> puts the property in front.</summary>
+    public string SeriesName(ReportColumn column, bool withProperty)
+    {
+        var name = column.Subject switch
+        {
+            ColumnSubject.Property => column.PropertyName,
+            ColumnSubject.Resource or ColumnSubject.Meter => BaseLabel(column),
+            _ => Subject(column),
+        };
+        return withProperty && column.Subject != ColumnSubject.Property ? $"{column.PropertyName} · {name}" : name;
+    }
+
     /// <summary>The month name of a month of the year ("January").</summary>
     public string MonthName(int month)
     {
@@ -82,16 +110,7 @@ public sealed class ReportLabels(ILocalizer localizer, CultureInfo? culture = nu
             return Total;
         }
 
-        var label = column.Subject switch
-        {
-            ColumnSubject.Category => column.Name ?? (column.Service is { } service ? ServiceName(service) : "—"),
-            ColumnSubject.Service => column.Service is { } kind ? ServiceName(kind) : "—",
-            ColumnSubject.Contract => column.Name ?? "—",
-            ColumnSubject.OneOff => localizer["ReportOneOff"],
-            ColumnSubject.Resource => ResourceLabel(column, null),
-            ColumnSubject.Meter => ResourceLabel(column, column.Name),
-            _ => MeasureName(column.Measure),
-        };
+        var label = Subject(column);
 
         var unit = column.Unit is { } u ? UnitName(u) : null;
         return column.ValueKind switch
@@ -102,6 +121,17 @@ public sealed class ReportLabels(ILocalizer localizer, CultureInfo? culture = nu
             _ => label,
         };
     }
+
+    private string Subject(ReportColumn column) => column.Subject switch
+    {
+        ColumnSubject.Category => column.Name ?? (column.Service is { } service ? ServiceName(service) : "—"),
+        ColumnSubject.Service => column.Service is { } kind ? ServiceName(kind) : "—",
+        ColumnSubject.Contract => column.Name ?? "—",
+        ColumnSubject.OneOff => localizer["ReportOneOff"],
+        ColumnSubject.Resource => ResourceLabel(column, null),
+        ColumnSubject.Meter => ResourceLabel(column, column.Name),
+        _ => MeasureName(column.Measure),
+    };
 
     private string ResourceLabel(ReportColumn column, string? meterName)
     {

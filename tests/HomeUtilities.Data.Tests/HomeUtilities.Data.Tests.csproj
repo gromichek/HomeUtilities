@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\HomeUtilities.Core\HomeUtilities.Core.csproj" />
     <ProjectReference Include="..\..\src\HomeUtilities.Data\HomeUtilities.Data.csproj" />
+    <ProjectReference Include="..\..\src\HomeUtilities.ViewModels\HomeUtilities.ViewModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

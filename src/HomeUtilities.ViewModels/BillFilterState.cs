@@ -25,6 +25,9 @@ public sealed class BillFilterState
     /// <summary>Only the bills of this property; null = all properties.</summary>
     public Guid? PropertyId { get; set; }
 
+    /// <summary>Only the bills of this category; null = all categories.</summary>
+    public Guid? CategoryId { get; set; }
+
     /// <summary>The period filter on the bills' periods; null = the current year.</summary>
     public PeriodFilter? Period { get; set; }
 
