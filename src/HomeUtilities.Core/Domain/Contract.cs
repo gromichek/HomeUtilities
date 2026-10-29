@@ -61,6 +61,9 @@ public class Contract : SyncEntity
     /// <summary>Whether bills are issued after the service month or paid in advance.</summary>
     public BillingTiming BillingTiming { get; set; } = BillingTiming.InArrears;
 
+    /// <summary>Whether the reminders announce the opening of the reading window (on by default).</summary>
+    public bool RemindAboutReadings { get; set; } = true;
+
     /// <summary>Custom fields that reappear on every bill of the contract.</summary>
     public List<CustomFieldDefinition> CustomFields { get; set; } = [];
 

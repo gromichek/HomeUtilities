@@ -25,6 +25,9 @@ public sealed record OverviewData(
     /// <summary>The draft bills; empty when none were loaded.</summary>
     public IReadOnlyList<Bill> Drafts { get; init; } = Drafts ?? [];
 
+    /// <summary>The bill templates (the reminders use their <c>RemindDaysBefore</c>); empty when none were loaded.</summary>
+    public IReadOnlyList<BillTemplate> BillTemplates { get; init; } = [];
+
     /// <summary>No data at all.</summary>
     public static OverviewData Empty { get; } = new([], [], [], [], [], [], new Dictionary<Guid, decimal>());
 }
