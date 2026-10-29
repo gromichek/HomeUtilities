@@ -687,7 +687,22 @@ the totals on the **Bills** screen for the same property and period (bills are c
 How much of each resource was used, from the **readings**: cold and hot water in m³, electricity in kWh (with *Day* and
 *Night* columns if the meter has them), heat in MWh. The month is chosen the same way as in [Charges](#10-charges): the
 latest reading in the reading window of the contract that bills the meter. A meter that was **replaced** counts as one
-meter, so the replacement month shows no dip. **One column per meter** shows every meter separately.
+meter, so the replacement month shows no dip.
+
+**Group by** decides what the columns are:
+
+- *Resource* (default) — one column per resource: all cold-water meters of a property add up, all hot-water meters add up.
+- *Contract* — one column per contract, with the sum of **all meters linked to that contract**. This answers "how much water
+  did the whole flat use?": link the two cold and the two hot water meters to the *Water* contract and its column is the
+  total water of the flat. Example, February: cold 5.000 + 4.000 m³ and hot 3.000 + 2.000 m³ give **Water = 14.000 m³**.
+  If the hot-water meters are also linked to a *Heating* contract, that column shows **5.000 m³** — a meter counts in
+  every contract it is linked to, so the columns are not meant to be added up. Only the months in which the link is valid
+  count, and registers with different units are never added together: a contract with a kWh and an m³ meter gets one column
+  per unit. A contract without linked meters has no column. The column heading is the contract title and the unit.
+- *Meter* — one column per meter (a replaced meter and its successor count as one).
+
+If a part of the sum cannot be determined (one meter has no reading for the month), the sum shows **≈** — the figure then
+covers only the meters that could be read.
 
 A month in which the consumption cannot be determined — there is no reading for it — shows **≈** and no number; it is
 **not zero**. The next month then also covers the gap and carries a **≈**.
@@ -720,7 +735,7 @@ follow the app language.
   **stacked**, so the height of a bar is the total of the month; the colours are the colours of your
   [categories](#8-categories). Grouped by property, the properties stand side by side. The same category of two properties
   is one colour with the sum. With **Year over year** every year is one colour and the months January to December are side by side.
-- **Consumption** — one line per resource, and one chart for each unit: one for m³ (cold and hot water), one for kWh, one for MWh.
+- **Consumption** — one line per resource (per contract or per meter, as chosen in **Group by**), and one chart for each unit: one for m³ (cold and hot water), one for kWh, one for MWh.
 - **Unit cost** — one line per contract (€ per m³ or kWh), one chart per unit.
 - **Calculated vs billed** — the difference as bars around the zero line: above zero the supplier billed more than the app
   calculated, below zero less. *Quantity difference (losses)* is drawn as a line in m³ because it is not money.

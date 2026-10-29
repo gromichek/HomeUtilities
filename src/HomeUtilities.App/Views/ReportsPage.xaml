@@ -54,6 +54,12 @@
                                     SelectedIndex="{Binding GroupingIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
 
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowConsumptionGrouping}">
+                            <Label Text="{Binding GroupingLabel}" Style="{StaticResource MutedLabel}" />
+                            <Picker ItemsSource="{Binding ConsumptionGroupings}" ItemDisplayBinding="{Binding Text, x:DataType=vm:ReportOptionViewModel}"
+                                    SelectedIndex="{Binding ConsumptionGroupingIndex, Mode=TwoWay}" />
+                        </VerticalStackLayout>
+
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowMeasure}">
                             <Label Text="{Binding MeasureLabel}" Style="{StaticResource MutedLabel}" />
                             <Picker ItemsSource="{Binding Measures}" ItemDisplayBinding="{Binding Text, x:DataType=vm:ReportOptionViewModel}"
@@ -71,10 +77,6 @@
                             <Switch Grid.Column="1" IsToggled="{Binding YearOverYear}" />
                         </Grid>
 
-                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowPerMeter}">
-                            <Label Grid.Column="0" Text="{Binding PerMeterText}" VerticalOptions="Center" />
-                            <Switch Grid.Column="1" IsToggled="{Binding PerMeter}" />
-                        </Grid>
                     </views:AdaptiveFieldGrid>
                 </VerticalStackLayout>
             </Border>

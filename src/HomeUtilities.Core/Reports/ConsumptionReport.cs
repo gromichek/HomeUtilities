@@ -26,26 +26,72 @@ internal static class ConsumptionReport
         foreach (var property in properties)
         {
             var chains = ChainsOf(data, property, months, contracts);
-            if (filter.PerMeter)
+            switch (filter.ConsumptionGrouping)
             {
-                foreach (var chain in chains)
-                {
-                    AddColumns(model, property, [chain], ColumnSubject.Meter, chain.Meters.Meters[^1]);
-                }
-            }
-            else
-            {
-                foreach (var group in chains.GroupBy(c => (c.Meters.Meters[^1].Resource, c.Meters.Meters[^1].Unit)).OrderBy(g => g.Key.Resource).ThenBy(g => g.Key.Unit))
-                {
-                    AddColumns(model, property, [.. group], ColumnSubject.Resource, group.First().Meters.Meters[^1]);
-                }
+                case ConsumptionGrouping.Meter:
+                    foreach (var chain in chains)
+                    {
+                        AddColumns(model, property, [chain], ColumnSubject.Meter, chain.Meters.Meters[^1]);
+                    }
+
+                    break;
+                case ConsumptionGrouping.Contract:
+                    AddContractColumns(model, data, property, chains, months);
+                    break;
+                default:
+                    foreach (var group in chains.GroupBy(c => (c.Meters.Meters[^1].Resource, c.Meters.Meters[^1].Unit)).OrderBy(g => g.Key.Resource).ThenBy(g => g.Key.Unit))
+                    {
+                        AddColumns(model, property, [.. group], ColumnSubject.Resource, group.First().Meters.Meters[^1]);
+                    }
+
+                    break;
             }
         }
 
         return model;
     }
 
-    private static void AddColumns(ReportModel model, Property property, IReadOnlyList<Chain> chains, ColumnSubject subject, Meter representative)
+    /// <summary>
+    /// One column per contract (and unit) with the sum of the meters linked to it. A meter counts in every contract it is linked to
+    /// in that month (hot water is in "Water" and in "Heating"); registers of different units are never added together.
+    /// </summary>
+    private static void AddContractColumns(ReportModel model, ReportData data, Property property, IReadOnlyList<Chain> chains, IReadOnlyList<YearMonth> months)
+    {
+        var contracts = data.Contracts
+            .Where(c => !c.IsDeleted && c.PropertyId == property.Id)
+            .OrderBy(c => c.Title, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(c => c.Id);
+        foreach (var contract in contracts)
+        {
+            var linked = new List<Chain>();
+            foreach (var chain in chains)
+            {
+                var ids = chain.Meters.Meters.Select(m => m.Id).ToHashSet();
+                var links = data.ContractMeters.Where(cm => cm.ContractId == contract.Id && ids.Contains(cm.MeterId)).ToList();
+                var kept = new Dictionary<RegisterKind, Dictionary<YearMonth, Acc>>();
+                foreach (var (kind, cells) in chain.ByKind)
+                {
+                    var inContract = cells.Where(c => months.Contains(c.Key) && links.Any(cm => cm.IsActiveOn(c.Key.LastDay))).ToDictionary(c => c.Key, c => c.Value);
+                    if (inContract.Count > 0)
+                    {
+                        kept[kind] = inContract;
+                    }
+                }
+
+                if (kept.Count > 0)
+                {
+                    linked.Add(chain with { ByKind = kept });
+                }
+            }
+
+            foreach (var group in linked.GroupBy(c => c.Meters.Meters[^1].Unit).OrderBy(g => g.Key))
+            {
+                AddColumns(model, property, [.. group], ColumnSubject.Contract, group.First().Meters.Meters[^1], contract);
+            }
+        }
+    }
+
+    private static void AddColumns(ReportModel model, Property property, IReadOnlyList<Chain> chains, ColumnSubject subject, Meter representative, Contract? contract = null)
     {
         var kinds = chains.SelectMany(c => c.ByKind.Keys).Distinct().OrderBy(k => Array.IndexOf(KindOrder, k)).ToList();
         var series = kinds.ToDictionary(k => k, k => Merge(chains.Where(c => c.ByKind.ContainsKey(k)).Select(c => c.ByKind[k])));
@@ -61,13 +107,21 @@ internal static class ConsumptionReport
             }
         }
 
-        var name = subject == ColumnSubject.Meter ? representative.Location ?? representative.SerialNumber : null;
+        var name = subject switch
+        {
+            ColumnSubject.Meter => representative.Location ?? representative.SerialNumber,
+            ColumnSubject.Contract => contract!.Title,
+            _ => null,
+        };
         foreach (var kind in kinds)
         {
-            var key = $"{property.Id}|{(subject == ColumnSubject.Meter ? representative.Id : representative.Resource)}|{representative.Unit}|{kind}";
+            var key = subject == ColumnSubject.Contract
+                ? $"{property.Id}|contract|{contract!.Id}|{representative.Unit}|{kind}"
+                : $"{property.Id}|{(subject == ColumnSubject.Meter ? representative.Id : representative.Resource)}|{representative.Unit}|{kind}";
             var column = ReportBuilder.Column(
                 key, property, subject, ReportMeasure.Quantity, ReportValueKind.Quantity, name,
-                resource: representative.Resource, unit: representative.Unit, register: kind);
+                service: contract?.Service, resource: representative.Resource, unit: representative.Unit, register: kind,
+                categoryId: contract?.CategoryId);
             model.Add(column, series[kind], (from, to) => new ReportDrill(DrillTarget.Readings, property.Id, from, to));
         }
     }

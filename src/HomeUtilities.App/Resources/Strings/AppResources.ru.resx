@@ -1072,6 +1072,8 @@
   <data name="ReportGroupService" xml:space="preserve"><value>Услуге</value></data>
   <data name="ReportGroupContract" xml:space="preserve"><value>Договору</value></data>
   <data name="ReportGroupProperty" xml:space="preserve"><value>Объекту</value></data>
+  <data name="ReportGroupResource" xml:space="preserve"><value>Ресурсу</value></data>
+  <data name="ReportGroupMeter" xml:space="preserve"><value>Счётчику</value></data>
   <data name="ReportMeasureLabel" xml:space="preserve"><value>Показывать</value></data>
   <data name="ReportMeasureGross" xml:space="preserve"><value>С НДС</value></data>
   <data name="ReportMeasureNet" xml:space="preserve"><value>Без НДС</value></data>
@@ -1086,7 +1088,6 @@
   <data name="ReportRowsMonths" xml:space="preserve"><value>Месяцы</value></data>
   <data name="ReportRowsYears" xml:space="preserve"><value>Годы</value></data>
   <data name="ReportYearOverYear" xml:space="preserve"><value>Сравнение по годам</value></data>
-  <data name="ReportPerMeter" xml:space="preserve"><value>Отдельный столбец для каждого счётчика</value></data>
   <data name="ReportTotal" xml:space="preserve"><value>Итого</value></data>
   <data name="ReportOneOff" xml:space="preserve"><value>Разовые расходы</value></data>
   <data name="ReportPeriodColumn" xml:space="preserve"><value>Период</value></data>

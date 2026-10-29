@@ -1072,6 +1072,8 @@
   <data name="ReportGroupService" xml:space="preserve"><value>Service</value></data>
   <data name="ReportGroupContract" xml:space="preserve"><value>Contract</value></data>
   <data name="ReportGroupProperty" xml:space="preserve"><value>Property</value></data>
+  <data name="ReportGroupResource" xml:space="preserve"><value>Resource</value></data>
+  <data name="ReportGroupMeter" xml:space="preserve"><value>Meter</value></data>
   <data name="ReportMeasureLabel" xml:space="preserve"><value>Show</value></data>
   <data name="ReportMeasureGross" xml:space="preserve"><value>Gross (incl. VAT)</value></data>
   <data name="ReportMeasureNet" xml:space="preserve"><value>Net (excl. VAT)</value></data>
@@ -1086,7 +1088,6 @@
   <data name="ReportRowsMonths" xml:space="preserve"><value>Months</value></data>
   <data name="ReportRowsYears" xml:space="preserve"><value>Years</value></data>
   <data name="ReportYearOverYear" xml:space="preserve"><value>Year over year</value></data>
-  <data name="ReportPerMeter" xml:space="preserve"><value>One column per meter</value></data>
   <data name="ReportTotal" xml:space="preserve"><value>Total</value></data>
   <data name="ReportOneOff" xml:space="preserve"><value>One-off expenses</value></data>
   <data name="ReportPeriodColumn" xml:space="preserve"><value>Period</value></data>

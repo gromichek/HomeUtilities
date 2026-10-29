@@ -127,6 +127,13 @@ public static class ReportChartBuilder
 
             var merged = key != column.Key;
             var color = column.CategoryId is { } category && categoryColors.TryGetValue(category, out var known) ? known : null;
+
+            // Consumption by contract: two contracts of one category must stay distinguishable, so the second one takes a palette colour.
+            if (table.Kind == ReportKind.Consumption && color is not null && raws.Any(r => r.Color == color))
+            {
+                color = null;
+            }
+
             raws.Add(new Raw(key, labels.SeriesName(column, multipleProperties && !merged), color, values, approx));
         }
 

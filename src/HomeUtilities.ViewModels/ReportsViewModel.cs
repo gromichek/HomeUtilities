@@ -107,7 +107,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     private bool _yearOverYear;
 
     [ObservableProperty]
-    private bool _perMeter;
+    private IReadOnlyList<ReportOptionViewModel> _consumptionGroupings = [];
 
     public ReportsViewModel(
         IReportDataLoader loader,
@@ -133,7 +133,6 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         _dialogs = dialogs;
         _filtersExpanded = state.FiltersExpanded ?? layout.Current != LayoutMode.Compact;
         _yearOverYear = state.YearOverYear;
-        _perMeter = state.PerMeter;
         RefreshTexts();
     }
 
@@ -173,8 +172,6 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
 
     public string YearOverYearText => _localizer["ReportYearOverYear"];
 
-    public string PerMeterText => _localizer["ReportPerMeter"];
-
     public string ExportExcelText => _localizer["ReportExportExcel"];
 
     public string ExportCsvText => _localizer["ReportExportCsv"];
@@ -191,7 +188,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
 
     public bool ShowYearOverYear => Kind is ReportKind.Costs or ReportKind.Consumption;
 
-    public bool ShowPerMeter => Kind == ReportKind.Consumption;
+    public bool ShowConsumptionGrouping => Kind == ReportKind.Consumption;
 
     /// <summary>True on narrow screens, where the owner picks the table or the chart; wide screens show both.</summary>
     public bool ShowViewSwitch => _hasData && _layout.Current != LayoutMode.Expanded;
@@ -371,6 +368,13 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         set => ChooseAt(Groupings, value);
     }
 
+    /// <summary>The index of the chosen consumption "group by" option (bound to a picker).</summary>
+    public int ConsumptionGroupingIndex
+    {
+        get => IndexOf(ConsumptionGroupings);
+        set => ChooseAt(ConsumptionGroupings, value);
+    }
+
     /// <summary>The index of the chosen "show" option (bound to a picker).</summary>
     public int MeasureIndex
     {
@@ -417,15 +421,6 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         }
     }
 
-    partial void OnPerMeterChanged(bool value)
-    {
-        _state.PerMeter = value;
-        if (_data is not null)
-        {
-            _last = RunSafeAsync(RebuildAsync);
-        }
-    }
-
     [RelayCommand]
     private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, HelpTopic.Reports));
 
@@ -455,6 +450,12 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     private void Choose(CostGrouping grouping) => _last = RunSafeAsync(async () =>
     {
         _state.Grouping = grouping;
+        await RebuildAsync();
+    });
+
+    private void Choose(ConsumptionGrouping grouping) => _last = RunSafeAsync(async () =>
+    {
+        _state.ConsumptionGrouping = grouping;
         await RebuildAsync();
     });
 
@@ -511,7 +512,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
             YearOverYear && ShowYearOverYear,
             _state.Grouping,
             measure,
-            PerMeter);
+            _state.ConsumptionGrouping);
     }
 
     private async Task RebuildAsync()
@@ -581,6 +582,12 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         [
             .. Enum.GetValues<CostGrouping>()
                 .Select(g => new ReportOptionViewModel(_localizer["ReportGroup" + g], g == _state.Grouping, o => Choose((CostGrouping)o.Value!)) { Value = g }),
+        ];
+
+        ConsumptionGroupings =
+        [
+            .. Enum.GetValues<ConsumptionGrouping>()
+                .Select(g => new ReportOptionViewModel(_localizer["ReportGroup" + g], g == _state.ConsumptionGrouping, o => Choose((ConsumptionGrouping)o.Value!)) { Value = g }),
         ];
 
         ReportMeasure[] measures = Kind switch
@@ -664,6 +671,11 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         if (ShowGrouping && Groupings.FirstOrDefault(g => g.IsSelected) is { } grouping)
         {
             parts.Add(grouping.Text);
+        }
+
+        if (ShowConsumptionGrouping && ConsumptionGroupings.FirstOrDefault(g => g.IsSelected) is { } consumptionGrouping)
+        {
+            parts.Add(consumptionGrouping.Text);
         }
 
         if (ShowMeasure && Measures.FirstOrDefault(m => m.IsSelected) is { } measure)

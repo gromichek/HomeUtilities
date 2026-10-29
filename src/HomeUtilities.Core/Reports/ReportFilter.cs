@@ -11,7 +11,7 @@ namespace HomeUtilities.Core.Reports;
 /// <param name="YearOverYear">Costs and consumption: the months of the year as rows and one column per year.</param>
 /// <param name="Grouping">Costs: what the columns are grouped by.</param>
 /// <param name="Measure">The figure shown: costs and unit cost Gross/Net/Vat, calculated vs billed Difference/DifferencePercent/Calculated/Billed/QuantityDifference.</param>
-/// <param name="PerMeter">Consumption: one column per meter instead of per resource.</param>
+/// <param name="ConsumptionGrouping">Consumption: what the columns are grouped by (resource, contract or meter).</param>
 public sealed record ReportFilter(
     YearMonth From,
     YearMonth To,
@@ -21,7 +21,7 @@ public sealed record ReportFilter(
     bool YearOverYear = false,
     CostGrouping Grouping = CostGrouping.Category,
     ReportMeasure Measure = ReportMeasure.Gross,
-    bool PerMeter = false)
+    ConsumptionGrouping ConsumptionGrouping = ConsumptionGrouping.Resource)
 {
     /// <summary>Every month of the range, oldest first; empty if <see cref="To"/> is before <see cref="From"/>.</summary>
     public IReadOnlyList<YearMonth> Months()

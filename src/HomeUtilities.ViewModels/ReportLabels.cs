@@ -126,6 +126,8 @@ public sealed class ReportLabels(ILocalizer localizer, CultureInfo? culture = nu
     {
         ColumnSubject.Category => column.Name ?? (column.Service is { } service ? ServiceName(service) : "—"),
         ColumnSubject.Service => column.Service is { } kind ? ServiceName(kind) : "—",
+        ColumnSubject.Contract when column.Register is { } register and not RegisterKind.Total
+            => $"{column.Name ?? "—"} · {localizer["Enum_RegisterKind_" + register]}",
         ColumnSubject.Contract => column.Name ?? "—",
         ColumnSubject.OneOff => localizer["ReportOneOff"],
         ColumnSubject.Resource => ResourceLabel(column, null),
