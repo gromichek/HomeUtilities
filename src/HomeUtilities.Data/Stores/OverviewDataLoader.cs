@@ -34,6 +34,7 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
         var bills = allBills.Where(b => !b.IsDraft).ToList();
         var drafts = allBills.Where(b => b.IsDraft).ToList();
         var payments = await db.Payments.AsNoTracking().Include(p => p.Allocations).AsSplitQuery().ToListAsync(ct);
+        var templates = await db.BillTemplates.AsNoTracking().Where(t => !t.IsDeleted).ToListAsync(ct);
         var plans = await db.EqualizedPlans.AsNoTracking().ToListAsync(ct);
 
         var settlements = new Dictionary<Guid, decimal>();
@@ -56,6 +57,6 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
             settlements[contract.Id] = EqualizedSettlement.Calculate(contractPlans, contractBills, charges, from, to).Expected;
         }
 
-        return new OverviewData(properties, contracts, contractMeters, meters, bills, payments, settlements, drafts);
+        return new OverviewData(properties, contracts, contractMeters, meters, bills, payments, settlements, drafts) { BillTemplates = templates };
     }
 }

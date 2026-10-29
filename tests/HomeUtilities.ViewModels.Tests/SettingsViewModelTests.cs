@@ -358,6 +358,17 @@ public class SettingsViewModelTests
         Assert.Equal("SectionImports [en]", vm.ImportsText);
     }
 
+    private static ReminderSettingsViewModel Reminders()
+    {
+        var language = new FakeLanguageService();
+        var notifications = new ReminderTests.FakeNotifications();
+        var store = new ReminderSettingsStore(new FakeSettingsStore());
+        var scheduler = new ReminderScheduler(
+            new ReminderTests.FakeDatabase(), new ReminderTests.FakeLoader(), store, notifications, new FakeLocalizer(language),
+            new FixedClock(), new FakeSnackbarService(), new HomeUtilities.Core.Abstractions.DataChangeNotifier(), new FakeErrorLog());
+        return new ReminderSettingsViewModel(store, scheduler, notifications, new FakeDialogService(), new FakeLocalizer(language));
+    }
+
     private SettingsViewModel Create(
         out FakeLanguageService language, out FakeThemeService theme, out FakeLayoutModeService layout, FakeNavigationService? navigation = null)
     {
@@ -365,7 +376,7 @@ public class SettingsViewModelTests
         language = new FakeLanguageService();
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
-        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock());
+        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), Reminders());
     }
 
     private sealed class FakeAppInfo(bool isDebug) : IAppInfo

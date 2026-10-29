@@ -13,6 +13,53 @@ public class InterceptorTests
         (new Property { Name = "P" }, new Supplier { Name = "S" }, new Category { Name = "C" });
 
     [Fact]
+    public async Task Successful_save_tells_the_change_notifier_and_a_failed_one_does_not()
+    {
+        using var test = new TestDb();
+        var notifier = new HomeUtilities.Core.Abstractions.DataChangeNotifier();
+        var raised = 0;
+        notifier.Changed += (_, _) => raised++;
+        var options = new DbContextOptionsBuilder<HomeUtilitiesDbContext>()
+            .UseSqlite(test.NewContext().Database.GetDbConnection())
+            .AddInterceptors(new SyncEntityInterceptor(test.Clock, notifier))
+            .Options;
+
+        await using (var db = new HomeUtilitiesDbContext(options))
+        {
+            await db.SaveChangesAsync();
+            Assert.Equal(1, raised);
+
+            db.Properties.Add(new Property { Name = "P" });
+            await db.SaveChangesAsync();
+            Assert.Equal(2, raised);
+        }
+
+        notifier.Changed += (_, _) => throw new InvalidOperationException("handler failure");
+        await using var second = new HomeUtilitiesDbContext(options);
+        second.Properties.Add(new Property { Name = "Q" });
+        await second.SaveChangesAsync(); // a failing handler must not break the save
+        Assert.Equal(3, raised);
+    }
+
+    [Fact]
+    public async Task Contract_reminder_flag_defaults_to_on_and_is_stored()
+    {
+        using var test = new TestDb();
+        var (property, supplier, category) = Basics();
+        var contract = new Contract { PropertyId = property.Id, SupplierId = supplier.Id, CategoryId = category.Id, Title = "Water", ValidFrom = new DateOnly(2026, 1, 1) };
+        Assert.True(contract.RemindAboutReadings);
+        contract.RemindAboutReadings = false;
+        await using (var db = test.NewContext())
+        {
+            db.AddRange(property, supplier, category, contract);
+            await db.SaveChangesAsync();
+        }
+
+        await using var read = test.NewContext();
+        Assert.False((await read.Contracts.AsNoTracking().SingleAsync()).RemindAboutReadings);
+    }
+
+    [Fact]
     public async Task Insert_stamps_both_timestamps()
     {
         using var test = new TestDb();

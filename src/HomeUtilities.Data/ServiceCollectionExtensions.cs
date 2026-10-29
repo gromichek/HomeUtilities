@@ -32,9 +32,10 @@ public static class ServiceCollectionExtensions
         }
 
         var connectionString = new SqliteConnectionStringBuilder { DataSource = databasePath }.ToString();
+        services.AddSingleton<IDataChangeNotifier, DataChangeNotifier>();
         services.AddDbContextFactory<HomeUtilitiesDbContext>((provider, options) => options
             .UseSqlite(connectionString)
-            .AddInterceptors(new SyncEntityInterceptor(provider.GetRequiredService<IClock>())));
+            .AddInterceptors(new SyncEntityInterceptor(provider.GetRequiredService<IClock>(), provider.GetRequiredService<IDataChangeNotifier>())));
 
         services.AddSingleton<IPropertyStore, PropertyStore>();
         services.AddSingleton<ICategoryStore, CategoryStore>();

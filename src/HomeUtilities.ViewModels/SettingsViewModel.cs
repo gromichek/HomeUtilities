@@ -126,8 +126,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         IAppLifecycle app,
         ISettingsStore settings,
         ISampleDataGenerator sampleData,
-        IClock clock)
+        IClock clock,
+        ReminderSettingsViewModel reminders)
     {
+        Reminders = reminders;
         _backup = backup;
         _backupFiles = backupFiles;
         _dialogs = dialogs;
@@ -148,6 +150,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         DatabasePath = appPaths.DatabasePath;
         RefreshTexts();
     }
+
+    /// <summary>The Reminders card.</summary>
+    public ReminderSettingsViewModel Reminders { get; }
 
     public string Version { get; }
 

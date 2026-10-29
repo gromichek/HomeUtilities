@@ -118,7 +118,7 @@ public static class TodoBuilder
     }
 
     /// <summary>True if any meter the contract uses in the window has a reading dated inside the window.</summary>
-    private static bool HasReadingInWindow(
+    internal static bool HasReadingInWindow(
         OverviewData data, Contract contract, Dictionary<Guid, Meter> meters, DateOnly from, DateOnly to)
     {
         var linked = data.ContractMeters

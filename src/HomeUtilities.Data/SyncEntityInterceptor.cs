@@ -1,4 +1,5 @@
 using HomeUtilities.Core;
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -7,10 +8,25 @@ namespace HomeUtilities.Data;
 
 /// <summary>
 /// Stamps <see cref="SyncEntity.CreatedAt"/> / <see cref="SyncEntity.UpdatedAt"/> on save and turns every
-/// delete into a soft delete.
+/// delete into a soft delete. After a successful save it tells the optional <see cref="IDataChangeNotifier"/>.
 /// </summary>
-public sealed class SyncEntityInterceptor(IClock clock) : SaveChangesInterceptor
+public sealed class SyncEntityInterceptor(IClock clock, IDataChangeNotifier? notifier = null) : SaveChangesInterceptor
 {
+    /// <inheritdoc />
+    public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
+    {
+        notifier?.Notify();
+        return result;
+    }
+
+    /// <inheritdoc />
+    public override ValueTask<int> SavedChangesAsync(
+        SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default)
+    {
+        notifier?.Notify();
+        return ValueTask.FromResult(result);
+    }
+
     /// <inheritdoc />
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {

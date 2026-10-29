@@ -155,6 +155,10 @@
                     </Grid>
                     <Label Text="{Binding ReadingWindowHint}" Style="{StaticResource MutedLabel}" FontSize="12"
                            IsVisible="{Binding HasReadingWindow}" />
+                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasReadingWindow}">
+                        <Switch IsToggled="{Binding RemindAboutReadings}" />
+                        <Label Text="{Binding RemindAboutReadingsLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                     <Label Text="{Binding ReadingWindowError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding ReadingWindowError, Converter={StaticResource HasText}}" />
 

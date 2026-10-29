@@ -558,6 +558,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<int?>("ReadingDayTo")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("RemindAboutReadings")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Service")
                         .HasColumnType("INTEGER");
 
