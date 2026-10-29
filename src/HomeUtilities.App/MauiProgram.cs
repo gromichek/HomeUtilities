@@ -4,6 +4,7 @@ using HomeUtilities.App.Views;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
+using HomeUtilities.Core.Export;
 using HomeUtilities.Data.Backup;
 using HomeUtilities.Data;
 using HomeUtilities.Core.Reports;
@@ -121,7 +122,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddSingleton<ReportFilterState>();
         builder.Services.AddSingleton<IReportWorkbookWriter, ClosedXmlReportWriter>();
+        builder.Services.AddSingleton<IExportWorkbookWriter, ClosedXmlExportWriter>();
         builder.Services.AddSingleton<IWorkbookReader, ClosedXmlWorkbookReader>();
+        builder.Services.AddTransient<WorkbookExportFlow>();
         builder.Services.AddSingleton<IImportFileService, ImportFileService>();
         builder.Services.AddTransient<ImportWizardViewModel>();
         builder.Services.AddTransient<ImportsViewModel>();

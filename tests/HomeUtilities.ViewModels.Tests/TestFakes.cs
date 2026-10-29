@@ -98,6 +98,9 @@ internal sealed class FakeDialogService : IDialogService
 
     public EditorDialogViewModel? LastEditor { get; private set; }
 
+    /// <summary>How many editor dialogs were shown.</summary>
+    public int EditorsShown { get; private set; }
+
     public List<(string Title, string Message)> Alerts { get; } = [];
 
     public Task AlertAsync(string title, string message)
@@ -124,6 +127,7 @@ internal sealed class FakeDialogService : IDialogService
     public Task<bool> ShowEditorAsync(EditorDialogViewModel editor)
     {
         LastEditor = editor;
+        EditorsShown++;
         EditorScript?.Invoke(editor);
         return Task.FromResult(editor.Saved);
     }
