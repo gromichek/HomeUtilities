@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Compile Include="..\HomeUtilities.Import.Tests\SyntheticWorkbook.cs" Link="Import\SyntheticWorkbook.cs" />
+    <Compile Include="..\HomeUtilities.Import.Tests\OwnerWorkbook.cs" Link="Import\OwnerWorkbook.cs" />
   </ItemGroup>
 
   <ItemGroup>

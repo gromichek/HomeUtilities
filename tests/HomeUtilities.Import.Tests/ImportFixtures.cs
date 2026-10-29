@@ -44,6 +44,7 @@ public sealed class ImportFixtures
         SheetName = SyntheticWorkbook.Water,
         ContractId = Contract.Id,
         PeriodColumn = 1,
+        DetectReplacements = false,
         Registers =
         [
             new RegisterColumnMapping { RegisterId = ColdRegister.Id, ReadingColumn = 2 },
@@ -59,6 +60,7 @@ public sealed class ImportFixtures
         SheetName = SyntheticWorkbook.Heat,
         ContractId = Contract.Id,
         PeriodColumn = 1,
+        DetectReplacements = false,
         Registers = [new RegisterColumnMapping { RegisterId = HotRegister.Id, ReadingColumn = 2 }],
         NetColumn = 3,
         VatPercentColumn = 4,
@@ -72,6 +74,7 @@ public sealed class ImportFixtures
         SheetName = SyntheticWorkbook.Waste,
         ContractId = Contract.Id,
         PeriodColumn = 1,
+        DetectReplacements = false,
         NetColumn = 2,
         VatColumn = 3,
         TotalColumn = 4,
@@ -84,6 +87,7 @@ public sealed class ImportFixtures
         SheetName = SyntheticWorkbook.Electricity,
         ContractId = Contract.Id,
         PeriodColumn = 1,
+        DetectReplacements = false,
         Registers = [new RegisterColumnMapping { RegisterId = PowerRegister.Id, ReadingColumn = 2, DateColumn = 3 }],
         TotalColumn = 4,
     };
@@ -93,6 +97,7 @@ public sealed class ImportFixtures
         SheetName = SyntheticWorkbook.Propane,
         ContractId = Contract.Id,
         PeriodColumn = 1,
+        DetectReplacements = false,
         Registers = [new RegisterColumnMapping { RegisterId = GasRegister.Id, ReadingColumn = 2 }],
         TotalColumn = 3,
     };

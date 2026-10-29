@@ -33,8 +33,11 @@ public static class ImportProfileValidator
         }
 
         var anything = profile.TotalColumn > 0
+            || profile.TotalFallbackColumn > 0
             || profile.NetColumn > 0
+            || profile.NetFallbackColumn > 0
             || profile.VatColumn > 0
+            || profile.VatFallbackColumn > 0
             || profile.Registers.Any(r => r.ReadingColumn > 0);
         if (!anything)
         {
@@ -44,6 +47,11 @@ public static class ImportProfileValidator
         if (profile.PaidColumn > 0 && string.IsNullOrWhiteSpace(profile.PaidMarker))
         {
             errors.Add(new(ErrorCodes.ImportPaidMarkerRequired, nameof(ImportProfile.PaidMarker)));
+        }
+
+        if (profile.PeriodDayLimit is < 1 or > 31 || profile.PeriodRuleChanges.Any(c => c.DayLimit is < 1 or > 31))
+        {
+            errors.Add(new(ErrorCodes.ImportDayLimitInvalid, nameof(ImportProfile.PeriodDayLimit)));
         }
 
         return errors.Count == 0 ? ValidationResult.Ok : ValidationResult.Fail([.. errors]);

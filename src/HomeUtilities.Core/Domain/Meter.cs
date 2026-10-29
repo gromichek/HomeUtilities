@@ -44,6 +44,9 @@ public class Meter : SyncEntity
     /// <summary>Free-form notes.</summary>
     public string? Notes { get; set; }
 
+    /// <summary>The import that created this meter (an automatic replacement); null for meters entered by hand.</summary>
+    public Guid? ImportBatchId { get; set; }
+
     /// <summary>Registers of the meter.</summary>
     public List<MeterRegister> Registers { get; set; } = [];
 

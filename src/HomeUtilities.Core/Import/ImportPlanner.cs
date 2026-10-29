@@ -9,7 +9,7 @@ namespace HomeUtilities.Core.Import;
 /// Dry run of an import: reads every data row of a sheet through an <see cref="ImportProfile"/> and says what would be
 /// created or skipped, without touching the database. An error makes the whole row skipped, a warning is imported with a note.
 /// </summary>
-public static class ImportPlanner
+public static partial class ImportPlanner
 {
     private const decimal AmountTolerance = 0.02m;
 
@@ -38,25 +38,27 @@ public static class ImportPlanner
             return ImportPlan.Invalid(missing);
         }
 
+        var positions = BuildPositions(profile, context, registers);
         var rows = new List<PlannedRow>();
         var candidates = new List<ReadingCandidate>();
-        var seenPeriods = context.ExistingBills
+        var existingPeriods = context.ExistingBills
             .Where(b => !b.IsDeleted && !b.IsDraft && b.ContractId == context.Contract.Id && b.Kind is not (BillKind.Settlement or BillKind.Correction))
             .Select(b => b.Period)
             .ToHashSet();
+        var sheetBills = new Dictionary<YearMonth, PlannedRow>();
 
         foreach (var row in DataRows(profile, sheet))
         {
-            var planned = PlanRow(profile, sheet, row, context, seenPeriods, candidates);
+            var planned = PlanRow(profile, sheet, row, context, existingPeriods, sheetBills, candidates, positions);
             if (planned is not null)
             {
                 rows.Add(planned);
             }
         }
 
-        ValidateReadingChains(candidates, registers);
-        Finalize(rows, registers);
-        return new ImportPlan(rows, []);
+        var replacements = PlanReadings(profile, sheet, context, positions, candidates, rows);
+        Finalize(rows, registers, replacements);
+        return new ImportPlan(rows, [], replacements);
     }
 
     private static IEnumerable<SheetRow> DataRows(ImportProfile profile, SheetData sheet)
@@ -79,8 +81,10 @@ public static class ImportPlanner
         SheetData sheet,
         SheetRow row,
         ImportContext context,
-        HashSet<YearMonth> seenPeriods,
-        List<ReadingCandidate> candidates)
+        HashSet<YearMonth> existingPeriods,
+        Dictionary<YearMonth, PlannedRow> sheetBills,
+        List<ReadingCandidate> candidates,
+        List<Position> positions)
     {
         var planned = new PlannedRow { RowNumber = row.Number };
         var periodCell = row.Cell(profile.PeriodColumn);
@@ -96,15 +100,37 @@ public static class ImportPlanner
             return planned;
         }
 
-        if (!ImportCellParser.TryParsePeriod(periodCell, out var period))
+        YearMonth period;
+        if (ImportCellParser.TryParseDate(periodCell, out var rowDate))
+        {
+            // A date: the rule says which month it stands for; the reading keeps the real date.
+            var (rule, dayLimit) = profile.RuleFor(rowDate);
+            period = ImportPeriodResolver.Resolve(rowDate, rule, dayLimit, context.Contract);
+            planned.RowDate = rowDate;
+        }
+        else if (!ImportCellParser.TryParsePeriod(periodCell, out period))
         {
             Error(planned, ImportIssueCodes.PeriodInvalid, periodCell.Text);
             return planned;
         }
 
+        planned.RuleBasedPeriod = period;
+        var correction = planned.RowDate is { } date ? profile.OverrideFor(date) : null;
+        if (correction is not null)
+        {
+            planned.Override = correction;
+            if (correction.Period is { } corrected)
+            {
+                period = YearMonth.From(corrected);
+            }
+
+            Info(planned, ImportIssueCodes.RowOverridden);
+        }
+
         planned.Period = period;
-        ReadReadings(profile, row, period, planned, candidates);
-        var bill = ReadBill(profile, sheet, row, period, context, planned, seenPeriods);
+        var candidateCount = candidates.Count;
+        ReadReadings(profile, row, planned.RowDate, period, planned, candidates, positions);
+        var bill = ReadBill(profile, sheet, row, period, context, planned, existingPeriods, sheetBills, correction);
         if (planned.HasErrors)
         {
             return planned;
@@ -113,16 +139,16 @@ public static class ImportPlanner
         var notes = BuildNotes(profile, sheet, row);
         if (bill is not null)
         {
-            bill.Notes = notes;
+            bill.Notes = JoinNotes(notes, correction?.Remark);
             planned.Bill = bill;
-            planned.Payment = ReadPayment(profile, row, period, bill, planned);
+            planned.Payment = ReadPayment(profile, row, planned.RowDate, period, bill, planned);
         }
-        else if (notes is not null && candidates.FirstOrDefault(c => c.Row == planned) is { } first)
+        else if (notes is not null && candidates.Count > candidateCount)
         {
-            first.NoteToAttach = notes;
+            candidates[candidateCount].NoteToAttach = notes;
         }
 
-        if (planned.Bill is null && !candidates.Any(c => c.Row == planned) && !planned.Issues.Any(i => i.Code == ImportIssueCodes.DuplicatePeriod))
+        if (planned.Bill is null && candidates.Count == candidateCount && !planned.Issues.Any(i => i.Code == ImportIssueCodes.DuplicatePeriod))
         {
             Warning(planned, ImportIssueCodes.NothingToImport);
         }
@@ -130,10 +156,18 @@ public static class ImportPlanner
         return planned;
     }
 
-    private static void ReadReadings(ImportProfile profile, SheetRow row, YearMonth period, PlannedRow planned, List<ReadingCandidate> candidates)
+    private static void ReadReadings(
+        ImportProfile profile,
+        SheetRow row,
+        DateOnly? rowDate,
+        YearMonth period,
+        PlannedRow planned,
+        List<ReadingCandidate> candidates,
+        List<Position> positions)
     {
-        foreach (var mapping in profile.Registers.Where(r => r.ReadingColumn > 0))
+        foreach (var position in positions)
         {
+            var mapping = position.Mapping;
             var cell = row.Cell(mapping.ReadingColumn);
             if (cell.IsEmpty)
             {
@@ -153,7 +187,7 @@ public static class ImportPlanner
                 continue;
             }
 
-            var date = period.LastDay;
+            var date = rowDate ?? period.LastDay;
             if (mapping.DateColumn > 0)
             {
                 var dateCell = row.Cell(mapping.DateColumn);
@@ -171,7 +205,9 @@ public static class ImportPlanner
                 }
             }
 
-            candidates.Add(new ReadingCandidate(planned, mapping.RegisterId, letter, date, value));
+            var candidate = new ReadingCandidate(planned, position, letter, date, value);
+            position.Candidates.Add(candidate);
+            candidates.Add(candidate);
         }
     }
 
@@ -182,13 +218,15 @@ public static class ImportPlanner
         YearMonth period,
         ImportContext context,
         PlannedRow planned,
-        HashSet<YearMonth> seenPeriods)
+        HashSet<YearMonth> existingPeriods,
+        Dictionary<YearMonth, PlannedRow> sheetBills,
+        ImportRowOverride? correction)
     {
-        var total = ReadAmount(row, profile.TotalColumn, planned);
-        var net = ReadAmount(row, profile.NetColumn, planned);
-        var vat = ReadAmount(row, profile.VatColumn, planned);
-        var percent = ReadAmount(row, profile.VatPercentColumn, planned);
-        var quantity = ReadAmount(row, profile.QuantityColumn, planned);
+        var total = ReadAmount(row, profile.TotalColumn, profile.TotalFallbackColumn, planned);
+        var net = ReadAmount(row, profile.NetColumn, profile.NetFallbackColumn, planned);
+        var vat = ReadAmount(row, profile.VatColumn, profile.VatFallbackColumn, planned);
+        var percent = ReadAmount(row, profile.VatPercentColumn, 0, planned);
+        var quantity = ReadAmount(row, profile.QuantityColumn, 0, planned);
         if (planned.HasErrors)
         {
             return null;
@@ -211,15 +249,25 @@ public static class ImportPlanner
             return null;
         }
 
-        if (!seenPeriods.Add(period))
+        if (existingPeriods.Contains(period))
         {
             Warning(planned, ImportIssueCodes.DuplicatePeriod, period.ToString());
             return null;
         }
 
+        if (sheetBills.TryGetValue(period, out var earlier))
+        {
+            // Two rows of one period: the later row (the corrected one) supplies the bill and the payment.
+            earlier.Bill = null;
+            earlier.Payment = null;
+            Warning(earlier, ImportIssueCodes.PeriodSuperseded, period.ToString(), planned.RowNumber.ToString(CultureInfo.InvariantCulture));
+            Warning(planned, ImportIssueCodes.PeriodSupersedes, period.ToString(), earlier.RowNumber.ToString(CultureInfo.InvariantCulture));
+        }
+
+        sheetBills[period] = planned;
         var amounts = Complete(net, percent, vat, gross.Value, planned);
         var contract = context.Contract;
-        return new Bill
+        var bill = new Bill
         {
             PropertyId = contract.PropertyId,
             CategoryId = contract.CategoryId,
@@ -234,6 +282,14 @@ public static class ImportPlanner
             Currency = profile.CurrencyFor(period),
             ConsumptionOnBill = quantity,
         };
+
+        if (correction?.CoversUntil is { } until && YearMonth.From(until) > period)
+        {
+            bill.ServiceFrom = period.FirstDay;
+            bill.ServiceTo = YearMonth.From(until).LastDay;
+        }
+
+        return bill;
     }
 
     private static AmountSet Complete(decimal? net, decimal? percent, decimal? vat, decimal gross, PlannedRow planned)
@@ -271,15 +327,21 @@ public static class ImportPlanner
 
     private static AmountSet TotalOnly(decimal gross) => Amounts.Complete(null, null, gross).Result!;
 
-    private static decimal? ReadAmount(SheetRow row, int column, PlannedRow planned)
+    private static decimal? ReadAmount(SheetRow row, int column, int fallbackColumn, PlannedRow planned)
     {
-        if (column <= 0)
+        var used = column;
+        var cell = column > 0 ? row.Cell(column) : SheetCell.Empty;
+        if (cell.IsEmpty && fallbackColumn > 0)
         {
-            return null;
+            cell = row.Cell(fallbackColumn);
+            used = fallbackColumn;
+            if (!cell.IsEmpty)
+            {
+                Info(planned, ImportIssueCodes.FallbackUsed, SheetData.ColumnLetter(fallbackColumn));
+            }
         }
 
-        var cell = row.Cell(column);
-        if (cell.IsEmpty)
+        if (used <= 0 || cell.IsEmpty)
         {
             return null;
         }
@@ -289,18 +351,18 @@ public static class ImportPlanner
             return value;
         }
 
-        Error(planned, ImportIssueCodes.NumberInvalid, SheetData.ColumnLetter(column), cell.Text);
+        Error(planned, ImportIssueCodes.NumberInvalid, SheetData.ColumnLetter(used), cell.Text);
         return null;
     }
 
-    private static Payment? ReadPayment(ImportProfile profile, SheetRow row, YearMonth period, Bill bill, PlannedRow planned)
+    private static Payment? ReadPayment(ImportProfile profile, SheetRow row, DateOnly? rowDate, YearMonth period, Bill bill, PlannedRow planned)
     {
         if (profile.PaidColumn <= 0 || !profile.IsPaidMarker(row.Cell(profile.PaidColumn).Text) || bill.Gross == 0)
         {
             return null;
         }
 
-        var paidOn = period.FirstDay;
+        var paidOn = profile.DateIsPaymentDate && rowDate is { } rowDay ? rowDay : period.FirstDay;
         if (profile.PaidDateColumn > 0)
         {
             var cell = row.Cell(profile.PaidDateColumn);
@@ -356,81 +418,30 @@ public static class ImportPlanner
         return joined.Length <= InputLimits.Notes ? joined : joined[..(InputLimits.Notes - 1)] + "…";
     }
 
-    private static void ValidateReadingChains(
-        List<ReadingCandidate> candidates,
-        Dictionary<Guid, (Meter Meter, MeterRegister Register)> registers)
+    private static string? JoinNotes(string? notes, string? remark)
     {
-        foreach (var group in candidates.Where(c => !c.Row.HasErrors).GroupBy(c => c.RegisterId))
+        var text = string.Join("; ", new[] { notes, remark?.Trim() }.Where(t => !string.IsNullOrWhiteSpace(t)));
+        if (text.Length == 0)
         {
-            var (meter, register) = registers[group.Key];
-            var existing = register.Readings.Where(r => !r.IsDeleted).OrderBy(r => r.Date).ThenBy(r => r.CreatedAt).ToList();
-            var accepted = new List<(DateOnly Date, decimal Value)>(existing.Select(r => (r.Date, r.Value)));
-
-            foreach (var candidate in group.OrderBy(c => c.Date).ThenBy(c => c.Row.RowNumber))
-            {
-                if (candidate.Row.HasErrors)
-                {
-                    continue;
-                }
-
-                var text = candidate.Value.ToString(CultureInfo.InvariantCulture);
-                if (accepted.Any(a => a.Date == candidate.Date))
-                {
-                    Warning(candidate.Row, ImportIssueCodes.ReadingExists, candidate.Column, candidate.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-                    continue;
-                }
-
-                if (candidate.Date < meter.InstalledOn || (meter.RemovedOn is { } removed && candidate.Date > removed))
-                {
-                    Error(candidate.Row, ImportIssueCodes.ReadingOutsideInstallation, candidate.Column, candidate.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-                    continue;
-                }
-
-                var previous = accepted.Where(a => a.Date < candidate.Date).OrderByDescending(a => a.Date).Cast<(DateOnly Date, decimal Value)?>().FirstOrDefault();
-                if (previous is { } p && candidate.Value < p.Value)
-                {
-                    var previousText = p.Value.ToString(CultureInfo.InvariantCulture);
-                    if (meter.Digits is null)
-                    {
-                        Error(candidate.Row, ImportIssueCodes.ReadingLowerThanPrevious, candidate.Column, text, previousText);
-                        continue;
-                    }
-
-                    Warning(candidate.Row, ImportIssueCodes.ReadingRollover, candidate.Column, text, previousText);
-                }
-
-                var next = existing.FirstOrDefault(r => r.Date > candidate.Date);
-                if (meter.Digits is null && next is not null && candidate.Value > next.Value)
-                {
-                    Error(candidate.Row, ImportIssueCodes.ReadingHigherThanNext, candidate.Column, text, next.Value.ToString(CultureInfo.InvariantCulture));
-                    continue;
-                }
-
-                accepted.Add((candidate.Date, candidate.Value));
-                candidate.Accepted = true;
-            }
+            return null;
         }
 
-        // Readings are attached after all checks so that a row skipped by a later check keeps none of them.
-        foreach (var candidate in candidates.Where(c => c.Accepted && !c.Row.HasErrors))
-        {
-            candidate.Row.Readings.Add(new PlannedReading(
-                candidate.RegisterId,
-                new MeterReading
-                {
-                    RegisterId = candidate.RegisterId,
-                    Date = candidate.Date,
-                    Value = candidate.Value,
-                    Kind = ReadingKind.Regular,
-                    Note = candidate.NoteToAttach,
-                }));
-        }
+        return text.Length <= InputLimits.Notes ? text : text[..(InputLimits.Notes - 1)] + "…";
     }
 
-    private static void Finalize(List<PlannedRow> rows, Dictionary<Guid, (Meter Meter, MeterRegister Register)> registers)
+    private static void Finalize(List<PlannedRow> rows, Dictionary<Guid, (Meter Meter, MeterRegister Register)> registers, List<PlannedReplacement> replacements)
     {
         foreach (var row in rows.Where(r => r.HasErrors))
         {
+            // The initial reading of a new meter that was the reading of a skipped row is stored with the replacement instead.
+            foreach (var reading in row.Readings)
+            {
+                foreach (var line in replacements.SelectMany(r => r.Registers).Where(l => l.InitialIsRowReading && l.InitialReading == reading.Reading))
+                {
+                    line.InitialIsRowReading = false;
+                }
+            }
+
             row.Readings.Clear();
             row.Bill = null;
             row.Payment = null;
@@ -439,8 +450,9 @@ public static class ImportPlanner
         // The first imported reading of a register that has none becomes its Initial reading.
         var firstPerRegister = rows
             .SelectMany(r => r.Readings)
+            .Where(r => r.Reading.Kind == ReadingKind.Regular)
             .GroupBy(r => r.RegisterId)
-            .Where(g => !registers[g.Key].Register.Readings.Any(r => !r.IsDeleted));
+            .Where(g => registers.TryGetValue(g.Key, out var entry) && !entry.Register.Readings.Any(r => !r.IsDeleted));
         foreach (var group in firstPerRegister)
         {
             group.OrderBy(r => r.Reading.Date).First().Reading.Kind = ReadingKind.Initial;
@@ -459,20 +471,6 @@ public static class ImportPlanner
     private static void Warning(PlannedRow row, string code, params string[] args) =>
         row.Issues.Add(new(ImportIssueSeverity.Warning, code, args));
 
-    private sealed class ReadingCandidate(PlannedRow row, Guid registerId, string column, DateOnly date, decimal value)
-    {
-        public PlannedRow Row { get; } = row;
-
-        public Guid RegisterId { get; } = registerId;
-
-        public string Column { get; } = column;
-
-        public DateOnly Date { get; } = date;
-
-        public decimal Value { get; } = value;
-
-        public bool Accepted { get; set; }
-
-        public string? NoteToAttach { get; set; }
-    }
+    private static void Info(PlannedRow row, string code, params string[] args) =>
+        row.Issues.Add(new(ImportIssueSeverity.Info, code, args));
 }

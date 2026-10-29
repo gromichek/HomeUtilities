@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.ImportRowOverrideEditorView"
+             x:DataType="vm:ImportRowOverrideEditorViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+
+    <ContentView.Resources>
+        <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+    </ContentView.Resources>
+
+    <!-- Moves one sheet row to another period, lets its bill cover several months, adds a remark. -->
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="8">
+            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+            <Label Text="{Binding RuleHint}" Style="{StaticResource MutedLabel}" />
+
+            <Label Text="{Binding PeriodLabel}" Style="{StaticResource MutedLabel}" />
+            <DatePicker Date="{Binding Period}" Format="MMMM yyyy" />
+
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Label Grid.Column="0" Text="{Binding CoversLabel}" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding Covers}" />
+            </Grid>
+            <VerticalStackLayout Spacing="2" IsVisible="{Binding Covers}">
+                <Label Text="{Binding UntilLabel}" Style="{StaticResource MutedLabel}" />
+                <DatePicker Date="{Binding Until}" Format="MMMM yyyy" />
+            </VerticalStackLayout>
+            <Label Text="{Binding RangeError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding RangeError, Converter={StaticResource HasText}}" />
+
+            <Label Text="{Binding RemarkLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding Remark}" MaxLength="{x:Static core:InputLimits.Notes}" />
+
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+                <Button Text="{Binding ClearText}" Command="{Binding ClearCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+                <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

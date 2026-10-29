@@ -167,11 +167,11 @@ public class ImportPlannerTests
     }
 
     [Fact]
-    public void The_reading_date_is_the_last_day_of_the_period_without_a_date_column()
+    public void The_reading_keeps_the_date_of_a_date_cell_and_is_the_last_day_of_a_text_period()
     {
         var plan = ImportPlanner.Plan(_f.WaterProfile(), Read(SyntheticWorkbook.Water), _f.Context(_f.Cold, _f.Hot));
 
-        Assert.Equal(new DateOnly(2013, 11, 30), Row(plan, 2).Readings[0].Reading.Date);
+        Assert.Equal(new DateOnly(2013, 11, 1), Row(plan, 2).Readings[0].Reading.Date);
         Assert.Equal(new DateOnly(2014, 2, 28), Row(plan, 5).Readings[0].Reading.Date);
     }
 
@@ -253,13 +253,17 @@ public class ImportPlannerTests
     }
 
     [Fact]
-    public void A_second_row_with_the_same_period_is_a_duplicate_warning_without_bill_or_payment()
+    public void Of_two_rows_with_the_same_period_the_later_one_supplies_the_bill()
     {
         var plan = ImportPlanner.Plan(_f.WasteProfile(), Read(SyntheticWorkbook.Waste), _f.Context());
 
-        var row = Row(plan, 5);
-        Assert.True(Has(row, ImportIssueCodes.DuplicatePeriod, ImportIssueSeverity.Warning));
-        Assert.True(row.IsSkipped);
+        var earlier = Row(plan, 4);
+        var later = Row(plan, 5);
+        Assert.True(Has(earlier, ImportIssueCodes.PeriodSuperseded, ImportIssueSeverity.Warning));
+        Assert.Equal(["2014-03", "5"], earlier.Issues.Single(i => i.Code == ImportIssueCodes.PeriodSuperseded).Args);
+        Assert.True(earlier.IsSkipped);
+        Assert.True(Has(later, ImportIssueCodes.PeriodSupersedes, ImportIssueSeverity.Warning));
+        Assert.NotNull(later.Bill);
         Assert.Equal(new ImportCounts(Readings: 0, Bills: 3, Payments: 2, SkippedRows: 1), plan.Counts);
     }
 

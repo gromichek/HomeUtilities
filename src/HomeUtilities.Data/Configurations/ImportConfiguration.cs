@@ -35,5 +35,7 @@ internal static class ImportBatchReferences
         modelBuilder.Entity<Bill>().HasReference<Bill, ImportBatch>(b => b.ImportBatchId);
         modelBuilder.Entity<Payment>().HasReference<Payment, ImportBatch>(p => p.ImportBatchId);
         modelBuilder.Entity<MeterReading>().HasReference<MeterReading, ImportBatch>(r => r.ImportBatchId);
+        modelBuilder.Entity<Meter>().HasReference<Meter, ImportBatch>(m => m.ImportBatchId);
+        modelBuilder.Entity<ContractMeter>().HasReference<ContractMeter, ImportBatch>(l => l.ImportBatchId);
     }
 }

@@ -119,15 +119,60 @@
 
                     <Border Style="{StaticResource SectionCard}">
                         <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding PeriodRuleLabel}" Style="{StaticResource SectionHeader}" />
+                            <Label Text="{Binding PeriodRuleHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                            <Picker ItemsSource="{Binding PeriodRules}"
+                                    ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportPeriodRuleChoice}"
+                                    SelectedItem="{Binding SelectedPeriodRule}" />
+                            <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDayLimit}">
+                                <Label Text="{Binding DayLimitLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                <Entry Text="{Binding PeriodDayLimitText}" Keyboard="Numeric" MaxLength="2" />
+                            </VerticalStackLayout>
+
+                            <Label Text="{Binding RuleChangesHeader}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                            <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding RuleChanges}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ImportRuleChangeRowViewModel">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <DatePicker Date="{Binding FromDate}" />
+                                            <Picker ItemsSource="{Binding Rules}"
+                                                    ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportPeriodRuleChoice}"
+                                                    SelectedItem="{Binding SelectedRule}" />
+                                            <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDayLimit}">
+                                                <Label Text="{Binding DayLimitLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                                <Entry Text="{Binding DayLimitText}" Keyboard="Numeric" MaxLength="2" />
+                                            </VerticalStackLayout>
+                                            <Button Text="{Binding RemoveText}" Command="{Binding RemoveCommand}"
+                                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Button Text="{Binding AddRuleChangeText}" Command="{Binding AddRuleChangeCommand}"
+                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="{Binding DateIsPaymentDateLabel}" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding DateIsPaymentDate}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Grid.Column="0" Text="{Binding ColumnsHeader}" Style="{StaticResource SectionHeader}" VerticalOptions="Center" />
                                 <Button Grid.Column="1" Text="{Binding GuessText}" Command="{Binding GuessCommand}" Style="{StaticResource SecondaryButton}" />
                             </Grid>
                             <views:ImportColumnPickerView BindingContext="{Binding PeriodPicker}" />
                             <views:ImportColumnPickerView BindingContext="{Binding TotalPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding TotalFallbackPicker}" />
                             <views:ImportColumnPickerView BindingContext="{Binding NetPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding NetFallbackPicker}" />
                             <views:ImportColumnPickerView BindingContext="{Binding VatPercentPicker}" />
                             <views:ImportColumnPickerView BindingContext="{Binding VatPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding VatFallbackPicker}" />
                             <views:ImportColumnPickerView BindingContext="{Binding PaidPicker}" />
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="{Binding PaidMarkerLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
@@ -153,6 +198,10 @@
                     <Border Style="{StaticResource SectionCard}">
                         <VerticalStackLayout Spacing="8">
                             <Label Text="{Binding ReadingsHeader}" Style="{StaticResource SectionHeader}" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="{Binding DetectReplacementsLabel}" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding DetectReplacements}" />
+                            </Grid>
                             <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding RegisterMappings}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ImportRegisterMappingViewModel">
@@ -187,6 +236,36 @@
                         SelectedItem="{Binding SelectedFilter}" WidthRequest="200" />
             </HorizontalStackLayout>
             <CollectionView Grid.Row="3" ItemsSource="{Binding PlanRows}">
+                <CollectionView.Header>
+                    <!-- The proposed meter replacements scroll with the rows; the owner corrects the values here. -->
+                    <VerticalStackLayout Spacing="8" Margin="0,0,0,8" IsVisible="{Binding HasReplacements}">
+                        <Label Text="{Binding ReplacementsHeader}" Style="{StaticResource SectionHeader}" />
+                        <Label Text="{Binding ReplacementsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ReplacementRows}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ImportReplacementRowViewModel">
+                                    <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                                            StrokeThickness="1" Padding="10" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding TitleText}" FontAttributes="Bold" />
+                                            <Label Text="{Binding EstimatedText}" Style="{StaticResource WarningLabel}" FontSize="12" IsVisible="{Binding HasEstimate}" />
+                                            <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <DatePicker Date="{Binding Date}" />
+                                            <Label Text="{Binding FinalLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <Entry Text="{Binding FinalText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                                            <Label Text="{Binding InitialLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <Entry Text="{Binding InitialText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                                            <Label Text="{Binding SerialLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <Entry Text="{Binding SerialText}" MaxLength="{x:Static core:InputLimits.Code}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Button Text="{Binding RecalculateText}" Command="{Binding RecalculateCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+                </CollectionView.Header>
                 <CollectionView.EmptyView>
                     <Label Text="{Binding NoRowsText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
                 </CollectionView.EmptyView>
@@ -203,6 +282,8 @@
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
+                                <Button Text="{Binding EditPeriodText}" Command="{Binding EditPeriodCommand}"
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" IsVisible="{Binding CanEditPeriod}" />
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Issues}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ImportIssueLine">
@@ -210,6 +291,9 @@
                                                 <Label.Triggers>
                                                     <DataTrigger TargetType="Label" x:DataType="vm:ImportIssueLine" Binding="{Binding IsError}" Value="True">
                                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" x:DataType="vm:ImportIssueLine" Binding="{Binding IsInfo}" Value="True">
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
                                                     </DataTrigger>
                                                 </Label.Triggers>
                                             </Label>

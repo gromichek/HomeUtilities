@@ -31,6 +31,9 @@ public class ImportBatch : SyncEntity
     /// <summary>Number of payments created.</summary>
     public int PaymentCount { get; set; }
 
+    /// <summary>Number of meter replacements the import carried out (new meters created).</summary>
+    public int ReplacementCount { get; set; }
+
     /// <summary>Number of rows that created nothing.</summary>
     public int SkippedCount { get; set; }
 

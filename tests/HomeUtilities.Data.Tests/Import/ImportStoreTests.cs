@@ -46,6 +46,7 @@ public class ImportStoreTests
             SheetName = SyntheticWorkbook.Water,
             ContractId = Contract.Id,
             PeriodColumn = 1,
+            DetectReplacements = false,
             Registers =
             [
                 new RegisterColumnMapping { RegisterId = Cold.Registers[0].Id, ReadingColumn = 2 },
