@@ -45,6 +45,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| — | Reminder on the last window day; equalized months decided by plan coverage | 2026-10-29, #127, #128 | Sonnet helpers. Switching a contract to equalized keeps it; months before the first plan stay "by consumption". |
 | T-028 | Reminders (local notifications) | 2026-10-29, #124 | Plugin.LocalNotification 14.1.2 (MIT). Manifest removes exact-alarm, wake-lock and foreground-service permissions — watch for a crash if the plugin needs them. Windows: in-app summary snackbar once a day (owner OK). Contract flag instead of ReminderRule. |
 | T-027 | Import: reading dates, positions, automatic replacements | 2026-10-29, #125 | Migration AddImportReplacements; estimated finals accepted by ConsumptionCalculator; DetectReplacements on by default. |
 | T-026 | Excel import wizard, profiles, undo | 2026-10-29, #116 | Lower reading without dial digits = error (row skipped) — T-027 may need replacement handling. Lead resolved resx conflict; `.gitattributes` now uses union merge for resx (#118). |
