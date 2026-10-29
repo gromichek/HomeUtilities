@@ -739,7 +739,7 @@ opens (Drive, e-mail…). The message at the bottom shows where the file went.
 
 ## 16. Settings
 
-Language (English / Русский), theme (system / light / dark), categories, VAT rates, [bill templates](#bill-templates-and-drafts), version, database file location,
+Language (English / Русский), theme (system / light / dark), categories, VAT rates, [bill templates](#bill-templates-and-drafts), [Excel import](#import-from-excel) and [imports](#imports-and-profiles), version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
 
 ### VAT rates
@@ -774,7 +774,64 @@ device (for example Windows → Android).
 After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
+### Import from Excel
+
+If you kept your history in an Excel workbook (one sheet per supplier, one row per month), **Settings → Import from Excel**
+brings it into the app. The workbook is never copied into the app: the wizard only reads it. Nothing changes until you
+press *Import*, and a finished import can be undone as a whole.
+
+**Before you start** make a backup (*Settings → Save backup…*) and create what the import needs: the **property**, the
+**contract** (for example *Water*) and its **meters**, linked to the contract. The import adds *readings* to the meters of the
+contract and *bills and payments* to the contract; it does not create contracts or meters and does not import prices
+(tariffs stay as you entered them). If a meter or contract is missing, the wizard says so; *Open contract* takes you to it.
+The file must be an `.xlsx` workbook (not the old `.xls`).
+
+The wizard has four steps:
+
+1. **File and sheet** — *Choose Excel file…* and pick the sheet (with its number of rows).
+2. **Contract** — choose a **profile** (a remembered column mapping; *New profile* the first time), the **property** and the
+   **contract**. The registers of the contract's meters are listed: these are the places readings can go.
+3. **Columns** — the first rows of the sheet are shown with column letters. For every field choose the column that holds
+   it; the choices are guessed from the header texts (Russian, Latvian and English words such as *Итого / Kopā / Total*,
+   *Оплачено / Apmaksāts / Paid*, *НДС / PVN / VAT*) — **check them**, or press *Guess again* after changing the header row.
+   Only the **period** (month) column is required. The period may be a date, a month cell, `MM.yyyy`, `yyyy-MM`, or a month name
+   in Russian, Latvian or English. You can map:
+   - for each meter register the **reading column** and, if there is one, the **reading date column** (without it the last
+     day of the month is used);
+   - the **bill total**, or the amount excl. VAT, the VAT % and the VAT amount (any two of net / VAT % / total are enough);
+   - the **paid marker**: a column and the text that means "paid in full" (default `***`), and optionally a **payment date** column;
+   - the **quantity on the bill** and **notes columns** (their text is added to the bill with the column header in front);
+   - the **currency**: *LVL before 2014-01, EUR after* (default, for workbooks that go back before the euro), *EUR* or *LVL*.
+   Numbers may use a comma or a dot. The header row, the first data row and the last data row can be changed; without a last
+   row the import stops at the first empty period.
+4. **Preview** — the dry run. For every row you see what will be created (*Reading …*, *Bill …*, *Payment …*) or that the row is
+   *Skipped*, and the problems found. The line on top adds up the result, for example *132 readings, 66 bills, 60 payments,
+   3 rows skipped*. Filter the list to *Errors* or *Warnings*. **Errors** skip the whole row (for example a period that cannot be
+   read, a number that is not a number, a reading lower than the previous one on a meter without dial digits — a meter
+   replacement has to be entered first). **Warnings** are imported with a note (for example a bill of that month exists
+   already, the total is missing so only the readings are imported, net + VAT do not match the total so only the total is kept).
+   Press **Import** to run it.
+
+**What is created.** Readings are *Regular* (the very first reading of an empty register is *Initial*). A bill is created per
+row with a total: *Regular*, or *Equalized* for an equalized contract. A `***` in the paid column creates a **payment
+equal to the bill total**, allocated to that bill, dated with the payment date column or, without it, the 1st of the month
+(reference *imported*). Amounts before 2014 are stored in **lats (LVL)** and shown as they are; reports convert them to EUR
+at the fixed rate. **Duplicates:** if the contract already has a bill for a month, or the register already has a reading on that
+date, that part is skipped — so importing the same sheet twice adds nothing. After a successful import the profile is saved
+(or updated) under the name you gave it.
+
+### Imports and profiles
+
+**Settings → Imports** lists the finished imports (date, file, sheet, how many readings, bills and payments) and the saved profiles.
+
+- **Undo import** hides everything that import created — its bills, their payments, readings — in one go, and the balances
+  return to what they were. Nothing is erased for good. If you edited some of those records after the import, the app
+  asks *Some imported records were edited later. Undo anyway?* before touching anything. After an undo you can import again.
+- A **profile** can be renamed (edit the name and press *Save name*), deleted, or **exported** to a `.json` file and loaded
+  again with *Import profile from file* — for example to send it to the person who helps you. The file contains only the
+  column numbers and settings: **no amounts and no readings**.
+
 ## 17. Coming soon
 
 Charts on the Overview,
-Excel import, reminders, automatic backups and Google Drive sync.
+reminders, automatic backups and Google Drive sync.
