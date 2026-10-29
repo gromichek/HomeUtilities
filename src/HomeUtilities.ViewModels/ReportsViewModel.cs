@@ -304,12 +304,8 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         }
 
         var (from, to) = CurrentRange();
-        var dialog = new ReportPeriodDialogViewModel(
-            _localizer,
-            _state.Preset,
-            from,
-            to,
-            ReportPeriodDialogViewModel.PickerRange(_data.EarliestMonth, _data.LatestMonth, YearMonth.From(_clock.Today)));
+        var (earliest, latest) = ReportPeriodDialogViewModel.PickerRange(_data.EarliestMonth, _data.LatestMonth, YearMonth.From(_clock.Today));
+        var dialog = new ReportPeriodDialogViewModel(_localizer, _state.Preset, from, to, earliest, latest);
         if (!await _dialogs.ShowEditorAsync(dialog))
         {
             return;
