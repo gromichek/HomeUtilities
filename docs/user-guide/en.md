@@ -146,6 +146,8 @@ Open a property → card **Contracts** → **Add contract**.
     and adds the rounded values (a difference of a cent or two). See [Charges](#10-charges).
 - **Reading submission window:** the days of the month when the supplier accepts readings, e.g. 25–28. A window
   like 28–3 continues into the next month. The Readings screen uses it to show "open now / opens in N days".
+  The switch **Remind me about readings** (on by default) under the days decides whether the [reminders](#reminders)
+  announce the opening of this window; switch it off for a contract whose readings you never submit by a date.
 - **Payment details / Links:** leave a field empty to use the supplier's value. "Effective payment details" shows
   the result, including the payment purpose filled with this contract's numbers.
 - **Tariff:** the priced components of this contract (see [Tariffs](#9-tariffs)). Available after the contract is
@@ -459,7 +461,7 @@ template can also point to a contract (internet with the FiberNet contract) so t
   payment falls, for example March), an optional *Last period*, and the *Issue day of the month* (1–31; 31 in February
   becomes 28 or 29). *Billing timing*: **In advance** (a prepaid bill is issued in the month **before** its period, as internet paid
   in October for November) or **In arrears** (issued in the month **after** it). *Due after … days* counts from the issue day;
-  *Remind … days before* is kept for the reminders that come later. A line **Next drafts** shows the next three periods with
+  *Remind … days before* is how long before the due date the [reminder](#reminders) of the bill comes; empty = the general setting. A line **Next drafts** shows the next three periods with
   their issue and due dates, for example *10.2026 (issued 05.11.2026, due 19.11.2026)*.
 - **Default amount** — any two of *Amount excl. VAT*, *VAT %* and *Total*, as in a bill. It may stay **empty** when the amount is
   different every time (the chimney sweep): the draft then says *Draft · enter the amount*.
@@ -741,8 +743,40 @@ opens (Drive, e-mail…). The message at the bottom shows where the file went.
 
 ## 16. Settings
 
-Language (English / Русский), theme (system / light / dark), categories, VAT rates, [bill templates](#bill-templates-and-drafts), [Excel import](#import-from-excel) and [imports](#imports-and-profiles), version, database file location,
+Language (English / Русский), theme (system / light / dark), [reminders](#reminders), categories, VAT rates, [bill templates](#bill-templates-and-drafts), [Excel import](#import-from-excel) and [imports](#imports-and-profiles), version, database file location,
 and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
+
+### Reminders
+
+**Settings → Reminders** makes the app remind you of the same things that are on the Overview [To do](#to-do) list, even when
+the app is closed (Android). Each reminder is a notification; tapping it opens the right screen.
+
+- **Submit readings** — on the first day of the reading window of a contract (see [Contracts](#5-contracts)), at the set
+  time. Contracts of one property with the same window give one notification. Nothing is sent if the readings of that window
+  are already entered, or if the contract has **Remind me about readings** switched off.
+- **Bills and tax installments due** — a few days before the due date (the setting *Remind about a bill … days before it is
+  due*, 0–14, default 2; a [template](#bill-templates-and-drafts) can have its own number) and again on the due day. Only
+  open bills are reminded: a paid bill, a draft or a bill without a due date is not.
+- **Meter verification** — 60 days before the verification date and on the date itself.
+- **Draft bills to confirm** — when drafts from templates wait for you: on the day they appear and then at most every
+  third day (five reminders at most), until you confirm them.
+
+The **time of day** is the same for all reminders (default 09:00). There are **no reminders from 21:00 to 08:00**: a time in
+that range moves to 08:00. Reminders are planned for the next 45 days, at most 60 of them, and are re-planned whenever you open
+the app or change readings, bills, payments, templates, contracts or these settings — so a bill you have just paid
+no longer reminds you.
+
+**Send a test notification** shows a notification at once, to check that everything works on this device.
+
+**Android.** When you switch the reminders on, Android asks for the permission to show notifications; if you refuse, the
+switch goes back off — allow notifications for the app in the system settings and try again. The app does nothing in the
+background: the notifications are handed to Android in advance, and are shown by the system a little after the set time (Android
+may delay them by a few minutes to save battery). They are kept after a restart of the phone. Reminders are stored on each
+device separately, so every phone and PC has its own switch.
+
+**Windows.** Notifications of a closed app are not available. The setting says *Notifications are not available on this
+device; reminders are shown when the app is opened*: when the app starts, one short message tells you how many things need
+attention (overdue, due today or due soon), once a day; the details are on the Overview.
 
 ### VAT rates
 
@@ -836,4 +870,4 @@ date, that part is skipped — so importing the same sheet twice adds nothing. A
 ## 17. Coming soon
 
 Charts on the Overview,
-reminders, automatic backups and Google Drive sync.
+automatic backups and Google Drive sync.
