@@ -151,13 +151,13 @@ public class ReportsViewModelTests : IDisposable
         var vm = await LoadAsync();
         Assert.Equal(
             (true, true, true, true, false, true),
-            (vm.ShowGrouping, vm.ShowMeasure, vm.ShowYearOverYear, vm.ShowRowModes, vm.ShowPerMeter, vm.ShowCategories));
+            (vm.ShowGrouping, vm.ShowMeasure, vm.ShowYearOverYear, vm.ShowRowModes, vm.ShowConsumptionGrouping, vm.ShowCategories));
         Assert.Equal(["Gross", "Net", "Vat"], vm.Measures.Select(m => ((ReportMeasure)m.Value!).ToString()));
 
         vm.Kinds[(int)ReportKind.Consumption].ChooseCommand.Execute(null);
         await Settled(vm);
 
-        Assert.Equal((false, false, true, true), (vm.ShowGrouping, vm.ShowMeasure, vm.ShowYearOverYear, vm.ShowPerMeter));
+        Assert.Equal((false, false, true, true), (vm.ShowGrouping, vm.ShowMeasure, vm.ShowYearOverYear, vm.ShowConsumptionGrouping));
         Assert.True(vm.Kinds[(int)ReportKind.Consumption].IsSelected);
         Assert.False(vm.Kinds[(int)ReportKind.Costs].IsSelected);
 
@@ -658,6 +658,118 @@ public class ReportsViewModelTests : IDisposable
         Assert.Equal(Routes.ReadingsFor, route);
         Assert.Equal(_flat.Id, parameters![EditorNavigation.PropertyIdParameter]);
         Assert.Equal(new DateOnly(2026, 2, 28), parameters[ReadingsViewModel.DateParameter]);
+    }
+
+    // ---- Consumption grouped by contract --------------------------------------------------------------------------
+
+    private static Meter NewMeter(Property property, MeterResource resource, decimal january, decimal february)
+    {
+        var meter = new Meter { PropertyId = property.Id, Resource = resource, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 1, 1) };
+        var register = new MeterRegister { MeterId = meter.Id, Kind = RegisterKind.Total, Direction = EnergyDirection.Import };
+        register.Readings.Add(new MeterReading { RegisterId = register.Id, Date = new DateOnly(2026, 1, 31), Value = january, Kind = ReadingKind.Regular });
+        register.Readings.Add(new MeterReading { RegisterId = register.Id, Date = new DateOnly(2026, 2, 28), Value = february, Kind = ReadingKind.Regular });
+        meter.Registers.Add(register);
+        return meter;
+    }
+
+    /// <summary>February: cold 5.000 + 4.000, hot 3.000 + 2.000 m3; all four on the "Water" contract, the hot ones also on "Heating".</summary>
+    private void UseWaterFlat()
+    {
+        var water = new Contract { PropertyId = _flat.Id, Title = "Water", CategoryId = _water.Id, ValidFrom = new DateOnly(2020, 1, 1) };
+        var heating = new Contract { PropertyId = _flat.Id, Title = "Heating", CategoryId = _water.Id, ValidFrom = new DateOnly(2020, 1, 1) };
+        var meters = new List<Meter>
+        {
+            NewMeter(_flat, MeterResource.ColdWater, 100m, 105m),
+            NewMeter(_flat, MeterResource.ColdWater, 200m, 204m),
+            NewMeter(_flat, MeterResource.HotWater, 50m, 53m),
+            NewMeter(_flat, MeterResource.HotWater, 80m, 82m),
+        };
+        var links = new List<ContractMeter>();
+        for (var i = 0; i < meters.Count; i++)
+        {
+            links.Add(new ContractMeter { ContractId = water.Id, MeterId = meters[i].Id, ValidFrom = new DateOnly(2020, 1, 1) });
+            if (i >= 2)
+            {
+                links.Add(new ContractMeter { ContractId = heating.Id, MeterId = meters[i].Id, ValidFrom = new DateOnly(2020, 1, 1) });
+            }
+        }
+
+        _loader.Data = new ReportData([_flat], [_water], [water, heating], links, meters, [], [], []);
+        _state.Kind = ReportKind.Consumption;
+    }
+
+    [Fact]
+    public async Task Consumption_can_be_grouped_by_resource_contract_or_meter_and_the_choice_is_remembered()
+    {
+        UseWaterFlat();
+        var vm = await LoadAsync();
+
+        Assert.True(vm.ShowConsumptionGrouping);
+        Assert.Equal(
+            [ConsumptionGrouping.Resource, ConsumptionGrouping.Contract, ConsumptionGrouping.Meter],
+            vm.ConsumptionGroupings.Select(g => (ConsumptionGrouping)g.Value!));
+        Assert.Equal(["ReportGroupResource [en]", "ReportGroupContract [en]", "ReportGroupMeter [en]"], vm.ConsumptionGroupings.Select(g => g.Text));
+        Assert.Equal(0, vm.ConsumptionGroupingIndex);
+        Assert.Equal(2, vm.TableView.ColumnHeaders.Count);
+
+        vm.ConsumptionGroupingIndex = 1;
+        await Settled(vm);
+
+        Assert.Equal(ConsumptionGrouping.Contract, _state.ConsumptionGrouping);
+        Assert.Equal(1, vm.ConsumptionGroupingIndex);
+        Assert.Equal(2, vm.TableView.ColumnHeaders.Count);
+        Assert.StartsWith("Heating (", vm.TableView.ColumnHeaders[0], StringComparison.Ordinal);
+        Assert.StartsWith("Water (", vm.TableView.ColumnHeaders[1], StringComparison.Ordinal);
+        Assert.Equal(["5.000", "14.000"], Texts(vm.TableView.Rows[1]));
+        Assert.Contains("ReportGroupContract [en]", vm.SummaryText, StringComparison.Ordinal);
+        var chart = Assert.Single(vm.Charts);
+        Assert.Equal(["Heating", "Water"], chart.Series.Select(x => x.Name));
+        Assert.Equal(19m, chart.Series.Sum(x => x.Points.Sum(p => p.Value ?? 0m)));
+
+        var again = Create();
+        await again.OnAppearingAsync();
+        Assert.Equal(1, again.ConsumptionGroupingIndex);
+
+        vm.ConsumptionGroupingIndex = 2;
+        await Settled(vm);
+        Assert.Equal(4, vm.TableView.ColumnHeaders.Count);
+    }
+
+    [Fact]
+    public void A_state_saved_with_the_old_per_meter_switch_loads_as_grouping_by_meter()
+    {
+        var state = new ReportFilterState { PerMeter = true };
+
+        Assert.Equal(ConsumptionGrouping.Meter, state.ConsumptionGrouping);
+
+        state.ConsumptionGrouping = ConsumptionGrouping.Contract;
+        state.PerMeter = false;
+        Assert.Equal(ConsumptionGrouping.Contract, state.ConsumptionGrouping);
+        Assert.False(state.PerMeter);
+
+        state.ConsumptionGrouping = ConsumptionGrouping.Meter;
+        state.PerMeter = false;
+        Assert.Equal(ConsumptionGrouping.Resource, state.ConsumptionGrouping);
+    }
+
+    [Fact]
+    public async Task Export_of_the_consumption_by_contract_has_the_contract_columns_and_names_the_grouping()
+    {
+        UseWaterFlat();
+        _state.ConsumptionGrouping = ConsumptionGrouping.Contract;
+        var vm = await LoadAsync();
+
+        await vm.ExportExcelCommand.ExecuteAsync(null);
+        await vm.ExportCsvCommand.ExecuteAsync(null);
+
+        var sheet = Assert.Single(_excel.Written);
+        Assert.Equal(["", "Flat", "Flat"], sheet.HeaderRows[0]);
+        Assert.StartsWith("Heating (", sheet.HeaderRows[1][1], StringComparison.Ordinal);
+        Assert.StartsWith("Water (", sheet.HeaderRows[1][2], StringComparison.Ordinal);
+        Assert.Contains(sheet.Filters, f => f.Label.StartsWith("ReportGroupingLabel", StringComparison.Ordinal) && f.Value == "ReportGroupContract [en]");
+        Assert.Equal([5m, 14m], [sheet.Rows[1][1].Number!.Value, sheet.Rows[1][2].Number!.Value]);
+        Assert.Equal(3, sheet.Rows[1][1].Decimals);
+        Assert.Contains("2026-02;5.000;14.000", Encoding.UTF8.GetString(_files.LastBytes), StringComparison.Ordinal);
     }
 
     // ---- Export ---------------------------------------------------------------------------------------------------

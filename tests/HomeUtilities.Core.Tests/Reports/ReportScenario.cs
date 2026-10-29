@@ -159,8 +159,8 @@ internal sealed class ReportFilterBuilder(YearMonth from, YearMonth to)
 
     public ReportMeasure Measure { get; set; } = ReportMeasure.Gross;
 
-    public bool PerMeter { get; set; }
+    public ConsumptionGrouping ConsumptionGrouping { get; set; }
 
     public ReportFilter Build() =>
-        new(from, to, PropertyIds, CategoryIds, Rows, YearOverYear, Grouping, Measure, PerMeter);
+        new(from, to, PropertyIds, CategoryIds, Rows, YearOverYear, Grouping, Measure, ConsumptionGrouping);
 }

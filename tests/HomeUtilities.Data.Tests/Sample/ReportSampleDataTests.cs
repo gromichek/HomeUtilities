@@ -33,7 +33,7 @@ public class ReportSampleDataTests
     {
         var options = new ReportFilterOptions();
         configure?.Invoke(options);
-        return new ReportFilter(from, to, null, null, options.Rows, options.YearOverYear, options.Grouping, options.Measure, options.PerMeter);
+        return new ReportFilter(from, to, null, null, options.Rows, options.YearOverYear, options.Grouping, options.Measure, options.ConsumptionGrouping);
     }
 
     private sealed class ReportFilterOptions
@@ -46,7 +46,7 @@ public class ReportSampleDataTests
 
         public ReportMeasure Measure { get; set; }
 
-        public bool PerMeter { get; set; }
+        public ConsumptionGrouping ConsumptionGrouping { get; set; }
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class ReportSampleDataTests
                             o.Rows = rows;
                             o.YearOverYear = yoy;
                             o.Measure = measure;
-                            o.PerMeter = measure == ReportMeasure.Net;
+                            o.ConsumptionGrouping = (ConsumptionGrouping)((int)measure % 3);
                         }));
 
                         Assert.All(table.Rows, r => Assert.Equal(table.Columns.Count, r.Cells.Count));

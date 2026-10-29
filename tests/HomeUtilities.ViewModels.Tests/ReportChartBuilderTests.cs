@@ -46,7 +46,7 @@ public class ReportChartBuilderTests : IDisposable
         CostGrouping grouping = CostGrouping.Category,
         bool yearOverYear = false,
         ReportMeasure measure = ReportMeasure.Gross) =>
-        new(from, to, null, null, ReportRows.Months, yearOverYear, grouping, measure, false);
+        new(from, to, null, null, ReportRows.Months, yearOverYear, grouping, measure);
 
     // ---- Costs ----------------------------------------------------------------------------------------------------
 
@@ -246,6 +246,27 @@ public class ReportChartBuilderTests : IDisposable
         Assert.Single(charts[1].Series);
         Assert.Equal([300m, 250m], charts[1].Series[0].Points.Select(p => p.Value));
         Assert.StartsWith("ReportKindConsumption [en], ", charts[1].Title);
+    }
+
+    [Fact]
+    public void Consumption_by_contract_is_a_line_per_contract_with_the_category_colour_used_once()
+    {
+        // Water and Heating are both in the "Water" category (blue): the first keeps the colour, the second gets a palette colour.
+        var water = Column("water", "Water", ColumnSubject.Contract, ReportValueKind.Quantity, ReportMeasure.Quantity, MeterUnit.M3) with { CategoryId = _water.Id };
+        var heating = Column("heating", "Heating", ColumnSubject.Contract, ReportValueKind.Quantity, ReportMeasure.Quantity, MeterUnit.M3) with { CategoryId = _water.Id };
+        var power = Column("power", "Power", ColumnSubject.Contract, ReportValueKind.Quantity, ReportMeasure.Quantity, MeterUnit.KWh) with { CategoryId = _power.Id };
+        var table = Table(
+            ReportKind.Consumption,
+            [water, heating, power],
+            [Row(1, [new ReportCell(14m), new ReportCell(5m), new ReportCell(200m)])]);
+
+        var charts = Charts(table);
+
+        Assert.Equal(2, charts.Count);
+        Assert.Equal(["Water", "Heating"], charts[0].Series.Select(x => x.Name));
+        Assert.Equal(_water.Color, charts[0].Series[0].Color);
+        Assert.NotEqual(_water.Color, charts[0].Series[1].Color);
+        Assert.Equal(_power.Color, charts[1].Series[0].Color);
     }
 
     [Fact]

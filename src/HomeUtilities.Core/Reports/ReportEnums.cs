@@ -42,6 +42,19 @@ public enum CostGrouping
     Property = 3,
 }
 
+/// <summary>What the columns of the consumption report are grouped by (inside each property).</summary>
+public enum ConsumptionGrouping
+{
+    /// <summary>One column per resource and unit (cold water, hot water, electricity…).</summary>
+    Resource = 0,
+
+    /// <summary>One column per contract: the sum of all meters linked to it (all the water of the flat).</summary>
+    Contract = 1,
+
+    /// <summary>One column per meter (with its replacements).</summary>
+    Meter = 2,
+}
+
 /// <summary>The figure a column shows.</summary>
 public enum ReportMeasure
 {

@@ -58,6 +58,11 @@ public static class ReportSheetBuilder
             filters.Add((localizer["ReportGroupingLabel"], localizer["ReportGroup" + filter.Grouping]));
         }
 
+        if (table.Kind == ReportKind.Consumption)
+        {
+            filters.Add((localizer["ReportGroupingLabel"], localizer["ReportGroup" + filter.ConsumptionGrouping]));
+        }
+
         if (table.Kind != ReportKind.Consumption)
         {
             filters.Add((localizer["ReportMeasureLabel"], labels.MeasureName(table.Columns.Count > 0 ? table.Columns[0].Measure : filter.Measure)));

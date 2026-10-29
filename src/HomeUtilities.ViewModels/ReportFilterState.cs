@@ -89,6 +89,26 @@ public sealed class ReportFilterState
     /// <summary>True = the filter panel is open; null = not chosen yet (open except on phones).</summary>
     public bool? FiltersExpanded { get; set; }
 
-    /// <summary>Consumption: one column per meter.</summary>
-    public bool PerMeter { get; set; }
+    /// <summary>Consumption: what the columns are grouped by.</summary>
+    public ConsumptionGrouping ConsumptionGrouping { get; set; } = ConsumptionGrouping.Resource;
+
+    /// <summary>
+    /// The old "one column per meter" switch, kept so that a state saved before the grouping choice existed still loads:
+    /// true maps to <see cref="ConsumptionGrouping.Meter"/>.
+    /// </summary>
+    public bool PerMeter
+    {
+        get => ConsumptionGrouping == ConsumptionGrouping.Meter;
+        set
+        {
+            if (value)
+            {
+                ConsumptionGrouping = ConsumptionGrouping.Meter;
+            }
+            else if (ConsumptionGrouping == ConsumptionGrouping.Meter)
+            {
+                ConsumptionGrouping = ConsumptionGrouping.Resource;
+            }
+        }
+    }
 }
