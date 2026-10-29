@@ -20,10 +20,10 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     private ReportPreset _preset;
 
     [ObservableProperty]
-    private int _fromIndex;
+    private DateOnly _fromDate;
 
     [ObservableProperty]
-    private int _toIndex;
+    private DateOnly _toDate;
 
     [ObservableProperty]
     private string _error = string.Empty;
@@ -33,8 +33,8 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     /// <param name="preset">The current preset.</param>
     /// <param name="from">First month of the current range (the start of the custom range).</param>
     /// <param name="to">Last month of the current range.</param>
-    /// <param name="earliest">First month the pickers offer (widened to include the range).</param>
-    /// <param name="latest">Last month the pickers offer (widened to include the range).</param>
+    /// <param name="earliest">First month the calendars offer (widened to include the range).</param>
+    /// <param name="latest">Last month the calendars offer (widened to include the range).</param>
     public ReportPeriodDialogViewModel(ILocalizer localizer, ReportPreset preset, YearMonth from, YearMonth to, YearMonth earliest, YearMonth latest)
         : base(localizer)
     {
@@ -45,19 +45,11 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
         ToLabel = localizer["ReportToLabel"];
         OkText = localizer["Dialog_Ok"];
 
-        var first = new[] { earliest, from, to }.Min();
-        var last = new[] { latest, from, to }.Max();
-        var months = new List<YearMonth>();
-        for (var month = first; month <= last; month = month.AddMonths(1))
-        {
-            months.Add(month);
-        }
-
-        Months = months;
-        MonthTexts = [.. months.Select(m => $"{m.Month:00}.{m.Year}")];
+        MinimumMonth = new[] { earliest, from, to }.Min();
+        MaximumMonth = new[] { latest, from, to }.Max();
         _preset = preset;
-        _fromIndex = months.IndexOf(from);
-        _toIndex = months.IndexOf(to);
+        _fromDate = from.FirstDay;
+        _toDate = to.FirstDay;
         BuildPresets();
     }
 
@@ -73,17 +65,38 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     /// <summary>Text of the confirm button.</summary>
     public string OkText { get; }
 
-    /// <summary>The months the pickers offer.</summary>
-    public IReadOnlyList<YearMonth> Months { get; }
+    /// <summary>The first month the calendars offer.</summary>
+    public YearMonth MinimumMonth { get; }
 
-    /// <summary>The months as <c>MM.yyyy</c>, for the pickers.</summary>
-    public IReadOnlyList<string> MonthTexts { get; }
+    /// <summary>The last month the calendars offer.</summary>
+    public YearMonth MaximumMonth { get; }
+
+    /// <summary>The first day the date pickers allow.</summary>
+    public DateOnly MinimumDate => MinimumMonth.FirstDay;
+
+    /// <summary>The last day the date pickers allow.</summary>
+    public DateOnly MaximumDate => MaximumMonth.LastDay;
+
+    /// <summary>
+    /// The months the calendars offer for the data of the Reports screen: from the first month with a bill or a reading
+    /// (10 years back from <paramref name="current"/> if there is none) to the later of <paramref name="current"/> and the
+    /// last bill's period (bills of prepaid services may lie in the future).
+    /// </summary>
+    /// <param name="earliestData">First month with data, or null.</param>
+    /// <param name="latestBill">Period of the last bill, or null.</param>
+    /// <param name="current">The current month.</param>
+    public static (YearMonth Earliest, YearMonth Latest) PickerRange(YearMonth? earliestData, YearMonth? latestBill, YearMonth current)
+    {
+        var latest = latestBill is { } bill && bill > current ? bill : current;
+        var earliest = earliestData ?? current.AddMonths(-120);
+        return (earliest < latest ? earliest : latest, latest);
+    }
 
     /// <summary>True while "Custom…" is chosen (the month pickers are shown).</summary>
     public bool IsCustom => Preset == ReportPreset.Custom;
 
     /// <summary>The chosen range of a custom period.</summary>
-    public (YearMonth From, YearMonth To) Range => (Months[Math.Max(FromIndex, 0)], Months[Math.Max(ToIndex, 0)]);
+    public (YearMonth From, YearMonth To) Range => (YearMonth.From(FromDate), YearMonth.From(ToDate));
 
     /// <summary>OK.</summary>
     [RelayCommand]

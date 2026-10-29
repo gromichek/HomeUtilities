@@ -645,7 +645,7 @@ by default and stays as you left it while the app runs. The exports are in the *
 
 - **Period** — the field shows the choice with its months, for example *This year (01.2026–12.2026)*. The dialog offers
   *This year* (January to December), *Last 12 months*, *Last year*, *All* (from your first record to today or your last
-  bill) and *Custom…*, which adds a *From* and a *To* month list under the options. The end cannot be before the start.
+  bill) and *Custom…*, which adds a *From* and a *To* field under the options; each opens a calendar where you pick any day of the month you mean (only the month and year count), and the calendar offers the months from your first bill or reading up to today or your last bill. The end cannot be before the start.
   Every choice dialog looks the same: the title on top, the options as rows (a round mark for one choice, a square one
   for several) that you can tap anywhere, and *Cancel* / *OK* at the bottom right; on a phone it fills the screen.
 - **Properties** and **Categories** — a dialog with a check box per item (categories with their colour), the buttons
@@ -656,7 +656,7 @@ by default and stays as you left it while the app runs. The exports are in the *
 - **Year over year** — a switch. Instead of one long list, the twelve months of the year are the rows and every year is its
   own column, so you can compare October 2026 with October 2025 at a glance. Available for costs and consumption.
 
-**Reading a table with several properties.** Each property has its own block of columns: a **coloured stripe** over the
+**Reading a table with several properties.** Each property has its own block of columns, and each property keeps its own **colour** (its name and column headings are tinted, the same colour whichever properties you filter): a **coloured stripe** over the
 property name, a **thick vertical line** before the block, every second block lightly shaded, and the block's **Total**
 column in bold on a tinted background. The last block (with no property name) is the **grand total** of the row across all
 properties. Column names wrap only between words; hover a header (Windows) to see its full name.

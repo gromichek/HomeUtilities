@@ -7,7 +7,7 @@ namespace HomeUtilities.App.Views;
 /// <summary>
 /// Draws a report table: the period column stays in place while the numbers scroll sideways inside the table area only (the
 /// page itself never scrolls sideways). Every row has a fixed height so the two parts line up. Each property's columns form a
-/// group: a coloured stripe on its header, every other group tinted, a 2 px separator before the group and a bold, tinted
+/// group: a coloured stripe on its header, every other group's numbers shaded, headers in the property's own colour (a fixed palette), a 2 px separator before the group and a bold, tinted
 /// total column. Column headers wrap at word boundaries only (a column is as wide as its longest word needs). Numbers that rest
 /// on incomplete data are muted, the totals row is bold, a number with bills or readings behind it can be tapped.
 /// </summary>
@@ -46,6 +46,7 @@ public sealed class ReportTableView : ContentView
         CellTint Tint = CellTint.None,
         bool Separator = false,
         bool Stripe = false,
+        int ColorIndex = -1,
         int MaxLines = 1,
         ICommand? Tap = null,
         string? ToolTip = null);
@@ -81,8 +82,15 @@ public sealed class ReportTableView : ContentView
         return Math.Max(MinCellWidth, (longest * CharWidth) + CellPadding);
     }
 
-    private static void ApplyTint(VisualElement cell, CellTint tint)
+    private static void ApplyTint(VisualElement cell, CellTint tint, int colorIndex)
     {
+        if (tint == CellTint.Heading && colorIndex >= 0)
+        {
+            var slot = colorIndex + 1;
+            cell.SetAppThemeColor(VisualElement.BackgroundColorProperty, ResourceColor($"PropertyTint{slot}Light"), ResourceColor($"PropertyTint{slot}Dark"));
+            return;
+        }
+
         switch (tint)
         {
             case CellTint.Group:
@@ -129,12 +137,20 @@ public sealed class ReportTableView : ContentView
         var cell = new Grid();
         cell.Children.Add(label);
         cell.Children.Add(line);
-        ApplyTint(cell, look.Tint);
+        ApplyTint(cell, look.Tint, look.ColorIndex);
 
         if (look.Stripe)
         {
             var stripe = new BoxView { HeightRequest = StripeHeight, VerticalOptions = LayoutOptions.Start };
-            stripe.SetAppThemeColor(BoxView.ColorProperty, ResourceColor("PrimaryLight"), ResourceColor("PrimaryDark"));
+            if (look.ColorIndex >= 0)
+            {
+                var slot = look.ColorIndex + 1;
+                stripe.SetAppThemeColor(BoxView.ColorProperty, ResourceColor($"PropertyStripe{slot}Light"), ResourceColor($"PropertyStripe{slot}Dark"));
+            }
+            else
+            {
+                stripe.SetAppThemeColor(BoxView.ColorProperty, ResourceColor("PrimaryLight"), ResourceColor("PrimaryDark"));
+            }
             cell.Children.Add(stripe);
         }
 
@@ -164,6 +180,7 @@ public sealed class ReportTableView : ContentView
         // Per column: the index of its group (-1 = grand total), whether it opens the group, and its width.
         var groupOf = new int[table.ColumnCount];
         var startsGroup = new bool[table.ColumnCount];
+        var colorOf = new int[table.ColumnCount];
         var position = 0;
         foreach (var group in table.Groups)
         {
@@ -171,6 +188,7 @@ public sealed class ReportTableView : ContentView
             {
                 groupOf[position + i] = group.Index;
                 startsGroup[position + i] = i == 0;
+                colorOf[position + i] = group.ColorIndex;
             }
 
             position += group.Span;
@@ -209,7 +227,7 @@ public sealed class ReportTableView : ContentView
         {
             var cell = MakeCell(
                 group.Text,
-                new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Heading, Separator: position > 0, Stripe: group.Index >= 0, ToolTip: group.Text));
+                new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Heading, Separator: position > 0, Stripe: group.Index >= 0, ColorIndex: group.ColorIndex, ToolTip: group.Text));
             body.Add(cell, position, 0);
             Grid.SetColumnSpan(cell, group.Span);
             position += group.Span;
@@ -219,7 +237,7 @@ public sealed class ReportTableView : ContentView
         {
             var header = table.ColumnHeaders[column];
             body.Add(
-                MakeCell(header, new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Heading, Separator: startsGroup[column] && column > 0, MaxLines: 3, ToolTip: header)),
+                MakeCell(header, new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Heading, Separator: startsGroup[column] && column > 0, ColorIndex: colorOf[column], MaxLines: 3, ToolTip: header)),
                 column,
                 1);
         }
