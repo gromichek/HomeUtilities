@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-027 | Import of the owner's workbook (owner runs the wizard; lead collects issues) | Waiting for owner | | |
+| T-027 | Import for the owner's workbook: reading dates, positions, automatic replacements | Ready | | lead analysed the workbook locally (not in repo) |
 | T-028 | Reminders (local notifications) | Ready | | |
 
 ## Done
@@ -106,7 +106,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
 | 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
-| | #116 + #117 | T-026 import wizard; report colours + calendar | pending |
+| 2026-10-29 | #116 + #117 | T-026 import wizard; report colours + calendar | Colours/calendar OK; Shift+wheel does not scroll the table. Import: dates are reading dates (not periods), one column per meter position with 6 replacements → T-027 |
 | 2026-10-29 | #114 | T-023b reports polish | OK (requests: coloured property headers, calendar for custom period → #117) |
 | | #111 | T-025 templates and drafts | pending |
 | 2026-10-28 | #108 | T-024 charts | OK |
