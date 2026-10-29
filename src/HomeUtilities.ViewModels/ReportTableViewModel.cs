@@ -8,7 +8,8 @@ namespace HomeUtilities.ViewModels;
 /// <param name="Text">The property name.</param>
 /// <param name="Span">How many columns it covers.</param>
 /// <param name="Index">0, 1, 2… per property in order (used to tint every other group); -1 for the grand total column.</param>
-public sealed record ReportHeaderGroup(string Text, int Span, int Index = -1);
+/// <param name="ColorIndex">Palette slot of the property (see <see cref="ReportPropertyColors"/>); -1 = neutral (grand total).</param>
+public sealed record ReportHeaderGroup(string Text, int Span, int Index = -1, int ColorIndex = -1);
 
 /// <summary>A number of the table as shown.</summary>
 public sealed class ReportCellViewModel
@@ -63,8 +64,13 @@ public sealed record ReportTableViewModel(
 
     /// <summary>
     /// Builds the view model of a table. <paramref name="open"/> is called with the drill target of a tapped cell.
+    /// <paramref name="colors"/> maps a property to its palette slot (null = neutral headers).
     /// </summary>
-    public static ReportTableViewModel From(ReportTable table, ReportLabels labels, Action<ReportDrill> open)
+    public static ReportTableViewModel From(
+        ReportTable table,
+        ReportLabels labels,
+        Action<ReportDrill> open,
+        IReadOnlyDictionary<Guid, int>? colors = null)
     {
         ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(labels);
@@ -85,7 +91,11 @@ public sealed record ReportTableViewModel(
             }
             else
             {
-                groups.Add(new ReportHeaderGroup(column.PropertyName, 1, groups.Count));
+                groups.Add(new ReportHeaderGroup(
+                    column.PropertyName,
+                    1,
+                    groups.Count,
+                    colors is not null && colors.TryGetValue(column.PropertyId, out var slot) ? slot : -1));
                 groupIds.Add(column.PropertyId);
             }
         }

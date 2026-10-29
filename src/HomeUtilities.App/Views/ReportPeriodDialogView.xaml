@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:views="clr-namespace:HomeUtilities.App.Views"
+             xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
              x:Class="HomeUtilities.App.Views.ReportPeriodDialogView"
              x:DataType="vm:ReportPeriodDialogViewModel"
@@ -11,9 +12,10 @@
 
     <ContentView.Resources>
         <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+        <conv:DateOnlyConverter x:Key="DateOnly" />
     </ContentView.Resources>
 
-    <!-- Radio rows (presets and "Custom…"); the from / to month pickers appear under the rows while "Custom…" is chosen. -->
+    <!-- Radio rows (presets and "Custom…"); the from / to calendars (month and year only) appear under the rows while "Custom…" is chosen. -->
     <Grid RowDefinitions="Auto,*,Auto" Padding="20" RowSpacing="8">
         <Label Grid.Row="0" Text="{Binding Title}" Style="{StaticResource SectionHeader}" VerticalOptions="Start" />
 
@@ -23,9 +25,9 @@
 
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustom}" Padding="4,0">
                     <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding FromIndex, Mode=TwoWay}" />
+                    <DatePicker x:Name="FromPicker" Format="MMMM yyyy" Date="{Binding FromDate, Converter={StaticResource DateOnly}}" />
                     <Label Text="{Binding ToLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding ToIndex, Mode=TwoWay}" />
+                    <DatePicker x:Name="ToPicker" Format="MMMM yyyy" Date="{Binding ToDate, Converter={StaticResource DateOnly}}" />
                     <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
                 </VerticalStackLayout>

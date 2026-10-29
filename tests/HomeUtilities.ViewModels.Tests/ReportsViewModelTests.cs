@@ -208,7 +208,7 @@ public class ReportsViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task A_custom_range_is_picked_from_the_month_lists()
+    public async Task A_custom_range_is_picked_with_the_calendars()
     {
         var vm = await LoadAsync();
 
@@ -217,8 +217,9 @@ public class ReportsViewModelTests : IDisposable
             Assert.False(d.IsCustom);
             d.Presets[(int)ReportPreset.Custom].ChooseCommand.Execute(null);
             Assert.True(d.IsCustom);
-            d.FromIndex = d.MonthTexts.ToList().IndexOf("02.2026");
-            d.ToIndex = d.MonthTexts.ToList().IndexOf("04.2026");
+            // Any day of the picked month counts: only the month is taken.
+            d.FromDate = new DateOnly(2026, 2, 17);
+            d.ToDate = new DateOnly(2026, 4, 30);
         });
 
         Assert.Equal(["02.2026", "04.2026"], [vm.FromText, vm.ToText]);
@@ -233,8 +234,8 @@ public class ReportsViewModelTests : IDisposable
         var (from, to) = (new YearMonth(2026, 1), new YearMonth(2026, 12));
         var dialog = new ReportPeriodDialogViewModel(_kit.Localizer, ReportPreset.Custom, from, to, from, to)
         {
-            FromIndex = 5,
-            ToIndex = 2,
+            FromDate = new DateOnly(2026, 6, 15),
+            ToDate = new DateOnly(2026, 3, 1),
         };
 
         dialog.ConfirmCommand.Execute(null);
@@ -242,6 +243,50 @@ public class ReportsViewModelTests : IDisposable
         Assert.False(dialog.Saved);
         Assert.Equal("ReportPeriodInvalid [en]", dialog.Error);
         Assert.NotNull(vm);
+    }
+
+    [Fact]
+    public void The_calendars_map_the_picked_dates_to_months_and_offer_the_range_of_the_data()
+    {
+        var (from, to) = (new YearMonth(2026, 3), new YearMonth(2026, 5));
+        var dialog = new ReportPeriodDialogViewModel(_kit.Localizer, ReportPreset.Custom, from, to, new YearMonth(2025, 11), new YearMonth(2026, 10));
+
+        // The calendars start on the first day of the current range and allow the whole range of the data.
+        Assert.Equal([new DateOnly(2026, 3, 1), new DateOnly(2026, 5, 1)], [dialog.FromDate, dialog.ToDate]);
+        Assert.Equal(new DateOnly(2025, 11, 1), dialog.MinimumDate);
+        Assert.Equal(new DateOnly(2026, 10, 31), dialog.MaximumDate);
+
+        dialog.FromDate = new DateOnly(2025, 12, 31);
+        dialog.ToDate = new DateOnly(2026, 2, 1);
+        Assert.Equal((new YearMonth(2025, 12), new YearMonth(2026, 2)), dialog.Range);
+    }
+
+    [Fact]
+    public void The_range_of_the_calendars_is_widened_to_include_the_current_range()
+    {
+        var (from, to) = (new YearMonth(2024, 1), new YearMonth(2027, 1));
+        var dialog = new ReportPeriodDialogViewModel(_kit.Localizer, ReportPreset.Custom, from, to, new YearMonth(2025, 11), new YearMonth(2026, 10));
+
+        Assert.Equal(new DateOnly(2024, 1, 1), dialog.MinimumDate);
+        Assert.Equal(new DateOnly(2027, 1, 31), dialog.MaximumDate);
+    }
+
+    [Fact]
+    public void The_picker_range_runs_from_the_first_data_to_the_later_of_now_and_the_last_bill()
+    {
+        var now = new YearMonth(2026, 10);
+
+        // Data from 03.2024; the last bill (prepaid) lies after the current month.
+        Assert.Equal((new YearMonth(2024, 3), new YearMonth(2027, 1)), ReportPeriodDialogViewModel.PickerRange(new YearMonth(2024, 3), new YearMonth(2027, 1), now));
+
+        // The last bill is older than the current month: the range still reaches the current month.
+        Assert.Equal((new YearMonth(2024, 3), now), ReportPeriodDialogViewModel.PickerRange(new YearMonth(2024, 3), new YearMonth(2026, 2), now));
+
+        // Readings only (no bills).
+        Assert.Equal((new YearMonth(2025, 6), now), ReportPeriodDialogViewModel.PickerRange(new YearMonth(2025, 6), null, now));
+
+        // No data: ten years back to the current month.
+        Assert.Equal((new YearMonth(2016, 10), now), ReportPeriodDialogViewModel.PickerRange(null, null, now));
     }
 
     [Fact]

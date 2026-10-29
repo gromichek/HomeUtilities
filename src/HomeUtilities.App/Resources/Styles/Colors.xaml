@@ -30,4 +30,39 @@
     <Color x:Key="OutlineLight">#D0D5DD</Color>
     <Color x:Key="OutlineDark">#3A3F47</Color>
 
+    <!-- Report table: one soft tint (header cells) and one stronger stripe colour per property slot; the slot is the
+         property's position in the alphabetical list of all properties (ReportPropertyColors). Text stays the normal theme text colour. -->
+    <Color x:Key="PropertyTint1Light">#DCE9F7</Color>
+    <Color x:Key="PropertyTint1Dark">#28394D</Color>
+    <Color x:Key="PropertyStripe1Light">#3F7CBF</Color>
+    <Color x:Key="PropertyStripe1Dark">#6FA8E0</Color>
+    <Color x:Key="PropertyTint2Light">#DDF0DF</Color>
+    <Color x:Key="PropertyTint2Dark">#2A402C</Color>
+    <Color x:Key="PropertyStripe2Light">#4C9A52</Color>
+    <Color x:Key="PropertyStripe2Dark">#7BC47F</Color>
+    <Color x:Key="PropertyTint3Light">#FBEBCB</Color>
+    <Color x:Key="PropertyTint3Dark">#45391F</Color>
+    <Color x:Key="PropertyStripe3Light">#C48A1A</Color>
+    <Color x:Key="PropertyStripe3Dark">#E0B04E</Color>
+    <Color x:Key="PropertyTint4Light">#F8DDE3</Color>
+    <Color x:Key="PropertyTint4Dark">#482B33</Color>
+    <Color x:Key="PropertyStripe4Light">#C2506A</Color>
+    <Color x:Key="PropertyStripe4Dark">#E08397</Color>
+    <Color x:Key="PropertyTint5Light">#E8E0F5</Color>
+    <Color x:Key="PropertyTint5Dark">#382F4A</Color>
+    <Color x:Key="PropertyStripe5Light">#7A5BB5</Color>
+    <Color x:Key="PropertyStripe5Dark">#A58BDA</Color>
+    <Color x:Key="PropertyTint6Light">#D5F0EE</Color>
+    <Color x:Key="PropertyTint6Dark">#243F3E</Color>
+    <Color x:Key="PropertyStripe6Light">#2A9490</Color>
+    <Color x:Key="PropertyStripe6Dark">#5CC4BF</Color>
+    <Color x:Key="PropertyTint7Light">#FBE0D2</Color>
+    <Color x:Key="PropertyTint7Dark">#46301F</Color>
+    <Color x:Key="PropertyStripe7Light">#CC6A33</Color>
+    <Color x:Key="PropertyStripe7Dark">#E89460</Color>
+    <Color x:Key="PropertyTint8Light">#EAEBD2</Color>
+    <Color x:Key="PropertyTint8Dark">#3A3C22</Color>
+    <Color x:Key="PropertyStripe8Light">#8A8F2E</Color>
+    <Color x:Key="PropertyStripe8Dark">#B5BB5C</Color>
+
 </ResourceDictionary>

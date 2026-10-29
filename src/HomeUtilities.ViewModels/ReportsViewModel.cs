@@ -304,13 +304,8 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         }
 
         var (from, to) = CurrentRange();
-        var dialog = new ReportPeriodDialogViewModel(
-            _localizer,
-            _state.Preset,
-            from,
-            to,
-            _data.EarliestMonth ?? from,
-            _data.LatestMonth ?? to);
+        var (earliest, latest) = ReportPeriodDialogViewModel.PickerRange(_data.EarliestMonth, _data.LatestMonth, YearMonth.From(_clock.Today));
+        var dialog = new ReportPeriodDialogViewModel(_localizer, _state.Preset, from, to, earliest, latest);
         if (!await _dialogs.ShowEditorAsync(dialog))
         {
             return;
@@ -555,7 +550,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
 
         _table = table;
         var labels = new ReportLabels(_localizer);
-        TableView = ReportTableViewModel.From(table, labels, OpenDrill);
+        TableView = ReportTableViewModel.From(table, labels, OpenDrill, ReportPropertyColors.Assign(data.Properties.Select(p => (p.Id, p.Name))));
         _hasData = !table.IsEmpty;
         Charts = ReportChartBuilder.Build(table, labels, _localizer, data.Categories.ToDictionary(c => c.Id, c => c.Color));
         ShowEmpty = table.IsEmpty;
