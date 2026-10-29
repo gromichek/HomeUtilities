@@ -29,6 +29,7 @@ these rules; the Properties screen (after T-012a) is the reference implementatio
 | `IconPaid` | mark as paid | `task_alt` | `E73E` CheckMark |
 | `IconHelp` | help | `help_outline` | `E897` Help |
 | `IconTodoReadings` / `Due` / `Missing` / `Verification` / `Settlement` | Overview to-do kinds | `speed` / `event` / `note_add` / `build` / `balance` | `E9D9` / `E787` / `E8A5` / `E7BA` / `E8EF` |
+| `IconCheckOn` / `IconCheckOff` / `IconRadioOn` / `IconRadioOff` | marks in choice dialogs (§3a) | `check_box` / `check_box_outline_blank` / `radio_button_checked` / `radio_button_unchecked` | Segoe check box / radio glyphs (see Icons.xaml) |
 | `IconChevron` | open / go to | `chevron_right` | `E76C` ChevronRight |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` | `E70D` / `E70E` Chevron down/up |
 
