@@ -1,0 +1,2 @@
+# Parallel sessions append resource strings at the end of the file: keep both sides instead of a conflict.
+*.resx merge=union
