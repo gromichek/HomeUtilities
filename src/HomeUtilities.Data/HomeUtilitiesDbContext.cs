@@ -4,6 +4,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Equalized;
+using HomeUtilities.Core.Import;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Data.Conversion;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,10 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
 
     public DbSet<Attachment> Attachments => Set<Attachment>();
 
+    public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
+
+    public DbSet<SavedImportProfile> ImportProfiles => Set<SavedImportProfile>();
+
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -82,6 +87,7 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
         modelBuilder.Ignore<Schedule>();
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(HomeUtilitiesDbContext).Assembly);
+        Configurations.ImportBatchReferences.Configure(modelBuilder);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(t => t.ClrType.IsAssignableTo(typeof(SyncEntity))))
         {

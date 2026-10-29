@@ -22,7 +22,7 @@ public class OverviewSampleDataTests
         var generator = new SampleDataGenerator(
             new PropertyStore(factory), new SupplierStore(factory), new CategoryStore(factory), new ContractStore(factory),
             new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillTemplateStore(factory, test.Clock), new BillStore(factory),
-            new PaymentStore(factory), new ChargeInputLoader(factory), test.Clock);
+            new PaymentStore(factory), new ImportProfileStore(factory), new ChargeInputLoader(factory), test.Clock);
         Assert.True(await generator.FillAsync());
 
         var today = test.Clock.Today;
