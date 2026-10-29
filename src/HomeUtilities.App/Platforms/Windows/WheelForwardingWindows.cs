@@ -10,8 +10,8 @@ namespace HomeUtilities.App.WinUI;
 
 /// <summary>
 /// The inner horizontal ScrollViewer of a report table takes the mouse wheel, so the page stops scrolling while the pointer is over
-/// the table. A plain vertical wheel is forwarded to the nearest outer ScrollViewer; Shift + wheel, a horizontal wheel, a
-/// touchpad swipe and the scrollbar keep scrolling the table sideways.
+/// the table. A plain vertical wheel is forwarded to the nearest outer ScrollViewer; Shift + wheel and a horizontal wheel scroll the
+/// table sideways (done here: the page's viewer took Shift + wheel before); a touchpad swipe and the scrollbar scroll it as well.
 /// </summary>
 internal static class WheelForwardingWindows
 {
@@ -35,9 +35,18 @@ internal static class WheelForwardingWindows
         }
 
         var properties = e.GetCurrentPoint(inner).Properties;
-        var shift = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down);
-        if (properties.IsHorizontalMouseWheel || shift || properties.MouseWheelDelta == 0)
+        if (properties.MouseWheelDelta == 0)
         {
+            return;
+        }
+
+        var shift = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down);
+        if (shift || properties.IsHorizontalMouseWheel)
+        {
+            // Shift + wheel (or a tilt wheel) moves the table sideways; wheel up = left, as in Excel.
+            var step = properties.IsHorizontalMouseWheel ? properties.MouseWheelDelta : -properties.MouseWheelDelta;
+            inner.ChangeView(inner.HorizontalOffset + step, null, null, true);
+            e.Handled = true;
             return;
         }
 

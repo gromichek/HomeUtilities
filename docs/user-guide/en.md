@@ -792,46 +792,97 @@ The wizard has four steps:
 
 1. **File and sheet** — *Choose Excel file…* and pick the sheet (with its number of rows).
 2. **Contract** — choose a **profile** (a remembered column mapping; *New profile* the first time), the **property** and the
-   **contract**. The registers of the contract's meters are listed: these are the places readings can go.
+   **contract**. The **positions** of the contract are listed: one line for each meter together with the meters that replaced
+   it (for example *Cold water · Bathroom*). A reading goes to the meter of that chain that was installed on the reading date,
+   so you only need to set up the first meter; the app can add the replacements it finds (see below).
 3. **Columns** — the first rows of the sheet are shown with column letters. For every field choose the column that holds
    it; the choices are guessed from the header texts (Russian, Latvian and English words such as *Итого / Kopā / Total*,
    *Оплачено / Apmaksāts / Paid*, *НДС / PVN / VAT*) — **check them**, or press *Guess again* after changing the header row.
-   Only the **period** (month) column is required. The period may be a date, a month cell, `MM.yyyy`, `yyyy-MM`, or a month name
-   in Russian, Latvian or English. You can map:
-   - for each meter register the **reading column** and, if there is one, the **reading date column** (without it the last
-     day of the month is used);
-   - the **bill total**, or the amount excl. VAT, the VAT % and the VAT amount (any two of net / VAT % / total are enough);
+   Only the **period** (month) column is required. The period column may hold a date, a month cell, `MM.yyyy`, `yyyy-MM`, or a month name
+   in Russian, Latvian or English. A **date** is not always the billing month — see *Dates and periods* below. You can map:
+   - for each meter position the **reading column** and, if there is one, the **reading date column** (without it the date of
+     the row is used, or the last day of the month when the period cell names a month);
+   - the **bill total**, or the amount excl. VAT, the VAT % and the VAT amount (any two of net / VAT % / total are enough). Each
+     of the three has a second column, **used when the first is empty in a row** — for example the supplier's real total first
+     and your own calculated total as the fallback. The preview tells you when the fallback was used;
    - the **paid marker**: a column and the text that means "paid in full" (default `***`), and optionally a **payment date** column;
    - the **quantity on the bill** and **notes columns** (their text is added to the bill with the column header in front);
-   - the **currency**: *LVL before 2014-01, EUR after* (default, for workbooks that go back before the euro), *EUR* or *LVL*.
+   - the **currency**: *LVL before 2014-01, EUR after* (default, for workbooks that go back before the euro), *EUR* or *LVL*;
+   - **how the date becomes the period**, a switch **The date of a row marked «paid» is the payment date** and the switch
+     **Find meter replacements in the readings** (all explained below).
    Numbers may use a comma or a dot. The header row, the first data row and the last data row can be changed; without a last
    row the import stops at the first empty period.
 4. **Preview** — the dry run. For every row you see what will be created (*Reading …*, *Bill …*, *Payment …*) or that the row is
    *Skipped*, and the problems found. The line on top adds up the result, for example *132 readings, 66 bills, 60 payments,
-   3 rows skipped*. Filter the list to *Errors* or *Warnings*. **Errors** skip the whole row (for example a period that cannot be
-   read, a number that is not a number, a reading lower than the previous one on a meter without dial digits — a meter
-   replacement has to be entered first). **Warnings** are imported with a note (for example a bill of that month exists
+   3 rows skipped, 5 meter replacements*. Filter the list to *Errors* or *Warnings*. **Errors** skip the whole row (for example a period that cannot be
+   read, a number that is not a number, or — when *Find meter replacements* is off — a reading lower than the previous one on a
+   meter without dial digits). **Warnings** are imported with a note (for example a bill of that month exists
    already, the total is missing so only the readings are imported, net + VAT do not match the total so only the total is kept).
-   Press **Import** to run it.
+   Grey lines are only information (for example which fallback column was used). A **Period…** button on a row lets you
+   correct that row (see below). Proposed **meter replacements** are listed above the rows. Press **Import** to run it.
+
+**Dates and periods.** In many workbooks the date in the first column is not the billing month. The wizard suggests a rule from
+the kind of service of the contract; you can change it, and the preview shows the result for every row (*Row 5 · 2004-04*):
+- **By the contract's reading window** (water; used when the contract has a reading window): a date inside the window belongs to that
+  month, a late date (after the window, before the next one) too. With the window 25–28, *26 October* is October and *1 May* is
+  April. If the window runs into the next month (28–3), *1 May* is April as well.
+- **Previous month** (heating, electricity): the date is the 1st of the month after the service, so *1 September* is August.
+- **Previous month if the day is up to the limit, else the month of the date** (limit 10 by default): *5 September* is August,
+  *26 September* is September.
+- **Month of the date** and **Next month** (a service paid in advance).
+The reading keeps its real date; only the bill gets the period. Sometimes the rule changed along the way (a service became
+prepaid in 2023): add **Other rule from a date on** and say from which date which rule applies. For fixed-amount sheets
+(maintenance, waste, internet) the date is the day the previous month was paid: choose *Previous month* and switch on **The date of a row
+marked «paid» is the payment date** — the payment then gets the date of the row instead of the 1st of the month. If two rows
+fall into the same period, the readings of both are imported but the bill and payment only once, from the later row (with a warning).
+**Correcting a single row:** in the preview press **Period…** on the row to give it another month, to let its bill cover
+several months (for example the first prepaid internet row that pays two months plus a connection fee) and to add a remark
+that goes into the bill's notes. Your corrections are remembered in the profile by the date of the row, so importing the same
+sheet again keeps them; *Reset* removes one.
+
+**Meter replacements.** A meter replaced during the years shows in the sheet as a reading that suddenly drops (the new meter starts
+near 0) or jumps (it started high). With *Find meter replacements* on, the preview lists each of them under **Meter replacements**
+with the proposed **replacement date**, the **final reading of the old meter**, the **initial reading of the new meter** and its
+serial number. How the values are found:
+- an **extra row in the same month** with a much lower or higher value is the new meter's reading on the installation day: its
+  date is the replacement date, the value is the initial reading, and the old meter's final reading is the last reading before;
+- a drop **in a regular row**: the replacement date is taken from a note next to the row if it contains a date (for example
+  *replaced 30.04.2015*), otherwise it is the day after the previous reading. A note such as
+  *skaititaja nr.: Auksta - 1210007 rad:398,054 rad:0,072* gives the serial number, the old final (first `rad:`) and the new
+  initial (second `rad:`) of the cold (*Auksta*) or hot (*Karsta*) meter;
+- without exact values the new meter is assumed to start at 0, and the old meter's final reading is estimated: what the
+  «consumption» column of the row says beyond what the new meters have counted is added to the old meters' last reading. Such
+  values are marked *estimated*; the final reading is stored as an **Estimated** reading with the note *estimated during import*.
+Two readings in one month without a drop or a jump (for example the switch from the 1st to the 26th) are not a replacement.
+**Check the proposals against your papers**, type the right numbers and press **Apply corrections**. On import the app creates the new
+meters like the replacement wizard does (same resource, unit, place and dial digits, *replaces* the old one), stores the final and
+initial readings, ends the old meter's contract links the day before and starts the new links on the replacement date. *Undo
+import* removes the new meters again and puts the old ones back into use. Turn the switch off if the sheet has drops that are
+not replacements; they are then errors, as before. If you already entered some replacements yourself, the app follows your chain
+and proposes only the missing ones.
+
+**A sheet without readings.** The readings of a heating bill may live in the water sheet (the heating bill uses the hot-water
+cubic metres). Map no reading columns on that sheet: then only bills and payments are imported (map *Quantity on the bill*
+to keep the cubic metres on the bill), and nothing is imported twice.
 
 **What is created.** Readings are *Regular* (the very first reading of an empty register is *Initial*). A bill is created per
 row with a total: *Regular*, or *Equalized* for an equalized contract. A `***` in the paid column creates a **payment
-equal to the bill total**, allocated to that bill, dated with the payment date column or, without it, the 1st of the month
-(reference *imported*). Amounts before 2014 are stored in **lats (LVL)** and shown as they are; reports convert them to EUR
+equal to the bill total**, allocated to that bill, dated with the payment date column or, without it, the date of the row (when
+*the date is the payment date* is on) or the 1st of the month (reference *imported*). Amounts before 2014 are stored in **lats (LVL)** and shown as they are; reports convert them to EUR
 at the fixed rate. **Duplicates:** if the contract already has a bill for a month, or the register already has a reading on that
 date, that part is skipped — so importing the same sheet twice adds nothing. After a successful import the profile is saved
 (or updated) under the name you gave it.
 
 ### Imports and profiles
 
-**Settings → Imports** lists the finished imports (date, file, sheet, how many readings, bills and payments) and the saved profiles.
+**Settings → Imports** lists the finished imports (date, file, sheet, how many readings, bills, payments and meter replacements) and the saved profiles.
 
-- **Undo import** hides everything that import created — its bills, their payments, readings — in one go, and the balances
-  return to what they were. Nothing is erased for good. If you edited some of those records after the import, the app
+- **Undo import** hides everything that import created — its bills, their payments, readings and the meters it added — in one go,
+  puts the replaced meters and their contract links back, and the balances return to what they were. Nothing is erased for good. If you edited some of those records after the import, the app
   asks *Some imported records were edited later. Undo anyway?* before touching anything. After an undo you can import again.
 - A **profile** can be renamed (edit the name and press *Save name*), deleted, or **exported** to a `.json` file and loaded
   again with *Import profile from file* — for example to send it to the person who helps you. The file contains only the
-  column numbers and settings: **no amounts and no readings**.
+  column numbers and settings (period rules, header texts): **no amounts and no readings**.
 
 ## 17. Coming soon
 
