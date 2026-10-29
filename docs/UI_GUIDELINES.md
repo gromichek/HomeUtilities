@@ -61,6 +61,20 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 - No artificial maximum width of the window or panes (space is needed for charts later). Two-pane split is
   proportional (list ~35–40 %).
 
+## 3a. Choice dialogs (single and multiple choice) — owner feedback 2026-10-29
+- One look for every choice dialog, the same as the child-item dialogs: title at the top-left, content **directly
+  under the title** (never vertically centred), **Cancel** (secondary) + **OK** (primary) at the bottom right. On
+  phones a full-screen sheet with the title in a top bar, the list filling the space and the buttons in a bottom bar;
+  on desktop/tablet a popup of fixed width (~420) with the list scrolling inside, max height ~70 % of the window.
+- **Rows** are list rows, never wrapping button rows: the whole row is tappable, height ≥ 48, the check box /
+  radio mark **directly before** the text (no gap column), optional colour dot between mark and text, text left-aligned.
+- Single choice (period presets, sort order, …): radio rows, one per option, vertical. Extra inputs of an option (e.g.
+  "Custom…" → from/to month) appear under that row when it is selected.
+- Multi choice: **All / None** as text buttons in one row under the title (or a "Select all" check row), then the
+  check rows.
+- Short fixed choices that need no explanation (2–5 options) may use the native `Picker` instead of a dialog.
+- No horizontal scrolling inside dialogs; nothing may be cut off ("Всё вр…").
+
 ## 4. Navigation and Back
 - Back (Android hardware/gesture back, toolbar back arrow, Windows back) **must always work**:
   - no unsaved changes → go back immediately;
