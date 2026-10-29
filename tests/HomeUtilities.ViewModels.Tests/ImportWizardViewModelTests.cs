@@ -75,9 +75,10 @@ public class ImportWizardViewModelTests
         return vm;
     }
 
-    private async Task<ImportWizardViewModel> ToPreviewStepAsync()
+    private async Task<ImportWizardViewModel> ToPreviewStepAsync(bool detectReplacements = false)
     {
         var vm = await ToMappingStepAsync();
+        vm.DetectReplacements = detectReplacements;
         await vm.NextCommand.ExecuteAsync(null);
         return vm;
     }
@@ -252,7 +253,7 @@ public class ImportWizardViewModelTests
         var vm = await ToPreviewStepAsync();
 
         Assert.Equal(ImportWizardStep.Preview, vm.Step);
-        Assert.Equal("ImportSummary 2|1|1|1|1|1 [en]", vm.SummaryText);
+        Assert.Equal("ImportSummary 2|1|1|1|1|1|0 [en]", vm.SummaryText);
         Assert.Equal(3, vm.PlanRows.Count);
         Assert.True(vm.CanImport);
         Assert.Contains(vm.PlanRows[1].Issues, i => i.IsError && i.Text.Contains("Error_import_issue_reading_lower_than_previous"));
@@ -280,11 +281,12 @@ public class ImportWizardViewModelTests
         _bills.All.Add(new Bill { ContractId = null, Period = new YearMonth(2014, 1), Gross = 1 });
         var vm = await ToMappingStepAsync();
         _bills.All.Add(new Bill { ContractId = _contract.Id, Period = new YearMonth(2014, 1), Gross = 1 });
+        vm.DetectReplacements = false;
 
         await vm.NextCommand.ExecuteAsync(null);
 
         Assert.Contains(vm.PlanRows[0].Issues, i => i.Text.Contains("Error_import_issue_duplicate_period"));
-        Assert.Equal("ImportSummary 2|0|0|1|1|2 [en]", vm.SummaryText);
+        Assert.Equal("ImportSummary 2|0|0|1|1|2|0 [en]", vm.SummaryText);
     }
 
     [Fact]
@@ -296,7 +298,7 @@ public class ImportWizardViewModelTests
         await vm.ImportCommand.ExecuteAsync(null);
 
         var confirmation = Assert.Single(_dialogs.Confirmations);
-        Assert.Equal("ImportConfirm 2|1|1 [en]", confirmation.Message);
+        Assert.Equal("ImportConfirm 2|1|1|0 [en]", confirmation.Message);
         var request = Assert.Single(_batches.Applied);
         Assert.Equal(("book.xlsx", "Water", _contract.Id), (request.FileName, request.SheetName, request.ContractId));
         Assert.Equal(new ImportCounts(2, 1, 1, 1), request.Plan.Counts);
@@ -304,7 +306,7 @@ public class ImportWizardViewModelTests
         Assert.Equal(("Water sheet", saved.Id), ("Water sheet", request.ProfileId));
         Assert.Equal((1, 3, 4, _contract.Id), (saved.Profile.PeriodColumn, saved.Profile.TotalColumn, saved.Profile.PaidColumn, saved.Profile.ContractId));
         Assert.Equal(ImportWizardStep.Done, vm.Step);
-        Assert.Equal("ImportDone 2|1|1|1 [en]", vm.ResultText);
+        Assert.Equal("ImportDone 2|1|1|1|0 [en]", vm.ResultText);
         Assert.False(vm.CanImport);
     }
 
@@ -469,6 +471,273 @@ public class ImportWizardViewModelTests
         public SheetData ReadSheet(Stream workbook, string sheetName) =>
             Fail ? throw new InvalidDataException("bad") : Sheets[sheetName];
     }
+
+    // ---- T-027: period rules, positions, replacements ----
+
+    [Fact]
+    public async Task The_period_rule_is_suggested_from_the_kind_of_service()
+    {
+        var vm = Create();
+        _contract.Service = ServiceKind.Heating;
+        await vm.OnAppearingAsync();
+        _reader.Sheets["Water"] = Water();
+        _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
+        await vm.PickFileCommand.ExecuteAsync(null);
+        await vm.NextCommand.ExecuteAsync(null);
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.Equal(ImportPeriodRule.PreviousMonth, vm.SelectedPeriodRule!.Value);
+        Assert.False(vm.DateIsPaymentDate);
+    }
+
+    [Fact]
+    public async Task A_fixed_amount_contract_suggests_previous_month_and_the_date_as_payment_date()
+    {
+        var vm = Create();
+        _contract.Service = ServiceKind.Maintenance;
+        await vm.OnAppearingAsync();
+        _reader.Sheets["Water"] = Water();
+        _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
+        await vm.PickFileCommand.ExecuteAsync(null);
+        await vm.NextCommand.ExecuteAsync(null);
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.Equal((ImportPeriodRule.PreviousMonth, true), (vm.SelectedPeriodRule!.Value, vm.DateIsPaymentDate));
+    }
+
+    [Fact]
+    public async Task The_day_limit_is_shown_only_for_the_rule_that_uses_it()
+    {
+        var vm = await ToMappingStepAsync();
+
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.PreviousMonthIfDayUpTo);
+        Assert.True(vm.ShowDayLimit);
+
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.MonthOfDate);
+        Assert.False(vm.ShowDayLimit);
+    }
+
+    [Fact]
+    public async Task A_bad_day_limit_is_reported_on_the_mapping_step()
+    {
+        var vm = await ToMappingStepAsync();
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.PreviousMonthIfDayUpTo);
+        vm.PeriodDayLimitText = "40";
+
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.Equal(ImportWizardStep.Mapping, vm.Step);
+        Assert.Contains("Error_import_day_limit_invalid", vm.MappingError);
+    }
+
+    [Fact]
+    public async Task The_rule_changes_the_period_of_the_rows_and_is_saved_in_the_profile()
+    {
+        var vm = await ToMappingStepAsync();
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.PreviousMonth);
+        vm.AddRuleChangeCommand.Execute(null);
+        var change = Assert.Single(vm.RuleChanges);
+        change.FromDate = new DateTime(2014, 2, 1);
+        change.SelectedRule = change.Rules.Single(r => r.Value == ImportPeriodRule.NextMonth);
+
+        await vm.NextCommand.ExecuteAsync(null);
+        await vm.ImportCommand.ExecuteAsync(null);
+
+        // Rows dated 1 January, 1 February, 1 March: previous month (December), then next month from February (March, April).
+        Assert.Equal(
+            [new YearMonth(2013, 12), new YearMonth(2014, 3), new YearMonth(2014, 4)],
+            _batches.Applied.Single().Plan.Rows.Select(r => r.Period!.Value));
+        var saved = Assert.Single(_profiles.Stored).Profile;
+        Assert.Equal(ImportPeriodRule.PreviousMonth, saved.PeriodRule);
+        var savedChange = Assert.Single(saved.PeriodRuleChanges);
+        Assert.Equal((new DateOnly(2014, 2, 1), ImportPeriodRule.NextMonth), (savedChange.FromDate, savedChange.Rule));
+    }
+
+    [Fact]
+    public async Task A_rule_change_can_be_removed()
+    {
+        var vm = await ToMappingStepAsync();
+        vm.AddRuleChangeCommand.Execute(null);
+
+        vm.RuleChanges[0].RemoveCommand.Execute(null);
+
+        Assert.Empty(vm.RuleChanges);
+    }
+
+    [Fact]
+    public async Task The_saved_profile_records_the_headers_and_the_new_options()
+    {
+        var vm = await ToMappingStepAsync();
+        vm.DateIsPaymentDate = true;
+        vm.TotalFallbackPicker.Select(2);
+
+        await vm.NextCommand.ExecuteAsync(null);
+        await vm.ImportCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_profiles.Stored).Profile;
+        Assert.True(saved.DateIsPaymentDate);
+        Assert.Equal(2, saved.TotalFallbackColumn);
+        Assert.Contains(saved.ColumnHeaders, h => h is { Field: "Total", Column: "C", Header: "Итого" });
+        Assert.Contains(saved.ColumnHeaders, h => h.Field == $"Reading:{_meter.Registers[0].Id}" && h.Column == "B");
+    }
+
+    [Fact]
+    public async Task A_saved_profile_brings_back_the_period_settings()
+    {
+        var vm = await ToMappingStepAsync();
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.PreviousMonthIfDayUpTo);
+        vm.PeriodDayLimitText = "12";
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+        await vm.ImportCommand.ExecuteAsync(null);
+
+        var again = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        await again.OnAppearingAsync();
+        _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
+        await again.PickFileCommand.ExecuteAsync(null);
+        await again.NextCommand.ExecuteAsync(null);
+        await again.NextCommand.ExecuteAsync(null);
+
+        Assert.Equal(ImportPeriodRule.PreviousMonthIfDayUpTo, again.SelectedPeriodRule!.Value);
+        Assert.Equal("12", again.PeriodDayLimitText);
+        Assert.False(again.DetectReplacements);
+    }
+
+    [Fact]
+    public async Task A_chain_of_replaced_meters_is_one_position()
+    {
+        var vm = Create();
+        var second = new Meter { PropertyId = _flat.Id, Resource = MeterResource.ColdWater, InstalledOn = new DateOnly(2010, 1, 1), ReplacedMeterId = _meter.Id };
+        second.Registers.Add(MeterRegister.CreateDefault(second.Id));
+        _meter.RemovedOn = new DateOnly(2010, 1, 1);
+        _meters.Stored.Add(second);
+        _contracts.Links.Add(new ContractMeter { ContractId = _contract.Id, MeterId = second.Id, ValidFrom = new DateOnly(2010, 1, 1) });
+        await vm.OnAppearingAsync();
+        _reader.Sheets["Water"] = Water();
+        _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
+        await vm.PickFileCommand.ExecuteAsync(null);
+
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.Single(vm.MeterLines);
+        await vm.NextCommand.ExecuteAsync(null);
+        Assert.Equal(_meter.Registers[0].Id, Assert.Single(vm.RegisterMappings).RegisterId);
+    }
+
+    [Fact]
+    public async Task A_dropping_reading_is_proposed_as_a_replacement_the_owner_can_correct()
+    {
+        // The sheet has 10 → 5 → 12 in the cold column (dates 1 January, 1 February, 1 March 2014).
+        var vm = await ToPreviewStepAsync(detectReplacements: true);
+
+        var row = Assert.Single(vm.ReplacementRows);
+        Assert.True(vm.HasReplacements);
+        Assert.Equal(3, row.RowNumber);
+        Assert.Equal(("10", "0"), (row.FinalText, row.InitialText));
+        Assert.True(row.HasEstimate);
+        Assert.Equal(1, vm.Plan!.Counts.Replacements);
+        Assert.Contains("|1 [en]", vm.SummaryText);
+
+        row.FinalText = "11,5";
+        row.InitialText = "0.2";
+        row.SerialText = "SN-77";
+        await vm.RecalculateCommand.ExecuteAsync(null);
+
+        var corrected = Assert.Single(vm.ReplacementRows);
+        Assert.Equal(("11.5", "0.2", "SN-77"), (corrected.FinalText.Replace(',', '.'), corrected.InitialText.Replace(',', '.'), corrected.SerialText));
+        Assert.False(corrected.HasEstimate);
+        Assert.Equal("SN-77", vm.Plan!.Replacements.Single().NewMeter.SerialNumber);
+    }
+
+    [Fact]
+    public async Task Importing_sends_the_replacements_with_the_plan()
+    {
+        var vm = await ToPreviewStepAsync(detectReplacements: true);
+
+        await vm.ImportCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(_batches.Applied);
+        Assert.Single(request.Plan.Replacements);
+        Assert.Contains("ImportConfirm", Assert.Single(_dialogs.Confirmations).Message);
+        Assert.EndsWith("|1 [en]", Assert.Single(_dialogs.Confirmations).Message);
+    }
+
+    [Fact]
+    public async Task Switching_the_detection_off_proposes_no_replacements()
+    {
+        var vm = await ToPreviewStepAsync(detectReplacements: false);
+
+        Assert.Empty(vm.ReplacementRows);
+        Assert.False(vm.HasReplacements);
+    }
+
+    [Fact]
+    public async Task The_period_of_a_row_can_be_corrected_and_is_kept_in_the_profile()
+    {
+        var vm = await ToPreviewStepAsync();
+        var row = vm.PlanRows.First(r => r.Row.RowNumber == 2);
+        Assert.True(row.CanEditPeriod);
+        _dialogs.EditorScript = editor =>
+        {
+            var dialog = Assert.IsType<ImportRowOverrideEditorViewModel>(editor);
+            dialog.Period = new DateTime(2013, 11, 15);
+            dialog.Covers = true;
+            dialog.Until = new DateTime(2013, 12, 1);
+            dialog.Remark = " incl. connection fee ";
+            dialog.SaveCommand.Execute(null);
+        };
+
+        await row.EditPeriodCommand.ExecuteAsync(null);
+
+        var corrected = vm.PlanRows.First(r => r.Row.RowNumber == 2).Row;
+        Assert.Equal(new YearMonth(2013, 11), corrected.Period);
+        Assert.Equal(new DateOnly(2013, 12, 31), corrected.Bill!.ServiceTo);
+        Assert.Equal("Примечание: ok; incl. connection fee", corrected.Bill.Notes);
+
+        await vm.ImportCommand.ExecuteAsync(null);
+        var saved = Assert.Single(_profiles.Stored).Profile;
+        var stored = Assert.Single(saved.RowOverrides);
+        Assert.Equal((Jan, new DateOnly(2013, 11, 1), new DateOnly(2013, 12, 1), "incl. connection fee"), (stored.RowDate, stored.Period!.Value, stored.CoversUntil!.Value, stored.Remark));
+    }
+
+    [Fact]
+    public async Task Resetting_the_correction_of_a_row_removes_it()
+    {
+        var vm = await ToPreviewStepAsync();
+        _dialogs.EditorScript = editor =>
+        {
+            var dialog = Assert.IsType<ImportRowOverrideEditorViewModel>(editor);
+            dialog.Remark = "x";
+            dialog.SaveCommand.Execute(null);
+        };
+        await vm.PlanRows.First(r => r.Row.RowNumber == 2).EditPeriodCommand.ExecuteAsync(null);
+        Assert.NotNull(vm.PlanRows.First(r => r.Row.RowNumber == 2).Row.Override);
+
+        _dialogs.EditorScript = editor => Assert.IsType<ImportRowOverrideEditorViewModel>(editor).ClearCommand.Execute(null);
+        await vm.PlanRows.First(r => r.Row.RowNumber == 2).EditPeriodCommand.ExecuteAsync(null);
+
+        Assert.Null(vm.PlanRows.First(r => r.Row.RowNumber == 2).Row.Override);
+    }
+
+    [Fact]
+    public async Task A_last_covered_month_before_the_period_is_refused_by_the_dialog()
+    {
+        var vm = await ToPreviewStepAsync();
+        var row = vm.PlanRows.First(r => r.Row.RowNumber == 2);
+        ImportRowOverrideEditorViewModel? shown = null;
+        _dialogs.EditorScript = editor =>
+        {
+            shown = Assert.IsType<ImportRowOverrideEditorViewModel>(editor);
+            shown.Covers = true;
+            shown.Until = shown.Period.AddMonths(-2);
+            shown.SaveCommand.Execute(null);
+        };
+
+        await row.EditPeriodCommand.ExecuteAsync(null);
+
+        Assert.False(shown!.Saved);
+        Assert.Contains("ImportOverrideRangeInvalid", shown.RangeError);
+    }
 }
 
 internal sealed class FakeImportProfileStore : IImportProfileStore
@@ -531,6 +800,7 @@ internal sealed class FakeImportBatchStore : IImportBatchStore
             BillCount = request.Plan.Counts.Bills,
             PaymentCount = request.Plan.Counts.Payments,
             SkippedCount = request.Plan.Counts.SkippedRows,
+            ReplacementCount = request.Plan.Counts.Replacements,
         };
         Batches.Add(batch);
         return Task.FromResult(batch);

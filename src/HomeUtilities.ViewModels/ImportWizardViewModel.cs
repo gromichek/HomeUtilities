@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Import;
 using HomeUtilities.ViewModels.Common;
@@ -83,6 +84,10 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     private SheetData? _sheet;
     private Contract? _contract;
     private IReadOnlyList<Meter> _propertyMeters = [];
+    private IReadOnlyList<ContractMeter> _propertyLinks = [];
+    private List<ImportRowOverride> _rowOverrides = [];
+    private List<ReplacementEdit> _replacementEdits = [];
+    private ImportProfile? _plannedProfile;
     private readonly Dictionary<Guid, string> _registerLabels = [];
     private ImportPlan? _plan;
     private IReadOnlyList<ImportPlanRowViewModel> _allPlanRows = [];
@@ -182,6 +187,37 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
 
     [ObservableProperty]
     private ImportColumnPickerViewModel _quantityPicker = ImportColumnPickerViewModel.Unmapped;
+
+    [ObservableProperty]
+    private ImportColumnPickerViewModel _totalFallbackPicker = ImportColumnPickerViewModel.Unmapped;
+
+    [ObservableProperty]
+    private ImportColumnPickerViewModel _netFallbackPicker = ImportColumnPickerViewModel.Unmapped;
+
+    [ObservableProperty]
+    private ImportColumnPickerViewModel _vatFallbackPicker = ImportColumnPickerViewModel.Unmapped;
+
+    [ObservableProperty]
+    private IReadOnlyList<ImportPeriodRuleChoice> _periodRules = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDayLimit))]
+    private ImportPeriodRuleChoice? _selectedPeriodRule;
+
+    [ObservableProperty]
+    private string _periodDayLimitText = ImportPeriodResolver.DefaultDayLimit.ToString(CultureInfo.InvariantCulture);
+
+    [ObservableProperty]
+    private bool _dateIsPaymentDate;
+
+    [ObservableProperty]
+    private bool _detectReplacements = true;
+
+    [ObservableProperty]
+    private IReadOnlyList<ImportRuleChangeRowViewModel> _ruleChanges = [];
+
+    [ObservableProperty]
+    private IReadOnlyList<ImportReplacementRowViewModel> _replacementRows = [];
 
     [ObservableProperty]
     private IReadOnlyList<ImportRegisterMappingViewModel> _registerMappings = [];
@@ -324,6 +360,32 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
 
     public string NoRowsText { get; private set; } = string.Empty;
 
+    public string PeriodRuleLabel { get; private set; } = string.Empty;
+
+    public string PeriodRuleHint { get; private set; } = string.Empty;
+
+    public string DayLimitLabel { get; private set; } = string.Empty;
+
+    public string DateIsPaymentDateLabel { get; private set; } = string.Empty;
+
+    public string RuleChangesHeader { get; private set; } = string.Empty;
+
+    public string AddRuleChangeText { get; private set; } = string.Empty;
+
+    public string DetectReplacementsLabel { get; private set; } = string.Empty;
+
+    public string ReplacementsHeader { get; private set; } = string.Empty;
+
+    public string ReplacementsHint { get; private set; } = string.Empty;
+
+    public string RecalculateText { get; private set; } = string.Empty;
+
+    /// <summary>True when the selected period rule uses the day limit.</summary>
+    public bool ShowDayLimit => SelectedPeriodRule?.Value == ImportPeriodRule.PreviousMonthIfDayUpTo;
+
+    /// <summary>True when the dry run proposes meter replacements.</summary>
+    public bool HasReplacements => ReplacementRows.Count > 0;
+
     /// <summary>True when the filtered list has no rows.</summary>
     public bool ShowNoRows => PlanRows.Count == 0 && _plan is not null;
 
@@ -350,6 +412,8 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
 
     /// <summary>Whether a new profile is being made (as opposed to reusing a saved one).</summary>
     public bool IsNewProfile => SelectedProfile?.Profile is null;
+
+    partial void OnReplacementRowsChanged(IReadOnlyList<ImportReplacementRowViewModel> value) => OnPropertyChanged(nameof(HasReplacements));
 
     partial void OnPlanRowsChanged(IReadOnlyList<ImportPlanRowViewModel> value) => OnPropertyChanged(nameof(ShowNoRows));
 
@@ -531,6 +595,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         var guessed = ImportColumnGuesser.Guess(_sheet, header, registerIds);
         guessed.ContractId = _contract?.Id ?? Guid.Empty;
         guessed.CurrencyRule = SelectedCurrencyRule?.Value ?? guessed.CurrencyRule;
+        CopyPeriodSettings(guessed);
         ApplyProfileToUi(guessed, keepRows: true);
         await Task.CompletedTask;
     });
@@ -592,7 +657,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         var counts = _plan.Counts;
         var confirmed = await _dialogs.ConfirmAsync(
             _localizer["ImportTitle"],
-            _localizer.Get("ImportConfirm", counts.Readings, counts.Bills, counts.Payments),
+            _localizer.Get("ImportConfirm", counts.Readings, counts.Bills, counts.Payments, counts.Replacements),
             _localizer["ImportAction"],
             _localizer["Cancel"]);
         if (!confirmed)
@@ -605,7 +670,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         {
             var saved = await SaveProfileAsync(profile);
             var batch = await _batches.ApplyAsync(new ImportApplyRequest(_plan, _fileName, profile.SheetName, _contract.Id, saved.Id));
-            ResultText = _localizer.Get("ImportDone", batch.ReadingCount, batch.BillCount, batch.PaymentCount, batch.SkippedCount);
+            ResultText = _localizer.Get("ImportDone", batch.ReadingCount, batch.BillCount, batch.PaymentCount, batch.SkippedCount, batch.ReplacementCount);
             CanImport = false;
             Step = ImportWizardStep.Done;
         }
@@ -650,6 +715,21 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         FilterLabel = _localizer["ImportFilterLabel"];
         OpenImportsText = _localizer["ImportOpenImports"];
         NoRowsText = _localizer["ImportNoRows"];
+
+        PeriodRuleLabel = _localizer["ImportPeriodRuleLabel"];
+        PeriodRuleHint = _localizer["ImportPeriodRuleHint"];
+        DayLimitLabel = _localizer["ImportDayLimitLabel"];
+        DateIsPaymentDateLabel = _localizer["ImportDateIsPaymentDate"];
+        RuleChangesHeader = _localizer["ImportRuleChangesHeader"];
+        AddRuleChangeText = _localizer["ImportAddRuleChange"];
+        DetectReplacementsLabel = _localizer["ImportDetectReplacements"];
+        ReplacementsHeader = _localizer["ImportReplacementsHeader"];
+        ReplacementsHint = _localizer["ImportReplacementsHint"];
+        RecalculateText = _localizer["ImportRecalculate"];
+
+        var periodRule = SelectedPeriodRule?.Value ?? ImportPeriodRule.MonthOfDate;
+        PeriodRules = [.. Enum.GetValues<ImportPeriodRule>().Select(r => new ImportPeriodRuleChoice(r, _localizer[$"ImportPeriodRule_{r}"]))];
+        SelectedPeriodRule = PeriodRules.First(r => r.Value == periodRule);
 
         var rule = SelectedCurrencyRule?.Value ?? ImportCurrencyRule.LvlBefore2014;
         CurrencyRules = [.. Enum.GetValues<ImportCurrencyRule>().Select(r => new ImportCurrencyChoice(r, _localizer[$"ImportCurrencyRule_{r}"]))];
@@ -797,25 +877,37 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
 
         _contract = await _contracts.GetAsync(choice.Id);
         _propertyMeters = await _meters.ListByPropertyAsync(property.Id);
+        _propertyLinks = await LoadPropertyLinksAsync(property.Id);
         var links = await _contracts.ListContractMetersAsync(choice.Id);
         var lines = new List<string>();
-        foreach (var meterId in links.Select(l => l.MeterId).Distinct())
-        {
-            var meter = _propertyMeters.FirstOrDefault(m => m.Id == meterId);
-            if (meter is null)
-            {
-                continue;
-            }
 
-            foreach (var register in meter.Registers.Where(r => !r.IsDeleted))
+        // A position is a chain of meters that replaced one another; the readings of the whole chain go to one column.
+        foreach (var first in links
+            .Select(l => _propertyMeters.FirstOrDefault(m => m.Id == l.MeterId))
+            .OfType<Meter>()
+            .Select(m => MeterChain.Build(_propertyMeters, m.Id).Meters[0])
+            .DistinctBy(m => m.Id))
+        {
+            foreach (var register in first.Registers.Where(r => !r.IsDeleted))
             {
-                var label = RegisterDisplay(meter, register);
+                var label = RegisterDisplay(first, register);
                 _registerLabels[register.Id] = label;
                 lines.Add(label);
             }
         }
 
         MeterLines = lines;
+    }
+
+    private async Task<IReadOnlyList<ContractMeter>> LoadPropertyLinksAsync(Guid propertyId)
+    {
+        var links = new List<ContractMeter>();
+        foreach (var contract in await _contracts.ListByPropertyAsync(propertyId))
+        {
+            links.AddRange(await _contracts.ListContractMetersAsync(contract.Id));
+        }
+
+        return links;
     }
 
     private string RegisterDisplay(Meter meter, MeterRegister register)
@@ -858,7 +950,15 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         else
         {
             profile = ImportColumnGuesser.Guess(_sheet, 1, registerIds);
+            if (_contract is not null)
+            {
+                var suggestion = ImportPeriodDefaults.For(_contract);
+                profile.PeriodRule = suggestion.Rule;
+                profile.DateIsPaymentDate = suggestion.DateIsPaymentDate;
+            }
         }
+
+        _replacementEdits = [];
 
         profile.SheetName = sheetName;
         profile.ContractId = _contract?.Id ?? Guid.Empty;
@@ -895,6 +995,12 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         }
 
         SelectedCurrencyRule = CurrencyRules.FirstOrDefault(r => r.Value == profile.CurrencyRule) ?? CurrencyRules[0];
+        SelectedPeriodRule = PeriodRules.FirstOrDefault(r => r.Value == profile.PeriodRule) ?? PeriodRules[0];
+        PeriodDayLimitText = profile.PeriodDayLimit.ToString(CultureInfo.InvariantCulture);
+        DateIsPaymentDate = profile.DateIsPaymentDate;
+        DetectReplacements = profile.DetectReplacements;
+        _rowOverrides = [.. profile.RowOverrides];
+        RuleChanges = [.. profile.PeriodRuleChanges.OrderBy(c => c.FromDate).Select(NewRuleChangeRow)];
         RebuildColumnOptions(profile.HeaderRow, profile);
         _notesColumns = [.. profile.NotesColumns];
         UpdateNotesSummary();
@@ -929,9 +1035,12 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
 
         PeriodPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldPeriod"], options, profile.PeriodColumn);
         TotalPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldTotal"], options, profile.TotalColumn);
+        TotalFallbackPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldTotalFallback"], options, profile.TotalFallbackColumn);
         NetPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldNet"], options, profile.NetColumn);
+        NetFallbackPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldNetFallback"], options, profile.NetFallbackColumn);
         VatPercentPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldVatPercent"], options, profile.VatPercentColumn);
         VatPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldVat"], options, profile.VatColumn);
+        VatFallbackPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldVatFallback"], options, profile.VatFallbackColumn);
         PaidPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldPaid"], options, profile.PaidColumn);
         PaidDatePicker = new ImportColumnPickerViewModel(_localizer["ImportFieldPaidDate"], options, profile.PaidDateColumn);
         QuantityPicker = new ImportColumnPickerViewModel(_localizer["ImportFieldQuantity"], options, profile.QuantityColumn);
@@ -951,7 +1060,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     }
 
     private IEnumerable<ImportColumnPickerViewModel> AllPickers() =>
-        new[] { PeriodPicker, TotalPicker, NetPicker, VatPercentPicker, VatPicker, PaidPicker, PaidDatePicker, QuantityPicker }
+        new[] { PeriodPicker, TotalPicker, TotalFallbackPicker, NetPicker, NetFallbackPicker, VatPercentPicker, VatPicker, VatFallbackPicker, PaidPicker, PaidDatePicker, QuantityPicker }
             .Concat(RegisterMappings.SelectMany(r => new[] { r.Reading, r.Date }));
 
     private void BuildPreview()
@@ -1008,9 +1117,18 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             ContractId = _contract?.Id ?? Guid.Empty,
             PeriodColumn = PeriodPicker.Column,
             TotalColumn = TotalPicker.Column,
+            TotalFallbackColumn = TotalFallbackPicker.Column,
             NetColumn = NetPicker.Column,
+            NetFallbackColumn = NetFallbackPicker.Column,
             VatPercentColumn = VatPercentPicker.Column,
             VatColumn = VatPicker.Column,
+            VatFallbackColumn = VatFallbackPicker.Column,
+            PeriodRule = SelectedPeriodRule?.Value ?? ImportPeriodRule.MonthOfDate,
+            PeriodDayLimit = int.TryParse(PeriodDayLimitText.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var dayLimit) ? dayLimit : 0,
+            PeriodRuleChanges = [.. RuleChanges.Select(r => r.ToChange()).OrderBy(c => c.FromDate)],
+            DateIsPaymentDate = DateIsPaymentDate,
+            DetectReplacements = DetectReplacements,
+            RowOverrides = [.. _rowOverrides],
             PaidColumn = PaidPicker.Column,
             PaidMarker = PaidMarker.Trim(),
             PaidDateColumn = PaidDatePicker.Column,
@@ -1032,6 +1150,11 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             return false;
         }
 
+        if (_sheet is not null)
+        {
+            ImportColumnHeaders.Record(profile, _sheet);
+        }
+
         return true;
     }
 
@@ -1040,22 +1163,115 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         var sheet = _sheet!;
         var contract = _contract!;
         var bills = await _bills.ListByContractAsync(contract.Id);
-        var context = new ImportContext(contract, _propertyMeters, bills);
+        var context = new ImportContext(contract, _propertyMeters, bills, _propertyLinks, _replacementEdits);
         var plan = await Task.Run(() => ImportPlanner.Plan(profile, sheet, context));
         _plan = plan;
+        _plannedProfile = profile;
 
         PlanProblemText = plan.Problems.Count == 0
             ? string.Empty
             : string.Join(Environment.NewLine, plan.Problems.Select(p => ValidationText.For(_localizer, p)));
-        _allPlanRows = [.. plan.Rows.Select(r => new ImportPlanRowViewModel(r, _localizer, _registerLabels))];
+        _allPlanRows = [.. plan.Rows.Select(r => new ImportPlanRowViewModel(r, _localizer, _registerLabels, EditRowPeriodAsync))];
+        ReplacementRows =
+        [
+            .. plan.Replacements.SelectMany(replacement => replacement.Registers
+                .Where(line => !line.Unmapped)
+                .Select(line => new ImportReplacementRowViewModel(replacement, line, _registerLabels.GetValueOrDefault(line.PositionRegisterId, string.Empty), _localizer))),
+        ];
         var counts = plan.Counts;
         SummaryText = plan.Problems.Count > 0
             ? string.Empty
-            : _localizer.Get("ImportSummary", counts.Readings, counts.Bills, counts.Payments, counts.SkippedRows, plan.ErrorRows, plan.WarningRows);
+            : _localizer.Get("ImportSummary", counts.Readings, counts.Bills, counts.Payments, counts.SkippedRows, plan.ErrorRows, plan.WarningRows, counts.Replacements);
         CanImport = plan.Problems.Count == 0 && (counts.Readings + counts.Bills) > 0;
         SelectedFilter = Filters[0];
         ApplyFilter();
     }
+
+    private ImportRuleChangeRowViewModel NewRuleChangeRow(PeriodRuleChange change) =>
+        new(change, PeriodRules, _localizer["ImportRuleChangeFrom"], _localizer["ImportDayLimitLabel"], _localizer["ImportRemove"], RemoveRuleChange);
+
+    private void RemoveRuleChange(ImportRuleChangeRowViewModel row) => RuleChanges = [.. RuleChanges.Where(r => r != row)];
+
+    // The guessed columns replace the mapping, not the owner's choices about the period.
+    private void CopyPeriodSettings(ImportProfile target)
+    {
+        target.PeriodRule = SelectedPeriodRule?.Value ?? target.PeriodRule;
+        target.PeriodDayLimit = int.TryParse(PeriodDayLimitText.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var limit) ? limit : target.PeriodDayLimit;
+        target.PeriodRuleChanges = [.. RuleChanges.Select(r => r.ToChange())];
+        target.DateIsPaymentDate = DateIsPaymentDate;
+        target.DetectReplacements = DetectReplacements;
+        target.RowOverrides = [.. _rowOverrides];
+    }
+
+    /// <summary>Adds a line "from this date on use that rule" (it starts as a copy of the base rule, from the first of the current year).</summary>
+    [RelayCommand]
+    private void AddRuleChange()
+    {
+        var change = new PeriodRuleChange
+        {
+            FromDate = new DateOnly(DateTime.Today.Year, 1, 1),
+            Rule = SelectedPeriodRule?.Value ?? ImportPeriodRule.MonthOfDate,
+        };
+        RuleChanges = [.. RuleChanges, NewRuleChangeRow(change)];
+    }
+
+    /// <summary>Plans the import again with the values the owner corrected in the list of meter replacements.</summary>
+    [RelayCommand]
+    private Task RecalculateAsync() => RunSafeAsync(async () =>
+    {
+        if (!TryBuildProfile(out var profile))
+        {
+            return;
+        }
+
+        _replacementEdits = [.. ReplacementRows.Select(r => r.ToEdit()).OfType<ReplacementEdit>()];
+        IsBusy = true;
+        try
+        {
+            await EnterPreviewAsync(profile);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    });
+
+    // Opens the dialog for the period of one row; the correction is kept in the profile by the date of the row.
+    private Task EditRowPeriodAsync(PlannedRow row) => RunSafeAsync(async () =>
+    {
+        if (row.RowDate is not { } rowDate)
+        {
+            return;
+        }
+
+        var editor = new ImportRowOverrideEditorViewModel(_localizer, row);
+        await _dialogs.ShowEditorAsync(editor);
+        if (!editor.Saved)
+        {
+            return;
+        }
+
+        _rowOverrides = [.. _rowOverrides.Where(o => o.RowDate != rowDate)];
+        if (editor.Result is { } result)
+        {
+            _rowOverrides.Add(result);
+        }
+
+        if (!TryBuildProfile(out var profile))
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            await EnterPreviewAsync(profile);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    });
 
     private void ApplyFilter()
     {

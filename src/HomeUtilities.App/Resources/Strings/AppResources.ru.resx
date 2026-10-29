@@ -1253,16 +1253,16 @@
   <data name="ImportActionBill" xml:space="preserve"><value>Счёт {0} {1}</value></data>
   <data name="ImportActionPayment" xml:space="preserve"><value>Платёж {0} {1} от {2}</value></data>
   <data name="ImportActionSkipped" xml:space="preserve"><value>Пропущена</value></data>
-  <data name="ImportSummary" xml:space="preserve"><value>Показаний: {0}, счетов: {1}, платежей: {2}, пропущено строк: {3} · строк с ошибками: {4}, с предупреждениями: {5}</value></data>
-  <data name="ImportConfirm" xml:space="preserve"><value>Импортировать показаний: {0}, счетов: {1}, платежей: {2}? Весь импорт можно будет отменить позже в Настройки → Импорты.</value></data>
-  <data name="ImportDone" xml:space="preserve"><value>Импортировано показаний: {0}, счетов: {1}, платежей: {2}. Пропущено строк: {3}.</value></data>
+  <data name="ImportSummary" xml:space="preserve"><value>Показаний: {0}, счетов: {1}, платежей: {2}, пропущено строк: {3}, замен счётчиков: {6} · строк с ошибками: {4}, с предупреждениями: {5}</value></data>
+  <data name="ImportConfirm" xml:space="preserve"><value>Импортировать показаний: {0}, счетов: {1}, платежей: {2} и заменить счётчиков: {3}? Весь импорт можно будет отменить позже в Настройки → Импорты.</value></data>
+  <data name="ImportDone" xml:space="preserve"><value>Импортировано показаний: {0}, счетов: {1}, платежей: {2}; замен счётчиков: {4}. Пропущено строк: {3}.</value></data>
   <data name="ImportOpenImports" xml:space="preserve"><value>Открыть импорты</value></data>
   <data name="ImportBatchesHeader" xml:space="preserve"><value>Выполненные импорты</value></data>
   <data name="ImportBatchesEmpty" xml:space="preserve"><value>Пока ничего не импортировано.</value></data>
   <data name="ImportBatchTitle" xml:space="preserve"><value>{0} · {1}</value></data>
-  <data name="ImportBatchDetail" xml:space="preserve"><value>{0:g} · показаний: {1}, счетов: {2}, платежей: {3}, пропущено строк: {4}</value></data>
+  <data name="ImportBatchDetail" xml:space="preserve"><value>{0:g} · показаний: {1}, счетов: {2}, платежей: {3}, пропущено строк: {4}, замен счётчиков: {5}</value></data>
   <data name="ImportUndo" xml:space="preserve"><value>Отменить импорт</value></data>
-  <data name="ImportUndoConfirm" xml:space="preserve"><value>Отменить импорт «{0}» (лист «{1}»)? Показания ({2}), счета ({3}) и платежи ({4}) будут скрыты, история сохранится.</value></data>
+  <data name="ImportUndoConfirm" xml:space="preserve"><value>Отменить импорт «{0}» (лист «{1}»)? Показания ({2}), счета ({3}) и платежи ({4}) будут скрыты, добавленные импортом счётчики ({5}) удалены, а заменённые счётчики снова в работе; история сохранится.</value></data>
   <data name="ImportUndoEdited" xml:space="preserve"><value>Некоторые импортированные записи позже изменялись. Всё равно отменить?</value></data>
   <data name="ImportUndoAnyway" xml:space="preserve"><value>Всё равно отменить</value></data>
   <data name="ImportUndone" xml:space="preserve"><value>Импорт отменён</value></data>
@@ -1277,6 +1277,42 @@
   <data name="ImportProfileImported" xml:space="preserve"><value>Профиль «{0}» загружен</value></data>
   <data name="ImportProfileSaved" xml:space="preserve"><value>Файл профиля сохранён</value></data>
   <data name="ImportProfileSavedTo" xml:space="preserve"><value>Файл профиля сохранён: {0}</value></data>
+  <data name="ImportPeriodRuleLabel" xml:space="preserve"><value>Как дата становится периодом (месяцем)</value></data>
+  <data name="ImportPeriodRuleHint" xml:space="preserve"><value>Дата в столбце периода — это дата показаний или дата оплаты, а не всегда расчётный месяц. Показание сохраняет свою настоящую дату, а счёт получает период. Ячейки вида «12.2013» или «Январь 2014» сами называют месяц, правило к ним не применяется.</value></data>
+  <data name="ImportPeriodRule_MonthOfDate" xml:space="preserve"><value>Месяц даты</value></data>
+  <data name="ImportPeriodRule_ReadingWindow" xml:space="preserve"><value>По окну показаний договора</value></data>
+  <data name="ImportPeriodRule_PreviousMonth" xml:space="preserve"><value>Предыдущий месяц (дата — 1-е число следующего месяца)</value></data>
+  <data name="ImportPeriodRule_PreviousMonthIfDayUpTo" xml:space="preserve"><value>Предыдущий месяц, если день не больше границы, иначе месяц даты</value></data>
+  <data name="ImportPeriodRule_NextMonth" xml:space="preserve"><value>Следующий месяц (оплата вперёд)</value></data>
+  <data name="ImportDayLimitLabel" xml:space="preserve"><value>Граница дня</value></data>
+  <data name="ImportDateIsPaymentDate" xml:space="preserve"><value>Дата в строке с отметкой «оплачено» — это дата платежа</value></data>
+  <data name="ImportRuleChangesHeader" xml:space="preserve"><value>Другое правило с определённой даты</value></data>
+  <data name="ImportAddRuleChange" xml:space="preserve"><value>Добавить смену правила</value></data>
+  <data name="ImportRuleChangeFrom" xml:space="preserve"><value>С даты</value></data>
+  <data name="ImportRemove" xml:space="preserve"><value>Убрать</value></data>
+  <data name="ImportFieldTotalFallback" xml:space="preserve"><value>Сумма счёта — если столбец выше пуст</value></data>
+  <data name="ImportFieldNetFallback" xml:space="preserve"><value>Сумма без НДС — если столбец выше пуст</value></data>
+  <data name="ImportFieldVatFallback" xml:space="preserve"><value>Сумма НДС — если столбец выше пуст</value></data>
+  <data name="ImportDetectReplacements" xml:space="preserve"><value>Искать замены счётчиков по показаниям</value></data>
+  <data name="ImportReplacementsHeader" xml:space="preserve"><value>Замены счётчиков</value></data>
+  <data name="ImportReplacementsHint" xml:space="preserve"><value>По показаниям видно, что эти счётчики меняли. Сверьте значения с бумагами, исправьте их и нажмите «Применить исправления». При импорте создаются новые счётчики, конечные показания старых, а привязки к договорам переносятся.</value></data>
+  <data name="ImportReplacementTitle" xml:space="preserve"><value>{0} — строка {1}</value></data>
+  <data name="ImportReplacementDate" xml:space="preserve"><value>Дата замены</value></data>
+  <data name="ImportReplacementFinal" xml:space="preserve"><value>Конечное показание старого счётчика</value></data>
+  <data name="ImportReplacementInitial" xml:space="preserve"><value>Начальное показание нового счётчика</value></data>
+  <data name="ImportReplacementSerial" xml:space="preserve"><value>Серийный номер нового счётчика</value></data>
+  <data name="ImportReplacementFinalEstimated" xml:space="preserve"><value>конечное показание оценено</value></data>
+  <data name="ImportReplacementInitialEstimated" xml:space="preserve"><value>начальное показание принято</value></data>
+  <data name="ImportRecalculate" xml:space="preserve"><value>Применить исправления</value></data>
+  <data name="ImportEditPeriod" xml:space="preserve"><value>Период…</value></data>
+  <data name="ImportRowOverrideTitle" xml:space="preserve"><value>Строка {0} · {1}</value></data>
+  <data name="ImportOverridePeriod" xml:space="preserve"><value>Период (месяц)</value></data>
+  <data name="ImportOverrideCovers" xml:space="preserve"><value>Счёт покрывает несколько месяцев</value></data>
+  <data name="ImportOverrideUntil" xml:space="preserve"><value>Последний покрытый месяц</value></data>
+  <data name="ImportOverrideRemark" xml:space="preserve"><value>Пометка к счёту (например, включая плату за подключение)</value></data>
+  <data name="ImportOverrideRuleHint" xml:space="preserve"><value>По правилу период — {0}.</value></data>
+  <data name="ImportOverrideClear" xml:space="preserve"><value>Сбросить</value></data>
+  <data name="ImportOverrideRangeInvalid" xml:space="preserve"><value>Последний месяц не может быть раньше периода.</value></data>
   <data name="Error_import_period_column_required" xml:space="preserve"><value>Выберите столбец с периодом (месяцем).</value></data>
   <data name="Error_import_nothing_mapped" xml:space="preserve"><value>Выберите хотя бы один столбец показаний или сумм.</value></data>
   <data name="Error_import_contract_required" xml:space="preserve"><value>Выберите договор.</value></data>
@@ -1302,6 +1338,12 @@
   <data name="Error_import_issue_paid_date_invalid" xml:space="preserve"><value>Столбец {0}: не удаётся прочитать дату оплаты «{1}»; берётся 1-е число месяца.</value></data>
   <data name="Error_import_issue_nothing_to_import" xml:space="preserve"><value>В этой строке нечего импортировать.</value></data>
   <data name="Error_import_issue_register_missing" xml:space="preserve"><value>Такого регистра счётчика нет.</value></data>
+  <data name="Error_import_day_limit_invalid" xml:space="preserve"><value>Граница дня должна быть днём месяца (1–31).</value></data>
+  <data name="Error_import_issue_fallback_used" xml:space="preserve"><value>Использован столбец {0}, потому что основной столбец пуст.</value></data>
+  <data name="Error_import_issue_period_superseded" xml:space="preserve"><value>В другой строке за {0} тоже есть счёт; счёт и платёж этой более ранней строки пропущены (берётся более поздняя строка {1}).</value></data>
+  <data name="Error_import_issue_period_supersedes" xml:space="preserve"><value>Счёт и платёж за {0} взяты из этой более поздней строки; в более ранней строке {1} они тоже были.</value></data>
+  <data name="Error_import_issue_replacement_proposed" xml:space="preserve"><value>Для этой строки предложена замена счётчика (см. «Замены счётчиков» выше).</value></data>
+  <data name="Error_import_issue_row_overridden" xml:space="preserve"><value>Период этой строки исправлен вами.</value></data>
   <data name="ReportKindLabel" xml:space="preserve"><value>Отчёт</value></data>
   <data name="ReportBusy" xml:space="preserve"><value>Расчёт…</value></data>
   <data name="ReportKindHintCosts" xml:space="preserve"><value>Сколько вы заплатили — по месяцам и категориям</value></data>

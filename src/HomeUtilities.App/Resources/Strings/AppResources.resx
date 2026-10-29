@@ -1253,16 +1253,16 @@
   <data name="ImportActionBill" xml:space="preserve"><value>Bill {0} {1}</value></data>
   <data name="ImportActionPayment" xml:space="preserve"><value>Payment {0} {1} on {2}</value></data>
   <data name="ImportActionSkipped" xml:space="preserve"><value>Skipped</value></data>
-  <data name="ImportSummary" xml:space="preserve"><value>{0} readings, {1} bills, {2} payments, {3} rows skipped · {4} rows with errors, {5} with warnings</value></data>
-  <data name="ImportConfirm" xml:space="preserve"><value>Import {0} readings, {1} bills and {2} payments? You can undo the whole import later in Settings → Imports.</value></data>
-  <data name="ImportDone" xml:space="preserve"><value>Imported {0} readings, {1} bills and {2} payments. Rows skipped: {3}.</value></data>
+  <data name="ImportSummary" xml:space="preserve"><value>{0} readings, {1} bills, {2} payments, {3} rows skipped, {6} meter replacements · {4} rows with errors, {5} with warnings</value></data>
+  <data name="ImportConfirm" xml:space="preserve"><value>Import {0} readings, {1} bills and {2} payments, and replace {3} meters? You can undo the whole import later in Settings → Imports.</value></data>
+  <data name="ImportDone" xml:space="preserve"><value>Imported {0} readings, {1} bills and {2} payments; {4} meter replacements. Rows skipped: {3}.</value></data>
   <data name="ImportOpenImports" xml:space="preserve"><value>Open imports</value></data>
   <data name="ImportBatchesHeader" xml:space="preserve"><value>Finished imports</value></data>
   <data name="ImportBatchesEmpty" xml:space="preserve"><value>Nothing has been imported yet.</value></data>
   <data name="ImportBatchTitle" xml:space="preserve"><value>{0} · {1}</value></data>
-  <data name="ImportBatchDetail" xml:space="preserve"><value>{0:g} · {1} readings, {2} bills, {3} payments, {4} rows skipped</value></data>
+  <data name="ImportBatchDetail" xml:space="preserve"><value>{0:g} · {1} readings, {2} bills, {3} payments, {4} rows skipped, {5} meter replacements</value></data>
   <data name="ImportUndo" xml:space="preserve"><value>Undo import</value></data>
-  <data name="ImportUndoConfirm" xml:space="preserve"><value>Undo the import of «{0}» (sheet «{1}»)? {2} readings, {3} bills and their {4} payments will be hidden; the history is kept.</value></data>
+  <data name="ImportUndoConfirm" xml:space="preserve"><value>Undo the import of «{0}» (sheet «{1}»)? {2} readings, {3} bills and their {4} payments will be hidden, and the {5} meters the import added are removed (the replaced meters are in use again); the history is kept.</value></data>
   <data name="ImportUndoEdited" xml:space="preserve"><value>Some imported records were edited later. Undo anyway?</value></data>
   <data name="ImportUndoAnyway" xml:space="preserve"><value>Undo anyway</value></data>
   <data name="ImportUndone" xml:space="preserve"><value>Import undone</value></data>
@@ -1277,6 +1277,42 @@
   <data name="ImportProfileImported" xml:space="preserve"><value>Profile «{0}» imported</value></data>
   <data name="ImportProfileSaved" xml:space="preserve"><value>Profile file saved</value></data>
   <data name="ImportProfileSavedTo" xml:space="preserve"><value>Profile file saved to {0}</value></data>
+  <data name="ImportPeriodRuleLabel" xml:space="preserve"><value>How the date becomes the period (month)</value></data>
+  <data name="ImportPeriodRuleHint" xml:space="preserve"><value>A date in the period column is the reading date or the payment date, not always the billing month. The reading keeps its real date; the bill gets the period. Cells such as «12.2013» or «January 2014» name the month themselves and ignore this rule.</value></data>
+  <data name="ImportPeriodRule_MonthOfDate" xml:space="preserve"><value>Month of the date</value></data>
+  <data name="ImportPeriodRule_ReadingWindow" xml:space="preserve"><value>By the contract’s reading window</value></data>
+  <data name="ImportPeriodRule_PreviousMonth" xml:space="preserve"><value>Previous month (the date is the 1st of the next month)</value></data>
+  <data name="ImportPeriodRule_PreviousMonthIfDayUpTo" xml:space="preserve"><value>Previous month if the day is up to the limit, else the month of the date</value></data>
+  <data name="ImportPeriodRule_NextMonth" xml:space="preserve"><value>Next month (paid in advance)</value></data>
+  <data name="ImportDayLimitLabel" xml:space="preserve"><value>Day limit</value></data>
+  <data name="ImportDateIsPaymentDate" xml:space="preserve"><value>The date of a row marked «paid» is the payment date</value></data>
+  <data name="ImportRuleChangesHeader" xml:space="preserve"><value>Other rule from a date on</value></data>
+  <data name="ImportAddRuleChange" xml:space="preserve"><value>Add a change of the rule</value></data>
+  <data name="ImportRuleChangeFrom" xml:space="preserve"><value>From date</value></data>
+  <data name="ImportRemove" xml:space="preserve"><value>Remove</value></data>
+  <data name="ImportFieldTotalFallback" xml:space="preserve"><value>Bill total — used when the column above is empty</value></data>
+  <data name="ImportFieldNetFallback" xml:space="preserve"><value>Amount excl. VAT — used when the column above is empty</value></data>
+  <data name="ImportFieldVatFallback" xml:space="preserve"><value>VAT amount — used when the column above is empty</value></data>
+  <data name="ImportDetectReplacements" xml:space="preserve"><value>Find meter replacements in the readings</value></data>
+  <data name="ImportReplacementsHeader" xml:space="preserve"><value>Meter replacements</value></data>
+  <data name="ImportReplacementsHint" xml:space="preserve"><value>The readings show that these meters were replaced. Check the values against your papers, correct them and press «Apply corrections». The import creates the new meters, the final readings of the old ones and moves the contract links.</value></data>
+  <data name="ImportReplacementTitle" xml:space="preserve"><value>{0} — row {1}</value></data>
+  <data name="ImportReplacementDate" xml:space="preserve"><value>Replacement date</value></data>
+  <data name="ImportReplacementFinal" xml:space="preserve"><value>Final reading of the old meter</value></data>
+  <data name="ImportReplacementInitial" xml:space="preserve"><value>Initial reading of the new meter</value></data>
+  <data name="ImportReplacementSerial" xml:space="preserve"><value>Serial number of the new meter</value></data>
+  <data name="ImportReplacementFinalEstimated" xml:space="preserve"><value>final reading estimated</value></data>
+  <data name="ImportReplacementInitialEstimated" xml:space="preserve"><value>initial reading assumed</value></data>
+  <data name="ImportRecalculate" xml:space="preserve"><value>Apply corrections</value></data>
+  <data name="ImportEditPeriod" xml:space="preserve"><value>Period…</value></data>
+  <data name="ImportRowOverrideTitle" xml:space="preserve"><value>Row {0} · {1}</value></data>
+  <data name="ImportOverridePeriod" xml:space="preserve"><value>Period (month)</value></data>
+  <data name="ImportOverrideCovers" xml:space="preserve"><value>The bill covers several months</value></data>
+  <data name="ImportOverrideUntil" xml:space="preserve"><value>Last month covered</value></data>
+  <data name="ImportOverrideRemark" xml:space="preserve"><value>Remark for the bill (e.g. incl. connection fee)</value></data>
+  <data name="ImportOverrideRuleHint" xml:space="preserve"><value>The rule gives the period {0}.</value></data>
+  <data name="ImportOverrideClear" xml:space="preserve"><value>Reset</value></data>
+  <data name="ImportOverrideRangeInvalid" xml:space="preserve"><value>The last month must not be before the period.</value></data>
   <data name="Error_import_period_column_required" xml:space="preserve"><value>Choose the column with the period (month).</value></data>
   <data name="Error_import_nothing_mapped" xml:space="preserve"><value>Choose at least one reading or amount column.</value></data>
   <data name="Error_import_contract_required" xml:space="preserve"><value>Choose the contract.</value></data>
@@ -1302,6 +1338,12 @@
   <data name="Error_import_issue_paid_date_invalid" xml:space="preserve"><value>Column {0}: cannot read the payment date «{1}»; the 1st of the month is used.</value></data>
   <data name="Error_import_issue_nothing_to_import" xml:space="preserve"><value>There is nothing to import in this row.</value></data>
   <data name="Error_import_issue_register_missing" xml:space="preserve"><value>The meter register does not exist.</value></data>
+  <data name="Error_import_day_limit_invalid" xml:space="preserve"><value>The day limit must be a day of the month (1–31).</value></data>
+  <data name="Error_import_issue_fallback_used" xml:space="preserve"><value>Column {0} was used because the preferred column is empty.</value></data>
+  <data name="Error_import_issue_period_superseded" xml:space="preserve"><value>Another row of {0} has a bill too; this earlier row’s bill and payment are skipped (the later row {1} is used).</value></data>
+  <data name="Error_import_issue_period_supersedes" xml:space="preserve"><value>The bill and payment of {0} come from this later row; the earlier row {1} had them too.</value></data>
+  <data name="Error_import_issue_replacement_proposed" xml:space="preserve"><value>A meter replacement is proposed for this row (see «Meter replacements» above).</value></data>
+  <data name="Error_import_issue_row_overridden" xml:space="preserve"><value>The period of this row was corrected by you.</value></data>
   <data name="ReportKindLabel" xml:space="preserve"><value>Report</value></data>
   <data name="ReportBusy" xml:space="preserve"><value>Calculating…</value></data>
   <data name="ReportKindHintCosts" xml:space="preserve"><value>What you paid, by month and category</value></data>

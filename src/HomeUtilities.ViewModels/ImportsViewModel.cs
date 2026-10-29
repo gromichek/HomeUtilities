@@ -24,7 +24,8 @@ public sealed partial class ImportBatchItemViewModel : ObservableObject
             batch.ReadingCount,
             batch.BillCount,
             batch.PaymentCount,
-            batch.SkippedCount);
+            batch.SkippedCount,
+            batch.ReplacementCount);
         UndoText = localizer["ImportUndo"];
     }
 
@@ -233,7 +234,7 @@ public sealed partial class ImportsViewModel : ViewModelBase
         var batch = item.Batch;
         var confirmed = await _dialogs.ConfirmAsync(
             _localizer["ImportUndo"],
-            _localizer.Get("ImportUndoConfirm", batch.FileName, batch.SheetName, batch.ReadingCount, batch.BillCount, batch.PaymentCount),
+            _localizer.Get("ImportUndoConfirm", batch.FileName, batch.SheetName, batch.ReadingCount, batch.BillCount, batch.PaymentCount, batch.ReplacementCount),
             _localizer["ImportUndo"],
             _localizer["Cancel"]);
         if (!confirmed)

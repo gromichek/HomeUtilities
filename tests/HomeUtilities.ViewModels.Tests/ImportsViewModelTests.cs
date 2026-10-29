@@ -70,7 +70,7 @@ public class ImportsViewModelTests
 
         await vm.BatchItems[0].UndoCommand.ExecuteAsync(null);
 
-        Assert.Equal("ImportUndoConfirm book.xlsx|Water|8|3|2 [en]", Assert.Single(_dialogs.Confirmations).Message);
+        Assert.Equal("ImportUndoConfirm book.xlsx|Water|8|3|2|0 [en]", Assert.Single(_dialogs.Confirmations).Message);
         Assert.Equal([(batch.Id, false)], _batches.UndoCalls);
         Assert.Empty(vm.BatchItems);
         Assert.Equal(["ImportUndone [en]"], _snackbar.Messages);

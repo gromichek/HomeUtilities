@@ -110,6 +110,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         TaxYearEditorViewModel => new TaxYearEditorView { BindingContext = editor },
         ReplaceMeterWizardViewModel => new ReplaceMeterWizardView { BindingContext = editor },
         MultiSelectDialogViewModel => new MultiSelectDialogView { BindingContext = editor },
+        ImportRowOverrideEditorViewModel => new ImportRowOverrideEditorView { BindingContext = editor },
         ReportPeriodDialogViewModel => new ReportPeriodDialogView { BindingContext = editor },
         SingleChoiceDialogViewModel => new SingleChoiceDialogView { BindingContext = editor },
         _ => throw new NotSupportedException($"No dialog view is registered for {editor.GetType().Name}."),
