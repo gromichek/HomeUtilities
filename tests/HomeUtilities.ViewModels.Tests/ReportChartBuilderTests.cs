@@ -46,7 +46,7 @@ public class ReportChartBuilderTests : IDisposable
         CostGrouping grouping = CostGrouping.Category,
         bool yearOverYear = false,
         ReportMeasure measure = ReportMeasure.Gross) =>
-        new(from, to, null, null, ReportRows.Months, yearOverYear, grouping, measure, false);
+        new(from, to, null, null, ReportRows.Months, yearOverYear, grouping, measure);
 
     // ---- Costs ----------------------------------------------------------------------------------------------------
 
