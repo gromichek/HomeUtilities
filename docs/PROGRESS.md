@@ -8,6 +8,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
 | T-026 | Excel import wizard, profiles, undo | Ready | | |
+| T-023b | Reports polish: dialogs, report picker, wheel, Android spinner; narrower menu | Ready | | owner findings 2026-10-29; can run in parallel with T-026 |
 
 ## Done
 
@@ -101,7 +102,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #54 | T-016a: meter/reading photos, submit links on meter cards | OK |
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
-| | #110 + #111 | T-023a report filters; T-025 templates and drafts (manual steps in the PRs) | pending |
+| 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
+| | #111 | T-025 templates and drafts | pending |
 | 2026-10-28 | #108 | T-024 charts | OK |
 | 2026-10-28 | #105 | T-023 reports | 6 steps OK. **Usability**: filter buttons do not fit (Windows), want drop-downs with check boxes; multi-property columns hard to assign; Android spinner keeps turning on first open → T-023a |
 | 2026-10-28 | #102 | T-022 overview | OK. Somewhere a text does not wrap (emulator) — to collect on a real phone/tablet in the polish pass |
