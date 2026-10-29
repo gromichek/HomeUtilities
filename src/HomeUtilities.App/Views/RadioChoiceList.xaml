@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.RadioChoiceList">
+
+    <!-- Radio rows of a single-choice dialog (UI_GUIDELINES §3a): the whole row is tappable, the mark sits directly before the text,
+         an optional explanation goes under the text. -->
+    <VerticalStackLayout x:Name="Rows" Spacing="2">
+        <BindableLayout.ItemTemplate>
+            <DataTemplate x:DataType="vm:ReportOptionViewModel">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinimumHeightRequest="48" Padding="4,6">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ChooseCommand}" />
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
+                           Text="{StaticResource IconRadioOff}"
+                           TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Text" Value="{StaticResource IconRadioOn}" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="{Binding Text}" />
+                        <Label Text="{Binding Description}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasDescription}" />
+                    </VerticalStackLayout>
+                </Grid>
+            </DataTemplate>
+        </BindableLayout.ItemTemplate>
+    </VerticalStackLayout>
+</ContentView>

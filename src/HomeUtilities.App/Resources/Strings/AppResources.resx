@@ -1302,4 +1302,10 @@
   <data name="Error_import_issue_paid_date_invalid" xml:space="preserve"><value>Column {0}: cannot read the payment date «{1}»; the 1st of the month is used.</value></data>
   <data name="Error_import_issue_nothing_to_import" xml:space="preserve"><value>There is nothing to import in this row.</value></data>
   <data name="Error_import_issue_register_missing" xml:space="preserve"><value>The meter register does not exist.</value></data>
+  <data name="ReportKindLabel" xml:space="preserve"><value>Report</value></data>
+  <data name="ReportBusy" xml:space="preserve"><value>Calculating…</value></data>
+  <data name="ReportKindHintCosts" xml:space="preserve"><value>What you paid, by month and category</value></data>
+  <data name="ReportKindHintConsumption" xml:space="preserve"><value>How much you used, by meter or property</value></data>
+  <data name="ReportKindHintUnitCost" xml:space="preserve"><value>Price per unit: cost divided by consumption</value></data>
+  <data name="ReportKindHintCalculatedVsBilled" xml:space="preserve"><value>What the app calculated against what the supplier billed</value></data>
 </root>

@@ -6,32 +6,35 @@
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
              x:Class="HomeUtilities.App.Views.ReportPeriodDialogView"
              x:DataType="vm:ReportPeriodDialogViewModel"
+             VerticalOptions="Fill"
              BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
 
     <ContentView.Resources>
         <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
     </ContentView.Resources>
 
-    <!-- A preset, or "Custom…" with a from and a to month picker. -->
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="8">
-            <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+    <!-- Radio rows (presets and "Custom…"); the from / to month pickers appear under the rows while "Custom…" is chosen. -->
+    <Grid RowDefinitions="Auto,*,Auto" Padding="20" RowSpacing="8">
+        <Label Grid.Row="0" Text="{Binding Title}" Style="{StaticResource SectionHeader}" VerticalOptions="Start" />
 
-            <views:ReportOptionRow Items="{Binding Presets}" />
+        <ScrollView Grid.Row="1" VerticalOptions="Start">
+            <VerticalStackLayout Spacing="8">
+                <views:RadioChoiceList Items="{Binding Presets}" />
 
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustom}">
-                <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" />
-                <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding FromIndex, Mode=TwoWay}" />
-                <Label Text="{Binding ToLabel}" Style="{StaticResource MutedLabel}" />
-                <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding ToIndex, Mode=TwoWay}" />
-                <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
-                       IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustom}" Padding="4,0">
+                    <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding FromIndex, Mode=TwoWay}" />
+                    <Label Text="{Binding ToLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding MonthTexts}" SelectedIndex="{Binding ToIndex, Mode=TwoWay}" />
+                    <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
+                           IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
             </VerticalStackLayout>
+        </ScrollView>
 
-            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
-                <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
-                <Button Text="{Binding OkText}" Command="{Binding ConfirmCommand}" Style="{StaticResource PrimaryButton}" />
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
-    </ScrollView>
+        <HorizontalStackLayout Grid.Row="2" Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
+            <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
+            <Button Text="{Binding OkText}" Command="{Binding ConfirmCommand}" Style="{StaticResource PrimaryButton}" />
+        </HorizontalStackLayout>
+    </Grid>
 </ContentView>

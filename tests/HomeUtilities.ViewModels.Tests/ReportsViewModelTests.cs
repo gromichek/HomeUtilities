@@ -179,6 +179,7 @@ public class ReportsViewModelTests : IDisposable
             script(dialog);
             (dialog as MultiSelectDialogViewModel)?.ConfirmCommand.Execute(null);
             (dialog as ReportPeriodDialogViewModel)?.ConfirmCommand.Execute(null);
+            (dialog as SingleChoiceDialogViewModel)?.ConfirmCommand.Execute(null);
         };
         await open();
         await Settled(vm);
@@ -241,6 +242,38 @@ public class ReportsViewModelTests : IDisposable
         Assert.False(dialog.Saved);
         Assert.Equal("ReportPeriodInvalid [en]", dialog.Error);
         Assert.NotNull(vm);
+    }
+
+    [Fact]
+    public async Task The_report_is_picked_in_a_dialog_with_a_hint_per_report_and_the_field_shows_it()
+    {
+        var vm = await LoadAsync();
+        Assert.Equal("ReportKindCosts [en]", vm.KindFieldText);
+
+        await RunDialogAsync<SingleChoiceDialogViewModel>(vm, () => vm.ChooseReportCommand.ExecuteAsync(null), d =>
+        {
+            Assert.Equal(
+                [ReportKind.Costs, ReportKind.Consumption, ReportKind.UnitCost, ReportKind.CalculatedVsBilled],
+                d.Items.Select(i => (ReportKind)i.Value!));
+            Assert.All(d.Items, i => Assert.True(i.HasDescription));
+            Assert.True(d.Items[0].IsSelected);
+            d.Items[(int)ReportKind.Consumption].ChooseCommand.Execute(null);
+        });
+
+        Assert.Equal(ReportKind.Consumption, _state.Kind);
+        Assert.Equal("ReportKindConsumption [en]", vm.KindFieldText);
+        Assert.False(vm.ShowGrouping);
+    }
+
+    [Fact]
+    public async Task Cancelling_the_report_dialog_keeps_the_report()
+    {
+        var vm = await LoadAsync();
+        _kit.Dialogs.EditorScript = editor => ((SingleChoiceDialogViewModel)editor).Items[1].ChooseCommand.Execute(null);
+
+        await vm.ChooseReportCommand.ExecuteAsync(null);
+
+        Assert.Equal(ReportKind.Costs, _state.Kind);
     }
 
     [Fact]

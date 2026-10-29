@@ -627,7 +627,7 @@ app calculated. The numbers come from the records you already keep — **bills**
 used) and the **tariffs** of the [contracts](#5-contracts) — so a report is only as complete as those are. Every amount
 is shown in euro (old amounts in lats are converted at the official rate).
 
-Pick the report at the top, set the filters under it, and read the table. Everything below the filters is a **table**:
+Pick the report in the **Report** field at the top (it opens a list with a one-line explanation of each report: *Costs — what you paid, by month and category*, and so on; the app remembers your choice), set the filters under it, and read the table. Everything below the filters is a **table**:
 the period stays on the left while the columns scroll sideways inside the table; the last row is the **total** of the
 whole period. Tap a number to see what is behind it: for costs and for unit cost and calculated vs billed the
 [Bills](#11-bills) screen opens for that property and month (for costs grouped by category, only the bills of that category are
@@ -645,7 +645,9 @@ by default and stays as you left it while the app runs. The exports are in the *
 
 - **Period** — the field shows the choice with its months, for example *This year (01.2026–12.2026)*. The dialog offers
   *This year* (January to December), *Last 12 months*, *Last year*, *All* (from your first record to today or your last
-  bill) and *Custom…*, which adds a *From* and a *To* month list. The end cannot be before the start.
+  bill) and *Custom…*, which adds a *From* and a *To* month list under the options. The end cannot be before the start.
+  Every choice dialog looks the same: the title on top, the options as rows (a round mark for one choice, a square one
+  for several) that you can tap anywhere, and *Cancel* / *OK* at the bottom right; on a phone it fills the screen.
 - **Properties** and **Categories** — a dialog with a check box per item (categories with their colour), the buttons
   *All* and *None* at the top and *OK* / *Cancel*. The field shows *All (3)*, the names (*Flat in town, Cottage*) or *4 of 15*.
   At least one item must stay checked, otherwise *OK* is disabled. A property you archived is off at first — check it to
