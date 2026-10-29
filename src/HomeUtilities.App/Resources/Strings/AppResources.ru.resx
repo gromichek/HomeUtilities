@@ -1365,6 +1365,7 @@
   <data name="ReminderLeadDays" xml:space="preserve"><value>Напоминать о счёте за {0} дн. до срока оплаты (0 = только в день оплаты)</value></data>
   <data name="ReminderReadingsTitle" xml:space="preserve"><value>Передайте показания</value></data>
   <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — открыт период передачи показаний, числа {2}–{3}.</value></data>
+  <data name="ReminderReadingsLastDayBody" xml:space="preserve"><value>Сегодня последний день передачи показаний: {0}</value></data>
   <data name="ReminderBillTitle" xml:space="preserve"><value>Срок оплаты счёта</value></data>
   <data name="ReminderTaxTitle" xml:space="preserve"><value>Срок оплаты налога</value></data>
   <data name="ReminderBillBodyToday" xml:space="preserve"><value>{0}: {1:N2} {2} — оплатить сегодня.</value></data>

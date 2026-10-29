@@ -753,7 +753,9 @@ the app is closed (Android). Each reminder is a notification; tapping it opens t
 
 - **Submit readings** — on the first day of the reading window of a contract (see [Contracts](#5-contracts)), at the set
   time. Contracts of one property with the same window give one notification. Nothing is sent if the readings of that window
-  are already entered, or if the contract has **Remind me about readings** switched off.
+  are already entered, or if the contract has **Remind me about readings** switched off. If the readings are still missing on
+  the **last day** of the window, a second notification "Last day to submit readings to …" comes at the same time of day
+  (a one-day window has only one); once you enter the readings, it disappears.
 - **Bills and tax installments due** — a few days before the due date (the setting *Remind about a bill … days before it is
   due*, 0–14, default 2; a [template](#bill-templates-and-drafts) can have its own number) and again on the due day. Only
   open bills are reminded: a paid bill, a draft or a bill without a due date is not.

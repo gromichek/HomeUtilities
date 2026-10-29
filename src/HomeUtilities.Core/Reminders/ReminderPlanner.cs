@@ -123,7 +123,8 @@ public static class ReminderPlanner
                     break;
                 }
 
-                if (context.Slot(window.From) is null
+                // A window is relevant while its start day or (for a window longer than one day) its last day is still ahead.
+                if ((context.Slot(window.From) is null && (window.To <= window.From || context.Slot(window.To) is null))
                     || !contract.IsActiveOn(window.From)
                     || TodoBuilder.HasReadingInWindow(data, contract, meters, window.From, window.To))
                 {
@@ -143,19 +144,37 @@ public static class ReminderPlanner
         foreach (var ((propertyId, from, to), contracts) in groups)
         {
             var titles = string.Join(", ", contracts.Select(c => c.Title).OrderBy(t => t, StringComparer.OrdinalIgnoreCase));
-            yield return new PlannedReminder(
-                $"readings:{Id(propertyId)}:{Day(from)}",
-                context.Slot(from)!.Value,
-                ReminderKind.SubmitReadings,
-                Text("ReminderReadingsTitle"),
-                Text("ReminderReadingsBody", context.PropertyNames[propertyId], titles, from.Day, to.Day),
-                new ReminderTarget(
-                    ReminderRoutes.ReadingsFor,
-                    new Dictionary<string, string>
-                    {
-                        [ReminderRoutes.PropertyIdParameter] = Id(propertyId),
-                        [ReminderRoutes.DateParameter] = Day(from),
-                    }));
+            var target = new ReminderTarget(
+                ReminderRoutes.ReadingsFor,
+                new Dictionary<string, string>
+                {
+                    [ReminderRoutes.PropertyIdParameter] = Id(propertyId),
+                    [ReminderRoutes.DateParameter] = Day(from),
+                });
+
+            if (context.Slot(from) is { } startAt)
+            {
+                yield return new PlannedReminder(
+                    $"readings:{Id(propertyId)}:{Day(from)}",
+                    startAt,
+                    ReminderKind.SubmitReadings,
+                    Text("ReminderReadingsTitle"),
+                    Text("ReminderReadingsBody", context.PropertyNames[propertyId], titles, from.Day, to.Day),
+                    target);
+            }
+
+            // The readings of the window are still missing (groups only hold such windows): remind once more on its last day.
+            // A one-day window has only the first reminder.
+            if (to > from && context.Slot(to) is { } lastAt)
+            {
+                yield return new PlannedReminder(
+                    $"readings:{Id(propertyId)}:{Day(from)}:last",
+                    lastAt,
+                    ReminderKind.SubmitReadings,
+                    Text("ReminderReadingsTitle"),
+                    Text("ReminderReadingsLastDayBody", titles),
+                    target);
+            }
         }
     }
 
