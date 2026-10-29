@@ -1365,6 +1365,7 @@
   <data name="ReminderLeadDays" xml:space="preserve"><value>Remind about a bill {0} day(s) before it is due (0 = on the due day only)</value></data>
   <data name="ReminderReadingsTitle" xml:space="preserve"><value>Submit readings</value></data>
   <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — the reading window is open, days {2}–{3}.</value></data>
+  <data name="ReminderReadingsLastDayBody" xml:space="preserve"><value>Last day to submit readings to {0}</value></data>
   <data name="ReminderBillTitle" xml:space="preserve"><value>Bill due</value></data>
   <data name="ReminderTaxTitle" xml:space="preserve"><value>Tax installment due</value></data>
   <data name="ReminderBillBodyToday" xml:space="preserve"><value>{0}: {1:N2} {2} is due today.</value></data>

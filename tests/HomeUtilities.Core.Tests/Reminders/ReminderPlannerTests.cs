@@ -54,7 +54,7 @@ public class ReminderPlannerTests
         var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
         scenario.AddMeter(water);
 
-        var reminder = Assert.Single(Plan(scenario, Now(10, 20), On with { TimeOfDay = new TimeOnly(10, 30) }, horizon: 10));
+        var reminder = Assert.Single(Plan(scenario, Now(10, 20), On with { TimeOfDay = new TimeOnly(10, 30) }, horizon: 6));
 
         Assert.Equal(At(10, 25, 10, 30), reminder.At);
         Assert.Equal(ReminderKind.SubmitReadings, reminder.Kind);
@@ -75,7 +75,7 @@ public class ReminderPlannerTests
 
         var plan = Plan(scenario, Now(10, 20));
 
-        Assert.Equal([At(10, 25), At(11, 25)], plan.Select(r => r.At));
+        Assert.Equal([At(10, 25), At(10, 28), At(11, 25), At(11, 28)], plan.Select(r => r.At));
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class ReminderPlannerTests
         scenario.AddMeter(water);
         scenario.AddMeter(gas, "Boiler");
 
-        var plan = Plan(scenario, Now(10, 20), horizon: 10);
+        var plan = Plan(scenario, Now(10, 20), horizon: 6);
 
         var reminder = Assert.Single(plan);
         Assert.Equal("Gas, Water", reminder.Body.Args[1]);
@@ -102,7 +102,7 @@ public class ReminderPlannerTests
         scenario.AddMeter(scenario.AddContract("Water", windowFrom: 25, windowTo: 28));
         scenario.AddMeter(scenario.AddContract("Water", cottage, 25, 28));
 
-        Assert.Equal(2, Plan(scenario, Now(10, 20), horizon: 10).Count);
+        Assert.Equal(2, Plan(scenario, Now(10, 20), horizon: 6).Count);
     }
 
     [Fact]
@@ -146,10 +146,10 @@ public class ReminderPlannerTests
         var scenario = new OverviewScenario();
         scenario.AddMeter(scenario.AddContract("Water", windowFrom: 25, windowTo: 28));
 
-        // 26 Oct: the window started yesterday; only the November one remains.
+        // 26 Oct: the window started yesterday; only the last-day reminder of October and the November ones remain.
         var plan = Plan(scenario, Now(10, 26));
 
-        Assert.Equal([At(11, 25)], plan.Select(r => r.At));
+        Assert.Equal([At(10, 28), At(11, 25), At(11, 28)], plan.Select(r => r.At));
     }
 
     [Fact]
@@ -158,8 +158,74 @@ public class ReminderPlannerTests
         var scenario = new OverviewScenario();
         scenario.AddMeter(scenario.AddContract("Water", windowFrom: 25, windowTo: 28));
 
-        Assert.Equal([At(11, 25)], Plan(scenario, Now(10, 25, 9)).Select(r => r.At));
-        Assert.Equal([At(10, 25), At(11, 25)], Plan(scenario, Now(10, 25, 8)).Select(r => r.At));
+        Assert.Equal([At(10, 28), At(11, 25), At(11, 28)], Plan(scenario, Now(10, 25, 9)).Select(r => r.At));
+        Assert.Equal([At(10, 25), At(10, 28), At(11, 25), At(11, 28)], Plan(scenario, Now(10, 25, 8)).Select(r => r.At));
+    }
+
+    [Fact]
+    public void Last_day_reminder_is_planned_with_its_own_key_and_text()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        var gas = scenario.AddContract("Gas", windowFrom: 25, windowTo: 28);
+        scenario.AddMeter(water);
+        scenario.AddMeter(gas, "Boiler");
+
+        // Window 25-28 Oct planned on 20 Oct: the first day and the last day.
+        var plan = Plan(scenario, Now(10, 20), horizon: 10);
+
+        Assert.Equal([At(10, 25), At(10, 28)], plan.Select(r => r.At));
+        Assert.Equal([$"readings:{scenario.Flat.Id}:2026-10-25", $"readings:{scenario.Flat.Id}:2026-10-25:last"], plan.Select(r => r.Key));
+        Assert.Equal("ReminderReadingsLastDayBody", plan[1].Body.Key);
+        Assert.Equal(["Gas, Water"], plan[1].Body.Args);
+        Assert.Equal(ReminderRoutes.ReadingsFor, plan[1].Target.Route);
+        Assert.Equal("2026-10-25", plan[1].Target.Parameters["date"]);
+    }
+
+    [Fact]
+    public void Last_day_reminder_remains_when_the_window_has_already_started()
+    {
+        var scenario = new OverviewScenario();
+        scenario.AddMeter(scenario.AddContract("Water", windowFrom: 25, windowTo: 28));
+
+        // 26 Oct, no readings yet: only 28 Oct is left of this window.
+        var plan = Plan(scenario, Now(10, 26), horizon: 10);
+
+        Assert.Equal([At(10, 28)], plan.Select(r => r.At));
+    }
+
+    [Fact]
+    public void Last_day_reminder_disappears_when_readings_are_entered()
+    {
+        var scenario = new OverviewScenario();
+        scenario.AddMeter(scenario.AddContract("Water", windowFrom: 25, windowTo: 28), "Kitchen", D(10, 26));
+
+        Assert.Empty(Plan(scenario, Now(10, 26), horizon: 10));
+    }
+
+    [Fact]
+    public void Window_crossing_the_month_has_its_last_day_in_the_next_month()
+    {
+        var scenario = new OverviewScenario();
+        scenario.AddMeter(scenario.AddContract("Water", windowFrom: 28, windowTo: 3));
+
+        // Window 28 Oct - 3 Nov.
+        var plan = Plan(scenario, Now(10, 20), horizon: 15);
+
+        Assert.Equal([At(10, 28), At(11, 3)], plan.Select(r => r.At));
+    }
+
+    [Fact]
+    public void One_day_window_has_only_one_reminder()
+    {
+        var scenario = new OverviewScenario();
+        scenario.AddMeter(scenario.AddContract("Water", windowFrom: 25, windowTo: 25));
+
+        var plan = Plan(scenario, Now(10, 20), horizon: 10);
+
+        var reminder = Assert.Single(plan);
+        Assert.Equal(At(10, 25), reminder.At);
+        Assert.Equal("ReminderReadingsBody", reminder.Body.Key);
     }
 
     // ---- Bills ----------------------------------------------------------------------------------------------------
