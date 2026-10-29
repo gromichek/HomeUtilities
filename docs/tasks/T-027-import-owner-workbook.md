@@ -74,7 +74,8 @@ numbers below are invented but have the same shape)
 5. **Readings from another sheet.** A sheet may map **no** reading columns (heating sheet: hot m³ come from the water
    sheet) — then only bills/payments are imported; a "consumption on bill" column can be mapped to
    `ConsumptionOnBill`.
-6. **Profile export/import** stays data-free. Guide: Import section (period rules with examples, positions, automatic
+6. Store in the profile what a later **export in the same layout** needs (T-027a): the header texts of the mapped
+   columns as read from the file and the column letters of every mapped field. **Profile export/import** stays data-free. Guide: Import section (period rules with examples, positions, automatic
    replacements and how to check them, fallback columns, heating sheet without readings).
 7. **Reports wheel fix (from T-023b test):** Shift+wheel over the report table does not scroll it sideways on Windows —
    make it scroll horizontally (and keep plain wheel → page).
