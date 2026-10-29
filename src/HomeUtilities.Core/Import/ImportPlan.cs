@@ -12,6 +12,9 @@ public enum ImportIssueSeverity
 
     /// <summary>The row is skipped.</summary>
     Error = 1,
+
+    /// <summary>Information only (e.g. which fallback column was used); not counted as a problem.</summary>
+    Info = 2,
 }
 
 /// <summary>A problem found in a row. The UI maps <see cref="Code"/> to a localized message.</summary>
@@ -33,6 +36,15 @@ public sealed class PlannedRow
 
     /// <summary>The parsed period, or null if the cell could not be read.</summary>
     public YearMonth? Period { get; set; }
+
+    /// <summary>The date in the period column, or null when the cell names the period itself (text such as "12.2013").</summary>
+    public DateOnly? RowDate { get; set; }
+
+    /// <summary>The period the rule gave, before the owner's correction (see <see cref="Override"/>).</summary>
+    public YearMonth? RuleBasedPeriod { get; set; }
+
+    /// <summary>The owner's correction that was applied to this row, if any.</summary>
+    public ImportRowOverride? Override { get; set; }
 
     /// <summary>Issues of the row.</summary>
     public List<ImportIssue> Issues { get; } = [];
@@ -56,12 +68,100 @@ public sealed class PlannedRow
     public bool IsSkipped => Readings.Count == 0 && Bill is null;
 }
 
+/// <summary>One register of a replaced meter: the final reading of the old register and the initial reading of the new one.</summary>
+public sealed class PlannedReplacementRegister
+{
+    /// <summary>The position (register of the first meter of the chain) this register belongs to.</summary>
+    public Guid PositionRegisterId { get; init; }
+
+    /// <summary>Register of the replaced meter.</summary>
+    public Guid OldRegisterId { get; init; }
+
+    /// <summary>Register of the new meter.</summary>
+    public Guid NewRegisterId { get; init; }
+
+    /// <summary>The Final reading of the old register (dated with the replacement).</summary>
+    public required MeterReading FinalReading { get; init; }
+
+    /// <summary>The Initial reading of the new register (dated with the replacement).</summary>
+    public required MeterReading InitialReading { get; init; }
+
+    /// <summary>True when the initial reading is the sheet row's own reading (it is then listed in that row, not counted twice).</summary>
+    public bool InitialIsRowReading { get; set; }
+
+    /// <summary>True when the final value was estimated; the reading is stored as <see cref="ReadingKind.Estimated"/>.</summary>
+    public bool FinalEstimated { get; set; }
+
+    /// <summary>True when the initial value is a default (0) and not read from the sheet.</summary>
+    public bool InitialEstimated { get; set; }
+
+    /// <summary>True when the register is not mapped to a column (its values are the last known reading and 0).</summary>
+    public bool Unmapped { get; init; }
+}
+
+/// <summary>A meter replacement the import will carry out (detected in the readings or taken from a note).</summary>
+public sealed class PlannedReplacement
+{
+    /// <summary>Identifier of the proposal.</summary>
+    public Guid Id { get; } = Guid.NewGuid();
+
+    /// <summary>The replaced meter.</summary>
+    public Guid OldMeterId { get; init; }
+
+    /// <summary>True when the replaced meter is itself created by this import (the chain grows by several replacements).</summary>
+    public bool OldMeterIsPlanned { get; init; }
+
+    /// <summary>The new meter with its registers; stored by the import.</summary>
+    public required Meter NewMeter { get; init; }
+
+    /// <summary>Replacement date: removal of the old meter, installation of the new one.</summary>
+    public DateOnly Date { get; set; }
+
+    /// <summary>Sheet row the replacement was found in.</summary>
+    public int RowNumber { get; init; }
+
+    /// <summary>The registers with their final and initial values.</summary>
+    public List<PlannedReplacementRegister> Registers { get; } = [];
+
+    /// <summary>Existing links of the old meter that end the day before the replacement (copies with the new end date).</summary>
+    public List<ContractMeter> LinksToClose { get; } = [];
+
+    /// <summary>Links of the new meter, one for each open link of the old meter.</summary>
+    public List<ContractMeter> LinksToCreate { get; } = [];
+
+    /// <summary>All readings the replacement creates besides the ones listed in sheet rows.</summary>
+    public IEnumerable<MeterReading> OwnReadings
+    {
+        get
+        {
+            foreach (var register in Registers)
+            {
+                yield return register.FinalReading;
+                if (!register.InitialIsRowReading)
+                {
+                    yield return register.InitialReading;
+                }
+            }
+        }
+    }
+}
+
+/// <summary>The owner's correction of a proposed replacement (found again by row and position when the plan is made again).</summary>
+/// <param name="RowNumber">Sheet row of the replacement.</param>
+/// <param name="PositionRegisterId">The position (register of the first meter of the chain).</param>
+/// <param name="Date">New replacement date, or null to keep the proposal.</param>
+/// <param name="Final">New final value of the old meter, or null.</param>
+/// <param name="Initial">New initial value of the new meter, or null.</param>
+/// <param name="SerialNumber">Serial number of the new meter, or null.</param>
+public sealed record ReplacementEdit(int RowNumber, Guid PositionRegisterId, DateOnly? Date, decimal? Final, decimal? Initial, string? SerialNumber);
+
 /// <summary>Totals of a plan.</summary>
-/// <param name="Readings">Readings to create.</param>
+/// <param name="Readings">Readings to create (those of replacements included).</param>
 /// <param name="Bills">Bills to create.</param>
 /// <param name="Payments">Payments to create.</param>
 /// <param name="SkippedRows">Rows that create nothing.</param>
-public sealed record ImportCounts(int Readings, int Bills, int Payments, int SkippedRows);
+/// <param name="Replacements">Meter replacements to carry out.</param>
+public sealed record ImportCounts(int Readings, int Bills, int Payments, int SkippedRows, int Replacements = 0);
 
 /// <summary>The dry run of an import: what every row of the sheet would create.</summary>
 public sealed class ImportPlan
@@ -70,16 +170,21 @@ public sealed class ImportPlan
     public static ImportPlan Invalid(IReadOnlyList<ValidationError> problems) => new([], problems);
 
     /// <summary>Creates a plan.</summary>
-    public ImportPlan(IReadOnlyList<PlannedRow> rows, IReadOnlyList<ValidationError> problems)
+    public ImportPlan(IReadOnlyList<PlannedRow> rows, IReadOnlyList<ValidationError> problems, IReadOnlyList<PlannedReplacement>? replacements = null)
     {
         Rows = rows;
         Problems = problems;
+        Replacements = replacements ?? [];
         Counts = new(
-            rows.Sum(r => r.Readings.Count),
+            rows.Sum(r => r.Readings.Count) + Replacements.Sum(r => r.OwnReadings.Count()),
             rows.Count(r => r.Bill is not null),
             rows.Count(r => r.Payment is not null),
-            rows.Count(r => r.IsSkipped));
+            rows.Count(r => r.IsSkipped),
+            Replacements.Count);
     }
+
+    /// <summary>Meter replacements proposed by the readings or taken from notes, oldest first.</summary>
+    public IReadOnlyList<PlannedReplacement> Replacements { get; }
 
     /// <summary>One entry per sheet row that is not blank.</summary>
     public IReadOnlyList<PlannedRow> Rows { get; }
@@ -101,7 +206,14 @@ public sealed class ImportPlan
 /// <param name="Contract">The target contract.</param>
 /// <param name="Meters">Meters (with registers and readings) that may receive readings.</param>
 /// <param name="ExistingBills">Non-deleted bills of the contract.</param>
-public sealed record ImportContext(Contract Contract, IReadOnlyList<Meter> Meters, IReadOnlyList<Bill> ExistingBills);
+/// <param name="ContractLinks">Meter links of every contract of the property (to move them to a replacement meter); may be null.</param>
+/// <param name="ReplacementEdits">Corrections of proposed replacements made by the owner; may be null.</param>
+public sealed record ImportContext(
+    Contract Contract,
+    IReadOnlyList<Meter> Meters,
+    IReadOnlyList<Bill> ExistingBills,
+    IReadOnlyList<ContractMeter>? ContractLinks = null,
+    IReadOnlyList<ReplacementEdit>? ReplacementEdits = null);
 
 /// <summary>Codes of the issues the planner reports.</summary>
 public static class ImportIssueCodes
@@ -159,4 +271,19 @@ public static class ImportIssueCodes
 
     /// <summary>The mapped register does not exist; Args: none.</summary>
     public const string RegisterMissing = "import_issue.register_missing";
+
+    /// <summary>The preferred amount column is empty; the fallback column was used; Args: column letter.</summary>
+    public const string FallbackUsed = "import_issue.fallback_used";
+
+    /// <summary>The row's bill is replaced by a later row of the same period; Args: period, row number of the later row.</summary>
+    public const string PeriodSuperseded = "import_issue.period_superseded";
+
+    /// <summary>This row's bill replaces the one of an earlier row of the same period; Args: period, row number of the earlier row.</summary>
+    public const string PeriodSupersedes = "import_issue.period_supersedes";
+
+    /// <summary>A meter replacement is proposed for the row; Args: none.</summary>
+    public const string ReplacementProposed = "import_issue.replacement_proposed";
+
+    /// <summary>The row was corrected by the owner (period, months covered or remark); Args: none.</summary>
+    public const string RowOverridden = "import_issue.row_overridden";
 }
