@@ -580,6 +580,12 @@ version that was running ends the day before it automatically, so the plans neve
 trash can deletes it. Enter the **tariff** of the contract as well (see [Tariffs](#9-tariffs)) — without prices and
 readings the app cannot say what the real consumption costs.
 
+**Switching an existing contract to equalized.** Keep the contract (its bills, readings and history stay), set *Billing mode* to
+**Equalized payments** and add the plan from the first equalized month. Earlier months stay billed by consumption: the app decides
+month by month, and a month is equalized only if a plan covers it. Before the first plan the bills are regular, the cards on
+[Charges](#10-charges) are ordinary ones, an Excel import brings the rows in as regular bills, and the contract stays in the
+unit cost and calculated-versus-billed reports for those months (equalized months are left out of them — the settlement page covers them).
+
 **Each month.** Enter the bill as usual ([Bills](#11-bills)): the kind is *Equalized payment* and the *Total* is the
 plan amount of the month. The bill is compared with the plan; the cost of the readings is shown next to it as information.
 
@@ -690,8 +696,9 @@ A month in which the consumption cannot be determined — there is no reading fo
 
 What one unit really costs: the **bill** of the month divided by the **metered quantity** of the contract (for example
 46.02 € ÷ 12.150 m³ = 3.79 €/m³). *Gross* includes VAT, *Net* does not. In a month without a bill the calculation is used
-and the number carries a **≈**. Only contracts billed by consumption appear (not fixed fees, per-area, per-resident,
-equalized or tax contracts). A row of a whole year divides the year's money by the year's quantity.
+and the number carries a **≈**. Only contracts billed by consumption appear (not fixed fees, per-area, per-resident
+or tax contracts). Months of an equalized contract that a plan covers are left out; the earlier months, billed by
+consumption, appear. A row of a whole year divides the year's money by the year's quantity.
 
 ### Calculated vs billed
 

@@ -1,6 +1,7 @@
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Import;
 
 namespace HomeUtilities.Import.Tests;
@@ -15,6 +16,9 @@ public class ImportPlannerTests
         using var stream = SyntheticWorkbook.Build();
         return _reader.ReadSheet(stream, sheet);
     }
+
+    private static EqualizedPlan Plan(Contract contract, DateOnly from, decimal amount) =>
+        new() { ContractId = contract.Id, ValidFrom = from, MonthlyAmount = amount };
 
     private static PlannedRow Row(ImportPlan plan, int number) => plan.Rows.Single(r => r.RowNumber == number);
 
@@ -331,16 +335,44 @@ public class ImportPlannerTests
     }
 
     [Fact]
-    public void An_equalized_contract_gets_equalized_bills_and_a_regular_one_regular_bills()
+    public void Rows_covered_by_a_plan_get_equalized_bills_and_the_others_regular_bills()
     {
         var equalized = new ImportFixtures(BillingMode.Equalized);
+        var plans = new[] { Plan(equalized.Contract, new DateOnly(2014, 1, 1), 30.00m) };
 
-        var plan = ImportPlanner.Plan(equalized.PropaneProfile(), Read(SyntheticWorkbook.Propane), equalized.Context(equalized.Gas));
+        var plan = ImportPlanner.Plan(
+            equalized.PropaneProfile(), Read(SyntheticWorkbook.Propane), new ImportContext(equalized.Contract, [equalized.Gas], [], null, null, plans));
         var regular = ImportPlanner.Plan(_f.PropaneProfile(), Read(SyntheticWorkbook.Propane), _f.Context(_f.Gas));
 
         Assert.All(plan.Rows, r => Assert.Equal(BillKind.Equalized, r.Bill!.Kind));
         Assert.All(regular.Rows, r => Assert.Equal(BillKind.Regular, r.Bill!.Kind));
         Assert.Equal(new ImportCounts(2, 2, 0, 0), plan.Counts);
+    }
+
+    [Fact]
+    public void A_contract_that_became_equalized_imports_the_earlier_rows_as_regular_bills()
+    {
+        // Rows: 01.2014 and 02.2014. The plan starts on 1 February 2014: January was billed by consumption (Regular),
+        // February by the plan (Equalized). The contract's current mode (Equalized) does not decide.
+        var f = new ImportFixtures(BillingMode.Equalized);
+        var plans = new[] { Plan(f.Contract, new DateOnly(2014, 2, 1), 30.00m) };
+
+        var plan = ImportPlanner.Plan(
+            f.PropaneProfile(), Read(SyntheticWorkbook.Propane), new ImportContext(f.Contract, [f.Gas], [], null, null, plans));
+
+        Assert.Equal(
+            [(new YearMonth(2014, 1), BillKind.Regular), (new YearMonth(2014, 2), BillKind.Equalized)],
+            plan.Rows.Select(r => (r.Bill!.Period, r.Bill.Kind)));
+    }
+
+    [Fact]
+    public void An_equalized_contract_without_plans_imports_regular_bills()
+    {
+        var f = new ImportFixtures(BillingMode.Equalized);
+
+        var plan = ImportPlanner.Plan(f.PropaneProfile(), Read(SyntheticWorkbook.Propane), f.Context(f.Gas));
+
+        Assert.All(plan.Rows, r => Assert.Equal(BillKind.Regular, r.Bill!.Kind));
     }
 
     [Fact]

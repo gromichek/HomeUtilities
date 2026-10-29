@@ -1,6 +1,7 @@
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 
 namespace HomeUtilities.Core.Import;
 
@@ -208,12 +209,14 @@ public sealed class ImportPlan
 /// <param name="ExistingBills">Non-deleted bills of the contract.</param>
 /// <param name="ContractLinks">Meter links of every contract of the property (to move them to a replacement meter); may be null.</param>
 /// <param name="ReplacementEdits">Corrections of proposed replacements made by the owner; may be null.</param>
+/// <param name="Plans">Equalized plans of the contract; a row whose period a plan covers becomes an equalized bill. May be null.</param>
 public sealed record ImportContext(
     Contract Contract,
     IReadOnlyList<Meter> Meters,
     IReadOnlyList<Bill> ExistingBills,
     IReadOnlyList<ContractMeter>? ContractLinks = null,
-    IReadOnlyList<ReplacementEdit>? ReplacementEdits = null);
+    IReadOnlyList<ReplacementEdit>? ReplacementEdits = null,
+    IReadOnlyList<EqualizedPlan>? Plans = null);
 
 /// <summary>Codes of the issues the planner reports.</summary>
 public static class ImportIssueCodes

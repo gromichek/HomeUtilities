@@ -2,6 +2,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Tariffs;
 
 namespace HomeUtilities.Core.Reports;
@@ -18,6 +19,7 @@ public sealed class ReportData
     private readonly ILookup<Guid, ContractMeter> _linksByContract;
     private readonly ILookup<Guid, Meter> _metersByProperty;
     private readonly ILookup<(Guid ContractId, YearMonth Period), Bill> _billsByContractPeriod;
+    private readonly ILookup<Guid, EqualizedPlan> _plansByContract;
     private readonly Dictionary<(Guid ContractId, YearMonth Period), CalculatedCharge?> _charges = [];
 
     /// <summary>Creates the data set.</summary>
@@ -29,7 +31,8 @@ public sealed class ReportData
         IReadOnlyList<Meter> meters,
         IReadOnlyList<Bill> bills,
         IReadOnlyList<TariffComponent> tariffComponents,
-        IReadOnlyCollection<VatRate> vatCatalog)
+        IReadOnlyCollection<VatRate> vatCatalog,
+        IReadOnlyList<EqualizedPlan>? equalizedPlans = null)
     {
         Properties = [.. properties.Where(p => !p.IsDeleted)];
         Categories = [.. categories.Where(c => !c.IsDeleted)];
@@ -40,6 +43,7 @@ public sealed class ReportData
         VatCatalog = vatCatalog;
 
         _properties = Properties.ToDictionary(p => p.Id);
+        _plansByContract = (equalizedPlans ?? []).Where(p => !p.IsDeleted).ToLookup(p => p.ContractId);
         _componentsByContract = tariffComponents.Where(t => !t.IsDeleted).ToLookup(t => t.ContractId);
         _linksByContract = ContractMeters.ToLookup(c => c.ContractId);
         _metersByProperty = Meters.ToLookup(m => m.PropertyId);
@@ -83,12 +87,27 @@ public sealed class ReportData
     /// <summary>The last month with a bill (bills of prepaid services may lie in the future); null if there is none.</summary>
     public YearMonth? LatestMonth => Bills.Count == 0 ? null : Bills.Max(b => b.Period);
 
+    /// <summary>
+    /// True if an equalized plan of the contract covers the month: such a month is billed by the plan, not by consumption.
+    /// Months before the first plan behave like <see cref="BillingMode.Actual"/>.
+    /// </summary>
+    public bool IsEqualized(Contract contract, YearMonth period)
+    {
+        ArgumentNullException.ThrowIfNull(contract);
+        return EqualizedPlans.AmountFor(_plansByContract[contract.Id], period) is not null;
+    }
+
+    /// <summary>True if the contract can have months billed by consumption: its mode is Actual, or Equalized (earlier months).</summary>
+    internal static bool CanBeBilledByConsumption(Contract contract) =>
+        contract.BillingMode is BillingMode.Actual or BillingMode.Equalized;
+
     /// <summary>The meters of a property.</summary>
     public IEnumerable<Meter> MetersOf(Guid propertyId) => _metersByProperty[propertyId];
 
     /// <summary>
     /// The calculation of a contract for a month as it would be made now (tariffs and readings as they are today);
-    /// null for contracts that are not billed by consumption (<see cref="BillingMode.Actual"/> only) or whose property is unknown.
+    /// null for months billed by an equalized plan, for contracts that are not billed by consumption (<see cref="BillingMode.Actual"/>,
+    /// or <see cref="BillingMode.Equalized"/> for the months before its plans) or whose property is unknown.
     /// </summary>
     public CalculatedCharge? Charge(Contract contract, YearMonth period)
     {
@@ -101,7 +120,7 @@ public sealed class ReportData
         }
 
         CalculatedCharge? result = null;
-        if (contract.BillingMode == BillingMode.Actual && _properties.TryGetValue(contract.PropertyId, out var property))
+        if (CanBeBilledByConsumption(contract) && !IsEqualized(contract, period) && _properties.TryGetValue(contract.PropertyId, out var property))
         {
             var (quantities, amounts) = BillQuantitySelection.From(_billsByContractPeriod[key].OrderBy(b => b.CreatedAt));
             result = ChargeCalculator.Calculate(new ChargeInput(

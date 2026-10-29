@@ -485,9 +485,15 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
 
         var symbol = _localizer["Currency_Symbol_" + contract.Currency];
         var plan = EqualizedPlans.AmountFor(report.Plans, Month);
+        if (plan is null)
+        {
+            // A month before the first plan was billed by consumption: a normal card.
+            return;
+        }
+
         card.EqualizedText = _localizer.Get(
             "ChargesEqualizedLine",
-            plan is { } p ? BillText.Money(p, symbol) : "–",
+            BillText.Money(plan.Value, symbol),
             charge is { IsComplete: true } ? BillText.Money(charge.TotalGross, symbol) : "–",
             BillText.SignedMoney(report.Settlement.Expected, symbol));
     }

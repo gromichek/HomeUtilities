@@ -19,6 +19,7 @@ public sealed class ReportDataLoader(IDbContextFactory<HomeUtilitiesDbContext> f
         var meters = await MeterStore.IncludeAll(db.Meters.AsNoTracking()).AsSplitQuery().ToListAsync(ct);
         var bills = await db.Bills.AsNoTracking().Where(b => !b.IsDraft).ToListAsync(ct);
         var components = await TariffStore.IncludeAll(db.TariffComponents.AsNoTracking()).AsSplitQuery().ToListAsync(ct);
+        var plans = await db.EqualizedPlans.AsNoTracking().ToListAsync(ct);
         var vatCatalog = await db.VatRates.AsNoTracking().Include(v => v.Versions).AsSplitQuery().OrderBy(v => v.Code).ToListAsync(ct);
 
         return new ReportData(
@@ -29,6 +30,7 @@ public sealed class ReportDataLoader(IDbContextFactory<HomeUtilitiesDbContext> f
             [.. meters.Select(MeterStore.SortChildren)],
             bills,
             [.. components.Select(TariffStore.SortChildren)],
-            vatCatalog);
+            vatCatalog,
+            plans);
     }
 }

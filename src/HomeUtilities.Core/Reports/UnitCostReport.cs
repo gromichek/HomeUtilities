@@ -7,7 +7,7 @@ namespace HomeUtilities.Core.Reports;
 /// <summary>
 /// What one unit of a contract's metered quantity costs: the contract's bills of the month (gross, or net) divided by the metered
 /// quantity. A month without a bill uses the calculation and is marked. Only contracts billed by consumption
-/// (<see cref="BillingMode.Actual"/> with per-unit tariff lines) appear. A longer row (a year) divides the sums, not the average of months.
+/// (<see cref="BillingMode.Actual"/>, or an equalized one for the months no plan covers, with per-unit tariff lines) appear. A longer row (a year) divides the sums, not the average of months.
 /// </summary>
 internal static class UnitCostReport
 {
@@ -31,7 +31,7 @@ internal static class UnitCostReport
         foreach (var property in properties)
         {
             foreach (var contract in data.Contracts
-                .Where(c => c.PropertyId == property.Id && c.BillingMode == BillingMode.Actual)
+                .Where(c => c.PropertyId == property.Id && ReportData.CanBeBilledByConsumption(c))
                 .OrderBy(c => c.Title, StringComparer.OrdinalIgnoreCase))
             {
                 var shares = billsByContract[contract.Id]
@@ -39,7 +39,7 @@ internal static class UnitCostReport
                     .Where(s => filter.Contains(s.Month))
                     .ToLookup(s => s.Month);
                 var cells = new Dictionary<YearMonth, Acc>();
-                foreach (var month in months.Where(m => Overlaps(contract, m)))
+                foreach (var month in months.Where(m => Overlaps(contract, m) && !data.IsEqualized(contract, m)))
                 {
                     var charge = data.Charge(contract, month);
                     var (quantity, hasPerUnit) = ContractQuantity.Of(charge);

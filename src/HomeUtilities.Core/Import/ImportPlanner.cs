@@ -2,6 +2,7 @@ using System.Globalization;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 
 namespace HomeUtilities.Core.Import;
 
@@ -274,7 +275,7 @@ public static partial class ImportPlanner
             ContractId = contract.Id,
             SupplierId = contract.SupplierId,
             Period = period,
-            Kind = contract.BillingMode == BillingMode.Equalized ? BillKind.Equalized : BillKind.Regular,
+            Kind = EqualizedPlans.AmountFor(context.Plans ?? [], period) is not null ? BillKind.Equalized : BillKind.Regular,
             Net = amounts.Net,
             VatPercent = amounts.VatPercent,
             Vat = amounts.Vat,
