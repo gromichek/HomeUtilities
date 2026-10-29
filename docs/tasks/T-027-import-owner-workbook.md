@@ -8,7 +8,11 @@ numbers below are invented but have the same shape)
     later on the 26th (26.10 = readings for October; the contract's reading window is 25–28);
   - heating sheet: the 1st of the month **after** the service month (01.09 row = August bill, its hot-water m³ equals
     the August reading of the water sheet);
-  - fixed-amount sheets (maintenance, waste, internet, TV): the 2nd of each month (meaning to be chosen per sheet).
+  - electricity sheet: the 1st of the month = **reading date for the previous month** (01.09 = August readings);
+  - fixed-amount sheets (maintenance, waste, internet, TV): the 2nd of each month, shown as "August 2025" by the cell
+    format = **payment date for the previous month** (02.08.2025 = July paid on 2 August) — owner, 2026-10-29;
+  - internet: from a date in 2023 the service is **prepaid**; the first prepaid row pays two months plus a connection
+    fee.
 - Water: cold and hot reading columns, a consumption column (both meters together), own calculated net / VAT / total
   columns, a "paid" column with `***`, and since 2016 an extra column with the **real bill total** (the calculated total
   remains next to it) and a difference column; notes in side columns.
@@ -30,6 +34,15 @@ numbers below are invented but have the same shape)
    - **Month of the date**; **Previous month** (date = 1st of the following month — heating); **Previous month if the
      day ≤ N, else the month of the date** (N configurable, default 10).
    The reading keeps its real date; the bill gets the period. Preview shows "date 01.05.2004 → period 04.2004".
+   - The rule can **change from a date** (e.g. internet: "previous month" until 01.2023, "month of the date" or "next
+     month" from 02.2023 for prepaid) — a list of `{ FromDate, Rule }` in the profile.
+   - Option **"The date is the payment date"**: with a paid marker the payment gets the row's date (fixed-amount sheets).
+   - **Per-row override in the preview**: the owner can change a row's period and mark it as covering several months
+     (sets `ServiceFrom/ServiceTo`, the amount is spread by reports), e.g. the first prepaid internet row; a remark field
+     for "incl. connection fee" goes to the bill notes. Overrides are stored in the profile by row date, so a re-import
+     keeps them.
+   Defaults the wizard suggests: water → by reading window; heating, electricity → previous month; fixed-amount sheets
+   → previous month + date is the payment date.
    Two rows in one period: readings of both rows are imported (both dates), the bill/payment only once (from the row that
    has amounts; if both have, the later one, with a warning).
 2. **Meter positions instead of meters.** The register mapping lists **positions** = replacement chains of the contract
