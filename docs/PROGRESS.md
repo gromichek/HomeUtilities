@@ -8,7 +8,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
 | T-027 | Import for the owner's workbook: reading dates, positions, automatic replacements | Ready | | lead analysed the workbook locally (not in repo) |
-| T-028 | Reminders (local notifications) | Ready | | |
+| T-027a | Export like the owner's workbook (reverse of the import) | Ready | | after T-027 |
+| T-028 | Reminders (local notifications) | Ready | | independent of T-027 |
 
 ## Done
 
