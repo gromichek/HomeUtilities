@@ -110,6 +110,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<decimal>("Gross")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("ImportBatchId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -167,6 +170,8 @@ namespace HomeUtilities.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ImportBatchId");
 
                     b.HasIndex("SupplierId");
 
@@ -360,6 +365,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<int>("Currency")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("ImportBatchId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -386,6 +394,8 @@ namespace HomeUtilities.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ContractId");
+
+                    b.HasIndex("ImportBatchId");
 
                     b.HasIndex("PropertyId");
 
@@ -738,6 +748,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("ImportBatchId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -764,6 +777,8 @@ namespace HomeUtilities.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ImportBatchId");
 
                     b.HasIndex("UpdatedAt");
 
@@ -1018,6 +1033,96 @@ namespace HomeUtilities.Data.Migrations
                     b.ToTable("EqualizedPlans", (string)null);
                 });
 
+            modelBuilder.Entity("HomeUtilities.Core.Import.ImportBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("BillCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ImportedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PaymentCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ReadingCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SheetName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SkippedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("ImportBatches", (string)null);
+                });
+
+            modelBuilder.Entity("HomeUtilities.Core.Import.SavedImportProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Profile")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("ImportProfiles", (string)null);
+                });
+
             modelBuilder.Entity("HomeUtilities.Core.Tariffs.TariffComponent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1226,6 +1331,11 @@ namespace HomeUtilities.Data.Migrations
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("HomeUtilities.Core.Import.ImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HomeUtilities.Core.Domain.Property", null)
                         .WithMany()
                         .HasForeignKey("PropertyId")
@@ -1282,6 +1392,11 @@ namespace HomeUtilities.Data.Migrations
                     b.HasOne("HomeUtilities.Core.Domain.Contract", null)
                         .WithMany()
                         .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HomeUtilities.Core.Import.ImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("ImportBatchId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HomeUtilities.Core.Domain.Property", null)
@@ -1357,6 +1472,11 @@ namespace HomeUtilities.Data.Migrations
 
             modelBuilder.Entity("HomeUtilities.Core.Domain.MeterReading", b =>
                 {
+                    b.HasOne("HomeUtilities.Core.Import.ImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HomeUtilities.Core.Domain.MeterRegister", null)
                         .WithMany("Readings")
                         .HasForeignKey("RegisterId")
@@ -1389,6 +1509,19 @@ namespace HomeUtilities.Data.Migrations
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("HomeUtilities.Core.Import.ImportBatch", b =>
+                {
+                    b.HasOne("HomeUtilities.Core.Domain.Contract", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HomeUtilities.Core.Import.SavedImportProfile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("HomeUtilities.Core.Tariffs.TariffComponent", b =>

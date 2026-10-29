@@ -17,6 +17,11 @@
     <ProjectReference Include="..\..\src\HomeUtilities.Core\HomeUtilities.Core.csproj" />
     <ProjectReference Include="..\..\src\HomeUtilities.Data\HomeUtilities.Data.csproj" />
     <ProjectReference Include="..\..\src\HomeUtilities.ViewModels\HomeUtilities.ViewModels.csproj" />
+    <ProjectReference Include="..\..\src\HomeUtilities.Import\HomeUtilities.Import.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\HomeUtilities.Import.Tests\SyntheticWorkbook.cs" Link="Import\SyntheticWorkbook.cs" />
   </ItemGroup>
 
   <ItemGroup>

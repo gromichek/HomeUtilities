@@ -59,6 +59,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private string _billTemplatesText = string.Empty;
 
     [ObservableProperty]
+    private string _importText = string.Empty;
+
+    [ObservableProperty]
+    private string _importsText = string.Empty;
+
+    [ObservableProperty]
     private string _versionText = string.Empty;
 
     [ObservableProperty]
@@ -158,6 +164,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     [RelayCommand]
     private Task OpenBillTemplatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.BillTemplates));
+
+    [RelayCommand]
+    private Task OpenImportWizardAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.ImportWizard));
+
+    [RelayCommand]
+    private Task OpenImportsAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Imports));
 
     [RelayCommand]
     private Task OpenVatRatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.VatRates));
@@ -323,6 +335,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             CategoriesText = _localizer["SectionCategories"];
             VatRatesText = _localizer["SectionVatRates"];
             BillTemplatesText = _localizer["SectionBillTemplates"];
+            ImportText = _localizer["SectionImport"];
+            ImportsText = _localizer["SectionImports"];
             ErrorLogHeader = _localizer["SettingsErrorLog"];
             ErrorLogHint = _localizer["SettingsErrorLogHint"];
             CopyLogText = _localizer["SettingsErrorLogCopy"];

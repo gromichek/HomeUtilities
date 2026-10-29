@@ -3,6 +3,7 @@ using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Import;
 using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Payments;
 using HomeUtilities.Core.Taxes;
@@ -31,7 +32,7 @@ public class SampleDataGeneratorTests
             VatRates = new VatRateStore(_test.Factory);
             Bills = new BillStore(_test.Factory);
             Payments = new PaymentStore(_test.Factory);
-            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), new BillTemplateStore(_test.Factory, _test.Clock), Bills, Payments, new ChargeInputLoader(_test.Factory), _test.Clock);
+            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), new BillTemplateStore(_test.Factory, _test.Clock), Bills, Payments, new ImportProfileStore(_test.Factory), new ChargeInputLoader(_test.Factory), _test.Clock);
             Loader = new ChargeInputLoader(_test.Factory);
         }
 
@@ -84,6 +85,19 @@ public class SampleDataGeneratorTests
         Assert.Contains(contracts, c => c.Service == ServiceKind.InternetTv && c.BillingTiming == HomeUtilities.Core.Billing.BillingTiming.InAdvance);
         Assert.Contains(contracts, c => c is { ReadingDayFrom: 25, ReadingDayTo: 28 });
         Assert.Contains(contracts, c => c is { ReadingDayFrom: 28, ReadingDayTo: 3 });
+    }
+
+    [Fact]
+    public async Task One_valid_import_profile_of_the_waste_contract_is_saved_and_no_import_exists()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+
+        var saved = Assert.Single(await new ImportProfileStore(rig.Factory).ListAsync());
+        var waste = (await rig.Contracts.ListAsync()).Single(c => c.Service == ServiceKind.Waste);
+        Assert.Equal(waste.Id, saved.Profile.ContractId);
+        Assert.True(ImportProfileValidator.Validate(saved.Profile).IsValid);
+        Assert.Empty(await new ImportBatchStore(rig.Factory).ListAsync());
     }
 
     [Fact]

@@ -85,6 +85,9 @@ public class Bill : SyncEntity
     /// <summary>Attached documents (PDF, photo).</summary>
     public List<Guid> AttachmentIds { get; set; } = [];
 
+    /// <summary>The Excel import that created the record; null for records entered by hand.</summary>
+    public Guid? ImportBatchId { get; set; }
+
     /// <summary>Free-text comment.</summary>
     public string? Notes { get; set; }
 

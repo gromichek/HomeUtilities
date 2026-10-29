@@ -362,4 +362,25 @@ public static class ErrorCodes
 
     /// <summary>A draft bill cannot be confirmed while its total is 0.</summary>
     public const string BillDraftAmountRequired = "bill.draft_amount_required";
+
+    /// <summary>The import profile has no period column.</summary>
+    public const string ImportPeriodColumnRequired = "import.period_column_required";
+
+    /// <summary>The import profile maps neither a reading nor an amount column.</summary>
+    public const string ImportNothingMapped = "import.nothing_mapped";
+
+    /// <summary>The import profile has no target contract.</summary>
+    public const string ImportContractRequired = "import.contract_required";
+
+    /// <summary>The header row, first data row or last data row of the import profile is not valid.</summary>
+    public const string ImportRowsInvalid = "import.rows_invalid";
+
+    /// <summary>The import profile has a paid column but no marker text.</summary>
+    public const string ImportPaidMarkerRequired = "import.paid_marker_required";
+
+    /// <summary>A register mapped by the import profile does not belong to the contract's meters.</summary>
+    public const string ImportRegisterMissing = "import.register_missing";
+
+    /// <summary>The file is not a profile exported by the app.</summary>
+    public const string ImportProfileFileInvalid = "import.profile_file_invalid";
 }

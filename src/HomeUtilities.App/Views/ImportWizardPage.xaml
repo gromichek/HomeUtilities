@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.ImportWizardPage"
+                x:DataType="vm:ImportWizardViewModel"
+                Title="{Binding Title}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="12" RowSpacing="8">
+
+        <Label Grid.Row="0" Text="{Binding StepText}" FontAttributes="Bold" />
+
+        <!-- Steps 1, 2, 3 and 5: forms. -->
+        <ScrollView Grid.Row="1" IsVisible="{Binding IsScrollStep}">
+            <VerticalStackLayout Spacing="12">
+
+                <!-- 1. File and sheet -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsFileStep}">
+                    <Label Text="{Binding FileHint}" Style="{StaticResource MutedLabel}" />
+                    <Button Text="{Binding PickFileText}" Command="{Binding PickFileCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    <Label Text="{Binding FileText}" />
+                    <Label Text="{Binding SheetsLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Picker ItemsSource="{Binding Sheets}"
+                            ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportSheetOption}"
+                            SelectedItem="{Binding SelectedSheet}" />
+                </VerticalStackLayout>
+
+                <!-- 2. Profile and target contract -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsTargetStep}">
+                    <Label Text="{Binding ProfileLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Picker ItemsSource="{Binding ProfileChoices}"
+                            ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportProfileOption}"
+                            SelectedItem="{Binding SelectedProfile}" />
+                    <Label Text="{Binding ProfileNameLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Entry Text="{Binding ProfileName}" MaxLength="{x:Static core:InputLimits.Name}" />
+
+                    <Label Text="{Binding PropertyLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Picker ItemsSource="{Binding PropertyChoices}"
+                            ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                            SelectedItem="{Binding SelectedProperty}" />
+                    <Label Text="{Binding ContractLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Picker ItemsSource="{Binding ContractChoices}"
+                            ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                            SelectedItem="{Binding SelectedContract}" />
+                    <Label Text="{Binding TargetHintText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasTargetHint}" />
+                    <Button Text="{Binding ShowContractText}" Command="{Binding ShowContractCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+
+                    <Border Style="{StaticResource SectionCard}" IsVisible="{Binding HasMeters}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding MetersHeader}" Style="{StaticResource SectionHeader}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MeterLines}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Label Text="{Binding .}" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 3. Column mapping -->
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsMappingStep}">
+                    <Label Text="{Binding MapHint}" Style="{StaticResource MutedLabel}" />
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{Binding SheetPreviewHeader}" Style="{StaticResource SectionHeader}" />
+                            <ScrollView Orientation="Both" HeightRequest="260">
+                                <VerticalStackLayout Spacing="2">
+                                    <HorizontalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding PreviewHeader}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ImportColumnOption">
+                                                <Label Text="{Binding Text}" FontAttributes="Bold" FontSize="12" WidthRequest="120" LineBreakMode="TailTruncation" />
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </HorizontalStackLayout>
+                                    <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding PreviewRows}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ImportSheetPreviewRow">
+                                                <HorizontalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Cells}">
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate x:DataType="x:String">
+                                                            <Label Text="{Binding .}" FontSize="12" WidthRequest="120" LineBreakMode="TailTruncation" />
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+                                                </HorizontalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </ScrollView>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding RowsHeader}" Style="{StaticResource SectionHeader}" />
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label Text="{Binding HeaderRowLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    <Entry Text="{Binding HeaderRowText}" Keyboard="Numeric" MaxLength="7" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1">
+                                    <Label Text="{Binding FirstRowLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    <Entry Text="{Binding FirstRowText}" Keyboard="Numeric" MaxLength="7" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="2">
+                                    <Label Text="{Binding LastRowLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    <Entry Text="{Binding LastRowText}" Keyboard="Numeric" MaxLength="7" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding ColumnsHeader}" Style="{StaticResource SectionHeader}" VerticalOptions="Center" />
+                                <Button Grid.Column="1" Text="{Binding GuessText}" Command="{Binding GuessCommand}" Style="{StaticResource SecondaryButton}" />
+                            </Grid>
+                            <views:ImportColumnPickerView BindingContext="{Binding PeriodPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding TotalPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding NetPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding VatPercentPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding VatPicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding PaidPicker}" />
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding PaidMarkerLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                <Entry Text="{Binding PaidMarker}" MaxLength="{x:Static core:InputLimits.Code}" />
+                            </VerticalStackLayout>
+                            <views:ImportColumnPickerView BindingContext="{Binding PaidDatePicker}" />
+                            <views:ImportColumnPickerView BindingContext="{Binding QuantityPicker}" />
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                <Label Text="{Binding NotesSummary}" />
+                                <Button Text="{Binding ChooseNotesText}" Command="{Binding ChooseNotesCommand}"
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                <Picker ItemsSource="{Binding CurrencyRules}"
+                                        ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportCurrencyChoice}"
+                                        SelectedItem="{Binding SelectedCurrencyRule}" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding ReadingsHeader}" Style="{StaticResource SectionHeader}" />
+                            <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding RegisterMappings}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ImportRegisterMappingViewModel">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding Label}" FontAttributes="Bold" />
+                                            <views:ImportColumnPickerView BindingContext="{Binding Reading}" />
+                                            <views:ImportColumnPickerView BindingContext="{Binding Date}" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- 5. Done -->
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsDoneStep}">
+                    <Label Text="{Binding ResultText}" FontAttributes="Bold" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- 4. Preview: the rows scroll in their own list. -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="8" IsVisible="{Binding IsPreviewStep}">
+            <Label Grid.Row="0" Text="{Binding SummaryText}" FontAttributes="Bold" />
+            <Label Grid.Row="1" Text="{Binding PlanProblemText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasPlanProblem}" />
+            <HorizontalStackLayout Grid.Row="2" Spacing="8">
+                <Label Text="{Binding FilterLabel}" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                <Picker ItemsSource="{Binding Filters}"
+                        ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportFilterChoice}"
+                        SelectedItem="{Binding SelectedFilter}" WidthRequest="200" />
+            </HorizontalStackLayout>
+            <CollectionView Grid.Row="3" ItemsSource="{Binding PlanRows}">
+                <CollectionView.EmptyView>
+                    <Label Text="{Binding NoRowsText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ImportPlanRowViewModel">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                                StrokeThickness="1" Padding="10" Margin="0,3" StrokeShape="RoundRectangle 8">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding HeaderText}" FontAttributes="Bold" />
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Actions}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Label Text="{Binding .}" FontSize="13" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Issues}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ImportIssueLine">
+                                            <Label Text="{Binding Text}" FontSize="13" Style="{StaticResource WarningLabel}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" x:DataType="vm:ImportIssueLine" Binding="{Binding IsError}" Value="True">
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <!-- Buttons: one primary action per step. -->
+        <VerticalStackLayout Grid.Row="2" Spacing="6">
+            <Label Text="{Binding MappingError}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasMappingError}" />
+            <ActivityIndicator IsRunning="True" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding BackText}" Command="{Binding BackCommand}"
+                        Style="{StaticResource SecondaryButton}" IsVisible="{Binding ShowBack}" />
+                <Button Grid.Column="2" Text="{Binding NextText}" Command="{Binding NextCommand}"
+                        Style="{StaticResource PrimaryButton}" IsVisible="{Binding ShowNext}" />
+                <Button Grid.Column="2" Text="{Binding ImportText}" Command="{Binding ImportCommand}"
+                        Style="{StaticResource PrimaryButton}" IsVisible="{Binding ShowImport}" IsEnabled="{Binding CanImport}" />
+                <Button Grid.Column="2" Text="{Binding OpenImportsText}" Command="{Binding OpenImportsCommand}"
+                        Style="{StaticResource PrimaryButton}" IsVisible="{Binding ShowOpenImports}" />
+            </Grid>
+        </VerticalStackLayout>
+    </Grid>
+
+</views:PageBase>

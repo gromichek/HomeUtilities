@@ -115,4 +115,10 @@ public static class Routes
     /// <c>contractId</c>. Back returns to the contract editor.
     /// </summary>
     public const string EqualizedSettlement = "EqualizedSettlement";
+
+    /// <summary>Pushed page opened from Settings: the Excel import wizard.</summary>
+    public const string ImportWizard = "ImportWizard";
+
+    /// <summary>Pushed page opened from Settings or the wizard: the list of imports with Undo and the saved import profiles.</summary>
+    public const string Imports = "Imports";
 }

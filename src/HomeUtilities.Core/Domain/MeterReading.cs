@@ -23,6 +23,9 @@ public class MeterReading : SyncEntity
     /// <summary>Photo attachment taken on the phone.</summary>
     public Guid? PhotoAttachmentId { get; set; }
 
+    /// <summary>The Excel import that created the record; null for records entered by hand.</summary>
+    public Guid? ImportBatchId { get; set; }
+
     /// <summary>Free-form note.</summary>
     public string? Note { get; set; }
 }

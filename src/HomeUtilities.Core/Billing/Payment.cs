@@ -35,6 +35,9 @@ public class Payment : SyncEntity
     /// <summary>The bills this payment settles.</summary>
     public List<PaymentAllocation> Allocations { get; set; } = [];
 
+    /// <summary>The Excel import that created the record; null for records entered by hand.</summary>
+    public Guid? ImportBatchId { get; set; }
+
     /// <summary>Free-text comment.</summary>
     public string? Notes { get; set; }
 }
