@@ -17,6 +17,9 @@ public class ContractMeter : SyncEntity, IVersioned
     /// <summary>Last day the link applies; null if open-ended.</summary>
     public DateOnly? ValidTo { get; set; }
 
+    /// <summary>The import that created this link (for an automatic replacement); null for links entered by hand.</summary>
+    public Guid? ImportBatchId { get; set; }
+
     /// <summary>True if the link is not deleted and applies on the given date (both bounds inclusive).</summary>
     public bool IsActiveOn(DateOnly date) =>
         !IsDeleted && ValidFrom <= date && (ValidTo is null || date <= ValidTo);

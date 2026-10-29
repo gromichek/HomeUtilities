@@ -644,6 +644,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("ImportBatchId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
@@ -663,6 +666,8 @@ namespace HomeUtilities.Data.Migrations
 
                     b.HasIndex("ContractId");
 
+                    b.HasIndex("ImportBatchId");
+
                     b.HasIndex("MeterId");
 
                     b.HasIndex("UpdatedAt");
@@ -680,6 +685,9 @@ namespace HomeUtilities.Data.Migrations
 
                     b.Property<int?>("Digits")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("ImportBatchId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("InstalledOn")
                         .HasColumnType("TEXT");
@@ -727,6 +735,8 @@ namespace HomeUtilities.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ImportBatchId");
 
                     b.HasIndex("PropertyId");
 
@@ -1069,6 +1079,9 @@ namespace HomeUtilities.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ReadingCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReplacementCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("SheetName")
@@ -1449,6 +1462,11 @@ namespace HomeUtilities.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HomeUtilities.Core.Import.ImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HomeUtilities.Core.Domain.Meter", null)
                         .WithMany()
                         .HasForeignKey("MeterId")
@@ -1458,6 +1476,11 @@ namespace HomeUtilities.Data.Migrations
 
             modelBuilder.Entity("HomeUtilities.Core.Domain.Meter", b =>
                 {
+                    b.HasOne("HomeUtilities.Core.Import.ImportBatch", null)
+                        .WithMany()
+                        .HasForeignKey("ImportBatchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("HomeUtilities.Core.Domain.Property", null)
                         .WithMany()
                         .HasForeignKey("PropertyId")
