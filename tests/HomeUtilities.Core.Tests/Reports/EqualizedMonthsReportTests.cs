@@ -9,7 +9,7 @@ namespace HomeUtilities.Core.Tests.Reports;
 
 /// <summary>
 /// A contract that was billed by consumption until June 2026 and is equalized from July 2026 (plan 25.00 per month): the months
-/// a plan covers are left out of the consumption reports, the earlier months stay in.
+/// a plan covers are calculated by the tariff in the consumption reports, the earlier months by their bills.
 /// </summary>
 public class EqualizedMonthsReportTests
 {
@@ -62,29 +62,28 @@ public class EqualizedMonthsReportTests
     }
 
     [Fact]
-    public void Unit_cost_leaves_out_the_months_a_plan_covers()
+    public void Unit_cost_of_a_month_a_plan_covers_is_the_tariff_charge_per_unit_and_marked()
     {
+        // The plan (25.00) is only an advance: August is 10 units * 3.00 = 30.00 + VAT 6.30 = 36.30 -> 3.63, marked "by tariff".
         var (s, _) = Scenario();
 
-        Assert.Empty(ReportBuilder.UnitCost(s.Data, Filter(Aug, Aug)).Columns);
+        var table = ReportBuilder.UnitCost(s.Data, Filter(May, Aug));
 
-        var wide = ReportBuilder.UnitCost(s.Data, Filter(May, Aug));
-        Assert.Equal(3.63m, wide.Rows[0].Cells[0].Value);
-        Assert.Null(wide.Rows[2].Cells[0].Value);
-        Assert.Null(wide.Rows[3].Cells[0].Value);
+        Assert.Equal([3.63m, 3.63m, 3.63m, 3.63m], table.Rows.Select(r => r.Cells[0].Value));
+        Assert.Equal([false, true, true, true], table.Rows.Select(r => r.Cells[0].IsApproximate));
     }
 
     [Fact]
-    public void Calculated_against_billed_has_the_months_before_the_first_plan_only()
+    public void Calculated_against_billed_compares_the_plan_with_the_tariff_charge()
     {
-        // May: billed 36.30 - calculated 36.30 = 0.00. August is billed by the plan and not compared.
+        // May: billed 36.30 - calculated 36.30 = 0.00. August: billed 25.00 (the plan) - calculated 36.30 = -11.30.
         var (s, _) = Scenario();
 
         var may = ReportBuilder.CalculatedVsBilled(s.Data, Filter(May, May));
         var august = ReportBuilder.CalculatedVsBilled(s.Data, Filter(Aug, Aug));
 
         Assert.Equal(0m, may.Rows[0].Cells[0].Value);
-        Assert.Empty(august.Columns);
+        Assert.Equal(-11.30m, august.Rows[0].Cells[0].Value);
     }
 
     [Fact]

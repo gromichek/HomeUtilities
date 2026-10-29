@@ -18,9 +18,13 @@ public sealed class ReportData
     private readonly ILookup<Guid, TariffComponent> _componentsByContract;
     private readonly ILookup<Guid, ContractMeter> _linksByContract;
     private readonly ILookup<Guid, Meter> _metersByProperty;
+    private readonly ILookup<Guid, ContractMeter> _linksByMeter;
     private readonly ILookup<(Guid ContractId, YearMonth Period), Bill> _billsByContractPeriod;
     private readonly ILookup<Guid, EqualizedPlan> _plansByContract;
     private readonly Dictionary<(Guid ContractId, YearMonth Period), CalculatedCharge?> _charges = [];
+    private readonly Dictionary<Guid, IReadOnlyList<TariffComponent>> _sortedComponents = [];
+    private readonly Dictionary<Guid, IReadOnlyList<ContractMeter>> _sortedLinks = [];
+    private readonly Dictionary<Guid, IReadOnlyList<Meter>> _sortedMeters = [];
 
     /// <summary>Creates the data set.</summary>
     public ReportData(
@@ -47,6 +51,8 @@ public sealed class ReportData
         _componentsByContract = tariffComponents.Where(t => !t.IsDeleted).ToLookup(t => t.ContractId);
         _linksByContract = ContractMeters.ToLookup(c => c.ContractId);
         _metersByProperty = Meters.ToLookup(m => m.PropertyId);
+        _linksByMeter = ContractMeters.ToLookup(c => c.MeterId);
+        ContractById = Contracts.ToDictionary(c => c.Id);
         _billsByContractPeriod = Bills.Where(b => b.ContractId is not null).ToLookup(b => (b.ContractId!.Value, b.Period));
     }
 
@@ -58,6 +64,9 @@ public sealed class ReportData
 
     /// <summary>The contracts.</summary>
     public IReadOnlyList<Contract> Contracts { get; }
+
+    /// <summary>The contracts by id (built once, so reports do not search the list).</summary>
+    internal IReadOnlyDictionary<Guid, Contract> ContractById { get; }
 
     /// <summary>The links between contracts and meters.</summary>
     public IReadOnlyList<ContractMeter> ContractMeters { get; }
@@ -101,6 +110,12 @@ public sealed class ReportData
     internal static bool CanBeBilledByConsumption(Contract contract) =>
         contract.BillingMode is BillingMode.Actual or BillingMode.Equalized;
 
+    /// <summary>The links of a contract to meters (not deleted), in no particular order.</summary>
+    internal IEnumerable<ContractMeter> LinksOfContract(Guid contractId) => _linksByContract[contractId];
+
+    /// <summary>The links of a meter to contracts (not deleted), in no particular order.</summary>
+    internal IEnumerable<ContractMeter> LinksOfMeter(Guid meterId) => _linksByMeter[meterId];
+
     /// <summary>The meters of a property.</summary>
     public IEnumerable<Meter> MetersOf(Guid propertyId) => _metersByProperty[propertyId];
 
@@ -112,6 +127,16 @@ public sealed class ReportData
     public CalculatedCharge? Charge(Contract contract, YearMonth period)
     {
         ArgumentNullException.ThrowIfNull(contract);
+        return IsEqualized(contract, period) ? null : ActualCharge(contract, period);
+    }
+
+    /// <summary>
+    /// What the month really costs by consumption: readings times tariff, also for a month an equalized plan covers (the plan is only
+    /// an advance, the settlement corrects it). Null for contracts that are not billed by consumption or whose property is unknown.
+    /// </summary>
+    public CalculatedCharge? ActualCharge(Contract contract, YearMonth period)
+    {
+        ArgumentNullException.ThrowIfNull(contract);
 
         var key = (contract.Id, period);
         if (_charges.TryGetValue(key, out var known))
@@ -120,15 +145,15 @@ public sealed class ReportData
         }
 
         CalculatedCharge? result = null;
-        if (CanBeBilledByConsumption(contract) && !IsEqualized(contract, period) && _properties.TryGetValue(contract.PropertyId, out var property))
+        if (CanBeBilledByConsumption(contract) && _properties.TryGetValue(contract.PropertyId, out var property))
         {
             var (quantities, amounts) = BillQuantitySelection.From(_billsByContractPeriod[key].OrderBy(b => b.CreatedAt));
             result = ChargeCalculator.Calculate(new ChargeInput(
                 contract,
                 property,
-                [.. _componentsByContract[contract.Id].OrderBy(t => t.SortOrder).ThenBy(t => t.Name)],
-                [.. _linksByContract[contract.Id].OrderBy(c => c.ValidFrom)],
-                [.. _metersByProperty[contract.PropertyId].OrderBy(m => m.InstalledOn).ThenBy(m => m.Id)],
+                Cached(_sortedComponents, contract.Id, () => [.. _componentsByContract[contract.Id].OrderBy(t => t.SortOrder).ThenBy(t => t.Name)]),
+                Cached(_sortedLinks, contract.Id, () => [.. _linksByContract[contract.Id].OrderBy(c => c.ValidFrom)]),
+                Cached(_sortedMeters, contract.PropertyId, () => [.. _metersByProperty[contract.PropertyId].OrderBy(m => m.InstalledOn).ThenBy(m => m.Id)]),
                 VatCatalog,
                 period,
                 quantities,
@@ -137,5 +162,26 @@ public sealed class ReportData
 
         _charges[key] = result;
         return result;
+    }
+
+    /// <summary>
+    /// True if the contract has tariff components or linked meters: only then can a quantity be known for it. Reports skip the others
+    /// without calculating every month.
+    /// </summary>
+    internal bool CanHaveQuantity(Contract contract) => _componentsByContract[contract.Id].Any() || _linksByContract[contract.Id].Any();
+
+    /// <summary>The monthly amount of the equalized plan that covers the month; null when no plan does.</summary>
+    internal decimal? PlanAmount(Contract contract, YearMonth period) => EqualizedPlans.AmountFor(_plansByContract[contract.Id], period);
+
+    // The sorted lists of a contract do not change between its months: sort them once, not once per month.
+    private static IReadOnlyList<T> Cached<T>(Dictionary<Guid, IReadOnlyList<T>> cache, Guid key, Func<IReadOnlyList<T>> make)
+    {
+        if (!cache.TryGetValue(key, out var list))
+        {
+            list = make();
+            cache[key] = list;
+        }
+
+        return list;
     }
 }

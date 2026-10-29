@@ -1091,13 +1091,14 @@
   <data name="ReportTotal" xml:space="preserve"><value>Итого</value></data>
   <data name="ReportOneOff" xml:space="preserve"><value>Разовые расходы</value></data>
   <data name="ReportPeriodColumn" xml:space="preserve"><value>Период</value></data>
-  <data name="ReportLegend" xml:space="preserve"><value>≈ — по неполным данным: нет показания или оно оценочное, сумма рассчитана, потому что счёта ещё нет, или счёт разнесён на несколько месяцев.</value></data>
+  <data name="ReportLegend" xml:space="preserve"><value>≈ — по неполным данным: нет показания или оно оценочное, сумма рассчитана, потому что счёта ещё нет, или счёт разнесён на несколько месяцев. В месяце с выравниванием себестоимость единицы считается «по тарифу»: показания × тариф, а не аванс.</value></data>
   <data name="ReportViewLabel" xml:space="preserve"><value>Вид</value></data>
   <data name="ReportViewTable" xml:space="preserve"><value>Таблица</value></data>
   <data name="ReportViewChart" xml:space="preserve"><value>График</value></data>
   <data name="ReportChartHint" xml:space="preserve"><value>Нажмите на столбец или точку, чтобы увидеть значение.</value></data>
   <data name="ReportChartOther" xml:space="preserve"><value>Прочее</value></data>
   <data name="ReportChartApproximate" xml:space="preserve"><value>Блёклые столбцы и пустые точки (≈) — по неполным данным.</value></data>
+  <data name="ReportChartByYear" xml:space="preserve"><value>Показано по годам: период длиннее 10 лет.</value></data>
   <data name="ReportEmpty" xml:space="preserve"><value>Нет данных для выбранных фильтров.</value></data>
   <data name="ReportExportExcel" xml:space="preserve"><value>Экспорт в Excel</value></data>
   <data name="ReportExportCsv" xml:space="preserve"><value>Экспорт в CSV</value></data>

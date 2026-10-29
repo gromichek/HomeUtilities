@@ -10,22 +10,22 @@ namespace HomeUtilities.Core.Reports;
 /// </summary>
 internal static class ConsumptionReport
 {
-    private sealed record Chain(MeterChain Meters, Guid PropertyId, Dictionary<RegisterKind, Dictionary<YearMonth, Acc>> ByKind);
+    internal sealed record Chain(MeterChain Meters, Guid PropertyId, Dictionary<RegisterKind, Dictionary<YearMonth, Acc>> ByKind);
 
     private static readonly RegisterKind[] KindOrder = [RegisterKind.Total, RegisterKind.Day, RegisterKind.Night, RegisterKind.Peak, RegisterKind.Export];
 
-    public static ReportModel Create(ReportData data, ReportFilter filter, IReadOnlyList<Property> properties)
+    public static ReportModel Create(ReportData data, ReportFilter filter, IReadOnlyList<Property> properties, CancellationToken cancellation = default)
     {
         var model = new ReportModel(ReportKind.Consumption, filter)
         {
             ToCell = (_, acc) => new ReportCell(acc.Any ? acc.A : null, acc.Approx || acc.Missing),
         };
         var months = filter.Months();
-        var contracts = data.Contracts.ToDictionary(c => c.Id);
 
         foreach (var property in properties)
         {
-            var chains = ChainsOf(data, property, months, contracts);
+            cancellation.ThrowIfCancellationRequested();
+            var chains = ChainsOf(data, property, months, cancellation);
             switch (filter.ConsumptionGrouping)
             {
                 case ConsumptionGrouping.Meter:
@@ -36,7 +36,7 @@ internal static class ConsumptionReport
 
                     break;
                 case ConsumptionGrouping.Contract:
-                    AddContractColumns(model, data, property, chains, months);
+                    AddContractColumns(model, data, property, chains, filter);
                     break;
                 default:
                     foreach (var group in chains.GroupBy(c => (c.Meters.Meters[^1].Resource, c.Meters.Meters[^1].Unit)).OrderBy(g => g.Key.Resource).ThenBy(g => g.Key.Unit))
@@ -55,8 +55,9 @@ internal static class ConsumptionReport
     /// One column per contract (and unit) with the sum of the meters linked to it. A meter counts in every contract it is linked to
     /// in that month (hot water is in "Water" and in "Heating"); registers of different units are never added together.
     /// </summary>
-    private static void AddContractColumns(ReportModel model, ReportData data, Property property, IReadOnlyList<Chain> chains, IReadOnlyList<YearMonth> months)
+    private static void AddContractColumns(ReportModel model, ReportData data, Property property, IReadOnlyList<Chain> chains, ReportFilter filter)
     {
+        var filterContains = filter.Contains;
         var contracts = data.Contracts
             .Where(c => !c.IsDeleted && c.PropertyId == property.Id)
             .OrderBy(c => c.Title, StringComparer.OrdinalIgnoreCase)
@@ -64,14 +65,15 @@ internal static class ConsumptionReport
         foreach (var contract in contracts)
         {
             var linked = new List<Chain>();
+            var contractLinks = data.LinksOfContract(contract.Id).ToList();
             foreach (var chain in chains)
             {
                 var ids = chain.Meters.Meters.Select(m => m.Id).ToHashSet();
-                var links = data.ContractMeters.Where(cm => cm.ContractId == contract.Id && ids.Contains(cm.MeterId)).ToList();
+                var links = contractLinks.Where(cm => ids.Contains(cm.MeterId)).ToList();
                 var kept = new Dictionary<RegisterKind, Dictionary<YearMonth, Acc>>();
                 foreach (var (kind, cells) in chain.ByKind)
                 {
-                    var inContract = cells.Where(c => months.Contains(c.Key) && links.Any(cm => cm.IsActiveOn(c.Key.LastDay))).ToDictionary(c => c.Key, c => c.Value);
+                    var inContract = cells.Where(c => filterContains(c.Key) && links.Any(cm => cm.IsActiveOn(c.Key.LastDay))).ToDictionary(c => c.Key, c => c.Value);
                     if (inContract.Count > 0)
                     {
                         kept[kind] = inContract;
@@ -140,19 +142,36 @@ internal static class ConsumptionReport
         return sum;
     }
 
-    private static List<Chain> ChainsOf(ReportData data, Property property, IReadOnlyList<YearMonth> months, Dictionary<Guid, Contract> contracts)
+    /// <summary>
+    /// The total of a chain over the months: the total register, or the sum of the day, night and peak registers when there is none.
+    /// Export registers are never part of it. Null if the chain has no import register with figures.
+    /// </summary>
+    internal static Dictionary<YearMonth, Acc>? ImportTotal(Chain chain)
+    {
+        if (chain.ByKind.TryGetValue(RegisterKind.Total, out var total))
+        {
+            return total;
+        }
+
+        var tariffs = chain.ByKind.Where(k => k.Key is RegisterKind.Day or RegisterKind.Night or RegisterKind.Peak).Select(k => k.Value).ToList();
+        return tariffs.Count == 0 ? null : Merge(tariffs);
+    }
+
+    internal static List<Chain> ChainsOf(ReportData data, Property property, IReadOnlyList<YearMonth> months, CancellationToken cancellation = default)
     {
         var meters = data.MetersOf(property.Id).ToList();
         var seen = new HashSet<Guid>();
         var result = new List<Chain>();
         foreach (var meter in meters.OrderBy(m => m.InstalledOn).ThenBy(m => m.Location, StringComparer.OrdinalIgnoreCase).ThenBy(m => m.Id))
         {
+            cancellation.ThrowIfCancellationRequested();
             var chain = MeterChain.Build(meters, meter.Id);
             if (!seen.Add(chain.Meters[^1].Id))
             {
                 continue;
             }
 
+            var windows = WindowsOf(data, chain);
             var byKind = new Dictionary<RegisterKind, Dictionary<YearMonth, Acc>>();
             var kinds = chain.Meters.SelectMany(m => m.Registers).Where(r => !r.IsDeleted).Select(r => r.Kind).Distinct();
             foreach (var kind in kinds)
@@ -160,7 +179,7 @@ internal static class ConsumptionReport
                 var cells = new Dictionary<YearMonth, Acc>();
                 foreach (var month in months)
                 {
-                    if (Month(data, chain, kind, month, contracts) is { } acc)
+                    if (Month(chain, kind, month, windows) is { } acc)
                     {
                         cells[month] = acc;
                     }
@@ -182,7 +201,7 @@ internal static class ConsumptionReport
     }
 
     /// <summary>The figures of one month; null when the meter did not exist then.</summary>
-    private static Acc? Month(ReportData data, MeterChain chain, RegisterKind kind, YearMonth month, Dictionary<Guid, Contract> contracts)
+    private static Acc? Month(MeterChain chain, RegisterKind kind, YearMonth month, IReadOnlyList<(ContractMeter Link, (int From, int To) Window)> windows)
     {
         var last = chain.Meters[^1];
         if (chain.Meters[0].InstalledOn > month.LastDay || (last.RemovedOn is { } removed && removed < month.FirstDay))
@@ -190,7 +209,7 @@ internal static class ConsumptionReport
             return null;
         }
 
-        var result = ConsumptionCalculator.CalculateForPeriod(chain, kind, month, WindowOf(data, chain, month, contracts));
+        var result = ConsumptionCalculator.CalculateForPeriod(chain, kind, month, WindowOf(windows, month));
 
         // Without a new reading since the previous period the start and the end are the same reading: nothing is known, not zero.
         if (!result.IsComplete || (result.StartReading is { } start && result.EndReading?.Id == start.Id))
@@ -204,16 +223,27 @@ internal static class ConsumptionReport
         return new Acc { A = result.Quantity, Any = true, Approx = approximate };
     }
 
-    /// <summary>The reading window of the first contract that bills the meter in the month.</summary>
-    private static (int From, int To)? WindowOf(ReportData data, MeterChain chain, YearMonth month, Dictionary<Guid, Contract> contracts)
-    {
-        var ids = chain.Meters.Select(m => m.Id).ToHashSet();
-        return data.ContractMeters
-            .Where(cm => ids.Contains(cm.MeterId) && cm.IsActiveOn(month.LastDay))
+    /// <summary>The links of the chain's meters to contracts that have a reading window, oldest link first (found once per chain).</summary>
+    private static List<(ContractMeter Link, (int From, int To) Window)> WindowsOf(ReportData data, MeterChain chain) =>
+        [.. chain.Meters
+            .SelectMany(m => data.LinksOfMeter(m.Id))
             .OrderBy(cm => cm.ValidFrom).ThenBy(cm => cm.Id)
-            .Select(cm => contracts.GetValueOrDefault(cm.ContractId))
-            .Where(c => c is { ReadingDayFrom: not null, ReadingDayTo: not null })
-            .Select(c => ((int, int)?)(c!.ReadingDayFrom!.Value, c.ReadingDayTo!.Value))
-            .FirstOrDefault();
+            .Select(cm => (Link: cm, Contract: data.ContractById.GetValueOrDefault(cm.ContractId)))
+            .Where(x => x.Contract is { ReadingDayFrom: not null, ReadingDayTo: not null })
+            .Select(x => (x.Link, (x.Contract!.ReadingDayFrom!.Value, x.Contract.ReadingDayTo!.Value)))];
+
+    /// <summary>The reading window of the first contract that bills the meter in the month.</summary>
+    private static (int From, int To)? WindowOf(IReadOnlyList<(ContractMeter Link, (int From, int To) Window)> windows, YearMonth month)
+    {
+        var last = month.LastDay;
+        foreach (var (link, window) in windows)
+        {
+            if (link.IsActiveOn(last))
+            {
+                return window;
+            }
+        }
+
+        return null;
     }
 }

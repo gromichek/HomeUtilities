@@ -31,11 +31,14 @@ public static class ReportChartBuilder
     /// <param name="labels">The texts of the table.</param>
     /// <param name="localizer">The localizer for "Other" and the note about approximate points.</param>
     /// <param name="categoryColors">Colour of each category, by id.</param>
+    /// <param name="shownByYear">True if <paramref name="table"/> has years as rows although the table on the screen has months (a long period):
+    /// the charts then say so.</param>
     public static IReadOnlyList<ChartModel> Build(
         ReportTable table,
         ReportLabels labels,
         ILocalizer localizer,
-        IReadOnlyDictionary<Guid, string> categoryColors)
+        IReadOnlyDictionary<Guid, string> categoryColors,
+        bool shownByYear = false)
     {
         ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(labels);
@@ -83,7 +86,8 @@ public static class ReportChartBuilder
                 first.ValueKind,
                 unit,
                 approximate,
-                approximate ? localizer["ReportChartApproximate"] : null));
+                approximate ? localizer["ReportChartApproximate"] : null,
+                shownByYear ? localizer["ReportChartByYear"] : null));
         }
 
         return charts;

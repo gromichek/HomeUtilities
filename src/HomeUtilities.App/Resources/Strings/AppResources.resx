@@ -1091,13 +1091,14 @@
   <data name="ReportTotal" xml:space="preserve"><value>Total</value></data>
   <data name="ReportOneOff" xml:space="preserve"><value>One-off expenses</value></data>
   <data name="ReportPeriodColumn" xml:space="preserve"><value>Period</value></data>
-  <data name="ReportLegend" xml:space="preserve"><value>≈ — based on incomplete data: a reading is missing or estimated, an amount is calculated because there is no bill yet, or a bill is spread over several months.</value></data>
+  <data name="ReportLegend" xml:space="preserve"><value>≈ — based on incomplete data: a reading is missing or estimated, an amount is calculated because there is no bill yet, or a bill is spread over several months. In an equalized month the unit cost is “by tariff”: readings × tariff instead of the advance.</value></data>
   <data name="ReportViewLabel" xml:space="preserve"><value>View</value></data>
   <data name="ReportViewTable" xml:space="preserve"><value>Table</value></data>
   <data name="ReportViewChart" xml:space="preserve"><value>Chart</value></data>
   <data name="ReportChartHint" xml:space="preserve"><value>Tap a bar or a point to see its value.</value></data>
   <data name="ReportChartOther" xml:space="preserve"><value>Other</value></data>
   <data name="ReportChartApproximate" xml:space="preserve"><value>Muted bars and hollow points (≈) rest on incomplete data.</value></data>
+  <data name="ReportChartByYear" xml:space="preserve"><value>Shown by year: the period is longer than 10 years.</value></data>
   <data name="ReportEmpty" xml:space="preserve"><value>No data for these filters.</value></data>
   <data name="ReportExportExcel" xml:space="preserve"><value>Export to Excel</value></data>
   <data name="ReportExportCsv" xml:space="preserve"><value>Export to CSV</value></data>

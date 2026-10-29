@@ -222,6 +222,21 @@ public class ReportChartBuilderTests : IDisposable
         Assert.Equal("Enum_MeterResource_ColdWater [en], Enum_MeterUnit_M3 [en] · Feb 26: ≈ 6.000 Enum_MeterUnit_M3 [en]", chart.Series[0].Points[1].Tooltip);
     }
 
+    [Fact]
+    public void A_chart_of_a_long_period_says_it_is_shown_by_year()
+    {
+        var table = Table(
+            ReportKind.Consumption,
+            [Column("w", "Water", ColumnSubject.Resource, ReportValueKind.Quantity, ReportMeasure.Quantity, MeterUnit.M3, MeterResource.ColdWater)],
+            [Row(1, [new ReportCell(5m)])]);
+
+        var plain = Assert.Single(Charts(table));
+        var byYear = Assert.Single(ReportChartBuilder.Build(table, new ReportLabels(_kit.Localizer), _kit.Localizer, Colors, shownByYear: true));
+
+        Assert.Null(plain.PeriodNote);
+        Assert.Equal("ReportChartByYear [en]", byYear.PeriodNote);
+    }
+
     // ---- Consumption, unit cost, comparison -------------------------------------------------------------------------
 
     [Fact]

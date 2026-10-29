@@ -36,6 +36,7 @@ public sealed record ChartSeries(string Name, string Color, IReadOnlyList<ChartP
 /// <param name="Unit">The unit written after the numbers on the axis ("€", "m³", "%"); empty = none.</param>
 /// <param name="HasApproximate">True if at least one point is approximate.</param>
 /// <param name="ApproximateNote">Explains the muted points; null when there are none.</param>
+/// <param name="PeriodNote">Says the months of a long period are charted by year; null otherwise.</param>
 public sealed record ChartModel(
     string Title,
     ChartKind Kind,
@@ -44,7 +45,8 @@ public sealed record ChartModel(
     ReportValueKind ValueKind,
     string Unit,
     bool HasApproximate,
-    string? ApproximateNote);
+    string? ApproximateNote,
+    string? PeriodNote = null);
 
 /// <summary>The scale of a value axis: round numbers from <see cref="Min"/> to <see cref="Max"/> in steps of <see cref="Step"/>.</summary>
 /// <param name="Min">The lowest tick (0 or below when the data reaches zero).</param>

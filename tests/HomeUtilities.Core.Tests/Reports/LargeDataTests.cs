@@ -9,13 +9,16 @@ namespace HomeUtilities.Core.Tests.Reports;
 
 public class LargeDataTests
 {
-    /// <summary>10 years x 3 properties x 15 contracts (5 of them metered), a bill per contract and month, a reading per meter and month.</summary>
+    /// <summary>
+    /// 20 years x 3 properties x 15 contracts (5 of them metered, 3 with a tariff and 2 without), a bill per contract and month,
+    /// a reading per meter and month. A sanity check against loops over all bills or readings for every cell, not a benchmark.
+    /// </summary>
     [Fact]
-    public void Ten_years_of_three_properties_and_fifteen_contracts_each_are_reported_in_reasonable_time()
+    public void Twenty_years_of_three_properties_and_fifteen_contracts_each_are_reported_in_two_seconds()
     {
         var s = new ReportScenario();
         var properties = new List<Property> { s.Flat, s.AddProperty("Cottage"), s.AddProperty("Garage", 3) };
-        var first = new YearMonth(2017, 1);
+        var first = new YearMonth(2007, 1);
         var last = new YearMonth(2026, 12);
         var months = first.MonthsUntil(last) + 1;
         var expectedBills = 0;
@@ -24,11 +27,16 @@ public class LargeDataTests
             for (var c = 0; c < 15; c++)
             {
                 var contract = s.AddContract($"Contract {c}", c % 2 == 0 ? s.Water : s.Maintenance, property);
+                contract.ValidFrom = new DateOnly(2006, 12, 1);
                 var metered = c < 5;
                 if (metered)
                 {
-                    s.AddPerUnit(contract, "Quantity", 1.50m);
-                    var meter = Meter(new DateOnly(2016, 12, 1), 8);
+                    if (c < 3)
+                    {
+                        s.AddPerUnit(contract, "Quantity", 1.50m);
+                    }
+
+                    var meter = Meter(new DateOnly(2006, 12, 1), 8);
                     meter.PropertyId = property.Id;
                     for (var m = -1; m < months; m++)
                     {
@@ -37,7 +45,7 @@ public class LargeDataTests
                     }
 
                     s.Meters.Add(meter);
-                    s.Links.Add(new ContractMeter { ContractId = contract.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2016, 12, 1) });
+                    s.Links.Add(new ContractMeter { ContractId = contract.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2006, 12, 1) });
                 }
 
                 for (var m = 0; m < months; m++)
@@ -57,7 +65,7 @@ public class LargeDataTests
         var compared = ReportBuilder.CalculatedVsBilled(data, filter);
         watch.Stop();
 
-        Assert.Equal(120, costs.Rows.Count);
+        Assert.Equal(240, costs.Rows.Count);
         Assert.Equal(
             properties.Sum(_ => Enumerable.Range(0, 15).Sum(c => (10m + c) * months)),
             costs.Totals!.Total!.Value);
@@ -65,6 +73,6 @@ public class LargeDataTests
         Assert.Equal(15, unitCost.Columns.Count);
         Assert.Equal(15, compared.Columns.Count);
         Assert.True(expectedBills > 0);
-        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(60), $"The reports took {watch.Elapsed}.");
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"The reports took {watch.Elapsed}.");
     }
 }

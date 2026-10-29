@@ -584,7 +584,7 @@ readings the app cannot say what the real consumption costs.
 **Equalized payments** and add the plan from the first equalized month. Earlier months stay billed by consumption: the app decides
 month by month, and a month is equalized only if a plan covers it. Before the first plan the bills are regular, the cards on
 [Charges](#10-charges) are ordinary ones, an Excel import brings the rows in as regular bills, and the contract stays in the
-unit cost and calculated-versus-billed reports for those months (equalized months are left out of them — the settlement page covers them).
+unit cost and calculated-versus-billed reports for all months; in equalized months they use the tariff charge instead of the advance (see [Reports](#15-reports)).
 
 **Each month.** Enter the bill as usual ([Bills](#11-bills)): the kind is *Equalized payment* and the *Total* is the
 plan amount of the month. The bill is compared with the plan; the cost of the readings is shown next to it as information.
@@ -712,8 +712,11 @@ A month in which the consumption cannot be determined — there is no reading fo
 What one unit really costs: the **bill** of the month divided by the **metered quantity** of the contract (for example
 46.02 € ÷ 12.150 m³ = 3.79 €/m³). *Gross* includes VAT, *Net* does not. In a month without a bill the calculation is used
 and the number carries a **≈**. Only contracts billed by consumption appear (not fixed fees, per-area, per-resident
-or tax contracts). Months of an equalized contract that a plan covers are left out; the earlier months, billed by
-consumption, appear. A row of a whole year divides the year's money by the year's quantity.
+or tax contracts). **You do not need to enter historic tariffs:** if a contract has no tariff for a month, its linked
+meters give the quantity and the number is the bill ÷ the metered quantity (a contract metered in several units gets one
+column per unit). In a month an **equalized** plan covers, the monthly payment is only an advance, so the number is what the
+readings cost by the tariff (or the plan amount if there is no tariff) and carries a **≈**. A row of a whole year divides the
+year's money by the year's quantity.
 
 ### Calculated vs billed
 
@@ -722,14 +725,19 @@ the calculation as it is now), what the supplier **billed**, and the **differenc
 *Difference, %*, *Calculated*, *Billed* and **Quantity difference (losses)** — the quantity printed on the bill minus the
 quantity you metered, for example the water the building lost between its main meter and your meters. A positive value
 means the supplier billed more than you used. Months without a bill, or where the calculation cannot be made (missing
-reading, prices taken from the bill), are marked **≈**.
+reading, prices taken from the bill), are marked **≈**. A contract that has meters but **no tariff** is listed too: it
+shows what was billed and the quantities, while the calculated amount and the difference stay empty (there is nothing to
+calculate with, which is not the same as zero). In a month an **equalized** plan covers, *billed* is the plan and
+*calculated* is what the readings cost by the tariff, so the difference is what will go into the settlement (positive: you
+paid too little, negative: too much); a *Settlement* bill is shown as billed in its own month.
 
 ### Charts
 
 The same numbers can be drawn as **charts**. On a phone or a narrow window the buttons **View: Table / Chart** switch between
 the two (your choice is remembered); on a wide window or a tablet in landscape the chart is shown above the table. Tap a bar or
 a point to see its period and value under the chart; the legend below lists the colours. The month names on the horizontal axis
-follow the app language.
+follow the app language. For a period longer than 10 years the table keeps its months, but the charts show **one point per
+year** (the chart says so), which keeps long periods fast and readable.
 
 - **Costs** — bars per month. When the columns are parts of a whole (grouped by category, service or contract) the bars are
   **stacked**, so the height of a bar is the total of the month; the colours are the colours of your
