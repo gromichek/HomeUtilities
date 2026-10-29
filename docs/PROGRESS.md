@@ -7,9 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-027 | Import for the owner's workbook: reading dates, positions, automatic replacements | Ready | | lead analysed the workbook locally (not in repo) |
 | T-027a | Export like the owner's workbook (reverse of the import) | Ready | | after T-027 |
-| T-028 | Reminders (local notifications) | Ready | | independent of T-027 |
 
 ## Done
 
@@ -47,6 +45,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-028 | Reminders (local notifications) | 2026-10-29, #124 | Plugin.LocalNotification 14.1.2 (MIT). Manifest removes exact-alarm, wake-lock and foreground-service permissions — watch for a crash if the plugin needs them. Windows: in-app summary snackbar once a day (owner OK). Contract flag instead of ReminderRule. |
+| T-027 | Import: reading dates, positions, automatic replacements | 2026-10-29, #125 | Migration AddImportReplacements; estimated finals accepted by ConsumptionCalculator; DetectReplacements on by default. |
 | T-026 | Excel import wizard, profiles, undo | 2026-10-29, #116 | Lower reading without dial digits = error (row skipped) — T-027 may need replacement handling. Lead resolved resx conflict; `.gitattributes` now uses union merge for resx (#118). |
 | — | Reports: coloured property groups, calendar for custom period | 2026-10-29, #117 | Sonnet helper; range from bills + readings (payments not counted). |
 | T-023b | Reports polish: dialogs, report picker, wheel, spinner; narrower menu | 2026-10-29, #114 | Android centred list caused by MaximumHeightRequest in a * row. Spinner replaced by "Calculating…" text. Wheel forwarding on Windows. Flyout width 200. |
@@ -107,6 +107,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
 | 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
+| | #124 + #125 | T-028 reminders; T-027 import of the owner's sheets | pending |
 | 2026-10-29 | #116 + #117 | T-026 import wizard; report colours + calendar | Colours/calendar OK; Shift+wheel does not scroll the table. Import: dates are reading dates (not periods), one column per meter position with 6 replacements → T-027 |
 | 2026-10-29 | #114 | T-023b reports polish | OK (requests: coloured property headers, calendar for custom period → #117) |
 | | #111 | T-025 templates and drafts | pending |
