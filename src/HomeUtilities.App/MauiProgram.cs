@@ -89,6 +89,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddSingleton<ReportFilterState>();
         builder.Services.AddSingleton<IReportWorkbookWriter, ClosedXmlReportWriter>();
+        builder.Services.AddSingleton<IWorkbookReader, ClosedXmlWorkbookReader>();
+        builder.Services.AddSingleton<IImportFileService, ImportFileService>();
+        builder.Services.AddTransient<ImportWizardViewModel>();
+        builder.Services.AddTransient<ImportsViewModel>();
         builder.Services.AddTransient<ReportsViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
@@ -158,6 +162,8 @@ public static class MauiProgram
         builder.Services.AddTransient<TariffComponentEditPage>();
         builder.Services.AddTransient<VatRatesPage>();
         builder.Services.AddTransient<VatRateEditPage>();
+        builder.Services.AddTransient<ImportWizardPage>();
+        builder.Services.AddTransient<ImportsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

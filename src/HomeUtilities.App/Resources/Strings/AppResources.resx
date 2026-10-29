@@ -1187,4 +1187,119 @@
   <data name="Error_schedule_end_before_start" xml:space="preserve"><value>The last period is before the first one.</value></data>
   <data name="Error_schedule_once_has_period" xml:space="preserve"><value>A once-only template has no periods.</value></data>
   <data name="Error_bill_draft_amount_required" xml:space="preserve"><value>Enter the total to confirm the bill.</value></data>
+  <data name="SectionImport" xml:space="preserve"><value>Import from Excel</value></data>
+  <data name="SectionImports" xml:space="preserve"><value>Imports</value></data>
+  <data name="ImportTitle" xml:space="preserve"><value>Import from Excel</value></data>
+  <data name="ImportsTitle" xml:space="preserve"><value>Imports</value></data>
+  <data name="ImportStepOf" xml:space="preserve"><value>Step {0} of {1}: {2}</value></data>
+  <data name="ImportStep_File" xml:space="preserve"><value>File and sheet</value></data>
+  <data name="ImportStep_Target" xml:space="preserve"><value>Contract</value></data>
+  <data name="ImportStep_Mapping" xml:space="preserve"><value>Columns</value></data>
+  <data name="ImportStep_Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="ImportStep_Done" xml:space="preserve"><value>Done</value></data>
+  <data name="ImportNext" xml:space="preserve"><value>Next</value></data>
+  <data name="ImportBack" xml:space="preserve"><value>Back</value></data>
+  <data name="ImportAction" xml:space="preserve"><value>Import</value></data>
+  <data name="ImportPickFile" xml:space="preserve"><value>Choose Excel file…</value></data>
+  <data name="ImportFileHint" xml:space="preserve"><value>Choose the .xlsx workbook with your history (one sheet per supplier, one row per month). The file is only read; nothing is changed until you press Import.</value></data>
+  <data name="ImportFileChosen" xml:space="preserve"><value>File: {0}</value></data>
+  <data name="ImportSheetRows" xml:space="preserve"><value>{0} — {1} rows</value></data>
+  <data name="ImportSheetsLabel" xml:space="preserve"><value>Sheet</value></data>
+  <data name="ImportChooseSheet" xml:space="preserve"><value>Choose a sheet first.</value></data>
+  <data name="ImportNotAWorkbook" xml:space="preserve"><value>This file is not a readable .xlsx workbook.</value></data>
+  <data name="ImportProfileLabel" xml:space="preserve"><value>Profile</value></data>
+  <data name="ImportNewProfile" xml:space="preserve"><value>New profile</value></data>
+  <data name="ImportProfileNameLabel" xml:space="preserve"><value>Profile name</value></data>
+  <data name="ImportChooseContract" xml:space="preserve"><value>Choose the contract the bills belong to.</value></data>
+  <data name="ImportNoProperties" xml:space="preserve"><value>There is no property yet. Create the property, its contract and its meters first.</value></data>
+  <data name="ImportNoContracts" xml:space="preserve"><value>This property has no contract yet. Create the contract and its meters first.</value></data>
+  <data name="ImportShowContract" xml:space="preserve"><value>Open contract</value></data>
+  <data name="ImportMetersHeader" xml:space="preserve"><value>Meters of the contract (the readings go here)</value></data>
+  <data name="ImportMapHint" xml:space="preserve"><value>Tell which sheet column means what. The columns are guessed from the header row; please check them. Only the period (month) column is required.</value></data>
+  <data name="ImportSheetPreview" xml:space="preserve"><value>Sheet (first rows)</value></data>
+  <data name="ImportRowsHeader" xml:space="preserve"><value>Rows</value></data>
+  <data name="ImportHeaderRowLabel" xml:space="preserve"><value>Header row</value></data>
+  <data name="ImportFirstRowLabel" xml:space="preserve"><value>First data row</value></data>
+  <data name="ImportLastRowLabel" xml:space="preserve"><value>Last data row (empty = until the first empty period)</value></data>
+  <data name="ImportColumnsHeader" xml:space="preserve"><value>Columns</value></data>
+  <data name="ImportGuess" xml:space="preserve"><value>Guess again</value></data>
+  <data name="ImportColumnNone" xml:space="preserve"><value>— not used —</value></data>
+  <data name="ImportFieldPeriod" xml:space="preserve"><value>Period (month) *</value></data>
+  <data name="ImportFieldTotal" xml:space="preserve"><value>Bill total</value></data>
+  <data name="ImportFieldNet" xml:space="preserve"><value>Amount excl. VAT</value></data>
+  <data name="ImportFieldVatPercent" xml:space="preserve"><value>VAT %</value></data>
+  <data name="ImportFieldVat" xml:space="preserve"><value>VAT amount</value></data>
+  <data name="ImportFieldPaid" xml:space="preserve"><value>Column with the «paid» marker</value></data>
+  <data name="ImportPaidMarkerLabel" xml:space="preserve"><value>Marker text for «paid»</value></data>
+  <data name="ImportFieldPaidDate" xml:space="preserve"><value>Payment date</value></data>
+  <data name="ImportFieldQuantity" xml:space="preserve"><value>Quantity on the bill</value></data>
+  <data name="ImportNotesLabel" xml:space="preserve"><value>Notes columns</value></data>
+  <data name="ImportChooseNotes" xml:space="preserve"><value>Choose notes columns…</value></data>
+  <data name="ImportCurrencyLabel" xml:space="preserve"><value>Currency</value></data>
+  <data name="ImportCurrencyRule_LvlBefore2014" xml:space="preserve"><value>LVL before 2014-01, EUR after</value></data>
+  <data name="ImportCurrencyRule_Eur" xml:space="preserve"><value>EUR</value></data>
+  <data name="ImportCurrencyRule_Lvl" xml:space="preserve"><value>LVL</value></data>
+  <data name="ImportReadingsHeader" xml:space="preserve"><value>Meter readings</value></data>
+  <data name="ImportFieldReading" xml:space="preserve"><value>Reading column</value></data>
+  <data name="ImportFieldReadingDate" xml:space="preserve"><value>Reading date column (empty = end of the month)</value></data>
+  <data name="ImportFilterLabel" xml:space="preserve"><value>Show</value></data>
+  <data name="ImportFilter_All" xml:space="preserve"><value>All rows</value></data>
+  <data name="ImportFilter_Errors" xml:space="preserve"><value>Errors</value></data>
+  <data name="ImportFilter_Warnings" xml:space="preserve"><value>Warnings</value></data>
+  <data name="ImportNoRows" xml:space="preserve"><value>No rows.</value></data>
+  <data name="ImportRowHeader" xml:space="preserve"><value>Row {0} · {1}</value></data>
+  <data name="ImportRowHeaderNoPeriod" xml:space="preserve"><value>Row {0}</value></data>
+  <data name="ImportActionReading" xml:space="preserve"><value>Reading {1} on {2} — {0}</value></data>
+  <data name="ImportActionBill" xml:space="preserve"><value>Bill {0} {1}</value></data>
+  <data name="ImportActionPayment" xml:space="preserve"><value>Payment {0} {1} on {2}</value></data>
+  <data name="ImportActionSkipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="ImportSummary" xml:space="preserve"><value>{0} readings, {1} bills, {2} payments, {3} rows skipped · {4} rows with errors, {5} with warnings</value></data>
+  <data name="ImportConfirm" xml:space="preserve"><value>Import {0} readings, {1} bills and {2} payments? You can undo the whole import later in Settings → Imports.</value></data>
+  <data name="ImportDone" xml:space="preserve"><value>Imported {0} readings, {1} bills and {2} payments. Rows skipped: {3}.</value></data>
+  <data name="ImportOpenImports" xml:space="preserve"><value>Open imports</value></data>
+  <data name="ImportBatchesHeader" xml:space="preserve"><value>Finished imports</value></data>
+  <data name="ImportBatchesEmpty" xml:space="preserve"><value>Nothing has been imported yet.</value></data>
+  <data name="ImportBatchTitle" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="ImportBatchDetail" xml:space="preserve"><value>{0:g} · {1} readings, {2} bills, {3} payments, {4} rows skipped</value></data>
+  <data name="ImportUndo" xml:space="preserve"><value>Undo import</value></data>
+  <data name="ImportUndoConfirm" xml:space="preserve"><value>Undo the import of «{0}» (sheet «{1}»)? {2} readings, {3} bills and their {4} payments will be hidden; the history is kept.</value></data>
+  <data name="ImportUndoEdited" xml:space="preserve"><value>Some imported records were edited later. Undo anyway?</value></data>
+  <data name="ImportUndoAnyway" xml:space="preserve"><value>Undo anyway</value></data>
+  <data name="ImportUndone" xml:space="preserve"><value>Import undone</value></data>
+  <data name="ImportProfilesHeader" xml:space="preserve"><value>Saved profiles</value></data>
+  <data name="ImportProfilesHint" xml:space="preserve"><value>A profile remembers which column means what, so a sheet can be imported again after fixes. The exported file contains no amounts or readings and can be shared.</value></data>
+  <data name="ImportProfilesEmpty" xml:space="preserve"><value>No saved profiles yet. A profile is saved with every import.</value></data>
+  <data name="ImportProfileSheet" xml:space="preserve"><value>Sheet: {0}</value></data>
+  <data name="ImportProfileSave" xml:space="preserve"><value>Save name</value></data>
+  <data name="ImportProfileExport" xml:space="preserve"><value>Export (JSON)</value></data>
+  <data name="ImportProfileDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="ImportProfileImport" xml:space="preserve"><value>Import profile from file</value></data>
+  <data name="ImportProfileImported" xml:space="preserve"><value>Profile «{0}» imported</value></data>
+  <data name="ImportProfileSaved" xml:space="preserve"><value>Profile file saved</value></data>
+  <data name="ImportProfileSavedTo" xml:space="preserve"><value>Profile file saved to {0}</value></data>
+  <data name="Error_import_period_column_required" xml:space="preserve"><value>Choose the column with the period (month).</value></data>
+  <data name="Error_import_nothing_mapped" xml:space="preserve"><value>Choose at least one reading or amount column.</value></data>
+  <data name="Error_import_contract_required" xml:space="preserve"><value>Choose the contract.</value></data>
+  <data name="Error_import_rows_invalid" xml:space="preserve"><value>Check the row numbers: the first data row must come after the header row.</value></data>
+  <data name="Error_import_paid_marker_required" xml:space="preserve"><value>Enter the marker text of the «paid» column.</value></data>
+  <data name="Error_import_register_missing" xml:space="preserve"><value>A meter register of the profile is not among the meters of this property any more. Choose the reading columns again.</value></data>
+  <data name="Error_import_profile_file_invalid" xml:space="preserve"><value>This file is not an import profile.</value></data>
+  <data name="Error_import_issue_period_missing" xml:space="preserve"><value>The period is empty.</value></data>
+  <data name="Error_import_issue_period_invalid" xml:space="preserve"><value>Cannot read the period «{0}».</value></data>
+  <data name="Error_import_issue_number_invalid" xml:space="preserve"><value>Column {0}: «{1}» is not a number.</value></data>
+  <data name="Error_import_issue_reading_negative" xml:space="preserve"><value>Column {0}: the reading {1} is negative.</value></data>
+  <data name="Error_import_issue_date_invalid" xml:space="preserve"><value>Column {0}: cannot read the date «{1}».</value></data>
+  <data name="Error_import_issue_reading_lower_than_previous" xml:space="preserve"><value>Column {0}: the reading {1} is lower than the previous one ({2}). Was the meter replaced? Enter the replacement first.</value></data>
+  <data name="Error_import_issue_reading_higher_than_next" xml:space="preserve"><value>Column {0}: the reading {1} is higher than the later reading {2} that already exists.</value></data>
+  <data name="Error_import_issue_reading_rollover" xml:space="preserve"><value>Column {0}: the reading {1} is lower than the previous one ({2}); the dial is assumed to have rolled over.</value></data>
+  <data name="Error_import_issue_reading_exists" xml:space="preserve"><value>Column {0}: a reading on {1} already exists; skipped.</value></data>
+  <data name="Error_import_issue_reading_outside_installation" xml:space="preserve"><value>Column {0}: {1} is outside the installation period of the meter. Adjust the dates of the meter.</value></data>
+  <data name="Error_import_issue_duplicate_period" xml:space="preserve"><value>A bill of this contract for {0} already exists; the bill and its payment are skipped.</value></data>
+  <data name="Error_import_issue_amounts_inconsistent" xml:space="preserve"><value>Amount, VAT and total do not agree; only the total is imported.</value></data>
+  <data name="Error_import_issue_vat_percent_invalid" xml:space="preserve"><value>The VAT percent is not between 0 and 100; it is ignored.</value></data>
+  <data name="Error_import_issue_total_missing" xml:space="preserve"><value>There is no total; only the readings are imported.</value></data>
+  <data name="Error_import_issue_paid_without_bill" xml:space="preserve"><value>Marked as paid, but there is no bill; no payment is created.</value></data>
+  <data name="Error_import_issue_paid_date_invalid" xml:space="preserve"><value>Column {0}: cannot read the payment date «{1}»; the 1st of the month is used.</value></data>
+  <data name="Error_import_issue_nothing_to_import" xml:space="preserve"><value>There is nothing to import in this row.</value></data>
+  <data name="Error_import_issue_register_missing" xml:space="preserve"><value>The meter register does not exist.</value></data>
 </root>
