@@ -139,6 +139,14 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
 
     public string PeriodLabel => _localizer["PeriodLabel"];
 
+    public string KindLabel => _localizer["ReportKindLabel"];
+
+    /// <summary>The chosen report, shown in the report field.</summary>
+    public string KindFieldText => new ReportLabels(_localizer).KindName(Kind);
+
+    /// <summary>The "Calculating…" line shown while the data loads (instead of a spinner animation).</summary>
+    public string BusyText => _localizer["ReportBusy"];
+
     /// <summary>Columns of the filter field grid: 3 on expanded, 2 on medium, 1 on compact layouts.</summary>
     public int FilterColumns => _layout.Current switch
     {
@@ -268,6 +276,24 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         OnPropertyChanged(nameof(ShowFilterSummary));
         OnPropertyChanged(nameof(FiltersToggleText));
     }
+
+    [RelayCommand]
+    private Task ChooseReportAsync() => RunSafeAsync(async () =>
+    {
+        var labels = new ReportLabels(_localizer);
+        var dialog = new SingleChoiceDialogViewModel(
+            _localizer,
+            KindLabel,
+            Enum.GetValues<ReportKind>().Select(k => new SingleChoiceOption(k, labels.KindName(k), _localizer["ReportKindHint" + k])),
+            Kind);
+        if (!await _dialogs.ShowEditorAsync(dialog) || dialog.SelectedValue is not ReportKind kind || kind == Kind)
+        {
+            return;
+        }
+
+        _state.Kind = kind;
+        await RebuildAsync();
+    });
 
     [RelayCommand]
     private Task ChoosePeriodAsync() => RunSafeAsync(async () =>

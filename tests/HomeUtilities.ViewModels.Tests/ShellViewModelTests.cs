@@ -55,4 +55,21 @@ public class ShellViewModelTests
 
         Assert.True(vm.IsFlyoutLocked);
     }
+
+    [Fact]
+    public void FlyoutWidth_IsDefaultOnCompactAndNarrowOtherwise()
+    {
+        var layout = new FakeLayoutModeService();
+        var vm = new ShellViewModel(new FakeLocalizer(new FakeLanguageService()), layout);
+        Assert.Equal(-1, vm.FlyoutWidth);
+
+        layout.Change(LayoutMode.Medium);
+        Assert.Equal(ShellViewModel.NarrowFlyoutWidth, vm.FlyoutWidth);
+
+        layout.Change(LayoutMode.Expanded);
+        Assert.Equal(ShellViewModel.NarrowFlyoutWidth, vm.FlyoutWidth);
+
+        layout.Change(LayoutMode.Compact);
+        Assert.Equal(-1, vm.FlyoutWidth);
+    }
 }

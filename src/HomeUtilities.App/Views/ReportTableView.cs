@@ -1,3 +1,4 @@
+using HomeUtilities.App.Services;
 using System.Windows.Input;
 using HomeUtilities.ViewModels;
 
@@ -22,6 +23,7 @@ public sealed class ReportTableView : ContentView
     private const double SeparatorWidth = 2;
     private const double StripeHeight = 4;
     private const int HeaderRows = 2;
+    private const double ScrollbarRoom = 24;
 
     public static readonly BindableProperty TableProperty = BindableProperty.Create(
         nameof(Table),
@@ -264,6 +266,13 @@ public sealed class ReportTableView : ContentView
         }
 
         var scroll = new ScrollView { Orientation = ScrollOrientation.Horizontal, HorizontalScrollBarVisibility = ScrollBarVisibility.Default, Content = body };
+
+        // Room below the last row: the horizontal scrollbar would otherwise sit on top of it.
+        body.Margin = new Thickness(0, 0, 0, ScrollbarRoom);
+        firstColumn.Margin = new Thickness(0, 0, 0, ScrollbarRoom);
+
+        // Windows: the wheel over the table must scroll the page, not the table (the table scrolls sideways only).
+        scroll.HandlerChanged += (_, _) => WheelForwarding.Attach(scroll);
         var root = new Grid { ColumnSpacing = 0 };
         root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));

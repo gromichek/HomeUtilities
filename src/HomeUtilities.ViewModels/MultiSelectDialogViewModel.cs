@@ -40,7 +40,7 @@ public sealed partial class MultiSelectItemViewModel : ObservableObject
 /// A dialog with a check box per item, All / None at the top and OK / Cancel. At least one item must stay selected: OK is
 /// disabled otherwise. Reusable for any "pick several" filter (reports: properties, categories).
 /// </summary>
-public sealed partial class MultiSelectDialogViewModel : EditorDialogViewModel
+public sealed partial class MultiSelectDialogViewModel : EditorDialogViewModel, IChoiceDialog
 {
     /// <summary>Creates the dialog; <paramref name="selected"/> are the ids checked at the start.</summary>
     public MultiSelectDialogViewModel(ILocalizer localizer, string title, IEnumerable<MultiSelectItemViewModel> items, IReadOnlyCollection<Guid> selected)
@@ -71,6 +71,9 @@ public sealed partial class MultiSelectDialogViewModel : EditorDialogViewModel
 
     /// <summary>The check boxes.</summary>
     public IReadOnlyList<MultiSelectItemViewModel> Items { get; }
+
+    /// <inheritdoc />
+    public int RowCountHint => Items.Count + 1;
 
     /// <summary>Text of the "All" button.</summary>
     public string AllText { get; }

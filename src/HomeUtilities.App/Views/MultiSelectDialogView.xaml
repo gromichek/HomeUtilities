@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
              x:Class="HomeUtilities.App.Views.MultiSelectDialogView"
              x:DataType="vm:MultiSelectDialogViewModel"
+             VerticalOptions="Fill"
              BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
 
     <ContentView.Resources>
@@ -13,26 +14,36 @@
 
     <!-- Check boxes with All / None at the top; OK is disabled while nothing is checked. -->
     <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="20" RowSpacing="8">
-        <Label Grid.Row="0" Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
+        <Label Grid.Row="0" Text="{Binding Title}" Style="{StaticResource SectionHeader}" VerticalOptions="Start" />
 
         <HorizontalStackLayout Grid.Row="1" Spacing="8">
             <Button Text="{Binding AllText}" Command="{Binding SelectAllCommand}" Style="{StaticResource SecondaryButton}" />
             <Button Text="{Binding NoneText}" Command="{Binding SelectNoneCommand}" Style="{StaticResource SecondaryButton}" />
         </HorizontalStackLayout>
 
-        <ScrollView Grid.Row="2" MaximumHeightRequest="360">
+        <!-- No MaximumHeightRequest: on Android a capped star row centred the list vertically. The popup gets a definite height from DialogService. -->
+        <ScrollView Grid.Row="2" VerticalOptions="Start">
             <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="2">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="vm:MultiSelectItemViewModel">
-                        <HorizontalStackLayout Spacing="8" MinimumHeightRequest="40">
-                            <HorizontalStackLayout.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="12" MinimumHeightRequest="48" Padding="4,6">
+                            <Grid.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnRowTapped" />
-                            </HorizontalStackLayout.GestureRecognizers>
-                            <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
-                            <BoxView WidthRequest="14" HeightRequest="14" CornerRadius="7" VerticalOptions="Center"
+                            </Grid.GestureRecognizers>
+                            <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
+                                   Text="{StaticResource IconCheckOff}"
+                                   TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Text" Value="{StaticResource IconCheckOn}" />
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <BoxView Grid.Column="1" WidthRequest="14" HeightRequest="14" CornerRadius="7" VerticalOptions="Center"
                                      Color="{Binding Color, Converter={StaticResource HexColor}}" IsVisible="{Binding HasColor}" />
-                            <Label Text="{Binding Text}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                        </HorizontalStackLayout>
+                            <Label Grid.Column="2" Text="{Binding Text}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                        </Grid>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>

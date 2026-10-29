@@ -5,7 +5,8 @@
        xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
        x:Class="HomeUtilities.App.AppShell"
        x:DataType="vm:ShellViewModel"
-       FlyoutBehavior="Flyout">
+       FlyoutBehavior="Flyout"
+       FlyoutWidth="{Binding FlyoutWidth}">
 
     <Shell.Triggers>
         <DataTrigger TargetType="Shell" x:DataType="vm:ShellViewModel" Binding="{Binding IsFlyoutLocked}" Value="True">

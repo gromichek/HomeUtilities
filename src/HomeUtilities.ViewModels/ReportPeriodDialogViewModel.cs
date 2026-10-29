@@ -9,7 +9,7 @@ namespace HomeUtilities.ViewModels;
 /// The period dialog of the Reports screen: a preset (this year, last 12 months, last year, all) or a custom range with a
 /// "from" and a "to" month picker.
 /// </summary>
-public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel
+public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel, IChoiceDialog
 {
     private readonly ILocalizer _localizer;
 
@@ -60,6 +60,9 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel
         _toIndex = months.IndexOf(to);
         BuildPresets();
     }
+
+    /// <inheritdoc />
+    public int RowCountHint => 10;
 
     /// <summary>Label of the "from" picker.</summary>
     public string FromLabel { get; }

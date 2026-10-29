@@ -15,10 +15,10 @@
     </views:PageBase.ToolbarItems>
 
     <ScrollView>
-        <VerticalStackLayout Padding="12" Spacing="12">
+        <VerticalStackLayout Padding="12,12,12,24" Spacing="12">
 
-            <!-- Which report -->
-            <views:ReportOptionRow Items="{Binding Kinds}" />
+            <!-- Which report: one field like the filter fields; it opens a single-choice dialog with a hint per report. -->
+            <views:ReportFilterField Caption="{Binding KindLabel}" Value="{Binding KindFieldText}" Command="{Binding ChooseReportCommand}" />
 
             <!-- Filters: fields that open pickers; one summary line when collapsed. -->
             <Border Style="{StaticResource SectionCard}" Padding="12">
@@ -79,8 +79,8 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Always running when visible: toggling IsRunning as well left the Android spinner turning after the first load. -->
-            <ActivityIndicator IsRunning="True" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
+            <!-- Text instead of an ActivityIndicator: the native indicator kept turning on Android after the first load (T-023a, T-023b). -->
+            <Label Text="{Binding BusyText}" Style="{StaticResource MutedLabel}" HorizontalOptions="Center" IsVisible="{Binding IsBusy}" />
 
             <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowEmpty}" />
 

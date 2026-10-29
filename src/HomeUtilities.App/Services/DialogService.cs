@@ -10,6 +10,12 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
 {
     private const double PopupWidth = 480;
 
+    // Choice dialogs (UI_GUIDELINES §3a): fixed width, height from the row count.
+    private const double ChoicePopupWidth = 420;
+    private const double ChoiceRowHeight = 50;
+    private const double ChoiceChromeHeight = 130;
+    private const double ChoiceMaxHeight = 560;
+
     /// <summary>Height of the multi-step wizard popup; its Grid needs a definite height so the step content scrolls.</summary>
     private const double WizardPopupHeight = 560;
 
@@ -59,6 +65,15 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         {
             var host = Page;
             view.WidthRequest = PopupWidth;
+            if (editor is IChoiceDialog choice)
+            {
+                // The list scrolls inside a popup of a definite height: just enough for the rows, at most 70 % of the window.
+                var wanted = ChoiceChromeHeight + (choice.RowCountHint * ChoiceRowHeight);
+                var limit = host.Height > 0 ? host.Height * 0.7 : ChoiceMaxHeight;
+                view.WidthRequest = ChoicePopupWidth;
+                view.HeightRequest = Math.Min(wanted, limit);
+            }
+
             if (view is ReplaceMeterWizardView)
             {
                 view.HeightRequest = host.Height > 0 ? Math.Min(WizardPopupHeight, host.Height * 0.9) : WizardPopupHeight;
@@ -96,6 +111,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         ReplaceMeterWizardViewModel => new ReplaceMeterWizardView { BindingContext = editor },
         MultiSelectDialogViewModel => new MultiSelectDialogView { BindingContext = editor },
         ReportPeriodDialogViewModel => new ReportPeriodDialogView { BindingContext = editor },
+        SingleChoiceDialogViewModel => new SingleChoiceDialogView { BindingContext = editor },
         _ => throw new NotSupportedException($"No dialog view is registered for {editor.GetType().Name}."),
     };
 

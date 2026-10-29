@@ -75,6 +75,25 @@
         <On Platform="WinUI" Value="&#xE70E;" />
     </OnPlatform>
 
+    <!-- Choice dialog rows (docs/UI_GUIDELINES.md §3a): check_box / check_box_outline_blank / radio_button_checked / radio_button_unchecked;
+         Segoe: CheckboxComposite / Checkbox / RadioBtnOn / RadioBtnOff. -->
+    <OnPlatform x:Key="IconCheckOn" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE834;" />
+        <On Platform="WinUI" Value="&#xE73A;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconCheckOff" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE835;" />
+        <On Platform="WinUI" Value="&#xE739;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconRadioOn" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE837;" />
+        <On Platform="WinUI" Value="&#xECCB;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconRadioOff" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE836;" />
+        <On Platform="WinUI" Value="&#xECCA;" />
+    </OnPlatform>
+
     <!-- Overview to-do rows (proposed for the UI guidelines table): readings = speed / Diagnostic, due bill = event / Calendar,
          missing bill = note_add / Document, verification = build / Warning, settlement = balance / Calculator, chevron = chevron_right. -->
     <OnPlatform x:Key="IconTodoReadings" x:TypeArguments="x:String">
