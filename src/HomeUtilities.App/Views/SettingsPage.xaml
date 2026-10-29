@@ -34,6 +34,42 @@
             <Button Text="{Binding ImportsText}" Command="{Binding OpenImportsCommand}"
                     Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,12,0,0" />
 
+            <Border Style="{StaticResource SectionCard}" Margin="0,12,0,0" BindingContext="{Binding Reminders}" x:DataType="vm:ReminderSettingsViewModel">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding HeaderText}" Style="{StaticResource SectionHeader}" />
+                    <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding NotSupportedText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding IsNotSupported}" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Switch IsToggled="{Binding IsEnabled}" />
+                        <Label Text="{Binding EnabledLabel}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowDetails}">
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch IsToggled="{Binding ReadingsOn}" />
+                            <Label Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch IsToggled="{Binding BillsOn}" />
+                            <Label Text="{Binding BillsLabel}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch IsToggled="{Binding VerificationOn}" />
+                            <Label Text="{Binding VerificationLabel}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Spacing="8">
+                            <Switch IsToggled="{Binding DraftsOn}" />
+                            <Label Text="{Binding DraftsLabel}" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding TimeLabel}" Style="{StaticResource MutedLabel}" />
+                        <TimePicker Time="{Binding Time}" Format="HH:mm" HorizontalOptions="Start" />
+                        <Label Text="{Binding LeadDaysLabel}" Style="{StaticResource MutedLabel}" />
+                        <Stepper Minimum="0" Maximum="14" Increment="1" Value="{Binding LeadDays}" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+                    <Button Text="{Binding SendTestText}" Command="{Binding SendTestCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
+
             <Border Style="{StaticResource SectionCard}" Margin="0,12,0,0">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding BackupHeader}" Style="{StaticResource SectionHeader}" />

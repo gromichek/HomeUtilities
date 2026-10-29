@@ -14,6 +14,10 @@ using Microsoft.Extensions.Logging;
 #if WINDOWS
 using Microsoft.Maui.LifecycleEvents;
 #endif
+#if ANDROID
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.AndroidOption;
+#endif
 
 namespace HomeUtilities.App;
 
@@ -30,6 +34,30 @@ public static class MauiProgram
 #if WINDOWS
         builder.ConfigureLifecycleEvents(events => events.AddWindows(windows =>
             windows.OnWindowCreated(window => HomeUtilities.App.WinUI.WindowCloseGuard.Attach(window))));
+#endif
+
+        var tapRouter = new NotificationTapRouter();
+        builder.Services.AddSingleton(tapRouter);
+#if ANDROID
+        var channelTexts = new ResxLocalizer();
+        builder
+            .UseLocalNotification(config => config.AddAndroid(android => android.AddChannel(new NotificationChannelRequest
+            {
+                Id = AndroidNotificationService.ChannelId,
+                Name = channelTexts["NotificationChannelName"],
+                Description = channelTexts["NotificationChannelDescription"],
+            })));
+        // Subscribed this early so that the tap which started the app is not lost; the router keeps it until the window is ready.
+        LocalNotificationCenter.Current.NotificationActionTapped += e =>
+        {
+            if (e.IsTapped)
+            {
+                tapRouter.Submit(e.Request.ReturningData);
+            }
+        };
+        builder.Services.AddSingleton<HomeUtilities.ViewModels.INotificationService, AndroidNotificationService>();
+#else
+        builder.Services.AddSingleton<HomeUtilities.ViewModels.INotificationService, UnavailableNotificationService>();
 #endif
 
         var appPaths = new AppPaths();
@@ -86,6 +114,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<SnackbarService>();
         builder.Services.AddSingleton<ISnackbarService>(sp => sp.GetRequiredService<SnackbarService>());
         builder.Services.AddSingleton<ISettingsStore, PreferencesSettingsStore>();
+        builder.Services.AddSingleton<ReminderSettingsStore>();
+        builder.Services.AddSingleton<ReminderScheduler>();
+        builder.Services.AddSingleton<NotificationTapHandler>();
+        builder.Services.AddTransient<ReminderSettingsViewModel>();
         builder.Services.AddSingleton<ShellViewModel>();
         builder.Services.AddSingleton<ReportFilterState>();
         builder.Services.AddSingleton<IReportWorkbookWriter, ClosedXmlReportWriter>();

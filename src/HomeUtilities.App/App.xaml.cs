@@ -34,7 +34,38 @@ public partial class App : Application
         var window = new Window(_services.GetRequiredService<AppShell>());
         _layoutModeService.Attach(window);
         ShowRestoreFailureOnce(window);
+        StartReminders(window);
         return window;
+    }
+
+    // Resolved here (not in the constructor): the scheduler reads localized texts and listens to data changes from now on.
+    // On start and on resume the notifications are rescheduled; a tap that started the app is opened once the window exists.
+    private void StartReminders(Window window)
+    {
+        var scheduler = _services.GetRequiredService<ReminderScheduler>();
+        var router = _services.GetRequiredService<NotificationTapRouter>();
+        var tapHandler = _services.GetRequiredService<NotificationTapHandler>();
+        var errorLog = _services.GetRequiredService<IErrorLog>();
+
+        void Refresh() => _ = Task.Run(async () =>
+        {
+            try
+            {
+                scheduler.RequestReschedule();
+                await scheduler.ShowStartSummaryAsync();
+            }
+            catch (Exception ex)
+            {
+                errorLog.Append("Reminders on start", ex);
+            }
+        });
+
+        window.Created += (_, _) =>
+        {
+            Dispatcher.Dispatch(() => router.Attach(tapHandler.OpenAsync));
+            Refresh();
+        };
+        window.Resumed += (_, _) => Refresh();
     }
 
     // A failed startup restore is reported once, when the first page is on screen.

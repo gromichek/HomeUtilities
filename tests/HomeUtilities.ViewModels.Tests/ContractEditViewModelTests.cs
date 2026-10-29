@@ -510,6 +510,37 @@ public class ContractEditViewModelTests
     }
 
     [Fact]
+    public async Task RemindAboutReadings_IsOnForANewContract_AndSavesAsOn()
+    {
+        var vm = await FilledNewAsync();
+
+        Assert.True(vm.RemindAboutReadings);
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(Assert.Single(_kit.Contracts.Saved).RemindAboutReadings);
+    }
+
+    [Fact]
+    public async Task RemindAboutReadings_SwitchedOff_IsSavedLoadedAndMarksTheEditorDirty()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.True(vm.RemindAboutReadings);
+        Assert.False(vm.IsDirty);
+
+        vm.RemindAboutReadings = false;
+        Assert.True(vm.IsDirty);
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Contracts.Saved);
+        Assert.False(saved.RemindAboutReadings);
+        var reloaded = _kit.CreateContractEditor();
+        await reloaded.LoadAsync(saved.PropertyId, saved.Id);
+        Assert.False(reloaded.RemindAboutReadings);
+    }
+
+    [Fact]
     public async Task VatOnTotal_SwitchedOff_SavesPerLine_AndMarksTheEditorDirty()
     {
         var contract = AddContract(ServiceKind.ColdWater);

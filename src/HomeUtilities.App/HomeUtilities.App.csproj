@@ -41,6 +41,11 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
   </ItemGroup>
 
+  <!-- Android only: Windows has no scheduled notifications (the plugin would also pull a second Windows App SDK). MIT. -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <PackageReference Include="Plugin.LocalNotification" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\HomeUtilities.Core\HomeUtilities.Core.csproj" />
     <ProjectReference Include="..\HomeUtilities.Data\HomeUtilities.Data.csproj" />

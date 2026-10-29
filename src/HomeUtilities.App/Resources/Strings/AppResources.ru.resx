@@ -1308,4 +1308,35 @@
   <data name="ReportKindHintConsumption" xml:space="preserve"><value>Сколько израсходовано — по счётчикам или объектам</value></data>
   <data name="ReportKindHintUnitCost" xml:space="preserve"><value>Цена за единицу: стоимость, делённая на потребление</value></data>
   <data name="ReportKindHintCalculatedVsBilled" xml:space="preserve"><value>Что рассчитало приложение и что выставил поставщик</value></data>
+  <data name="ContractRemindAboutReadings" xml:space="preserve"><value>Напоминать о показаниях</value></data>
+  <data name="SettingsReminders" xml:space="preserve"><value>Напоминания</value></data>
+  <data name="SettingsRemindersHint" xml:space="preserve"><value>Приложение напоминает о показаниях, счетах, поверке счётчиков и черновиках, в том числе когда оно закрыто (Android). С 21:00 до 08:00 напоминаний нет.</value></data>
+  <data name="SettingsRemindersEnabled" xml:space="preserve"><value>Напоминать</value></data>
+  <data name="SettingsRemindersReadings" xml:space="preserve"><value>Передать показания</value></data>
+  <data name="SettingsRemindersBills" xml:space="preserve"><value>Сроки оплаты счетов и налога</value></data>
+  <data name="SettingsRemindersVerification" xml:space="preserve"><value>Поверка счётчиков</value></data>
+  <data name="SettingsRemindersDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению</value></data>
+  <data name="SettingsRemindersTime" xml:space="preserve"><value>Время напоминаний</value></data>
+  <data name="SettingsRemindersTest" xml:space="preserve"><value>Отправить тестовое уведомление</value></data>
+  <data name="SettingsRemindersNotSupported" xml:space="preserve"><value>На этом устройстве уведомления недоступны; напоминания показываются при открытии приложения.</value></data>
+  <data name="SettingsRemindersPermissionDenied" xml:space="preserve"><value>Разрешение на показ уведомлений не выдано. Разрешите уведомления для HomeUtilities в настройках системы и включите напоминания снова.</value></data>
+  <data name="ReminderLeadDays" xml:space="preserve"><value>Напоминать о счёте за {0} дн. до срока оплаты (0 = только в день оплаты)</value></data>
+  <data name="ReminderReadingsTitle" xml:space="preserve"><value>Передайте показания</value></data>
+  <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — открыт период передачи показаний, числа {2}–{3}.</value></data>
+  <data name="ReminderBillTitle" xml:space="preserve"><value>Срок оплаты счёта</value></data>
+  <data name="ReminderTaxTitle" xml:space="preserve"><value>Срок оплаты налога</value></data>
+  <data name="ReminderBillBodyToday" xml:space="preserve"><value>{0}: {1:N2} {2} — оплатить сегодня.</value></data>
+  <data name="ReminderBillBodyTomorrow" xml:space="preserve"><value>{0}: {1:N2} {2} — оплатить завтра.</value></data>
+  <data name="ReminderBillBodyIn" xml:space="preserve"><value>{0}: {1:N2} {2} — оплатить через {3} дн.</value></data>
+  <data name="ReminderVerificationTitle" xml:space="preserve"><value>Поверка счётчика</value></data>
+  <data name="ReminderVerificationBodyIn" xml:space="preserve"><value>{0}: поверка через {1} дн.</value></data>
+  <data name="ReminderVerificationBodyToday" xml:space="preserve"><value>{0}: поверка сегодня.</value></data>
+  <data name="ReminderDraftsTitle" xml:space="preserve"><value>Черновики счетов</value></data>
+  <data name="ReminderDraftsBody" xml:space="preserve"><value>Черновиков счетов к подтверждению: {0}.</value></data>
+  <data name="ReminderSummaryTitle" xml:space="preserve"><value>HomeUtilities</value></data>
+  <data name="ReminderSummaryBody" xml:space="preserve"><value>Требуют внимания: {0}. Смотрите Обзор.</value></data>
+  <data name="ReminderTestTitle" xml:space="preserve"><value>Тестовое уведомление</value></data>
+  <data name="ReminderTestBody" xml:space="preserve"><value>Напоминания работают на этом устройстве.</value></data>
+  <data name="NotificationChannelName" xml:space="preserve"><value>Напоминания</value></data>
+  <data name="NotificationChannelDescription" xml:space="preserve"><value>Показания, сроки оплаты, поверка счётчиков и черновики счетов</value></data>
 </root>
