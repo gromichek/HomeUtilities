@@ -38,11 +38,11 @@ internal static class CalculatedVsBilledReport
         foreach (var property in properties)
         {
             foreach (var contract in data.Contracts
-                .Where(c => c.PropertyId == property.Id && c.BillingMode == BillingMode.Actual)
+                .Where(c => c.PropertyId == property.Id && ReportData.CanBeBilledByConsumption(c))
                 .OrderBy(c => c.Title, StringComparer.OrdinalIgnoreCase))
             {
                 var cells = new Dictionary<YearMonth, Acc>();
-                foreach (var group in billsByContract[contract.Id].GroupBy(b => b.Period).Where(g => filter.Contains(g.Key)))
+                foreach (var group in billsByContract[contract.Id].GroupBy(b => b.Period).Where(g => filter.Contains(g.Key) && !data.IsEqualized(contract, g.Key)))
                 {
                     cells[group.Key] = Month(data, contract, group.Key, [.. group]);
                 }

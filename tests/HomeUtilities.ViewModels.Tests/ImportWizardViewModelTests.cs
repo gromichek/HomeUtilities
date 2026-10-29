@@ -17,6 +17,7 @@ public class ImportWizardViewModelTests
     private readonly FakeContractStore _contracts = new();
     private readonly FakeMeterStore _meters = new();
     private readonly FakeBillStore _bills = new();
+    private readonly FakeEqualizedPlanStore _plans = new();
     private readonly FakeImportProfileStore _profiles = new();
     private readonly FakeImportBatchStore _batches = new();
     private readonly FakeDialogService _dialogs = new();
@@ -40,7 +41,7 @@ public class ImportWizardViewModelTests
             _contracts.Links.Add(new ContractMeter { ContractId = _contract.Id, MeterId = _meter.Id, ValidFrom = new DateOnly(2000, 1, 1) });
         }
 
-        return new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        return new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
     }
 
     private static SheetData Water()
@@ -155,7 +156,7 @@ public class ImportWizardViewModelTests
     [Fact]
     public async Task Without_properties_the_target_step_says_to_create_them_first()
     {
-        var vm = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        var vm = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
         await vm.OnAppearingAsync();
         _reader.Sheets["Water"] = Water();
         _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
@@ -591,7 +592,7 @@ public class ImportWizardViewModelTests
         await vm.NextCommand.ExecuteAsync(null);
         await vm.ImportCommand.ExecuteAsync(null);
 
-        var again = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        var again = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
         await again.OnAppearingAsync();
         _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
         await again.PickFileCommand.ExecuteAsync(null);

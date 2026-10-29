@@ -348,6 +348,7 @@ public sealed partial class BillEditViewModel
         _input = input;
         _live = live;
         _plans = plans;
+        AlignKindWithPlans();
         QuantityRows = rows;
         ApplyAmountWarnings(live);
         _calculationFailed = failed;
@@ -364,6 +365,25 @@ public sealed partial class BillEditViewModel
         }
 
         UpdateComparison();
+    }
+
+    /// <summary>
+    /// A new bill of a contract that is currently equalized is an equalized bill only when a plan covers its period; an earlier
+    /// month was billed by consumption and starts as a regular bill.
+    /// </summary>
+    private void AlignKindWithPlans()
+    {
+        var current = SelectedKind?.Value;
+        if (!IsNew || IsOneOff || _contract is not { BillingMode: BillingMode.Equalized } || current is not (BillKind.Equalized or BillKind.Regular))
+        {
+            return;
+        }
+
+        var wanted = EqualizedPlans.AmountFor(_plans, Period) is not null ? BillKind.Equalized : BillKind.Regular;
+        if (!Equals(current, wanted) && Kinds.FirstOrDefault(k => k.Value.Equals(wanted)) is { } option)
+        {
+            SelectedKind = option;
+        }
     }
 
     /// <summary>The plan amount of the bill's period, when the bill is an equalized one of a contract with a plan.</summary>

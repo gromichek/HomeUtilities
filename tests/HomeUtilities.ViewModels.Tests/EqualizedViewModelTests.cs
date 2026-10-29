@@ -482,6 +482,33 @@ public class EqualizedViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task NewBill_OfAContractThatBecomesEqualizedLater_IsRegularBeforeThePlanAndEqualizedFromIt()
+    {
+        // The contract was billed by consumption; the plan starts in November 2026 (25.00 per month).
+        var contract = AddEqualizedContract();
+        AddPlan(contract, "2026-11-01", 25m);
+
+        var vm = await NewBillAsync(contract);
+
+        Assert.Equal(new YearMonth(2026, 10), vm.Period);
+        Assert.Equal(BillKind.Regular, vm.SelectedKind!.Value);
+        Assert.Equal(string.Empty, vm.Amounts.GrossText);
+        Assert.False(vm.PlanMode);
+
+        vm.NextPeriodCommand.Execute(null);
+        await vm.PendingRefresh;
+        Assert.Equal(BillKind.Equalized, vm.SelectedKind!.Value);
+        Assert.Equal("25.00", vm.Amounts.GrossText);
+        Assert.True(vm.PlanMode);
+
+        vm.PreviousPeriodCommand.Execute(null);
+        await vm.PendingRefresh;
+        Assert.Equal(BillKind.Regular, vm.SelectedKind!.Value);
+        Assert.Equal(string.Empty, vm.Amounts.GrossText);
+        Assert.False(vm.PlanMode);
+    }
+
+    [Fact]
     public async Task NewBill_ForAnotherKind_DoesNotTakeThePlanAmount()
     {
         var contract = AddEqualizedContract();
@@ -556,6 +583,18 @@ public class EqualizedViewModelTests : IDisposable
         Assert.Equal(
             "ChargesEqualizedLine 40.00 Currency_Symbol_EUR [en]|45.10 Currency_Symbol_EUR [en]|+5.10 Currency_Symbol_EUR [en] [en]",
             card.EqualizedText);
+    }
+
+    [Fact]
+    public async Task Charges_MonthBeforeTheFirstPlan_IsAnOrdinaryCard()
+    {
+        var contract = AddEqualizedContract();
+        AddPlan(contract, "2026-12-01", 25m);
+        var vm = _kit.Kit.CreateCharges();
+
+        await vm.ReloadAsync();
+
+        Assert.False(Assert.Single(vm.Cards).HasEqualizedText);
     }
 
     [Fact]

@@ -72,6 +72,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     private readonly IContractStore _contracts;
     private readonly IMeterStore _meters;
     private readonly IBillStore _bills;
+    private readonly IEqualizedPlanStore _plans;
     private readonly IImportProfileStore _profiles;
     private readonly IImportBatchStore _batches;
     private readonly IDialogService _dialogs;
@@ -256,6 +257,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         IContractStore contracts,
         IMeterStore meters,
         IBillStore bills,
+        IEqualizedPlanStore plans,
         IImportProfileStore profiles,
         IImportBatchStore batches,
         IDialogService dialogs,
@@ -269,6 +271,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         _contracts = contracts;
         _meters = meters;
         _bills = bills;
+        _plans = plans;
         _profiles = profiles;
         _batches = batches;
         _dialogs = dialogs;
@@ -1163,7 +1166,8 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         var sheet = _sheet!;
         var contract = _contract!;
         var bills = await _bills.ListByContractAsync(contract.Id);
-        var context = new ImportContext(contract, _propertyMeters, bills, _propertyLinks, _replacementEdits);
+        var plans = await _plans.ListByContractAsync(contract.Id);
+        var context = new ImportContext(contract, _propertyMeters, bills, _propertyLinks, _replacementEdits, plans);
         var plan = await Task.Run(() => ImportPlanner.Plan(profile, sheet, context));
         _plan = plan;
         _plannedProfile = profile;

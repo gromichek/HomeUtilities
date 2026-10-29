@@ -351,6 +351,9 @@ Derived (not stored): `Difference = Gross − CalculatedSnapshot.TotalGross`; `O
 amount. The app keeps calculating the *actual* charge from readings; the dashboard shows the running
 difference "actual − paid by plan" since the last settlement, i.e. the expected settlement amount.
 A `Settlement` bill (positive = surcharge, negative = refund) closes the year.
+`Contract.BillingMode` is the *current* mode (defaults for new bills, which cards are shown); whether a **month** is equalized is
+decided by the plans alone: a period is equalized iff an `EqualizedPlan` of the contract covers it, and months before the first plan
+behave like `Actual` (imported as `Regular`, included in the consumption reports, shown as ordinary cards).
 
 ## §7. Property taxes
 A contract with `Service = PropertyTaxBuilding/PropertyTaxLand`, `BillingMode = Assessed`, supplier =

@@ -2,6 +2,7 @@ using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Reports;
 using HomeUtilities.Core.Tariffs;
 using static HomeUtilities.Core.Tests.Fakes.MeterBuilder;
@@ -38,7 +39,17 @@ internal sealed class ReportScenario
 
     public List<TariffComponent> Components { get; } = [];
 
-    public ReportData Data => new(Properties, Categories, Contracts, Links, Meters, Bills, Components, LatvianVatDefaults.Create());
+    public List<EqualizedPlan> Plans { get; } = [];
+
+    public ReportData Data => new(Properties, Categories, Contracts, Links, Meters, Bills, Components, LatvianVatDefaults.Create(), Plans);
+
+    /// <summary>An open-ended equalized plan of the contract from the given day.</summary>
+    public EqualizedPlan AddPlan(Contract contract, DateOnly from, decimal monthlyAmount)
+    {
+        var plan = new EqualizedPlan { ContractId = contract.Id, ValidFrom = from, MonthlyAmount = monthlyAmount };
+        Plans.Add(plan);
+        return plan;
+    }
 
     public Property AddProperty(string name, int sortOrder = 2)
     {
