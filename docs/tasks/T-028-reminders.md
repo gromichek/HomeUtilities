@@ -13,6 +13,18 @@ The rules are the same as the Overview to-do (T-022), so they live in Core and a
 - `TodoBuilder` / `OverviewDataLoader` (T-022), `BillTemplate.RemindDaysBefore` (T-025), contract reading windows,
   `Meter.GetVerificationDue()`, drafts. UI_GUIDELINES §6a: **never** use CommunityToolkit Toast/Snackbar for this.
 
+## Battery and Windows (owner decision 2026-10-29)
+- **Android: minimal battery use while the app is closed.** Nothing of ours runs in the background: no foreground or
+  background service, no periodic `WorkManager`/`JobScheduler` polling, no wake locks, no exact alarms
+  (`SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` are **not** requested), no network. The plan is computed only while the
+  app is open and handed to the system as **pre-scheduled inexact notifications** (Plugin.LocalNotification →
+  AlarmManager); between them the phone does nothing for us. After a reboot only the plugin's boot receiver re-registers
+  the stored notifications (no database work). Verify the plugin configuration does this (no exact alarms, no repeating
+  background task) and list the resulting Android permissions/receivers in the PR.
+- **Windows:** notifications while the app is closed are **not required**. On app start (and while it runs) show the
+  reminders that are due now or were missed (one system notification or the in-app snackbar + Overview); no scheduled
+  toasts, no background task.
+
 ## Scope — do
 1. **Core** `ReminderPlanner.Plan(data, settings, now, horizonDays = 45)` → list of `PlannedReminder { Key (stable,
    e.g. "readings:{contractId}:2026-11"), At (local DateTime), Kind, Title, Body (localization keys + args),
@@ -35,11 +47,10 @@ The rules are the same as the Overview to-do (T-022), so they live in Core and a
    `CancelAllAsync`, `IsSupported`):
    - Android: Plugin.LocalNotification (POST_NOTIFICATIONS permission on Android 13+, request when the user enables
      reminders; channel "Reminders"; notifications survive reboot as the plugin supports; inexact alarms are fine).
-   - Windows (unpackaged): `AppNotificationManager.Default.Register()` at startup; schedule by keeping the plan and
-     showing due notifications while the app runs **and** via `ScheduledToastNotification` if available for
-     unpackaged apps — if scheduling while closed is not possible unpackaged, show missed reminders on the next start
-     and say so in the guide. Must not crash if notifications are unavailable (`IsSupported = false` → settings shows
-     "Notifications are not available on this device").
+   - Windows (unpackaged): on start and while running, show due/missed reminders (see "Battery and Windows"); use
+     `AppNotificationManager` only if it works unpackaged without extra registration, else the in-app snackbar. Must
+     not crash if notifications are unavailable (`IsSupported = false` → settings shows "Notifications are not
+     available on this device; reminders are shown when the app is opened").
    - Reschedule (cancel + schedule the new plan) on app start, on resume, after saving readings/bills/payments/
      templates/settings (debounced, e.g. 2 s) — through one `ReminderScheduler` service in ViewModels (unit tested with
      a fake notification service: idempotent, debounced, disabled = cancel all).
@@ -53,7 +64,7 @@ The rules are the same as the Overview to-do (T-022), so they live in Core and a
 
 ## Acceptance criteria
 1. `dotnet test HomeUtilities.Tests.slnf` green, zero warnings; CI green; new package + transitive licences named.
-2. Android: test notification appears; a bill due tomorrow produces a notification at the configured time; tap opens
+2. Android: no background service / exact alarm / periodic work in the merged manifest (listed in the PR); test notification appears; a bill due tomorrow produces a notification at the configured time; tap opens
    the bill; reminders still fire after a reboot.
 3. Windows: test notification appears; no crash when notifications are disabled in Windows settings.
 

@@ -62,6 +62,7 @@ is written; the list below is the plan and will change.
 
 ## Phase 8a — Device polish
 - T-028a Pass on a real phone and tablet: text wrapping, touch targets, layouts per width, performance with real data (owner collects findings first)
+- T-028b Memory and battery optimisation: profile startup, memory (images, lists, report data), database queries; Android battery usage with reminders on (owner request 2026-10-29)
 
 ## Phase 9 — Backup and sync
 - T-029 Automatic local backups, export/import full data as JSON (manual backup file exists since T-017c)
