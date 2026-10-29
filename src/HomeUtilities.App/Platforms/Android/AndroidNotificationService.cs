@@ -1,6 +1,7 @@
 using HomeUtilities.ViewModels;
 using Plugin.LocalNotification;
-using Plugin.LocalNotification.AndroidOption;
+using Plugin.LocalNotification.Core.Models;
+using Plugin.LocalNotification.Core.Models.AndroidOption;
 
 namespace HomeUtilities.App.Services;
 
@@ -8,7 +9,7 @@ namespace HomeUtilities.App.Services;
 /// Local notifications on Android through Plugin.LocalNotification. The reminders are scheduled with the system alarm
 /// manager as inexact alarms ahead of time; the app runs no service, no periodic work and no wake lock.
 /// </summary>
-public sealed class AndroidNotificationService : INotificationService
+public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotificationService
 {
     /// <summary>Id of the notification channel "Reminders".</summary>
     public const string ChannelId = "reminders";

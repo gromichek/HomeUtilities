@@ -16,7 +16,7 @@ using Microsoft.Maui.LifecycleEvents;
 #endif
 #if ANDROID
 using Plugin.LocalNotification;
-using Plugin.LocalNotification.AndroidOption;
+using Plugin.LocalNotification.Core.Models.AndroidOption;
 #endif
 
 namespace HomeUtilities.App;
@@ -41,7 +41,7 @@ public static class MauiProgram
 #if ANDROID
         var channelTexts = new ResxLocalizer();
         builder
-            .UseLocalNotification(config => config.AddAndroid(android => android.AddChannel(new NotificationChannelRequest
+            .UseLocalNotification(config => config.AddAndroid(android => android.AddChannel(new AndroidNotificationChannelRequest
             {
                 Id = AndroidNotificationService.ChannelId,
                 Name = channelTexts["NotificationChannelName"],
