@@ -11,6 +11,7 @@ public sealed partial class ShellViewModel : ViewModelBase, IRecipient<LayoutMod
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFlyoutLocked))]
+    [NotifyPropertyChangedFor(nameof(FlyoutWidth))]
     private LayoutMode _layoutMode;
 
     [ObservableProperty]
@@ -50,6 +51,12 @@ public sealed partial class ShellViewModel : ViewModelBase, IRecipient<LayoutMod
         _layoutMode = layoutModeService.Current;
         RefreshTexts();
     }
+
+    /// <summary>Width of the narrow menu on medium and expanded layouts (fits the longest EN / RU label plus icon and padding).</summary>
+    public const double NarrowFlyoutWidth = 200;
+
+    /// <summary>Menu width: -1 = the platform default (phones), a narrower fixed width on wider layouts.</summary>
+    public double FlyoutWidth => LayoutMode == LayoutMode.Compact ? -1 : NarrowFlyoutWidth;
 
     public bool IsFlyoutLocked => LayoutMode == LayoutMode.Expanded;
 

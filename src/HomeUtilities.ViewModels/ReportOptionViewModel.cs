@@ -23,6 +23,12 @@ public sealed partial class ReportOptionViewModel : ObservableObject
     /// <summary>Tapped.</summary>
     public IRelayCommand ChooseCommand { get; }
 
+    /// <summary>One-line explanation shown under the text in choice dialogs; empty = none.</summary>
+    public string Description { get; init; } = string.Empty;
+
+    /// <summary>True if the option has an explanation line.</summary>
+    public bool HasDescription => Description.Length > 0;
+
     /// <summary>What the option stands for (a report kind, a property id…).</summary>
     public object? Value { get; init; }
 }
