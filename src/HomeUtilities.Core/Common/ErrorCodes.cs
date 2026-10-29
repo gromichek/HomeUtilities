@@ -383,4 +383,7 @@ public static class ErrorCodes
 
     /// <summary>The file is not a profile exported by the app.</summary>
     public const string ImportProfileFileInvalid = "import.profile_file_invalid";
+
+    /// <summary>The day limit of a period rule is not a day of the month (1–31).</summary>
+    public const string ImportDayLimitInvalid = "import.day_limit_invalid";
 }
