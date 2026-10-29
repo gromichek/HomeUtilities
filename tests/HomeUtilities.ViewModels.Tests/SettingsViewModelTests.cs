@@ -344,6 +344,20 @@ public class SettingsViewModelTests
         Assert.Equal(0, App.QuitCalls);
     }
 
+    [Fact]
+    public async Task The_import_buttons_open_the_wizard_and_the_imports_list()
+    {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+
+        await vm.OpenImportWizardCommand.ExecuteAsync(null);
+        await vm.OpenImportsCommand.ExecuteAsync(null);
+
+        Assert.Equal([Routes.ImportWizard, Routes.Imports], navigation.Visited.Select(v => v.Route));
+        Assert.Equal("SectionImport [en]", vm.ImportText);
+        Assert.Equal("SectionImports [en]", vm.ImportsText);
+    }
+
     private SettingsViewModel Create(
         out FakeLanguageService language, out FakeThemeService theme, out FakeLayoutModeService layout, FakeNavigationService? navigation = null)
     {
