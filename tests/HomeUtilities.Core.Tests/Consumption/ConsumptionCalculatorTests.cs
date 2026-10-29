@@ -161,6 +161,34 @@ public class ConsumptionCalculatorTests
     }
 
     [Fact]
+    public void An_estimated_reading_on_the_removal_date_ends_a_replaced_meter()
+    {
+        // The import stores an estimated final when the sheet gave none: old 202 - 190 = 12; new 13 - 0 = 13.
+        var (old, fresh) = ReplacedPair();
+        old.Registers[0].Readings.Single(r => r.Kind == ReadingKind.Final).Kind = ReadingKind.Estimated;
+        fresh.Add(D(2015, 6, 1), 13m);
+
+        var r = ConsumptionCalculator.Calculate(Chain(old, fresh), RegisterKind.Total, D(2015, 3, 1), D(2015, 6, 1));
+
+        Assert.True(r.IsComplete);
+        Assert.Equal(25m, r.Quantity);
+    }
+
+    [Fact]
+    public void An_estimated_reading_inside_the_life_of_a_replaced_meter_is_not_its_end()
+    {
+        var (old, fresh) = ReplacedPair();
+        old.Registers[0].Readings.RemoveAll(r => r.Kind == ReadingKind.Final);
+        old.Add(D(2015, 4, 1), 199m, ReadingKind.Estimated);
+        fresh.Add(D(2015, 6, 1), 13m);
+
+        var r = ConsumptionCalculator.Calculate(Chain(old, fresh), RegisterKind.Total, D(2015, 3, 1), D(2015, 6, 1));
+
+        Assert.False(r.IsComplete);
+        Assert.Equal([ConsumptionWarningCodes.MissingFinalReading], Codes(r));
+    }
+
+    [Fact]
     public void Dual_tariff_registers_are_independent()
     {
         var m = Meter(D(2020, 1, 1), 6, null, RegisterKind.Day, RegisterKind.Night);

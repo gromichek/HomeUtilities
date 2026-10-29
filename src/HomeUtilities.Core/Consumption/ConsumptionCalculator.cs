@@ -89,6 +89,11 @@ public static class ConsumptionCalculator
             .Where(r => !r.IsDeleted)
             .OrderBy(r => r.Date)];
 
+    // The last reading of a replaced meter: its Final reading, or the estimated one the import stored on the removal date.
+    private static MeterReading? LastReadingOf(Meter meter, List<MeterReading> own) =>
+        own.LastOrDefault(r => r.Kind == ReadingKind.Final)
+        ?? own.LastOrDefault(r => r.Kind == ReadingKind.Estimated && r.Date == meter.RemovedOn);
+
     private static Located? LatestOnOrBefore(List<Located> readings, DateOnly date) =>
         readings.LastOrDefault(r => r.Reading.Date <= date);
 
@@ -126,7 +131,7 @@ public static class ConsumptionCalculator
             var own = RegisterReadings(meter, kind);
 
             MeterReading? segStart = i == start.MeterIndex ? start.Reading : FirstReading(own);
-            MeterReading? segEnd = i == end.MeterIndex ? end.Reading : own.LastOrDefault(r => r.Kind == ReadingKind.Final);
+            MeterReading? segEnd = i == end.MeterIndex ? end.Reading : LastReadingOf(meter, own);
 
             if (segStart is null)
             {
