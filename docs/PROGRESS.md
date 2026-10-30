@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-028c | Fixes from real-data testing (lists perf, bills selection, Android reminders, help links, import window) | Ready | | |
 
 ## Done
 
@@ -76,6 +77,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016a | Attachments, meter/reading photos, submit links on meter cards | 2026-10-24, #54 | Image shrinking on Android only. Soft-deleted attachment files kept (cleanup later). |
 
 ## Known issues / tech debt
+
+- Items marked "To fix" below and the reading-history freeze are covered by **T-028c**.
 
 - **To fix (owner, 2026-10-30):** in Help, links inside the guide (to other sections / anchors) open the system browser instead of scrolling within the help page (`HelpViewModel.ShouldIntercept` / `HelpPage.OnNavigating` — the WebView reports internal anchors as a full URL; treat same-document and `en.md`/`ru.md` links as internal).
 - **Gap (owner, 2026-10-30):** no way to close the open remainder of a bill without a payment (e.g. equalized bill 10,69 € paid 9,00 € by consumption, the difference settled later) — consider a "write-off / settled by settlement" allocation or letting a Settlement/Correction bill offset open equalized bills. Decide with the owner.

@@ -62,6 +62,7 @@ is written; the list below is the plan and will change.
 - T-028 `INotificationService` for Android and Windows, reminder rules, scheduling
 
 ## Phase 8a — Device polish
+- T-028c Fixes from real-data testing (performance of long lists, selection, reminders delivery, help links, import window)
 - T-028a Pass on a real phone and tablet: text wrapping, touch targets, layouts per width, performance with real data (owner collects findings first)
 - T-028b Memory and battery optimisation: profile startup, memory (images, lists, report data), database queries; Android battery usage with reminders on (owner request 2026-10-29)
 
