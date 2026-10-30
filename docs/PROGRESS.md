@@ -77,6 +77,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
+- **To fix (owner, 2026-10-30, Android emulator):** scheduled reminders never arrive, the test notification does (followed the step-by-step check: reminders on, bills on, time = now + 5 min, open bill due in 2 days, app closed, waited). Suspects: (1) the manifest removes `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM`/`WAKE_LOCK` — Plugin.LocalNotification may schedule with exact alarms and fail silently without them (check its Android scheduling API and use its inexact option, or allow `WAKE_LOCK` if the receiver needs it); (2) the plan is empty or the reschedule never runs (log the planned list + count to the error log / a debug screen in Settings: "Planned reminders"); (3) the schedule time is computed in UTC vs local. Add a debug list of planned reminders in Settings to make this testable.
+
 - **To fix (owner, 2026-10-30, Windows wide):** Bills opened from a contract ("All bills", `BillsFor`, contract highlighted): tapping one card marks **all** cards as selected and the selection never clears (screenshot: every gas bill card has the selected border). Likely the "highlighted contract" state and the selection share the same visual (border) or IsSelected is set for every row of that contract. Fix together with the next Bills change.
 - To check (same screenshot): gas bill editor offers "Use prepayment 158,56 €" and the list shows several unpaid equalized bills after the import — imported payments may be left unallocated (prepayment) instead of allocated to their bills. Verify with the owner before fixing.
 
