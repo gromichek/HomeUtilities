@@ -45,7 +45,8 @@ Prompt for a new lead session:
 - `gh` works only through the **REST API** in these sessions (GraphQL is blocked, so `gh pr create/merge/checks`
   fail). Create a PR: `gh api repos/gromichek/HomeUtilities/pulls -f title=… -f head=<branch> -f base=main
   -F body=@body.md`; squash-merge: `gh api -X PUT repos/gromichek/HomeUtilities/pulls/<n>/merge
-  -f merge_method=squash`, then `gh api -X DELETE repos/gromichek/HomeUtilities/git/refs/heads/<branch>`.
+  -f merge_method=squash`. Deleting remote branches through the API is blocked by the proxy — leave them
+  (the owner can clean up on GitHub).
 - CI status: `gh api repos/gromichek/HomeUtilities/commits/<sha>/check-runs`; failed tests/compiler errors as annotations:
   `gh api repos/gromichek/HomeUtilities/check-runs/<id>/annotations` (written by `report_trx.py`).
 - Code PR CI ≈ 4 min; docs-only PRs (`docs/**`, `*.md`) skip the builds.
