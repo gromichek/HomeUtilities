@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-027a | Export like the owner's workbook (reverse of the import) | Ready | | after T-027 |
 
 ## Done
 
@@ -45,6 +44,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-027a | Export like the owner's workbook | 2026-10-30, #132 | Total sheet = billed only (report parity). Paid mark only for fully paid bills. |
+| — | Fix: editor reloaded after closing a child dialog | 2026-10-30, #136 | Shell re-applied the query on return → lost name/prices in the tariff editor. |
 | — | Reports: metered contracts without tariff, equalized months by tariff, months before contract start, 20-year performance | 2026-10-30, #133 | Sonnet helper (resumed after the weekly limit). |
 | — | Meter–contract links start at installation; editable link dates; repair | 2026-10-30, #134 | Sonnet helper. Old rule started new links "today", hiding history. |
 | — | Consumption report: group by resource / contract / meter | 2026-10-29, #130 | Sonnet helper; water total of the flat = contract grouping. |
@@ -75,6 +76,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016a | Attachments, meter/reading photos, submit links on meter cards | 2026-10-24, #54 | Image shrinking on Android only. Soft-deleted attachment files kept (cleanup later). |
 
 ## Known issues / tech debt
+
+- Import: an installation-day row ignores the old-final value from a note (old final = last regular reading) — exact round trip only when they are equal (T-027a).
 
 - Some texts do not wrap on narrow screens (seen in the emulator, place not noted) → device polish pass on a real phone/tablet before backup/sync.
 
