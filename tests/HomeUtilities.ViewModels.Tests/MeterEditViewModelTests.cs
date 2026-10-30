@@ -331,8 +331,9 @@ public class MeterEditViewModelTests
     }
 
     [Fact]
-    public async Task TurningAContractSwitchOn_CreatesALinkFromTheLaterOfInstallDateAndToday()
+    public async Task TurningAContractSwitchOn_CreatesALinkFromTheLaterOfInstallDateAndContractStart()
     {
+        // Meter installed 01.10.2020, contract from 01.01.2020, linked today (23.10.2026): the link starts on the installation.
         var water = AddContract("Water");
         var vm = await LoadNewAsync();
         vm.InstalledOn = new DateOnly(2020, 10, 1);
@@ -342,8 +343,52 @@ public class MeterEditViewModelTests
         await vm.SaveCommand.ExecuteAsync(null);
 
         var link = Assert.Single(_kit.Contracts.SavedLinks);
-        Assert.Equal((water.Id, vm.EntityId, Today, null), (link.ContractId, link.MeterId, link.ValidFrom, link.ValidTo));
+        Assert.Equal((water.Id, vm.EntityId, new DateOnly(2020, 10, 1), null), (link.ContractId, link.MeterId, link.ValidFrom, link.ValidTo));
         Assert.True(vm.ContractSwitches[0].IsOn);
+    }
+
+    [Fact]
+    public async Task ALinkMadeForAnOldMeter_StartsAtTheInstallationNotToday()
+    {
+        // Meter installed 01.05.2004, contract from 01.05.2004, linked on 23.10.2026 -> link from 01.05.2004.
+        AddContract("Water", validFrom: new DateOnly(2004, 5, 1));
+        var vm = await LoadNewAsync();
+        vm.InstalledOn = new DateOnly(2004, 5, 1);
+        vm.ContractSwitches[0].IsOn = true;
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(new DateOnly(2004, 5, 1), Assert.Single(_kit.Contracts.SavedLinks).ValidFrom);
+    }
+
+    [Fact]
+    public async Task ALinkToALaterContract_StartsWithTheContract()
+    {
+        // Meter installed 01.05.2004, contract from 01.01.2010 -> link from 01.01.2010.
+        AddContract("Water", validFrom: new DateOnly(2010, 1, 1));
+        var vm = await LoadNewAsync();
+        vm.InstalledOn = new DateOnly(2004, 5, 1);
+        vm.ContractSwitches[0].IsOn = true;
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(new DateOnly(2010, 1, 1), Assert.Single(_kit.Contracts.SavedLinks).ValidFrom);
+    }
+
+    [Fact]
+    public async Task SwitchingTheContractOffAndOnAgain_StartsTheNewLinkAfterTheEndedOne()
+    {
+        var water = AddContract("Water", validFrom: new DateOnly(2004, 5, 1));
+        var meter = StoredMeter(withReading: false);
+        meter.InstalledOn = new DateOnly(2004, 5, 1);
+        _kit.Contracts.Links.Add(new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2004, 5, 1), ValidTo = new DateOnly(2026, 10, 1) });
+        var vm = await LoadAsync(meter);
+        Assert.False(vm.ContractSwitches[0].IsOn);
+
+        vm.ContractSwitches[0].IsOn = true;
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(new DateOnly(2026, 10, 2), Assert.Single(_kit.Contracts.SavedLinks).ValidFrom);
     }
 
     [Fact]
@@ -390,6 +435,157 @@ public class MeterEditViewModelTests
         await vm.SaveCommand.ExecuteAsync(null);
 
         Assert.Empty(_kit.Contracts.SavedLinks);
+    }
+
+    [Fact]
+    public async Task ALinkedContractRow_ShowsTheDatesOfTheLink()
+    {
+        var water = AddContract("Water");
+        var meter = StoredMeter(withReading: false);
+        _kit.Contracts.Links.Add(new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2004, 5, 1) });
+
+        var vm = await LoadAsync(meter);
+
+        var row = vm.ContractSwitches[0];
+        Assert.True(row.ShowLinkDates);
+        Assert.Equal($"MeterLinkFrom {new DateOnly(2004, 5, 1)} [en]", row.LinkText);
+
+        row.CurrentLink!.ValidTo = new DateOnly(2030, 12, 31);
+        row.RefreshLinkText();
+        Assert.Equal($"MeterLinkFromTo {new DateOnly(2004, 5, 1)}|{new DateOnly(2030, 12, 31)} [en]", row.LinkText);
+
+        row.IsOn = false;
+        Assert.False(row.ShowLinkDates);
+        Assert.Equal(string.Empty, row.LinkText);
+    }
+
+    [Fact]
+    public async Task EditingALink_StoresTheNewDatesAndKeepsThePageOpen()
+    {
+        var water = AddContract("Water", validFrom: new DateOnly(2004, 5, 1));
+        var meter = StoredMeter(withReading: false);
+        meter.InstalledOn = new DateOnly(2004, 5, 1);
+        var link = new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2026, 10, 23) };
+        _kit.Contracts.Links.Add(link);
+        var vm = await LoadAsync(meter);
+        _kit.Dialogs.EditorScript = e =>
+        {
+            var editor = (MeterLinkEditorViewModel)e;
+            Assert.Equal(new DateOnly(2026, 10, 23), editor.ValidFrom);
+            editor.ValidFrom = new DateOnly(2004, 5, 1);
+            editor.SaveCommand.Execute(null);
+        };
+
+        await vm.EditLinkCommand.ExecuteAsync(vm.ContractSwitches[0]);
+
+        Assert.Same(link, Assert.Single(_kit.Contracts.SavedLinks));
+        Assert.Equal(new DateOnly(2004, 5, 1), link.ValidFrom);
+        Assert.Equal($"MeterLinkFrom {new DateOnly(2004, 5, 1)} [en]", vm.ContractSwitches[0].LinkText);
+        Assert.Equal(0, _kit.Navigation.BackCount);
+        Assert.False(vm.IsDirty);
+    }
+
+    [Fact]
+    public async Task CancellingTheLinkDialog_ChangesNothing()
+    {
+        var water = AddContract("Water");
+        var meter = StoredMeter(withReading: false);
+        var link = new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2026, 10, 23) };
+        _kit.Contracts.Links.Add(link);
+        var vm = await LoadAsync(meter);
+        _kit.Dialogs.EditorScript = e => ((MeterLinkEditorViewModel)e).ValidFrom = new DateOnly(2021, 1, 1);
+
+        await vm.EditLinkCommand.ExecuteAsync(vm.ContractSwitches[0]);
+
+        Assert.Empty(_kit.Contracts.SavedLinks);
+        Assert.Equal(new DateOnly(2026, 10, 23), link.ValidFrom);
+    }
+
+    [Fact]
+    public async Task TheLinkDialog_RejectsAStartBeforeTheInstallationAndAnEndBeforeTheStart()
+    {
+        // Meter installed 01.10.2020.
+        var water = AddContract("Water", validFrom: new DateOnly(2020, 1, 1));
+        var meter = StoredMeter(withReading: false);
+        var link = new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2021, 1, 1) };
+        _kit.Contracts.Links.Add(link);
+        var vm = await LoadAsync(meter);
+        MeterLinkEditorViewModel? seen = null;
+        _kit.Dialogs.EditorScript = e =>
+        {
+            var editor = seen = (MeterLinkEditorViewModel)e;
+            editor.ValidFrom = new DateOnly(2020, 9, 30);
+            editor.SaveCommand.Execute(null);
+            Assert.False(editor.Saved);
+            Assert.Contains("Error_contract_meter_valid_from_before_installation", editor.ValidFromError);
+
+            editor.ValidFrom = new DateOnly(2021, 1, 1);
+            editor.HasValidTo = true;
+            editor.ValidTo = new DateOnly(2020, 12, 31);
+            editor.SaveCommand.Execute(null);
+            Assert.False(editor.Saved);
+            Assert.Contains("Error_contract_meter_valid_to_before_valid_from", editor.ValidToError);
+        };
+
+        await vm.EditLinkCommand.ExecuteAsync(vm.ContractSwitches[0]);
+
+        Assert.NotNull(seen);
+        Assert.Empty(_kit.Contracts.SavedLinks);
+        Assert.Equal(new DateOnly(2021, 1, 1), link.ValidFrom);
+        Assert.Null(link.ValidTo);
+    }
+
+    [Fact]
+    public async Task TheLinkDialog_RejectsOverlapWithAnotherLinkAndWarnsAboutAStartBeforeTheContract()
+    {
+        // Meter installed 01.10.2020; contract from 01.01.2022; an ended link 01.10.2020 - 31.12.2021 exists.
+        var water = AddContract("Water", validFrom: new DateOnly(2022, 1, 1));
+        var meter = StoredMeter(withReading: false);
+        var ended = new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2020, 10, 1), ValidTo = new DateOnly(2021, 12, 31) };
+        var link = new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2022, 1, 1) };
+        _kit.Contracts.Links.AddRange([ended, link]);
+        var vm = await LoadAsync(meter);
+        _kit.Dialogs.EditorScript = e =>
+        {
+            var editor = (MeterLinkEditorViewModel)e;
+            Assert.False(editor.HasWarning);
+
+            editor.ValidFrom = new DateOnly(2021, 6, 1);
+            Assert.True(editor.HasWarning);
+            Assert.Contains("MeterLinkBeforeContract", editor.WarningText);
+            editor.SaveCommand.Execute(null);
+            Assert.False(editor.Saved);
+            Assert.Contains("Error_contract_meter_overlaps_other_link", editor.ValidFromError);
+
+            // Right after the ended link it is fine.
+            editor.ValidFrom = new DateOnly(2022, 1, 1);
+            editor.SaveCommand.Execute(null);
+            Assert.True(editor.Saved);
+        };
+
+        await vm.EditLinkCommand.ExecuteAsync(vm.ContractSwitches[0]);
+
+        Assert.Single(_kit.Contracts.SavedLinks);
+    }
+
+    [Fact]
+    public async Task TheLinkDialog_AllowsAStartBeforeTheContractAsAWarning()
+    {
+        var water = AddContract("Water", validFrom: new DateOnly(2022, 1, 1));
+        var meter = StoredMeter(withReading: false);
+        var link = new ContractMeter { ContractId = water.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2022, 1, 1) };
+        _kit.Contracts.Links.Add(link);
+        var vm = await LoadAsync(meter);
+        _kit.Dialogs.EditorScript = e =>
+        {
+            var editor = (MeterLinkEditorViewModel)e;
+            editor.ValidFrom = new DateOnly(2020, 10, 1);
+            editor.SaveCommand.Execute(null);
+        };
+
+        await vm.EditLinkCommand.ExecuteAsync(vm.ContractSwitches[0]);
+
+        Assert.Equal(new DateOnly(2020, 10, 1), link.ValidFrom);
     }
 
     [Fact]
@@ -520,14 +716,14 @@ public class MeterEditViewModelTests
         Assert.Equal("Enum_MeterResource_HotWater [ru]", vm.SelectedResource.DisplayName);
     }
 
-    private Contract AddContract(string title, Guid? propertyId = null)
+    private Contract AddContract(string title, Guid? propertyId = null, DateOnly? validFrom = null)
     {
         var contract = new Contract
         {
             PropertyId = propertyId ?? _kit.Property.Id,
             Title = title,
             Service = ServiceKind.ColdWater,
-            ValidFrom = new DateOnly(2020, 1, 1),
+            ValidFrom = validFrom ?? new DateOnly(2020, 1, 1),
         };
         _kit.Contracts.Stored.Add(contract);
         return contract;

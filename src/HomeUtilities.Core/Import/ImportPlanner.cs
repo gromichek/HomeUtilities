@@ -59,7 +59,21 @@ public static partial class ImportPlanner
 
         var replacements = PlanReadings(profile, sheet, context, positions, candidates, rows);
         Finalize(rows, registers, replacements);
-        return new ImportPlan(rows, [], replacements);
+        return new ImportPlan(rows, [], replacements) { ContractValidFrom = context.Contract.ValidFrom };
+    }
+
+    // A period outside the contract's dates is imported (the bill exists), but charges and reports treat the contract as not valid
+    // then, so the owner is told where to fix it.
+    private static void WarnIfOutsideContract(PlannedRow row, YearMonth period, Contract contract)
+    {
+        if (contract.ValidFrom > period.LastDay)
+        {
+            Warning(row, ImportIssueCodes.PeriodBeforeContractStart, contract.ValidFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+        }
+        else if (contract.ValidTo is { } end && end < period.FirstDay)
+        {
+            Warning(row, ImportIssueCodes.PeriodAfterContractEnd, end.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+        }
     }
 
     private static IEnumerable<SheetRow> DataRows(ImportProfile profile, SheetData sheet)
@@ -129,6 +143,7 @@ public static partial class ImportPlanner
         }
 
         planned.Period = period;
+        WarnIfOutsideContract(planned, period, context.Contract);
         var candidateCount = candidates.Count;
         ReadReadings(profile, row, planned.RowDate, period, planned, candidates, positions);
         var bill = ReadBill(profile, sheet, row, period, context, planned, existingPeriods, sheetBills, correction);

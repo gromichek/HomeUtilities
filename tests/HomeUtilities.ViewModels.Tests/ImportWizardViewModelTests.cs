@@ -312,6 +312,111 @@ public class ImportWizardViewModelTests
     }
 
     [Fact]
+    public async Task Rows_before_the_contract_start_are_announced_and_the_start_can_be_moved_with_one_click()
+    {
+        // The sheet has January, February and March 2014; the contract starts on 10 February: January is before it.
+        var vm = await ToMappingStepAsync();
+        _contract.ValidFrom = new DateOnly(2014, 2, 10);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.True(vm.HasBeforeStart);
+        Assert.Equal("ImportBeforeStart 1|10.02.2014 [en]", vm.BeforeStartText);
+        Assert.Equal("ImportSetContractStart 01.01.2014 [en]", vm.SetContractStartText);
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Equal("ImportSetContractStartConfirm 10.02.2014|01.01.2014 [en]", Assert.Single(_dialogs.Confirmations).Message);
+        Assert.Equal(new DateOnly(2014, 1, 1), Assert.Single(_contracts.Saved).ValidFrom);
+        Assert.False(vm.HasBeforeStart);
+        Assert.Equal(ImportWizardStep.Preview, vm.Step);
+    }
+
+    [Fact]
+    public async Task Declining_the_contract_start_change_keeps_the_contract()
+    {
+        var vm = await ToMappingStepAsync();
+        _contract.ValidFrom = new DateOnly(2014, 2, 10);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+        _dialogs.ConfirmResult = false;
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Empty(_contracts.Saved);
+        Assert.Equal(new DateOnly(2014, 2, 10), _contract.ValidFrom);
+        Assert.True(vm.HasBeforeStart);
+    }
+
+    [Fact]
+    public async Task A_link_that_starts_after_the_imported_months_is_announced_and_moved_to_the_installation()
+    {
+        // The sheet starts in January 2014; the meter (installed 01.01.2000) was linked on 29.10.2026.
+        var vm = await ToMappingStepAsync();
+        var link = Assert.Single(_contracts.Links);
+        link.ValidFrom = new DateOnly(2026, 10, 29);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.False(vm.HasBeforeStart);
+        Assert.True(vm.HasLinkStart);
+        Assert.Equal("ImportLinkStartLate 1|01.01.2014 [en]", vm.LinkStartText);
+        Assert.Equal("ImportMoveLinkStarts [en]", vm.SetContractStartText);
+        Assert.True(vm.HasStartFix);
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Equal("ImportSetStartLinksConfirm 1 [en]", Assert.Single(_dialogs.Confirmations).Message);
+        Assert.Empty(_contracts.Saved);
+        Assert.Equal(new DateOnly(2000, 1, 1), Assert.Single(_contracts.SavedLinks).ValidFrom);
+        Assert.False(vm.HasLinkStart);
+        Assert.False(vm.HasStartFix);
+        Assert.Equal(ImportWizardStep.Preview, vm.Step);
+    }
+
+    [Fact]
+    public async Task Moving_the_contract_start_moves_the_links_with_it()
+    {
+        // Contract from 10.02.2014, sheet from 01.2014, meter installed 01.01.2000, linked 29.10.2026: both start on 01.01.2014.
+        var vm = await ToMappingStepAsync();
+        _contract.ValidFrom = new DateOnly(2014, 2, 10);
+        var link = Assert.Single(_contracts.Links);
+        link.ValidFrom = new DateOnly(2026, 10, 29);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.Equal("ImportSetContractStart 01.01.2014 [en]", vm.SetContractStartText);
+        Assert.True(vm.HasLinkStart);
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            "ImportSetContractStartConfirm 10.02.2014|01.01.2014 [en]" + Environment.NewLine + Environment.NewLine + "ImportSetStartLinksConfirm 1 [en]",
+            Assert.Single(_dialogs.Confirmations).Message);
+        Assert.Equal(new DateOnly(2014, 1, 1), Assert.Single(_contracts.Saved).ValidFrom);
+        Assert.Equal(new DateOnly(2014, 1, 1), Assert.Single(_contracts.SavedLinks).ValidFrom);
+        Assert.False(vm.HasBeforeStart);
+        Assert.False(vm.HasLinkStart);
+    }
+
+    [Fact]
+    public async Task Declining_the_link_start_change_keeps_the_links()
+    {
+        var vm = await ToMappingStepAsync();
+        var link = Assert.Single(_contracts.Links);
+        link.ValidFrom = new DateOnly(2026, 10, 29);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+        _dialogs.ConfirmResult = false;
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Empty(_contracts.SavedLinks);
+        Assert.Equal(new DateOnly(2026, 10, 29), link.ValidFrom);
+        Assert.True(vm.HasLinkStart);
+    }
+
+    [Fact]
     public async Task Declining_the_confirmation_imports_nothing()
     {
         var vm = await ToPreviewStepAsync();

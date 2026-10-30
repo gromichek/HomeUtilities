@@ -196,6 +196,28 @@ public sealed class ImportPlan
     /// <summary>Totals.</summary>
     public ImportCounts Counts { get; }
 
+    /// <summary>The contract's "valid from" date the plan was made for.</summary>
+    public DateOnly? ContractValidFrom { get; init; }
+
+    /// <summary>Rows (without errors) whose period lies before the contract's start date.</summary>
+    public int RowsBeforeContractStart => Rows.Count(IsBeforeContractStart);
+
+    /// <summary>
+    /// The first day of the earliest period of the rows before the contract's start: the date the contract should start on to include
+    /// them. Null if there is no such row.
+    /// </summary>
+    public DateOnly? SuggestedContractStart
+    {
+        get
+        {
+            var periods = Rows.Where(IsBeforeContractStart).Select(r => r.Period!.Value).ToList();
+            return periods.Count == 0 ? null : periods.Min().FirstDay;
+        }
+    }
+
+    private static bool IsBeforeContractStart(PlannedRow row) =>
+        !row.HasErrors && row.Period is not null && row.Issues.Any(i => i.Code == ImportIssueCodes.PeriodBeforeContractStart);
+
     /// <summary>Number of rows with errors.</summary>
     public int ErrorRows => Rows.Count(r => r.HasErrors);
 
@@ -283,6 +305,12 @@ public static class ImportIssueCodes
 
     /// <summary>This row's bill replaces the one of an earlier row of the same period; Args: period, row number of the earlier row.</summary>
     public const string PeriodSupersedes = "import_issue.period_supersedes";
+
+    /// <summary>The row's period is before the contract's start date; the row is imported; Args: the start date (dd.MM.yyyy).</summary>
+    public const string PeriodBeforeContractStart = "import_issue.period_before_contract_start";
+
+    /// <summary>The row's period is after the contract's end date; the row is imported; Args: the end date (dd.MM.yyyy).</summary>
+    public const string PeriodAfterContractEnd = "import_issue.period_after_contract_end";
 
     /// <summary>A meter replacement is proposed for the row; Args: none.</summary>
     public const string ReplacementProposed = "import_issue.replacement_proposed";

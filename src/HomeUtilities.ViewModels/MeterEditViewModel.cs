@@ -314,11 +314,10 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         {
             foreach (var contract in await _contractStore.ListByPropertyAsync(_propertyId))
             {
-                var open = IsNew
+                IReadOnlyList<ContractMeter> pair = IsNew
                     ? []
-                    : (await _contractStore.ListContractMetersAsync(contract.Id))
-                        .Where(l => l.MeterId == _meter.Id && MeterContractLink.IsOpen(l, today))
-                        .ToList();
+                    : [.. (await _contractStore.ListContractMetersAsync(contract.Id)).Where(l => l.MeterId == _meter.Id && !l.IsDeleted)];
+                var open = pair.Where(l => MeterContractLink.IsOpen(l, today)).ToList();
                 var inUse = open.Count > 0;
                 if (!inUse && (contract.IsArchived || contract.ValidTo is { } end && end < today))
                 {
@@ -326,8 +325,10 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
                 }
 
                 var row = new MeterContractSwitchViewModel(
-                    new MeterContractLink(contract, open), EnumText.Get(_localizer, contract.Service), inUse);
+                    new MeterContractLink(contract, open), EnumText.Get(_localizer, contract.Service), inUse, pair);
                 row.Toggled = MarkDirty;
+                row.LinkTextBuilder = LinkDatesText;
+                row.EditLinkCommand = new RelayCommand(() => EditLinkCommand.Execute(row));
                 rows.Add(row);
             }
         }
@@ -335,6 +336,46 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         ContractSwitches = [.. rows.OrderBy(r => r.Title, StringComparer.CurrentCultureIgnoreCase)];
         OnPropertyChanged(nameof(HasNoContracts));
     }
+
+    /// <summary>"from 01.05.2004" or "from 01.05.2004 to 31.12.2030".</summary>
+    private string LinkDatesText(ContractMeter link) => link.ValidTo is { } end
+        ? _localizer.Get("MeterLinkFromTo", link.ValidFrom, end)
+        : _localizer.Get("MeterLinkFrom", link.ValidFrom);
+
+    /// <summary>
+    /// Opens the dialog with the dates of a linked contract. The link is a record of its own, so a change is stored at once (the
+    /// other unsaved input of the page stays as it is); the page stays open.
+    /// </summary>
+    [RelayCommand]
+    private Task EditLinkAsync(MeterContractSwitchViewModel row) => RunSafeAsync(async () =>
+    {
+        if (IsNew || row.CurrentLink is not { } link)
+        {
+            return;
+        }
+
+        var editor = new MeterLinkEditorViewModel(_localizer, link, _meter.InstalledOn, row.Link.Contract, row.PairLinks);
+        if (!await Dialogs.ShowEditorAsync(editor) || editor.Result is not { } result)
+        {
+            return;
+        }
+
+        var (oldFrom, oldTo) = (link.ValidFrom, link.ValidTo);
+        link.ValidFrom = result.ValidFrom;
+        link.ValidTo = result.ValidTo;
+        try
+        {
+            await _contractStore.SaveContractMeterAsync(link);
+        }
+        catch
+        {
+            (link.ValidFrom, link.ValidTo) = (oldFrom, oldTo);
+            throw;
+        }
+
+        row.RefreshLinkText();
+        _snackbar.Notify(_localizer["MeterLinkSaved"]);
+    });
 
     private async Task LoadHistoryAsync()
     {
@@ -537,7 +578,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
                 {
                     ContractId = row.ContractId,
                     MeterId = saved.Id,
-                    ValidFrom = saved.InstalledOn > today ? saved.InstalledOn : today,
+                    ValidFrom = MeterLinkRules.NewLinkStart(saved.InstalledOn, row.Link.Contract.ValidFrom, row.PairLinks),
                 };
                 await _contractStore.SaveContractMeterAsync(link);
             }
@@ -622,6 +663,10 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
             RebuildRecentReadings();
             OnPropertyChanged(nameof(VerificationLine));
             OnPropertyChanged(nameof(VerificationBadgeText));
+            foreach (var row in ContractSwitches)
+            {
+                row.RefreshLinkText();
+            }
         }
         finally
         {

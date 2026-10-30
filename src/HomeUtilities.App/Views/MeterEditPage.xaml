@@ -149,16 +149,24 @@
                     <Label Text="{Binding Texts.ContractsHeader}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding Texts.ContractsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
                     <Label Text="{Binding Texts.ContractsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoContracts}" />
+                    <Label Text="{Binding Texts.LinkHint}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding ShowReadings}" />
 
                     <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ContractSwitches}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:MeterContractSwitchViewModel">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding EditLinkCommand}" />
+                                        </VerticalStackLayout.GestureRecognizers>
                                         <Label Text="{Binding Title}" FontAttributes="Bold" />
                                         <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" />
+                                        <Label Text="{Binding LinkText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowLinkDates}" />
                                     </VerticalStackLayout>
-                                    <Switch Grid.Column="1" IsToggled="{Binding IsOn}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
+                                           VerticalOptions="Center" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowLinkDates}"
+                                           SemanticProperties.Description="{Binding LinkText}" />
+                                    <Switch Grid.Column="2" IsToggled="{Binding IsOn}" VerticalOptions="Center" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>

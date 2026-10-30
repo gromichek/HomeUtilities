@@ -1,5 +1,6 @@
 using System.Text;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Import;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -11,12 +12,14 @@ public class ImportsViewModelTests
     private readonly FakeImportProfileStore _profiles = new();
     private readonly FakeImportFilePicker _files = new();
     private readonly FakeSaver _saver = new();
+    private readonly FakeMeterStore _meters = new();
+    private readonly FakeContractStore _contracts = new();
     private readonly FakeDialogService _dialogs = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeSnackbarService _snackbar = new();
 
     private ImportsViewModel Create() =>
-        new(_batches, _profiles, _files, _saver, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow());
+        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow());
 
     private WorkbookExportFlow ExportFlow() => new(
         new FakeExportLoader(), new FakePaymentStore(), new FakeSupplierStore(), _profiles, new FakeExportWriter(), _saver, _dialogs, _snackbar, new FakeLocalizer(_language), new TestClock(new DateOnly(2026, 10, 29)));
@@ -33,6 +36,79 @@ public class ImportsViewModelTests
         var profile = new SavedImportProfile { Name = name, Profile = new ImportProfile { SheetName = "Water", PeriodColumn = 1, TotalColumn = 4, ContractId = Guid.NewGuid() } };
         _profiles.Stored.Add(profile);
         return profile;
+    }
+
+    private (Contract Contract, Meter Meter, ContractMeter Link) AddLateLink()
+    {
+        // Meter installed 01.05.2004 with a reading of 2010, contract from 01.05.2004, linked on 29.10.2026.
+        var contract = new Contract { Title = "Water", ValidFrom = new DateOnly(2004, 5, 1) };
+        var meter = new Meter { Location = "Kitchen", InstalledOn = new DateOnly(2004, 5, 1) };
+        var register = MeterRegister.CreateDefault(meter.Id);
+        register.Readings.Add(new MeterReading { RegisterId = register.Id, Date = new DateOnly(2010, 6, 1), Value = 10m });
+        meter.Registers.Add(register);
+        var link = new ContractMeter { ContractId = contract.Id, MeterId = meter.Id, ValidFrom = new DateOnly(2026, 10, 29) };
+        _contracts.Stored.Add(contract);
+        _meters.Stored.Add(meter);
+        _contracts.Links.Add(link);
+        return (contract, meter, link);
+    }
+
+    [Fact]
+    public async Task A_link_that_starts_after_the_installation_is_offered_for_repair()
+    {
+        AddLateLink();
+        var vm = Create();
+
+        await vm.OnAppearingAsync();
+
+        Assert.True(vm.HasLinkRepair);
+        Assert.False(vm.HasNoLinkRepair);
+        Assert.Equal(
+            $"ImportsLinkRepairLine Water|Kitchen|{new DateOnly(2026, 10, 29)}|{new DateOnly(2004, 5, 1)} [en]",
+            Assert.Single(vm.LinkRepairLines));
+    }
+
+    [Fact]
+    public async Task Confirming_the_repair_starts_the_links_at_the_installation_and_the_card_empties()
+    {
+        var (_, _, link) = AddLateLink();
+        var vm = Create();
+        await vm.OnAppearingAsync();
+
+        await vm.RepairLinksCommand.ExecuteAsync(null);
+
+        var confirmation = Assert.Single(_dialogs.Confirmations);
+        Assert.StartsWith("ImportsLinkRepairQuestion [en]", confirmation.Message);
+        Assert.Same(link, Assert.Single(_contracts.SavedLinks));
+        Assert.Equal(new DateOnly(2004, 5, 1), link.ValidFrom);
+        Assert.False(vm.HasLinkRepair);
+        Assert.True(vm.HasNoLinkRepair);
+    }
+
+    [Fact]
+    public async Task Declining_the_repair_changes_nothing()
+    {
+        var (_, _, link) = AddLateLink();
+        var vm = Create();
+        await vm.OnAppearingAsync();
+        _dialogs.ConfirmResult = false;
+
+        await vm.RepairLinksCommand.ExecuteAsync(null);
+
+        Assert.Empty(_contracts.SavedLinks);
+        Assert.Equal(new DateOnly(2026, 10, 29), link.ValidFrom);
+        Assert.True(vm.HasLinkRepair);
+    }
+
+    [Fact]
+    public async Task Without_late_links_the_repair_card_says_so()
+    {
+        var vm = Create();
+
+        await vm.OnAppearingAsync();
+
+        Assert.True(vm.HasNoLinkRepair);
+        Assert.False(vm.HasLinkRepair);
     }
 
     [Fact]

@@ -14,11 +14,17 @@ internal struct Acc
     /// <summary>Third figure (calculated vs billed: quantity difference).</summary>
     public decimal C;
 
+    /// <summary>Fourth figure (calculated vs billed: the billed amount of the months that have a calculation, so a difference compares like with like).</summary>
+    public decimal D;
+
     /// <summary>True if at least one month contributed figures.</summary>
     public bool Any;
 
     /// <summary>True if <see cref="C"/> was filled.</summary>
     public bool HasC;
+
+    /// <summary>True if <see cref="A"/> and <see cref="D"/> were filled: at least one month had a calculation to compare with.</summary>
+    public bool HasCalc;
 
     /// <summary>True if the figures are approximate (spread, estimated, calculated instead of billed).</summary>
     public bool Approx;
@@ -31,8 +37,10 @@ internal struct Acc
         A = left.A + right.A,
         B = left.B + right.B,
         C = left.C + right.C,
+        D = left.D + right.D,
         Any = left.Any || right.Any,
         HasC = left.HasC || right.HasC,
+        HasCalc = left.HasCalc || right.HasCalc,
         Approx = left.Approx || right.Approx,
         Missing = left.Missing || right.Missing,
     };

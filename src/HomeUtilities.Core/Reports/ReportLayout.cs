@@ -46,8 +46,9 @@ internal static class ReportLayout
             }
         }
 
+        var allMonths = filter.Months();
         IReadOnlyList<YearMonth> MonthsOf(int year, int? month) =>
-            [.. filter.Months().Where(m => m.Year == year && (month is null || m.Month == month))];
+            [.. allMonths.Where(m => m.Year == year && (month is null || m.Month == month))];
 
         ReportRow Make(ReportRowKind kind, int month)
         {

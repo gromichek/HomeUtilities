@@ -228,7 +228,13 @@
         <!-- 4. Preview: the rows scroll in their own list. -->
         <Grid Grid.Row="1" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="8" IsVisible="{Binding IsPreviewStep}">
             <Label Grid.Row="0" Text="{Binding SummaryText}" FontAttributes="Bold" />
-            <Label Grid.Row="1" Text="{Binding PlanProblemText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasPlanProblem}" />
+            <VerticalStackLayout Grid.Row="1" Spacing="6">
+                <Label Text="{Binding PlanProblemText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasPlanProblem}" />
+                <Label Text="{Binding BeforeStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasBeforeStart}" />
+                <Label Text="{Binding LinkStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasLinkStart}" />
+                <Button Text="{Binding SetContractStartText}" Command="{Binding SetContractStartCommand}" Style="{StaticResource SecondaryButton}"
+                        HorizontalOptions="Start" IsVisible="{Binding HasStartFix}" />
+            </VerticalStackLayout>
             <HorizontalStackLayout Grid.Row="2" Spacing="8">
                 <Label Text="{Binding FilterLabel}" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
                 <Picker ItemsSource="{Binding Filters}"

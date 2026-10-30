@@ -133,7 +133,9 @@ Menu **Suppliers** → **New supplier**.
 
 Open a property → card **Contracts** → **Add contract**.
 - **General:** title, supplier, service kind (water, heating, electricity, waste, internet, tax…), category, valid
-  from / to, archived.
+  from / to, archived. **Valid from** is the day the contract starts: [Charges](#10-charges) and the [reports](#15-reports)
+  treat the months before it as outside the contract. If you keep older bills (or are about to import them), set it to the
+  first day of the history.
 - **Account:** customer number, contract number, portal login (no password).
 - **Billing:**
   - *Billing mode* — **By consumption** (meters), **Fixed fee**, **Equalized payments** (the same amount every month,
@@ -176,7 +178,15 @@ Open a property → card **Meters** → **Add meter**.
 - **Installation and verification:** installed on, last verified, verification interval (water meters usually 72
   months) → the app shows "Next verification" and warns when it is overdue.
 - **Contracts:** switch on every contract that uses this meter. A hot water meter is usually linked to both the
-  water and the heating contract.
+  water and the heating contract. Each linked contract shows the dates of the link (*from 01.05.2004*, and *to …* if it
+  ended). **The link decides which readings belong to the contract:** charges and reports (consumption by contract, unit
+  cost, calculated vs billed) count a meter's readings only inside the link. A new link therefore starts on the later of the
+  meter's *installed on* date and the contract's *Valid from* — not today — so the whole history of an old meter is counted.
+  Tap a linked contract to open **Contract link dates**: *Valid from* and, if the meter stopped serving the contract, an end
+  date. The app refuses a start before the meter was installed, an end before the start, and dates that overlap another link
+  of the same meter and contract; a start before the contract's own start is allowed (with a warning), but charges only count
+  the months from the contract's start. The dates are saved when you press *Save* in the dialog; the meter page stays open.
+  Switching a contract off ends the link yesterday; switching it on again starts a new link the day after the old one ended.
 - **Readings:** the latest readings and "All readings". A *Submit readings* link of the contract or supplier is
   shown on the meter card.
 - **Replace meter…** — use this when a meter is physically replaced (verification, defect). A wizard asks for the
@@ -584,7 +594,7 @@ readings the app cannot say what the real consumption costs.
 **Equalized payments** and add the plan from the first equalized month. Earlier months stay billed by consumption: the app decides
 month by month, and a month is equalized only if a plan covers it. Before the first plan the bills are regular, the cards on
 [Charges](#10-charges) are ordinary ones, an Excel import brings the rows in as regular bills, and the contract stays in the
-unit cost and calculated-versus-billed reports for those months (equalized months are left out of them — the settlement page covers them).
+unit cost and calculated-versus-billed reports for all months; in equalized months they use the tariff charge instead of the advance (see [Reports](#15-reports)).
 
 **Each month.** Enter the bill as usual ([Bills](#11-bills)): the kind is *Equalized payment* and the *Total* is the
 plan amount of the month. The bill is compared with the plan; the cost of the readings is shown next to it as information.
@@ -712,8 +722,11 @@ A month in which the consumption cannot be determined — there is no reading fo
 What one unit really costs: the **bill** of the month divided by the **metered quantity** of the contract (for example
 46.02 € ÷ 12.150 m³ = 3.79 €/m³). *Gross* includes VAT, *Net* does not. In a month without a bill the calculation is used
 and the number carries a **≈**. Only contracts billed by consumption appear (not fixed fees, per-area, per-resident
-or tax contracts). Months of an equalized contract that a plan covers are left out; the earlier months, billed by
-consumption, appear. A row of a whole year divides the year's money by the year's quantity.
+or tax contracts). **You do not need to enter historic tariffs:** if a contract has no tariff for a month, its linked
+meters give the quantity and the number is the bill ÷ the metered quantity (a contract metered in several units gets one
+column per unit). In a month an **equalized** plan covers, the monthly payment is only an advance, so the number is what the
+readings cost by the tariff (or the plan amount if there is no tariff) and carries a **≈**. A row of a whole year divides the
+year's money by the year's quantity.
 
 ### Calculated vs billed
 
@@ -722,14 +735,19 @@ the calculation as it is now), what the supplier **billed**, and the **differenc
 *Difference, %*, *Calculated*, *Billed* and **Quantity difference (losses)** — the quantity printed on the bill minus the
 quantity you metered, for example the water the building lost between its main meter and your meters. A positive value
 means the supplier billed more than you used. Months without a bill, or where the calculation cannot be made (missing
-reading, prices taken from the bill), are marked **≈**.
+reading, prices taken from the bill), are marked **≈**. A contract that has meters but **no tariff** is listed too: it
+shows what was billed and the quantities, while the calculated amount and the difference stay empty (there is nothing to
+calculate with, which is not the same as zero). In a month an **equalized** plan covers, *billed* is the plan and
+*calculated* is what the readings cost by the tariff, so the difference is what will go into the settlement (positive: you
+paid too little, negative: too much); a *Settlement* bill is shown as billed in its own month.
 
 ### Charts
 
 The same numbers can be drawn as **charts**. On a phone or a narrow window the buttons **View: Table / Chart** switch between
 the two (your choice is remembered); on a wide window or a tablet in landscape the chart is shown above the table. Tap a bar or
 a point to see its period and value under the chart; the legend below lists the colours. The month names on the horizontal axis
-follow the app language.
+follow the app language. For a period longer than 10 years the table keeps its months, but the charts show **one point per
+year** (the chart says so), which keeps long periods fast and readable.
 
 - **Costs** — bars per month. When the columns are parts of a whole (grouped by category, service or contract) the bars are
   **stacked**, so the height of a bar is the total of the month; the colours are the colours of your
@@ -846,6 +864,23 @@ contract and *bills and payments* to the contract; it does not create contracts 
 (tariffs stay as you entered them). If a meter or contract is missing, the wizard says so; *Open contract* takes you to it.
 The file must be an `.xlsx` workbook (not the old `.xls`).
 
+**Three dates must cover the history** — the contract's start, the meter's installation and the **link** between them
+(*Meters → Contracts*). Charges and reports count a reading only when all three allow it.
+
+**Set the contract's *Valid from* to the start of the history first.** Charges and reports ignore the months before the
+contract's start date. If the sheet has older rows, those rows get a warning (*This period is before the contract's start
+date…*) and the preview says *N rows are before the contract's start date 15.10.2026 — set "Valid from" in the contract…*;
+the button **Set contract start to 01.01.2014** changes the contract's *Valid from* to the first day of the earliest imported
+month (after a confirmation) and plans the import again. The rows are imported either way.
+
+**Check the meters' installation dates and link dates too.** A meter's readings count for a contract only inside the link
+between them. If a meter was linked to the contract recently (the link starts on that day), the older months would show no
+consumption. When the sheet has data before the start of a meter link, the preview adds *N meter links of this contract start
+after the earliest imported data (01.01.2014) — the consumption of the earlier months would be missing…*. The same button (or,
+when the contract start is fine, **Start meter links at installation**) moves those links to the later of the meter's
+installation and the (new) contract start, after a confirmation. A meter installed after the first imported month keeps its own
+installation date — enter the real one in the meter, or let the import find the replacement.
+
 The wizard has four steps:
 
 1. **File and sheet** — *Choose Excel file…* and pick the sheet (with its number of rows).
@@ -938,6 +973,10 @@ date, that part is skipped — so importing the same sheet twice adds nothing. A
 - **Undo import** hides everything that import created — its bills, their payments, readings and the meters it added — in one go,
   puts the replaced meters and their contract links back, and the balances return to what they were. Nothing is erased for good. If you edited some of those records after the import, the app
   asks *Some imported records were edited later. Undo anyway?* before touching anything. After an undo you can import again.
+- **Meter links** shows links that start after their meter was installed although the meter has readings before the link
+  (typically a link made today for a meter installed years ago), with the date they have now and the date they would get:
+  the later of the meter's installation and the contract's *Valid from*. *Start links at installation…* moves them after a
+  confirmation; nothing changes before you confirm. The card only lists the first link of a meter and contract.
 - A **profile** can be renamed (edit the name and press *Save name*), deleted, or **exported** to a `.json` file and loaded
   again with *Import profile from file* — for example to send it to the person who helps you. The file contains only the
   column numbers and settings (period rules, header texts): **no amounts and no readings**.
