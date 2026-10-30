@@ -312,6 +312,43 @@ public class ImportWizardViewModelTests
     }
 
     [Fact]
+    public async Task Rows_before_the_contract_start_are_announced_and_the_start_can_be_moved_with_one_click()
+    {
+        // The sheet has January, February and March 2014; the contract starts on 10 February: January is before it.
+        var vm = await ToMappingStepAsync();
+        _contract.ValidFrom = new DateOnly(2014, 2, 10);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.True(vm.HasBeforeStart);
+        Assert.Equal("ImportBeforeStart 1|10.02.2014 [en]", vm.BeforeStartText);
+        Assert.Equal("ImportSetContractStart 01.01.2014 [en]", vm.SetContractStartText);
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Equal("ImportSetContractStartConfirm 10.02.2014|01.01.2014 [en]", Assert.Single(_dialogs.Confirmations).Message);
+        Assert.Equal(new DateOnly(2014, 1, 1), Assert.Single(_contracts.Saved).ValidFrom);
+        Assert.False(vm.HasBeforeStart);
+        Assert.Equal(ImportWizardStep.Preview, vm.Step);
+    }
+
+    [Fact]
+    public async Task Declining_the_contract_start_change_keeps_the_contract()
+    {
+        var vm = await ToMappingStepAsync();
+        _contract.ValidFrom = new DateOnly(2014, 2, 10);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+        _dialogs.ConfirmResult = false;
+
+        await vm.SetContractStartCommand.ExecuteAsync(null);
+
+        Assert.Empty(_contracts.Saved);
+        Assert.Equal(new DateOnly(2014, 2, 10), _contract.ValidFrom);
+        Assert.True(vm.HasBeforeStart);
+    }
+
+    [Fact]
     public async Task Declining_the_confirmation_imports_nothing()
     {
         var vm = await ToPreviewStepAsync();

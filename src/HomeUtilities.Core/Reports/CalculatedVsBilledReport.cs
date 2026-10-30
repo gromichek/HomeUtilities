@@ -60,6 +60,12 @@ internal static class CalculatedVsBilledReport
                         acc += new Acc { B = settlements.Sum(b => ReportMoney.Eur(b.Gross, b.Currency)), Any = true };
                     }
 
+                    // A bill outside the contract's dates (history older than its "valid from") is shown, but marked.
+                    if (!UnitCostReport.Overlaps(contract, group.Key))
+                    {
+                        acc.Approx = true;
+                    }
+
                     cells[group.Key] = acc;
                 }
 

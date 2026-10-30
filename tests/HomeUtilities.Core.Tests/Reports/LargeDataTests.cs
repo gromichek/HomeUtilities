@@ -60,10 +60,14 @@ public class LargeDataTests
         var filter = Filter(first, last);
         var watch = Stopwatch.StartNew();
         var costs = ReportBuilder.Costs(data, filter);
+        var costsTime = watch.Elapsed;
         var consumption = ReportBuilder.Consumption(data, filter);
+        var consumptionTime = watch.Elapsed - costsTime;
         var unitCost = ReportBuilder.UnitCost(data, filter);
+        var unitCostTime = watch.Elapsed - costsTime - consumptionTime;
         var compared = ReportBuilder.CalculatedVsBilled(data, filter);
         watch.Stop();
+        var breakdown = $"costs {costsTime.TotalMilliseconds:0} ms, consumption {consumptionTime.TotalMilliseconds:0} ms, unit cost {unitCostTime.TotalMilliseconds:0} ms, total {watch.Elapsed.TotalMilliseconds:0} ms";
 
         Assert.Equal(240, costs.Rows.Count);
         Assert.Equal(
@@ -73,6 +77,6 @@ public class LargeDataTests
         Assert.Equal(15, unitCost.Columns.Count);
         Assert.Equal(15, compared.Columns.Count);
         Assert.True(expectedBills > 0);
-        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"The reports took {watch.Elapsed}.");
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"The reports took too long: {breakdown}.");
     }
 }

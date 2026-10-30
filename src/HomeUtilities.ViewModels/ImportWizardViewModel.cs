@@ -235,6 +235,14 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     [ObservableProperty]
     private string _planProblemText = string.Empty;
 
+    /// <summary>"N rows are before the contract's start date …"; empty when no row is.</summary>
+    [ObservableProperty]
+    private string _beforeStartText = string.Empty;
+
+    /// <summary>The text of the "Set contract start to …" button; empty when there is nothing to set.</summary>
+    [ObservableProperty]
+    private string _setContractStartText = string.Empty;
+
     [ObservableProperty]
     private IReadOnlyList<ImportFilterChoice> _filters = [];
 
@@ -421,6 +429,11 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     partial void OnPlanRowsChanged(IReadOnlyList<ImportPlanRowViewModel> value) => OnPropertyChanged(nameof(ShowNoRows));
 
     partial void OnPlanProblemTextChanged(string value) => OnPropertyChanged(nameof(HasPlanProblem));
+
+    /// <summary>True when rows lie before the contract's start date and the start can be moved.</summary>
+    public bool HasBeforeStart => BeforeStartText.Length > 0;
+
+    partial void OnBeforeStartTextChanged(string value) => OnPropertyChanged(nameof(HasBeforeStart));
 
     partial void OnMappingErrorChanged(string value) => OnPropertyChanged(nameof(HasMappingError));
 
@@ -1187,6 +1200,17 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             ? string.Empty
             : _localizer.Get("ImportSummary", counts.Readings, counts.Bills, counts.Payments, counts.SkippedRows, plan.ErrorRows, plan.WarningRows, counts.Replacements);
         CanImport = plan.Problems.Count == 0 && (counts.Readings + counts.Bills) > 0;
+        if (plan is { RowsBeforeContractStart: > 0, SuggestedContractStart: { } suggested, ContractValidFrom: { } validFrom })
+        {
+            BeforeStartText = _localizer.Get("ImportBeforeStart", plan.RowsBeforeContractStart, validFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+            SetContractStartText = _localizer.Get("ImportSetContractStart", suggested.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+        }
+        else
+        {
+            BeforeStartText = string.Empty;
+            SetContractStartText = string.Empty;
+        }
+
         SelectedFilter = Filters[0];
         ApplyFilter();
     }
@@ -1218,6 +1242,45 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         };
         RuleChanges = [.. RuleChanges, NewRuleChangeRow(change)];
     }
+
+    /// <summary>
+    /// Moves the contract's "valid from" to the first day of the earliest imported period (after a confirmation) and plans the import
+    /// again, so that charges and reports include the imported history.
+    /// </summary>
+    [RelayCommand]
+    private Task SetContractStartAsync() => RunSafeAsync(async () =>
+    {
+        if (_plan?.SuggestedContractStart is not { } start || _contract is null || !TryBuildProfile(out var profile))
+        {
+            return;
+        }
+
+        var before = _contract.ValidFrom;
+        var confirmed = await _dialogs.ConfirmAsync(
+            _localizer["ImportTitle"],
+            _localizer.Get(
+                "ImportSetContractStartConfirm",
+                before.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
+                start.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)),
+            _localizer["Save"],
+            _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _contract.ValidFrom = start;
+            await _contracts.SaveAsync(_contract);
+            await EnterPreviewAsync(profile);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    });
 
     /// <summary>Plans the import again with the values the owner corrected in the list of meter replacements.</summary>
     [RelayCommand]

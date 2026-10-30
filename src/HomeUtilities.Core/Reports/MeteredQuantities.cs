@@ -81,7 +81,7 @@ internal sealed class MeteredQuantities(ReportData data, ReportFilter filter, Ca
         if (!_chains.TryGetValue(propertyId, out var chains))
         {
             var property = data.Properties.FirstOrDefault(p => p.Id == propertyId);
-            chains = property is null ? [] : ConsumptionReport.ChainsOf(data, property, _months, cancellation);
+            chains = property is null ? [] : data.ChainsOf(property, _months, cancellation);
             _chains[propertyId] = chains;
         }
 

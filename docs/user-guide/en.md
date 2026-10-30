@@ -133,7 +133,9 @@ Menu **Suppliers** → **New supplier**.
 
 Open a property → card **Contracts** → **Add contract**.
 - **General:** title, supplier, service kind (water, heating, electricity, waste, internet, tax…), category, valid
-  from / to, archived.
+  from / to, archived. **Valid from** is the day the contract starts: [Charges](#10-charges) and the [reports](#15-reports)
+  treat the months before it as outside the contract. If you keep older bills (or are about to import them), set it to the
+  first day of the history.
 - **Account:** customer number, contract number, portal login (no password).
 - **Billing:**
   - *Billing mode* — **By consumption** (meters), **Fixed fee**, **Equalized payments** (the same amount every month,
@@ -853,6 +855,12 @@ press *Import*, and a finished import can be undone as a whole.
 contract and *bills and payments* to the contract; it does not create contracts or meters and does not import prices
 (tariffs stay as you entered them). If a meter or contract is missing, the wizard says so; *Open contract* takes you to it.
 The file must be an `.xlsx` workbook (not the old `.xls`).
+
+**Set the contract's *Valid from* to the start of the history first.** Charges and reports ignore the months before the
+contract's start date. If the sheet has older rows, those rows get a warning (*This period is before the contract's start
+date…*) and the preview says *N rows are before the contract's start date 15.10.2026 — set "Valid from" in the contract…*;
+the button **Set contract start to 01.01.2014** changes the contract's *Valid from* to the first day of the earliest imported
+month (after a confirmation) and plans the import again. The rows are imported either way.
 
 The wizard has four steps:
 

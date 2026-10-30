@@ -25,7 +25,7 @@ internal static class ConsumptionReport
         foreach (var property in properties)
         {
             cancellation.ThrowIfCancellationRequested();
-            var chains = ChainsOf(data, property, months, cancellation);
+            var chains = data.ChainsOf(property, months, cancellation);
             switch (filter.ConsumptionGrouping)
             {
                 case ConsumptionGrouping.Meter:
@@ -157,7 +157,7 @@ internal static class ConsumptionReport
         return tariffs.Count == 0 ? null : Merge(tariffs);
     }
 
-    internal static List<Chain> ChainsOf(ReportData data, Property property, IReadOnlyList<YearMonth> months, CancellationToken cancellation = default)
+    internal static List<Chain> ComputeChains(ReportData data, Property property, IReadOnlyList<YearMonth> months, CancellationToken cancellation = default)
     {
         var meters = data.MetersOf(property.Id).ToList();
         var seen = new HashSet<Guid>();

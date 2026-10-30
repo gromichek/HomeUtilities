@@ -25,6 +25,7 @@ public sealed class ReportData
     private readonly Dictionary<Guid, IReadOnlyList<TariffComponent>> _sortedComponents = [];
     private readonly Dictionary<Guid, IReadOnlyList<ContractMeter>> _sortedLinks = [];
     private readonly Dictionary<Guid, IReadOnlyList<Meter>> _sortedMeters = [];
+    private readonly Dictionary<(Guid PropertyId, YearMonth From, YearMonth To), List<ConsumptionReport.Chain>> _chains = [];
 
     /// <summary>Creates the data set.</summary>
     public ReportData(
@@ -169,6 +170,22 @@ public sealed class ReportData
     /// without calculating every month.
     /// </summary>
     internal bool CanHaveQuantity(Contract contract) => _componentsByContract[contract.Id].Any() || _linksByContract[contract.Id].Any();
+
+    /// <summary>
+    /// The meter chains of a property with their consumption over the months, calculated once per property and range: the consumption
+    /// report and the metered quantities of the other reports share them.
+    /// </summary>
+    internal List<ConsumptionReport.Chain> ChainsOf(Property property, IReadOnlyList<YearMonth> months, CancellationToken cancellation)
+    {
+        var key = (property.Id, months.Count == 0 ? default : months[0], months.Count == 0 ? default : months[^1]);
+        if (!_chains.TryGetValue(key, out var chains))
+        {
+            chains = ConsumptionReport.ComputeChains(this, property, months, cancellation);
+            _chains[key] = chains;
+        }
+
+        return chains;
+    }
 
     /// <summary>The monthly amount of the equalized plan that covers the month; null when no plan does.</summary>
     internal decimal? PlanAmount(Contract contract, YearMonth period) => EqualizedPlans.AmountFor(_plansByContract[contract.Id], period);

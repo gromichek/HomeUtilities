@@ -254,4 +254,28 @@ public class MeteredContractReportTests
         Assert.Single(ReportBuilder.UnitCost(s.Data, Filter(Sep, Sep)).Columns);
         Assert.Single(ReportBuilder.CalculatedVsBilled(s.Data, Filter(Sep, Sep)).Columns);
     }
+
+    // ---- Bills outside the contract's dates ----------------------------------------------------------------------
+
+    [Fact]
+    public void Months_before_the_contract_start_are_shown_but_marked()
+    {
+        // The contract starts on 2020-01-01 (default) but a March 2018 bill exists: 9.00 / 6.000 m3 = 1.50, marked.
+        var s = new ReportScenario();
+        var gas = s.AddContract("Gas", service: ServiceKind.Gas);
+        s.AddMeter(gas, (D(2018, 2, 28), 50m), (D(2018, 3, 31), 56m));
+        s.Meters[0].InstalledOn = D(2018, 1, 1);
+        s.Links[0].ValidFrom = D(2018, 1, 1);
+        s.AddBill(gas, 9m, new YearMonth(2018, 3));
+        s.AddBill(gas, 9m, new YearMonth(2020, 3));
+        s.Meters[0].Add(D(2020, 2, 29), 100m);
+        s.Meters[0].Add(D(2020, 3, 31), 106m);
+
+        var unitCost = ReportBuilder.UnitCost(s.Data, Filter(new YearMonth(2018, 3), new YearMonth(2020, 3), b => b.Rows = ReportRows.Months));
+        var billed = ReportBuilder.CalculatedVsBilled(s.Data, Filter(new YearMonth(2018, 3), new YearMonth(2018, 3), b => b.Measure = ReportMeasure.Billed));
+
+        Assert.Equal((1.50m, true), (unitCost.Rows[0].Cells[0].Value, unitCost.Rows[0].Cells[0].IsApproximate));
+        Assert.Equal((1.50m, false), (unitCost.Rows[^1].Cells[0].Value, unitCost.Rows[^1].Cells[0].IsApproximate));
+        Assert.Equal((9m, true), (billed.Rows[0].Cells[0].Value, billed.Rows[0].Cells[0].IsApproximate));
+    }
 }

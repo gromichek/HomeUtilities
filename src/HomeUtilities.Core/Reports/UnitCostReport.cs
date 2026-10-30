@@ -148,6 +148,17 @@ internal static class UnitCostReport
                     }
                 }
 
+                // A bill outside the contract's dates (history older than its "valid from") is not dropped, but its figures are marked.
+                foreach (var one in series)
+                {
+                    foreach (var month in one.Cells.Keys.Where(m => !Overlaps(contract, m)).ToList())
+                    {
+                        var cell = one.Cells[month];
+                        cell.Approx = true;
+                        one.Cells[month] = cell;
+                    }
+                }
+
                 var shown = series.Where(s => s.Cells.Values.Any(a => a.Any && a.B > 0)).OrderBy(s => s.Unit is null).ThenBy(s => s.Unit).ToList();
                 foreach (var one in shown)
                 {
