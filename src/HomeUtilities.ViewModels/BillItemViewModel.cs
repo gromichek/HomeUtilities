@@ -10,6 +10,10 @@ public sealed partial class BillItemViewModel : ObservableObject
     [ObservableProperty]
     private bool _isSelected;
 
+    /// <summary>The bill belongs to the contract the screen was opened for; shown with a tint, not with the selection border.</summary>
+    [ObservableProperty]
+    private bool _isHighlighted;
+
     public BillItemViewModel(
         Bill bill,
         string title,
@@ -105,7 +109,6 @@ public sealed partial class BillItemViewModel : ObservableObject
     public bool DifferenceLower { get; }
 
     /// <summary>The contract the screen was opened for ("All bills" of a contract).</summary>
-    public bool IsHighlighted { get; }
 
     public bool CanMarkPaid { get; }
 

@@ -134,8 +134,7 @@
                                     <Setter Property="Opacity" Value="0.75" />
                                 </DataTrigger>
                                 <DataTrigger TargetType="Border" x:DataType="vm:BillItemViewModel" Binding="{Binding IsHighlighted}" Value="True">
-                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                    <Setter Property="StrokeThickness" Value="2" />
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource HighlightLight}, Dark={StaticResource HighlightDark}}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <Border.GestureRecognizers>

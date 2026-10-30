@@ -369,6 +369,26 @@ public class BillsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task OpenFor_SelectingABill_DropsTheContractHighlightAndSelectsOnlyThatBill()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        var first = _kit.AddBill(water, new YearMonth(2024, 5), 30m);
+        var second = _kit.AddBill(water, new YearMonth(2024, 6), 31m);
+        var vm = await LoadAsync();
+        await vm.OpenForAsync(_kit.Kit.Property.Id, water.Id);
+        Assert.All(vm.Items, i => Assert.True(i.IsHighlighted));
+
+        await vm.SelectCommand.ExecuteAsync(first.Id);
+
+        Assert.Equal([first.Id], vm.Items.Where(i => i.IsSelected).Select(i => i.Id));
+        Assert.All(vm.Items, i => Assert.False(i.IsHighlighted));
+
+        await vm.SelectCommand.ExecuteAsync(second.Id);
+
+        Assert.Equal([second.Id], vm.Items.Where(i => i.IsSelected).Select(i => i.Id));
+    }
+
+    [Fact]
     public async Task OpenFor_FromTheOverview_AppliesTheStatusFilter()
     {
         var water = _kit.AddWaterContract(tariff: false);

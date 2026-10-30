@@ -132,9 +132,13 @@ public sealed partial class HelpContentService : IHelpContentService
 
     private static string WrapPage(string body, string? anchor, AppThemeChoice theme)
     {
-        var script = string.IsNullOrEmpty(anchor)
+        // In-page "#section" links scroll in the page itself: the WebView then never reports a navigation (its URL differs per platform).
+        var onClick = "document.addEventListener('click', function (ev) { var a = ev.target.closest ? ev.target.closest('a[href^=\"#\"]') : null;"
+            + " if (a) { ev.preventDefault(); var e = document.getElementById(decodeURIComponent(a.getAttribute('href').substring(1))); if (e) { e.scrollIntoView(); } } });";
+        var onLoad = string.IsNullOrEmpty(anchor)
             ? string.Empty
-            : $"<script>window.addEventListener('load', function () {{ var e = document.getElementById({System.Text.Json.JsonSerializer.Serialize(anchor, AnchorJson)}); if (e) {{ e.scrollIntoView(); }} }});</script>";
+            : $" window.addEventListener('load', function () {{ var e = document.getElementById({System.Text.Json.JsonSerializer.Serialize(anchor, AnchorJson)}); if (e) {{ e.scrollIntoView(); }} }});";
+        var script = $"<script>{onClick}{onLoad}</script>";
         var themeAttribute = theme == AppThemeChoice.System ? string.Empty : $" data-theme=\"{theme.ToString().ToLowerInvariant()}\"";
         return $"""
             <!DOCTYPE html>

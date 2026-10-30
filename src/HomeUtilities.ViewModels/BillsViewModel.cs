@@ -230,6 +230,16 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         {
             item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
         }
+
+        if (SelectedEditor is { IsNew: false })
+        {
+            // The contract highlight only helps to find the bills; once the user picks one, only that card stands out.
+            _highlightContractId = null;
+            foreach (var item in Items)
+            {
+                item.IsHighlighted = false;
+            }
+        }
     }
 
     // ---- Filters --------------------------------------------------------------------------------------------------
