@@ -315,7 +315,7 @@ public sealed partial class ReadingHistoryGroupViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(HasMore));
-        ShowMoreText = _localizer.Get("ReadingHistoryShowMore", Rows.Count - VisibleRows.Count);
+        ShowMoreText = _localizer.Get("ListShowMore", Rows.Count - VisibleRows.Count);
     }
 }
 
