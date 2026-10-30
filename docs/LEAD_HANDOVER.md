@@ -30,7 +30,7 @@ Prompt for a new lead session:
 - Reviews PRs: code against the task, CLAUDE.md rules, licences of new packages (transitive too), tests with
   concrete numbers, `SampleDataGenerator` extended for new entities, user guide EN + RU updated and consistent,
   no personal data. Then CI must be green on **linux**, **windows** and **changes** jobs.
-- **Squash-merges** (`gh pr merge <n> --squash --delete-branch`), then a small docs PR that updates PROGRESS
+- **Squash-merges** (REST, see §2 commands), then a small docs PR that updates PROGRESS
   (Current → Done with a one-line note, Known issues, Manual test log). Coding sessions never edit PROGRESS.
 - Maintains ROADMAP, PROGRESS, WORKFLOW, UI_GUIDELINES, DATA_MODEL, ARCHITECTURE decision log, CLAUDE.md.
 - **Who fixes what** (owner decision 2026-10-24, WORKFLOW.md): trivial PR blockers and urgent breakage on `main`
@@ -42,7 +42,11 @@ Prompt for a new lead session:
 
 ### Practical commands
 - Repo clone: `/home/claude/homeutilities` (the session's cwd `/home/claude` itself is not a git repo).
-- CI status: `gh pr checks <n>`; failed tests/compiler errors as annotations:
+- `gh` works only through the **REST API** in these sessions (GraphQL is blocked, so `gh pr create/merge/checks`
+  fail). Create a PR: `gh api repos/gromichek/HomeUtilities/pulls -f title=… -f head=<branch> -f base=main
+  -F body=@body.md`; squash-merge: `gh api -X PUT repos/gromichek/HomeUtilities/pulls/<n>/merge
+  -f merge_method=squash`, then `gh api -X DELETE repos/gromichek/HomeUtilities/git/refs/heads/<branch>`.
+- CI status: `gh api repos/gromichek/HomeUtilities/commits/<sha>/check-runs`; failed tests/compiler errors as annotations:
   `gh api repos/gromichek/HomeUtilities/check-runs/<id>/annotations` (written by `report_trx.py`).
 - Code PR CI ≈ 4 min; docs-only PRs (`docs/**`, `*.md`) skip the builds.
 - **Helper worktree:** `git worktree add .claude/worktrees/<name> -b fix/<name> origin/main` inside the repo
@@ -56,7 +60,7 @@ Prompt for a new lead session:
 - **Flaky performance tests:** limits must catch gross slowdowns only (CI machines vary). Current limits:
   `LargeDataTests` 5 s, `ListPerformanceTests` 3 s.
 - Wait for **all** checks (incl. windows) before merging — once a PR was merged before the Windows job ended.
-- Commit/PR attribution lines are given by the environment; PR bodies via `--body-file` (long `--body` failed once).
+- Commit/PR attribution lines are given by the environment; PR bodies from a file (`-F body=@file`).
 
 ## 3. Standing owner decisions (keep them in every task)
 | Date | Decision |
