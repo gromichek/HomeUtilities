@@ -1389,4 +1389,26 @@
   <data name="ImportSetContractStartConfirm" xml:space="preserve"><value>Изменить «Действует с» этого договора с {0} на {1}? Начисления и отчёты тогда учтут импортированные месяцы.</value></data>
   <data name="Error_import_issue_period_before_contract_start" xml:space="preserve"><value>Этот период раньше даты начала договора {0}. Строка будет импортирована, но начисления и отчёты считают договор ещё недействующим, пока вы не укажете «Действует с».</value></data>
   <data name="Error_import_issue_period_after_contract_end" xml:space="preserve"><value>Этот период позже даты окончания договора {0}. Строка будет импортирована, но начисления и отчёты считают договор завершённым.</value></data>
+  <data name="Error_contract_meter_valid_from_before_installation" xml:space="preserve"><value>Привязка не может начинаться раньше установки счётчика ({0}).</value></data>
+  <data name="Error_contract_meter_overlaps_other_link" xml:space="preserve"><value>Даты пересекаются с другой привязкой этого счётчика к этому договору (с {0}).</value></data>
+  <data name="MeterLinkFrom" xml:space="preserve"><value>с {0}</value></data>
+  <data name="MeterLinkFromTo" xml:space="preserve"><value>с {0} по {1}</value></data>
+  <data name="MeterLinkEdit" xml:space="preserve"><value>Даты привязки к договору</value></data>
+  <data name="MeterLinkHint" xml:space="preserve"><value>Нажмите на привязанный договор, чтобы изменить даты, в которые счётчик относится к нему. Показания вне этих дат для договора не учитываются.</value></data>
+  <data name="MeterLinkValidFrom" xml:space="preserve"><value>Действует с</value></data>
+  <data name="MeterLinkHasValidTo" xml:space="preserve"><value>Есть дата окончания</value></data>
+  <data name="MeterLinkValidTo" xml:space="preserve"><value>Действует по</value></data>
+  <data name="MeterLinkBeforeContract" xml:space="preserve"><value>Привязка начинается раньше договора ({0}); начисления и отчёты учитывают только месяцы с начала договора.</value></data>
+  <data name="MeterLinkSaved" xml:space="preserve"><value>Даты привязки сохранены</value></data>
+  <data name="MeterLinkEditTip" xml:space="preserve"><value>Изменить даты</value></data>
+  <data name="ImportsLinkRepairHeader" xml:space="preserve"><value>Привязки счётчиков</value></data>
+  <data name="ImportsLinkRepairHint" xml:space="preserve"><value>Привязка, которая начинается позже установки счётчика, скрывает более ранние показания из начислений и отчётов.</value></data>
+  <data name="ImportsLinkRepairNone" xml:space="preserve"><value>Все привязки счётчиков начинаются с их установки.</value></data>
+  <data name="ImportsLinkRepairLine" xml:space="preserve"><value>{0} · {1}: {2} → {3}</value></data>
+  <data name="ImportsLinkRepairButton" xml:space="preserve"><value>Начать привязки с установки…</value></data>
+  <data name="ImportsLinkRepairQuestion" xml:space="preserve"><value>Некоторые привязки счётчиков начинаются позже установки счётчика. Начать их с установки?</value></data>
+  <data name="ImportsLinkRepairDone" xml:space="preserve"><value>Привязок изменено: {0}</value></data>
+  <data name="ImportLinkStartLate" xml:space="preserve"><value>Привязок счётчиков этого договора, которые начинаются позже самых ранних импортируемых данных ({1}): {0} — расход за более ранние месяцы не попадёт в начисления и отчёты.</value></data>
+  <data name="ImportMoveLinkStarts" xml:space="preserve"><value>Начать привязки счётчиков с установки</value></data>
+  <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>Начало привязок счётчиков ({0}) будет перенесено на дату установки счётчика (или на начало договора, если оно позже).</value></data>
 </root>

@@ -101,6 +101,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         LinkEditorViewModel => new LinkEditorView { BindingContext = editor },
         CustomFieldEditorViewModel => new CustomFieldEditorView { BindingContext = editor },
         RegisterEditorViewModel => new RegisterEditorView { BindingContext = editor },
+        MeterLinkEditorViewModel => new MeterLinkEditorView { BindingContext = editor },
         ReadingEditorViewModel => new ReadingEditorView { BindingContext = editor },
         BillLineEditorViewModel => new BillLineEditorView { BindingContext = editor },
         AllocationAmountEditorViewModel => new AllocationAmountEditorView { BindingContext = editor },

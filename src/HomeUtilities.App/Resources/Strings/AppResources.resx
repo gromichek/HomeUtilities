@@ -1389,4 +1389,26 @@
   <data name="ImportSetContractStartConfirm" xml:space="preserve"><value>Change “Valid from” of this contract from {0} to {1}? Charges and reports will then include the imported months.</value></data>
   <data name="Error_import_issue_period_before_contract_start" xml:space="preserve"><value>This period is before the contract’s start date {0}. The row is imported, but charges and reports treat the contract as not yet valid until you set “Valid from”.</value></data>
   <data name="Error_import_issue_period_after_contract_end" xml:space="preserve"><value>This period is after the contract’s end date {0}. The row is imported, but charges and reports treat the contract as ended.</value></data>
+  <data name="Error_contract_meter_valid_from_before_installation" xml:space="preserve"><value>The link cannot start before the meter was installed ({0}).</value></data>
+  <data name="Error_contract_meter_overlaps_other_link" xml:space="preserve"><value>The dates overlap another link of this meter and contract (from {0}).</value></data>
+  <data name="MeterLinkFrom" xml:space="preserve"><value>from {0}</value></data>
+  <data name="MeterLinkFromTo" xml:space="preserve"><value>from {0} to {1}</value></data>
+  <data name="MeterLinkEdit" xml:space="preserve"><value>Contract link dates</value></data>
+  <data name="MeterLinkHint" xml:space="preserve"><value>Tap a linked contract to change the dates the meter belongs to it. Readings outside these dates are not counted for the contract.</value></data>
+  <data name="MeterLinkValidFrom" xml:space="preserve"><value>Valid from</value></data>
+  <data name="MeterLinkHasValidTo" xml:space="preserve"><value>Has an end date</value></data>
+  <data name="MeterLinkValidTo" xml:space="preserve"><value>Valid to</value></data>
+  <data name="MeterLinkBeforeContract" xml:space="preserve"><value>The link starts before the contract ({0}); charges and reports only count the months from the contract’s start.</value></data>
+  <data name="MeterLinkSaved" xml:space="preserve"><value>Link dates saved</value></data>
+  <data name="MeterLinkEditTip" xml:space="preserve"><value>Edit dates</value></data>
+  <data name="ImportsLinkRepairHeader" xml:space="preserve"><value>Meter links</value></data>
+  <data name="ImportsLinkRepairHint" xml:space="preserve"><value>A link that starts after the meter was installed hides the earlier readings from charges and reports.</value></data>
+  <data name="ImportsLinkRepairNone" xml:space="preserve"><value>All meter links start at the installation of their meters.</value></data>
+  <data name="ImportsLinkRepairLine" xml:space="preserve"><value>{0} · {1}: {2} → {3}</value></data>
+  <data name="ImportsLinkRepairButton" xml:space="preserve"><value>Start links at installation…</value></data>
+  <data name="ImportsLinkRepairQuestion" xml:space="preserve"><value>Some meter links start after the meter was installed — start them at installation?</value></data>
+  <data name="ImportsLinkRepairDone" xml:space="preserve"><value>{0} links moved</value></data>
+  <data name="ImportLinkStartLate" xml:space="preserve"><value>{0} meter links of this contract start after the earliest imported data ({1}) — the consumption of the earlier months would be missing in charges and reports.</value></data>
+  <data name="ImportMoveLinkStarts" xml:space="preserve"><value>Start meter links at installation</value></data>
+  <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>The start of {0} meter links will move to the installation of the meter (or the contract’s start, if later).</value></data>
 </root>

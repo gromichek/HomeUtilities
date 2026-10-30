@@ -86,6 +86,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     private Contract? _contract;
     private IReadOnlyList<Meter> _propertyMeters = [];
     private IReadOnlyList<ContractMeter> _propertyLinks = [];
+    private IReadOnlyList<LinkStartMove> _linkMoves = [];
     private List<ImportRowOverride> _rowOverrides = [];
     private List<ReplacementEdit> _replacementEdits = [];
     private ImportProfile? _plannedProfile;
@@ -242,6 +243,10 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     /// <summary>The text of the "Set contract start to …" button; empty when there is nothing to set.</summary>
     [ObservableProperty]
     private string _setContractStartText = string.Empty;
+
+    /// <summary>"N meter links start after the earliest imported data …"; empty when no link does.</summary>
+    [ObservableProperty]
+    private string _linkStartText = string.Empty;
 
     [ObservableProperty]
     private IReadOnlyList<ImportFilterChoice> _filters = [];
@@ -434,6 +439,16 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     public bool HasBeforeStart => BeforeStartText.Length > 0;
 
     partial void OnBeforeStartTextChanged(string value) => OnPropertyChanged(nameof(HasBeforeStart));
+
+    /// <summary>True when meter links of the contract start after the earliest imported data.</summary>
+    public bool HasLinkStart => LinkStartText.Length > 0;
+
+    /// <summary>True when the button that moves the contract start and/or the link starts is offered.</summary>
+    public bool HasStartFix => SetContractStartText.Length > 0;
+
+    partial void OnLinkStartTextChanged(string value) => OnPropertyChanged(nameof(HasLinkStart));
+
+    partial void OnSetContractStartTextChanged(string value) => OnPropertyChanged(nameof(HasStartFix));
 
     partial void OnMappingErrorChanged(string value) => OnPropertyChanged(nameof(HasMappingError));
 
@@ -1211,6 +1226,21 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             SetContractStartText = string.Empty;
         }
 
+        // Charges and reports count a meter only inside its link, so a link that starts after the imported months hides them.
+        _linkMoves = ImportLinkStarts.Find(plan, contract, _propertyMeters, _propertyLinks);
+        if (_linkMoves.Count > 0 && ImportLinkStarts.EarliestImportedDate(plan) is { } earliest)
+        {
+            LinkStartText = _localizer.Get("ImportLinkStartLate", _linkMoves.Count, earliest.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+            if (SetContractStartText.Length == 0)
+            {
+                SetContractStartText = _localizer["ImportMoveLinkStarts"];
+            }
+        }
+        else
+        {
+            LinkStartText = string.Empty;
+        }
+
         SelectedFilter = Filters[0];
         ApplyFilter();
     }
@@ -1244,26 +1274,38 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Moves the contract's "valid from" to the first day of the earliest imported period (after a confirmation) and plans the import
-    /// again, so that charges and reports include the imported history.
+    /// Moves the contract's "valid from" to the first day of the earliest imported period and the start of the meter links of the
+    /// contract to the installation of their meters (after a confirmation), and plans the import again, so that charges and reports
+    /// include the imported history.
     /// </summary>
     [RelayCommand]
     private Task SetContractStartAsync() => RunSafeAsync(async () =>
     {
-        if (_plan?.SuggestedContractStart is not { } start || _contract is null || !TryBuildProfile(out var profile))
+        if (_plan is null || _contract is null || !TryBuildProfile(out var profile))
         {
             return;
         }
 
-        var before = _contract.ValidFrom;
-        var confirmed = await _dialogs.ConfirmAsync(
-            _localizer["ImportTitle"],
-            _localizer.Get(
+        var start = _plan.SuggestedContractStart;
+        var moves = _linkMoves;
+        if (start is null && moves.Count == 0)
+        {
+            return;
+        }
+
+        var message = start is { } newStart
+            ? _localizer.Get(
                 "ImportSetContractStartConfirm",
-                before.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
-                start.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)),
-            _localizer["Save"],
-            _localizer["Cancel"]);
+                _contract.ValidFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
+                newStart.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture))
+            : string.Empty;
+        if (moves.Count > 0)
+        {
+            var links = _localizer.Get("ImportSetStartLinksConfirm", moves.Count);
+            message = message.Length == 0 ? links : message + Environment.NewLine + Environment.NewLine + links;
+        }
+
+        var confirmed = await _dialogs.ConfirmAsync(_localizer["ImportTitle"], message, _localizer["Save"], _localizer["Cancel"]);
         if (!confirmed)
         {
             return;
@@ -1272,8 +1314,23 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            _contract.ValidFrom = start;
-            await _contracts.SaveAsync(_contract);
+            if (start is { } contractStart)
+            {
+                _contract.ValidFrom = contractStart;
+                await _contracts.SaveAsync(_contract);
+            }
+
+            foreach (var move in moves)
+            {
+                move.Link.ValidFrom = move.NewValidFrom;
+                await _contracts.SaveContractMeterAsync(move.Link);
+            }
+
+            if (moves.Count > 0 && SelectedProperty is { } property)
+            {
+                _propertyLinks = await LoadPropertyLinksAsync(property.Id);
+            }
+
             await EnterPreviewAsync(profile);
         }
         finally

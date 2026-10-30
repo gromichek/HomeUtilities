@@ -141,6 +141,12 @@ public static class ErrorCodes
     /// <summary>The link ends before it starts.</summary>
     public const string ContractMeterValidToBeforeValidFrom = "contract_meter.valid_to_before_valid_from";
 
+    /// <summary>The link starts before the meter was installed. Args: the installation date.</summary>
+    public const string ContractMeterValidFromBeforeInstallation = "contract_meter.valid_from_before_installation";
+
+    /// <summary>The link overlaps another link of the same meter and contract. Args: the start date of the other link.</summary>
+    public const string ContractMeterOverlap = "contract_meter.overlaps_other_link";
+
     /// <summary>The VAT code is not 1–32 upper-case letters, digits or dashes.</summary>
     public const string VatRateCodeInvalid = "vat_rate.code_invalid";
 
