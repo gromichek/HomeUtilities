@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028c | Fixes from real-data testing (lists perf, bills selection, Android reminders, help links, import window) | Ready | | |
 
 ## Done
 
@@ -45,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-028c | Fixes from real-data testing | 2026-10-30, #143 | "Show more" paging for long lists; Overview settlement capped at 24 months; Planned reminders debug list; reminder cause not confirmed (WAKE_LOCK still removed — re-allow if the plan is non-empty and nothing arrives). Lead relaxed two flaky perf limits. |
 | T-027a | Export like the owner's workbook | 2026-10-30, #132 | Total sheet = billed only (report parity). Paid mark only for fully paid bills. |
 | — | Fix: editor reloaded after closing a child dialog | 2026-10-30, #136 | Shell re-applied the query on return → lost name/prices in the tariff editor. |
 | — | Reports: metered contracts without tariff, equalized months by tariff, months before contract start, 20-year performance | 2026-10-30, #133 | Sonnet helper (resumed after the weekly limit). |
@@ -78,7 +78,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
-- Items marked "To fix" below and the reading-history freeze are covered by **T-028c**.
+- Items marked "To fix" below were addressed by **T-028c** (#143) — owner to confirm, then remove them.
 
 - **To fix (owner, 2026-10-30):** in Help, links inside the guide (to other sections / anchors) open the system browser instead of scrolling within the help page (`HelpViewModel.ShouldIntercept` / `HelpPage.OnNavigating` — the WebView reports internal anchors as a full URL; treat same-document and `en.md`/`ru.md` links as internal).
 - Not planned (owner decision 2026-10-30): closing the open remainder of a bill without a payment (e.g. equalized bill paid less by consumption). Workaround: treat such months as "by consumption" (plan starts later).
