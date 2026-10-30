@@ -981,6 +981,33 @@ date, that part is skipped — so importing the same sheet twice adds nothing. A
   again with *Import profile from file* — for example to send it to the person who helps you. The file contains only the
   column numbers and settings (period rules, header texts): **no amounts and no readings**.
 
+### Export like your workbook
+
+The reverse of the import: **Settings → Imports → Export to Excel** saves your data as a workbook shaped like your own — one sheet
+per contract (named *supplier + contract title*, at most 31 characters), one row per month — so you can compare what the app
+holds with your original sheet, or keep a familiar spreadsheet as an extra copy. The app asks three things: **which contracts**
+(a check-box list: *property · supplier contract*), **which period** (all, this year, … or your own range) and **how to show amounts
+before 2014** — *as stored* (LVL, the way the bills were entered) or *converted to EUR*. The file is called
+`HomeUtilities-export-YYYY-MM-DD.xlsx`.
+
+- **A contract you imported from a sheet** is laid out exactly like that sheet: the same columns and header row, the header texts
+  as they were in your file. The date column is written the way the import reads it back — the reading date for sheets dated by
+  the day of the reading, the 1st of the next month for sheets where the date means "the month before", the payment date for
+  fixed-amount sheets. A bill that is **paid in full** gets the paid mark (and the payment date if the sheet has such a column).
+  Because the layout matches the saved profile, the file can be **imported again without choosing columns** (use
+  *As stored* for the amounts, so the old LVL amounts are not read as EUR a second time).
+- **A contract without an import profile** gets a standard layout: date, one column per meter (the register is added for meters
+  with day and night values), consumption, net, VAT %, VAT, calculated total, bill total, difference, paid mark and payment date, notes,
+  currency.
+- **Meter replacements.** The month of a replacement gets an extra row on the replacement date with the new meter's first reading
+  and a note such as *replaced 15.03.2014: cold - CW-20140 reading 110 reading 0* (serial number of the new meter, last reading
+  of the old one, first reading of the new one) — the import understands this note, so a re-import finds the replacement again.
+- The first sheet **Total** has one row per month and one column per contract, with row and column totals, always in EUR: the
+  same numbers as [Reports](#15-reports) → *Costs* grouped by contract.
+
+Values only — no formulas and no charts are written. Numbers are real numbers (2 decimals for money, 3 for readings) and dates
+are real dates, so Excel or LibreOffice can sum and sort them.
+
 ## 17. Coming soon
 
 Charts on the Overview,

@@ -107,6 +107,7 @@ public sealed partial class ImportsViewModel : ViewModelBase
     private readonly INavigationService _navigation;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizer _localizer;
+    private readonly WorkbookExportFlow _export;
     private IReadOnlyList<MeterLinkRepairItem> _repairItems = [];
 
     [ObservableProperty]
@@ -137,6 +138,12 @@ public sealed partial class ImportsViewModel : ViewModelBase
     private string _startImportText = string.Empty;
 
     [ObservableProperty]
+    private string _exportExcelText = string.Empty;
+
+    [ObservableProperty]
+    private string _exportExcelHint = string.Empty;
+
+    [ObservableProperty]
     private IReadOnlyList<string> _linkRepairLines = [];
 
     [ObservableProperty]
@@ -161,8 +168,10 @@ public sealed partial class ImportsViewModel : ViewModelBase
         IDialogService dialogs,
         INavigationService navigation,
         ISnackbarService snackbar,
-        ILocalizer localizer)
+        ILocalizer localizer,
+        WorkbookExportFlow export)
     {
+        _export = export;
         _batches = batches;
         _profiles = profiles;
         _files = files;
@@ -270,6 +279,10 @@ public sealed partial class ImportsViewModel : ViewModelBase
     [RelayCommand]
     private Task StartImportAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.ImportWizard));
 
+    /// <summary>Exports the data like the owner's own workbook (one sheet per contract).</summary>
+    [RelayCommand]
+    private Task ExportExcelAsync() => RunSafeAsync(_export.RunAsync);
+
     /// <summary>Picks an exported profile file and saves it as a new profile.</summary>
     [RelayCommand]
     private Task ImportProfileAsync() => RunSafeAsync(async () =>
@@ -309,6 +322,8 @@ public sealed partial class ImportsViewModel : ViewModelBase
         ProfilesHint = _localizer["ImportProfilesHint"];
         ImportProfileText = _localizer["ImportProfileImport"];
         StartImportText = _localizer["SectionImport"];
+        ExportExcelText = _localizer["ExportExcel"];
+        ExportExcelHint = _localizer["ExportExcelHint"];
         LinkRepairHeader = _localizer["ImportsLinkRepairHeader"];
         LinkRepairHint = _localizer["ImportsLinkRepairHint"];
         LinkRepairNone = _localizer["ImportsLinkRepairNone"];

@@ -14,6 +14,13 @@
             <Button Text="{Binding StartImportText}" Command="{Binding StartImportCommand}"
                     Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
 
+            <!-- The reverse of the import: the data as a workbook like the owner's own. -->
+            <VerticalStackLayout Spacing="4">
+                <Button Text="{Binding ExportExcelText}" Command="{Binding ExportExcelCommand}"
+                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                <Label Text="{Binding ExportExcelHint}" Style="{StaticResource MutedLabel}" FontSize="13" />
+            </VerticalStackLayout>
+
             <!-- Finished imports; each can be undone as a whole. -->
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">

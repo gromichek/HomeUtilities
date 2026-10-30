@@ -1193,6 +1193,33 @@
   <data name="SectionImports" xml:space="preserve"><value>Импорты</value></data>
   <data name="ImportTitle" xml:space="preserve"><value>Импорт из Excel</value></data>
   <data name="ImportsTitle" xml:space="preserve"><value>Импорты</value></data>
+  <data name="ExportExcel" xml:space="preserve"><value>Экспорт в Excel</value></data>
+  <data name="ExportExcelHint" xml:space="preserve"><value>Сохраняет данные в книгу, похожую на вашу собственную: лист на каждый договор, строка на каждый месяц, колонки как в профиле импорта этого договора, и лист с итогами.</value></data>
+  <data name="ExportNothing" xml:space="preserve"><value>Для этого выбора нечего экспортировать.</value></data>
+  <data name="ExportContractsTitle" xml:space="preserve"><value>Договоры для экспорта</value></data>
+  <data name="ExportCurrencyTitle" xml:space="preserve"><value>Суммы до 2014 года</value></data>
+  <data name="ExportCurrencyStored" xml:space="preserve"><value>Как хранятся (LVL до 2014)</value></data>
+  <data name="ExportCurrencyStoredHint" xml:space="preserve"><value>Нужно, если файл потом снова импортируется.</value></data>
+  <data name="ExportCurrencyEur" xml:space="preserve"><value>В пересчёте на EUR</value></data>
+  <data name="ExportCurrencyEurHint" xml:space="preserve"><value>Все суммы в EUR (курс 0,702804), так удобнее сравнивать.</value></data>
+  <data name="ExportSaved" xml:space="preserve"><value>Файл сохранён.</value></data>
+  <data name="ExportSavedTo" xml:space="preserve"><value>Файл сохранён: {0}</value></data>
+  <data name="ExportColDate" xml:space="preserve"><value>Дата</value></data>
+  <data name="ExportColConsumption" xml:space="preserve"><value>Потребление</value></data>
+  <data name="ExportColNet" xml:space="preserve"><value>Без НДС</value></data>
+  <data name="ExportColVatPercent" xml:space="preserve"><value>НДС %</value></data>
+  <data name="ExportColVat" xml:space="preserve"><value>НДС</value></data>
+  <data name="ExportColCalculated" xml:space="preserve"><value>Расчётная сумма</value></data>
+  <data name="ExportColBillTotal" xml:space="preserve"><value>Сумма счёта</value></data>
+  <data name="ExportColDifference" xml:space="preserve"><value>Разница</value></data>
+  <data name="ExportColPaid" xml:space="preserve"><value>Оплачено</value></data>
+  <data name="ExportColPaidDate" xml:space="preserve"><value>Дата оплаты</value></data>
+  <data name="ExportColNotes" xml:space="preserve"><value>Заметки</value></data>
+  <data name="ExportColCurrency" xml:space="preserve"><value>Валюта</value></data>
+  <data name="ExportTotalSheet" xml:space="preserve"><value>Всего</value></data>
+  <data name="ExportTotalMonth" xml:space="preserve"><value>Месяц</value></data>
+  <data name="ExportTotalColumn" xml:space="preserve"><value>Всего</value></data>
+  <data name="ExportOneOff" xml:space="preserve"><value>Разовые расходы</value></data>
   <data name="ImportStepOf" xml:space="preserve"><value>Шаг {0} из {1}: {2}</value></data>
   <data name="ImportStep_File" xml:space="preserve"><value>Файл и лист</value></data>
   <data name="ImportStep_Target" xml:space="preserve"><value>Договор</value></data>

@@ -1193,6 +1193,33 @@
   <data name="SectionImports" xml:space="preserve"><value>Imports</value></data>
   <data name="ImportTitle" xml:space="preserve"><value>Import from Excel</value></data>
   <data name="ImportsTitle" xml:space="preserve"><value>Imports</value></data>
+  <data name="ExportExcel" xml:space="preserve"><value>Export to Excel</value></data>
+  <data name="ExportExcelHint" xml:space="preserve"><value>Saves your data as a workbook like your own: one sheet per contract, one row per month, laid out like the import profile of the contract, plus a sheet with the totals.</value></data>
+  <data name="ExportNothing" xml:space="preserve"><value>There is nothing to export for this selection.</value></data>
+  <data name="ExportContractsTitle" xml:space="preserve"><value>Contracts to export</value></data>
+  <data name="ExportCurrencyTitle" xml:space="preserve"><value>Amounts before 2014</value></data>
+  <data name="ExportCurrencyStored" xml:space="preserve"><value>As stored (LVL before 2014)</value></data>
+  <data name="ExportCurrencyStoredHint" xml:space="preserve"><value>Needed if you want to import the file again.</value></data>
+  <data name="ExportCurrencyEur" xml:space="preserve"><value>Converted to EUR</value></data>
+  <data name="ExportCurrencyEurHint" xml:space="preserve"><value>All amounts in EUR (rate 0.702804), easier to compare.</value></data>
+  <data name="ExportSaved" xml:space="preserve"><value>Workbook saved.</value></data>
+  <data name="ExportSavedTo" xml:space="preserve"><value>Workbook saved to {0}</value></data>
+  <data name="ExportColDate" xml:space="preserve"><value>Date</value></data>
+  <data name="ExportColConsumption" xml:space="preserve"><value>Consumption</value></data>
+  <data name="ExportColNet" xml:space="preserve"><value>Net</value></data>
+  <data name="ExportColVatPercent" xml:space="preserve"><value>VAT %</value></data>
+  <data name="ExportColVat" xml:space="preserve"><value>VAT</value></data>
+  <data name="ExportColCalculated" xml:space="preserve"><value>Calculated total</value></data>
+  <data name="ExportColBillTotal" xml:space="preserve"><value>Bill total</value></data>
+  <data name="ExportColDifference" xml:space="preserve"><value>Difference</value></data>
+  <data name="ExportColPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="ExportColPaidDate" xml:space="preserve"><value>Paid on</value></data>
+  <data name="ExportColNotes" xml:space="preserve"><value>Notes</value></data>
+  <data name="ExportColCurrency" xml:space="preserve"><value>Currency</value></data>
+  <data name="ExportTotalSheet" xml:space="preserve"><value>Total</value></data>
+  <data name="ExportTotalMonth" xml:space="preserve"><value>Month</value></data>
+  <data name="ExportTotalColumn" xml:space="preserve"><value>Total</value></data>
+  <data name="ExportOneOff" xml:space="preserve"><value>One-off expenses</value></data>
   <data name="ImportStepOf" xml:space="preserve"><value>Step {0} of {1}: {2}</value></data>
   <data name="ImportStep_File" xml:space="preserve"><value>File and sheet</value></data>
   <data name="ImportStep_Target" xml:space="preserve"><value>Contract</value></data>

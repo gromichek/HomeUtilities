@@ -19,7 +19,10 @@ public class ImportsViewModelTests
     private readonly FakeSnackbarService _snackbar = new();
 
     private ImportsViewModel Create() =>
-        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow());
+
+    private WorkbookExportFlow ExportFlow() => new(
+        new FakeExportLoader(), new FakePaymentStore(), new FakeSupplierStore(), _profiles, new FakeExportWriter(), _saver, _dialogs, _snackbar, new FakeLocalizer(_language), new TestClock(new DateOnly(2026, 10, 29)));
 
     private ImportBatch AddBatch(string file = "book.xlsx", string sheet = "Water")
     {
@@ -106,6 +109,18 @@ public class ImportsViewModelTests
 
         Assert.True(vm.HasNoLinkRepair);
         Assert.False(vm.HasLinkRepair);
+    }
+
+    [Fact]
+    public async Task Export_to_Excel_starts_the_export_flow()
+    {
+        var vm = Create();
+
+        await vm.ExportExcelCommand.ExecuteAsync(null);
+
+        // Without contracts the flow tells the owner there is nothing to export.
+        Assert.Equal("ExportNothing [en]", Assert.Single(_dialogs.Alerts).Message);
+        Assert.Equal("ExportExcel [en]", vm.ExportExcelText);
     }
 
     [Fact]
@@ -318,6 +333,19 @@ public class ImportsViewModelTests
         public Task<ImportPickedFile?> PickWorkbookAsync() => Task.FromResult<ImportPickedFile?>(null);
 
         public Task<ImportPickedFile?> PickProfileAsync() => Task.FromResult(Profile);
+    }
+
+    private sealed class FakeExportLoader : IReportDataLoader
+    {
+        public Task<HomeUtilities.Core.Reports.ReportData> LoadAsync(CancellationToken ct = default) =>
+            Task.FromResult(new HomeUtilities.Core.Reports.ReportData([], [], [], [], [], [], [], []));
+    }
+
+    private sealed class FakeExportWriter : HomeUtilities.Core.Export.IExportWorkbookWriter
+    {
+        public void Write(IReadOnlyList<HomeUtilities.Core.Export.ExportSheet> sheets, Stream stream)
+        {
+        }
     }
 
     private sealed class FakeSaver : IFileSaveService
