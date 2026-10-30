@@ -142,6 +142,8 @@ public sealed partial class ImportsViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _exportExcelHint = string.Empty;
+
+    [ObservableProperty]
     private IReadOnlyList<string> _linkRepairLines = [];
 
     [ObservableProperty]
