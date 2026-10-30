@@ -409,6 +409,8 @@
   <data name="ReadingHistoryHeader" xml:space="preserve"><value>Показания</value></data>
   <data name="ReadingHistoryTitle" xml:space="preserve"><value>Показания — {0}</value></data>
   <data name="ReadingHistoryEmpty" xml:space="preserve"><value>Показаний пока нет.</value></data>
+  <data name="Loading" xml:space="preserve"><value>Загрузка…</value></data>
+  <data name="ListShowMore" xml:space="preserve"><value>Показать ещё (осталось: {0})</value></data>
   <data name="ReadingSubmittedOn" xml:space="preserve"><value>передано {0}</value></data>
   <data name="ReadingEditTitle" xml:space="preserve"><value>Изменить показание</value></data>
   <data name="ReadingDateLabel" xml:space="preserve"><value>Дата *</value></data>
@@ -1389,6 +1391,15 @@
   <data name="SettingsRemindersDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению</value></data>
   <data name="SettingsRemindersTime" xml:space="preserve"><value>Время напоминаний</value></data>
   <data name="SettingsRemindersTest" xml:space="preserve"><value>Отправить тестовое уведомление</value></data>
+  <data name="SettingsRemindersPlanned" xml:space="preserve"><value>Запланированные напоминания</value></data>
+  <data name="ReminderPlannedOff" xml:space="preserve"><value>Напоминания выключены.</value></data>
+  <data name="ReminderPlannedNone" xml:space="preserve"><value>Напоминаний не запланировано: в ближайшие недели ничего не ожидается или все времена уже прошли.</value></data>
+  <data name="ReminderPlannedCount" xml:space="preserve"><value>Запланировано напоминаний: {0}, ближайшие первыми. Время местное; время с 21:00 до 08:00 переносится на 08:00.</value></data>
+  <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Показания</value></data>
+  <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Счёт</value></data>
+  <data name="ReminderPlannedKind_TaxInstallment" xml:space="preserve"><value>Налоговый платёж</value></data>
+  <data name="ReminderPlannedKind_MeterVerification" xml:space="preserve"><value>Поверка счётчика</value></data>
+  <data name="ReminderPlannedKind_DraftsToConfirm" xml:space="preserve"><value>Черновики счетов</value></data>
   <data name="SettingsRemindersNotSupported" xml:space="preserve"><value>На этом устройстве уведомления недоступны; напоминания показываются при открытии приложения.</value></data>
   <data name="SettingsRemindersPermissionDenied" xml:space="preserve"><value>Разрешение на показ уведомлений не выдано. Разрешите уведомления для HomeUtilities в настройках системы и включите напоминания снова.</value></data>
   <data name="ReminderLeadDays" xml:space="preserve"><value>Напоминать о счёте за {0} дн. до срока оплаты (0 = только в день оплаты)</value></data>
@@ -1437,5 +1448,9 @@
   <data name="ImportsLinkRepairDone" xml:space="preserve"><value>Привязок изменено: {0}</value></data>
   <data name="ImportLinkStartLate" xml:space="preserve"><value>Привязок счётчиков этого договора, которые начинаются позже самых ранних импортируемых данных ({1}): {0} — расход за более ранние месяцы не попадёт в начисления и отчёты.</value></data>
   <data name="ImportMoveLinkStarts" xml:space="preserve"><value>Начать привязки счётчиков с установки</value></data>
+  <data name="ImportReadingWindowMissing" xml:space="preserve"><value>Строк с показаниями, снятыми в начале месяца и относящимися к предыдущему месяцу: {0}, но окно подачи показаний договора эти даты не содержит — начисления будут искать показания не в том месяце. Установите окно {1}, чтобы расчёт совпал с таблицей.</value></data>
+  <data name="ImportSetReadingWindow" xml:space="preserve"><value>Установить окно показаний {0}</value></data>
+  <data name="ImportSetReadingWindowConfirm" xml:space="preserve"><value>Изменить окно подачи показаний этого договора с {0} на {1}? Тогда начисления и отчёты будут относить показания первых чисел месяца к предыдущему месяцу.</value></data>
+  <data name="ImportNoReadingWindow" xml:space="preserve"><value>нет</value></data>
   <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>Начало привязок счётчиков ({0}) будет перенесено на дату установки счётчика (или на начало договора, если оно позже).</value></data>
 </root>

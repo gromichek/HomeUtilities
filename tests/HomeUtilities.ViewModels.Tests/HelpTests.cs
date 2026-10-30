@@ -156,7 +156,16 @@ public class HelpContentServiceTests
         var html = (await service.LoadAsync("en", "3-properties")).Html;
 
         Assert.Contains("getElementById(\"3-properties\")", html);
-        Assert.DoesNotContain("getElementById", (await service.LoadAsync("en")).Html);
+        Assert.DoesNotContain("addEventListener('load'", (await service.LoadAsync("en")).Html);
+    }
+
+    [Fact]
+    public async Task LoadAsync_ScrollsInPageAnchorLinksInsteadOfNavigating()
+    {
+        var html = (await Create(Reader("## 3. Properties")).LoadAsync("en")).Html;
+
+        Assert.Contains("addEventListener('click'", html);
+        Assert.Contains("preventDefault", html);
     }
 
     [Theory]
@@ -290,8 +299,28 @@ public class HelpViewModelTests
     [InlineData("about:blank#3-properties")]
     [InlineData("about:blank")]
     [InlineData("data:text/html;base64,AAAA")]
+    [InlineData("file:///android_asset/#3-properties")]
+    [InlineData("file:///C:/app/guide/index.html#3-properties")]
+    [InlineData("https://0.0.0.0/#3-properties")]
+    [InlineData("http://localhost/#3-properties")]
+    [InlineData("https://appassets.androidplatform.net/guide/#3-properties")]
+    [InlineData("ms-appx-web:///guide/#3-properties")]
+    [InlineData("#")]
+    [InlineData("")]
     [InlineData(null)]
     public void InternalNavigation_StaysInTheWebView(string? url) => Assert.False(Create().ShouldIntercept(url));
+
+    [Theory]
+    [InlineData("https://example.com/")]
+    [InlineData("http://example.com/portal#top")]
+    [InlineData("HTTPS://Example.com/x")]
+    public void LinksToOtherSites_AreIntercepted(string url) => Assert.True(Create().ShouldIntercept(url));
+
+    [Theory]
+    [InlineData("file:///android_asset/guide/ru.md")]
+    [InlineData("https://0.0.0.0/en.md#10-charges")]
+    [InlineData("about:blank/en.md")]
+    public void LinksToTheGuideFiles_AreIntercepted(string url) => Assert.True(Create().ShouldIntercept(url));
 
     [Fact]
     public async Task LinkToTheOtherGuideFile_ReloadsInThatLanguage()

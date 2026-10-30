@@ -36,7 +36,7 @@ public sealed partial class HelpViewModel : ViewModelBase
     /// <summary>
     /// True when a WebView navigation to <paramref name="url"/> must be cancelled and handed to
     /// <see cref="InterceptAsync"/>: external links (system browser) and links to the other language's guide file.
-    /// "#anchor" links and the page itself stay in the WebView.
+    /// "#anchor" links, the page itself and local hosts of the embedded page stay in the WebView.
     /// </summary>
     public bool ShouldIntercept(string? url) => IsExternal(url) || GuideLanguageOf(url) is not null;
 
@@ -74,10 +74,20 @@ public sealed partial class HelpViewModel : ViewModelBase
         Html = (await _content.LoadAsync(language, anchor)).Html;
     }
 
+    // Only http(s) links to other sites are external. The WebView may report the guide's own anchors as a full URL on
+    // a local host of the embedded page (e.g. https://0.0.0.0/#section), which must stay inside the page.
     private static bool IsExternal(string? url) =>
         url is not null
-        && (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-            || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+        && Uri.TryCreate(url, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+        && !IsLocalHost(uri.Host);
+
+    private static bool IsLocalHost(string host) =>
+        host.Length == 0
+        || host is "localhost" or "0.0.0.0" or "127.0.0.1" or "::1" or "[::1]"
+        || host.EndsWith(".invalid", StringComparison.OrdinalIgnoreCase)
+        || host.EndsWith(".androidplatform.net", StringComparison.OrdinalIgnoreCase)
+        || host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase);
 
     private static string? GuideLanguageOf(string? url)
     {

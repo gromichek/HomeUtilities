@@ -4,6 +4,9 @@
 
     <Color x:Key="PrimaryLight">#2F5D8A</Color>
     <Color x:Key="PrimaryDark">#7FB0E0</Color>
+    <!-- Tint of list rows that belong to the contract a list was opened for (not the selection). -->
+    <Color x:Key="HighlightLight">#262F5D8A</Color>
+    <Color x:Key="HighlightDark">#337FB0E0</Color>
     <Color x:Key="SurfaceLight">#F6F7F9</Color>
     <Color x:Key="SurfaceDark">#1B1D21</Color>
     <Color x:Key="TextLight">#1B1D21</Color>

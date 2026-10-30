@@ -67,6 +67,22 @@
                     </VerticalStackLayout>
                     <Button Text="{Binding SendTestText}" Command="{Binding SendTestCommand}"
                             Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    <Button Text="{Binding PlannedText}" Command="{Binding TogglePlannedCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowPlanned}">
+                        <Label Text="{Binding PlannedSummary}" Style="{StaticResource MutedLabel}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Planned}" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PlannedReminderRowViewModel">
+                                    <VerticalStackLayout Spacing="0">
+                                        <Label Text="{Binding Header}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Text}" />
+                                        <Label Text="{Binding Target}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 

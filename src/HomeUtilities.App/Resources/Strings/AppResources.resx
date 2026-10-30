@@ -409,6 +409,8 @@
   <data name="ReadingHistoryHeader" xml:space="preserve"><value>Readings</value></data>
   <data name="ReadingHistoryTitle" xml:space="preserve"><value>Readings — {0}</value></data>
   <data name="ReadingHistoryEmpty" xml:space="preserve"><value>No readings yet.</value></data>
+  <data name="Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="ListShowMore" xml:space="preserve"><value>Show more ({0} left)</value></data>
   <data name="ReadingSubmittedOn" xml:space="preserve"><value>submitted {0}</value></data>
   <data name="ReadingEditTitle" xml:space="preserve"><value>Edit reading</value></data>
   <data name="ReadingDateLabel" xml:space="preserve"><value>Date *</value></data>
@@ -1389,6 +1391,15 @@
   <data name="SettingsRemindersDrafts" xml:space="preserve"><value>Draft bills to confirm</value></data>
   <data name="SettingsRemindersTime" xml:space="preserve"><value>Time of day</value></data>
   <data name="SettingsRemindersTest" xml:space="preserve"><value>Send a test notification</value></data>
+  <data name="SettingsRemindersPlanned" xml:space="preserve"><value>Planned reminders</value></data>
+  <data name="ReminderPlannedOff" xml:space="preserve"><value>The reminders are switched off.</value></data>
+  <data name="ReminderPlannedNone" xml:space="preserve"><value>No reminders are planned: nothing is due in the coming weeks, or all times have passed.</value></data>
+  <data name="ReminderPlannedCount" xml:space="preserve"><value>{0} reminder(s) are planned, the earliest first. Times are local; a time between 21:00 and 08:00 is moved to 08:00.</value></data>
+  <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Readings</value></data>
+  <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Bill</value></data>
+  <data name="ReminderPlannedKind_TaxInstallment" xml:space="preserve"><value>Tax installment</value></data>
+  <data name="ReminderPlannedKind_MeterVerification" xml:space="preserve"><value>Meter verification</value></data>
+  <data name="ReminderPlannedKind_DraftsToConfirm" xml:space="preserve"><value>Draft bills</value></data>
   <data name="SettingsRemindersNotSupported" xml:space="preserve"><value>Notifications are not available on this device; reminders are shown when the app is opened.</value></data>
   <data name="SettingsRemindersPermissionDenied" xml:space="preserve"><value>The permission to show notifications was not granted. Allow notifications for HomeUtilities in the system settings and switch the reminders on again.</value></data>
   <data name="ReminderLeadDays" xml:space="preserve"><value>Remind about a bill {0} day(s) before it is due (0 = on the due day only)</value></data>
@@ -1437,5 +1448,9 @@
   <data name="ImportsLinkRepairDone" xml:space="preserve"><value>{0} links moved</value></data>
   <data name="ImportLinkStartLate" xml:space="preserve"><value>{0} meter links of this contract start after the earliest imported data ({1}) — the consumption of the earlier months would be missing in charges and reports.</value></data>
   <data name="ImportMoveLinkStarts" xml:space="preserve"><value>Start meter links at installation</value></data>
+  <data name="ImportReadingWindowMissing" xml:space="preserve"><value>{0} rows have readings dated early in the month that belong to the previous month, but the reading window of this contract does not contain those dates — the charges would look for the readings in the wrong month. Set the window to {1} so that the calculations match the sheet.</value></data>
+  <data name="ImportSetReadingWindow" xml:space="preserve"><value>Set reading window {0}</value></data>
+  <data name="ImportSetReadingWindowConfirm" xml:space="preserve"><value>Change the reading window of this contract from {0} to {1}? Charges and reports will then assign the readings of the first days of a month to the month before.</value></data>
+  <data name="ImportNoReadingWindow" xml:space="preserve"><value>none</value></data>
   <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>The start of {0} meter links will move to the installation of the meter (or the contract’s start, if later).</value></data>
 </root>

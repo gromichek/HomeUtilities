@@ -50,6 +50,17 @@ public class ImportOwnerWorkbookTests
         return ImportPlanner.Plan(profile ?? WaterProfile(), Read(OwnerWorkbook.Water), context);
     }
 
+    // The installation-day row (6) of the invented workbook gets a note in the note column (H).
+    private ImportPlan PlanWaterWithInstallationNote(string note)
+    {
+        var sheet = Read(OwnerWorkbook.Water);
+        var rows = sheet.Rows.Select(r => r.Number != 6
+            ? r
+            : r with { Cells = [.. Enumerable.Range(1, 7).Select(r.Cell), SheetCell.String(note)] }).ToList();
+        var context = new ImportContext(_f.Contract, [_f.Cold, _f.Hot], []);
+        return ImportPlanner.Plan(WaterProfile(), sheet with { Rows = rows }, context);
+    }
+
     private static PlannedRow Row(ImportPlan plan, int number) => plan.Rows.Single(r => r.RowNumber == number);
 
     private PlannedReplacement ReplacementOn(ImportPlan plan, int row, MeterResource resource) =>
@@ -104,6 +115,33 @@ public class ImportOwnerWorkbookTests
         Assert.Equal(2, readings.Count);
         Assert.All(readings, r => Assert.Equal(ReadingKind.Initial, r.Reading.Kind));
         Assert.Contains(readings, r => r.RegisterId == coldLine.NewRegisterId && r.Reading.Value == 3m);
+    }
+
+    [Fact]
+    public void Pattern_1_with_a_note_takes_the_old_final_from_the_note_not_the_last_regular_reading()
+    {
+        // Cold: last regular reading 112, the note says the old meter ended at 115.3; the new one starts at 3 (the row's value).
+        var plan = PlanWaterWithInstallationNote("skaititaja nr.: Auksta - 1210007 rad:115,300 rad:0,072");
+
+        var cold = ReplacementOn(plan, 6, MeterResource.ColdWater);
+        var coldLine = Assert.Single(cold.Registers);
+        Assert.Equal((115.3m, 3m, false, true), (coldLine.FinalReading.Value, coldLine.InitialReading.Value, coldLine.FinalEstimated, coldLine.InitialIsRowReading));
+        Assert.Equal(ReadingKind.Final, coldLine.FinalReading.Kind);
+        Assert.Equal("1210007", cold.NewMeter.SerialNumber);
+
+        // The hot water is not named in the note: its final stays the last regular reading.
+        var hotLine = Assert.Single(ReplacementOn(plan, 6, MeterResource.HotWater).Registers);
+        Assert.Equal(56m, hotLine.FinalReading.Value);
+    }
+
+    [Fact]
+    public void Pattern_1_ignores_a_noted_final_that_is_below_the_last_regular_reading()
+    {
+        var plan = PlanWaterWithInstallationNote("skaititaja nr.: Auksta - 1210007 rad:100,000 rad:0,072");
+
+        var coldLine = Assert.Single(ReplacementOn(plan, 6, MeterResource.ColdWater).Registers);
+
+        Assert.Equal(112m, coldLine.FinalReading.Value);
     }
 
     [Fact]

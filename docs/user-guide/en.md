@@ -208,7 +208,8 @@ Menu **Readings**: the fastest way to enter monthly values.
    submitted?** — *Mark submitted* stores the date, so you can see which readings were sent.
 
 Tap a meter to see its reading history; tap a reading to edit it (date, value, kind, note, submitted). Initial and
-final readings belong to a meter replacement and cannot be deleted.
+final readings belong to a meter replacement and cannot be deleted. A long history (twenty years of monthly readings) opens
+quickly: each register shows its newest 30 readings first, and **Show more (N left)** adds the next 30.
 
 ## 8. Categories
 
@@ -362,7 +363,10 @@ category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *
 list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
 category colour, the **total**, the **status badge** and — when the app has a calculation to compare with — the
 difference, for example *+2,15 € (+3,4 %)*: **red** when the bill is more than 5 % above the calculation, **green**
-when it is more than 5 % below, grey otherwise. Tap a row to open the bill. **New bill** (＋ on a phone) starts a new one.
+when it is more than 5 % below, grey otherwise. Tap a row to open the bill. **New bill** (＋ on a phone) starts a new one. A list longer than 100 rows (all years of a long history)
+shows the first 100; **Show more (N left)** below it adds the next 100 — the totals always count the whole list. When you come from a
+contract with **All bills**, the contract's bills have a light tint; as soon as you tap a bill the tint disappears and only the bill you
+opened has the selection border.
 The **Category** filter is what a number in the [Costs report](#costs) leads to: tap a cell of a report grouped by category and
 the list shows only the bills of that category, that property and that month.
 
@@ -517,7 +521,7 @@ says what left your account, and the **allocation** says which bill the money se
 **The list.** At the top: filters **Property** (all or one), **Period** and **Contract**; they are
 remembered until you close the app. **Period** has three choices: *All years*, *Year* and *Month* (by the date of the
 payment); with *Year* or *Month* the ‹ › buttons step to the previous or next year or month, and the totals below follow
-the chosen period. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Each row
+the chosen period. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Like the bills, a list longer than 100 rows shows the first 100 and **Show more (N left)** adds the next 100. Each row
 shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for
 example *Water 09.2026, Water 10.2026 +1* (two bills are named, then *+N*). A yellow badge **Prepayment 12,30 €** means that
 part of the payment pays no bill; a refund is shown in green as *−12,00 € refund*; the small word *quick* marks a
@@ -810,6 +814,13 @@ no longer reminds you.
 
 **Send a test notification** shows a notification at once, to check that everything works on this device.
 
+**Planned reminders** lists what the app plans right now: the local date and time, what it is about (readings, bill, tax
+installment, meter verification, draft bills), the text of the notification and the screen a tap opens. Use it when a
+reminder you expected does not arrive: if it is not in the list, nothing is due (or its time has already passed — a reminder
+is planned only for a time in the future, and a time between 21:00 and 08:00 moves to 08:00); if it is in the list, the
+notification has been handed to Android. For a test, set the bill's due date or the time of day a few minutes ahead and
+open the list.
+
 **Android.** When you switch the reminders on, Android asks for the permission to show notifications; if you refuse, the
 switch goes back off — allow notifications for the app in the system settings and try again. The app does nothing in the
 background: the notifications are handed to Android in advance, and are shown by the system a little after the set time (Android
@@ -872,6 +883,14 @@ contract's start date. If the sheet has older rows, those rows get a warning (*T
 date…*) and the preview says *N rows are before the contract's start date 15.10.2026 — set "Valid from" in the contract…*;
 the button **Set contract start to 01.01.2014** changes the contract's *Valid from* to the first day of the earliest imported
 month (after a confirmation) and plans the import again. The rows are imported either way.
+
+**Check the contract's reading window if the sheet is dated early in the month.** Gas, electricity and heating sheets are often
+dated the 1st of the month after the service, and the *previous month* rule puts such a row in the month before. The charges,
+however, look for a month's readings inside the contract's reading window; without a window that contains those dates they look
+in the wrong month and every amount seems shifted by one row. The preview then adds *N rows have readings dated early in the month
+that belong to the previous month, but the reading window of this contract does not contain those dates…* and the button
+**Set reading window 28–3** (from the 28th of the service month to two days after the latest early reading day seen, at most the
+10th). After a confirmation the contract gets that window and the import is planned again.
 
 **Check the meters' installation dates and link dates too.** A meter's readings count for a contract only inside the link
 between them. If a meter was linked to the contract recently (the link starts on that day), the older months would show no

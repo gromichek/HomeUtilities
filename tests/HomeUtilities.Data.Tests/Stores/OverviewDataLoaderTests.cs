@@ -1,4 +1,7 @@
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
+using HomeUtilities.Core.Charges;
+using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Data.Stores;
@@ -97,5 +100,33 @@ public class OverviewDataLoaderTests
 
         var reading = Assert.Single(Assert.Single(Assert.Single(data.Meters).Registers).Readings);
         Assert.Equal(Today.AddDays(-30), reading.Date);
+    }
+
+    [Fact]
+    public async Task Expected_settlement_of_a_long_history_covers_only_the_last_two_years()
+    {
+        using var test = new TestDb();
+        var (_, water, _) = await ArrangeAsync(test);
+        water.BillingMode = BillingMode.Equalized;
+        await new ContractStore(test.Factory).SaveAsync(water);
+        await new EqualizedPlanStore(test.Factory).SaveAsync(new EqualizedPlan { ContractId = water.Id, ValidFrom = new DateOnly(2007, 1, 1), MonthlyAmount = 30m });
+        var counter = new CountingChargeInputLoader(new ChargeInputLoader(test.Factory));
+
+        await new OverviewDataLoader(test.Factory, counter).LoadAsync(Today);
+
+        Assert.Equal(OverviewDataLoader.SettlementMaxMonths, counter.Months.Count);
+        Assert.Equal(new YearMonth(2024, 11), counter.Months.Min());
+        Assert.Equal(new YearMonth(2026, 10), counter.Months.Max());
+    }
+
+    private sealed class CountingChargeInputLoader(IChargeInputLoader inner) : IChargeInputLoader
+    {
+        public List<YearMonth> Months { get; } = [];
+
+        public Task<ChargeInput?> LoadAsync(Guid contractId, YearMonth period, CancellationToken ct = default)
+        {
+            Months.Add(period);
+            return inner.LoadAsync(contractId, period, ct);
+        }
     }
 }

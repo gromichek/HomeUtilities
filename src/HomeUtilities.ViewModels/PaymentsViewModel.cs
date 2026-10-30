@@ -32,6 +32,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     private Dictionary<Guid, Bill> _billsById = [];
     private Dictionary<Guid, Contract> _contracts = [];
     private Guid? _highlightContractId;
+    private readonly ListPaging _paging = new();
 
     [ObservableProperty]
     private IReadOnlyList<PaymentItemViewModel> _items = [];
@@ -53,6 +54,12 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     [ObservableProperty]
     private bool _showNothingFound;
+
+    [ObservableProperty]
+    private bool _hasMoreItems;
+
+    [ObservableProperty]
+    private string _showMoreText = string.Empty;
 
     public PaymentsViewModel(
         IPaymentStore paymentStore,
@@ -207,11 +214,13 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     private void RebuildItems()
     {
         var rows = _payments.Where(Matches).ToList();
+        _paging.Track($"{_filter.PropertyId}|{_filter.ContractId}|{Period.Current}");
         Items =
         [
             .. rows
                 .OrderByDescending(p => p.PaidOn)
                 .ThenByDescending(p => p.CreatedAt)
+                .Take(_paging.Limit)
                 .Select(p => new PaymentItemViewModel(
                     p.Id,
                     p.Amount < 0,
@@ -237,7 +246,17 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         Period.Refresh();
         TotalsText = BuildTotals(rows);
         ShowNothingFound = IsLoaded && _payments.Count > 0 && Items.Count == 0;
+        HasMoreItems = rows.Count > Items.Count;
+        ShowMoreText = _localizer.Get("ListShowMore", rows.Count - Items.Count);
         MarkSelectedItem();
+    }
+
+    /// <summary>"Show more" below a long list (all years of a big history): adds a page of rows.</summary>
+    [RelayCommand]
+    private void ShowMore()
+    {
+        _paging.ShowMore();
+        RebuildItems();
     }
 
     private bool Matches(Payment payment)

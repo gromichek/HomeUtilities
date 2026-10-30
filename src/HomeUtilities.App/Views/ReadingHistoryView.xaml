@@ -10,6 +10,7 @@
         <VerticalStackLayout Padding="12" Spacing="12">
             <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" />
             <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" />
+            <Label Text="{Binding LoadingText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsLoading}" />
             <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsEmpty}" />
 
             <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Groups}">
@@ -19,7 +20,7 @@
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="{Binding Header}" Style="{StaticResource SectionHeader}" IsVisible="{Binding HasHeader}" />
 
-                                <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Rows}">
+                                <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding VisibleRows}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ReadingHistoryRowViewModel">
                                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" Padding="0,4">
@@ -54,6 +55,9 @@
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
+
+                                <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMore}"
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

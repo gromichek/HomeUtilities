@@ -41,6 +41,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private IReadOnlyList<Category> _categories = [];
     private Dictionary<Guid, List<Payment>> _paymentsByBill = [];
     private Guid? _highlightContractId;
+    private readonly ListPaging _paging = new();
 
     [ObservableProperty]
     private IReadOnlyList<BillItemViewModel> _items = [];
@@ -71,6 +72,12 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     [ObservableProperty]
     private bool _showNothingFound;
+
+    [ObservableProperty]
+    private bool _hasMoreItems;
+
+    [ObservableProperty]
+    private string _showMoreText = string.Empty;
 
     public BillsViewModel(
         IBillStore billStore,
@@ -230,6 +237,16 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         {
             item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
         }
+
+        if (SelectedEditor is { IsNew: false })
+        {
+            // The contract highlight only helps to find the bills; once the user picks one, only that card stands out.
+            _highlightContractId = null;
+            foreach (var item in Items)
+            {
+                item.IsHighlighted = false;
+            }
+        }
     }
 
     // ---- Filters --------------------------------------------------------------------------------------------------
@@ -365,11 +382,13 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
             }
         }
 
+        _paging.Track($"{_filter.PropertyId}|{_filter.CategoryId}|{_filter.Status}|{Period.Current}");
         Items =
         [
             .. rows
                 .OrderByDescending(r => r.Bill.Period)
                 .ThenBy(r => TitleOf(r.Bill), StringComparer.CurrentCultureIgnoreCase)
+                .Take(_paging.Limit)
                 .Select(r => new BillItemViewModel(
                     r.Bill,
                     TitleOf(r.Bill),
@@ -395,7 +414,17 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         StatusFilterName = StatusName(_filter.Status);
         TotalsText = BuildTotals(rows);
         ShowNothingFound = IsLoaded && _bills.Count > 0 && Items.Count == 0;
+        HasMoreItems = rows.Count > Items.Count;
+        ShowMoreText = _localizer.Get("ListShowMore", rows.Count - Items.Count);
         MarkSelectedItem();
+    }
+
+    /// <summary>"Show more" below a long list (all years of a big history): adds a page of rows.</summary>
+    [RelayCommand]
+    private void ShowMore()
+    {
+        _paging.ShowMore();
+        RebuildItems();
     }
 
     private string TitleOf(Bill bill) =>

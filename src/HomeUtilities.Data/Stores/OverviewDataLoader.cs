@@ -14,6 +14,13 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
     /// <summary>Readings older than this many days are not loaded: the newest reading window is at most about two months back.</summary>
     public const int ReadingHistoryDays = 100;
 
+    /// <summary>
+    /// The expected settlement of an equalized contract covers at most this many months back. Without a Settlement bill the
+    /// range starts at the first plan, which after a 20-year import means hundreds of charge calculations (one database
+    /// round trip each) on every refresh of the Overview and of the reminders.
+    /// </summary>
+    public const int SettlementMaxMonths = 24;
+
     /// <inheritdoc />
     public async Task<OverviewData> LoadAsync(DateOnly today, CancellationToken ct = default)
     {
@@ -44,6 +51,11 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
             var contractPlans = plans.Where(p => p.ContractId == contract.Id).OrderBy(p => p.ValidFrom).ToList();
             var contractBills = bills.Where(b => b.ContractId == contract.Id).ToList();
             var (from, to) = EqualizedSettlement.Range(contractPlans, contractBills, current);
+            var earliest = current.AddMonths(1 - SettlementMaxMonths);
+            if (from < earliest)
+            {
+                from = earliest;
+            }
 
             var charges = new Dictionary<YearMonth, CalculatedCharge>();
             for (var month = from; month <= to; month = month.AddMonths(1))
