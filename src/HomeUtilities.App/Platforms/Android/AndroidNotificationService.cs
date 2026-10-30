@@ -49,6 +49,8 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
     public async Task ShowNowAsync(string title, string body, string data) =>
         await LocalNotificationCenter.Current.Show(Request(new ScheduledNotification(int.MaxValue, DateTime.Now, title, body, data), null));
 
+    // Always the inexact, idle-tolerant alarm (AlarmManager.setAndAllowWhileIdle): it needs no SCHEDULE_EXACT_ALARM, which
+    // the manifest removes on purpose. The plugin's default mode would pick an exact alarm if that permission were granted.
     private static NotificationRequest Request(ScheduledNotification notification, DateTime? at) => new()
     {
         NotificationId = notification.Id,
@@ -56,6 +58,15 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
         Description = notification.Body,
         ReturningData = notification.Data,
         Android = new AndroidOptions { ChannelId = ChannelId },
-        Schedule = new NotificationRequestSchedule { NotifyTime = at },
+        Schedule = new NotificationRequestSchedule
+        {
+            // The planned time is local wall-clock time; an unspecified kind is easy to read as UTC.
+            NotifyTime = at is { } local ? DateTime.SpecifyKind(local, DateTimeKind.Local) : null,
+            Android = new AndroidScheduleOptions
+            {
+                AlarmType = AndroidAlarmType.RtcWakeup,
+                ScheduleMode = AndroidScheduleMode.InexactAllowWhileIdle,
+            },
+        },
     };
 }

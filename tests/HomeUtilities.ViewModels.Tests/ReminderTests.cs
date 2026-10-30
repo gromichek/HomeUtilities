@@ -433,6 +433,38 @@ public class ReminderTests : IDisposable
         Assert.Single(_notifications.Shown);
     }
 
+    [Fact]
+    public async Task Planned_list_shows_what_would_be_scheduled_and_schedules_nothing()
+    {
+        TurnOn();
+        var card = CreateCard();
+
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        Assert.True(card.ShowPlanned);
+        Assert.Equal(2, card.Planned.Count);
+        Assert.Equal(new DateTime(2026, 11, 4, 9, 0, 0).ToString("g", System.Globalization.CultureInfo.CurrentCulture), card.Planned[0].When);
+        Assert.Equal("ReminderPlannedKind_PayBill [en]", card.Planned[0].Kind);
+        Assert.StartsWith("BillEdit?id=", card.Planned[0].Target, StringComparison.Ordinal);
+        Assert.StartsWith("ReminderPlannedCount", card.PlannedSummary, StringComparison.Ordinal);
+        Assert.Empty(_notifications.Batches);
+
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        Assert.False(card.ShowPlanned);
+    }
+
+    [Fact]
+    public async Task Planned_list_says_so_when_the_reminders_are_off()
+    {
+        var card = CreateCard();
+
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        Assert.Empty(card.Planned);
+        Assert.StartsWith("ReminderPlannedOff", card.PlannedSummary, StringComparison.Ordinal);
+    }
+
     // ---- Tap on a notification ------------------------------------------------------------------------------------
 
     private (NotificationTapHandler Handler, FakeNavigationService Navigation, BillFilterState Filter) CreateHandler()

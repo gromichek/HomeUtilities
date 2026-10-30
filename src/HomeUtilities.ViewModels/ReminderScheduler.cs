@@ -106,12 +106,7 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
                 return;
             }
 
-            // The first run can come before any screen opened the database.
-            await _database.InitializeAsync(ct);
-            var now = _clock.UtcNow.ToLocalTime().DateTime;
-            var data = await _loader.LoadAsync(DateOnly.FromDateTime(now), ct);
-            var plan = ReminderPlanner.Plan(data, settings, now);
-            var notifications = plan
+            var notifications = (await PlanAsync(settings, ct))
                 .Select(r => new ScheduledNotification(IdOf(r.Key), r.At, Localize(r.Title), Localize(r.Body), r.Target.Serialize()))
                 .ToList();
 
@@ -122,6 +117,21 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
         {
             _gate.Release();
         }
+    }
+
+    /// <summary>
+    /// The reminders that would be scheduled now, with the texts as the notification shows them ("Planned reminders" in the
+    /// Settings, for checking). Empty while the reminders are off. Nothing is scheduled or cancelled.
+    /// </summary>
+    public async Task<IReadOnlyList<PlannedReminderInfo>> PreviewAsync(CancellationToken ct = default)
+    {
+        var settings = _settings.Load();
+        if (!settings.Enabled)
+        {
+            return [];
+        }
+
+        return [.. (await PlanAsync(settings, ct)).Select(r => new PlannedReminderInfo(r.At, r.Kind, Localize(r.Title), Localize(r.Body), r.Target.Serialize()))];
     }
 
     /// <summary>
@@ -178,6 +188,15 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
         _gate.Dispose();
     }
 
+    private async Task<IReadOnlyList<PlannedReminder>> PlanAsync(ReminderSettings settings, CancellationToken ct)
+    {
+        // The first run can come before any screen opened the database.
+        await _database.InitializeAsync(ct);
+        var now = _clock.UtcNow.ToLocalTime().DateTime;
+        var data = await _loader.LoadAsync(DateOnly.FromDateTime(now), ct);
+        return ReminderPlanner.Plan(data, settings, now);
+    }
+
     private static bool Wanted(ReminderSettings settings, TodoKind kind) => kind switch
     {
         TodoKind.ReadingsWindow => settings.Wants(ReminderKind.SubmitReadings),
@@ -219,3 +238,11 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
         }
     }
 }
+
+/// <summary>One planned reminder as the Settings list shows it.</summary>
+/// <param name="At">Local time it is scheduled for.</param>
+/// <param name="Kind">What it is about.</param>
+/// <param name="Title">Notification title.</param>
+/// <param name="Body">Notification text.</param>
+/// <param name="Target">The serialized screen a tap opens.</param>
+public sealed record PlannedReminderInfo(DateTime At, ReminderKind Kind, string Title, string Body, string Target);

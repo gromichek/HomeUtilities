@@ -1389,6 +1389,15 @@
   <data name="SettingsRemindersDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению</value></data>
   <data name="SettingsRemindersTime" xml:space="preserve"><value>Время напоминаний</value></data>
   <data name="SettingsRemindersTest" xml:space="preserve"><value>Отправить тестовое уведомление</value></data>
+  <data name="SettingsRemindersPlanned" xml:space="preserve"><value>Запланированные напоминания</value></data>
+  <data name="ReminderPlannedOff" xml:space="preserve"><value>Напоминания выключены.</value></data>
+  <data name="ReminderPlannedNone" xml:space="preserve"><value>Напоминаний не запланировано: в ближайшие недели ничего не ожидается или все времена уже прошли.</value></data>
+  <data name="ReminderPlannedCount" xml:space="preserve"><value>Запланировано напоминаний: {0}, ближайшие первыми. Время местное; время с 21:00 до 08:00 переносится на 08:00.</value></data>
+  <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Показания</value></data>
+  <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Счёт</value></data>
+  <data name="ReminderPlannedKind_TaxInstallment" xml:space="preserve"><value>Налоговый платёж</value></data>
+  <data name="ReminderPlannedKind_MeterVerification" xml:space="preserve"><value>Поверка счётчика</value></data>
+  <data name="ReminderPlannedKind_DraftsToConfirm" xml:space="preserve"><value>Черновики счетов</value></data>
   <data name="SettingsRemindersNotSupported" xml:space="preserve"><value>На этом устройстве уведомления недоступны; напоминания показываются при открытии приложения.</value></data>
   <data name="SettingsRemindersPermissionDenied" xml:space="preserve"><value>Разрешение на показ уведомлений не выдано. Разрешите уведомления для HomeUtilities в настройках системы и включите напоминания снова.</value></data>
   <data name="ReminderLeadDays" xml:space="preserve"><value>Напоминать о счёте за {0} дн. до срока оплаты (0 = только в день оплаты)</value></data>

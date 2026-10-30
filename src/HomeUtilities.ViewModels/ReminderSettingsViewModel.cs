@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core.Reminders;
@@ -72,6 +74,15 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _notSupportedText = string.Empty;
 
+    [ObservableProperty]
+    private string _plannedText = string.Empty;
+
+    [ObservableProperty]
+    private string _plannedSummary = string.Empty;
+
+    [ObservableProperty]
+    private bool _showPlanned;
+
     /// <summary>Creates the card and loads the stored settings.</summary>
     public ReminderSettingsViewModel(
         ReminderSettingsStore store,
@@ -88,6 +99,9 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         Load();
         RefreshTexts();
     }
+
+    /// <summary>The reminders the app plans now (debug list; filled when the list is opened).</summary>
+    public ObservableCollection<PlannedReminderRowViewModel> Planned { get; } = [];
 
     /// <summary>True if the device cannot show notifications at all (the card says reminders appear when the app is opened).</summary>
     public bool IsNotSupported => !_notifications.IsSupported;
@@ -118,6 +132,39 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
 
     [RelayCommand]
     private Task SendTestAsync() => RunSafeAsync(_scheduler.SendTestAsync);
+
+    [RelayCommand]
+    private Task TogglePlannedAsync() => RunSafeAsync(async () =>
+    {
+        if (ShowPlanned)
+        {
+            ShowPlanned = false;
+            return;
+        }
+
+        await LoadPlannedAsync();
+        ShowPlanned = true;
+    });
+
+    private async Task LoadPlannedAsync()
+    {
+        var items = await _scheduler.PreviewAsync();
+        Planned.Clear();
+        foreach (var item in items)
+        {
+            Planned.Add(new PlannedReminderRowViewModel(
+                item.At.ToString("g", CultureInfo.CurrentCulture),
+                _localizer["ReminderPlannedKind_" + item.Kind],
+                $"{item.Title} — {item.Body}",
+                item.Target));
+        }
+
+        PlannedSummary = !IsEnabled
+            ? _localizer["ReminderPlannedOff"]
+            : items.Count == 0
+                ? _localizer["ReminderPlannedNone"]
+                : _localizer.Get("ReminderPlannedCount", items.Count);
+    }
 
     partial void OnIsEnabledChanged(bool value)
     {
@@ -171,6 +218,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         LeadDaysLabel = _localizer.Get("ReminderLeadDays", LeadDays);
         SendTestText = _localizer["SettingsRemindersTest"];
         NotSupportedText = _localizer["SettingsRemindersNotSupported"];
+        PlannedText = _localizer["SettingsRemindersPlanned"];
     }
 
     /// <summary>Asks for the notification permission when the reminders are switched on; without it the switch goes back to off.</summary>
@@ -205,4 +253,15 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         _store.Save(new ReminderSettings(IsEnabled, ReadingsOn, BillsOn, VerificationOn, DraftsOn, TimeOnly.FromTimeSpan(Time), LeadDays));
         _scheduler.RequestReschedule();
     }
+}
+
+/// <summary>One line of the "Planned reminders" list.</summary>
+/// <param name="When">Local date and time.</param>
+/// <param name="Kind">What the reminder is about.</param>
+/// <param name="Text">Title and body as the notification shows them.</param>
+/// <param name="Target">The screen a tap opens.</param>
+public sealed record PlannedReminderRowViewModel(string When, string Kind, string Text, string Target)
+{
+    /// <summary>Time and kind in one line.</summary>
+    public string Header => $"{When} · {Kind}";
 }
