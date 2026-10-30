@@ -77,6 +77,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
+- **To fix (owner, 2026-10-30, Windows wide):** Bills opened from a contract ("All bills", `BillsFor`, contract highlighted): tapping one card marks **all** cards as selected and the selection never clears (screenshot: every gas bill card has the selected border). Likely the "highlighted contract" state and the selection share the same visual (border) or IsSelected is set for every row of that contract. Fix together with the next Bills change.
+- To check (same screenshot): gas bill editor offers "Use prepayment 158,56 €" and the list shows several unpaid equalized bills after the import — imported payments may be left unallocated (prepayment) instead of allocated to their bills. Verify with the owner before fixing.
+
 - Import: an installation-day row ignores the old-final value from a note (old final = last regular reading) — exact round trip only when they are equal (T-027a).
 
 - Some texts do not wrap on narrow screens (seen in the emulator, place not noted) → device polish pass on a real phone/tablet before backup/sync.
