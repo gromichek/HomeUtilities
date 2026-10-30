@@ -15,8 +15,19 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
         Shell.SetBackButtonBehavior(this, new BackButtonBehavior { Command = new Command(LeaveAsync) });
     }
 
+    private bool _queryApplied;
+
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        // Shell applies a plain query dictionary again whenever the user comes back to this page (e.g. after a child
+        // dialog page was closed). Loading again would throw away the unsaved input (owner bug 2026-10-30: the name of a
+        // new tariff component vanished after adding a price), so the query is applied only once per page.
+        if (_queryApplied)
+        {
+            return;
+        }
+
+        _queryApplied = true;
         if (query.TryGetValue(EditorNavigation.EditorParameter, out var editor) && editor is PaneEditorViewModel running)
         {
             BindingContext = running;
