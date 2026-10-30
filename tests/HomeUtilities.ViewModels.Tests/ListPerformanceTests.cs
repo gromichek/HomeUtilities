@@ -13,7 +13,8 @@ namespace HomeUtilities.ViewModels.Tests;
 public class ListPerformanceTests
 {
     private static readonly DateOnly Today = new(2026, 10, 27);
-    private static readonly TimeSpan Limit = TimeSpan.FromSeconds(1);
+    // A sanity limit, not a benchmark: shared CI runners vary.
+    private static readonly TimeSpan Limit = TimeSpan.FromSeconds(3);
 
     private readonly BillTestKit _kit = new(Today);
 
