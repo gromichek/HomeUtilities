@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -30,6 +31,12 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     [ObservableProperty]
     private string _emptyText = string.Empty;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private string _loadingText = string.Empty;
+
     public ReadingHistoryViewModel(
         IMeterStore store,
         IAttachmentStore attachments,
@@ -52,7 +59,9 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     /// <summary>Called after a reading was edited or deleted, so that the screen that opened the history can refresh.</summary>
     public Func<Task>? Changed { get; set; }
 
-    public bool IsEmpty => Groups.All(g => g.Rows.Count == 0);
+    public bool IsEmpty => !IsLoading && Groups.All(g => g.Rows.Count == 0);
+
+    partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsEmpty));
 
     public Task LoadAsync(Guid meterId)
     {
@@ -66,20 +75,29 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     /// <summary>Reads the meter again and rebuilds the rows.</summary>
     public async Task ReloadAsync()
     {
-        _meter = MeterId == Guid.Empty ? null : await _store.GetAsync(MeterId);
-        Rebuild();
+        IsLoading = true;
+        try
+        {
+            _meter = MeterId == Guid.Empty ? null : await _store.GetAsync(MeterId);
+            await RebuildAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     protected override void RefreshTexts()
     {
         EmptyText = _localizer["ReadingHistoryEmpty"];
+        LoadingText = _localizer["Loading"];
         if (_meter is not null)
         {
-            Rebuild();
+            _ = RunSafeAsync(RebuildAsync);
         }
     }
 
-    private void Rebuild()
+    private async Task RebuildAsync()
     {
         if (_meter is not { } meter)
         {
@@ -95,16 +113,19 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
         var chain = new MeterChain([meter]);
         var unit = EnumText.Get(_localizer, meter.Unit);
 
-        Groups =
-        [
-            .. meter.Registers
+        // Twenty years of monthly readings per register: the rows are built off the UI thread, and the screen shows a page
+        // of them at a time (ReadingHistoryGroupViewModel), so only a few dozen row views are ever created.
+        var groups = await Task.Run(() =>
+            meter.Registers
                 .Where(r => !r.IsDeleted)
                 .OrderBy(r => r.Kind)
                 .ThenBy(r => r.Direction)
                 .Select(register => new ReadingHistoryGroupViewModel(
                     RegisterLabel.For(_localizer, meter, register),
-                    BuildRows(meter, register, chain, unit))),
-        ];
+                    BuildRows(meter, register, chain, unit),
+                    _localizer))
+                .ToList());
+        Groups = groups;
         OnPropertyChanged(nameof(IsEmpty));
     }
 
@@ -252,14 +273,50 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     }
 }
 
-/// <summary>The readings of one register in the history.</summary>
-public sealed class ReadingHistoryGroupViewModel(string header, IReadOnlyList<ReadingHistoryRowViewModel> rows)
+/// <summary>The readings of one register in the history; <see cref="VisibleRows"/> grows by a page on "Show more".</summary>
+public sealed partial class ReadingHistoryGroupViewModel : ObservableObject
 {
-    public string Header { get; } = header;
+    /// <summary>How many rows are shown at first and added by each "Show more".</summary>
+    public const int PageSize = 30;
+
+    private readonly ILocalizer _localizer;
+
+    public ReadingHistoryGroupViewModel(string header, IReadOnlyList<ReadingHistoryRowViewModel> rows, ILocalizer localizer)
+    {
+        Header = header;
+        Rows = rows;
+        _localizer = localizer;
+        ShowMoreCommand = new RelayCommand(ShowMore);
+        ShowMore();
+    }
+
+    public string Header { get; }
 
     public bool HasHeader => Header.Length > 0;
 
-    public IReadOnlyList<ReadingHistoryRowViewModel> Rows { get; } = rows;
+    /// <summary>Every reading of the register, newest first.</summary>
+    public IReadOnlyList<ReadingHistoryRowViewModel> Rows { get; }
+
+    /// <summary>The rows on screen: the newest <see cref="PageSize"/>, then more on request.</summary>
+    public ObservableCollection<ReadingHistoryRowViewModel> VisibleRows { get; } = [];
+
+    public bool HasMore => VisibleRows.Count < Rows.Count;
+
+    [ObservableProperty]
+    private string _showMoreText = string.Empty;
+
+    public IRelayCommand ShowMoreCommand { get; }
+
+    private void ShowMore()
+    {
+        foreach (var row in Rows.Skip(VisibleRows.Count).Take(PageSize))
+        {
+            VisibleRows.Add(row);
+        }
+
+        OnPropertyChanged(nameof(HasMore));
+        ShowMoreText = _localizer.Get("ReadingHistoryShowMore", Rows.Count - VisibleRows.Count);
+    }
 }
 
 /// <summary>One reading in the history list.</summary>

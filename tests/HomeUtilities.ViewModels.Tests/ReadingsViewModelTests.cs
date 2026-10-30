@@ -606,6 +606,15 @@ public class ReadingsViewModelTests
         Assert.True(vm.ShowNoMeters);
     }
 
+    // The history builds its rows off the UI thread, so opening it completes a moment after the tap.
+    private static async Task WaitAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 300 && !condition(); i++)
+        {
+            await Task.Delay(10);
+        }
+    }
+
     [Fact]
     public async Task Tapping_a_card_opens_the_history_page_on_a_phone_and_the_pane_on_a_tablet()
     {
@@ -614,7 +623,7 @@ public class ReadingsViewModelTests
         var vm = await LoadAsync();
 
         Card(vm, "Kitchen").OpenHistoryCommand.Execute(null);
-        await Task.Yield();
+        await WaitAsync(() => _kit.Navigation.Visited.Count > 0);
 
         var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
         Assert.Equal(Routes.ReadingHistory, route);
@@ -626,7 +635,7 @@ public class ReadingsViewModelTests
         Assert.True(vm.IsTwoPane);
         Assert.True(vm.ShowHistoryHint);
         Card(vm, "Kitchen").OpenHistoryCommand.Execute(null);
-        await Task.Yield();
+        await WaitAsync(() => vm.SelectedHistory is not null);
 
         Assert.Equal(kitchen.Id, vm.SelectedHistory!.MeterId);
         Assert.True(Card(vm, "Kitchen").IsSelected);
@@ -641,7 +650,7 @@ public class ReadingsViewModelTests
         _kit.Layout.Change(LayoutMode.Expanded);
         var vm = await LoadAsync();
         Card(vm, "Kitchen").OpenHistoryCommand.Execute(null);
-        await Task.Yield();
+        await WaitAsync(() => vm.SelectedHistory is not null);
         Assert.Contains("100", Card(vm, "Kitchen").Rows[0].LastText);
 
         _kit.Dialogs.ConfirmResult = true;

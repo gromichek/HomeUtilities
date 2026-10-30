@@ -409,6 +409,8 @@
   <data name="ReadingHistoryHeader" xml:space="preserve"><value>Readings</value></data>
   <data name="ReadingHistoryTitle" xml:space="preserve"><value>Readings — {0}</value></data>
   <data name="ReadingHistoryEmpty" xml:space="preserve"><value>No readings yet.</value></data>
+  <data name="Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="ReadingHistoryShowMore" xml:space="preserve"><value>Show more ({0} older)</value></data>
   <data name="ReadingSubmittedOn" xml:space="preserve"><value>submitted {0}</value></data>
   <data name="ReadingEditTitle" xml:space="preserve"><value>Edit reading</value></data>
   <data name="ReadingDateLabel" xml:space="preserve"><value>Date *</value></data>
