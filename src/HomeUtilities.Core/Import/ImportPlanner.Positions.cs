@@ -278,8 +278,9 @@ public static partial class ImportPlanner
         }
         else if (rowInitial)
         {
-            // The installation-day row: the old meter's last reading is the last value before.
-            final = previous.Value;
+            // The installation-day row: the old meter's final reading is the one in the note ("rad:"), if it is not below the
+            // last regular reading; otherwise the last value before.
+            final = entry?.OldFinal is { } noted && noted >= previous.Value ? noted : previous.Value;
         }
         else if (entry?.OldFinal is { } notedFinal)
         {
