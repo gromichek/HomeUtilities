@@ -76,18 +76,58 @@ public static class ConsumptionCalculator
     }
 
     /// <summary>Readings of the register of the given kind over all meters of the chain, ordered by date, then by meter position.</summary>
-    private static List<Located> LocateReadings(MeterChain chain, RegisterKind kind) =>
-        [.. chain.Meters
-            .SelectMany((meter, index) => RegisterReadings(meter, kind).Select(r => new Located(r, index)))
-            .OrderBy(l => l.Reading.Date)
-            .ThenBy(l => l.MeterIndex)];
+    private static List<Located> LocateReadings(MeterChain chain, RegisterKind kind)
+    {
+        var result = new List<Located>();
+        for (var index = 0; index < chain.Meters.Count; index++)
+        {
+            foreach (var reading in RegisterReadings(chain.Meters[index], kind))
+            {
+                result.Add(new Located(reading, index));
+            }
+        }
 
-    private static List<MeterReading> RegisterReadings(Meter meter, RegisterKind kind) =>
-        [.. meter.Registers
-            .Where(r => !r.IsDeleted && r.Kind == kind)
-            .SelectMany(r => r.Readings)
-            .Where(r => !r.IsDeleted)
-            .OrderBy(r => r.Date)];
+        // Readings are normally stored oldest first: sort only when they are not (the sort is stable, like the order of insertion).
+        for (var i = 1; i < result.Count; i++)
+        {
+            if (result[i - 1].Reading.Date > result[i].Reading.Date)
+            {
+                return [.. result.OrderBy(l => l.Reading.Date).ThenBy(l => l.MeterIndex)];
+            }
+        }
+
+        return result;
+    }
+
+    private static List<MeterReading> RegisterReadings(Meter meter, RegisterKind kind)
+    {
+        var readings = new List<MeterReading>();
+        foreach (var register in meter.Registers)
+        {
+            if (register.IsDeleted || register.Kind != kind)
+            {
+                continue;
+            }
+
+            foreach (var reading in register.Readings)
+            {
+                if (!reading.IsDeleted)
+                {
+                    readings.Add(reading);
+                }
+            }
+        }
+
+        for (var i = 1; i < readings.Count; i++)
+        {
+            if (readings[i - 1].Date > readings[i].Date)
+            {
+                return [.. readings.OrderBy(r => r.Date)];
+            }
+        }
+
+        return readings;
+    }
 
     // The last reading of a replaced meter: its Final reading, or the estimated one the import stored on the removal date.
     private static MeterReading? LastReadingOf(Meter meter, List<MeterReading> own) =>

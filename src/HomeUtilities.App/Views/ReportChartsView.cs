@@ -105,6 +105,11 @@ public sealed class ReportChartsView : ContentView
         block.Children.Add(graphics);
         block.Children.Add(tooltip);
         block.Children.Add(Legend(model, text));
+        if (model.PeriodNote is { } periodNote)
+        {
+            block.Children.Add(new Label { Text = periodNote, FontSize = 12, TextColor = muted });
+        }
+
         if (model.ApproximateNote is { } note)
         {
             block.Children.Add(new Label { Text = note, FontSize = 12, TextColor = muted });

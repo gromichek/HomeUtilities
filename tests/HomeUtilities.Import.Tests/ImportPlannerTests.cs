@@ -40,6 +40,49 @@ public class ImportPlannerTests
     }
 
     [Fact]
+    public void Rows_before_the_contract_start_are_imported_with_a_warning_and_a_suggested_start()
+    {
+        // Periods are 2013-11, 2013-12, 2014-01, 2014-02, 2014-03; the contract starts on 2014-02-10: the first three are before it.
+        _f.Contract.ValidFrom = new DateOnly(2014, 2, 10);
+
+        var plan = ImportPlanner.Plan(_f.WaterProfile(), Read(SyntheticWorkbook.Water), _f.Context(_f.Cold, _f.Hot));
+
+        foreach (var number in new[] { 2, 3, 4 })
+        {
+            var issue = Row(plan, number).Issues.Single(i => i.Code == ImportIssueCodes.PeriodBeforeContractStart);
+            Assert.Equal(ImportIssueSeverity.Warning, issue.Severity);
+            Assert.Equal(["10.02.2014"], issue.Args);
+            Assert.NotNull(Row(plan, number).Bill);
+        }
+
+        Assert.DoesNotContain(Row(plan, 5).Issues, i => i.Code == ImportIssueCodes.PeriodBeforeContractStart);
+        Assert.Equal(3, plan.RowsBeforeContractStart);
+        Assert.Equal(new DateOnly(2013, 11, 1), plan.SuggestedContractStart);
+        Assert.Equal(new DateOnly(2014, 2, 10), plan.ContractValidFrom);
+    }
+
+    [Fact]
+    public void A_contract_that_covers_the_sheet_gives_no_validity_warning()
+    {
+        var plan = ImportPlanner.Plan(_f.WaterProfile(), Read(SyntheticWorkbook.Water), _f.Context(_f.Cold, _f.Hot));
+
+        Assert.Equal(0, plan.RowsBeforeContractStart);
+        Assert.Null(plan.SuggestedContractStart);
+        Assert.DoesNotContain(plan.Rows.SelectMany(r => r.Issues), i => i.Code is ImportIssueCodes.PeriodBeforeContractStart or ImportIssueCodes.PeriodAfterContractEnd);
+    }
+
+    [Fact]
+    public void Rows_after_the_contract_end_get_a_warning()
+    {
+        _f.Contract.ValidTo = new DateOnly(2013, 12, 31);
+
+        var plan = ImportPlanner.Plan(_f.WaterProfile(), Read(SyntheticWorkbook.Water), _f.Context(_f.Cold, _f.Hot));
+
+        Assert.True(Has(Row(plan, 4), ImportIssueCodes.PeriodAfterContractEnd, ImportIssueSeverity.Warning));
+        Assert.False(Has(Row(plan, 3), ImportIssueCodes.PeriodAfterContractEnd, ImportIssueSeverity.Warning));
+    }
+
+    [Fact]
     public void Each_period_format_of_the_water_sheet_is_understood()
     {
         var plan = ImportPlanner.Plan(_f.WaterProfile(), Read(SyntheticWorkbook.Water), _f.Context(_f.Cold, _f.Hot));

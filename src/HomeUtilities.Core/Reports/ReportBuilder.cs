@@ -5,21 +5,23 @@ namespace HomeUtilities.Core.Reports;
 /// <summary>Builds the report tables from the loaded data. Pure functions: the same data and filter give the same table.</summary>
 public static class ReportBuilder
 {
-    /// <summary>Builds the report of the given kind.</summary>
-    public static ReportTable Build(ReportKind kind, ReportData data, ReportFilter filter)
+    /// <summary>Builds the report of the given kind. A cancelled build throws <see cref="OperationCanceledException"/>.</summary>
+    public static ReportTable Build(ReportKind kind, ReportData data, ReportFilter filter, CancellationToken cancellation = default)
     {
         ArgumentNullException.ThrowIfNull(data);
         ArgumentNullException.ThrowIfNull(filter);
 
+        cancellation.ThrowIfCancellationRequested();
         var properties = SelectedProperties(data, filter);
         var model = kind switch
         {
             ReportKind.Costs => CostsReport.Create(data, filter, properties),
-            ReportKind.Consumption => ConsumptionReport.Create(data, filter, properties),
-            ReportKind.UnitCost => UnitCostReport.Create(data, filter, properties),
-            ReportKind.CalculatedVsBilled => CalculatedVsBilledReport.Create(data, filter, properties),
+            ReportKind.Consumption => ConsumptionReport.Create(data, filter, properties, cancellation),
+            ReportKind.UnitCost => UnitCostReport.Create(data, filter, properties, cancellation),
+            ReportKind.CalculatedVsBilled => CalculatedVsBilledReport.Create(data, filter, properties, cancellation),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown report."),
         };
+        cancellation.ThrowIfCancellationRequested();
         return ReportLayout.Build(model);
     }
 

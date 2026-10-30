@@ -10,6 +10,9 @@ namespace HomeUtilities.App.Views;
 /// group: a coloured stripe on its header, every other group's numbers shaded, headers in the property's own colour (a fixed palette), a 2 px separator before the group and a bold, tinted
 /// total column. Column headers wrap at word boundaries only (a column is as wide as its longest word needs). Numbers that rest
 /// on incomplete data are muted, the totals row is bold, a number with bills or readings behind it can be tapped.
+/// A long table (20 years of months) is not built in one go: the grid has all its rows from the start (so the scroll height is right),
+/// the first screenful of rows is filled at once and the rest in batches on the dispatcher, so the page stays responsive. A newer
+/// table cancels the filling of the older one.
 /// </summary>
 public sealed class ReportTableView : ContentView
 {
@@ -24,6 +27,11 @@ public sealed class ReportTableView : ContentView
     private const double StripeHeight = 4;
     private const int HeaderRows = 2;
     private const double ScrollbarRoom = 24;
+    private const int FirstBatchRows = 60;
+    private const int BatchRows = 30;
+
+    // Counts the tables set so far: a filling that belongs to an older table stops.
+    private int _generation;
 
     public static readonly BindableProperty TableProperty = BindableProperty.Create(
         nameof(Table),
@@ -171,6 +179,7 @@ public sealed class ReportTableView : ContentView
 
     private void Rebuild(ReportTableViewModel? table)
     {
+        var generation = ++_generation;
         if (table is null || table.Rows.Count == 0)
         {
             Content = null;
@@ -248,7 +257,7 @@ public sealed class ReportTableView : ContentView
             body.Add(MakeCell(totalHeader, new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Total, Separator: true, MaxLines: 3, ToolTip: totalHeader)), column, 1);
         }
 
-        for (var r = 0; r < table.Rows.Count; r++)
+        void AddRow(int r)
         {
             var row = table.Rows[r];
             var gridRow = r + HeaderRows;
@@ -281,6 +290,37 @@ public sealed class ReportTableView : ContentView
                     row.Cells.Count,
                     gridRow);
             }
+        }
+
+        // The first screenful now, the rest in batches; the totals row (the last one) comes last.
+        var first = Math.Min(FirstBatchRows, table.Rows.Count);
+        for (var r = 0; r < first; r++)
+        {
+            AddRow(r);
+        }
+
+        void FillFrom(int next)
+        {
+            if (generation != _generation)
+            {
+                return;
+            }
+
+            var end = Math.Min(next + BatchRows, table.Rows.Count);
+            for (var r = next; r < end; r++)
+            {
+                AddRow(r);
+            }
+
+            if (end < table.Rows.Count)
+            {
+                Dispatcher.Dispatch(() => FillFrom(end));
+            }
+        }
+
+        if (first < table.Rows.Count)
+        {
+            Dispatcher.Dispatch(() => FillFrom(first));
         }
 
         var scroll = new ScrollView { Orientation = ScrollOrientation.Horizontal, HorizontalScrollBarVisibility = ScrollBarVisibility.Default, Content = body };

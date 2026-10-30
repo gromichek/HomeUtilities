@@ -32,6 +32,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     private readonly ILayoutModeService _layout;
     private readonly IDialogService _dialogs;
     private int _busyCount;
+    private CancellationTokenSource? _buildCancellation;
     private readonly SemaphoreSlim _calculation = new(1, 1);
 
     private ReportData? _data;
@@ -515,6 +516,14 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
             _state.ConsumptionGrouping);
     }
 
+    /// <summary>A report as the screen needs it, made off the UI thread.</summary>
+    private sealed record Built(ReportTable Table, ReportTableViewModel View, IReadOnlyList<ChartModel> Charts);
+
+    /// <summary>
+    /// More months than this are charted by year (a table of 20 years keeps its months, the chart would have 240 points per series).
+    /// </summary>
+    internal const int MaxChartMonths = 120;
+
     private async Task RebuildAsync()
     {
         if (_data is null)
@@ -527,21 +536,67 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         var kind = Kind;
         var version = Interlocked.Increment(ref _version);
 
-        // ReportData remembers calculated charges and is not thread-safe: one calculation at a time.
-        ReportTable table;
-        await _calculation.WaitAsync();
+        // A newer filter change cancels the older build: its result is never shown (the old table stays until the new one is ready).
+        var source = new CancellationTokenSource();
+        var older = Interlocked.Exchange(ref _buildCancellation, source);
+        older?.Cancel();
+        var token = source.Token;
+
+        var culture = CultureInfo.CurrentCulture;
+        var uiCulture = CultureInfo.CurrentUICulture;
+        var labels = new ReportLabels(_localizer, culture);
+        var drill = OpenDrill;
+        var propertyColors = ReportPropertyColors.Assign(data.Properties.Select(p => (p.Id, p.Name)));
+        var categoryColors = data.Categories.ToDictionary(c => c.Id, c => c.Color);
+
+        _busyCount++;
+        IsBusy = true;
+        Built built;
         try
         {
-            if (version != _version)
+            // ReportData remembers calculated charges and is not thread-safe: one calculation at a time.
+            await _calculation.WaitAsync();
+            try
+            {
+                if (version != _version)
+                {
+                    return;
+                }
+
+                // The report, the table to draw and the charts are all made on a pool thread; only the result is applied here.
+                built = await Task.Run(
+                    () =>
+                    {
+                        CultureInfo.CurrentCulture = culture;
+                        CultureInfo.CurrentUICulture = uiCulture;
+                        var report = ReportBuilder.Build(kind, data, filter, token);
+                        var view = ReportTableViewModel.From(report, labels, drill, propertyColors);
+                        token.ThrowIfCancellationRequested();
+
+                        // 20 years of months would be 240 points per series: chart the years instead (the table keeps its months).
+                        var byYear = filter is { Rows: ReportRows.Months, YearOverYear: false } && filter.From.MonthsUntil(filter.To) + 1 > MaxChartMonths;
+                        var chartTable = byYear ? ReportBuilder.Build(kind, data, filter with { Rows = ReportRows.Years }, token) : report;
+                        var charts = ReportChartBuilder.Build(chartTable, labels, _localizer, categoryColors, byYear);
+                        return new Built(report, view, charts);
+                    },
+                    token);
+            }
+            catch (OperationCanceledException)
             {
                 return;
             }
-
-            table = await Task.Run(() => ReportBuilder.Build(kind, data, filter));
+            finally
+            {
+                _calculation.Release();
+            }
         }
         finally
         {
-            _calculation.Release();
+            if (--_busyCount <= 0)
+            {
+                _busyCount = 0;
+                IsBusy = false;
+            }
         }
 
         if (version != _version)
@@ -549,11 +604,11 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
             return;
         }
 
+        var table = built.Table;
         _table = table;
-        var labels = new ReportLabels(_localizer);
-        TableView = ReportTableViewModel.From(table, labels, OpenDrill, ReportPropertyColors.Assign(data.Properties.Select(p => (p.Id, p.Name))));
+        TableView = built.View;
         _hasData = !table.IsEmpty;
-        Charts = ReportChartBuilder.Build(table, labels, _localizer, data.Categories.ToDictionary(c => c.Id, c => c.Color));
+        Charts = built.Charts;
         ShowEmpty = table.IsEmpty;
         ShowLegend = !table.IsEmpty;
         var (from, to) = (filter.From, filter.To);

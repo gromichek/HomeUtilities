@@ -1,5 +1,6 @@
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Tariffs;
 
 namespace HomeUtilities.Core.Reports;
@@ -59,4 +60,12 @@ internal static class ContractQuantity
             .Where(l => l.Basis == ChargeBasis.PerUnit)
             .SelectMany(l => l.Consumption)
             .Any(c => c.StartReading is { } start && c.EndReading?.Id == start.Id);
+
+    /// <summary>The unit of the first meter ever linked to the contract; null if it has none.</summary>
+    public static MeterUnit? FirstUnit(ReportData data, Contract contract, IReadOnlyDictionary<Guid, MeterUnit> meterUnits) =>
+        data.LinksOfContract(contract.Id)
+            .Where(cm => meterUnits.ContainsKey(cm.MeterId))
+            .OrderBy(cm => cm.ValidFrom)
+            .Select(cm => (MeterUnit?)meterUnits[cm.MeterId])
+            .FirstOrDefault();
 }
