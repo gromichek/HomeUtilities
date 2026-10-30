@@ -2,6 +2,7 @@
 
 ## Roles
 - **Project lead** (Claude, planning session): architecture, data model, task files, PR review, merge.
+  A new lead session starts from `docs/LEAD_HANDOVER.md`.
 - **Coding session** (Claude Code): implements one task, tests, opens a PR with a report. Rules: `CLAUDE.md`.
 - **Owner** (Sergej): passes tasks to coding sessions, pulls `main`, tests the app manually, decides on
   functionality.
