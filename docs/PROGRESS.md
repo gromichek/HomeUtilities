@@ -45,6 +45,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| — | Reports: metered contracts without tariff, equalized months by tariff, months before contract start, 20-year performance | 2026-10-30, #133 | Sonnet helper (resumed after the weekly limit). |
+| — | Meter–contract links start at installation; editable link dates; repair | 2026-10-30, #134 | Sonnet helper. Old rule started new links "today", hiding history. |
 | — | Consumption report: group by resource / contract / meter | 2026-10-29, #130 | Sonnet helper; water total of the flat = contract grouping. |
 | — | Reminder on the last window day; equalized months decided by plan coverage | 2026-10-29, #127, #128 | Sonnet helpers. Switching a contract to equalized keeps it; months before the first plan stay "by consumption". |
 | T-028 | Reminders (local notifications) | 2026-10-29, #124 | Plugin.LocalNotification 14.1.2 (MIT). Manifest removes exact-alarm, wake-lock and foreground-service permissions — watch for a crash if the plugin needs them. Windows: in-app summary snackbar once a day (owner OK). Contract flag instead of ReminderRule. |
@@ -110,6 +112,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
 | 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
+| 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
 | | #124 | T-028 reminders | pending |
 | 2026-10-29 | #116 + #117 | T-026 import wizard; report colours + calendar | Colours/calendar OK; Shift+wheel does not scroll the table. Import: dates are reading dates (not periods), one column per meter position with 6 replacements → T-027 |
 | 2026-10-29 | #114 | T-023b reports polish | OK (requests: coloured property headers, calendar for custom period → #117) |
