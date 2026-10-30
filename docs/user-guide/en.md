@@ -178,7 +178,15 @@ Open a property → card **Meters** → **Add meter**.
 - **Installation and verification:** installed on, last verified, verification interval (water meters usually 72
   months) → the app shows "Next verification" and warns when it is overdue.
 - **Contracts:** switch on every contract that uses this meter. A hot water meter is usually linked to both the
-  water and the heating contract.
+  water and the heating contract. Each linked contract shows the dates of the link (*from 01.05.2004*, and *to …* if it
+  ended). **The link decides which readings belong to the contract:** charges and reports (consumption by contract, unit
+  cost, calculated vs billed) count a meter's readings only inside the link. A new link therefore starts on the later of the
+  meter's *installed on* date and the contract's *Valid from* — not today — so the whole history of an old meter is counted.
+  Tap a linked contract to open **Contract link dates**: *Valid from* and, if the meter stopped serving the contract, an end
+  date. The app refuses a start before the meter was installed, an end before the start, and dates that overlap another link
+  of the same meter and contract; a start before the contract's own start is allowed (with a warning), but charges only count
+  the months from the contract's start. The dates are saved when you press *Save* in the dialog; the meter page stays open.
+  Switching a contract off ends the link yesterday; switching it on again starts a new link the day after the old one ended.
 - **Readings:** the latest readings and "All readings". A *Submit readings* link of the contract or supplier is
   shown on the meter card.
 - **Replace meter…** — use this when a meter is physically replaced (verification, defect). A wizard asks for the
@@ -856,11 +864,22 @@ contract and *bills and payments* to the contract; it does not create contracts 
 (tariffs stay as you entered them). If a meter or contract is missing, the wizard says so; *Open contract* takes you to it.
 The file must be an `.xlsx` workbook (not the old `.xls`).
 
+**Three dates must cover the history** — the contract's start, the meter's installation and the **link** between them
+(*Meters → Contracts*). Charges and reports count a reading only when all three allow it.
+
 **Set the contract's *Valid from* to the start of the history first.** Charges and reports ignore the months before the
 contract's start date. If the sheet has older rows, those rows get a warning (*This period is before the contract's start
 date…*) and the preview says *N rows are before the contract's start date 15.10.2026 — set "Valid from" in the contract…*;
 the button **Set contract start to 01.01.2014** changes the contract's *Valid from* to the first day of the earliest imported
 month (after a confirmation) and plans the import again. The rows are imported either way.
+
+**Check the meters' installation dates and link dates too.** A meter's readings count for a contract only inside the link
+between them. If a meter was linked to the contract recently (the link starts on that day), the older months would show no
+consumption. When the sheet has data before the start of a meter link, the preview adds *N meter links of this contract start
+after the earliest imported data (01.01.2014) — the consumption of the earlier months would be missing…*. The same button (or,
+when the contract start is fine, **Start meter links at installation**) moves those links to the later of the meter's
+installation and the (new) contract start, after a confirmation. A meter installed after the first imported month keeps its own
+installation date — enter the real one in the meter, or let the import find the replacement.
 
 The wizard has four steps:
 
@@ -954,6 +973,10 @@ date, that part is skipped — so importing the same sheet twice adds nothing. A
 - **Undo import** hides everything that import created — its bills, their payments, readings and the meters it added — in one go,
   puts the replaced meters and their contract links back, and the balances return to what they were. Nothing is erased for good. If you edited some of those records after the import, the app
   asks *Some imported records were edited later. Undo anyway?* before touching anything. After an undo you can import again.
+- **Meter links** shows links that start after their meter was installed although the meter has readings before the link
+  (typically a link made today for a meter installed years ago), with the date they have now and the date they would get:
+  the later of the meter's installation and the contract's *Valid from*. *Start links at installation…* moves them after a
+  confirmation; nothing changes before you confirm. The card only lists the first link of a meter and contract.
 - A **profile** can be renamed (edit the name and press *Save name*), deleted, or **exported** to a `.json` file and loaded
   again with *Import profile from file* — for example to send it to the person who helps you. The file contains only the
   column numbers and settings (period rules, header texts): **no amounts and no readings**.

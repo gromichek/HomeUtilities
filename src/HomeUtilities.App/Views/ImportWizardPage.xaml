@@ -231,8 +231,9 @@
             <VerticalStackLayout Grid.Row="1" Spacing="6">
                 <Label Text="{Binding PlanProblemText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasPlanProblem}" />
                 <Label Text="{Binding BeforeStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasBeforeStart}" />
+                <Label Text="{Binding LinkStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasLinkStart}" />
                 <Button Text="{Binding SetContractStartText}" Command="{Binding SetContractStartCommand}" Style="{StaticResource SecondaryButton}"
-                        HorizontalOptions="Start" IsVisible="{Binding HasBeforeStart}" />
+                        HorizontalOptions="Start" IsVisible="{Binding HasStartFix}" />
             </VerticalStackLayout>
             <HorizontalStackLayout Grid.Row="2" Spacing="8">
                 <Label Text="{Binding FilterLabel}" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />

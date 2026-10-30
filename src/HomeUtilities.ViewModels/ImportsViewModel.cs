@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Common;
+using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Import;
 using HomeUtilities.ViewModels.Common;
 
@@ -100,10 +101,13 @@ public sealed partial class ImportsViewModel : ViewModelBase
     private readonly IImportProfileStore _profiles;
     private readonly IImportFileService _files;
     private readonly IFileSaveService _saver;
+    private readonly IMeterStore _meters;
+    private readonly IContractStore _contracts;
     private readonly IDialogService _dialogs;
     private readonly INavigationService _navigation;
     private readonly ISnackbarService _snackbar;
     private readonly ILocalizer _localizer;
+    private IReadOnlyList<MeterLinkRepairItem> _repairItems = [];
 
     [ObservableProperty]
     private IReadOnlyList<ImportBatchItemViewModel> _batchItems = [];
@@ -132,11 +136,28 @@ public sealed partial class ImportsViewModel : ViewModelBase
     [ObservableProperty]
     private string _startImportText = string.Empty;
 
+    [ObservableProperty]
+    private IReadOnlyList<string> _linkRepairLines = [];
+
+    [ObservableProperty]
+    private string _linkRepairHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _linkRepairHint = string.Empty;
+
+    [ObservableProperty]
+    private string _linkRepairNone = string.Empty;
+
+    [ObservableProperty]
+    private string _linkRepairButtonText = string.Empty;
+
     public ImportsViewModel(
         IImportBatchStore batches,
         IImportProfileStore profiles,
         IImportFileService files,
         IFileSaveService saver,
+        IMeterStore meters,
+        IContractStore contracts,
         IDialogService dialogs,
         INavigationService navigation,
         ISnackbarService snackbar,
@@ -146,6 +167,8 @@ public sealed partial class ImportsViewModel : ViewModelBase
         _profiles = profiles;
         _files = files;
         _saver = saver;
+        _meters = meters;
+        _contracts = contracts;
         _dialogs = dialogs;
         _navigation = navigation;
         _snackbar = snackbar;
@@ -160,6 +183,17 @@ public sealed partial class ImportsViewModel : ViewModelBase
     public bool HasProfiles => ProfileItems.Count > 0;
 
     public bool HasNoProfiles => ProfileItems.Count == 0;
+
+    /// <summary>True while some meter links start after their meter was installed (the repair card offers the fix).</summary>
+    public bool HasLinkRepair => LinkRepairLines.Count > 0;
+
+    public bool HasNoLinkRepair => LinkRepairLines.Count == 0;
+
+    partial void OnLinkRepairLinesChanged(IReadOnlyList<string> value)
+    {
+        OnPropertyChanged(nameof(HasLinkRepair));
+        OnPropertyChanged(nameof(HasNoLinkRepair));
+    }
 
     partial void OnBatchItemsChanged(IReadOnlyList<ImportBatchItemViewModel> value)
     {
@@ -182,7 +216,55 @@ public sealed partial class ImportsViewModel : ViewModelBase
         var profiles = await _profiles.ListAsync();
         BatchItems = [.. batches.Select(b => new ImportBatchItemViewModel(b, _localizer, UndoAsync))];
         ProfileItems = [.. profiles.Select(p => new ImportProfileItemViewModel(p, _localizer, SaveNameAsync, ExportAsync, DeleteProfileAsync))];
+        await LoadLinkRepairAsync();
     }
+
+    private async Task LoadLinkRepairAsync()
+    {
+        var contracts = await _contracts.ListAsync();
+        var links = new List<ContractMeter>();
+        foreach (var contract in contracts)
+        {
+            links.AddRange(await _contracts.ListContractMetersAsync(contract.Id));
+        }
+
+        _repairItems = MeterLinkRepair.Find(await _meters.ListAsync(), contracts, links);
+        LinkRepairLines =
+        [
+            .. _repairItems.Select(i => _localizer.Get(
+                "ImportsLinkRepairLine", i.Contract.Title, MeterNames.Title(_localizer, i.Meter), i.Link.ValidFrom, i.NewValidFrom)),
+        ];
+    }
+
+    /// <summary>After a confirmation moves the start of the listed links to the installation of their meters (or the contract's start).</summary>
+    [RelayCommand]
+    private Task RepairLinksAsync() => RunSafeAsync(async () =>
+    {
+        var items = _repairItems;
+        if (items.Count == 0)
+        {
+            return;
+        }
+
+        var confirmed = await _dialogs.ConfirmAsync(
+            _localizer["ImportsLinkRepairHeader"],
+            _localizer["ImportsLinkRepairQuestion"] + Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, LinkRepairLines),
+            _localizer["Save"],
+            _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        foreach (var item in items)
+        {
+            item.Link.ValidFrom = item.NewValidFrom;
+            await _contracts.SaveContractMeterAsync(item.Link);
+        }
+
+        await LoadLinkRepairAsync();
+        _snackbar.Notify(_localizer.Get("ImportsLinkRepairDone", items.Count));
+    });
 
     /// <summary>Opens the import wizard.</summary>
     [RelayCommand]
@@ -227,6 +309,10 @@ public sealed partial class ImportsViewModel : ViewModelBase
         ProfilesHint = _localizer["ImportProfilesHint"];
         ImportProfileText = _localizer["ImportProfileImport"];
         StartImportText = _localizer["SectionImport"];
+        LinkRepairHeader = _localizer["ImportsLinkRepairHeader"];
+        LinkRepairHint = _localizer["ImportsLinkRepairHint"];
+        LinkRepairNone = _localizer["ImportsLinkRepairNone"];
+        LinkRepairButtonText = _localizer["ImportsLinkRepairButton"];
     }
 
     private Task UndoAsync(ImportBatchItemViewModel item) => RunSafeAsync(async () =>

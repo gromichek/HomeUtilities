@@ -65,6 +65,24 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Repair: links that start after the meter was installed hide the earlier readings. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding LinkRepairHeader}" Style="{StaticResource SectionHeader}" />
+                    <Label Text="{Binding LinkRepairHint}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                    <Label Text="{Binding LinkRepairNone}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoLinkRepair}" />
+                    <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding LinkRepairLines}" IsVisible="{Binding HasLinkRepair}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Button Text="{Binding LinkRepairButtonText}" Command="{Binding RepairLinksCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" IsVisible="{Binding HasLinkRepair}" />
+                </VerticalStackLayout>
+            </Border>
+
             <ActivityIndicator IsRunning="True" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
         </VerticalStackLayout>
     </ScrollView>

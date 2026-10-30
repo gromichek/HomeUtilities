@@ -48,15 +48,19 @@ public sealed partial class MeterContractSwitchViewModel : CommunityToolkit.Mvvm
 {
     private bool _isOn;
 
-    public MeterContractSwitchViewModel(MeterContractLink link, string subtitle, bool isOn)
+    public MeterContractSwitchViewModel(MeterContractLink link, string subtitle, bool isOn, IReadOnlyList<ContractMeter>? pairLinks = null)
     {
         Link = link;
         Title = link.Contract.Title;
         Subtitle = subtitle;
         _isOn = isOn;
+        PairLinks = pairLinks ?? link.OpenLinks;
     }
 
     public MeterContractLink Link { get; }
+
+    /// <summary>Every stored link of the meter and the contract, ended ones included (they decide where a new link may start).</summary>
+    public IReadOnlyList<ContractMeter> PairLinks { get; }
 
     public Guid ContractId => Link.Contract.Id;
 
@@ -67,6 +71,21 @@ public sealed partial class MeterContractSwitchViewModel : CommunityToolkit.Mvvm
     /// <summary>Called after the user flipped the switch.</summary>
     public Action? Toggled { get; set; }
 
+    /// <summary>Builds the "from … to …" text of the link; set by the editor.</summary>
+    public Func<ContractMeter, string>? LinkTextBuilder { get; set; }
+
+    /// <summary>Opens the dialog with the dates of the link; set by the editor.</summary>
+    public IRelayCommand? EditLinkCommand { get; set; }
+
+    /// <summary>The link whose dates the row shows and edits: the open link that started last.</summary>
+    public ContractMeter? CurrentLink => Link.OpenLinks.OrderByDescending(l => l.ValidFrom).FirstOrDefault();
+
+    /// <summary>True when the meter is linked to the contract and the link can be opened (switched off rows show nothing).</summary>
+    public bool ShowLinkDates => IsOn && CurrentLink is not null;
+
+    /// <summary>"from 01.05.2004" or "from 01.05.2004 to 31.12.2030"; empty when the meter is not linked.</summary>
+    public string LinkText => ShowLinkDates && LinkTextBuilder is { } builder ? builder(CurrentLink!) : string.Empty;
+
     public bool IsOn
     {
         get => _isOn;
@@ -74,9 +93,18 @@ public sealed partial class MeterContractSwitchViewModel : CommunityToolkit.Mvvm
         {
             if (SetProperty(ref _isOn, value))
             {
+                OnPropertyChanged(nameof(ShowLinkDates));
+                OnPropertyChanged(nameof(LinkText));
                 Toggled?.Invoke();
             }
         }
+    }
+
+    /// <summary>Raises the change notifications of the link texts (after the dates or the language changed).</summary>
+    public void RefreshLinkText()
+    {
+        OnPropertyChanged(nameof(ShowLinkDates));
+        OnPropertyChanged(nameof(LinkText));
     }
 }
 
