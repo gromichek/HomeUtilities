@@ -1448,5 +1448,9 @@
   <data name="ImportsLinkRepairDone" xml:space="preserve"><value>Привязок изменено: {0}</value></data>
   <data name="ImportLinkStartLate" xml:space="preserve"><value>Привязок счётчиков этого договора, которые начинаются позже самых ранних импортируемых данных ({1}): {0} — расход за более ранние месяцы не попадёт в начисления и отчёты.</value></data>
   <data name="ImportMoveLinkStarts" xml:space="preserve"><value>Начать привязки счётчиков с установки</value></data>
+  <data name="ImportReadingWindowMissing" xml:space="preserve"><value>Строк с показаниями, снятыми в начале месяца и относящимися к предыдущему месяцу: {0}, но окно подачи показаний договора эти даты не содержит — начисления будут искать показания не в том месяце. Установите окно {1}, чтобы расчёт совпал с таблицей.</value></data>
+  <data name="ImportSetReadingWindow" xml:space="preserve"><value>Установить окно показаний {0}</value></data>
+  <data name="ImportSetReadingWindowConfirm" xml:space="preserve"><value>Изменить окно подачи показаний этого договора с {0} на {1}? Тогда начисления и отчёты будут относить показания первых чисел месяца к предыдущему месяцу.</value></data>
+  <data name="ImportNoReadingWindow" xml:space="preserve"><value>нет</value></data>
   <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>Начало привязок счётчиков ({0}) будет перенесено на дату установки счётчика (или на начало договора, если оно позже).</value></data>
 </root>

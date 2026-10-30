@@ -199,6 +199,9 @@ public sealed class ImportPlan
     /// <summary>The contract's "valid from" date the plan was made for.</summary>
     public DateOnly? ContractValidFrom { get; init; }
 
+    /// <summary>The reading window the contract needs for the readings of the sheet to be assigned to the right months; null if none.</summary>
+    public ReadingWindowSuggestion? SuggestedReadingWindow { get; init; }
+
     /// <summary>Rows (without errors) whose period lies before the contract's start date.</summary>
     public int RowsBeforeContractStart => Rows.Count(IsBeforeContractStart);
 

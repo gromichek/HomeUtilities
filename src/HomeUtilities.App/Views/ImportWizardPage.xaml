@@ -231,6 +231,9 @@
             <VerticalStackLayout Grid.Row="1" Spacing="6">
                 <Label Text="{Binding PlanProblemText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasPlanProblem}" />
                 <Label Text="{Binding BeforeStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasBeforeStart}" />
+                <Label Text="{Binding ReadingWindowText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasReadingWindowFix}" />
+                <Button Text="{Binding SetReadingWindowText}" Command="{Binding SetReadingWindowCommand}" Style="{StaticResource SecondaryButton}"
+                        HorizontalOptions="Start" IsVisible="{Binding HasReadingWindowFix}" />
                 <Label Text="{Binding LinkStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasLinkStart}" />
                 <Button Text="{Binding SetContractStartText}" Command="{Binding SetContractStartCommand}" Style="{StaticResource SecondaryButton}"
                         HorizontalOptions="Start" IsVisible="{Binding HasStartFix}" />

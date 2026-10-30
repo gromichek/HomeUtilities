@@ -1448,5 +1448,9 @@
   <data name="ImportsLinkRepairDone" xml:space="preserve"><value>{0} links moved</value></data>
   <data name="ImportLinkStartLate" xml:space="preserve"><value>{0} meter links of this contract start after the earliest imported data ({1}) — the consumption of the earlier months would be missing in charges and reports.</value></data>
   <data name="ImportMoveLinkStarts" xml:space="preserve"><value>Start meter links at installation</value></data>
+  <data name="ImportReadingWindowMissing" xml:space="preserve"><value>{0} rows have readings dated early in the month that belong to the previous month, but the reading window of this contract does not contain those dates — the charges would look for the readings in the wrong month. Set the window to {1} so that the calculations match the sheet.</value></data>
+  <data name="ImportSetReadingWindow" xml:space="preserve"><value>Set reading window {0}</value></data>
+  <data name="ImportSetReadingWindowConfirm" xml:space="preserve"><value>Change the reading window of this contract from {0} to {1}? Charges and reports will then assign the readings of the first days of a month to the month before.</value></data>
+  <data name="ImportNoReadingWindow" xml:space="preserve"><value>none</value></data>
   <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>The start of {0} meter links will move to the installation of the meter (or the contract’s start, if later).</value></data>
 </root>

@@ -59,7 +59,11 @@ public static partial class ImportPlanner
 
         var replacements = PlanReadings(profile, sheet, context, positions, candidates, rows);
         Finalize(rows, registers, replacements);
-        return new ImportPlan(rows, [], replacements) { ContractValidFrom = context.Contract.ValidFrom };
+        return new ImportPlan(rows, [], replacements)
+        {
+            ContractValidFrom = context.Contract.ValidFrom,
+            SuggestedReadingWindow = ImportReadingWindowAdvice.Suggest(rows, context.Contract),
+        };
     }
 
     // A period outside the contract's dates is imported (the bill exists), but charges and reports treat the contract as not valid

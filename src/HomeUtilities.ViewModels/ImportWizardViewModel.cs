@@ -244,6 +244,14 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     [ObservableProperty]
     private string _setContractStartText = string.Empty;
 
+    /// <summary>"Readings on the 1st belong to the previous month, but the reading window …"; empty when the window is fine.</summary>
+    [ObservableProperty]
+    private string _readingWindowText = string.Empty;
+
+    /// <summary>The text of the "Set reading window …" button; empty when there is nothing to set.</summary>
+    [ObservableProperty]
+    private string _setReadingWindowText = string.Empty;
+
     /// <summary>"N meter links start after the earliest imported data …"; empty when no link does.</summary>
     [ObservableProperty]
     private string _linkStartText = string.Empty;
@@ -439,6 +447,11 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     public bool HasBeforeStart => BeforeStartText.Length > 0;
 
     partial void OnBeforeStartTextChanged(string value) => OnPropertyChanged(nameof(HasBeforeStart));
+
+    /// <summary>True when the reading window of the contract does not match the imported reading dates.</summary>
+    public bool HasReadingWindowFix => SetReadingWindowText.Length > 0;
+
+    partial void OnSetReadingWindowTextChanged(string value) => OnPropertyChanged(nameof(HasReadingWindowFix));
 
     /// <summary>True when meter links of the contract start after the earliest imported data.</summary>
     public bool HasLinkStart => LinkStartText.Length > 0;
@@ -1226,6 +1239,19 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             SetContractStartText = string.Empty;
         }
 
+        // Readings dated early in the month that the rule moves to the previous month are only found by the charges inside a window.
+        if (plan.SuggestedReadingWindow is { } window)
+        {
+            var range = $"{window.From}–{window.To}";
+            ReadingWindowText = _localizer.Get("ImportReadingWindowMissing", window.Rows, range);
+            SetReadingWindowText = _localizer.Get("ImportSetReadingWindow", range);
+        }
+        else
+        {
+            ReadingWindowText = string.Empty;
+            SetReadingWindowText = string.Empty;
+        }
+
         // Charges and reports count a meter only inside its link, so a link that starts after the imported months hides them.
         _linkMoves = ImportLinkStarts.Find(plan, contract, _propertyMeters, _propertyLinks);
         if (_linkMoves.Count > 0 && ImportLinkStarts.EarliestImportedDate(plan) is { } earliest)
@@ -1331,6 +1357,43 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
                 _propertyLinks = await LoadPropertyLinksAsync(property.Id);
             }
 
+            await EnterPreviewAsync(profile);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    });
+
+    /// <summary>
+    /// Sets the contract's reading window to the suggested days (after a confirmation) and plans the import again, so that the
+    /// calculations assign the imported readings to the same months as the sheet.
+    /// </summary>
+    [RelayCommand]
+    private Task SetReadingWindowAsync() => RunSafeAsync(async () =>
+    {
+        if (_plan?.SuggestedReadingWindow is not { } window || _contract is null || !TryBuildProfile(out var profile))
+        {
+            return;
+        }
+
+        var current = _contract.ReadingDayFrom is { } from && _contract.ReadingDayTo is { } to ? $"{from}–{to}" : _localizer["ImportNoReadingWindow"];
+        var confirmed = await _dialogs.ConfirmAsync(
+            _localizer["ImportTitle"],
+            _localizer.Get("ImportSetReadingWindowConfirm", current, $"{window.From}–{window.To}"),
+            _localizer["Save"],
+            _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            _contract.ReadingDayFrom = window.From;
+            _contract.ReadingDayTo = window.To;
+            await _contracts.SaveAsync(_contract);
             await EnterPreviewAsync(profile);
         }
         finally

@@ -333,6 +333,53 @@ public class ImportWizardViewModelTests
     }
 
     [Fact]
+    public async Task Readings_of_the_1st_moved_to_the_previous_month_offer_the_reading_window_28_to_3()
+    {
+        // Rows dated 1 January, 1 February, 1 March with readings; "previous month" gives December, January, February;
+        // the contract has no reading window, so the charges would look for them in the month of the date.
+        var vm = await ToMappingStepAsync();
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.PreviousMonth);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.True(vm.HasReadingWindowFix);
+        Assert.Equal("ImportReadingWindowMissing 2|28–3 [en]", vm.ReadingWindowText);
+        Assert.Equal("ImportSetReadingWindow 28–3 [en]", vm.SetReadingWindowText);
+
+        await vm.SetReadingWindowCommand.ExecuteAsync(null);
+
+        Assert.Equal("ImportSetReadingWindowConfirm ImportNoReadingWindow [en]|28–3 [en]", Assert.Single(_dialogs.Confirmations).Message);
+        var saved = Assert.Single(_contracts.Saved);
+        Assert.Equal((28, 3), (saved.ReadingDayFrom, saved.ReadingDayTo));
+        Assert.False(vm.HasReadingWindowFix);
+        Assert.Equal(ImportWizardStep.Preview, vm.Step);
+    }
+
+    [Fact]
+    public async Task Declining_the_reading_window_change_keeps_the_contract()
+    {
+        var vm = await ToMappingStepAsync();
+        vm.SelectedPeriodRule = vm.PeriodRules.Single(r => r.Value == ImportPeriodRule.PreviousMonth);
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+        _dialogs.ConfirmResult = false;
+
+        await vm.SetReadingWindowCommand.ExecuteAsync(null);
+
+        Assert.Empty(_contracts.Saved);
+        Assert.Null(_contract.ReadingDayFrom);
+        Assert.True(vm.HasReadingWindowFix);
+    }
+
+    [Fact]
+    public async Task Dates_in_their_own_month_offer_no_reading_window()
+    {
+        var vm = await ToPreviewStepAsync();
+
+        Assert.False(vm.HasReadingWindowFix);
+    }
+
+    [Fact]
     public async Task Declining_the_contract_start_change_keeps_the_contract()
     {
         var vm = await ToMappingStepAsync();
