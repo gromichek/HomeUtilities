@@ -44,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| — | Fix: late reminders dropped; Planned reminders diagnostics; help link to the other guide on Windows | 2026-10-31, #147 | Cause: Plugin.LocalNotification drops an alarm delivered > `AllowedDelay` (default 1 min) late; inexact alarms are late → now 6 h. List shows "Handed to the system: N of M" and refreshes on settings change. Windows WebView serves help from `https://0.0.0.1/`. |
 | T-028c | Fixes from real-data testing | 2026-10-30, #143 | "Show more" paging for long lists; Overview settlement capped at 24 months; Planned reminders debug list; reminder cause not confirmed (WAKE_LOCK still removed — re-allow if the plan is non-empty and nothing arrives). Lead relaxed two flaky perf limits. |
 | T-027a | Export like the owner's workbook | 2026-10-30, #132 | Total sheet = billed only (report parity). Paid mark only for fully paid bills. |
 | — | Fix: editor reloaded after closing a child dialog | 2026-10-30, #136 | Shell re-applied the query on return → lost name/prices in the tariff editor. |
@@ -78,15 +79,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
-- Items marked "To fix" below were addressed by **T-028c** (#143) — owner to confirm, then remove them.
-
-- **To fix (owner, 2026-10-30):** in Help, links inside the guide (to other sections / anchors) open the system browser instead of scrolling within the help page (`HelpViewModel.ShouldIntercept` / `HelpPage.OnNavigating` — the WebView reports internal anchors as a full URL; treat same-document and `en.md`/`ru.md` links as internal).
 - Not planned (owner decision 2026-10-30): closing the open remainder of a bill without a payment (e.g. equalized bill paid less by consumption). Workaround: treat such months as "by consumption" (plan starts later).
 
-- **To fix (owner, 2026-10-30, Android emulator):** scheduled reminders never arrive, the test notification does (followed the step-by-step check: reminders on, bills on, time = now + 5 min, open bill due in 2 days, app closed, waited). Suspects: (1) the manifest removes `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM`/`WAKE_LOCK` — Plugin.LocalNotification may schedule with exact alarms and fail silently without them (check its Android scheduling API and use its inexact option, or allow `WAKE_LOCK` if the receiver needs it); (2) the plan is empty or the reschedule never runs (log the planned list + count to the error log / a debug screen in Settings: "Planned reminders"); (3) the schedule time is computed in UTC vs local. Add a debug list of planned reminders in Settings to make this testable.
 
-- **To fix (owner, 2026-10-30, Windows wide):** Bills opened from a contract ("All bills", `BillsFor`, contract highlighted): tapping one card marks **all** cards as selected and the selection never clears (screenshot: every gas bill card has the selected border). Likely the "highlighted contract" state and the selection share the same visual (border) or IsSelected is set for every row of that contract. Fix together with the next Bills change.
-- To check (same screenshot): gas bill editor offers "Use prepayment 158,56 €" and the list shows several unpaid equalized bills after the import — imported payments may be left unallocated (prepayment) instead of allocated to their bills. Verify with the owner before fixing.
 
 - Import: an installation-day row ignores the old-final value from a note (old final = last regular reading) — exact round trip only when they are equal (T-027a).
 
@@ -125,6 +120,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #64 | T-017c backup | Sample data OK, delete all OK, Windows save OK. **Bug**: after Restore on Windows the window never appears (deadlock) → #66. Android: only share targets, no folder (no account in emulator) → save dialog in #66. Restore on Android pending |
 | 2026-10-26 | — | Bill due date: false "due before issue date" seen twice, not reproducible → Sonnet helper. Heating line 0,233 MWh × 73,76 = 17,19 vs 17,22 on the bill (supplier bills unrounded quantity) → optional line amount from the bill → #95, #97 | pending |
 | 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
+| 2026-10-31 | #143 | T-028c: long lists, contract → All bills selection, gas import window warning, help links (Android) | OK. Overview settlement cap of 24 months accepted. Import "unpaid gas bills" was the owner's own experiments — no bug. **Bugs**: reminders listed but not delivered; Windows help link to `ru.md`/`en.md` opens the browser → #147 |
+| | #147 | Reminders delivery (app closed, ~15 min), "Handed to the system", help link on Windows | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
 | | #124 | T-028 reminders | pending |
