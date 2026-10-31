@@ -104,25 +104,17 @@ Prompt for a new lead session:
   on the 1st belong to the previous month), use the meter-link repair, re-import gas after fixing plans.
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
-## 5. Current state (2026-10-30)
-- All tasks up to **T-028c** are merged (#143, PROGRESS updated in #144). No task is `Ready`.
-- Waiting for the owner's tests of T-028c:
-  1. Long lists (reading history, Bills/Payments all years) with "Show more".
-  2. Contract → All bills → only the tapped bill is selected.
-  3. Settings → Reminders → **Planned reminders** + the bill-due test (due in 2 days, reminder time = now + 5 min,
-     app closed). If the list is **empty** → bug in the planner (find it). If the list has the entry but nothing
-     arrives → re-allow `WAKE_LOCK` in the Android manifest (no battery cost while idle). Current permissions:
-     POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, INTERNET, CAMERA, ACCESS_NETWORK_STATE.
-  4. Help → links to other sections stay inside Help.
-  5. Gas import → warning about the missing reading window + "Set reading window".
-- Open question for the owner: Overview's expected settlement is capped at the **last 24 months** (performance).
-  The contract's own settlement page is not capped. Ask whether that is acceptable.
-- Still to verify with him (PROGRESS Known issues): after the import, some gas bills look unpaid while the bill
-  editor offers "Use prepayment" → imported payments may stay unallocated. Do not fix before he confirms.
+## 5. Current state (2026-10-31)
+- All tasks up to **T-028c** are merged, plus fix #147 (reminders delivery, help link on Windows). No task is `Ready`.
+- Waiting for the owner's test of #147: reminder with the app closed arrives (allow ~15 min), Planned reminders shows
+  "Handed to the system: N of N"; Windows help link to the other language stays in Help.
+  If reminders still do not arrive although the system holds them → next suspects: re-allow `WAKE_LOCK`, battery
+  optimisation of the emulator image.
+- Overview settlement cap of 24 months: accepted by the owner (2026-10-31).
 - Several older "pending" rows in the PROGRESS manual test log — ask him only if relevant.
 
 ## 6. Next steps (ROADMAP)
-1. After the T-028c tests: remove the "To fix" items from Known issues, log the result, handle findings.
+1. After the #147 test: log the result, handle findings.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
