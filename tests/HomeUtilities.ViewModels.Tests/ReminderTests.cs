@@ -434,7 +434,7 @@ public class ReminderTests : IDisposable
     }
 
     [Fact]
-    public async Task Planned_list_shows_what_would_be_scheduled_and_schedules_nothing()
+    public async Task Planned_list_hands_the_plan_to_the_system_and_shows_it()
     {
         TurnOn();
         var card = CreateCard();
@@ -447,7 +447,7 @@ public class ReminderTests : IDisposable
         Assert.Equal("ReminderPlannedKind_PayBill [en]", card.Planned[0].Kind);
         Assert.StartsWith("BillEdit?id=", card.Planned[0].Target, StringComparison.Ordinal);
         Assert.StartsWith("ReminderPlannedCount", card.PlannedSummary, StringComparison.Ordinal);
-        Assert.Empty(_notifications.Batches);
+        Assert.Single(_notifications.Batches);
 
         await card.TogglePlannedCommand.ExecuteAsync(null);
 
@@ -460,12 +460,15 @@ public class ReminderTests : IDisposable
         TurnOn();
         var card = CreateCard();
 
-        // Nothing handed over yet: both rows are marked, the summary says 0 of 2 and "—" for the last update.
+        // The system refuses the first reminder (4 Nov, the bill 3 days ahead): only that row is marked, 1 of 2 held.
+        _notifications.RefuseFirst = true;
         await card.TogglePlannedCommand.ExecuteAsync(null);
 
-        Assert.All(card.Planned, row => Assert.True(row.HasProblem));
+        Assert.True(card.Planned[0].HasProblem);
+        Assert.False(card.Planned[1].HasProblem);
         Assert.Equal("ReminderPlannedNotInSystem [en]", card.Planned[0].Problem);
-        Assert.Contains("ReminderPlannedInSystem 0|2|—", card.PlannedSummary, StringComparison.Ordinal);
+        var handedOver = LocalNow.ToString("g", System.Globalization.CultureInfo.CurrentCulture);
+        Assert.Contains($"ReminderPlannedInSystem 1|2|{handedOver}", card.PlannedSummary, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -491,11 +494,12 @@ public class ReminderTests : IDisposable
         await card.TogglePlannedCommand.ExecuteAsync(null);
 
         // 09:00 -> 18:39: the bill reminder on 4 Nov moves to 18:39 at once, without closing and reopening the list.
+        var expected = new DateTime(2026, 11, 4, 18, 39, 0).ToString("g", System.Globalization.CultureInfo.CurrentCulture);
         card.Time = new TimeSpan(18, 39, 0);
-        await WaitAsync(() => _notifications.Batches.Count == 1 && !card.Planned[0].HasProblem);
+        await WaitAsync(() => _notifications.Batches.Count == 2 && card.Planned[0].When == expected);
 
-        Assert.Single(_notifications.Batches);
-        Assert.Equal(new DateTime(2026, 11, 4, 18, 39, 0).ToString("g", System.Globalization.CultureInfo.CurrentCulture), card.Planned[0].When);
+        Assert.Equal(2, _notifications.Batches.Count);
+        Assert.Equal(expected, card.Planned[0].When);
         Assert.False(card.Planned[0].HasProblem);
     }
 
@@ -665,7 +669,7 @@ public class ReminderTests : IDisposable
         public Task ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications)
         {
             Batches.Add(notifications);
-            Pending.UnionWith(notifications.Select(n => n.Id));
+            Pending.UnionWith(notifications.Skip(RefuseFirst ? 1 : 0).Select(n => n.Id));
             return Task.CompletedTask;
         }
 
@@ -675,6 +679,9 @@ public class ReminderTests : IDisposable
             Pending.Clear();
             return Task.CompletedTask;
         }
+
+        /// <summary>If true, the "system" does not accept the first notification of each batch.</summary>
+        public bool RefuseFirst { get; set; }
 
         /// <summary>What the "system" holds: the ids of the batches scheduled since the last cancel.</summary>
         public HashSet<int> Pending { get; } = [];

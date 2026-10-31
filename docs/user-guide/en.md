@@ -807,8 +807,8 @@ the app is closed (Android). Each reminder is a notification; tapping it opens t
 - **Draft bills to confirm** — when drafts from templates wait for you: on the day they appear and then at most every
   third day (five reminders at most), until you confirm them.
 
-The **time of day** is the same for all reminders (default 09:00). There are **no reminders from 21:00 to 08:00**: a time in
-that range moves to 08:00. Reminders are planned for the next 45 days, at most 60 of them, and are re-planned whenever you open
+The **time of day** is the same for all reminders (default 09:00) and is used exactly as set, also late in the evening or
+early in the morning. Reminders are planned for the next 45 days, at most 60 of them, and are re-planned whenever you open
 the app or change readings, bills, payments, templates, contracts or these settings — so a bill you have just paid
 no longer reminds you.
 
@@ -817,7 +817,8 @@ no longer reminds you.
 **Planned reminders** lists what the app plans right now: the local date and time, what it is about (readings, bill, tax
 installment, meter verification, draft bills), the text of the notification and the screen a tap opens. Use it when a
 reminder you expected does not arrive: if it is not in the list, nothing is due (or its time has already passed — a reminder
-is planned only for a time in the future, and a time between 21:00 and 08:00 moves to 08:00). Under the count the list says
+is planned only for a time in the future). Opening the list first hands the current plan to Android, so the list and Android
+always compare the same plan. Under the count the list says
 how many of the planned reminders Android really holds and when the app last handed them over ("Handed to the system: 13 of
 13. Last update: …"); a reminder Android does not hold is marked in red. While the list is open, changing the time or a
 switch updates it at once. For a test, set the bill's due date or the time of day a few minutes ahead and open the list.

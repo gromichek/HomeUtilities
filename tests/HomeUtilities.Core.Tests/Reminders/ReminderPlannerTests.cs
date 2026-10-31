@@ -468,31 +468,31 @@ public class ReminderPlannerTests
         Assert.Empty(Plan(new OverviewScenario(), Now(11, 1)));
     }
 
-    // ---- Quiet hours, horizon, count ------------------------------------------------------------------------------
+    // ---- Time of day, horizon, count -----------------------------------------------------------------------------
 
     [Theory]
-    [InlineData(6, 0, 25, 8, 0)]
-    [InlineData(7, 59, 25, 8, 0)]
-    [InlineData(8, 0, 25, 8, 0)]
-    [InlineData(20, 59, 25, 20, 59)]
-    [InlineData(21, 0, 26, 8, 0)]
-    [InlineData(23, 30, 26, 8, 0)]
-    public void Quiet_hours_move_the_time_to_eight_in_the_morning(int hour, int minute, int expectedDay, int expectedHour, int expectedMinute)
+    [InlineData(6, 0)]
+    [InlineData(7, 59)]
+    [InlineData(20, 59)]
+    [InlineData(21, 0)]
+    [InlineData(23, 30)]
+    public void The_configured_time_is_used_as_it_is_also_at_night(int hour, int minute)
     {
         var at = ReminderPlanner.TimeOn(D(10, 25), new TimeOnly(hour, minute));
 
-        Assert.Equal(At(10, expectedDay, expectedHour, expectedMinute), at);
+        Assert.Equal(At(10, 25, hour, minute), at);
     }
 
     [Fact]
-    public void Configured_night_time_is_moved_in_the_plan()
+    public void Configured_night_time_stays_on_the_due_day_in_the_plan()
     {
+        // Bill due 10 Nov, lead 0 days, time 22:00 -> 10 Nov 22:00 (no quiet hours since 2026-10-31).
         var scenario = new OverviewScenario();
         scenario.AddBill(null, 40m, D(11, 10), new YearMonth(2026, 11));
 
         var plan = Plan(scenario, Now(11, 1), On with { TimeOfDay = new TimeOnly(22, 0), BillLeadDays = 0 });
 
-        Assert.Equal([At(11, 11, 8)], plan.Select(r => r.At));
+        Assert.Equal([At(11, 10, 22)], plan.Select(r => r.At));
     }
 
     [Fact]

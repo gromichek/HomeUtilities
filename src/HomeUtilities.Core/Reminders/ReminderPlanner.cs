@@ -28,12 +28,6 @@ public static class ReminderPlanner
     /// <summary>At most this many draft reminders are planned, so an ignored draft does not nag for weeks.</summary>
     public const int MaxDraftReminders = 5;
 
-    /// <summary>No reminder is shown from this time of day ...</summary>
-    public static readonly TimeOnly QuietFrom = new(21, 0);
-
-    /// <summary>... until this time of day; a reminder in between moves to this time.</summary>
-    public static readonly TimeOnly QuietUntil = new(8, 0);
-
     /// <summary>The reminders from <paramref name="now"/> (local time) to the horizon, sorted by time, at most <see cref="MaxReminders"/>.</summary>
     public static IReadOnlyList<PlannedReminder> Plan(OverviewData data, ReminderSettings settings, DateTime now, int horizonDays = DefaultHorizonDays)
     {
@@ -70,21 +64,11 @@ public static class ReminderPlanner
         return [.. all.OrderBy(r => r.At).ThenBy(r => r.Key, StringComparer.Ordinal).Take(MaxReminders)];
     }
 
-    /// <summary>The time a reminder of <paramref name="day"/> is shown: the configured time, moved out of the quiet hours.</summary>
-    public static DateTime TimeOn(DateOnly day, TimeOnly time)
-    {
-        if (time < QuietUntil)
-        {
-            time = QuietUntil;
-        }
-        else if (time >= QuietFrom)
-        {
-            day = day.AddDays(1);
-            time = QuietUntil;
-        }
-
-        return day.ToDateTime(time);
-    }
+    /// <summary>
+    /// The time a reminder of <paramref name="day"/> is shown: exactly the configured time of day. There are no quiet hours
+    /// (owner decision 2026-10-31: the time of day is his choice).
+    /// </summary>
+    public static DateTime TimeOn(DateOnly day, TimeOnly time) => day.ToDateTime(time);
 
     private sealed record Context(OverviewData Data, ReminderSettings Settings, DateTime Now, DateTime Last)
     {
