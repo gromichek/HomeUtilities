@@ -91,6 +91,12 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
    the top. On a phone in landscape use the phone editor commands (toolbar ✓ Save at the top, Back cancels, Delete in
    the menu / at the end of the form, UI_GUIDELINES §3), and a footer must never overlap (wrap or shrink). Check all
    two-pane editors, not only Suppliers.
+3. **Settings (phone, 2026-10-31):** one long page; button text cut off ("Очистит" instead of "Очистить" in Error log —
+   two buttons side by side on a narrow screen). Owner wants Settings as a **list of sections** (Language, Theme,
+   Reminders, Backup, Imports, Error log, About…); tapping a section opens a page (phone) / right pane (tablet, desktop)
+   with all its settings. Review where plain buttons can be replaced by drop-downs / choice rows as elsewhere in the app
+   (UI_GUIDELINES §3a), and bring Settings to the same style as the other screens. Buttons must never cut their text
+   (wrap or stack vertically on narrow screens).
 
 - Not planned (owner decision 2026-10-30): closing the open remainder of a bill without a payment (e.g. equalized bill paid less by consumption). Workaround: treat such months as "by consumption" (plan starts later).
 
