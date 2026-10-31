@@ -97,6 +97,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
    with all its settings. Review where plain buttons can be replaced by drop-downs / choice rows as elsewhere in the app
    (UI_GUIDELINES §3a), and bring Settings to the same style as the other screens. Buttons must never cut their text
    (wrap or stack vertically on narrow screens).
+4. **Property → Contracts (phone, 2026-10-31):** the label of the switch "Show ended and archived" does not fit (cut off).
+   Owner: check this **everywhere** — every switch/check box label, button text and card line must wrap (or the control
+   moves under the label) instead of being cut; go through all screens in Russian (the longer language) on a narrow phone.
 
 - Not planned (owner decision 2026-10-30): closing the open remainder of a bill without a payment (e.g. equalized bill paid less by consumption). Workaround: treat such months as "by consumption" (plan starts later).
 
