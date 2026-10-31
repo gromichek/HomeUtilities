@@ -80,6 +80,18 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
+### T-028a findings (owner, real phone; collected, not started)
+
+1. **Bills, Payments (phone, 2026-10-31):** the filter block (property, period buttons + year, category/contract, status,
+   totals) is fixed at the top and does not scroll with the list → little room for the cards in portrait; in **landscape
+   no card is visible at all**. Filters must scroll away with the list (header of the list) or collapse into a compact
+   filter row / dialog on narrow or low screens.
+2. **Suppliers (phone landscape, 2026-10-31):** the two-pane layout shows the desktop footer (Save / Cancel / Delete supplier);
+   the buttons overlap each other ("Cancel" under "Delete supplier"). Owner: Save is not the standard one and not at
+   the top. On a phone in landscape use the phone editor commands (toolbar ✓ Save at the top, Back cancels, Delete in
+   the menu / at the end of the form, UI_GUIDELINES §3), and a footer must never overlap (wrap or shrink). Check all
+   two-pane editors, not only Suppliers.
+
 - Not planned (owner decision 2026-10-30): closing the open remainder of a bill without a payment (e.g. equalized bill paid less by consumption). Workaround: treat such months as "by consumption" (plan starts later).
 
 
