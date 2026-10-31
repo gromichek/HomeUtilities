@@ -142,6 +142,13 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
             return;
         }
 
+        // Hand the current plan to the system first, so the list compares the same plan with what the system holds;
+        // otherwise a list opened before the debounced update (or after a data change) showed false "not handed" marks.
+        if (IsEnabled && _notifications.CanSchedule)
+        {
+            await _scheduler.RescheduleAsync();
+        }
+
         await LoadPlannedAsync();
         ShowPlanned = true;
     });
