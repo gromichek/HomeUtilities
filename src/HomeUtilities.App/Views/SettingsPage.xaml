@@ -78,6 +78,7 @@
                                         <Label Text="{Binding Header}" FontAttributes="Bold" />
                                         <Label Text="{Binding Text}" />
                                         <Label Text="{Binding Target}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                        <Label Text="{Binding Problem}" IsVisible="{Binding HasProblem}" Style="{StaticResource ErrorLabel}" />
                                     </VerticalStackLayout>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>

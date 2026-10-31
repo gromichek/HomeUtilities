@@ -1395,6 +1395,8 @@
   <data name="ReminderPlannedOff" xml:space="preserve"><value>The reminders are switched off.</value></data>
   <data name="ReminderPlannedNone" xml:space="preserve"><value>No reminders are planned: nothing is due in the coming weeks, or all times have passed.</value></data>
   <data name="ReminderPlannedCount" xml:space="preserve"><value>{0} reminder(s) are planned, the earliest first. Times are local; a time between 21:00 and 08:00 is moved to 08:00.</value></data>
+  <data name="ReminderPlannedInSystem" xml:space="preserve"><value>Handed to the system: {0} of {1}. Last update: {2}.</value></data>
+  <data name="ReminderPlannedNotInSystem" xml:space="preserve"><value>not handed to the system — this reminder will not arrive</value></data>
   <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Readings</value></data>
   <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Bill</value></data>
   <data name="ReminderPlannedKind_TaxInstallment" xml:space="preserve"><value>Tax installment</value></data>

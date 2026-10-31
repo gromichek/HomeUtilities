@@ -302,6 +302,7 @@ public class HelpViewModelTests
     [InlineData("file:///android_asset/#3-properties")]
     [InlineData("file:///C:/app/guide/index.html#3-properties")]
     [InlineData("https://0.0.0.0/#3-properties")]
+    [InlineData("https://0.0.0.1/#3-properties")]
     [InlineData("http://localhost/#3-properties")]
     [InlineData("https://appassets.androidplatform.net/guide/#3-properties")]
     [InlineData("ms-appx-web:///guide/#3-properties")]
@@ -330,6 +331,23 @@ public class HelpViewModelTests
 
         Assert.True(vm.ShouldIntercept("file:///android_asset/guide/ru.md#3-объекты"));
         await vm.InterceptAsync("file:///android_asset/guide/ru.md#3-объекты");
+
+        Assert.Contains("Русский", vm.Html);
+        Assert.Empty(_launcher.Opened);
+    }
+
+    [Theory]
+    [InlineData("https://0.0.0.1/ru.md")]
+    [InlineData("https://0.0.0.1/ru.md#3-объекты")]
+    [InlineData("https://example.invalid/guide/ru.md")]
+    public async Task LinkToTheOtherGuideFile_OnAnHttpsHost_ReloadsInsteadOfOpeningTheBrowser(string url)
+    {
+        // Windows: the embedded page is served from https://0.0.0.1/, so "ru.md" arrives as an https link (owner test 2026-10-31).
+        var vm = Create();
+        await vm.OnAppearingAsync();
+
+        Assert.True(vm.ShouldIntercept(url));
+        await vm.InterceptAsync(url);
 
         Assert.Contains("Русский", vm.Html);
         Assert.Empty(_launcher.Opened);

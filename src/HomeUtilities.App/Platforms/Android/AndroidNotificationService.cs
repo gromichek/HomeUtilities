@@ -14,6 +14,13 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
     /// <summary>Id of the notification channel "Reminders".</summary>
     public const string ChannelId = "reminders";
 
+    /// <summary>
+    /// How late a scheduled reminder may still be shown. An inexact alarm is often delivered minutes (in Doze, hours) after
+    /// its time, and the plugin's default of one minute silently dropped those late alarms — owner test 2026-10-31.
+    /// The same limit applies after a reboot: reminders missed while the phone was off are shown if not older than this.
+    /// </summary>
+    public static readonly TimeSpan AllowedDelay = TimeSpan.FromHours(6);
+
     public bool IsSupported => true;
 
     public bool CanSchedule => true;
@@ -38,6 +45,12 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
         {
             await LocalNotificationCenter.Current.Show(Request(notification, notification.At));
         }
+    }
+
+    public async Task<IReadOnlyCollection<int>> GetPendingIdsAsync()
+    {
+        var pending = await LocalNotificationCenter.Current.GetPendingNotificationList();
+        return [.. pending.Select(r => r.NotificationId)];
     }
 
     public Task CancelAllAsync()
@@ -66,6 +79,7 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
             {
                 AlarmType = AndroidAlarmType.RtcWakeup,
                 ScheduleMode = AndroidScheduleMode.InexactAllowWhileIdle,
+                AllowedDelay = AllowedDelay,
             },
         },
     };
