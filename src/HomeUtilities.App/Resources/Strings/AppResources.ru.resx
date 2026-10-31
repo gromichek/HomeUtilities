@@ -1395,6 +1395,8 @@
   <data name="ReminderPlannedOff" xml:space="preserve"><value>Напоминания выключены.</value></data>
   <data name="ReminderPlannedNone" xml:space="preserve"><value>Напоминаний не запланировано: в ближайшие недели ничего не ожидается или все времена уже прошли.</value></data>
   <data name="ReminderPlannedCount" xml:space="preserve"><value>Запланировано напоминаний: {0}, ближайшие первыми. Время местное; время с 21:00 до 08:00 переносится на 08:00.</value></data>
+  <data name="ReminderPlannedInSystem" xml:space="preserve"><value>Передано системе: {0} из {1}. Последнее обновление: {2}.</value></data>
+  <data name="ReminderPlannedNotInSystem" xml:space="preserve"><value>не передано системе — это напоминание не придёт</value></data>
   <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Показания</value></data>
   <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Счёт</value></data>
   <data name="ReminderPlannedKind_TaxInstallment" xml:space="preserve"><value>Налоговый платёж</value></data>

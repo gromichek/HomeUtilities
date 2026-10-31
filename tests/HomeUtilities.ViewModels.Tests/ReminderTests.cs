@@ -455,6 +455,51 @@ public class ReminderTests : IDisposable
     }
 
     [Fact]
+    public async Task Planned_list_marks_reminders_the_system_does_not_hold()
+    {
+        TurnOn();
+        var card = CreateCard();
+
+        // Nothing handed over yet: both rows are marked, the summary says 0 of 2 and "—" for the last update.
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        Assert.All(card.Planned, row => Assert.True(row.HasProblem));
+        Assert.Equal("ReminderPlannedNotInSystem [en]", card.Planned[0].Problem);
+        Assert.Contains("ReminderPlannedInSystem 0|2|—", card.PlannedSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Planned_list_after_scheduling_shows_all_held_and_the_time_of_the_hand_over()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+        var card = new ReminderSettingsViewModel(Store, scheduler, _notifications, new FakeDialogService(), new FakeLocalizer(_language));
+        await scheduler.RescheduleAsync();
+
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        Assert.All(card.Planned, row => Assert.False(row.HasProblem));
+        var handedOver = LocalNow.ToString("g", System.Globalization.CultureInfo.CurrentCulture);
+        Assert.Contains($"ReminderPlannedInSystem 2|2|{handedOver}", card.PlannedSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Changing_the_time_while_the_list_is_open_reschedules_and_refreshes_the_list()
+    {
+        TurnOn();
+        var card = CreateCard();
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        // 09:00 -> 18:39: the bill reminder on 4 Nov moves to 18:39 at once, without closing and reopening the list.
+        card.Time = new TimeSpan(18, 39, 0);
+        await WaitAsync(() => _notifications.Batches.Count == 1 && !card.Planned[0].HasProblem);
+
+        Assert.Single(_notifications.Batches);
+        Assert.Equal(new DateTime(2026, 11, 4, 18, 39, 0).ToString("g", System.Globalization.CultureInfo.CurrentCulture), card.Planned[0].When);
+        Assert.False(card.Planned[0].HasProblem);
+    }
+
+    [Fact]
     public async Task Planned_list_says_so_when_the_reminders_are_off()
     {
         var card = CreateCard();
@@ -620,14 +665,21 @@ public class ReminderTests : IDisposable
         public Task ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications)
         {
             Batches.Add(notifications);
+            Pending.UnionWith(notifications.Select(n => n.Id));
             return Task.CompletedTask;
         }
 
         public Task CancelAllAsync()
         {
             CancelCalls++;
+            Pending.Clear();
             return Task.CompletedTask;
         }
+
+        /// <summary>What the "system" holds: the ids of the batches scheduled since the last cancel.</summary>
+        public HashSet<int> Pending { get; } = [];
+
+        public Task<IReadOnlyCollection<int>> GetPendingIdsAsync() => Task.FromResult<IReadOnlyCollection<int>>([.. Pending]);
 
         public Task ShowNowAsync(string title, string body, string data)
         {

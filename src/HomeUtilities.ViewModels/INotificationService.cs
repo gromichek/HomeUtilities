@@ -26,6 +26,12 @@ public interface INotificationService
     /// <summary>Schedules the notifications. Callers cancel the old ones first (<see cref="CancelAllAsync"/>).</summary>
     Task ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications);
 
+    /// <summary>
+    /// Ids of the notifications the system currently holds for later ("Planned reminders" marks the planned ones that are
+    /// missing). Empty where nothing can be scheduled.
+    /// </summary>
+    Task<IReadOnlyCollection<int>> GetPendingIdsAsync() => Task.FromResult<IReadOnlyCollection<int>>([]);
+
     /// <summary>Removes every pending notification of the app.</summary>
     Task CancelAllAsync();
 

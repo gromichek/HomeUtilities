@@ -60,6 +60,9 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
     /// <summary>The debounce interval.</summary>
     public TimeSpan Debounce { get; }
 
+    /// <summary>Local time the plan was last handed to the system (null before the first run in this app session).</summary>
+    public DateTime? LastScheduledAt { get; private set; }
+
     /// <summary>A stable positive notification id for a reminder key (FNV-1a), so the same reminder always has the same id.</summary>
     public static int IdOf(string key)
     {
@@ -112,6 +115,7 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
 
             await _notifications.CancelAllAsync();
             await _notifications.ScheduleAsync(notifications);
+            LastScheduledAt = _clock.UtcNow.ToLocalTime().DateTime;
         }
         finally
         {
@@ -131,7 +135,7 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
             return [];
         }
 
-        return [.. (await PlanAsync(settings, ct)).Select(r => new PlannedReminderInfo(r.At, r.Kind, Localize(r.Title), Localize(r.Body), r.Target.Serialize()))];
+        return [.. (await PlanAsync(settings, ct)).Select(r => new PlannedReminderInfo(IdOf(r.Key), r.At, r.Kind, Localize(r.Title), Localize(r.Body), r.Target.Serialize()))];
     }
 
     /// <summary>
@@ -240,9 +244,10 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
 }
 
 /// <summary>One planned reminder as the Settings list shows it.</summary>
+/// <param name="Id">Notification id (see <see cref="ReminderScheduler.IdOf"/>).</param>
 /// <param name="At">Local time it is scheduled for.</param>
 /// <param name="Kind">What it is about.</param>
 /// <param name="Title">Notification title.</param>
 /// <param name="Body">Notification text.</param>
 /// <param name="Target">The serialized screen a tap opens.</param>
-public sealed record PlannedReminderInfo(DateTime At, ReminderKind Kind, string Title, string Body, string Target);
+public sealed record PlannedReminderInfo(int Id, DateTime At, ReminderKind Kind, string Title, string Body, string Target);

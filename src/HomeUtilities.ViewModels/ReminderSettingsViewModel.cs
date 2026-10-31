@@ -149,6 +149,8 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
     private async Task LoadPlannedAsync()
     {
         var items = await _scheduler.PreviewAsync();
+        var canCheck = _notifications.CanSchedule && items.Count > 0;
+        IReadOnlyCollection<int> pending = canCheck ? await _notifications.GetPendingIdsAsync() : [];
         Planned.Clear();
         foreach (var item in items)
         {
@@ -156,7 +158,8 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
                 item.At.ToString("g", CultureInfo.CurrentCulture),
                 _localizer["ReminderPlannedKind_" + item.Kind],
                 $"{item.Title} — {item.Body}",
-                item.Target));
+                item.Target,
+                canCheck && !pending.Contains(item.Id) ? _localizer["ReminderPlannedNotInSystem"] : string.Empty));
         }
 
         PlannedSummary = !IsEnabled
@@ -164,6 +167,23 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
             : items.Count == 0
                 ? _localizer["ReminderPlannedNone"]
                 : _localizer.Get("ReminderPlannedCount", items.Count);
+        if (canCheck)
+        {
+            // How many of the planned reminders the system really holds, and when the plan was last handed over.
+            var held = items.Count(item => pending.Contains(item.Id));
+            var when = _scheduler.LastScheduledAt is { } at ? at.ToString("g", CultureInfo.CurrentCulture) : "—";
+            PlannedSummary += Environment.NewLine + _localizer.Get("ReminderPlannedInSystem", held, items.Count, when);
+        }
+    }
+
+    /// <summary>While the list is open, a settings change reschedules at once and refreshes the list, so it never shows an old time.</summary>
+    private async Task RescheduleAndRefreshAsync()
+    {
+        await _scheduler.RescheduleAsync();
+        if (ShowPlanned)
+        {
+            await LoadPlannedAsync();
+        }
     }
 
     partial void OnIsEnabledChanged(bool value)
@@ -251,7 +271,14 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         }
 
         _store.Save(new ReminderSettings(IsEnabled, ReadingsOn, BillsOn, VerificationOn, DraftsOn, TimeOnly.FromTimeSpan(Time), LeadDays));
-        _scheduler.RequestReschedule();
+        if (ShowPlanned)
+        {
+            _ = RunSafeAsync(RescheduleAndRefreshAsync);
+        }
+        else
+        {
+            _scheduler.RequestReschedule();
+        }
     }
 }
 
@@ -260,8 +287,12 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
 /// <param name="Kind">What the reminder is about.</param>
 /// <param name="Text">Title and body as the notification shows them.</param>
 /// <param name="Target">The screen a tap opens.</param>
-public sealed record PlannedReminderRowViewModel(string When, string Kind, string Text, string Target)
+/// <param name="Problem">Empty, or a warning that the system does not hold this reminder.</param>
+public sealed record PlannedReminderRowViewModel(string When, string Kind, string Text, string Target, string Problem = "")
 {
+    /// <summary>True if <see cref="Problem"/> has a text.</summary>
+    public bool HasProblem => Problem.Length > 0;
+
     /// <summary>Time and kind in one line.</summary>
     public string Header => $"{When} · {Kind}";
 }

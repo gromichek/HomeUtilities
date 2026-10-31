@@ -817,9 +817,12 @@ no longer reminds you.
 **Planned reminders** lists what the app plans right now: the local date and time, what it is about (readings, bill, tax
 installment, meter verification, draft bills), the text of the notification and the screen a tap opens. Use it when a
 reminder you expected does not arrive: if it is not in the list, nothing is due (or its time has already passed — a reminder
-is planned only for a time in the future, and a time between 21:00 and 08:00 moves to 08:00); if it is in the list, the
-notification has been handed to Android. For a test, set the bill's due date or the time of day a few minutes ahead and
-open the list.
+is planned only for a time in the future, and a time between 21:00 and 08:00 moves to 08:00). Under the count the list says
+how many of the planned reminders Android really holds and when the app last handed them over ("Handed to the system: 13 of
+13. Last update: …"); a reminder Android does not hold is marked in red. While the list is open, changing the time or a
+switch updates it at once. For a test, set the bill's due date or the time of day a few minutes ahead and open the list.
+Android delivers reminders without waking the phone exactly on time, so a reminder may come a few minutes late (in deep
+sleep even later); a reminder that is more than 6 hours late is skipped.
 
 **Android.** When you switch the reminders on, Android asks for the permission to show notifications; if you refuse, the
 switch goes back off — allow notifications for the app in the system settings and try again. The app does nothing in the

@@ -43,15 +43,17 @@ public sealed partial class HelpViewModel : ViewModelBase
     /// <summary>Opens an external link in the system browser, or reloads the page in the linked guide's language.</summary>
     public Task InterceptAsync(string url) => RunSafeAsync(async () =>
     {
-        if (IsExternal(url))
-        {
-            await _launcher.OpenAsync(new Uri(url));
-        }
-        else if (GuideLanguageOf(url) is { } language)
+        // The guide file is checked first: on Windows the embedded page lives on a virtual https host (https://0.0.0.1/),
+        // so a link to "ru.md" arrives as an http(s) URL and would otherwise open in the browser.
+        if (GuideLanguageOf(url) is { } language)
         {
             _languageOverride = language;
             Topic = null;
             await ReloadAsync();
+        }
+        else if (IsExternal(url))
+        {
+            await _launcher.OpenAsync(new Uri(url));
         }
     });
 
@@ -84,7 +86,7 @@ public sealed partial class HelpViewModel : ViewModelBase
 
     private static bool IsLocalHost(string host) =>
         host.Length == 0
-        || host is "localhost" or "0.0.0.0" or "127.0.0.1" or "::1" or "[::1]"
+        || host is "localhost" or "0.0.0.0" or "0.0.0.1" or "127.0.0.1" or "::1" or "[::1]"
         || host.EndsWith(".invalid", StringComparison.OrdinalIgnoreCase)
         || host.EndsWith(".androidplatform.net", StringComparison.OrdinalIgnoreCase)
         || host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase);
