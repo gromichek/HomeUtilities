@@ -90,6 +90,7 @@ Prompt for a new lead session:
 | 2026-10-29 | Export "like my workbook" (T-027a) — one sheet per contract from the import profile. |
 | 2026-10-30 | Closing the remainder of a bill **without a payment** is not planned. Workaround: such months are treated as "by consumption" (plan starts later). |
 | 2026-10-30 | Meter–contract links start at the meter's installation (not "today"); link dates are editable; repair under Settings → Imports. |
+| 2026-10-31 | Reminders: **no quiet hours** — the configured time of day is used exactly. Inexact alarms (≈1 min late) are fine. |
 
 ## 4. The owner's data (private — never in the repo)
 - He keeps ~20 years (2004–2026) of history in an Excel workbook: one sheet per supplier, one row per month,
@@ -105,16 +106,14 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-10-31)
-- All tasks up to **T-028c** are merged, plus fix #147 (reminders delivery, help link on Windows). No task is `Ready`.
-- Waiting for the owner's test of #147: reminder with the app closed arrives (allow ~15 min), Planned reminders shows
-  "Handed to the system: N of N"; Windows help link to the other language stays in Help.
-  If reminders still do not arrive although the system holds them → next suspects: re-allow `WAKE_LOCK`, battery
-  optimisation of the emulator image.
+- All tasks up to **T-028c** are merged, plus fixes #147 (late reminders were dropped by the plugin — `AllowedDelay` 6 h; help
+  link on Windows) and #149 (no quiet hours; the Planned reminders list reschedules before comparing). No task is `Ready`.
+- Reminders confirmed working on the owner's real phone (release build). Waiting only for his quick check of #149.
 - Overview settlement cap of 24 months: accepted by the owner (2026-10-31).
 - Several older "pending" rows in the PROGRESS manual test log — ask him only if relevant.
 
 ## 6. Next steps (ROADMAP)
-1. After the #147 test: log the result, handle findings.
+1. After the #149 check: log the result. Then ask the owner whether he has collected T-028a findings (real phone/tablet).
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
