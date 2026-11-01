@@ -1,13 +1,12 @@
 # T-028d: Settings as a list of sections, unified controls
-Phase: 8a · Depends on: T-028a (shared wrapping/footer rules), T-028e (Reminders card) · Size: M
+Phase: 8a · Depends on: T-028f (one content pane), T-028e (Reminders card) · Size: M
 
 Owner finding 3 (PROGRESS "T-028a findings", 2026-10-31): Settings is one long page; on a phone a button text is cut
 ("Очистит" instead of "Очистить" in Error log — two buttons side by side). He wants Settings like the rest of the app.
 
 ## Goal
-Settings becomes a **list of sections**; tapping a section opens it — a page on the phone, the right pane on tablet and
-Windows (same list + detail pattern as the other screens, UI_GUIDELINES §3, layout modes incl. the low-height rule of
-T-028a).
+Settings becomes a **list of sections**; tapping a section opens it as a **page** on every device (one content pane,
+T-028f; owner decision 2026-11-01). Back returns to the list.
 
 ## Sections (one row each: icon, title, one-line current value)
 1. **Language** — current language ("Русский"); choice per UI_GUIDELINES §3a (single choice dialog / radio list).
@@ -42,4 +41,4 @@ it in the closest one and say so in the PR.
    Back → list shows "English".
 2. Tap Reminders → all reminder settings and Planned reminders as before; Back.
 3. Tap Error log → Copy / Clear stacked, texts fully visible.
-4. Tablet/Windows: the section list on the left, the section on the right; switching sections keeps the list selection.
+4. Tablet/Windows: the section list fills the content area; a section opens as a page; Back returns to the list.

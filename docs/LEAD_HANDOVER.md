@@ -92,6 +92,7 @@ Prompt for a new lead session:
 | 2026-10-30 | Meter–contract links start at the meter's installation (not "today"); link dates are editable; repair under Settings → Imports. |
 | 2026-10-31 | Reminders: **no quiet hours** — the configured time of day is used exactly. Inexact alarms (≈1 min late) are fine. |
 | 2026-11-01 | A window **lower than 480 dp** (phone in landscape) uses the phone layout (single pane, ✓ Save at the top), whatever its width (T-028a). |
+| 2026-11-01 | **One content pane everywhere** (variant A): no list + editor split on tablet/Windows; editors are pages with ✓ at the top on every device; lists in 2–3 columns on wide windows; period filter as a drop-down (T-028f). Owner tests speed only in **Release** builds. |
 
 ## 4. The owner's data (private — never in the repo)
 - He keeps ~20 years (2004–2026) of history in an Excel workbook: one sheet per supplier, one row per month,
@@ -109,7 +110,8 @@ Prompt for a new lead session:
 ## 5. Current state (2026-11-01)
 - Merged up to **T-028a** (#157) and **T-028e** (#158). Waiting for the owner's device tests of both
   (reminder scenarios a–d of T-028e with the app closed; layouts, cut texts and system Back on phone/tablet/Windows).
-- **Ready:** T-028d Settings as a section list (start after the owner's tests of #157/#158).
+- **Ready:** T-028f one content pane (next), then T-028d Settings as a section list, then T-028b performance (scrolling
+  stutters in Release on phone and tablet).
 - Reminders now use our own `ReminderAlarms` (Android), not the plugin's scheduling. If a reminder with ✓ still does not
   arrive → OEM battery management (Samsung "sleeping apps") is the next suspect.
 - Phone Android 16, tablet Android 13.

@@ -7,7 +7,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028d | Settings as a list of sections | Ready | | finding 3; after T-028a and T-028e |
+| T-028f | One content pane everywhere | Ready | | owner decision 2026-11-01 (variant A); period filter as drop-down |
+| T-028d | Settings as a list of sections | Ready | | finding 3; after T-028f (sections open as pages everywhere) |
 
 ## Done
 
@@ -86,10 +87,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 ### New findings (owner, 2026-11-01, after T-028a/T-028e)
 
 5. **Tablet (portrait and landscape with the menu open):** list + editor two-pane leaves the list ~450 dp; the filter
-   card is cramped (period buttons cut to "Вс/Го/Ме", the year "2026" wraps per digit). Owner: go to **one content pane**
-   (plus the menu). Decision pending (see lead's question). Period buttons → a drop-down like the other filters.
-6. **Scrolling stutters** on phone and tablet in all lists/panes. To check: Release build (Debug is much slower on
-   Android), then profile (T-028b): card templates (nested layouts, shadows), `CollectionView` item sizing, images.
+   card is cramped (period buttons cut to "Вс/Го/Ме", the year "2026" wraps per digit). Owner decision: **one content
+   pane** everywhere (variant A) → T-028f. Period buttons → a drop-down like the other filters.
+6. **Scrolling stutters** on phone and tablet in all lists/panes — **in Release builds** (owner tests speed only in
+   Release). Profile in T-028b: card templates (nested layouts, shadows), `CollectionView` item sizing, images.
 7. **Reminder for a paid bill arrived once** (not reproduced on the second try). Watch; ask the owner for the steps
    (Paid on the card / in the editor, undo, how soon before the reminder time).
 
