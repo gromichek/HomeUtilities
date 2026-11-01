@@ -164,7 +164,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-01 | #163 | T-028f one content pane (tablet portrait/landscape, Windows, phone) | OK; 2-column editors look fine (keep). |
 | 2026-11-01 | #160 | Reminder text on the lock screen | **Not shown** on the lock screen (sound only) → high-importance channel #166 |
 | 2026-11-01 | #166 | Reminders pop-up / lock screen | Pop-up OK when unlocked; **locked: sound only**, notification is in the shade after unlocking. App settings correct (lock screen allowed, show content). Delayed test added (#168) to check. |
-| | #165 + #168 | T-028d Settings sections; "Test notification in 1 minute" on the lock screen (phone and tablet) | pending |
+| | #165 + #168 | T-028d Settings sections; "Test notification in 1 minute" on the lock screen (phone and tablet) | pending — owner: WhatsApp/Gmail light up the locked screen briefly, ours only sound (shown after power button) → one-colour small icon + app colour #170 |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
