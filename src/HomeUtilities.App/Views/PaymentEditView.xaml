@@ -158,12 +158,12 @@
         <!-- Tablet / desktop footer: Save (primary), Cancel (secondary), Delete (destructive) at the far end. -->
         <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
                 BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
-            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
                 <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
                         Style="{StaticResource PrimaryButton}" />
                 <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
                         Style="{StaticResource SecondaryButton}" />
-                <Button Grid.Column="3" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                <Button Grid.Column="2" HorizontalOptions="End" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                         Style="{StaticResource DestructiveButton}"
                         IsVisible="{Binding IsNew, Converter={StaticResource Not}}" />
             </Grid>

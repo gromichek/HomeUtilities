@@ -31,10 +31,10 @@
                         <Label Text="{Binding NameError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
 
-                        <HorizontalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Switch IsToggled="{Binding IsActive}" />
-                            <Label Text="{Binding Texts.IsActiveLabel}" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
+                            <Label Grid.Column="1" Text="{Binding Texts.IsActiveLabel}" VerticalOptions="Center" />
+                        </Grid>
 
                         <Label Text="{Binding Texts.PropertyLabel}" Style="{StaticResource MutedLabel}" />
                         <Border Padding="12,10" StrokeShape="RoundRectangle 8" IsVisible="{Binding ShowPropertyChooser}"
@@ -132,10 +132,10 @@
                             <Label Text="{Binding StartError}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding StartError, Converter={StaticResource HasText}}" />
 
-                            <HorizontalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                 <Switch IsToggled="{Binding HasEnd}" />
-                                <Label Text="{Binding Texts.HasEndLabel}" VerticalOptions="Center" />
-                            </HorizontalStackLayout>
+                                <Label Grid.Column="1" Text="{Binding Texts.HasEndLabel}" VerticalOptions="Center" />
+                            </Grid>
                             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEnd}">
                                 <Label Text="{Binding Texts.EndLabel}" Style="{StaticResource MutedLabel}" />
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
@@ -313,12 +313,12 @@
         <!-- Tablet / desktop footer: Save (primary), Cancel (secondary), Delete (destructive) at the far end. -->
         <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
                 BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
-            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
                 <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
                         Style="{StaticResource PrimaryButton}" />
                 <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
                         Style="{StaticResource SecondaryButton}" />
-                <Button Grid.Column="3" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                <Button Grid.Column="2" HorizontalOptions="End" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                         Style="{StaticResource DestructiveButton}"
                         IsVisible="{Binding IsNew, Converter={StaticResource Not}}" />
             </Grid>

@@ -28,16 +28,15 @@
                                                     <TapGestureRecognizer Command="{Binding EditCommand}" />
                                                 </Grid.GestureRecognizers>
                                                 <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                                    <HorizontalStackLayout Spacing="12">
-                                                        <Label Text="{Binding DateText}" Style="{StaticResource MutedLabel}" VerticalOptions="Center" />
-                                                        <Label Text="{Binding ValueText}" FontAttributes="Bold" VerticalOptions="Center" />
-                                                        <Label Text="{Binding ConsumptionText}" IsVisible="{Binding HasConsumption}" VerticalOptions="Center" />
-                                                    </HorizontalStackLayout>
-                                                    <HorizontalStackLayout Spacing="8">
-                                                        <Label Text="{Binding KindText}" Style="{StaticResource BadgeDueSoonLabel}" IsVisible="{Binding HasKind}" />
-                                                        <Label Text="{Binding SubmittedText}" Style="{StaticResource SuccessLabel}" FontSize="12"
-                                                               IsVisible="{Binding HasSubmitted}" />
-                                                    </HorizontalStackLayout>
+                                                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="12">
+                                                        <Label Grid.Column="0" Text="{Binding DateText}" Style="{StaticResource MutedLabel}" VerticalOptions="Center" />
+                                                        <Label Grid.Column="1" Text="{Binding ValueText}" FontAttributes="Bold" VerticalOptions="Center" />
+                                                        <Label Grid.Column="2" Text="{Binding ConsumptionText}" IsVisible="{Binding HasConsumption}" VerticalOptions="Center" />
+                                                    </Grid>
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                        <Label Grid.Column="0" Text="{Binding KindText}" Style="{StaticResource BadgeDueSoonLabel}" IsVisible="{Binding HasKind}" />
+                                                        <Label Grid.Column="1" Text="{Binding SubmittedText}" Style="{StaticResource SuccessLabel}" FontSize="12" IsVisible="{Binding HasSubmitted}" />
+                                                    </Grid>
                                                     <Label Text="{Binding Note}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasNote}" />
                                                 </VerticalStackLayout>
                                                 <!-- Tap the photo icon to see the picture in the system viewer. -->

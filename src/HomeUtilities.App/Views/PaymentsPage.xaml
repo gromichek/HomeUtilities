@@ -145,14 +145,14 @@
                                 <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding PaysText}" FontSize="13"
                                        IsVisible="{Binding HasPays}" />
 
-                                <HorizontalStackLayout Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Spacing="12">
+                                <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
                                     <!-- Money no bill uses yet: a prepayment (yellow). -->
-                                    <Label Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
+                                    <Label Grid.Column="0" Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
                                            TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
                                            IsVisible="{Binding HasPrepayment}" />
-                                    <Label Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
+                                    <Label Grid.Column="1" Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
                                            IsVisible="{Binding IsQuick}" />
-                                </HorizontalStackLayout>
+                                </Grid>
                             </Grid>
                         </Border>
                     </DataTemplate>

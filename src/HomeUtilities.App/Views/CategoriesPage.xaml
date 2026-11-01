@@ -24,10 +24,10 @@
                     ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
                     HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
 
-            <HorizontalStackLayout Grid.Row="1" Spacing="8">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Grid.Row="1">
                 <Switch IsToggled="{Binding ShowArchived}" />
-                <Label Text="{Binding ShowArchivedText}" VerticalOptions="Center" />
-            </HorizontalStackLayout>
+                <Label Grid.Column="1" Text="{Binding ShowArchivedText}" VerticalOptions="Center" />
+            </Grid>
 
             <CollectionView Grid.Row="2" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
                 <CollectionView.ItemTemplate>
