@@ -2,133 +2,44 @@
 <views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                 xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
                 xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
                 x:Class="HomeUtilities.App.Views.SettingsPage"
                 x:DataType="vm:SettingsViewModel"
                 Title="{Binding Title}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12" MaximumWidthRequest="600" HorizontalOptions="Fill">
-            <Label Text="{Binding LanguageLabel}" Style="{StaticResource MutedLabel}" />
-            <Picker ItemsSource="{Binding Languages}"
-                    ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:LanguageOption}"
-                    SelectedItem="{Binding SelectedLanguage}" />
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
 
-            <Label Text="{Binding ThemeLabel}" Style="{StaticResource MutedLabel}" Margin="0,12,0,0" />
-            <Picker ItemsSource="{Binding Themes}"
-                    ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:ThemeOption}"
-                    SelectedItem="{Binding SelectedTheme}" />
+    <views:PageBase.Resources>
+        <conv:ResourceKeyConverter x:Key="ResourceKey" />
+    </views:PageBase.Resources>
 
-            <Button Text="{Binding CategoriesText}" Command="{Binding OpenCategoriesCommand}"
-                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,12,0,0" />
-
-            <Button Text="{Binding VatRatesText}" Command="{Binding OpenVatRatesCommand}"
-                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,12,0,0" />
-
-            <Button Text="{Binding BillTemplatesText}" Command="{Binding OpenBillTemplatesCommand}"
-                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,12,0,0" />
-
-            <Button Text="{Binding ImportText}" Command="{Binding OpenImportWizardCommand}"
-                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,12,0,0" />
-
-            <Button Text="{Binding ImportsText}" Command="{Binding OpenImportsCommand}"
-                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,12,0,0" />
-
-            <Border Style="{StaticResource SectionCard}" Margin="0,12,0,0" BindingContext="{Binding Reminders}" x:DataType="vm:ReminderSettingsViewModel">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding HeaderText}" Style="{StaticResource SectionHeader}" />
-                    <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
-                    <Label Text="{Binding NotSupportedText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding IsNotSupported}" />
-                    <VerticalStackLayout Spacing="6" IsVisible="{Binding NotificationsBlocked}">
-                        <Label Text="{Binding NotificationsBlockedText}" Style="{StaticResource ErrorLabel}" />
-                        <Button Text="{Binding OpenNotificationSettingsText}" Command="{Binding OpenNotificationSettingsCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
-                    </VerticalStackLayout>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                        <Switch IsToggled="{Binding IsEnabled}" />
-                        <Label Grid.Column="1" Text="{Binding EnabledLabel}" VerticalOptions="Center" />
-                    </Grid>
-                    <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowDetails}">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding ReadingsOn}" />
-                            <Label Grid.Column="1" Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
-                        </Grid>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding BillsOn}" />
-                            <Label Grid.Column="1" Text="{Binding BillsLabel}" VerticalOptions="Center" />
-                        </Grid>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding VerificationOn}" />
-                            <Label Grid.Column="1" Text="{Binding VerificationLabel}" VerticalOptions="Center" />
-                        </Grid>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding DraftsOn}" />
-                            <Label Grid.Column="1" Text="{Binding DraftsLabel}" VerticalOptions="Center" />
-                        </Grid>
-                        <Label Text="{Binding TimeLabel}" Style="{StaticResource MutedLabel}" />
-                        <TimePicker Time="{Binding Time}" Format="HH:mm" HorizontalOptions="Start" />
-                        <Label Text="{Binding LeadDaysLabel}" Style="{StaticResource MutedLabel}" />
-                        <Stepper Minimum="0" Maximum="14" Increment="1" Value="{Binding LeadDays}" HorizontalOptions="Start" />
-                    </VerticalStackLayout>
-                    <Button Text="{Binding SendTestText}" Command="{Binding SendTestCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
-                    <Button Text="{Binding PlannedText}" Command="{Binding TogglePlannedCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
-                    <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowPlanned}">
-                        <Label Text="{Binding PlannedSummary}" Style="{StaticResource MutedLabel}" />
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Planned}" Spacing="6">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="vm:PlannedReminderRowViewModel">
-                                    <VerticalStackLayout Spacing="0">
-                                        <Label Text="{Binding Header}" FontAttributes="Bold" />
-                                        <Label Text="{Binding Text}" />
-                                        <Label Text="{Binding Target}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                                        <Label Text="{Binding Problem}" IsVisible="{Binding HasProblem}" Style="{StaticResource ErrorLabel}" />
-                                    </VerticalStackLayout>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
+    <!-- The list of sections (T-028d): one row = icon, title, current value; a row opens its page (one content pane). -->
+    <CollectionView ItemsSource="{Binding Sections}" views:ListColumns.MinItemWidth="360" Margin="12">
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="vm:SettingsSectionRowViewModel">
+                <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}"
+                        StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="24" VerticalOptions="Center"
+                               Text="{Binding IconKey, Converter={StaticResource ResourceKey}}"
+                               TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="{Binding Title}" FontAttributes="Bold" />
+                            <Label Text="{Binding Value}" Style="{StaticResource MutedLabel}" />
                         </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Border>
-
-            <Border Style="{StaticResource SectionCard}" Margin="0,12,0,0">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding BackupHeader}" Style="{StaticResource SectionHeader}" />
-                    <Label Text="{Binding BackupHint}" Style="{StaticResource MutedLabel}" />
-                    <Label Text="{Binding LastBackupText}" />
-                    <Button Text="{Binding SaveBackupText}" Command="{Binding SaveBackupCommand}"
-                            Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
-                    <Button Text="{Binding RestoreBackupText}" Command="{Binding RestoreBackupCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
-                </VerticalStackLayout>
-            </Border>
-
-            <Border Style="{StaticResource SectionCard}" IsVisible="{Binding IsDebugBuild}">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding TestDataHeader}" Style="{StaticResource SectionHeader}" />
-                    <Button Text="{Binding FillSampleDataText}" Command="{Binding FillSampleDataCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
-                    <Button Text="{Binding DeleteAllDataText}" Command="{Binding DeleteAllDataCommand}"
-                            Style="{StaticResource DestructiveButton}" HorizontalOptions="Start" />
-                </VerticalStackLayout>
-            </Border>
-
-            <Label Text="{Binding ErrorLogHeader}" FontAttributes="Bold" Margin="0,24,0,0" />
-            <Label Text="{Binding ErrorLogHint}" Style="{StaticResource MutedLabel}" />
-            <Grid>
-            <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Start" AlignContent="Start">
-                <Button Text="{Binding CopyLogText}" Command="{Binding CopyLogCommand}"
-                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
-                <Button Text="{Binding ClearLogText}" Command="{Binding ClearLogCommand}"
-                        Style="{StaticResource SecondaryButton}" Margin="0,0,8,8" />
-            </FlexLayout>
-            </Grid>
-
-            <Label Text="{Binding VersionText}" Margin="0,12,0,0" />
-            <Label Text="{Binding DatabasePathText}" />
-            <Label Text="{Binding LayoutText}" />
-        </VerticalStackLayout>
-    </ScrollView>
+                        <Label Grid.Column="2" FontFamily="{DynamicResource IconFontFamily}" FontSize="20" VerticalOptions="Center"
+                               Text="{StaticResource IconChevron}"
+                               TextColor="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 
 </views:PageBase>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:PageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:views="clr-namespace:HomeUtilities.App.Views"
+                xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+                x:Class="HomeUtilities.App.Views.SettingsSectionPage"
+                x:DataType="vm:SettingsSectionViewModel"
+                Title="{Binding Title}">
+
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
+    <!--
+        The settings of one section. Every block is wrapped in a ContentView that carries IsVisible, because the inner layout
+        switches its BindingContext to the SettingsViewModel (UI_GUIDELINES §6a). Buttons fill the column and stack vertically,
+        so their text wraps instead of being cut (T-028d).
+    -->
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="12" MaximumWidthRequest="600" HorizontalOptions="Fill">
+
+            <ContentView IsVisible="{Binding IsLanguage}">
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
+                    <Label Text="{Binding LanguageLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding Languages}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:LanguageOption}"
+                            SelectedItem="{Binding SelectedLanguage}" />
+                </VerticalStackLayout>
+            </ContentView>
+
+            <ContentView IsVisible="{Binding IsTheme}">
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
+                    <Label Text="{Binding ThemeLabel}" Style="{StaticResource MutedLabel}" />
+                    <Picker ItemsSource="{Binding Themes}"
+                            ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:ThemeOption}"
+                            SelectedItem="{Binding SelectedTheme}" />
+                </VerticalStackLayout>
+            </ContentView>
+
+            <ContentView IsVisible="{Binding IsReminders}">
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings.Reminders}" x:DataType="vm:ReminderSettingsViewModel">
+                    <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding NotSupportedText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding IsNotSupported}" />
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding NotificationsBlocked}">
+                        <Label Text="{Binding NotificationsBlockedText}" Style="{StaticResource ErrorLabel}" />
+                        <Button Text="{Binding OpenNotificationSettingsText}" Command="{Binding OpenNotificationSettingsCommand}"
+                                Style="{StaticResource SecondaryButton}" />
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Switch IsToggled="{Binding IsEnabled}" />
+                        <Label Grid.Column="1" Text="{Binding EnabledLabel}" VerticalOptions="Center" />
+                    </Grid>
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowDetails}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Switch IsToggled="{Binding ReadingsOn}" />
+                            <Label Grid.Column="1" Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Switch IsToggled="{Binding BillsOn}" />
+                            <Label Grid.Column="1" Text="{Binding BillsLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Switch IsToggled="{Binding VerificationOn}" />
+                            <Label Grid.Column="1" Text="{Binding VerificationLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Switch IsToggled="{Binding DraftsOn}" />
+                            <Label Grid.Column="1" Text="{Binding DraftsLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Label Text="{Binding TimeLabel}" Style="{StaticResource MutedLabel}" />
+                        <TimePicker Time="{Binding Time}" Format="HH:mm" HorizontalOptions="Start" />
+                        <Label Text="{Binding LeadDaysLabel}" Style="{StaticResource MutedLabel}" />
+                        <Stepper Minimum="0" Maximum="14" Increment="1" Value="{Binding LeadDays}" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+                    <Button Text="{Binding SendTestText}" Command="{Binding SendTestCommand}"
+                            Style="{StaticResource SecondaryButton}" />
+                    <Button Text="{Binding PlannedText}" Command="{Binding TogglePlannedCommand}"
+                            Style="{StaticResource SecondaryButton}" />
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowPlanned}">
+                        <Label Text="{Binding PlannedSummary}" Style="{StaticResource MutedLabel}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Planned}" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PlannedReminderRowViewModel">
+                                    <VerticalStackLayout Spacing="0">
+                                        <Label Text="{Binding Header}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Text}" />
+                                        <Label Text="{Binding Target}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                        <Label Text="{Binding Problem}" IsVisible="{Binding HasProblem}" Style="{StaticResource ErrorLabel}" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ContentView>
+
+            <ContentView IsVisible="{Binding IsBackup}">
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
+                    <Label Text="{Binding BackupHint}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding LastBackupText}" />
+                    <Button Text="{Binding SaveBackupText}" Command="{Binding SaveBackupCommand}"
+                            Style="{StaticResource PrimaryButton}" />
+                    <Button Text="{Binding RestoreBackupText}" Command="{Binding RestoreBackupCommand}"
+                            Style="{StaticResource SecondaryButton}" />
+                </VerticalStackLayout>
+            </ContentView>
+
+            <ContentView IsVisible="{Binding IsErrorLog}">
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
+                    <Label Text="{Binding ErrorLogHint}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding ErrorLogCountText}" />
+                    <Button Text="{Binding CopyLogText}" Command="{Binding CopyLogCommand}"
+                            Style="{StaticResource SecondaryButton}" />
+                    <Button Text="{Binding ClearLogText}" Command="{Binding ClearLogCommand}"
+                            Style="{StaticResource DestructiveButton}" />
+                </VerticalStackLayout>
+            </ContentView>
+
+            <ContentView IsVisible="{Binding IsAbout}">
+                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
+                    <Label Text="{Binding VersionText}" />
+                    <Label Text="{Binding DatabasePathText}" />
+                    <Label Text="{Binding LayoutText}" />
+                    <Border Style="{StaticResource SectionCard}" IsVisible="{Binding IsDebugBuild}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding TestDataHeader}" Style="{StaticResource SectionHeader}" />
+                            <Button Text="{Binding FillSampleDataText}" Command="{Binding FillSampleDataCommand}"
+                                    Style="{StaticResource SecondaryButton}" />
+                            <Button Text="{Binding DeleteAllDataText}" Command="{Binding DeleteAllDataCommand}"
+                                    Style="{StaticResource DestructiveButton}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ContentView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</views:PageBase>

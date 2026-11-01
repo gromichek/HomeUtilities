@@ -1,5 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
@@ -50,21 +53,6 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private string _themeLabel = string.Empty;
 
     [ObservableProperty]
-    private string _categoriesText = string.Empty;
-
-    [ObservableProperty]
-    private string _vatRatesText = string.Empty;
-
-    [ObservableProperty]
-    private string _billTemplatesText = string.Empty;
-
-    [ObservableProperty]
-    private string _importText = string.Empty;
-
-    [ObservableProperty]
-    private string _importsText = string.Empty;
-
-    [ObservableProperty]
     private string _versionText = string.Empty;
 
     [ObservableProperty]
@@ -78,6 +66,15 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     [ObservableProperty]
     private string _errorLogHint = string.Empty;
+
+    [ObservableProperty]
+    private string _errorLogCountText = string.Empty;
+
+    [ObservableProperty]
+    private string _aboutHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _helpText = string.Empty;
 
     [ObservableProperty]
     private string _copyLogText = string.Empty;
@@ -148,8 +145,18 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         _navigation = navigation;
         Version = appInfo.Version;
         DatabasePath = appPaths.DatabasePath;
+        Reminders.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(ReminderSettingsViewModel.IsEnabled) or nameof(ReminderSettingsViewModel.Time))
+            {
+                RefreshSectionValues();
+            }
+        };
         RefreshTexts();
     }
+
+    /// <summary>The rows of the list: icon, title and the current value of each section.</summary>
+    public ObservableCollection<SettingsSectionRowViewModel> Sections { get; } = [];
 
     /// <summary>The Reminders card.</summary>
     public ReminderSettingsViewModel Reminders { get; }
@@ -164,20 +171,88 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     /// <summary>Settings key of the time the last backup was created on this device (ISO 8601).</summary>
     public const string LastBackupKey = "LastBackupAt";
 
+    /// <summary>
+    /// Opens a row: the settings pages of Language, Theme, Reminders, Backup, Error log and About are pushed with this view
+    /// model as their owner; Categories, VAT rates, Bill templates and Imports open their existing screens.
+    /// </summary>
     [RelayCommand]
-    private Task OpenCategoriesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Categories));
+    private Task OpenSectionAsync(SettingsSection section) => RunSafeAsync(() => OpenAsync(section));
 
-    [RelayCommand]
-    private Task OpenBillTemplatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.BillTemplates));
+    private Task OpenAsync(SettingsSection section) => section switch
+    {
+        SettingsSection.Categories => _navigation.GoToAsync(Routes.Categories),
+        SettingsSection.VatRates => _navigation.GoToAsync(Routes.VatRates),
+        SettingsSection.BillTemplates => _navigation.GoToAsync(Routes.BillTemplates),
+        SettingsSection.Imports => _navigation.GoToAsync(Routes.Imports),
+        _ => _navigation.GoToAsync(
+            Routes.SettingsSection,
+            new Dictionary<string, object> { [SectionParameter] = new SettingsSectionViewModel(this, section, _localizer, _navigation) }),
+    };
 
+    /// <summary>The "?" button of the list: the Settings chapter of the user guide.</summary>
     [RelayCommand]
-    private Task OpenImportWizardAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.ImportWizard));
+    private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, HelpTopic.Settings));
 
-    [RelayCommand]
-    private Task OpenImportsAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Imports));
+    /// <summary>Navigation parameter carrying the <see cref="SettingsSectionViewModel"/> of a section page.</summary>
+    public const string SectionParameter = "section";
 
-    [RelayCommand]
-    private Task OpenVatRatesAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.VatRates));
+    /// <summary>The page title of a section (also the title of its row in the list).</summary>
+    public string TitleOf(SettingsSection section) => _localizer[section switch
+    {
+        SettingsSection.Language => "SettingsLanguage",
+        SettingsSection.Theme => "SettingsTheme",
+        SettingsSection.Reminders => "SettingsReminders",
+        SettingsSection.Backup => "SettingsBackup",
+        SettingsSection.Categories => "SectionCategories",
+        SettingsSection.VatRates => "SectionVatRates",
+        SettingsSection.BillTemplates => "SectionBillTemplates",
+        SettingsSection.Imports => "SectionImports",
+        SettingsSection.ErrorLog => "SettingsErrorLog",
+        _ => "SettingsAbout",
+    }];
+
+    /// <summary>The one-line value shown under the title of a row.</summary>
+    public string ValueOf(SettingsSection section) => section switch
+    {
+        SettingsSection.Language => SelectedLanguage?.DisplayName ?? string.Empty,
+        SettingsSection.Theme => SelectedTheme?.DisplayName ?? string.Empty,
+        SettingsSection.Reminders => Reminders.IsEnabled
+            ? _localizer.Get("SettingsValueRemindersOn", Reminders.Time.ToString(@"hh\:mm", CultureInfo.InvariantCulture))
+            : _localizer["SettingsValueRemindersOff"],
+        SettingsSection.Backup => DateTimeOffset.TryParse(_settings.GetString(LastBackupKey), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var last)
+            ? _localizer.Get("SettingsValueBackupLast", last.ToLocalTime())
+            : _localizer["SettingsValueBackupNever"],
+        SettingsSection.Categories => _localizer["SettingsValueCategories"],
+        SettingsSection.VatRates => _localizer["SettingsValueVatRates"],
+        SettingsSection.BillTemplates => _localizer["SettingsValueBillTemplates"],
+        SettingsSection.Imports => _localizer["SettingsValueImports"],
+        SettingsSection.ErrorLog => _localizer.Get("SettingsValueErrorLog", CountLogEntries()),
+        _ => _localizer.Get("SettingsVersion", Version),
+    };
+
+    /// <summary>Number of entries in the error log: every entry starts with a <c>[timestamp]</c> line.</summary>
+    private int CountLogEntries() => LogEntryStart().Count(_errorLog.ReadAll());
+
+    [GeneratedRegex(@"^\[\d{4}-\d{2}-\d{2} ", RegexOptions.Multiline)]
+    private static partial Regex LogEntryStart();
+
+    /// <summary>Re-reads the values of all rows (language, theme, reminders, backup, log); cheap, called when the list appears.</summary>
+    public void RefreshSectionValues()
+    {
+        foreach (var row in Sections)
+        {
+            row.Title = TitleOf(row.Section);
+            row.Value = ValueOf(row.Section);
+        }
+
+        ErrorLogCountText = _localizer.Get("SettingsValueErrorLog", CountLogEntries());
+    }
+
+    public override Task OnAppearingAsync()
+    {
+        RefreshSectionValues();
+        return Task.CompletedTask;
+    }
 
     /// <summary>Puts the error log on the clipboard so the owner can send it; an empty log says so instead.</summary>
     [RelayCommand]
@@ -310,8 +385,20 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         }
     }
 
+    /// <summary>Clears the error log after a confirmation.</summary>
     [RelayCommand]
-    private void ClearLog() => _errorLog.Clear();
+    private Task ClearLogAsync() => RunSafeAsync(async () =>
+    {
+        var confirmed = await _dialogs.ConfirmAsync(
+            _localizer["SettingsErrorLog"], _localizer["SettingsErrorLogClearConfirm"], _localizer["SettingsErrorLogClear"], _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        _errorLog.Clear();
+        RefreshSectionValues();
+    });
 
     void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) => RefreshLayoutText();
 
@@ -328,6 +415,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         if (!_refreshing && value is not null && value.Theme != _themeService.Current)
         {
             _themeService.Set(value.Theme);
+            RefreshSectionValues();
         }
     }
 
@@ -337,13 +425,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         try
         {
             Title = _localizer["SectionSettings"];
-            CategoriesText = _localizer["SectionCategories"];
-            VatRatesText = _localizer["SectionVatRates"];
-            BillTemplatesText = _localizer["SectionBillTemplates"];
-            ImportText = _localizer["SectionImport"];
-            ImportsText = _localizer["SectionImports"];
             ErrorLogHeader = _localizer["SettingsErrorLog"];
             ErrorLogHint = _localizer["SettingsErrorLogHint"];
+            AboutHeader = _localizer["SettingsAbout"];
+            HelpText = _localizer["SectionHelp"];
             CopyLogText = _localizer["SettingsErrorLogCopy"];
             ClearLogText = _localizer["SettingsErrorLogClear"];
             BackupHeader = _localizer["SettingsBackup"];
@@ -366,11 +451,23 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             SelectedTheme = Themes.FirstOrDefault(t => t.Theme == _themeService.Current);
 
             RefreshLayoutText();
+            RebuildSections();
         }
         finally
         {
             _refreshing = false;
         }
+    }
+
+    private void RebuildSections()
+    {
+        Sections.Clear();
+        foreach (var section in Enum.GetValues<SettingsSection>())
+        {
+            Sections.Add(new SettingsSectionRowViewModel(section, TitleOf(section), ValueOf(section), open => RunSafeAsync(() => OpenAsync(open))));
+        }
+
+        ErrorLogCountText = _localizer.Get("SettingsValueErrorLog", CountLogEntries());
     }
 
     private void RefreshLastBackupText() =>

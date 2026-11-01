@@ -1455,4 +1455,15 @@
   <data name="ImportSetReadingWindowConfirm" xml:space="preserve"><value>Изменить окно подачи показаний этого договора с {0} на {1}? Тогда начисления и отчёты будут относить показания первых чисел месяца к предыдущему месяцу.</value></data>
   <data name="ImportNoReadingWindow" xml:space="preserve"><value>нет</value></data>
   <data name="ImportSetStartLinksConfirm" xml:space="preserve"><value>Начало привязок счётчиков ({0}) будет перенесено на дату установки счётчика (или на начало договора, если оно позже).</value></data>
+  <data name="SettingsAbout" xml:space="preserve"><value>О приложении</value></data>
+  <data name="SettingsValueRemindersOn" xml:space="preserve"><value>Вкл., {0}</value></data>
+  <data name="SettingsValueRemindersOff" xml:space="preserve"><value>Выкл.</value></data>
+  <data name="SettingsValueBackupLast" xml:space="preserve"><value>Последняя копия: {0:d}</value></data>
+  <data name="SettingsValueBackupNever" xml:space="preserve"><value>Копий ещё нет</value></data>
+  <data name="SettingsValueCategories" xml:space="preserve"><value>Категории платежей и цвета</value></data>
+  <data name="SettingsValueVatRates" xml:space="preserve"><value>Проценты НДС по датам</value></data>
+  <data name="SettingsValueBillTemplates" xml:space="preserve"><value>Повторяющиеся и разовые счета</value></data>
+  <data name="SettingsValueImports" xml:space="preserve"><value>Импорт из Excel, профили, отмена, исправление</value></data>
+  <data name="SettingsValueErrorLog" xml:space="preserve"><value>Записей: {0}</value></data>
+  <data name="SettingsErrorLogClearConfirm" xml:space="preserve"><value>Очистить журнал ошибок? Записи нельзя будет вернуть.</value></data>
 </root>

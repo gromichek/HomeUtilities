@@ -121,4 +121,10 @@ public static class Routes
 
     /// <summary>Pushed page opened from Settings or the wizard: the list of imports with Undo and the saved import profiles.</summary>
     public const string Imports = "Imports";
+
+    /// <summary>
+    /// Pushed page opened from the Settings list: the settings of one section, parameter <c>section</c> (a
+    /// <see cref="SettingsSectionViewModel"/>). Back returns to the list.
+    /// </summary>
+    public const string SettingsSection = "SettingsSection";
 }

@@ -121,6 +121,48 @@
         <On Platform="WinUI" Value="&#xE76C;" />
     </OnPlatform>
 
+    <!-- Settings list rows (T-028d): language / palette / event / backup / category / percent / description / upload_file / bug_report / info; Segoe: Globe / Color / Calendar / Upload / Tag / Calculator / Page / Import / ErrorBadge / Info. -->
+    <OnPlatform x:Key="IconSettingsLanguage" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE894;" />
+        <On Platform="WinUI" Value="&#xE774;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsTheme" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE40A;" />
+        <On Platform="WinUI" Value="&#xE790;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsReminders" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE878;" />
+        <On Platform="WinUI" Value="&#xE787;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsBackup" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE864;" />
+        <On Platform="WinUI" Value="&#xE898;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsCategories" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE574;" />
+        <On Platform="WinUI" Value="&#xE8EC;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsVatRates" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xEB58;" />
+        <On Platform="WinUI" Value="&#xE8EF;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsBillTemplates" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE873;" />
+        <On Platform="WinUI" Value="&#xE7C3;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsImports" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE9FC;" />
+        <On Platform="WinUI" Value="&#xE8B5;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsErrorLog" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE868;" />
+        <On Platform="WinUI" Value="&#xE783;" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSettingsAbout" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE88E;" />
+        <On Platform="WinUI" Value="&#xE946;" />
+    </OnPlatform>
+
     <!-- Image sources for toolbar items and buttons with an icon next to the text. -->
     <FontImageSource x:Key="IconAddSource"
                      FontFamily="{StaticResource IconFontFamily}"

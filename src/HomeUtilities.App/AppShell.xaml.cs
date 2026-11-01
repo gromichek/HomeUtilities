@@ -31,6 +31,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.BillTemplateEdit, typeof(BillTemplateEditPage));
         Routing.RegisterRoute(Routes.ImportWizard, typeof(ImportWizardPage));
         Routing.RegisterRoute(Routes.Imports, typeof(ImportsPage));
+        Routing.RegisterRoute(Routes.SettingsSection, typeof(SettingsSectionPage));
         Routing.RegisterRoute(Routes.PaymentEdit, typeof(PaymentEditPage));
         Routing.RegisterRoute(Routes.PaymentsFor, typeof(PaymentsPage));
         Routing.RegisterRoute(Routes.EqualizedSettlement, typeof(EqualizedSettlementPage));
