@@ -542,6 +542,46 @@ public class BillsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task FilterPanel_IsCollapsedOnCompact_ExpandedOnWide_AndRemembersTheUsersChoice()
+    {
+        AddTypicalBills();
+        var compact = await LoadAsync();
+        Assert.False(compact.FilterPanel.IsExpanded);
+        Assert.Equal(1, compact.FilterPanel.Columns);
+        Assert.False(string.IsNullOrEmpty(compact.FilterPanel.SummaryText));
+        Assert.Contains(compact.Period.Label, compact.FilterPanel.SummaryText);
+        Assert.Contains(compact.TotalsText, compact.FilterPanel.SummaryText);
+
+        compact.FilterPanel.ToggleCommand.Execute(null);
+        Assert.True(compact.FilterPanel.IsExpanded);
+
+        // The screen is recreated when the user comes back: the choice is kept for the session.
+        var again = await LoadAsync();
+        Assert.True(again.FilterPanel.IsExpanded);
+    }
+
+    [Fact]
+    public async Task FilterPanel_FollowsTheLayoutUntilTheUserChooses()
+    {
+        AddTypicalBills();
+        var vm = await LoadAsync();
+        Assert.False(vm.FilterPanel.IsExpanded);
+
+        _kit.Kit.Layout.Change(LayoutMode.Medium);
+        Assert.True(vm.FilterPanel.IsExpanded);
+        Assert.Equal(2, vm.FilterPanel.Columns);
+
+        _kit.Kit.Layout.Change(LayoutMode.Expanded);
+        Assert.Equal(3, vm.FilterPanel.Columns);
+
+        vm.FilterPanel.ToggleCommand.Execute(null); // the user collapses it
+        _kit.Kit.Layout.Change(LayoutMode.Compact);
+        Assert.False(vm.FilterPanel.IsExpanded);
+        _kit.Kit.Layout.Change(LayoutMode.Expanded);
+        Assert.False(vm.FilterPanel.IsExpanded); // the user's choice wins
+    }
+
+    [Fact]
     public async Task Editor_InThePane_SavingRefreshesTheList()
     {
         _kit.Kit.Layout.Change(LayoutMode.Expanded);

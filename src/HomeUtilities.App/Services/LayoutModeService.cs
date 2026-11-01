@@ -10,18 +10,18 @@ public sealed class LayoutModeService : ILayoutModeService
 
     public void Attach(Window window)
     {
-        window.SizeChanged += (_, _) => Update(window.Width);
-        window.Created += (_, _) => Update(window.Width);
+        window.SizeChanged += (_, _) => Update(window.Width, window.Height);
+        window.Created += (_, _) => Update(window.Width, window.Height);
     }
 
-    private void Update(double widthDp)
+    private void Update(double widthDp, double heightDp)
     {
         if (widthDp <= 0)
         {
             return;
         }
 
-        var mode = LayoutModes.FromWidth(widthDp);
+        var mode = LayoutModes.FromSize(widthDp, heightDp);
         if (mode == Current)
         {
             return;

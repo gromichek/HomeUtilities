@@ -63,10 +63,10 @@
                     <Label Text="{Binding DigitsError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding DigitsError, Converter={StaticResource HasText}}" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding HasVerifiedOn}" />
-                        <Label Text="{Binding Texts.HasVerifiedOnLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding Texts.HasVerifiedOnLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasVerifiedOn}">
                         <Label Text="{Binding Texts.VerifiedOnLabel}" Style="{StaticResource MutedLabel}" />
                         <DatePicker Date="{Binding VerifiedOn, Converter={StaticResource DateOnly}}" />

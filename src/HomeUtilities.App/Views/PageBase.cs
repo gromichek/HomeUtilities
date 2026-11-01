@@ -43,6 +43,17 @@ public abstract class PageBase : ContentPage
             return true;
         }
 
+        // A section root other than the Overview: Back goes to the Overview; on the Overview it leaves the app (default).
+        // The same path for the toolbar arrow, the system Back button and the gesture (T-028a).
+        if (this is not OverviewPage
+            && Shell.Current is { } current
+            && current.CurrentItem?.CurrentItem?.Stack.Count is null or <= 1
+            && Navigation.ModalStack.Count == 0)
+        {
+            _ = current.GoToAsync($"//{Routes.Overview}");
+            return true;
+        }
+
         return base.OnBackButtonPressed();
     }
 

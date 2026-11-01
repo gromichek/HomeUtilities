@@ -31,18 +31,18 @@
                        IsVisible="{Binding PriceError, Converter={StaticResource HasText}}" />
             </VerticalStackLayout>
 
-            <HorizontalStackLayout Spacing="8">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                 <Switch IsToggled="{Binding PriceIncludesVat}" />
-                <Label Text="{Binding PriceIncludesVatLabel}" VerticalOptions="Center" />
-            </HorizontalStackLayout>
+                <Label Grid.Column="1" Text="{Binding PriceIncludesVatLabel}" VerticalOptions="Center" />
+            </Grid>
 
             <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" />
             <Label Text="{Binding CurrencyText}" />
 
-            <HorizontalStackLayout Spacing="8" IsVisible="{Binding AllowTiers}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding AllowTiers}">
                 <Switch IsToggled="{Binding IsStepped}" />
-                <Label Text="{Binding SteppedLabel}" VerticalOptions="Center" />
-            </HorizontalStackLayout>
+                <Label Grid.Column="1" Text="{Binding SteppedLabel}" VerticalOptions="Center" />
+            </Grid>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStepped}">
                 <Label Text="{Binding TiersHint}" Style="{StaticResource MutedLabel}" FontSize="12" />

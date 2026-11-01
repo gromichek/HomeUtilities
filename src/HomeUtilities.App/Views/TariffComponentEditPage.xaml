@@ -80,10 +80,10 @@
                         <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Meters}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TariffMeterSwitchViewModel">
-                                    <HorizontalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                         <Switch IsToggled="{Binding IsOn}" />
-                                        <Label Text="{Binding Title}" VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
+                                        <Label Grid.Column="1" Text="{Binding Title}" VerticalOptions="Center" />
+                                    </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
@@ -92,10 +92,10 @@
                         <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Registers}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TariffRegisterSwitchViewModel">
-                                    <HorizontalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                         <Switch IsToggled="{Binding IsOn}" />
-                                        <Label Text="{Binding Title}" VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
+                                        <Label Grid.Column="1" Text="{Binding Title}" VerticalOptions="Center" />
+                                    </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>

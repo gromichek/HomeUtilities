@@ -55,14 +55,15 @@
                                 <VerticalStackLayout Spacing="4">
                                     <Entry Text="{Binding Name}" MaxLength="{x:Static core:InputLimits.Name}" />
                                     <Label Text="{Binding SheetText}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                                    <HorizontalStackLayout Spacing="8">
-                                        <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                                    <!-- Equal columns: the texts wrap inside the buttons instead of being cut (T-028a). -->
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                        <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
                                                 Style="{StaticResource SecondaryButton}" IsVisible="{Binding IsChanged}" />
-                                        <Button Text="{Binding ExportText}" Command="{Binding ExportCommand}"
+                                        <Button Grid.Column="1" Text="{Binding ExportText}" Command="{Binding ExportCommand}"
                                                 Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="{Binding DeleteText}" Command="{Binding DeleteCommand}"
+                                        <Button Grid.Column="2" Text="{Binding DeleteText}" Command="{Binding DeleteCommand}"
                                                 Style="{StaticResource DestructiveButton}" />
-                                    </HorizontalStackLayout>
+                                    </Grid>
                                 </VerticalStackLayout>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
