@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028d | Settings as a list of sections | Ready | | finding 3; after T-028f (sections open as pages everywhere) |
 
 ## Done
 
@@ -45,6 +44,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-028d | Settings as a list of sections | 2026-11-01, #165 | 10 rows (icon, title, value); Language, Theme, Reminders, Backup, Error log, About open `SettingsSectionPage`; Categories, VAT rates, Bill templates, Imports open their screens; buttons stacked; Clear log confirmed; new HelpTopics. Segoe glyphs chosen from memory — owner to check icons on Windows. |
+| — | Reminders pop up and show on the lock screen | 2026-11-01, #166 | Channel `reminder_alerts` with **high** importance (default importance: no pop-up, not on the owner's lock screen); old channels deleted. |
 | T-028f | One content pane everywhere | 2026-11-01, #163 | No list + editor split; editors are pages with ✓ everywhere (desktop footer removed); lists in 1–3 columns (`ListColumns`), editor cards in up to 2 columns; highlight + scroll to the last opened card; period filter as a drop-down; side-pane code and 8 resx keys removed. Owner to check the 2-column long editors (Bill, Contract) — `MaxColumns="1"` if they look bad. |
 | — | Reminder text on the lock screen | 2026-11-01, #160 | New channel `reminders_public` (lock-screen visibility public), old channel deleted. |
 | T-028e | Reliable reminders on Android | 2026-11-01, #158 | Own scheduler (`ReminderAlarms`: inexact `SetAndAllowWhileIdle`, own receiver, plan in prefs, boot receiver); plugin only for permission/channel/test. Flush on leaving the app; real `FLAG_NO_CREATE` check + reason in Planned reminders; failures to the error log. Lead fixed the Android build (`IntentFilter` ambiguity, nullable builder chain) and merged after T-028a (MainActivity conflict). Cause of the old failure not confirmed on a device. |
@@ -89,7 +90,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 5. **Tablet (portrait and landscape with the menu open):** list + editor two-pane leaves the list ~450 dp; the filter
    card is cramped (period buttons cut to "Вс/Го/Ме", the year "2026" wraps per digit). Owner decision: **one content
-   pane** everywhere (variant A) → T-028f. Period buttons → a drop-down like the other filters.
+   pane** everywhere (variant A) → done in T-028f (#163).
 6. **Scrolling stutters** on phone and tablet in all lists/panes — **in Release builds** (owner tests speed only in
    Release). Profile in T-028b: card templates (nested layouts, shadows), `CollectionView` item sizing, images.
 7. **Reminder for a paid bill arrived once** (not reproduced on the second try). Watch; ask the owner for the steps
@@ -160,8 +161,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-31 | #143 | T-028c: long lists, contract → All bills selection, gas import window warning, help links (Android) | OK. Overview settlement cap of 24 months accepted. Import "unpaid gas bills" was the owner's own experiments — no bug. **Bugs**: reminders listed but not delivered; Windows help link to `ru.md`/`en.md` opens the browser → #147 |
 | 2026-10-31 | #147 | Reminders on a real phone (release build), help link on Windows | OK, reminders arrive ~1 min late (inexact alarm). Occasional "not handed" marks were a stale comparison; owner asked to drop quiet hours → #149 |
 | 2026-11-01 | #157 + #158 | T-028a layouts/Back (phone, tablet, Windows); T-028e reminders scenarios a–d | Reminders OK (new, changed, restart, notifications off); **once** a paid bill still notified (not reproduced). Layouts OK on phone, Back OK. **Tablet**: two panes too cramped (filters: "Вс/Го/Ме", year "202/6" wrapped) → owner wants one content pane. Lock screen showed no text → #160. Scrolling stutters on phone and tablet in all lists. |
-| | #160 | Reminder text on the lock screen (new public channel) | pending |
-| | #163 | T-028f one content pane (tablet portrait/landscape, Windows, phone) | pending |
+| 2026-11-01 | #163 | T-028f one content pane (tablet portrait/landscape, Windows, phone) | OK; 2-column editors look fine (keep). |
+| 2026-11-01 | #160 | Reminder text on the lock screen | **Not shown** on the lock screen (sound only) → high-importance channel #166 |
+| | #165 + #166 | T-028d Settings sections; reminders pop-up / lock screen | pending |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
