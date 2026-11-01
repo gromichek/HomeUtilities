@@ -867,7 +867,7 @@ the developer; failures are written there with the reminder and its time. (3) If
 that notifications are allowed for the app: if you switched them off in the Android settings, the *Reminders* page shows a
 red warning with the button **Open notification settings**.
 
-**Lock screen.** Reminders show their text on the lock screen. If you see only "Content hidden", the phone hides the
+**Lock screen.** Reminders pop up like messages and show their text on the lock screen. If you see only "Content hidden", the phone hides the
 content of all notifications: in the Android settings, *Notifications → Lock screen notifications*, choose to show the
 content.
 
