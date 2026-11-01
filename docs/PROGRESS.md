@@ -7,8 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028e | Reliable reminders on Android | In progress | | first: own inexact AlarmManager scheduler, every save path, flush on leaving the app, real system check |
-| T-028a | Device polish: layouts, cut texts, Android Back | Ready | | findings 1, 2, 4 + Windows Bills/Payments + system Back on the phone |
 | T-028d | Settings as a list of sections | Ready | | finding 3; after T-028a and T-028e |
 
 ## Done
@@ -47,6 +45,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-028e | Reliable reminders on Android | 2026-11-01, #158 | Own scheduler (`ReminderAlarms`: inexact `SetAndAllowWhileIdle`, own receiver, plan in prefs, boot receiver); plugin only for permission/channel/test. Flush on leaving the app; real `FLAG_NO_CREATE` check + reason in Planned reminders; failures to the error log. Lead fixed the Android build (`IntentFilter` ambiguity, nullable builder chain) and merged after T-028a (MainActivity conflict). Cause of the old failure not confirmed on a device. |
+| T-028a | Device polish: layouts, cut texts, Android Back | 2026-11-01, #157 | Bills/Payments filters in the list header, collapsible summary on compact; height < 480 dp → Compact; footers never overlap; 33 switch rows wrap; AndroidX `OnBackPressedCallback` → `IWindow.BackButtonClicked` (predictive back on Android 16), section root Back → Overview. |
 | — | Reminders without quiet hours; Planned reminders list hands the plan over first | 2026-10-31, #149 | Owner decision: reminder time used exactly as set (21:00–08:00 shift removed). False "not handed" marks came from comparing a fresh plan with the last debounced one. |
 | — | Fix: late reminders dropped; Planned reminders diagnostics; help link to the other guide on Windows | 2026-10-31, #147 | Cause: Plugin.LocalNotification drops an alarm delivered > `AllowedDelay` (default 1 min) late; inexact alarms are late → now 6 h. List shows "Handed to the system: N of M" and refreshes on settings change. Windows WebView serves help from `https://0.0.0.1/`. |
 | T-028c | Fixes from real-data testing | 2026-10-30, #143 | "Show more" paging for long lists; Overview settlement capped at 24 months; Planned reminders debug list; reminder cause not confirmed (WAKE_LOCK still removed — re-allow if the plan is non-empty and nothing arrives). Lead relaxed two flaky perf limits. |
@@ -147,6 +147,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
 | 2026-10-31 | #143 | T-028c: long lists, contract → All bills selection, gas import window warning, help links (Android) | OK. Overview settlement cap of 24 months accepted. Import "unpaid gas bills" was the owner's own experiments — no bug. **Bugs**: reminders listed but not delivered; Windows help link to `ru.md`/`en.md` opens the browser → #147 |
 | 2026-10-31 | #147 | Reminders on a real phone (release build), help link on Windows | OK, reminders arrive ~1 min late (inexact alarm). Occasional "not handed" marks were a stale comparison; owner asked to drop quiet hours → #149 |
+| | #157 + #158 | T-028a layouts/Back (phone, tablet, Windows); T-028e reminders scenarios a–d | pending |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |

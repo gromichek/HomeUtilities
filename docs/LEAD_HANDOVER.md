@@ -107,16 +107,15 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-01)
-- All tasks up to **T-028c** are merged, plus fixes #147 and #149 (reminders, help link on Windows, no quiet hours).
-- **Ready** (owner runs the sessions): **T-028e** reliable reminders on Android (still broken after #149: a new bill's
-  reminder is not handed over / every row "not handed"; cause not confirmed — task asks for an own AlarmManager
-  scheduler), **T-028a** layouts + cut texts + Android system Back, **T-028d** Settings as a section list (after both).
-- Owner findings from phone/tablet/Windows are in PROGRESS "T-028a findings". Tablet has the same UI issues as the phone.
-- Phone Android 16, tablet Android 13. Back cause open: predictive back (targetSdk 36) or pushed pages on the phone
-  (owner's view) — T-028a finds out. Owner started **T-028e** (2026-11-01).
+- Merged up to **T-028a** (#157) and **T-028e** (#158). Waiting for the owner's device tests of both
+  (reminder scenarios a–d of T-028e with the app closed; layouts, cut texts and system Back on phone/tablet/Windows).
+- **Ready:** T-028d Settings as a section list (start after the owner's tests of #157/#158).
+- Reminders now use our own `ReminderAlarms` (Android), not the plugin's scheduling. If a reminder with ✓ still does not
+  arrive → OEM battery management (Samsung "sleeping apps") is the next suspect.
+- Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Review and merge T-028e, T-028a, T-028d as the owner finishes the sessions.
+1. Owner tests of #157/#158 → log results, fix findings; then T-028d.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
