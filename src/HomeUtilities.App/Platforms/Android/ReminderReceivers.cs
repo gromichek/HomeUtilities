@@ -31,7 +31,7 @@ public class ReminderAlarmReceiver : BroadcastReceiver
 /// (no database work, no network).
 /// </summary>
 [BroadcastReceiver(Enabled = true, Exported = true)]
-[IntentFilter(new[] { Intent.ActionBootCompleted, Intent.ActionMyPackageReplaced, "android.intent.action.QUICKBOOT_POWERON" })]
+[Android.App.IntentFilter(new[] { Intent.ActionBootCompleted, Intent.ActionMyPackageReplaced, "android.intent.action.QUICKBOOT_POWERON" })]
 public class ReminderBootReceiver : BroadcastReceiver
 {
     public override void OnReceive(Context? context, Intent? intent)
