@@ -91,6 +91,7 @@ Prompt for a new lead session:
 | 2026-10-30 | Closing the remainder of a bill **without a payment** is not planned. Workaround: such months are treated as "by consumption" (plan starts later). |
 | 2026-10-30 | Meter–contract links start at the meter's installation (not "today"); link dates are editable; repair under Settings → Imports. |
 | 2026-10-31 | Reminders: **no quiet hours** — the configured time of day is used exactly. Inexact alarms (≈1 min late) are fine. |
+| 2026-11-01 | A window **lower than 480 dp** (phone in landscape) uses the phone layout (single pane, ✓ Save at the top), whatever its width (T-028a). |
 
 ## 4. The owner's data (private — never in the repo)
 - He keeps ~20 years (2004–2026) of history in an Excel workbook: one sheet per supplier, one row per month,
@@ -111,8 +112,8 @@ Prompt for a new lead session:
   reminder is not handed over / every row "not handed"; cause not confirmed — task asks for an own AlarmManager
   scheduler), **T-028a** layouts + cut texts + Android system Back, **T-028d** Settings as a section list (after both).
 - Owner findings from phone/tablet/Windows are in PROGRESS "T-028a findings". Tablet has the same UI issues as the phone.
-- Owner question pending: Android versions of phone and tablet (Back works on the tablet, minimizes on the phone —
-  suspected predictive back with targetSdk 36).
+- Phone Android 16, tablet Android 13. Back cause open: predictive back (targetSdk 36) or pushed pages on the phone
+  (owner's view) — T-028a finds out. Owner started **T-028e** (2026-11-01).
 
 ## 6. Next steps (ROADMAP)
 1. Review and merge T-028e, T-028a, T-028d as the owner finishes the sessions.

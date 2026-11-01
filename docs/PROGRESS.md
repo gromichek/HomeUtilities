@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028e | Reliable reminders on Android | Ready | | first: own inexact AlarmManager scheduler, every save path, flush on leaving the app, real system check |
+| T-028e | Reliable reminders on Android | In progress | | first: own inexact AlarmManager scheduler, every save path, flush on leaving the app, real system check |
 | T-028a | Device polish: layouts, cut texts, Android Back | Ready | | findings 1, 2, 4 + Windows Bills/Payments + system Back on the phone |
 | T-028d | Settings as a list of sections | Ready | | finding 3; after T-028a and T-028e |
 
