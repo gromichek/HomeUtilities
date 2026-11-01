@@ -6,7 +6,7 @@ using HomeUtilities.Core;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>
-/// The period filter control of the Bills and Payments screens: a scope selector (All years / Year / Month), ‹ › buttons
+/// The period filter control of the Bills and Payments screens: a scope drop-down (All years / Year / Month), ‹ › buttons
 /// and the label ("2026", "October 2026"). The filter value itself lives in the screen's filter state (read/write
 /// delegates), so it is remembered for the session.
 /// </summary>
@@ -16,6 +16,7 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
     private readonly Action<PeriodFilter> _write;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
+    private readonly IDialogService _dialogs;
     private readonly Action _changed;
     private readonly CultureInfo? _culture;
 
@@ -23,6 +24,7 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
     /// <param name="write">Remembers the filter.</param>
     /// <param name="clock">Supplies today's date for the defaults.</param>
     /// <param name="localizer">Supplies the texts.</param>
+    /// <param name="dialogs">Shows the choice dialog of the scope drop-down.</param>
     /// <param name="changed">Called after the user changed the filter, to rebuild the list.</param>
     /// <param name="culture">Culture for the month name; null = the current culture of the app.</param>
     public PeriodFilterViewModel(
@@ -30,6 +32,7 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
         Action<PeriodFilter> write,
         IClock clock,
         ILocalizer localizer,
+        IDialogService dialogs,
         Action changed,
         CultureInfo? culture = null)
     {
@@ -37,6 +40,7 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
         _write = write;
         _clock = clock;
         _localizer = localizer;
+        _dialogs = dialogs;
         _changed = changed;
         _culture = culture;
     }
@@ -73,6 +77,14 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
         }
     }
 
+    /// <summary>The value shown in the scope drop-down: the name of the current scope.</summary>
+    public string ScopeText => Current.Scope switch
+    {
+        PeriodScope.Year => YearText,
+        PeriodScope.Month => MonthText,
+        _ => AllYearsText,
+    };
+
     public string PeriodLabel => _localizer["PeriodLabel"];
 
     public string AllYearsText => _localizer["PeriodAllYears"];
@@ -94,6 +106,28 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
 
     /// <summary>Raises change notifications for everything (also after a language switch).</summary>
     public void Refresh() => OnPropertyChanged(string.Empty);
+
+    /// <summary>Opens the choice dialog of the scope drop-down (All years / Year / Month).</summary>
+    [RelayCommand]
+    private async Task ChooseScopeAsync()
+    {
+        var options = new (string Name, PeriodScope Scope)[]
+        {
+            (AllYearsText, PeriodScope.AllYears),
+            (YearText, PeriodScope.Year),
+            (MonthText, PeriodScope.Month),
+        };
+        var picked = await _dialogs.ChooseAsync(PeriodLabel, [.. options.Select(o => o.Name)]);
+        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { Name: not null } option)
+        {
+            return;
+        }
+
+        if (option.Scope != Current.Scope)
+        {
+            Change(Current.WithScope(option.Scope, _clock.Today));
+        }
+    }
 
     [RelayCommand]
     private void ShowAllYears() => Change(Current.WithScope(PeriodScope.AllYears, _clock.Today));

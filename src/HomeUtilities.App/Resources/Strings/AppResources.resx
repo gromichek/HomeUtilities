@@ -59,7 +59,6 @@
   <data name="PropertyAdd" xml:space="preserve"><value>New property</value></data>
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>Archived</value></data>
-  <data name="PropertySelectHint" xml:space="preserve"><value>Select a property or add a new one.</value></data>
   <data name="PropertySummaryResidents" xml:space="preserve"><value>Residents: {0}</value></data>
   <data name="PropertySummaryArea" xml:space="preserve"><value>Area: {0} m²</value></data>
   <data name="PropertyNew" xml:space="preserve"><value>New property</value></data>
@@ -99,7 +98,6 @@
   <data name="SuppliersEmpty" xml:space="preserve"><value>No suppliers yet.</value></data>
   <data name="SupplierAdd" xml:space="preserve"><value>New supplier</value></data>
   <data name="SuppliersSearch" xml:space="preserve"><value>Search by name</value></data>
-  <data name="SupplierSelectHint" xml:space="preserve"><value>Select a supplier or add a new one.</value></data>
   <data name="SupplierLinksCount" xml:space="preserve"><value>Links: {0}</value></data>
   <data name="SupplierHasPaymentDetails" xml:space="preserve"><value>Payment details</value></data>
   <data name="SupplierNew" xml:space="preserve"><value>New supplier</value></data>
@@ -179,7 +177,6 @@
   <data name="CategoriesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="CategoryBuiltInBadge" xml:space="preserve"><value>Built-in</value></data>
   <data name="CategoryArchivedBadge" xml:space="preserve"><value>Archived</value></data>
-  <data name="CategorySelectHint" xml:space="preserve"><value>Select a category or add a new one.</value></data>
   <data name="CategoryNew" xml:space="preserve"><value>New category</value></data>
   <data name="CategoryGeneral" xml:space="preserve"><value>General</value></data>
   <data name="CategoryName" xml:space="preserve"><value>Name</value></data>
@@ -385,7 +382,6 @@
   <data name="ReadingsSaveAll" xml:space="preserve"><value>Save all</value></data>
   <data name="ReadingsNoProperties" xml:space="preserve"><value>No properties yet. Add a property first.</value></data>
   <data name="ReadingsNoMeters" xml:space="preserve"><value>This property has no active meters. Add meters in the property.</value></data>
-  <data name="ReadingsHistoryHint" xml:space="preserve"><value>Tap a meter to see its readings</value></data>
   <data name="ReadingsLast" xml:space="preserve"><value>last: {0} · {1}</value></data>
   <data name="ReadingsNoLast" xml:space="preserve"><value>no readings yet</value></data>
   <data name="ReadingsNoteShow" xml:space="preserve"><value>Add a note</value></data>
@@ -606,7 +602,6 @@
   <data name="SectionVatRates" xml:space="preserve"><value>VAT rates</value></data>
   <data name="VatRatesEmpty" xml:space="preserve"><value>No VAT rates.</value></data>
   <data name="VatRateAdd" xml:space="preserve"><value>New VAT rate</value></data>
-  <data name="VatRateSelectHint" xml:space="preserve"><value>Select a VAT rate or add a new one.</value></data>
   <data name="VatRatesBanner" xml:space="preserve"><value>Default Latvian rates — please check them against your bills.</value></data>
   <data name="VatPercentValue" xml:space="preserve"><value>{0} %</value></data>
   <data name="VatNoPercent" xml:space="preserve"><value>no percentage</value></data>
@@ -795,7 +790,6 @@
   <data name="BillsEmpty" xml:space="preserve"><value>There are no bills yet. Add the first one with the button below.</value></data>
   <data name="BillsNothingFound" xml:space="preserve"><value>No bills match the filters.</value></data>
   <data name="BillAdd" xml:space="preserve"><value>New bill</value></data>
-  <data name="BillSelectHint" xml:space="preserve"><value>Select a bill or add a new one.</value></data>
   <data name="BillTotals" xml:space="preserve"><value>Billed {0} · Paid {1} · Open {2}</value></data>
   <data name="BillPaymentRow" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
   <data name="BillPaymentQuick" xml:space="preserve"><value>Paid button</value></data>
@@ -851,7 +845,6 @@
   <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Direct debit</value></data>
   <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Other</value></data>
   <data name="PaymentAdd" xml:space="preserve"><value>New payment</value></data>
-  <data name="PaymentSelectHint" xml:space="preserve"><value>Select a payment or add a new one.</value></data>
   <data name="PaymentsEmpty" xml:space="preserve"><value>No payments yet. Add the first one with the button below.</value></data>
   <data name="PaymentsNothingFound" xml:space="preserve"><value>No payments match the filters.</value></data>
   <data name="PaymentsPropertyFilter" xml:space="preserve"><value>Property</value></data>
@@ -1139,7 +1132,6 @@
   <data name="SectionBillTemplates" xml:space="preserve"><value>Bill templates</value></data>
   <data name="BillTemplatesEmpty" xml:space="preserve"><value>No bill templates yet. A template describes a payment that comes regularly or more than once, so you do not type it from scratch.</value></data>
   <data name="BillTemplateAdd" xml:space="preserve"><value>New template</value></data>
-  <data name="BillTemplateSelectHint" xml:space="preserve"><value>Select a template or add a new one</value></data>
   <data name="BillTemplateInactiveBadge" xml:space="preserve"><value>Inactive — creates no drafts</value></data>
   <data name="BillTemplateScheduleOnce" xml:space="preserve"><value>Used by hand (New bill › From template)</value></data>
   <data name="BillTemplateScheduleMonthly" xml:space="preserve"><value>Monthly from {0}</value></data>

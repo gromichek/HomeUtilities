@@ -1,10 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the payments list.</summary>
-public sealed partial class PaymentItemViewModel : ObservableObject
+public sealed partial class PaymentItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

@@ -116,7 +116,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _filter = filter;
         _texts = new BillsListTexts(localizer);
         FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
-        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
+        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, dialogs, RebuildItems);
         RefreshTexts();
     }
 

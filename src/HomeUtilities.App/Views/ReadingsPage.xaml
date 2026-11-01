@@ -19,10 +19,8 @@
         <conv:StreamFactoryImageConverter x:Key="StreamImage" />
     </views:PageBase.Resources>
 
-    <Grid x:Name="Root" ColumnDefinitions="*,0">
-
-        <!-- Left / only column: entry form with a fixed "Save all" bar at the bottom. -->
-        <Grid Grid.Column="0" RowDefinitions="*,Auto">
+    <!-- Entry form with a fixed "Save all" bar at the bottom. -->
+    <Grid RowDefinitions="*,Auto">
             <ScrollView Grid.Row="0">
                 <VerticalStackLayout Padding="12" Spacing="12">
 
@@ -98,7 +96,7 @@
                                 <VerticalStackLayout Spacing="8">
                                     <Label Text="{Binding Header}" Style="{StaticResource SectionHeader}" />
 
-                                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cards}">
+                                    <views:AdaptiveFieldGrid RowSpacing="8" ColumnSpacing="12" MinColumnWidth="400" MaxColumns="3" BindableLayout.ItemsSource="{Binding Cards}">
                                         <BindableLayout.ItemTemplate>
                                             <DataTemplate x:DataType="vm:MeterCardViewModel">
                                                 <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Style="{StaticResource SectionCard}">
@@ -175,7 +173,7 @@
                                                 </Border>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
+                                    </views:AdaptiveFieldGrid>
                                 </VerticalStackLayout>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -189,16 +187,6 @@
                     IsVisible="{Binding HasMeters}">
                 <Button Text="{Binding SaveAllText}" Command="{Binding SaveAllCommand}" Style="{StaticResource PrimaryButton}" />
             </Border>
-        </Grid>
-
-        <!-- Right pane (tablet / desktop): history of the tapped meter. -->
-        <Grid Grid.Column="1">
-            <ContentView IsVisible="{Binding HasSelectedHistory}">
-                <views:ReadingHistoryView BindingContext="{Binding SelectedHistory}" />
-            </ContentView>
-            <Label Text="{Binding HistoryHintText}" Style="{StaticResource MutedLabel}"
-                   HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowHistoryHint}" />
-        </Grid>
     </Grid>
 
 </views:PageBase>

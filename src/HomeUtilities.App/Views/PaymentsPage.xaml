@@ -16,171 +16,132 @@
         <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
     </views:PageBase.Resources>
 
-    <Grid x:Name="Root" ColumnDefinitions="*,0">
+    <Grid RowDefinitions="Auto,*" Padding="12" RowSpacing="8">
+        <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
+                ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
 
-        <Grid Grid.Column="0" RowDefinitions="Auto,*" Padding="12" RowSpacing="8">
-            <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
-                    ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
-                    HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
-
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
-                <!-- The filters are the list header: they scroll away with the cards (T-028a). -->
-                <CollectionView.Header>
-                    <VerticalStackLayout Spacing="8" Padding="0,0,0,4">
-                        <Border Style="{StaticResource SectionCard}" Padding="12">
-                            <VerticalStackLayout Spacing="8">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.Title}" Style="{StaticResource SectionHeader}"
-                                           IsVisible="{Binding FilterPanel.IsExpanded}" />
-                                    <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.SummaryText}" LineBreakMode="TailTruncation" MaxLines="3"
-                                           IsVisible="{Binding FilterPanel.ShowSummary}">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding FilterPanel.ToggleCommand}" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
-                                    <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconCollapse}"
-                                            Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.IsExpanded}"
-                                            ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"
-                                            SemanticProperties.Description="{Binding FilterPanel.ToggleText}" />
-                                    <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconExpand}"
-                                            Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.ShowSummary}"
-                                            ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"
-                                            SemanticProperties.Description="{Binding FilterPanel.ToggleText}" />
-                                </Grid>
-
-                                <views:AdaptiveFieldGrid Columns="{Binding FilterPanel.Columns}" IsVisible="{Binding FilterPanel.IsExpanded}">
-                            <views:ReportFilterField Caption="{Binding Texts.PropertyFilterLabel}" Value="{Binding PropertyFilterName}" Command="{Binding ChoosePropertyFilterCommand}" />
-                            <VerticalStackLayout Spacing="8">
-                                <Label Text="{Binding Period.PeriodLabel}" Style="{StaticResource MutedLabel}" />
-                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                            <Button Grid.Column="0" Text="{Binding Period.AllYearsText}" Command="{Binding Period.ShowAllYearsCommand}"
-                                    Style="{StaticResource SecondaryButton}" Padding="8,8">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding Period.IsAllYearsScope}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button Grid.Column="1" Text="{Binding Period.YearText}" Command="{Binding Period.ShowYearCommand}"
-                                    Style="{StaticResource SecondaryButton}" Padding="8,8">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding Period.IsYearScope}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button Grid.Column="2" Text="{Binding Period.MonthText}" Command="{Binding Period.ShowMonthCommand}"
-                                    Style="{StaticResource SecondaryButton}" Padding="8,8">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding Period.IsMonthScope}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                        </Grid>
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
-                            <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
-                                    Command="{Binding Period.PreviousCommand}"
-                                    ToolTipProperties.Text="{Binding Period.PreviousText}"
-                                    SemanticProperties.Description="{Binding Period.PreviousText}" />
-                            <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold"
-                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                            <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
-                                    Command="{Binding Period.NextCommand}"
-                                    ToolTipProperties.Text="{Binding Period.NextText}"
-                                    SemanticProperties.Description="{Binding Period.NextText}" />
-                        </Grid>
-                            </VerticalStackLayout>
-                            <views:ReportFilterField Caption="{Binding Texts.ContractFilterLabel}" Value="{Binding ContractFilterName}" Command="{Binding ChooseContractFilterCommand}" />
-                                </views:AdaptiveFieldGrid>
-
-                                <!-- Totals of the filtered list (part of the summary line when collapsed). -->
-                                <Label Text="{Binding TotalsText}" FontAttributes="Bold" IsVisible="{Binding FilterPanel.IsExpanded}" />
-                            </VerticalStackLayout>
-                        </Border>
-                        <Label Text="{Binding NothingFoundText}" Style="{StaticResource MutedLabel}"
-                               HorizontalTextAlignment="Center" IsVisible="{Binding ShowNothingFound}" />
-                    </VerticalStackLayout>
-                </CollectionView.Header>
-                <CollectionView.Footer>
-                    <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,4,0,64" />
-                </CollectionView.Footer>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:PaymentItemViewModel">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsSelected}" Value="True">
-                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                    <Setter Property="StrokeThickness" Value="2" />
-                                </DataTrigger>
-                                <DataTrigger TargetType="Border" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsHighlighted}" Value="True">
-                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                    <Setter Property="StrokeThickness" Value="2" />
-                                </DataTrigger>
-                            </Border.Triggers>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectCommand}" />
-                            </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="2">
-                                <VerticalStackLayout Grid.Column="0" Grid.Row="0" Spacing="0">
-                                    <Label Text="{Binding TitleText}" FontAttributes="Bold" />
-                                    <Label Text="{Binding DateText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                </VerticalStackLayout>
-                                <VerticalStackLayout Grid.Column="1" Grid.Row="0" HorizontalOptions="End" Spacing="0">
-                                    <!-- A refund received is green. -->
-                                    <Label Text="{Binding AmountText}" FontAttributes="Bold" HorizontalTextAlignment="End">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsRefund}" Value="True">
-                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                    <Label Text="{Binding MethodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalTextAlignment="End" />
-                                </VerticalStackLayout>
-
-                                <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding PaysText}" FontSize="13"
-                                       IsVisible="{Binding HasPays}" />
-
-                                <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                    <!-- Money no bill uses yet: a prepayment (yellow). -->
-                                    <Label Grid.Column="0" Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
-                                           TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
-                                           IsVisible="{Binding HasPrepayment}" />
-                                    <Label Grid.Column="1" Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
-                                           IsVisible="{Binding IsQuick}" />
-                                </Grid>
+        <CollectionView x:Name="ItemList" Grid.Row="1" ItemsSource="{Binding Items}" views:ListColumns.MinItemWidth="360" IsVisible="{Binding HasItems}">
+            <!-- The filters are the list header: they scroll away with the cards (T-028a). -->
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="8" Padding="0,0,0,4">
+                    <Border Style="{StaticResource SectionCard}" Padding="12">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.Title}" Style="{StaticResource SectionHeader}"
+                                       IsVisible="{Binding FilterPanel.IsExpanded}" />
+                                <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.SummaryText}" LineBreakMode="TailTruncation" MaxLines="3"
+                                       IsVisible="{Binding FilterPanel.ShowSummary}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding FilterPanel.ToggleCommand}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                                <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconCollapse}"
+                                        Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.IsExpanded}"
+                                        ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"
+                                        SemanticProperties.Description="{Binding FilterPanel.ToggleText}" />
+                                <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconExpand}"
+                                        Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.ShowSummary}"
+                                        ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"
+                                        SemanticProperties.Description="{Binding FilterPanel.ToggleText}" />
                             </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
 
-            <VerticalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
-                                 IsVisible="{Binding IsEmpty}">
-                <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
+                            <views:AdaptiveFieldGrid Columns="{Binding FilterPanel.Columns}" IsVisible="{Binding FilterPanel.IsExpanded}">
+                        <views:ReportFilterField Caption="{Binding Texts.PropertyFilterLabel}" Value="{Binding PropertyFilterName}" Command="{Binding ChoosePropertyFilterCommand}" />
+                        <VerticalStackLayout Spacing="8">
+                            <!-- The period scope (All years / Year / Month) is a drop-down like the other filters (T-028f). -->
+                            <views:ReportFilterField Caption="{Binding Period.PeriodLabel}" Value="{Binding Period.ScopeText}" Command="{Binding Period.ChooseScopeCommand}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
+                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                                Command="{Binding Period.PreviousCommand}"
+                                ToolTipProperties.Text="{Binding Period.PreviousText}"
+                                SemanticProperties.Description="{Binding Period.PreviousText}" />
+                        <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold" LineBreakMode="NoWrap" MaxLines="1"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                                Command="{Binding Period.NextCommand}"
+                                ToolTipProperties.Text="{Binding Period.NextText}"
+                                SemanticProperties.Description="{Binding Period.NextText}" />
+                    </Grid>
+                        </VerticalStackLayout>
+                        <views:ReportFilterField Caption="{Binding Texts.ContractFilterLabel}" Value="{Binding ContractFilterName}" Command="{Binding ChooseContractFilterCommand}" />
+                            </views:AdaptiveFieldGrid>
 
-            <!-- Phone layout: floating add button, bottom-right. -->
-            <Button Grid.Row="0" Grid.RowSpan="2" Style="{StaticResource FabButton}"
-                    Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
-                    HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
-                    IsVisible="{Binding ShowAddFab}"
-                    ToolTipProperties.Text="{Binding AddText}"
-                    SemanticProperties.Description="{Binding AddText}" />
-        </Grid>
+                            <!-- Totals of the filtered list (part of the summary line when collapsed). -->
+                            <Label Text="{Binding TotalsText}" FontAttributes="Bold" IsVisible="{Binding FilterPanel.IsExpanded}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Label Text="{Binding NothingFoundText}" Style="{StaticResource MutedLabel}"
+                           HorizontalTextAlignment="Center" IsVisible="{Binding ShowNothingFound}" />
+                </VerticalStackLayout>
+            </CollectionView.Header>
+            <CollectionView.Footer>
+                <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
+                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,4,0,64" />
+            </CollectionView.Footer>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:PaymentItemViewModel">
+                    <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                <Setter Property="StrokeThickness" Value="2" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsHighlighted}" Value="True">
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                <Setter Property="StrokeThickness" Value="2" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="2">
+                            <VerticalStackLayout Grid.Column="0" Grid.Row="0" Spacing="0">
+                                <Label Text="{Binding TitleText}" FontAttributes="Bold" />
+                                <Label Text="{Binding DateText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Grid.Row="0" HorizontalOptions="End" Spacing="0">
+                                <!-- A refund received is green. -->
+                                <Label Text="{Binding AmountText}" FontAttributes="Bold" HorizontalTextAlignment="End">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsRefund}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Text="{Binding MethodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalTextAlignment="End" />
+                            </VerticalStackLayout>
 
-        <Grid Grid.Column="1">
-            <!-- IsVisible must be evaluated on the page view model, not on the (possibly null) editor. -->
-            <ContentView IsVisible="{Binding HasSelection}">
-                <views:PaymentEditView BindingContext="{Binding SelectedEditor}" />
-            </ContentView>
-            <Label Text="{Binding SelectHintText}" Style="{StaticResource MutedLabel}"
-                   HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowSelectHint}" />
-        </Grid>
+                            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding PaysText}" FontSize="13"
+                                   IsVisible="{Binding HasPays}" />
+
+                            <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <!-- Money no bill uses yet: a prepayment (yellow). -->
+                                <Label Grid.Column="0" Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
+                                       TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
+                                       IsVisible="{Binding HasPrepayment}" />
+                                <Label Grid.Column="1" Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
+                                       IsVisible="{Binding IsQuick}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
+                             IsVisible="{Binding IsEmpty}">
+            <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
+        <!-- Phone layout: floating add button, bottom-right. -->
+        <Button Grid.Row="0" Grid.RowSpan="2" Style="{StaticResource FabButton}"
+                Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
+                HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
+                IsVisible="{Binding ShowAddFab}"
+                ToolTipProperties.Text="{Binding AddText}"
+                SemanticProperties.Description="{Binding AddText}" />
     </Grid>
+
 
 </views:PageBase>

@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the bill templates list: name, property and a short description of the schedule.</summary>
-public sealed partial class BillTemplateItemViewModel : ObservableObject
+public sealed partial class BillTemplateItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

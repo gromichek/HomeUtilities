@@ -1,11 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HomeUtilities.ViewModels.Common;
 using HomeUtilities.Core.Billing;
 
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the bills list.</summary>
-public sealed partial class BillItemViewModel : ObservableObject
+public sealed partial class BillItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

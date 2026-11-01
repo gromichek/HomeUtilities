@@ -4,7 +4,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.App.Views;
 
 /// <summary>
-/// Compact-layout payment editor page, see <see cref="EditorPageBase"/>. A new payment can start from a bill (<c>billId</c>: its
+/// payment editor page, see <see cref="EditorPageBase"/>. A new payment can start from a bill (<c>billId</c>: its
 /// contract, the open amount, allocated in full), several bills (<c>billIds</c>, comma-separated, "Pay whole year"), a contract (<c>contractId</c>) or a property (<c>propertyId</c>).
 /// </summary>
 public partial class PaymentEditPage : EditorPageBase

@@ -1,11 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HomeUtilities.ViewModels.Common;
 using HomeUtilities.Core.Domain;
 
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the supplier list.</summary>
-public sealed partial class SupplierItemViewModel : ObservableObject
+public sealed partial class SupplierItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

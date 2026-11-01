@@ -84,7 +84,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         _localizer = localizer;
         _filter = filter;
         _texts = new PaymentsListTexts(localizer);
-        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
+        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, dialogs, RebuildItems);
         FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
         RefreshTexts();
     }

@@ -7,7 +7,7 @@ public static class LayoutModes
 
     /// <summary>
     /// A window lower than this is treated as a phone whatever its width (a phone in landscape: ~900 x 400 dp), so the
-    /// editors open as pages with the phone commands instead of a cramped side pane with a footer.
+    /// editors open as pages with the phone commands instead of a cramped layout.
     /// </summary>
     public const double CompactBelowHeight = 480;
 
