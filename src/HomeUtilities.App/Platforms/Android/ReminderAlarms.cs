@@ -208,7 +208,9 @@ public static class ReminderAlarms
 
         // The binding marks every builder method as nullable; the calls are made one by one on the same builder.
         var builder = new NotificationCompat.Builder(context, ChannelId);
-        _ = builder.SetSmallIcon(context.ApplicationInfo?.Icon ?? 0);
+        // A one-colour small icon: the coloured app icon is not valid as a status bar icon and Samsung's lock screen /
+        // Always On Display may skip such notifications (owner, 2026-11-01: WhatsApp lights up the locked screen, we did not).
+        _ = builder.SetSmallIcon(Resource.Drawable.ic_stat_reminder);
         _ = builder.SetContentTitle(reminder.Title);
         _ = builder.SetContentText(reminder.Body);
         _ = builder.SetStyle(new NotificationCompat.BigTextStyle().BigText(reminder.Body));
