@@ -108,16 +108,15 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-01)
-- Merged up to **T-028a** (#157) and **T-028e** (#158). Waiting for the owner's device tests of both
-  (reminder scenarios a–d of T-028e with the app closed; layouts, cut texts and system Back on phone/tablet/Windows).
-- **Ready:** T-028f one content pane (next), then T-028d Settings as a section list, then T-028b performance (scrolling
-  stutters in Release on phone and tablet).
-- Reminders now use our own `ReminderAlarms` (Android), not the plugin's scheduling. If a reminder with ✓ still does not
-  arrive → OEM battery management (Samsung "sleeping apps") is the next suspect.
-- Phone Android 16, tablet Android 13.
+- Merged up to **T-028f** (#163, one content pane) and #160 (reminder text on the lock screen). T-028a/T-028e tested OK
+  by the owner (one unexplained reminder for a paid bill — watch, PROGRESS finding 7).
+- Waiting for the owner's tests of #160 and #163.
+- **Ready:** T-028d Settings as a section list (next), then T-028b performance (scrolling stutters in **Release** on phone
+  and tablet; T-028f note: `CollectionView` resets to the top when `Items` is replaced).
+- Phone Android 16, tablet Android 13. Reminders use our own `ReminderAlarms`; channel `reminders_public`.
 
 ## 6. Next steps (ROADMAP)
-1. Owner tests of #157/#158 → log results, fix findings; then T-028d.
+1. Owner tests of #160/#163 → log results, fix findings; then T-028d, then T-028b.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
