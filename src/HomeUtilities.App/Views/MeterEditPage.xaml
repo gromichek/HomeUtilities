@@ -108,10 +108,10 @@
                     <Label Text="{Binding InstalledOnError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding InstalledOnError, Converter={StaticResource HasText}}" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding HasVerifiedOn}" />
-                        <Label Text="{Binding Texts.HasVerifiedOnLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding Texts.HasVerifiedOnLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasVerifiedOn}">
                         <Label Text="{Binding Texts.VerifiedOnLabel}" Style="{StaticResource MutedLabel}" />
                         <DatePicker Date="{Binding VerifiedOn, Converter={StaticResource DateOnly}}" />
@@ -123,10 +123,10 @@
                     <Label Text="{Binding IntervalError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding IntervalError, Converter={StaticResource HasText}}" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding HasDueOverride}" />
-                        <Label Text="{Binding Texts.HasDueOverrideLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding Texts.HasDueOverrideLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasDueOverride}">
                         <Label Text="{Binding Texts.DueOverrideLabel}" Style="{StaticResource MutedLabel}" />
                         <DatePicker Date="{Binding DueOverride, Converter={StaticResource DateOnly}}" />

@@ -83,10 +83,10 @@
                                 SelectedIndex="{Binding SelectedCurrencyIndex, Mode=TwoWay}" />
                     </VerticalStackLayout>
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding IsArchived}" />
-                        <Label Text="{Binding ArchivedLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding ArchivedLabel}" VerticalOptions="Center" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 
@@ -108,10 +108,10 @@
                     <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
                     <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding HasEndDate}" />
-                        <Label Text="{Binding HasEndDateLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding HasEndDateLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEndDate}">
                         <Label Text="{Binding ValidToLabel}" Style="{StaticResource MutedLabel}" />
                         <DatePicker Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />
@@ -137,16 +137,16 @@
                             SelectedIndex="{Binding SelectedBillingTimingIndex, Mode=TwoWay}" />
                     <Label Text="{Binding BillingTimingHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding VatOnTotal}" />
-                        <Label Text="{Binding VatOnTotalLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding VatOnTotalLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <Label Text="{Binding VatOnTotalHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding HasReadingWindow}" />
-                        <Label Text="{Binding ReadingWindowLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding ReadingWindowLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" IsVisible="{Binding HasReadingWindow}">
                         <Label Grid.Row="0" Grid.Column="0" Text="{Binding ReadingFromLabel}" Style="{StaticResource MutedLabel}" />
                         <Label Grid.Row="0" Grid.Column="1" Text="{Binding ReadingToLabel}" Style="{StaticResource MutedLabel}" />
@@ -155,10 +155,10 @@
                     </Grid>
                     <Label Text="{Binding ReadingWindowHint}" Style="{StaticResource MutedLabel}" FontSize="12"
                            IsVisible="{Binding HasReadingWindow}" />
-                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasReadingWindow}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding HasReadingWindow}">
                         <Switch IsToggled="{Binding RemindAboutReadings}" />
-                        <Label Text="{Binding RemindAboutReadingsLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding RemindAboutReadingsLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <Label Text="{Binding ReadingWindowError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding ReadingWindowError, Converter={StaticResource HasText}}" />
 

@@ -24,10 +24,10 @@
                    IsVisible="{Binding ValidFromError, Converter={StaticResource HasText}}" />
             <Label Text="{Binding WarningText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasWarning}" />
 
-            <HorizontalStackLayout Spacing="8">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                 <Switch IsToggled="{Binding HasValidTo}" />
-                <Label Text="{Binding HasValidToLabel}" VerticalOptions="Center" />
-            </HorizontalStackLayout>
+                <Label Grid.Column="1" Text="{Binding HasValidToLabel}" VerticalOptions="Center" />
+            </Grid>
             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasValidTo}">
                 <Label Text="{Binding ValidToLabel}" Style="{StaticResource MutedLabel}" />
                 <DatePicker Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />

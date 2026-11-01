@@ -74,10 +74,10 @@
                             <Entry Text="{Binding Text}" MaxLength="500" IsVisible="{Binding IsText}" />
                             <Entry Text="{Binding Text}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" IsVisible="{Binding IsNumber}" />
                             <VerticalStackLayout Spacing="4" IsVisible="{Binding IsDate}">
-                                <HorizontalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                     <Switch IsToggled="{Binding HasDate}" />
-                                    <Label Text="{Binding DateSetText}" VerticalOptions="Center" />
-                                </HorizontalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding DateSetText}" VerticalOptions="Center" />
+                                </Grid>
                                 <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
                             </VerticalStackLayout>
                             <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />

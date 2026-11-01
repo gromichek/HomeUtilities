@@ -39,10 +39,10 @@
             <Label Text="{Binding KindError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding KindError, Converter={StaticResource HasText}}" />
 
-            <HorizontalStackLayout Spacing="8">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                 <Switch IsToggled="{Binding HasSubmitted}" />
-                <Label Text="{Binding SubmittedLabel}" VerticalOptions="Center" />
-            </HorizontalStackLayout>
+                <Label Grid.Column="1" Text="{Binding SubmittedLabel}" VerticalOptions="Center" />
+            </Grid>
             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSubmitted}">
                 <Label Text="{Binding SubmittedOnLabel}" Style="{StaticResource MutedLabel}" />
                 <DatePicker Date="{Binding SubmittedOn, Converter={StaticResource DateOnly}}" />
@@ -53,16 +53,16 @@
             <!-- Photo of the dial: add, replace or remove. -->
             <Label Text="{Binding PhotoLabel}" Style="{StaticResource MutedLabel}" />
             <Label Text="{Binding PhotoText}" />
-            <HorizontalStackLayout Spacing="8">
-                <Button Text="{Binding TakePhotoText}" Command="{Binding TakePhotoCommand}"
+            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="{Binding TakePhotoText}" Command="{Binding TakePhotoCommand}"
                         Style="{StaticResource SecondaryButton}" IsVisible="{Binding CanTakePhoto}" />
-                <Button Text="{Binding ChoosePhotoText}" Command="{Binding ChoosePhotoCommand}"
+                <Button Grid.Column="1" Text="{Binding ChoosePhotoText}" Command="{Binding ChoosePhotoCommand}"
                         Style="{StaticResource SecondaryButton}" />
-                <Button Style="{StaticResource DestructiveIconButton}" Text="{StaticResource IconDelete}"
+                <Button Grid.Column="2" Style="{StaticResource DestructiveIconButton}" Text="{StaticResource IconDelete}"
                         Command="{Binding RemovePhotoCommand}" IsVisible="{Binding HasPhoto}"
                         ToolTipProperties.Text="{Binding RemovePhotoText}"
                         SemanticProperties.Description="{Binding RemovePhotoText}" />
-            </HorizontalStackLayout>
+            </Grid>
             <Label Text="{Binding PhotoError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding PhotoError, Converter={StaticResource HasText}}" />
 

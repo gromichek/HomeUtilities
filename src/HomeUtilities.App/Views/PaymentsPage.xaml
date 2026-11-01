@@ -18,92 +18,97 @@
 
     <Grid x:Name="Root" ColumnDefinitions="*,0">
 
-        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*,Auto" Padding="12" RowSpacing="8">
+        <Grid Grid.Column="0" RowDefinitions="Auto,*" Padding="12" RowSpacing="8">
             <Button Grid.Row="0" Text="{Binding AddText}" Command="{Binding AddCommand}"
                     ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
                     HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
 
-            <!-- Filters: property, period (all years / year / month) with ‹ ›, contract. -->
-            <Border Grid.Row="1" Style="{StaticResource SectionCard}" Padding="12" IsVisible="{Binding HasItems}">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding Texts.PropertyFilterLabel}" Style="{StaticResource MutedLabel}" />
-                    <Border Padding="12,8" StrokeShape="RoundRectangle 8"
-                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ChoosePropertyFilterCommand}" />
-                        </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{Binding PropertyFilterName}" VerticalOptions="Center" />
-                            <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
-                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+                <!-- The filters are the list header: they scroll away with the cards (T-028a). -->
+                <CollectionView.Header>
+                    <VerticalStackLayout Spacing="8" Padding="0,0,0,4">
+                        <Border Style="{StaticResource SectionCard}" Padding="12">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.Title}" Style="{StaticResource SectionHeader}"
+                                           IsVisible="{Binding FilterPanel.IsExpanded}" />
+                                    <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.SummaryText}" LineBreakMode="TailTruncation" MaxLines="3"
+                                           IsVisible="{Binding FilterPanel.ShowSummary}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding FilterPanel.ToggleCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconCollapse}"
+                                            Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.IsExpanded}"
+                                            ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"
+                                            SemanticProperties.Description="{Binding FilterPanel.ToggleText}" />
+                                    <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconExpand}"
+                                            Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.ShowSummary}"
+                                            ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"
+                                            SemanticProperties.Description="{Binding FilterPanel.ToggleText}" />
+                                </Grid>
+
+                                <views:AdaptiveFieldGrid Columns="{Binding FilterPanel.Columns}" IsVisible="{Binding FilterPanel.IsExpanded}">
+                            <views:ReportFilterField Caption="{Binding Texts.PropertyFilterLabel}" Value="{Binding PropertyFilterName}" Command="{Binding ChoosePropertyFilterCommand}" />
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding Period.PeriodLabel}" Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <Button Grid.Column="0" Text="{Binding Period.AllYearsText}" Command="{Binding Period.ShowAllYearsCommand}"
+                                    Style="{StaticResource SecondaryButton}" Padding="8,8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Period.IsAllYearsScope}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Column="1" Text="{Binding Period.YearText}" Command="{Binding Period.ShowYearCommand}"
+                                    Style="{StaticResource SecondaryButton}" Padding="8,8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Period.IsYearScope}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Column="2" Text="{Binding Period.MonthText}" Command="{Binding Period.ShowMonthCommand}"
+                                    Style="{StaticResource SecondaryButton}" Padding="8,8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Period.IsMonthScope}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
                         </Grid>
-                    </Border>
-
-                    <Label Text="{Binding Period.PeriodLabel}" Style="{StaticResource MutedLabel}" />
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                        <Button Grid.Column="0" Text="{Binding Period.AllYearsText}" Command="{Binding Period.ShowAllYearsCommand}"
-                                Style="{StaticResource SecondaryButton}" Padding="8,8">
-                            <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding Period.IsAllYearsScope}" Value="True">
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
-                        <Button Grid.Column="1" Text="{Binding Period.YearText}" Command="{Binding Period.ShowYearCommand}"
-                                Style="{StaticResource SecondaryButton}" Padding="8,8">
-                            <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding Period.IsYearScope}" Value="True">
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
-                        <Button Grid.Column="2" Text="{Binding Period.MonthText}" Command="{Binding Period.ShowMonthCommand}"
-                                Style="{StaticResource SecondaryButton}" Padding="8,8">
-                            <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding Period.IsMonthScope}" Value="True">
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
-                    </Grid>
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
-                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
-                                Command="{Binding Period.PreviousCommand}"
-                                ToolTipProperties.Text="{Binding Period.PreviousText}"
-                                SemanticProperties.Description="{Binding Period.PreviousText}" />
-                        <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold"
-                               HorizontalOptions="Center" VerticalOptions="Center" />
-                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
-                                Command="{Binding Period.NextCommand}"
-                                ToolTipProperties.Text="{Binding Period.NextText}"
-                                SemanticProperties.Description="{Binding Period.NextText}" />
-                    </Grid>
-
-                    <Label Text="{Binding Texts.ContractFilterLabel}" Style="{StaticResource MutedLabel}" />
-                    <Border Padding="12,8" StrokeShape="RoundRectangle 8"
-                            Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ChooseContractFilterCommand}" />
-                        </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{Binding ContractFilterName}" VerticalOptions="Center" />
-                            <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
-                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
+                            <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                                    Command="{Binding Period.PreviousCommand}"
+                                    ToolTipProperties.Text="{Binding Period.PreviousText}"
+                                    SemanticProperties.Description="{Binding Period.PreviousText}" />
+                            <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                                    Command="{Binding Period.NextCommand}"
+                                    ToolTipProperties.Text="{Binding Period.NextText}"
+                                    SemanticProperties.Description="{Binding Period.NextText}" />
                         </Grid>
-                    </Border>
+                            </VerticalStackLayout>
+                            <views:ReportFilterField Caption="{Binding Texts.ContractFilterLabel}" Value="{Binding ContractFilterName}" Command="{Binding ChooseContractFilterCommand}" />
+                                </views:AdaptiveFieldGrid>
 
-                    <!-- Totals of the filtered list. -->
-                    <Label Text="{Binding TotalsText}" FontAttributes="Bold" IsVisible="{Binding TotalsText, Converter={StaticResource HasText}}" />
-                </VerticalStackLayout>
-            </Border>
-
-            <Label Grid.Row="2" Text="{Binding NothingFoundText}" Style="{StaticResource MutedLabel}"
-                   HorizontalTextAlignment="Center" IsVisible="{Binding ShowNothingFound}" />
-
-            <CollectionView Grid.Row="3" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
+                                <!-- Totals of the filtered list (part of the summary line when collapsed). -->
+                                <Label Text="{Binding TotalsText}" FontAttributes="Bold" IsVisible="{Binding FilterPanel.IsExpanded}" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Label Text="{Binding NothingFoundText}" Style="{StaticResource MutedLabel}"
+                               HorizontalTextAlignment="Center" IsVisible="{Binding ShowNothingFound}" />
+                    </VerticalStackLayout>
+                </CollectionView.Header>
+                <CollectionView.Footer>
+                    <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,4,0,64" />
+                </CollectionView.Footer>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:PaymentItemViewModel">
                         <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
@@ -140,30 +145,27 @@
                                 <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding PaysText}" FontSize="13"
                                        IsVisible="{Binding HasPays}" />
 
-                                <HorizontalStackLayout Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Spacing="12">
+                                <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
                                     <!-- Money no bill uses yet: a prepayment (yellow). -->
-                                    <Label Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
+                                    <Label Grid.Column="0" Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
                                            TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
                                            IsVisible="{Binding HasPrepayment}" />
-                                    <Label Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
+                                    <Label Grid.Column="1" Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
                                            IsVisible="{Binding IsQuick}" />
-                                </HorizontalStackLayout>
+                                </Grid>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <Button Grid.Row="4" Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
-                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
-
-            <VerticalStackLayout Grid.Row="3" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
+            <VerticalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
                                  IsVisible="{Binding IsEmpty}">
                 <Label Text="{Binding EmptyText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
 
             <!-- Phone layout: floating add button, bottom-right. -->
-            <Button Grid.Row="0" Grid.RowSpan="4" Style="{StaticResource FabButton}"
+            <Button Grid.Row="0" Grid.RowSpan="2" Style="{StaticResource FabButton}"
                     Text="{StaticResource IconAdd}" Command="{Binding AddCommand}"
                     HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,16"
                     IsVisible="{Binding ShowAddFab}"

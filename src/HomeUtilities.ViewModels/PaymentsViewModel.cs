@@ -85,8 +85,12 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         _filter = filter;
         _texts = new PaymentsListTexts(localizer);
         Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
+        FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
         RefreshTexts();
     }
+
+    /// <summary>The collapsible block around the filters (summary line when collapsed).</summary>
+    public FilterPanelViewModel FilterPanel { get; }
 
     /// <summary>The period filter (all years / year / month) on the payment date; the current year until the user changes it.</summary>
     public PeriodFilterViewModel Period { get; }
@@ -141,6 +145,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         SelectHintText = _localizer["PaymentSelectHint"];
         NothingFoundText = _localizer["PaymentsNothingFound"];
         Texts = new PaymentsListTexts(_localizer);
+        FilterPanel.RefreshTexts();
         RebuildItems();
     }
 
@@ -245,6 +250,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
             : _localizer["PaymentsAllContracts"];
         Period.Refresh();
         TotalsText = BuildTotals(rows);
+        FilterPanel.SummaryText = string.Join(" · ", new[] { PropertyFilterName, Period.Label, ContractFilterName, TotalsText }.Where(s => !string.IsNullOrEmpty(s)));
         ShowNothingFound = IsLoaded && _payments.Count > 0 && Items.Count == 0;
         HasMoreItems = rows.Count > Items.Count;
         ShowMoreText = _localizer.Get("ListShowMore", rows.Count - Items.Count);

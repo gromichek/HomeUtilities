@@ -14,4 +14,7 @@ public sealed class PaymentFilterState
 
     /// <summary>Only the payments of this contract; null = all contracts.</summary>
     public Guid? ContractId { get; set; }
+
+    /// <summary>Whether the user expanded (true) or collapsed (false) the filter block; null = not chosen, follows the layout.</summary>
+    public bool? FiltersExpanded { get; set; }
 }

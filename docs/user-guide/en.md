@@ -42,7 +42,8 @@ with ☰; on a wide window it is always visible.
 item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
-**Layout:** on a phone a list opens the editor as a separate page. On a tablet or a wide window the list is on the
+**Layout:** on a phone a list opens the editor as a separate page — also on a phone held sideways (a window lower than about
+480 dp counts as a phone), where the editor then has the ✓ **Save** button at the top and **Back** instead of a cramped side pane. On a tablet or a wide window the list is on the
 left and the editor on the right. Settings shows the current layout (phone / tablet / desktop).
 
 **Saving and leaving**
@@ -51,6 +52,9 @@ left and the editor on the right. Settings shows the current layout (phone / tab
   This also applies when you pick another item in the menu, use the Android back gesture, or close the Windows window.
   If *Save* finds a mistake in the form, you stay and see the red message.
 - A menu item always opens the **main screen of its section** (the list), never a half-finished editor you left earlier.
+- On Android the **system Back** (button or gesture) does exactly what the **Back** arrow in the app does: it closes a dialog,
+  leaves an editor (asking **Save changes?** if needed) and goes up one page. On the main screen of a section it takes you to
+  the **Overview**; on the Overview it sends the app to the background.
   On a wide window the list opens with the previously selected record and its editor on the right.
 - **Delete** hides the record; its history is kept. Many records can instead be **archived** — hidden from lists and
   pickers but still used in history. Use "Show archived" to see them again.
@@ -357,7 +361,11 @@ calculation, and whether it is paid. A **bill** is a record of its own: the *cha
 what the app expects, the bill is what the supplier asked for, the *payment* is what you paid.
 
 **The list.** At the top: filters **Property** (all or one), **Period**, **Category** (*All categories* or one
-category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *Paid*, *Drafts*); the filters are remembered until you close the app. **Period** has three choices:
+category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *Paid*, *Drafts*); the filters are remembered until you close the app.
+The filters are the **header of the list**: they scroll away with the cards, so the cards get the whole screen. On a phone
+the filter block is collapsed to **one summary line** (for example *All properties · 2026 · All categories · All · Billed 78,13 € · Paid 78,13 €*);
+tap it, or the arrow at its right, to open the fields (**Show filters** / **Hide filters**). On a tablet and on a wide window the
+fields are open and sit in two or three columns. Your choice (open or collapsed) is remembered until you close the app. **Period** has three choices:
 *All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
 (a bill belongs to the month of its billing period), and the totals below follow the chosen period. Below them the totals of the
 list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
@@ -519,7 +527,8 @@ says what left your account, and the **allocation** says which bill the money se
   several bills, money paid before the bill arrived, a partial payment or a refund.
 
 **The list.** At the top: filters **Property** (all or one), **Period** and **Contract**; they are
-remembered until you close the app. **Period** has three choices: *All years*, *Year* and *Month* (by the date of the
+remembered until you close the app. Like on Bills, they are the header of the list (they scroll away with the cards) and are
+collapsed to one summary line on a phone (tap it to open them). **Period** has three choices: *All years*, *Year* and *Month* (by the date of the
 payment); with *Year* or *Month* the ‹ › buttons step to the previous or next year or month, and the totals below follow
 the chosen period. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Like the bills, a list longer than 100 rows shows the first 100 and **Show more (N left)** adds the next 100. Each row
 shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for

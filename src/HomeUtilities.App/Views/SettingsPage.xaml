@@ -44,27 +44,27 @@
                         <Button Text="{Binding OpenNotificationSettingsText}" Command="{Binding OpenNotificationSettingsCommand}"
                                 Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
                     </VerticalStackLayout>
-                    <HorizontalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding IsEnabled}" />
-                        <Label Text="{Binding EnabledLabel}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding EnabledLabel}" VerticalOptions="Center" />
+                    </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowDetails}">
-                        <HorizontalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Switch IsToggled="{Binding ReadingsOn}" />
-                            <Label Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="8">
+                            <Label Grid.Column="1" Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Switch IsToggled="{Binding BillsOn}" />
-                            <Label Text="{Binding BillsLabel}" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="8">
+                            <Label Grid.Column="1" Text="{Binding BillsLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Switch IsToggled="{Binding VerificationOn}" />
-                            <Label Text="{Binding VerificationLabel}" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="8">
+                            <Label Grid.Column="1" Text="{Binding VerificationLabel}" VerticalOptions="Center" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Switch IsToggled="{Binding DraftsOn}" />
-                            <Label Text="{Binding DraftsLabel}" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
+                            <Label Grid.Column="1" Text="{Binding DraftsLabel}" VerticalOptions="Center" />
+                        </Grid>
                         <Label Text="{Binding TimeLabel}" Style="{StaticResource MutedLabel}" />
                         <TimePicker Time="{Binding Time}" Format="HH:mm" HorizontalOptions="Start" />
                         <Label Text="{Binding LeadDaysLabel}" Style="{StaticResource MutedLabel}" />

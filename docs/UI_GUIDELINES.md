@@ -59,6 +59,12 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
     No separate "Cancel" — Back cancels. Delete in the `IconMore` menu or as a red "Delete …" at the end of the form.
   - Tablet/desktop (right pane): a footer with **Save** (primary), **Cancel** (secondary), and **Delete …**
     (destructive) at the far end.
+- **Low windows are phones** (T-028a): a window lower than 480 dp (a phone in landscape, ~900 x 400 dp) is `Compact`
+  whatever its width (`LayoutModes.FromSize`), so editors open as pages with the phone commands.
+- A footer never overlaps: Save and Cancel keep their natural width, the Delete button gets the rest of the row and wraps.
+- **Filter blocks above long lists** (Bills, Payments) are the list **header** (they scroll with the cards) and collapse to
+  one summary line on compact width (`FilterPanelViewModel`, state remembered per screen for the session); medium/expanded
+  show the fields in 2 / 3 columns (`AdaptiveFieldGrid`).
 - No artificial maximum width of the window or panes (space is needed for charts later). Two-pane split is
   proportional (list ~35–40 %).
 
@@ -83,6 +89,10 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   - after a successful **Save → stay in the editor** (title updates, short confirmation); after **Delete →
     go back**. (Changed 2026-10-23 at the owner's request.)
 - Never swallow Back without showing a dialog.
+- The **system Back** (Android button / gesture, incl. predictive back on Android 16) takes the same path as the toolbar arrow:
+  dialog → Cancel; pushed page / editor → the unsaved-changes dialog if needed, then up; section root → Overview;
+  Overview → the app goes to the background. Implemented in `MainActivity` (AndroidX `OnBackPressedDispatcher`) +
+  `PageBase.OnBackButtonPressed`.
 - **Menu (flyout) items always open the section's root page**; pages pushed inside the section being left are
   closed. Leaving any page with unsaved changes — menu, back, window close — goes through the central navigation
   guard (T-017a) with the standard "Save changes?" dialog. The menu is never disabled. (Owner decision 2026-10-24.)
@@ -104,6 +114,9 @@ Use these wordings everywhere (resx keys in brackets):
 - Label above the field; validation message in red directly under the field.
 - Pickers must always display the current value (Android binding bugs: test that the selected item shows).
 - Numbers accept `,` and `.`; dates use the platform date picker.
+- **Nothing is cut off**: a switch / check box label is a `Grid` `Auto,*` (switch + wrapping label), never a
+  `HorizontalStackLayout` (it gives the label unlimited width and cuts it); several texts or buttons in a row use a
+  `Grid` with `Auto,…,*` or equal `*` columns so that the texts wrap; check every screen in Russian at 360 dp and in landscape.
 - Read-only summary lines ("Now: 54.7 m² since 20.10.2026") in muted colour.
 
 ## 6a. Known MAUI pitfalls (found in owner tests)
