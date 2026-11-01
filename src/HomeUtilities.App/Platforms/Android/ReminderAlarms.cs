@@ -23,13 +23,14 @@ public sealed record StoredReminder(int Id, long AtUtcMillis, string Title, stri
 public static class ReminderAlarms
 {
     /// <summary>The notification channel created at startup (see MauiProgram).</summary>
-    public const string ChannelId = "reminders_public";
+    public const string ChannelId = "reminder_alerts";
 
     /// <summary>
-    /// The first channel (until 2026-11-01) was created with a private lock-screen visibility, so the lock screen showed only
-    /// "content hidden". Android never changes an existing channel, so the app uses a new id and deletes the old channel.
+    /// Earlier channels, deleted at start. Android never changes the importance or lock-screen visibility of an existing
+    /// channel, so each fix needs a new id: "reminders" (private on the lock screen), "reminders_public" (default importance:
+    /// no pop-up, not shown on the owner's lock screen, 2026-11-01). The current one has high importance and public visibility.
     /// </summary>
-    public const string OldChannelId = "reminders";
+    public static readonly string[] OldChannelIds = ["reminders", "reminders_public"];
 
     /// <summary>Intent extra of the activity intent: the serialized target of a tapped reminder.</summary>
     public const string TargetExtra = "homeutilities.reminder.target";
@@ -210,7 +211,8 @@ public static class ReminderAlarms
         _ = builder.SetStyle(new NotificationCompat.BigTextStyle().BigText(reminder.Body));
         _ = builder.SetContentIntent(tap);
         _ = builder.SetAutoCancel(true);
-        _ = builder.SetPriority(NotificationCompat.PriorityDefault);
+        _ = builder.SetPriority(NotificationCompat.PriorityHigh);
+        _ = builder.SetCategory(NotificationCompat.CategoryReminder);
         _ = builder.SetVisibility(NotificationCompat.VisibilityPublic);
         var notification = builder.Build();
         NotificationManagerCompat.From(context)!.Notify(reminder.Id, notification);
@@ -264,18 +266,26 @@ public static class ReminderAlarms
             return;
         }
 
-        manager.CreateNotificationChannel(new NotificationChannel(ChannelId, "Reminders", NotificationImportance.Default)
+        manager.CreateNotificationChannel(new NotificationChannel(ChannelId, "Reminders", NotificationImportance.High)
         {
             LockscreenVisibility = NotificationVisibility.Public,
         });
     }
 
-    /// <summary>Deletes the first reminders channel (private lock-screen visibility); see <see cref="OldChannelId"/>.</summary>
+    /// <summary>Deletes the earlier reminder channels; see <see cref="OldChannelIds"/>.</summary>
     public static void DeleteOldChannel(Context context)
     {
-        if (context.GetSystemService(Context.NotificationService) is NotificationManager manager && manager.GetNotificationChannel(OldChannelId) is not null)
+        if (context.GetSystemService(Context.NotificationService) is not NotificationManager manager)
         {
-            manager.DeleteNotificationChannel(OldChannelId);
+            return;
+        }
+
+        foreach (var id in OldChannelIds)
+        {
+            if (manager.GetNotificationChannel(id) is not null)
+            {
+                manager.DeleteNotificationChannel(id);
+            }
         }
     }
 }

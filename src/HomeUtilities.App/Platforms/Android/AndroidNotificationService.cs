@@ -108,7 +108,7 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
             Title = title,
             Description = body,
             ReturningData = data,
-            Android = new AndroidOptions { ChannelId = ChannelId, VisibilityType = AndroidVisibilityType.Public },
+            Android = new AndroidOptions { ChannelId = ChannelId, VisibilityType = AndroidVisibilityType.Public, Priority = AndroidPriority.High },
         });
 
     // Versions before T-028e scheduled through the plugin, which keeps its own list of alarms and re-registers them after a
