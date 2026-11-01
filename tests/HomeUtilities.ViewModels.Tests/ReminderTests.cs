@@ -625,6 +625,34 @@ public class ReminderTests : IDisposable
     }
 
     [Fact]
+    public async Task Delayed_test_is_scheduled_one_minute_ahead_and_not_part_of_the_plan()
+    {
+        // Now 1 Nov 07:00 -> the test notification at 07:01, nothing else scheduled, an in-app message says so.
+        var card = CreateCard();
+
+        await card.SendDelayedTestCommand.ExecuteAsync(null);
+
+        Assert.True(card.CanSendDelayedTest);
+        var test = Assert.Single(_notifications.Tests);
+        Assert.Equal(new DateTime(2026, 11, 1, 7, 1, 0), test.At);
+        Assert.Equal("ReminderTestTitle [en]", test.Title);
+        Assert.Empty(_notifications.Batches);
+        Assert.Contains("ReminderDelayedTestScheduled [en]", _snackbar.Messages);
+    }
+
+    [Fact]
+    public async Task Delayed_test_is_not_offered_where_nothing_can_be_scheduled()
+    {
+        _notifications.CanScheduleValue = false;
+        var card = CreateCard();
+
+        await card.SendDelayedTestCommand.ExecuteAsync(null);
+
+        Assert.False(card.CanSendDelayedTest);
+        Assert.Empty(_notifications.Tests);
+    }
+
+    [Fact]
     public async Task Test_button_sends_a_test_notification()
     {
         var card = CreateCard();
@@ -886,6 +914,15 @@ public class ReminderTests : IDisposable
 
     internal sealed class FakeNotifications : INotificationService
     {
+        /// <summary>Delayed test notifications scheduled.</summary>
+        public List<(DateTime At, string Title)> Tests { get; } = [];
+
+        public Task<bool> ScheduleTestAsync(DateTime at, string title, string body, string data)
+        {
+            Tests.Add((at, title));
+            return Task.FromResult(true);
+        }
+
         public bool SupportedValue { get; set; } = true;
 
         public bool CanScheduleValue { get; set; } = true;

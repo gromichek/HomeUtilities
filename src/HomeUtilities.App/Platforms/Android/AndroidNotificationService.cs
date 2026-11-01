@@ -101,6 +101,14 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
             }
         });
 
+    public Task<bool> ScheduleTestAsync(DateTime at, string title, string body, string data) =>
+        Task.Run(() =>
+        {
+            // Not stored in the plan: a reschedule neither replaces nor cancels it; the alarm forgets it once shown.
+            ReminderAlarms.Register(AppContext, new StoredReminder(ReminderAlarms.TestId, ReminderAlarms.ToUtcMillis(at), title, body, data));
+            return true;
+        });
+
     public async Task ShowNowAsync(string title, string body, string data) =>
         await LocalNotificationCenter.Current.Show(new NotificationRequest
         {

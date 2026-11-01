@@ -1383,6 +1383,8 @@
   <data name="SettingsRemindersDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению</value></data>
   <data name="SettingsRemindersTime" xml:space="preserve"><value>Время напоминаний</value></data>
   <data name="SettingsRemindersTest" xml:space="preserve"><value>Отправить тестовое уведомление</value></data>
+  <data name="SettingsRemindersTestDelayed" xml:space="preserve"><value>Тестовое уведомление через 1 минуту</value></data>
+  <data name="ReminderDelayedTestScheduled" xml:space="preserve"><value>Тестовое уведомление придёт примерно через минуту. Заблокируйте экран и подождите.</value></data>
   <data name="SettingsRemindersPlanned" xml:space="preserve"><value>Запланированные напоминания</value></data>
   <data name="ReminderPlannedOff" xml:space="preserve"><value>Напоминания выключены.</value></data>
   <data name="ReminderPlannedNone" xml:space="preserve"><value>Напоминаний не запланировано: в ближайшие недели ничего не ожидается или все времена уже прошли.</value></data>

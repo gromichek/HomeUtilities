@@ -846,7 +846,7 @@ early in the morning. Reminders are planned for the next 45 days, at most 60 of 
 the app or change readings, bills, payments, templates, contracts or these settings — so a bill you have just paid
 no longer reminds you.
 
-**Send a test notification** shows a notification at once, to check that everything works on this device.
+**Send a test notification** shows a notification at once, to check that everything works on this device. **Test notification in 1 minute** (Android) sends the same test through the reminder alarm a minute later — lock the screen and check how a real reminder looks on the lock screen.
 
 **Planned reminders** lists what the app plans right now: the local date and time, what it is about (readings, bill, tax
 installment, meter verification, draft bills), the text of the notification and the screen a tap opens. Use it when a
