@@ -108,15 +108,15 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-01)
-- Merged up to **T-028f** (#163, one content pane) and #160 (reminder text on the lock screen). T-028a/T-028e tested OK
-  by the owner (one unexplained reminder for a paid bill — watch, PROGRESS finding 7).
-- Waiting for the owner's tests of #160 and #163.
-- **Ready:** T-028d Settings as a section list (next), then T-028b performance (scrolling stutters in **Release** on phone
-  and tablet; T-028f note: `CollectionView` resets to the top when `Items` is replaced).
-- Phone Android 16, tablet Android 13. Reminders use our own `ReminderAlarms`; channel `reminders_public`.
+- Merged up to **T-028d** (#165, Settings sections) and #166 (reminder channel `reminder_alerts`, high importance).
+  T-028f tested OK by the owner (2-column editors: keep).
+- Waiting for the owner's tests of #165 and #166 (lock screen / pop-up; Settings sections; icons on Windows).
+- **Next:** T-028b performance (task file not written yet): scrolling stutters in **Release** on phone and tablet in all
+  lists. Then T-029 backups.
+- Watch: one reminder for a paid bill (PROGRESS finding 7).
 
 ## 6. Next steps (ROADMAP)
-1. Owner tests of #160/#163 → log results, fix findings; then T-028d, then T-028b.
+1. Owner tests of #165/#166 → log results; write T-028b (performance) with his observations.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
