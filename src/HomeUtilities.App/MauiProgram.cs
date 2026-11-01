@@ -47,7 +47,10 @@ public static class MauiProgram
                 Id = AndroidNotificationService.ChannelId,
                 Name = channelTexts["NotificationChannelName"],
                 Description = channelTexts["NotificationChannelDescription"],
+                // Show the reminder text on the lock screen (owner, 2026-11-01: only the sound came).
+                LockScreenVisibility = Plugin.LocalNotification.Core.Models.AndroidOption.AndroidVisibilityType.Public,
             })));
+        Services.ReminderAlarms.DeleteOldChannel(global::Android.App.Application.Context);
         // Subscribed this early so that the tap which started the app is not lost; the router keeps it until the window is ready.
         LocalNotificationCenter.Current.NotificationActionTapped += e =>
         {
