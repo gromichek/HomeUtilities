@@ -133,9 +133,12 @@ public class PeriodFilterTests
                 value => Stored = value,
                 new TestClock(Today),
                 new FakeLocalizer(_language),
+                Dialogs,
                 () => Changes++,
                 CultureInfo.InvariantCulture);
         }
+
+        public FakeDialogService Dialogs { get; } = new();
 
         public PeriodFilter? Stored { get; private set; }
 
@@ -203,5 +206,56 @@ public class PeriodFilterTests
         h.Control.Set(PeriodFilter.ForAllYears(2026));
         Assert.Equal(2, h.Changes);
         Assert.True(h.Control.IsAllYearsScope);
+    }
+
+    [Fact]
+    public async Task ScopeDropDown_ShowsTheCurrentScopeAndOffersAllThree()
+    {
+        var h = new Harness();
+        IReadOnlyList<string>? offered = null;
+        h.Dialogs.ChooseScript = options =>
+        {
+            offered = options;
+            return null;
+        };
+
+        Assert.Equal("PeriodYear [en]", h.Control.ScopeText);
+        await h.Control.ChooseScopeCommand.ExecuteAsync(null);
+
+        Assert.Equal(["PeriodAllYears [en]", "PeriodYear [en]", "PeriodMonth [en]"], offered);
+        Assert.Equal(0, h.Changes);
+        Assert.Null(h.Stored);
+    }
+
+    [Fact]
+    public async Task ScopeDropDown_PickingAScope_ChangesTheFilterAndRebuildsTheList()
+    {
+        var h = new Harness();
+        h.Dialogs.ChooseScript = options => options[2]; // Month
+
+        await h.Control.ChooseScopeCommand.ExecuteAsync(null);
+
+        Assert.Equal(PeriodScope.Month, h.Control.Current.Scope);
+        Assert.Equal("October 2026", h.Control.Label);
+        Assert.Equal("PeriodMonth [en]", h.Control.ScopeText);
+        Assert.Equal(1, h.Changes);
+
+        h.Dialogs.ChooseScript = options => options[0]; // All years
+        await h.Control.ChooseScopeCommand.ExecuteAsync(null);
+
+        Assert.True(h.Control.IsAllYearsScope);
+        Assert.False(h.Control.ShowStepper);
+        Assert.Equal(2, h.Changes);
+    }
+
+    [Fact]
+    public async Task ScopeDropDown_PickingTheCurrentScope_ChangesNothing()
+    {
+        var h = new Harness();
+        h.Dialogs.ChooseScript = options => options[1]; // Year, already active
+
+        await h.Control.ChooseScopeCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, h.Changes);
     }
 }

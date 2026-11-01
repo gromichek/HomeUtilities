@@ -304,7 +304,6 @@ public class MeterEditViewModelTests
     {
         var meter = StoredMeter(withReading: false);
         var vm = await LoadAsync(meter);
-        vm.IsHostedInPage = true;
 
         Assert.True(vm.CanShowDelete);
         Assert.False(vm.ShowDeleteBlocked);
@@ -638,7 +637,6 @@ public class MeterEditViewModelTests
         var meter = StoredMeter(withReading: true);
         var finished = new List<EditOutcome>();
         var vm = await LoadAsync(meter);
-        vm.IsHostedInPage = true;
         vm.Finished = outcome =>
         {
             finished.Add(outcome);
@@ -666,7 +664,6 @@ public class MeterEditViewModelTests
     public async Task Replace_CancelledWizard_ChangesNothing()
     {
         var vm = await LoadAsync(StoredMeter(withReading: true));
-        vm.IsHostedInPage = true;
 
         await vm.ReplaceCommand.ExecuteAsync(null);
 
@@ -691,7 +688,6 @@ public class MeterEditViewModelTests
     public async Task Cancel_WithUnsavedChanges_AsksAndLeaves()
     {
         var vm = await LoadNewAsync();
-        vm.IsHostedInPage = true;
         vm.Location = "Bath";
 
         await vm.CancelCommand.ExecuteAsync(null);

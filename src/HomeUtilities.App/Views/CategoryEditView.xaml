@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
@@ -13,10 +14,10 @@
         <conv:HexColorConverter x:Key="HexColor" />
     </ContentView.Resources>
 
-    <Grid RowDefinitions="*,Auto">
+    <Grid>
 
-        <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="16" Spacing="16">
+        <ScrollView>
+            <views:AdaptiveFieldGrid Padding="16" RowSpacing="16" ColumnSpacing="16" MinColumnWidth="560" MaxColumns="2">
 
                 <Border Style="{StaticResource SectionCard}">
                     <VerticalStackLayout Spacing="8">
@@ -100,24 +101,12 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Phone: destructive action at the end of the form (user categories only). -->
+                <!-- Destructive action at the end of the form (user categories only). -->
                 <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                         Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
                         IsVisible="{Binding ShowFormDelete}" />
-            </VerticalStackLayout>
+            </views:AdaptiveFieldGrid>
         </ScrollView>
 
-        <Border Grid.Row="1" IsVisible="{Binding ShowFooter}" StrokeThickness="0" Padding="16,12"
-                BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
-            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
-                <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
-                        Style="{StaticResource PrimaryButton}" />
-                <Button Grid.Column="1" Text="{Binding CancelText}" Command="{Binding CancelCommand}"
-                        Style="{StaticResource SecondaryButton}" />
-                <Button Grid.Column="2" HorizontalOptions="End" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
-                        Style="{StaticResource DestructiveButton}"
-                        IsVisible="{Binding CanShowDelete}" />
-            </Grid>
-        </Border>
     </Grid>
 </ContentView>

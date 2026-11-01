@@ -13,8 +13,7 @@ namespace HomeUtilities.ViewModels;
 
 /// <summary>
 /// Editor of one payment: the general data (contract or property, date, amount, method, reference) and the bills it settles
-/// (allocations). The part of the amount that settles no bill is a prepayment. Shown in the side pane of the Payments screen
-/// or as a page (<see cref="Routes.PaymentEdit"/>).
+/// (allocations). The part of the amount that settles no bill is a prepayment. Shown on its own page (<see cref="Routes.PaymentEdit"/>).
 /// </summary>
 public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 {

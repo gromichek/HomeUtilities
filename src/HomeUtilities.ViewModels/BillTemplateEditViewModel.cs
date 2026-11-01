@@ -13,7 +13,7 @@ namespace HomeUtilities.ViewModels;
 /// <summary>
 /// Editor of one bill template: how a recurring or repeated payment looks (property, category, contract, supplier, title,
 /// amounts, lines, custom fields) and when it comes (schedule, timing, due date), with a preview of the next drafts.
-/// Shown in the side pane of the Bill templates screen or as a page (<see cref="Routes.BillTemplateEdit"/>).
+/// Shown on its own page (<see cref="Routes.BillTemplateEdit"/>).
 /// </summary>
 public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
 {

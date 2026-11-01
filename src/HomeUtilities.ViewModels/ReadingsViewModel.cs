@@ -15,7 +15,7 @@ namespace HomeUtilities.ViewModels;
 /// The readings screen: pick a property, type the new value of every register, see consumption and warnings,
 /// save all at once, open the supplier's submit page and mark the readings as submitted.
 /// </summary>
-public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>, IUnsavedChangesGuarded
+public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGuarded
 {
     /// <summary>Settings key of the last selected property.</summary>
     public const string LastPropertyKey = "readings.last_property";
@@ -36,7 +36,6 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly ISettingsStore _settings;
     private readonly IAttachmentStore _attachments;
     private readonly IMediaService _media;
-    private readonly ILayoutModeService _layoutModeService;
     private readonly Func<ReadingHistoryViewModel> _historyFactory;
 
     private IReadOnlyList<Meter> _meters = [];
@@ -69,13 +68,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     [NotifyPropertyChangedFor(nameof(HasPrompts))]
     private IReadOnlyList<SubmitPromptViewModel> _prompts = [];
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowHistoryHint))]
-    private bool _isTwoPane;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSelectedHistory), nameof(ShowHistoryHint))]
-    private ReadingHistoryViewModel? _selectedHistory;
+    /// <summary>The meter whose history page was opened last; its card stays highlighted.</summary>
+    private Guid? _openedMeterId;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowNoProperties), nameof(ShowNoMeters))]
@@ -96,9 +90,6 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     [ObservableProperty]
     private string _noMetersText = string.Empty;
 
-    [ObservableProperty]
-    private string _historyHintText = string.Empty;
-
     public ReadingsViewModel(
         IPropertyStore propertyStore,
         IMeterStore meterStore,
@@ -113,7 +104,6 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         ISettingsStore settings,
         IAttachmentStore attachments,
         IMediaService media,
-        ILayoutModeService layoutModeService,
         Func<ReadingHistoryViewModel> historyFactory)
     {
         _attachments = attachments;
@@ -129,9 +119,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         _snackbar = snackbar;
         _launcher = launcher;
         _settings = settings;
-        _layoutModeService = layoutModeService;
         _historyFactory = historyFactory;
-        _isTwoPane = layoutModeService.Current != LayoutMode.Compact;
         _readingDate = clock.Today;
         RefreshTexts();
     }
@@ -158,10 +146,6 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
     public bool ShowNoProperties => IsLoaded && Properties.Count == 0;
 
     public bool ShowNoMeters => IsLoaded && Properties.Count > 0 && Groups.Count == 0;
-
-    public bool HasSelectedHistory => SelectedHistory is not null;
-
-    public bool ShowHistoryHint => IsTwoPane && SelectedHistory is null;
 
     /// <summary>True while a new value has been typed and not saved.</summary>
     bool IUnsavedChangesGuarded.HasUnsavedChanges => HasUnsavedValues;
@@ -240,20 +224,9 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         SaveAllText = _localizer["ReadingsSaveAll"];
         NoPropertiesText = _localizer["ReadingsNoProperties"];
         NoMetersText = _localizer["ReadingsNoMeters"];
-        HistoryHintText = _localizer["ReadingsHistoryHint"];
         if (IsLoaded)
         {
             Rebuild(KeepEntries());
-        }
-    }
-
-    void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message)
-    {
-        IsTwoPane = _layoutModeService.Current != LayoutMode.Compact;
-        if (!IsTwoPane)
-        {
-            SelectedHistory = null;
-            MarkSelectedCard(null);
         }
     }
 
@@ -283,7 +256,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         _photos.Clear();
         _pendingSubmit.Clear();
         _settings.SetString(LastPropertyKey, propertyId.ToString());
-        SelectedHistory = null;
+        _openedMeterId = null;
         _lastSaved = [];
         _dismissedPrompts = [];
         await LoadPropertyAsync();
@@ -588,7 +561,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
             }
         }
 
-        MarkSelectedCard(SelectedHistory?.MeterId);
+        MarkSelectedCard(_openedMeterId);
         Prompts = [.. BuildPrompts()];
         OnPropertyChanged(nameof(HasUnsavedValues));
     }
@@ -775,10 +748,6 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         await _meterStore.UpdateReadingsAsync(readings);
         Dismiss(contractId);
         _snackbar.Notify(_localizer["ReadingsMarked"]);
-        if (SelectedHistory is { } history)
-        {
-            await history.ReloadAsync();
-        }
     }
 
     private async Task OpenHistoryAsync(Guid meterId)
@@ -786,16 +755,9 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IRecipient<Layout
         var history = _historyFactory();
         await history.LoadAsync(meterId);
 
-        if (IsTwoPane)
-        {
-            history.Changed = () => RunSafeAsync(ReloadAsync);
-            SelectedHistory = history;
-            MarkSelectedCard(meterId);
-        }
-        else
-        {
-            await _navigation.GoToAsync(Routes.ReadingHistory, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = history });
-        }
+        _openedMeterId = meterId;
+        MarkSelectedCard(meterId);
+        await _navigation.GoToAsync(Routes.ReadingHistory, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = history });
     }
 
     private void MarkSelectedCard(Guid? meterId)

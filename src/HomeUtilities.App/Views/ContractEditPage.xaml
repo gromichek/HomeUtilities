@@ -25,7 +25,7 @@
     </views:EditorPageBase.Resources>
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="16">
+        <views:AdaptiveFieldGrid Padding="16" RowSpacing="16" ColumnSpacing="16" MinColumnWidth="560" MaxColumns="2">
 
             <!-- 1. General -->
             <Border Style="{StaticResource SectionCard}">
@@ -633,7 +633,7 @@
             <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                     Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
                     IsVisible="{Binding ShowFormDelete}" />
-        </VerticalStackLayout>
+        </views:AdaptiveFieldGrid>
     </ScrollView>
 
 </views:EditorPageBase>

@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the category list.</summary>
-public sealed partial class CategoryItemViewModel : ObservableObject
+public sealed partial class CategoryItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

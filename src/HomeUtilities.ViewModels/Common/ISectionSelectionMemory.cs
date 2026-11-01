@@ -1,7 +1,7 @@
 namespace HomeUtilities.ViewModels.Common;
 
 /// <summary>
-/// Remembers which item was open in the side pane of a two-pane list screen, per section. The screen's page and view
+/// Remembers which item of a list screen was opened last (it stays highlighted when the user comes back), per section. The screen's page and view
 /// model may be recreated when the user leaves the section and comes back, so the selection must not live there.
 /// </summary>
 public interface ISectionSelectionMemory

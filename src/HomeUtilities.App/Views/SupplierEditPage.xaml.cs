@@ -2,7 +2,7 @@ using HomeUtilities.ViewModels;
 
 namespace HomeUtilities.App.Views;
 
-/// <summary>Compact-layout supplier editor page, see <see cref="EditorPageBase"/>.</summary>
+/// <summary>Supplier editor page, see <see cref="EditorPageBase"/>.</summary>
 public partial class SupplierEditPage : EditorPageBase
 {
     public SupplierEditPage(SupplierEditViewModel viewModel)

@@ -14,7 +14,6 @@ public partial class ReadingsPage : PageBase, IQueryAttributable
     {
         InitializeComponent();
         BindingContext = viewModel;
-        TwoPaneLayout.Attach(Root, viewModel, () => viewModel.IsTwoPane);
     }
 
     /// <summary>

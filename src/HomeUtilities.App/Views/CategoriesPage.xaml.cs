@@ -8,6 +8,11 @@ public partial class CategoriesPage : PageBase
     {
         InitializeComponent();
         BindingContext = viewModel;
-        TwoPaneLayout.Attach(Root, viewModel, () => viewModel.IsTwoPane);
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        ListScroll.RevealSelected(ItemList);
     }
 }

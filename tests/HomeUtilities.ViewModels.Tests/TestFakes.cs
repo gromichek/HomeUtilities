@@ -761,7 +761,7 @@ internal sealed class ContractTestKit
     public ReadingHistoryViewModel CreateHistory() => new(Meters, Attachments, Viewer, Media, Localizer, Dialogs);
 
     public ReadingsViewModel CreateReadings() =>
-        new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, Layout, CreateHistory);
+        new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, CreateHistory);
 
     public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
         new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Settlement, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);

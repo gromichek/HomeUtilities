@@ -5,11 +5,12 @@ using CommunityToolkit.Mvvm.Messaging;
 namespace HomeUtilities.ViewModels.Common;
 
 /// <summary>
-/// Base of the list screens with an editor. In compact layout an editor opens as a separate page; in medium/expanded
-/// layout it is shown next to the list. The editor instance is the same in both cases, so switching the layout keeps
-/// the input. Same behaviour as <see cref="PropertiesViewModel"/>.
+/// Base of the list screens with an editor. One content pane on every device (T-028f): the list fills the content
+/// area and an editor always opens as a separate page. The item last opened stays highlighted when the user comes
+/// back (the remembered id lives in <see cref="ISectionSelectionMemory"/>, because the page and this view model may be
+/// recreated when the user leaves the section and comes back).
 /// </summary>
-public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IRecipient<LayoutModeChangedMessage>, IUnsavedChangesGuarded
+public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IRecipient<LayoutModeChangedMessage>
     where TEditor : PaneEditorViewModel
 {
     private readonly INavigationService _navigation;
@@ -18,13 +19,13 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     private readonly string _editRoute;
     private readonly ISectionSelectionMemory _selectionMemory;
 
+    /// <summary>The editor of the item opened last; its page is on the navigation stack until the user leaves it.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasSelection), nameof(ShowSelectHint))]
     private TEditor? _selectedEditor;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowSelectHint), nameof(ShowAddFab), nameof(ShowAddButton))]
-    private bool _isTwoPane;
+    [NotifyPropertyChangedFor(nameof(ShowAddFab), nameof(ShowAddButton))]
+    private bool _isWide;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
@@ -39,9 +40,6 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     [ObservableProperty]
     private string _helpText = string.Empty;
 
-    [ObservableProperty]
-    private string _selectHintText = string.Empty;
-
     protected MasterDetailViewModel(
         INavigationService navigation,
         ILayoutModeService layoutModeService,
@@ -54,7 +52,7 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
         _layoutModeService = layoutModeService;
         _editorFactory = editorFactory;
         _editRoute = editRoute;
-        _isTwoPane = layoutModeService.Current != LayoutMode.Compact;
+        _isWide = layoutModeService.Current != LayoutMode.Compact;
     }
 
     /// <summary>The user-guide section the "?" button of this screen opens.</summary>
@@ -63,57 +61,22 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     [RelayCommand]
     private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, GuideTopic));
 
-    /// <summary>Only an editor in the side pane belongs to this screen; an editor page guards itself.</summary>
-    bool IUnsavedChangesGuarded.HasUnsavedChanges => SelectedEditor is { IsHostedInPage: false, IsDirty: true };
-
-    /// <summary>
-    /// Leaving the section with the side-pane editor dirty: asks the standard question. "Don't save" discards the
-    /// input, so the section reopens with the saved state (a new, unsaved item is closed).
-    /// </summary>
-    public async Task<bool> CanLeaveAsync()
-    {
-        if (SelectedEditor is not { IsHostedInPage: false, IsDirty: true } editor)
-        {
-            return true;
-        }
-
-        if (!await editor.CanLeaveAsync())
-        {
-            return false;
-        }
-
-        if (editor.IsDirty)
-        {
-            if (editor.IsNew)
-            {
-                Detach(editor);
-            }
-            else
-            {
-                await editor.LoadAsync(editor.EntityId);
-            }
-        }
-
-        return true;
-    }
-
-    public bool HasSelection => SelectedEditor is not null;
-
-    public bool ShowSelectHint => IsTwoPane && !HasSelection;
-
     /// <summary>Floating "add" button of the phone layout.</summary>
-    public bool ShowAddFab => !IsTwoPane;
+    public bool ShowAddFab => !IsWide;
 
     /// <summary>"New …" button above the list on tablets and desktops.</summary>
-    public bool ShowAddButton => IsTwoPane;
+    public bool ShowAddButton => IsWide;
 
     public bool HasItems => TotalCount > 0;
 
     /// <summary>True when the list was loaded and contains nothing at all (shows the empty state).</summary>
     public bool IsEmpty => IsLoaded && TotalCount == 0;
 
-    /// <summary>The last layout switch; completes when the editor has been moved between page and pane.</summary>
-    public Task PendingLayoutChange { get; private set; } = Task.CompletedTask;
+    /// <summary>
+    /// The item to highlight in the list: the one opened last, while it is still in the loaded list. A new, unsaved item
+    /// and a deleted one are not remembered.
+    /// </summary>
+    protected Guid? HighlightedId => _selectionMemory.Recall(_editRoute) is { } id && ContainsItem(id) ? id : null;
 
     /// <summary>Number of entries before any search filter is applied.</summary>
     protected abstract int TotalCount { get; }
@@ -124,25 +87,18 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     /// <summary>Whether the loaded list contains the item (archived items hidden by a filter are not contained).</summary>
     protected abstract bool ContainsItem(Guid id);
 
-    /// <summary>Highlights the list row of <see cref="SelectedEditor"/>.</summary>
+    /// <summary>Highlights the list row of <see cref="HighlightedId"/>.</summary>
     protected abstract void MarkSelectedItem();
 
     public override async Task OnAppearingAsync()
     {
-        // Back on the list in compact layout: the editor page is gone (closed, or left with the system back gesture).
-        if (!IsTwoPane && SelectedEditor is { IsHostedInPage: true } editor)
+        // Back on the list: the editor page is gone (closed, or left with the system back gesture).
+        if (SelectedEditor is { } editor)
         {
-            Detach(editor);
+            Detach(editor, forget: false);
         }
 
         await ReloadAsync();
-
-        // Back via the menu: the page and this view model may be new, the selection comes from the memory. Compact
-        // layout shows only the list (the menu rule of the navigation guard).
-        if (IsTwoPane && SelectedEditor is null)
-        {
-            await RestoreSelectionAsync();
-        }
     }
 
     [RelayCommand]
@@ -151,10 +107,8 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     [RelayCommand]
     private Task SelectAsync(Guid id) => RunSafeAsync(() => OpenEditorAsync(id));
 
-    partial void OnSelectedEditorChanged(TEditor? value) => MarkSelectedItem();
-
     void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) =>
-        PendingLayoutChange = LayoutChangedAsync();
+        IsWide = _layoutModeService.Current != LayoutMode.Compact;
 
     /// <summary>Call after the items changed.</summary>
     protected void RaiseItemsChanged()
@@ -167,58 +121,16 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     {
         if (SelectedEditor is { } current)
         {
-            if (!await current.CanLeaveAsync())
-            {
-                return;
-            }
-
-            Detach(current);
+            Detach(current, forget: false);
         }
 
-        var compact = _layoutModeService.Current == LayoutMode.Compact;
-        var editor = CreateEditor(compact);
+        var editor = _editorFactory();
+        editor.Finished = outcome => EditorFinishedAsync(editor, outcome);
         await editor.LoadAsync(id);
         SelectedEditor = editor;
         RememberSelection(editor);
-
-        if (compact)
-        {
-            await _navigation.GoToAsync(_editRoute, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
-        }
-    }
-
-    private TEditor CreateEditor(bool hostedInPage)
-    {
-        var editor = _editorFactory();
-        editor.IsHostedInPage = hostedInPage;
-        editor.Finished = outcome => EditorFinishedAsync(editor, outcome);
-        return editor;
-    }
-
-    private async Task RestoreSelectionAsync()
-    {
-        if (_selectionMemory.Recall(_editRoute) is not { } id)
-        {
-            return;
-        }
-
-        if (!ContainsItem(id))
-        {
-            _selectionMemory.Remember(_editRoute, null);
-            return;
-        }
-
-        var editor = CreateEditor(false);
-        await editor.LoadAsync(id);
-        if (editor.IsNew)
-        {
-            // The item vanished from the store meanwhile.
-            editor.Finished = null;
-            _selectionMemory.Remember(_editRoute, null);
-            return;
-        }
-
-        SelectedEditor = editor;
+        MarkSelectedItem();
+        await _navigation.GoToAsync(_editRoute, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
     }
 
     /// <summary>Only a saved item is remembered; a new, unsaved one is not.</summary>
@@ -227,52 +139,34 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
 
     private async Task EditorFinishedAsync(TEditor editor, EditOutcome outcome)
     {
-        // After a successful save the editor stays (pane or page); every other way out closes it.
-        if (outcome != EditOutcome.Saved)
+        // After a successful save the editor page stays open (a new item becomes the highlighted one); cancelling keeps
+        // the highlight of the opened item; a deleted item has nothing to highlight.
+        if (outcome == EditOutcome.Saved)
         {
-            Detach(editor);
+            if (ReferenceEquals(SelectedEditor, editor))
+            {
+                RememberSelection(editor);
+            }
         }
-        else if (ReferenceEquals(SelectedEditor, editor))
+        else
         {
-            RememberSelection(editor);
+            Detach(editor, forget: outcome == EditOutcome.Deleted);
         }
 
         await ReloadAsync();
     }
 
-    private void Detach(TEditor editor)
+    private void Detach(TEditor editor, bool forget)
     {
         editor.Finished = null;
         if (ReferenceEquals(SelectedEditor, editor))
         {
             SelectedEditor = null;
+        }
+
+        if (forget)
+        {
             _selectionMemory.Remember(_editRoute, null);
-        }
-    }
-
-    private async Task LayoutChangedAsync()
-    {
-        IsTwoPane = _layoutModeService.Current != LayoutMode.Compact;
-        if (SelectedEditor is not { } editor)
-        {
-            return;
-        }
-
-        if (!IsTwoPane && !editor.IsHostedInPage)
-        {
-            editor.IsHostedInPage = true;
-            await _navigation.GoToAsync(_editRoute, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
-        }
-        else if (IsTwoPane && editor.IsHostedInPage)
-        {
-            editor.IsHostedInPage = false;
-
-            // Only pop the editor's own page. When a child page (e.g. a contract) is on top, popping would close that
-            // one instead; the editor page below pops itself when it appears again (see EditorPageBase).
-            if (_navigation.IsShowing(editor))
-            {
-                await _navigation.GoBackAsync();
-            }
         }
     }
 }

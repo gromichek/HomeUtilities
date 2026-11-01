@@ -147,7 +147,6 @@ public class VatRatesViewModelTests
         await vm.ReloadAsync();
         await vm.AddCommand.ExecuteAsync(null);
         var editor = vm.SelectedEditor!;
-        editor.IsHostedInPage = true;
 
         await editor.SaveCommand.ExecuteAsync(null);
 
@@ -261,7 +260,6 @@ public class VatRatesViewModelTests
     private async Task<VatRateEditViewModel> OpenAsync(string code)
     {
         var editor = _kit.CreateVatRateEditor();
-        editor.IsHostedInPage = true;
         await editor.LoadAsync(_kit.VatRates.Stored.Single(v => v.Code == code).Id);
         return editor;
     }

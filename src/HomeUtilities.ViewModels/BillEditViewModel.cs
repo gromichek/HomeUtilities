@@ -14,8 +14,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>
-/// Editor of one bill (a supplier bill of a contract, or a one-off expense). Shown in the side pane of the Bills screen or
-/// as a page (<see cref="Routes.BillEdit"/>). The cards: General, Amounts, Comparison with the calculation, Lines,
+/// Editor of one bill (a supplier bill of a contract, or a one-off expense). Shown on its own page (<see cref="Routes.BillEdit"/>). The cards: General, Amounts, Comparison with the calculation, Lines,
 /// Custom fields, Document, Payment, Notes. The payment card does the "Paid" quick action and its undo, adds a payment in the
 /// payment editor and uses a prepayment of the contract.
 /// </summary>

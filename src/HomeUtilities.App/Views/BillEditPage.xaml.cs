@@ -5,7 +5,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.App.Views;
 
 /// <summary>
-/// Compact-layout bill editor page, see <see cref="EditorPageBase"/>. A new bill can start from a contract (<c>contractId</c>),
+/// bill editor page, see <see cref="EditorPageBase"/>. A new bill can start from a contract (<c>contractId</c>),
 /// a property (<c>propertyId</c>), a month (<c>period</c>, <c>yyyy-MM</c>) and a calculated total (<c>gross</c>, shown as a hint) and a kind (<c>kind</c>, a <c>BillKind</c> name).
 /// </summary>
 public partial class BillEditPage : EditorPageBase

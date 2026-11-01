@@ -16,7 +16,6 @@ public class CategoryEditViewModelTests
         var water = new Category { SystemKey = ServiceKind.ColdWater };
         _store.Stored.Add(water);
         var vm = await LoadAsync(water);
-        vm.IsHostedInPage = true;
 
         Assert.True(vm.IsBuiltIn);
         Assert.False(vm.CanShowDelete);
@@ -32,7 +31,6 @@ public class CategoryEditViewModelTests
         var own = new Category { Name = "Kindergarten" };
         _store.Stored.Add(own);
         var vm = await LoadAsync(own);
-        vm.IsHostedInPage = true;
 
         Assert.True(vm.CanShowDelete);
         Assert.True(vm.ShowFormDelete);
@@ -48,7 +46,6 @@ public class CategoryEditViewModelTests
     public async Task NewCategory_HasNoDelete()
     {
         var vm = await LoadAsync(null);
-        vm.IsHostedInPage = true;
 
         Assert.False(vm.CanShowDelete);
         Assert.False(vm.ShowFormDelete);
@@ -152,7 +149,6 @@ public class CategoryEditViewModelTests
     public async Task Cancel_WithoutChanges_DoesNotAsk()
     {
         var vm = await LoadAsync(null);
-        vm.IsHostedInPage = true;
 
         await vm.CancelCommand.ExecuteAsync(null);
 

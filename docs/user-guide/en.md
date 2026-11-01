@@ -42,9 +42,12 @@ with ☰; on a wide window it is always visible.
 item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
-**Layout:** on a phone a list opens the editor as a separate page — also on a phone held sideways (a window lower than about
-480 dp counts as a phone), where the editor then has the ✓ **Save** button at the top and **Back** instead of a cramped side pane. On a tablet or a wide window the list is on the
-left and the editor on the right. Settings shows the current layout (phone / tablet / desktop).
+**Layout:** every screen has **one content area**. A list fills it, and tapping a record (or **New …**) opens its editor as a
+**separate page** — on a phone, a tablet and a Windows window alike. The editor always has the ✓ **Save** button at the top and
+**Back** to leave; there is no Save / Cancel row at the bottom and no editor next to the list. On a wide window the list shows
+its cards in two or three columns and the editor puts its cards and fields side by side instead of stretching them across the
+screen. A window lower than about 480 dp (a phone held sideways) counts as a phone: **＋ New …** is then the round button at the
+bottom right. Settings shows the current layout (phone / tablet / desktop).
 
 **Saving and leaving**
 - ✓ / **Save** saves and **keeps you in the editor**. Only **Back** leaves.
@@ -55,7 +58,7 @@ left and the editor on the right. Settings shows the current layout (phone / tab
 - On Android the **system Back** (button or gesture) does exactly what the **Back** arrow in the app does: it closes a dialog,
   leaves an editor (asking **Save changes?** if needed) and goes up one page. On the main screen of a section it takes you to
   the **Overview**; on the Overview it sends the app to the background.
-  On a wide window the list opens with the previously selected record and its editor on the right.
+  After you close an editor, the list shows the same place again and the record you opened is **highlighted**.
 - **Delete** hides the record; its history is kept. Many records can instead be **archived** — hidden from lists and
   pickers but still used in history. Use "Show archived" to see them again.
 - Fields marked * are required. A wrong value shows a red message under the field; the app does not save until
@@ -365,8 +368,8 @@ category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *
 The filters are the **header of the list**: they scroll away with the cards, so the cards get the whole screen. On a phone
 the filter block is collapsed to **one summary line** (for example *All properties · 2026 · All categories · All · Billed 78,13 € · Paid 78,13 €*);
 tap it, or the arrow at its right, to open the fields (**Show filters** / **Hide filters**). On a tablet and on a wide window the
-fields are open and sit in two or three columns. Your choice (open or collapsed) is remembered until you close the app. **Period** has three choices:
-*All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
+fields are open and sit in two or three columns. Your choice (open or collapsed) is remembered until you close the app. **Period** is a
+drop-down like the other filters with three choices: *All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
 (a bill belongs to the month of its billing period), and the totals below follow the chosen period. Below them the totals of the
 list: *Billed · Paid · Open*. Each row shows the month, the contract (or the title of an expense), the supplier, the
 category colour, the **total**, the **status badge** and — when the app has a calculation to compare with — the
@@ -528,7 +531,7 @@ says what left your account, and the **allocation** says which bill the money se
 
 **The list.** At the top: filters **Property** (all or one), **Period** and **Contract**; they are
 remembered until you close the app. Like on Bills, they are the header of the list (they scroll away with the cards) and are
-collapsed to one summary line on a phone (tap it to open them). **Period** has three choices: *All years*, *Year* and *Month* (by the date of the
+collapsed to one summary line on a phone (tap it to open them). **Period** is a drop-down with three choices: *All years*, *Year* and *Month* (by the date of the
 payment); with *Year* or *Month* the ‹ › buttons step to the previous or next year or month, and the totals below follow
 the chosen period. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Like the bills, a list longer than 100 rows shows the first 100 and **Show more (N left)** adds the next 100. Each row
 shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for

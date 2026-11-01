@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the VAT catalog list: name, code and the percent valid today.</summary>
-public sealed partial class VatRateItemViewModel : ObservableObject
+public sealed partial class VatRateItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

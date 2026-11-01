@@ -11,7 +11,7 @@ namespace HomeUtilities.ViewModels;
 
 /// <summary>
 /// The Bills screen: the bills filtered by property, period (all years, year or month) and status with their payment badge and the difference to the
-/// calculation, the totals of the list, and the "Paid" quick action. Two-pane like Properties; the editor is
+/// calculation, the totals of the list, and the "Paid" quick action. The editor is
 /// <see cref="BillEditViewModel"/>.
 /// </summary>
 public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewModel>
@@ -116,7 +116,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _filter = filter;
         _texts = new BillsListTexts(localizer);
         FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
-        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
+        Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, dialogs, RebuildItems);
         RefreshTexts();
     }
 
@@ -173,16 +173,6 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         RaiseItemsChanged();
     }
 
-    /// <summary>Back from the payment editor: the bill open in the side pane shows the payments as they are now.</summary>
-    public override async Task OnAppearingAsync()
-    {
-        await base.OnAppearingAsync();
-        if (SelectedEditor is { IsNew: false, IsHostedInPage: false } editor)
-        {
-            await editor.RefreshPaymentCardAsync();
-        }
-    }
-
     /// <summary>Navigation parameter carrying a <see cref="BillStatusFilter"/> name when the screen is opened from the Overview.</summary>
     public const string StatusParameter = "status";
 
@@ -227,7 +217,6 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         EmptyText = _localizer["BillsEmpty"];
         AddText = _localizer["BillAdd"];
         HelpText = _localizer["SectionHelp"];
-        SelectHintText = _localizer["BillSelectHint"];
         NothingFoundText = _localizer["BillsNothingFound"];
         Texts = new BillsListTexts(_localizer);
         FilterPanel.RefreshTexts();
@@ -240,7 +229,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
 
         if (SelectedEditor is { IsNew: false })

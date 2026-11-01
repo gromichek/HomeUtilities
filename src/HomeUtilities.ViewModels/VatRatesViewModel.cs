@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>The VAT catalog (Settings → VAT rates); two-pane like Categories.</summary>
+/// <summary>The VAT catalog (Settings → VAT rates).</summary>
 public sealed partial class VatRatesViewModel : MasterDetailViewModel<VatRateEditViewModel>
 {
     protected override HelpTopic GuideTopic => HelpTopic.VatRates;
@@ -56,7 +56,6 @@ public sealed partial class VatRatesViewModel : MasterDetailViewModel<VatRateEdi
         EmptyText = _localizer["VatRatesEmpty"];
         AddText = _localizer["VatRateAdd"];
         HelpText = _localizer["SectionHelp"];
-        SelectHintText = _localizer["VatRateSelectHint"];
         BannerText = _localizer["VatRatesBanner"];
         RebuildItems();
     }
@@ -67,7 +66,7 @@ public sealed partial class VatRatesViewModel : MasterDetailViewModel<VatRateEdi
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
     }
 

@@ -418,7 +418,6 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     private Task OpenMeterAsync(Guid id) => RunSafeAsync(async () =>
     {
         var editor = _editorFactory();
-        editor.IsHostedInPage = true;
         editor.Finished = Finished;
         await editor.LoadAsync(_propertyId, id);
         await _navigation.GoToAsync(Routes.MeterEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });

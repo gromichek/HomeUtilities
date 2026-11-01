@@ -4,7 +4,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.App.Views;
 
 /// <summary>
-/// Reading history page of the compact layout. Query parameter <c>editor</c> hands over a loaded
+/// Reading history page. Query parameter <c>editor</c> hands over a loaded
 /// <see cref="ReadingHistoryViewModel"/>; otherwise <c>id</c> (the meter id) is loaded into the page's own view model.
 /// Standard Back; there is nothing unsaved on this page.
 /// </summary>

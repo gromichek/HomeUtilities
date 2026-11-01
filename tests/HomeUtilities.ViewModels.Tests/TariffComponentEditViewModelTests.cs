@@ -740,7 +740,6 @@ public class TariffComponentEditViewModelTests
     {
         var vm = _kit.CreateTariffEditor();
         vm.ContractId = _contract.Id;
-        vm.IsHostedInPage = true;
         await vm.LoadAsync(null);
         return vm;
     }
@@ -790,7 +789,6 @@ public class TariffComponentEditViewModelTests
         _kit.Tariffs.Stored.Add(component);
         var vm = _kit.CreateTariffEditor();
         vm.ContractId = _contract.Id;
-        vm.IsHostedInPage = true;
 
         await vm.LoadAsync(component.Id);
 

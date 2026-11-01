@@ -14,7 +14,6 @@ public partial class BillsPage : PageBase, IQueryAttributable
     {
         InitializeComponent();
         BindingContext = viewModel;
-        TwoPaneLayout.Attach(Root, viewModel, () => viewModel.IsTwoPane);
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -46,5 +45,11 @@ public partial class BillsPage : PageBase, IQueryAttributable
                 string text => Guid.TryParse(text, out id),
                 _ => false,
             };
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        ListScroll.RevealSelected(ItemList);
     }
 }

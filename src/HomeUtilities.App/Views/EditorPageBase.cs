@@ -4,8 +4,8 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.App.Views;
 
 /// <summary>
-/// Compact-layout editor page. Query parameter <c>editor</c> hands over a running editor (so entered data
-/// survives a layout switch); otherwise <c>id</c> (absent = new item) is loaded into a fresh editor.
+/// Editor page, used on every device and window size (one content pane, T-028f). Query parameter <c>editor</c> hands over a
+/// running editor (the list screen creates and loads it); otherwise <c>id</c> (absent = new item) is loaded into a fresh editor.
 /// </summary>
 public abstract class EditorPageBase : PageBase, IQueryAttributable
 {
@@ -34,7 +34,6 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
         }
         else if (BindingContext is PaneEditorViewModel fresh)
         {
-            fresh.IsHostedInPage = true;
             PrepareFresh(fresh, query);
             Guid? id = query.TryGetValue(EditorNavigation.IdParameter, out var value)
                 ? value switch
@@ -51,17 +50,6 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
     /// <summary>Lets a page pass extra query parameters to a fresh editor before it is loaded.</summary>
     protected virtual void PrepareFresh(PaneEditorViewModel editor, IDictionary<string, object> query)
     {
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-
-        // The layout became two-pane while a child page covered this page: the editor lives in the side pane now.
-        if (BindingContext is PaneEditorViewModel { IsHostedInPage: false })
-        {
-            _ = Shell.Current.GoToAsync("..");
-        }
     }
 
     // Hardware / gesture Back and the toolbar Back arrow take the same path: unsaved changes dialog, then close.

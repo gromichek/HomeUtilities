@@ -7,7 +7,7 @@ using HomeUtilities.ViewModels.Common;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>One row of the property list.</summary>
-public sealed partial class PropertyItemViewModel : ObservableObject
+public sealed partial class PropertyItemViewModel : ObservableObject, ISelectableListItem
 {
     [ObservableProperty]
     private bool _isSelected;

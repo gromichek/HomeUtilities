@@ -14,7 +14,6 @@ public sealed class BillTemplateLauncher(Func<BillTemplateEditViewModel> editorF
     private async Task OpenAsync(Action<BillTemplateEditViewModel> preset)
     {
         var editor = editorFactory();
-        editor.IsHostedInPage = true;
         preset(editor);
         await editor.LoadAsync(null);
         await navigation.GoToAsync(Routes.BillTemplateEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });

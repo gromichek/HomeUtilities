@@ -823,7 +823,6 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private Task NewSupplierAsync() => RunSafeAsync(async () =>
     {
         var editor = _supplierEditorFactory();
-        editor.IsHostedInPage = true;
         editor.Finished = async outcome =>
         {
             if (outcome != EditOutcome.Saved)
