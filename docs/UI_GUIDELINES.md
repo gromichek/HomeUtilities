@@ -44,8 +44,12 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 - Styles `PrimaryButton`, `SecondaryButton`, `DestructiveButton`, `IconButton` in `Styles.xaml`; no ad-hoc colours.
 
 ## 3. Layout of list + editor screens
+- **One content pane on every device** (owner decision 2026-11-01, T-028f): no list + editor split. The list fills the
+  content area; on wide windows cards are in 1–3 columns (`ListColumns.MinItemWidth="360"`). Tapping a card pushes the
+  **editor page** on phone, tablet and Windows alike. The menu (flyout) is the only other pane.
 - **List**: "＋ New …" — on phones a **floating action button** with `IconAdd` bottom-right; on tablet/desktop a
-  button above the list. Tap a row to open it.
+  button above the list. Tap a row to open it. Back from an editor keeps the scroll position and highlights the card
+  opened last.
 - **Editor**: grouped into **cards/sections** with a header; a section that contains a list (parameters, links,
   lines…) has its own `IconAdd` button **in the section header**.
 - **Child rows**: tap the row → edit; `IconDelete` at the end of the row (with confirmation). No separate
@@ -53,20 +57,19 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 - **Adding/editing a child item opens a dialog** (popup on desktop/tablet, full-screen sheet on phones) with its
   own title ("New parameter", "Edit parameter") and its own Save / Cancel — never an inline form inside the
   parent form.
-- **Editor commands**
-  - Phone (separate page): toolbar has system **Back** + **Save** (`IconSave` ✓). **✓ only saves and never
-    leaves the page; only Back leaves** (owner rule 2026-10-23, applies to every editor and dialog page).
-    No separate "Cancel" — Back cancels. Delete in the `IconMore` menu or as a red "Delete …" at the end of the form.
-  - Tablet/desktop (right pane): a footer with **Save** (primary), **Cancel** (secondary), and **Delete …**
-    (destructive) at the far end.
+- **Editor commands (every device)**: toolbar has **Back** + **Save** (`IconSave` ✓). **✓ only saves and never
+  leaves the page; only Back leaves** (owner rule 2026-10-23, applies to every editor and dialog page).
+  No separate "Cancel" — Back cancels. Delete in the `IconMore` menu or as a red "Delete …" at the end of the form.
+  There is no desktop footer any more (T-028f).
+- **Editor pages on wide windows**: the cards of the form flow into up to 2 columns (`AdaptiveFieldGrid`
+  `MinColumnWidth="560" MaxColumns="2"`); fields are never stretched across the whole screen.
 - **Low windows are phones** (T-028a): a window lower than 480 dp (a phone in landscape, ~900 x 400 dp) is `Compact`
-  whatever its width (`LayoutModes.FromSize`), so editors open as pages with the phone commands.
-- A footer never overlaps: Save and Cancel keep their natural width, the Delete button gets the rest of the row and wraps.
+  whatever its width (`LayoutModes.FromSize`).
 - **Filter blocks above long lists** (Bills, Payments) are the list **header** (they scroll with the cards) and collapse to
   one summary line on compact width (`FilterPanelViewModel`, state remembered per screen for the session); medium/expanded
-  show the fields in 2 / 3 columns (`AdaptiveFieldGrid`).
-- No artificial maximum width of the window or panes (space is needed for charts later). Two-pane split is
-  proportional (list ~35–40 %).
+  show the fields in 2 / 3 columns (`AdaptiveFieldGrid`). The period (All years / Year / Month) is a drop-down followed by
+  the ‹ 2026 › switcher; the year never wraps.
+- No artificial maximum width of the window (space is needed for charts); width is used by columns, not by stretching.
 
 ## 3a. Choice dialogs (single and multiple choice) — owner feedback 2026-10-29
 - One look for every choice dialog, the same as the child-item dialogs: title at the top-left, content **directly

@@ -83,9 +83,10 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 8. **Thin UI.** Pages are bindings + layout.
 9. **Adaptive layouts for three form factors:** Android phone (portrait, narrow), Android tablet
    (portrait and landscape) and Windows desktop (resizable window). Layout is chosen by **available
-   width, not by platform**: compact < 600 dp (single column, phone), medium 600–1000 dp
-   (tablet portrait: list + detail or two columns), expanded > 1000 dp (tablet landscape / desktop:
-   list + detail side by side, wider charts). A window **lower than 480 dp** (phone in landscape) is Compact whatever its width
+   width, not by platform**: compact < 600 dp (phone), medium 600–1000 dp (tablet portrait),
+   expanded > 1000 dp (tablet landscape / desktop). Since T-028f (owner decision 2026-11-01) every device has **one
+   content pane** — lists in 1–3 columns by width, editors as pages; the mode decides the FAB vs "New" button, the menu,
+   dialog presentation and column counts. A window **lower than 480 dp** (phone in landscape) is Compact whatever its width
    (owner decision 2026-11-01, T-028a). Use `AdaptiveTrigger`/`VisualStateManager` or an
    `ILayoutModeService` exposed to ViewModels — no `DeviceIdiom` checks in pages. Rotation must
    not lose entered data. Every UI task lists manual checks for phone and tablet.
