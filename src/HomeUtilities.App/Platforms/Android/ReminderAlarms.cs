@@ -196,15 +196,16 @@ public static class ReminderAlarms
         open.PutExtra(TargetExtra, reminder.Data);
         var tap = PendingIntent.GetActivity(context, reminder.Id, open, PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
 
-        var notification = new NotificationCompat.Builder(context, ChannelId)
-            .SetSmallIcon(context.ApplicationInfo?.Icon ?? 0)
-            .SetContentTitle(reminder.Title)
-            .SetContentText(reminder.Body)
-            .SetStyle(new NotificationCompat.BigTextStyle().BigText(reminder.Body))
-            .SetContentIntent(tap)
-            .SetAutoCancel(true)
-            .SetPriority(NotificationCompat.PriorityDefault)
-            .Build();
+        // The binding marks every builder method as nullable; the calls are made one by one on the same builder.
+        var builder = new NotificationCompat.Builder(context, ChannelId);
+        _ = builder.SetSmallIcon(context.ApplicationInfo?.Icon ?? 0);
+        _ = builder.SetContentTitle(reminder.Title);
+        _ = builder.SetContentText(reminder.Body);
+        _ = builder.SetStyle(new NotificationCompat.BigTextStyle().BigText(reminder.Body));
+        _ = builder.SetContentIntent(tap);
+        _ = builder.SetAutoCancel(true);
+        _ = builder.SetPriority(NotificationCompat.PriorityDefault);
+        var notification = builder.Build();
         NotificationManagerCompat.From(context)!.Notify(reminder.Id, notification);
     }
 
