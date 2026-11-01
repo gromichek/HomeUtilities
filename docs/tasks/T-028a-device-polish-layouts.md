@@ -43,8 +43,11 @@ Owner: check this **everywhere**.
 
 ## 4. Android system Back minimizes the app on the phone
 On the phone the system Back (button/gesture) minimizes the app where the in-app Back works; on the tablet it works.
-Likely cause: the phone runs Android 16 and the app targets API 36 → **predictive back** — `onBackPressed`/
-`OnBackButtonPressed` may not be called any more (the tablet has an older Android). Verify with the MAUI 10 docs/issues.
+Phone: Android 16; tablet: Android 13. Two possible causes — find out which (or both) and say so in the PR:
+(a) targetSdk 36 on Android 16 → **predictive back**: `onBackPressed`/`OnBackButtonPressed` may not be called any more
+(check MAUI 10 docs/issues); (b) owner's view: the tablet uses the two-pane layout (editor in the right pane, like
+Windows) while the phone pushes separate pages, and Back is not handled on those pages. Test on the phone in compact
+layout **and** on the tablet with pushed pages/dialogs (e.g. a child dialog, Reading history).
 - Make the system Back do exactly what the in-app Back does on every page: pushed pages and editors → the same path as
   the toolbar arrow (unsaved-changes dialog, UI_GUIDELINES §4); dialogs/sheets → Cancel; a section root other than
   Overview → go to Overview; Overview → leave the app (Android default).
