@@ -14,7 +14,8 @@ public sealed class UnavailableNotificationService : INotificationService
 
     public Task<bool> RequestPermissionAsync() => Task.FromResult(false);
 
-    public Task ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications) => Task.CompletedTask;
+    public Task<IReadOnlyList<ScheduleFailure>> ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications) =>
+        Task.FromResult<IReadOnlyList<ScheduleFailure>>([]);
 
     public Task CancelAllAsync() => Task.CompletedTask;
 

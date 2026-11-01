@@ -29,6 +29,8 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
     private readonly object _debounceLock = new();
 
     private CancellationTokenSource? _pending;
+    private ReminderRescheduleReason? _pendingReason;
+    private bool _loggedDisabled;
 
     /// <summary>Creates the scheduler and starts listening to data and language changes.</summary>
     public ReminderScheduler(
@@ -61,7 +63,10 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
     public TimeSpan Debounce { get; }
 
     /// <summary>Local time the plan was last handed to the system (null before the first run in this app session).</summary>
-    public DateTime? LastScheduledAt { get; private set; }
+    public DateTime? LastScheduledAt => LastStatus?.At;
+
+    /// <summary>The last hand-over of the plan to the system in this app session (null before the first run).</summary>
+    public ReminderScheduleStatus? LastStatus { get; private set; }
 
     /// <summary>A stable positive notification id for a reminder key (FNV-1a), so the same reminder always has the same id.</summary>
     public static int IdOf(string key)
@@ -77,8 +82,8 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
         return (int)(hash & 0x7FFFFFFF);
     }
 
-    /// <summary>Reschedules after <see cref="Debounce"/>; several requests within that time give one run.</summary>
-    public void RequestReschedule()
+    /// <summary>Reschedules after <see cref="Debounce"/>; several requests within that time give one run (the last reason counts).</summary>
+    public void RequestReschedule(ReminderRescheduleReason reason = ReminderRescheduleReason.Change)
     {
         CancellationTokenSource source;
         lock (_debounceLock)
@@ -86,13 +91,58 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
             _pending?.Cancel();
             _pending?.Dispose();
             source = _pending = new CancellationTokenSource();
+            _pendingReason = reason;
         }
 
-        _ = DebouncedAsync(source.Token);
+        _ = DebouncedAsync(source.Token, reason);
     }
 
-    /// <summary>Replaces the pending notifications by the current plan; with the reminders switched off it cancels them all.</summary>
-    public async Task RescheduleAsync(CancellationToken ct = default)
+    /// <summary>
+    /// Called when the app is left (Android: the window is stopped or deactivated). A change that still waits for the
+    /// debounce is handed to the system at once, so a bill saved a second before closing the app is not lost; if a run is
+    /// already in progress, waits for it. Never throws.
+    /// </summary>
+    public async Task FlushAsync()
+    {
+        try
+        {
+            bool pending;
+            lock (_debounceLock)
+            {
+                pending = _pendingReason is not null;
+                if (pending)
+                {
+                    _pending?.Cancel();
+                    _pending?.Dispose();
+                    _pending = null;
+                    _pendingReason = null;
+                }
+            }
+
+            if (pending)
+            {
+                await RescheduleAsync(ReminderRescheduleReason.LeavingApp);
+                return;
+            }
+
+            // Nothing waits, but a run may be in flight: let it finish before the app goes to the background.
+            await _gate.WaitAsync();
+            _gate.Release();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (Exception ex)
+        {
+            _errorLog.Append("Reminder scheduling", ex);
+        }
+    }
+
+    /// <summary>
+    /// Replaces the pending notifications by the current plan; with the reminders switched off it cancels them all. The new
+    /// plan is built first and handed over as a whole, so a failure while planning leaves the old notifications in place.
+    /// </summary>
+    public async Task RescheduleAsync(ReminderRescheduleReason reason = ReminderRescheduleReason.Change, CancellationToken ct = default)
     {
         await _gate.WaitAsync(ct);
         try
@@ -113,9 +163,18 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
                 .Select(r => new ScheduledNotification(IdOf(r.Key), r.At, Localize(r.Title), Localize(r.Body), r.Target.Serialize()))
                 .ToList();
 
-            await _notifications.CancelAllAsync();
-            await _notifications.ScheduleAsync(notifications);
-            LastScheduledAt = _clock.UtcNow.ToLocalTime().DateTime;
+            var failures = await _notifications.ScheduleAsync(notifications);
+            foreach (var failure in failures)
+            {
+                _errorLog.Append(
+                    "Reminder scheduling",
+                    new InvalidOperationException($"Reminder {failure.Id} for {failure.At:yyyy-MM-dd HH:mm} was not handed to the system: {failure.Reason}"));
+            }
+
+            await LogDisabledOnceAsync();
+            var status = new ReminderScheduleStatus(_clock.UtcNow.ToLocalTime().DateTime, reason, notifications.Count, failures.Count);
+            LastStatus = status;
+            WeakReferenceMessenger.Default.Send(new ReminderScheduleChangedMessage(status));
         }
         finally
         {
@@ -175,7 +234,7 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
     }
 
     /// <inheritdoc />
-    public void Receive(LanguageChangedMessage message) => RequestReschedule();
+    public void Receive(LanguageChangedMessage message) => RequestReschedule(ReminderRescheduleReason.Language);
 
     /// <inheritdoc />
     public void Dispose()
@@ -187,6 +246,7 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
             _pending?.Cancel();
             _pending?.Dispose();
             _pending = null;
+            _pendingReason = null;
         }
 
         _gate.Dispose();
@@ -224,14 +284,37 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
 
     private string Localize(ReminderText text) => text.Args.Count == 0 ? _localizer[text.Key] : _localizer.Get(text.Key, [.. text.Args]);
 
-    private void OnDataChanged(object? sender, EventArgs e) => RequestReschedule();
+    private void OnDataChanged(object? sender, EventArgs e) => RequestReschedule(ReminderRescheduleReason.Change);
 
-    private async Task DebouncedAsync(CancellationToken ct)
+    // Notifications switched off in the system: the alarms are still registered (they work as soon as the user allows them
+    // again), but the owner must be able to see why nothing arrives; written once per app session, not on every save.
+    private async Task LogDisabledOnceAsync()
+    {
+        if (_loggedDisabled || await _notifications.AreNotificationsEnabledAsync())
+        {
+            return;
+        }
+
+        _loggedDisabled = true;
+        _errorLog.Append("Reminder scheduling", new InvalidOperationException("Notifications are switched off for the app in the system settings: reminders are handed over but not shown."));
+    }
+
+    private async Task DebouncedAsync(CancellationToken ct, ReminderRescheduleReason reason)
     {
         try
         {
             await Task.Delay(Debounce, ct);
-            await RescheduleAsync(ct);
+            lock (_debounceLock)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                _pendingReason = null;
+            }
+
+            await RescheduleAsync(reason, ct);
         }
         catch (OperationCanceledException)
         {

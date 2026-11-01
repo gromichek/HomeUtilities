@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core.Reminders;
 
 namespace HomeUtilities.ViewModels;
@@ -10,7 +11,7 @@ namespace HomeUtilities.ViewModels;
 /// The "Reminders" card of the Settings: on/off, which kinds, the time of day, the lead of bill reminders and a test
 /// notification. Every change is stored and the notifications are rescheduled (debounced).
 /// </summary>
-public sealed partial class ReminderSettingsViewModel : ViewModelBase
+public sealed partial class ReminderSettingsViewModel : ViewModelBase, IRecipient<ReminderScheduleChangedMessage>
 {
     private readonly ReminderSettingsStore _store;
     private readonly ReminderScheduler _scheduler;
@@ -83,6 +84,15 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showPlanned;
 
+    [ObservableProperty]
+    private bool _notificationsBlocked;
+
+    [ObservableProperty]
+    private string _notificationsBlockedText = string.Empty;
+
+    [ObservableProperty]
+    private string _openNotificationSettingsText = string.Empty;
+
     /// <summary>Creates the card and loads the stored settings.</summary>
     public ReminderSettingsViewModel(
         ReminderSettingsStore store,
@@ -98,6 +108,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         _localizer = localizer;
         Load();
         RefreshTexts();
+        _ = RunSafeAsync(RefreshNotificationStateAsync);
     }
 
     /// <summary>The reminders the app plans now (debug list; filled when the list is opened).</summary>
@@ -130,6 +141,17 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         }
     }
 
+    /// <summary>A hand-over finished (also after the app came back from the system settings): re-checks whether the system still allows notifications.</summary>
+    void IRecipient<ReminderScheduleChangedMessage>.Receive(ReminderScheduleChangedMessage message) =>
+        _ = RunSafeAsync(RefreshNotificationStateAsync);
+
+    /// <summary>Shows the warning with the button to the system settings when the reminders are on but the system blocks notifications.</summary>
+    public async Task RefreshNotificationStateAsync() =>
+        NotificationsBlocked = IsEnabled && _notifications.IsSupported && !await _notifications.AreNotificationsEnabledAsync();
+
+    [RelayCommand]
+    private Task OpenNotificationSettingsAsync() => RunSafeAsync(_notifications.OpenNotificationSettingsAsync);
+
     [RelayCommand]
     private Task SendTestAsync() => RunSafeAsync(_scheduler.SendTestAsync);
 
@@ -146,7 +168,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         // otherwise a list opened before the debounced update (or after a data change) showed false "not handed" marks.
         if (IsEnabled && _notifications.CanSchedule)
         {
-            await _scheduler.RescheduleAsync();
+            await _scheduler.RescheduleAsync(ReminderRescheduleReason.Settings);
         }
 
         await LoadPlannedAsync();
@@ -157,7 +179,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
     {
         var items = await _scheduler.PreviewAsync();
         var canCheck = _notifications.CanSchedule && items.Count > 0;
-        IReadOnlyCollection<int> pending = canCheck ? await _notifications.GetPendingIdsAsync() : [];
+        IReadOnlyCollection<int> pending = canCheck ? await _notifications.GetHeldIdsAsync([.. items.Select(item => item.Id)]) : [];
         Planned.Clear();
         foreach (var item in items)
         {
@@ -178,15 +200,17 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         {
             // How many of the planned reminders the system really holds, and when the plan was last handed over.
             var held = items.Count(item => pending.Contains(item.Id));
-            var when = _scheduler.LastScheduledAt is { } at ? at.ToString("g", CultureInfo.CurrentCulture) : "—";
-            PlannedSummary += Environment.NewLine + _localizer.Get("ReminderPlannedInSystem", held, items.Count, when);
+            var status = _scheduler.LastStatus;
+            var when = status is null ? "—" : status.At.ToString("g", CultureInfo.CurrentCulture);
+            var reason = status is null ? "—" : _localizer["ReminderReason_" + status.Reason];
+            PlannedSummary += Environment.NewLine + _localizer.Get("ReminderPlannedInSystem", held, items.Count, when, reason);
         }
     }
 
     /// <summary>While the list is open, a settings change reschedules at once and refreshes the list, so it never shows an old time.</summary>
     private async Task RescheduleAndRefreshAsync()
     {
-        await _scheduler.RescheduleAsync();
+        await _scheduler.RescheduleAsync(ReminderRescheduleReason.Settings);
         if (ShowPlanned)
         {
             await LoadPlannedAsync();
@@ -204,6 +228,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         if (!value)
         {
             Persist();
+            NotificationsBlocked = false;
             return;
         }
 
@@ -246,6 +271,8 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         SendTestText = _localizer["SettingsRemindersTest"];
         NotSupportedText = _localizer["SettingsRemindersNotSupported"];
         PlannedText = _localizer["SettingsRemindersPlanned"];
+        NotificationsBlockedText = _localizer["SettingsRemindersBlocked"];
+        OpenNotificationSettingsText = _localizer["SettingsRemindersOpenSystemSettings"];
     }
 
     /// <summary>Asks for the notification permission when the reminders are switched on; without it the switch goes back to off.</summary>
@@ -268,6 +295,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         }
 
         Persist();
+        await RefreshNotificationStateAsync();
     }
 
     private void Persist()
@@ -284,7 +312,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase
         }
         else
         {
-            _scheduler.RequestReschedule();
+            _scheduler.RequestReschedule(ReminderRescheduleReason.Settings);
         }
     }
 }

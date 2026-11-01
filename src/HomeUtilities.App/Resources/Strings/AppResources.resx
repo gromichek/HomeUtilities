@@ -1395,7 +1395,7 @@
   <data name="ReminderPlannedOff" xml:space="preserve"><value>The reminders are switched off.</value></data>
   <data name="ReminderPlannedNone" xml:space="preserve"><value>No reminders are planned: nothing is due in the coming weeks, or all times have passed.</value></data>
   <data name="ReminderPlannedCount" xml:space="preserve"><value>{0} reminder(s) are planned, the earliest first. Times are local.</value></data>
-  <data name="ReminderPlannedInSystem" xml:space="preserve"><value>Handed to the system: {0} of {1}. Last update: {2}.</value></data>
+  <data name="ReminderPlannedInSystem" xml:space="preserve"><value>Handed to the system: {0} of {1}. Last update: {2} ({3}).</value></data>
   <data name="ReminderPlannedNotInSystem" xml:space="preserve"><value>not handed to the system — this reminder will not arrive</value></data>
   <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Readings</value></data>
   <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Bill</value></data>
@@ -1404,6 +1404,14 @@
   <data name="ReminderPlannedKind_DraftsToConfirm" xml:space="preserve"><value>Draft bills</value></data>
   <data name="SettingsRemindersNotSupported" xml:space="preserve"><value>Notifications are not available on this device; reminders are shown when the app is opened.</value></data>
   <data name="SettingsRemindersPermissionDenied" xml:space="preserve"><value>The permission to show notifications was not granted. Allow notifications for HomeUtilities in the system settings and switch the reminders on again.</value></data>
+  <data name="SettingsRemindersBlocked" xml:space="preserve"><value>Notifications are switched off for HomeUtilities in the system settings: reminders are planned but will not be shown.</value></data>
+  <data name="SettingsRemindersOpenSystemSettings" xml:space="preserve"><value>Open notification settings</value></data>
+  <data name="ReminderReason_Start" xml:space="preserve"><value>start</value></data>
+  <data name="ReminderReason_Resume" xml:space="preserve"><value>app opened again</value></data>
+  <data name="ReminderReason_Change" xml:space="preserve"><value>change</value></data>
+  <data name="ReminderReason_Settings" xml:space="preserve"><value>settings</value></data>
+  <data name="ReminderReason_Language" xml:space="preserve"><value>language change</value></data>
+  <data name="ReminderReason_LeavingApp" xml:space="preserve"><value>leaving the app</value></data>
   <data name="ReminderLeadDays" xml:space="preserve"><value>Remind about a bill {0} day(s) before it is due (0 = on the due day only)</value></data>
   <data name="ReminderReadingsTitle" xml:space="preserve"><value>Submit readings</value></data>
   <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — the reading window is open, days {2}–{3}.</value></data>

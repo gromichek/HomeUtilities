@@ -1395,7 +1395,7 @@
   <data name="ReminderPlannedOff" xml:space="preserve"><value>Напоминания выключены.</value></data>
   <data name="ReminderPlannedNone" xml:space="preserve"><value>Напоминаний не запланировано: в ближайшие недели ничего не ожидается или все времена уже прошли.</value></data>
   <data name="ReminderPlannedCount" xml:space="preserve"><value>Запланировано напоминаний: {0}, ближайшие первыми. Время местное.</value></data>
-  <data name="ReminderPlannedInSystem" xml:space="preserve"><value>Передано системе: {0} из {1}. Последнее обновление: {2}.</value></data>
+  <data name="ReminderPlannedInSystem" xml:space="preserve"><value>Передано системе: {0} из {1}. Последнее обновление: {2} ({3}).</value></data>
   <data name="ReminderPlannedNotInSystem" xml:space="preserve"><value>не передано системе — это напоминание не придёт</value></data>
   <data name="ReminderPlannedKind_SubmitReadings" xml:space="preserve"><value>Показания</value></data>
   <data name="ReminderPlannedKind_PayBill" xml:space="preserve"><value>Счёт</value></data>
@@ -1404,6 +1404,14 @@
   <data name="ReminderPlannedKind_DraftsToConfirm" xml:space="preserve"><value>Черновики счетов</value></data>
   <data name="SettingsRemindersNotSupported" xml:space="preserve"><value>На этом устройстве уведомления недоступны; напоминания показываются при открытии приложения.</value></data>
   <data name="SettingsRemindersPermissionDenied" xml:space="preserve"><value>Разрешение на показ уведомлений не выдано. Разрешите уведомления для HomeUtilities в настройках системы и включите напоминания снова.</value></data>
+  <data name="SettingsRemindersBlocked" xml:space="preserve"><value>Уведомления для HomeUtilities выключены в настройках системы: напоминания запланированы, но показаны не будут.</value></data>
+  <data name="SettingsRemindersOpenSystemSettings" xml:space="preserve"><value>Открыть настройки уведомлений</value></data>
+  <data name="ReminderReason_Start" xml:space="preserve"><value>запуск</value></data>
+  <data name="ReminderReason_Resume" xml:space="preserve"><value>повторное открытие</value></data>
+  <data name="ReminderReason_Change" xml:space="preserve"><value>изменение данных</value></data>
+  <data name="ReminderReason_Settings" xml:space="preserve"><value>настройки</value></data>
+  <data name="ReminderReason_Language" xml:space="preserve"><value>смена языка</value></data>
+  <data name="ReminderReason_LeavingApp" xml:space="preserve"><value>выход из приложения</value></data>
   <data name="ReminderLeadDays" xml:space="preserve"><value>Напоминать о счёте за {0} дн. до срока оплаты (0 = только в день оплаты)</value></data>
   <data name="ReminderReadingsTitle" xml:space="preserve"><value>Передайте показания</value></data>
   <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — открыт период передачи показаний, числа {2}–{3}.</value></data>

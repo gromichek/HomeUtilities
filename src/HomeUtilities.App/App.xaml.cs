@@ -39,19 +39,21 @@ public partial class App : Application
     }
 
     // Resolved here (not in the constructor): the scheduler reads localized texts and listens to data changes from now on.
-    // On start and on resume the notifications are rescheduled; a tap that started the app is opened once the window exists.
+    // On start and on resume the notifications are rescheduled; when the app is left, a change that still waits for the
+    // debounce is handed to the system at once; a tap that started the app is opened once the window exists.
     private void StartReminders(Window window)
     {
         var scheduler = _services.GetRequiredService<ReminderScheduler>();
         var router = _services.GetRequiredService<NotificationTapRouter>();
         var tapHandler = _services.GetRequiredService<NotificationTapHandler>();
         var errorLog = _services.GetRequiredService<IErrorLog>();
+        var justCreated = false;
 
-        void Refresh() => _ = Task.Run(async () =>
+        void Refresh(ReminderRescheduleReason reason) => _ = Task.Run(async () =>
         {
             try
             {
-                scheduler.RequestReschedule();
+                scheduler.RequestReschedule(reason);
                 await scheduler.ShowStartSummaryAsync();
             }
             catch (Exception ex)
@@ -60,12 +62,28 @@ public partial class App : Application
             }
         });
 
+        // Android stops the activity (and may end the process) soon after the app is left: no waiting for the debounce.
+        void Flush() => _ = Task.Run(scheduler.FlushAsync);
+
         window.Created += (_, _) =>
         {
+            justCreated = true;
             Dispatcher.Dispatch(() => router.Attach(tapHandler.OpenAsync));
-            Refresh();
+            Refresh(ReminderRescheduleReason.Start);
         };
-        window.Resumed += (_, _) => Refresh();
+        window.Resumed += (_, _) =>
+        {
+            // The first Resumed follows Created: the start run is already requested.
+            if (justCreated)
+            {
+                justCreated = false;
+                return;
+            }
+
+            Refresh(ReminderRescheduleReason.Resume);
+        };
+        window.Deactivated += (_, _) => Flush();
+        window.Stopped += (_, _) => Flush();
     }
 
     // A failed startup restore is reported once, when the first page is on screen.
