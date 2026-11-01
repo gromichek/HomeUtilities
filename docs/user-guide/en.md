@@ -39,7 +39,7 @@ a bill should be and to compare your bills with it. You can add a supplier direc
 with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
-item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Categories, VAT rates and the contract, meter and tariff component
+item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Settings (and each of its sections), Categories, VAT rates and the contract, meter and tariff component
 editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
 
 **Layout:** every screen has **one content area**. A list fills it, and tapping a record (or **New …**) opens its editor as a
@@ -47,7 +47,7 @@ editors have a **?** button in the toolbar that opens the guide at the matching 
 **Back** to leave; there is no Save / Cancel row at the bottom and no editor next to the list. On a wide window the list shows
 its cards in two or three columns and the editor puts its cards and fields side by side instead of stretching them across the
 screen. A window lower than about 480 dp (a phone held sideways) counts as a phone: **＋ New …** is then the round button at the
-bottom right. Settings shows the current layout (phone / tablet / desktop).
+bottom right. *Settings → About* shows the current layout (phone / tablet / desktop).
 
 **Saving and leaving**
 - ✓ / **Save** saves and **keeps you in the editor**. Only **Back** leaves.
@@ -799,12 +799,34 @@ opens (Drive, e-mail…). The message at the bottom shows where the file went.
 
 ## 16. Settings
 
-Language (English / Русский), theme (system / light / dark), [reminders](#reminders), categories, VAT rates, [bill templates](#bill-templates-and-drafts), [Excel import](#import-from-excel) and [imports](#imports-and-profiles), version, database file location,
-and the **Error log**: if the app reports an error, use *Copy log* and send the text to the developer.
+**Settings** is a **list of sections**. Each row has an icon, the name of the section and its current value (for example
+*Language — Русский*, *Reminders — On, 18:30*, *Error log — Entries: 0*). Tap a row to open it; **Back** returns to the list
+and the value is updated. The **?** button in the toolbar opens this chapter; inside a section it opens the matching part.
+
+| Row | What it holds |
+|---|---|
+| **Language** | The language of the app: [Language and theme](#language-and-theme). |
+| **Theme** | System / Light / Dark: [Language and theme](#language-and-theme). |
+| **Reminders** | [Reminders](#reminders): what, when, planned reminders, a test notification. |
+| **Backup** | [Backup](#backup): save a copy of all data, restore from a copy. |
+| **Categories** | The categories of contracts and payments, see [Categories](#8-categories). |
+| **VAT rates** | The catalog of VAT percentages, see [VAT rates](#vat-rates). |
+| **Bill templates** | Payments without a meter, see [Bill templates and drafts](#bill-templates-and-drafts). |
+| **Imports** | [Import from Excel](#import-from-excel), the finished imports with *Undo*, the saved profiles, the export and the meter-link repair: [Imports and profiles](#imports-and-profiles). |
+| **Error log** | If the app reports an error: [Error log](#error-log). |
+| **About** | Version, database file, layout: [About](#about). |
+
+The rows *Categories*, *VAT rates*, *Bill templates* and *Imports* open the same screens as before; the other rows open a page with
+the settings of that section. On a wide window the rows are in two or three columns.
+
+### Language and theme
+
+**Language** — *English* or *Русский*; the whole app switches at once and the row shows the new language when you go back.
+**Theme** — *System* (follows the phone or Windows), *Light* or *Dark*. Both are stored on this device only.
 
 ### Reminders
 
-**Settings → Reminders** makes the app remind you of the same things that are on the Overview [To do](#to-do) list, even when
+**Settings → Reminders** (a page with switches, the time of day and the buttons below) makes the app remind you of the same things that are on the Overview [To do](#to-do) list, even when
 the app is closed (Android). Each reminder is a notification; tapping it opens the right screen.
 
 - **Submit readings** — on the first day of the reading window of a contract (see [Contracts](#5-contracts)), at the set
@@ -842,7 +864,7 @@ sleep even later); a reminder that is more than 6 hours late is skipped.
 **If a reminder does not arrive.** (1) Open *Planned reminders*: if the row is missing, nothing is due (or its time has
 passed). (2) If the row is red, Android does not hold it — open *Settings → Error log*, tap *Copy log* and send the text to
 the developer; failures are written there with the reminder and its time. (3) If the row is fine but nothing comes, check
-that notifications are allowed for the app: if you switched them off in the Android settings, the Reminders card shows a
+that notifications are allowed for the app: if you switched them off in the Android settings, the *Reminders* page shows a
 red warning with the button **Open notification settings**.
 
 **Lock screen.** Reminders show their text on the lock screen. If you see only "Content hidden", the phone hides the
@@ -877,6 +899,8 @@ you how many components use it. A component can also skip the catalog and use it
 
 ### Backup
 
+**Settings → Backup** holds two buttons, **Save backup…** and **Restore from backup…**, one under the other, and the line with the date of the last backup (also shown on the row in the list).
+
 Everything you type (properties, suppliers, contracts, meters, readings) and all attachments and photos live only
 inside the app. If you uninstall the app, they are deleted with it. A backup is a single file
 (`HomeUtilities-backup-YYYY-MM-DD-HHmm.zip`) that you keep outside the app and can restore later, also on another
@@ -891,16 +915,16 @@ device (for example Windows → Android).
   asks you to close it; open it again and the restored data is there. If you choose a file that is not a backup, or a
   backup made by a newer version of the app, you get a message and nothing changes.
 
-After reinstalling the app: open *Settings → Restore from backup…*, pick your file, confirm, close the app and open it
+After reinstalling the app: open *Settings → Backup → Restore from backup…*, pick your file, confirm, close the app and open it
 again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
 
 ### Import from Excel
 
-If you kept your history in an Excel workbook (one sheet per supplier, one row per month), **Settings → Import from Excel**
+If you kept your history in an Excel workbook (one sheet per supplier, one row per month), **Settings → Imports → Import from Excel**
 brings it into the app. The workbook is never copied into the app: the wizard only reads it. Nothing changes until you
 press *Import*, and a finished import can be undone as a whole.
 
-**Before you start** make a backup (*Settings → Save backup…*) and create what the import needs: the **property**, the
+**Before you start** make a backup (*Settings → Backup → Save backup…*) and create what the import needs: the **property**, the
 **contract** (for example *Water*) and its **meters**, linked to the contract. The import adds *readings* to the meters of the
 contract and *bills and payments* to the contract; it does not create contracts or meters and does not import prices
 (tariffs stay as you entered them). If a meter or contract is missing, the wizard says so; *Open contract* takes you to it.
@@ -1057,6 +1081,15 @@ before 2014** — *as stored* (LVL, the way the bills were entered) or *converte
 
 Values only — no formulas and no charts are written. Numbers are real numbers (2 decimals for money, 3 for readings) and dates
 are real dates, so Excel or LibreOffice can sum and sort them.
+### Error log
+
+**Settings → Error log**: if the app reports an error, tap **Copy log** and send the text to the developer. The page says how
+many entries the log holds. **Clear** empties the log after a confirmation (*Clear the error log? The entries cannot be restored.*).
+
+### About
+
+**Settings → About** shows the version of the app, the path of the database file and the current layout (phone / tablet /
+desktop). In test builds it also holds *Fill with sample data* and *Delete all data*.
 
 ## 17. Coming soon
 

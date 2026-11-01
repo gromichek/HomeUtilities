@@ -48,15 +48,173 @@ public class SettingsViewModelTests
     }
 
     [Fact]
-    public void ClearLog_ClearsTheLog()
+    public async Task ClearLog_AfterConfirmation_ClearsTheLogAndTheCount()
     {
         var vm = Create(out _, out _, out _);
-        ErrorLog.Text = "boom";
+        ErrorLog.Text = LogEntry + LogEntry;
+        vm.RefreshSectionValues();
+        Assert.Equal("SettingsValueErrorLog 2 [en]", vm.ErrorLogCountText);
+        Dialogs.ConfirmResult = true;
 
-        vm.ClearLogCommand.Execute(null);
+        await vm.ClearLogCommand.ExecuteAsync(null);
 
         Assert.Equal(string.Empty, ErrorLog.Text);
+        Assert.Equal("SettingsValueErrorLog 0 [en]", vm.ErrorLogCountText);
+        Assert.Equal("SettingsErrorLogClearConfirm [en]", Assert.Single(Dialogs.Confirmations).Message);
     }
+
+    [Fact]
+    public async Task ClearLog_WhenCancelled_KeepsTheLog()
+    {
+        var vm = Create(out _, out _, out _);
+        ErrorLog.Text = LogEntry;
+        Dialogs.ConfirmResult = false;
+
+        await vm.ClearLogCommand.ExecuteAsync(null);
+
+        Assert.Equal(LogEntry, ErrorLog.Text);
+    }
+
+    // The error log starts every entry with "[yyyy-MM-dd HH:mm:ssZ] source" (FileErrorLog).
+    private const string LogEntry = "[2026-10-31 08:15:00Z] SettingsViewModel.Test\nSystem.Exception: boom\n\n";
+
+    [Fact]
+    public void Sections_AreListedInOrderWithTheirCurrentValues()
+    {
+        Settings.Values[SettingsViewModel.LastBackupKey] = "2026-10-24T09:30:00.0000000+00:00";
+        ErrorLog.Text = LogEntry + LogEntry + LogEntry;
+
+        var vm = Create(out _, out _, out _);
+
+        Assert.Equal(
+            [
+                SettingsSection.Language, SettingsSection.Theme, SettingsSection.Reminders, SettingsSection.Backup,
+                SettingsSection.Categories, SettingsSection.VatRates, SettingsSection.BillTemplates, SettingsSection.Imports,
+                SettingsSection.ErrorLog, SettingsSection.About,
+            ],
+            vm.Sections.Select(r => r.Section));
+        Assert.Equal("SettingsLanguage [en]", vm.Sections[0].Title);
+        Assert.Equal("LanguageName_en [en]", Row(vm, SettingsSection.Language).Value);
+        Assert.Equal("Theme_System [en]", Row(vm, SettingsSection.Theme).Value);
+        Assert.Equal("SettingsValueRemindersOff [en]", Row(vm, SettingsSection.Reminders).Value);
+        Assert.StartsWith("SettingsValueBackupLast ", Row(vm, SettingsSection.Backup).Value);
+        Assert.Equal("SettingsValueErrorLog 3 [en]", Row(vm, SettingsSection.ErrorLog).Value);
+        Assert.Equal("SettingsVersion 1.2.3 [en]", Row(vm, SettingsSection.About).Value);
+        Assert.Equal("SettingsValueCategories [en]", Row(vm, SettingsSection.Categories).Value);
+        Assert.Equal("SettingsValueImports [en]", Row(vm, SettingsSection.Imports).Value);
+    }
+
+    [Fact]
+    public void BackupRow_WithoutBackup_SaysSo()
+    {
+        var vm = Create(out _, out _, out _);
+
+        Assert.Equal("SettingsValueBackupNever [en]", Row(vm, SettingsSection.Backup).Value);
+    }
+
+    [Fact]
+    public void RemindersRow_ShowsOnWithTheTimeOrOff()
+    {
+        var vm = Create(out _, out _, out _);
+        vm.Reminders.IsEnabled = true;
+
+        Assert.Equal("SettingsValueRemindersOn 09:00 [en]", Row(vm, SettingsSection.Reminders).Value);
+
+        vm.Reminders.Time = new TimeSpan(18, 30, 0);
+        Assert.Equal("SettingsValueRemindersOn 18:30 [en]", Row(vm, SettingsSection.Reminders).Value);
+
+        vm.Reminders.IsEnabled = false;
+        Assert.Equal("SettingsValueRemindersOff [en]", Row(vm, SettingsSection.Reminders).Value);
+    }
+
+    [Fact]
+    public void SelectingLanguageOrTheme_UpdatesTheRowValue()
+    {
+        var vm = Create(out _, out _, out _);
+
+        vm.SelectedLanguage = vm.Languages.Single(l => l.Code == "ru");
+        Assert.Equal("LanguageName_ru [ru]", Row(vm, SettingsSection.Language).Value);
+        Assert.Equal("SettingsLanguage [ru]", Row(vm, SettingsSection.Language).Title);
+
+        vm.SelectedTheme = vm.Themes.Single(t => t.Theme == AppThemeChoice.Dark);
+        Assert.Equal("Theme_Dark [ru]", Row(vm, SettingsSection.Theme).Value);
+    }
+
+    [Theory]
+    [InlineData(SettingsSection.Categories, Routes.Categories)]
+    [InlineData(SettingsSection.VatRates, Routes.VatRates)]
+    [InlineData(SettingsSection.BillTemplates, Routes.BillTemplates)]
+    [InlineData(SettingsSection.Imports, Routes.Imports)]
+    public async Task OpeningAnExistingScreenRow_NavigatesToThatScreen(SettingsSection section, string route)
+    {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+
+        await Row(vm, section).OpenCommand.ExecuteAsync(null);
+
+        var visit = Assert.Single(navigation.Visited);
+        Assert.Equal(route, visit.Route);
+        Assert.Null(visit.Parameters);
+    }
+
+    [Theory]
+    [InlineData(SettingsSection.Language)]
+    [InlineData(SettingsSection.Theme)]
+    [InlineData(SettingsSection.Reminders)]
+    [InlineData(SettingsSection.Backup)]
+    [InlineData(SettingsSection.ErrorLog)]
+    [InlineData(SettingsSection.About)]
+    public async Task OpeningASettingsRow_PushesTheSectionPageWithItsViewModel(SettingsSection section)
+    {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+
+        await Row(vm, section).OpenCommand.ExecuteAsync(null);
+
+        var visit = Assert.Single(navigation.Visited);
+        Assert.Equal(Routes.SettingsSection, visit.Route);
+        var page = Assert.IsType<SettingsSectionViewModel>(visit.Parameters![SettingsViewModel.SectionParameter]);
+        Assert.Equal(section, page.Section);
+        Assert.Same(vm, page.Settings);
+        Assert.Equal(vm.TitleOf(section), page.Title);
+        Assert.Equal(section == SettingsSection.Language, page.IsLanguage);
+        Assert.Equal(section == SettingsSection.Reminders, page.IsReminders);
+        Assert.Equal(section == SettingsSection.About, page.IsAbout);
+    }
+
+    [Theory]
+    [InlineData(SettingsSection.Language, HelpTopic.LanguageAndTheme)]
+    [InlineData(SettingsSection.Theme, HelpTopic.LanguageAndTheme)]
+    [InlineData(SettingsSection.Reminders, HelpTopic.Reminders)]
+    [InlineData(SettingsSection.Backup, HelpTopic.Backup)]
+    [InlineData(SettingsSection.ErrorLog, HelpTopic.ErrorLog)]
+    [InlineData(SettingsSection.About, HelpTopic.About)]
+    public async Task SectionHelp_OpensTheMatchingGuideSection(SettingsSection section, HelpTopic topic)
+    {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+        var page = new SettingsSectionViewModel(vm, section, new FakeLocalizer(new FakeLanguageService()), navigation);
+
+        await page.OpenHelpCommand.ExecuteAsync(null);
+
+        var visit = Assert.Single(navigation.Visited);
+        Assert.Equal(Routes.HelpSection, visit.Route);
+        Assert.Equal(topic, visit.Parameters![HelpNavigation.TopicParameter]);
+    }
+
+    [Fact]
+    public async Task ListHelp_OpensTheSettingsChapter()
+    {
+        var navigation = new FakeNavigationService();
+        var vm = Create(out _, out _, out _, navigation);
+
+        await vm.OpenHelpCommand.ExecuteAsync(null);
+
+        Assert.Equal(HelpTopic.Settings, Assert.Single(navigation.Visited).Parameters![HelpNavigation.TopicParameter]);
+    }
+
+    private static SettingsSectionRowViewModel Row(SettingsViewModel vm, SettingsSection section) =>
+        vm.Sections.Single(r => r.Section == section);
 
     [Fact]
     public void Languages_AreListedWithLocalizedNamesAndCurrentSelected()
@@ -122,30 +280,6 @@ public class SettingsViewModelTests
         layout.Change(LayoutMode.Expanded);
 
         Assert.Equal("SettingsLayout Layout_Expanded [en] [en]", vm.LayoutText);
-    }
-
-    [Fact]
-    public async Task OpenVatRates_NavigatesToTheVatRatesPage()
-    {
-        var navigation = new FakeNavigationService();
-        var vm = Create(out _, out _, out _, navigation);
-
-        await vm.OpenVatRatesCommand.ExecuteAsync(null);
-
-        Assert.Equal(Routes.VatRates, Assert.Single(navigation.Visited).Route);
-        Assert.Equal("SectionVatRates [en]", vm.VatRatesText);
-    }
-
-    [Fact]
-    public async Task OpenCategories_NavigatesToCategoriesPage()
-    {
-        var navigation = new FakeNavigationService();
-        var vm = Create(out _, out _, out _, navigation);
-
-        await vm.OpenCategoriesCommand.ExecuteAsync(null);
-
-        Assert.Equal(Routes.Categories, Assert.Single(navigation.Visited).Route);
-        Assert.Equal("SectionCategories [en]", vm.CategoriesText);
     }
 
     [Fact]
@@ -342,20 +476,6 @@ public class SettingsViewModelTests
 
         Assert.Equal(0, Backup.Wipes);
         Assert.Equal(0, App.QuitCalls);
-    }
-
-    [Fact]
-    public async Task The_import_buttons_open_the_wizard_and_the_imports_list()
-    {
-        var navigation = new FakeNavigationService();
-        var vm = Create(out _, out _, out _, navigation);
-
-        await vm.OpenImportWizardCommand.ExecuteAsync(null);
-        await vm.OpenImportsCommand.ExecuteAsync(null);
-
-        Assert.Equal([Routes.ImportWizard, Routes.Imports], navigation.Visited.Select(v => v.Route));
-        Assert.Equal("SectionImport [en]", vm.ImportText);
-        Assert.Equal("SectionImports [en]", vm.ImportsText);
     }
 
     private static ReminderSettingsViewModel Reminders()
