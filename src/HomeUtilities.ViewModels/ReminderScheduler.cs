@@ -233,6 +233,27 @@ public sealed class ReminderScheduler : IRecipient<LanguageChangedMessage>, IDis
         await ShowAsync(_localizer["ReminderTestTitle"], _localizer["ReminderTestBody"]);
     }
 
+    /// <summary>How long after the tap the delayed test notification comes (time to lock the screen).</summary>
+    public static readonly TimeSpan DelayedTestDelay = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Schedules a test notification in <see cref="DelayedTestDelay"/> through the same alarm path as the reminders, so the
+    /// owner can lock the screen and check how a real reminder looks there. Says so with an in-app message.
+    /// </summary>
+    public async Task SendDelayedTestAsync()
+    {
+        if (!_notifications.CanSchedule || !await _notifications.RequestPermissionAsync())
+        {
+            return;
+        }
+
+        var at = _clock.UtcNow.ToLocalTime().DateTime + DelayedTestDelay;
+        if (await _notifications.ScheduleTestAsync(at, _localizer["ReminderTestTitle"], _localizer["ReminderTestBody"], ReminderRoutes.Overview))
+        {
+            _snackbar.Notify(_localizer["ReminderDelayedTestScheduled"]);
+        }
+    }
+
     /// <inheritdoc />
     public void Receive(LanguageChangedMessage message) => RequestReschedule(ReminderRescheduleReason.Language);
 

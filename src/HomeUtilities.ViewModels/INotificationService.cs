@@ -48,6 +48,13 @@ public interface INotificationService
     /// <summary>Opens the notification settings of the app in the system settings.</summary>
     Task OpenNotificationSettingsAsync() => Task.CompletedTask;
 
+    /// <summary>
+    /// Schedules one test notification at <paramref name="at"/> (local time) through the same path as the reminders, so it
+    /// can be checked with the screen locked. It is not part of the plan and is never cancelled by a reschedule.
+    /// False where nothing can be scheduled.
+    /// </summary>
+    Task<bool> ScheduleTestAsync(DateTime at, string title, string body, string data) => Task.FromResult(false);
+
     /// <summary>Removes every pending notification of the app.</summary>
     Task CancelAllAsync();
 

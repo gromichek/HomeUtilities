@@ -1383,6 +1383,8 @@
   <data name="SettingsRemindersDrafts" xml:space="preserve"><value>Draft bills to confirm</value></data>
   <data name="SettingsRemindersTime" xml:space="preserve"><value>Time of day</value></data>
   <data name="SettingsRemindersTest" xml:space="preserve"><value>Send a test notification</value></data>
+  <data name="SettingsRemindersTestDelayed" xml:space="preserve"><value>Test notification in 1 minute</value></data>
+  <data name="ReminderDelayedTestScheduled" xml:space="preserve"><value>The test notification comes in about 1 minute. Lock the screen now and wait.</value></data>
   <data name="SettingsRemindersPlanned" xml:space="preserve"><value>Planned reminders</value></data>
   <data name="ReminderPlannedOff" xml:space="preserve"><value>The reminders are switched off.</value></data>
   <data name="ReminderPlannedNone" xml:space="preserve"><value>No reminders are planned: nothing is due in the coming weeks, or all times have passed.</value></data>

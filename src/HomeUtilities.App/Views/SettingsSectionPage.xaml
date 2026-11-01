@@ -74,6 +74,8 @@
                     </VerticalStackLayout>
                     <Button Text="{Binding SendTestText}" Command="{Binding SendTestCommand}"
                             Style="{StaticResource SecondaryButton}" />
+                    <Button Text="{Binding SendDelayedTestText}" Command="{Binding SendDelayedTestCommand}"
+                            IsVisible="{Binding CanSendDelayedTest}" Style="{StaticResource SecondaryButton}" />
                     <Button Text="{Binding PlannedText}" Command="{Binding TogglePlannedCommand}"
                             Style="{StaticResource SecondaryButton}" />
                     <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowPlanned}">

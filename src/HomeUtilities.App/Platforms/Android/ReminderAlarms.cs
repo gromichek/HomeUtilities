@@ -32,6 +32,9 @@ public static class ReminderAlarms
     /// </summary>
     public static readonly string[] OldChannelIds = ["reminders", "reminders_public"];
 
+    /// <summary>Notification id of the delayed test notification (never produced by the reminder id hash in practice).</summary>
+    public const int TestId = int.MaxValue - 1;
+
     /// <summary>Intent extra of the activity intent: the serialized target of a tapped reminder.</summary>
     public const string TargetExtra = "homeutilities.reminder.target";
 

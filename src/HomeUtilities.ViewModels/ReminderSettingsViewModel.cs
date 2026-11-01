@@ -73,6 +73,9 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase, IRecipien
     private string _sendTestText = string.Empty;
 
     [ObservableProperty]
+    private string _sendDelayedTestText = string.Empty;
+
+    [ObservableProperty]
     private string _notSupportedText = string.Empty;
 
     [ObservableProperty]
@@ -117,6 +120,9 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase, IRecipien
     /// <summary>True if the device cannot show notifications at all (the card says reminders appear when the app is opened).</summary>
     public bool IsNotSupported => !_notifications.IsSupported;
 
+    /// <summary>The delayed test is offered only where reminders are scheduled ahead (Android).</summary>
+    public bool CanSendDelayedTest => _notifications.CanSchedule;
+
     /// <summary>The detail switches and the time are shown only while the reminders are on.</summary>
     public bool ShowDetails => IsEnabled;
 
@@ -154,6 +160,9 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase, IRecipien
 
     [RelayCommand]
     private Task SendTestAsync() => RunSafeAsync(_scheduler.SendTestAsync);
+
+    [RelayCommand]
+    private Task SendDelayedTestAsync() => RunSafeAsync(_scheduler.SendDelayedTestAsync);
 
     [RelayCommand]
     private Task TogglePlannedAsync() => RunSafeAsync(async () =>
@@ -269,6 +278,7 @@ public sealed partial class ReminderSettingsViewModel : ViewModelBase, IRecipien
         TimeLabel = _localizer["SettingsRemindersTime"];
         LeadDaysLabel = _localizer.Get("ReminderLeadDays", LeadDays);
         SendTestText = _localizer["SettingsRemindersTest"];
+        SendDelayedTestText = _localizer["SettingsRemindersTestDelayed"];
         NotSupportedText = _localizer["SettingsRemindersNotSupported"];
         PlannedText = _localizer["SettingsRemindersPlanned"];
         NotificationsBlockedText = _localizer["SettingsRemindersBlocked"];
