@@ -85,7 +85,8 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
    (portrait and landscape) and Windows desktop (resizable window). Layout is chosen by **available
    width, not by platform**: compact < 600 dp (single column, phone), medium 600–1000 dp
    (tablet portrait: list + detail or two columns), expanded > 1000 dp (tablet landscape / desktop:
-   list + detail side by side, wider charts). Use `AdaptiveTrigger`/`VisualStateManager` or an
+   list + detail side by side, wider charts). A window **lower than 480 dp** (phone in landscape) is Compact whatever its width
+   (owner decision 2026-11-01, T-028a). Use `AdaptiveTrigger`/`VisualStateManager` or an
    `ILayoutModeService` exposed to ViewModels — no `DeviceIdiom` checks in pages. Rotation must
    not lose entered data. Every UI task lists manual checks for phone and tablet.
 
