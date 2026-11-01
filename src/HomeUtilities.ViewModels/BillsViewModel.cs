@@ -115,9 +115,13 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _localizer = localizer;
         _filter = filter;
         _texts = new BillsListTexts(localizer);
+        FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
         Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, RebuildItems);
         RefreshTexts();
     }
+
+    /// <summary>The collapsible block around the filters (summary line when collapsed).</summary>
+    public FilterPanelViewModel FilterPanel { get; }
 
     /// <summary>The period filter (all years / year / month); the current year until the user changes it.</summary>
     public PeriodFilterViewModel Period { get; }
@@ -226,6 +230,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         SelectHintText = _localizer["BillSelectHint"];
         NothingFoundText = _localizer["BillsNothingFound"];
         Texts = new BillsListTexts(_localizer);
+        FilterPanel.RefreshTexts();
         RebuildItems();
     }
 
@@ -413,6 +418,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         Period.Refresh();
         StatusFilterName = StatusName(_filter.Status);
         TotalsText = BuildTotals(rows);
+        FilterPanel.SummaryText = string.Join(" · ", new[] { PropertyFilterName, Period.Label, CategoryFilterName, StatusFilterName, TotalsText }.Where(s => !string.IsNullOrEmpty(s)));
         ShowNothingFound = IsLoaded && _bills.Count > 0 && Items.Count == 0;
         HasMoreItems = rows.Count > Items.Count;
         ShowMoreText = _localizer.Get("ListShowMore", rows.Count - Items.Count);

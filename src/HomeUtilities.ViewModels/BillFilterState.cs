@@ -36,4 +36,7 @@ public sealed class BillFilterState
 
     /// <summary>The status filter.</summary>
     public BillStatusFilter Status { get; set; }
+
+    /// <summary>Whether the user expanded (true) or collapsed (false) the filter block; null = not chosen, follows the layout.</summary>
+    public bool? FiltersExpanded { get; set; }
 }
