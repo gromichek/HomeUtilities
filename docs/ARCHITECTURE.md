@@ -172,4 +172,5 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-20 | Bill period = service/readings month; prepaid services via `BillingTiming` | owner's billing practice |
 | 2026-10-20 | Bills without contract (one-off), BillTemplate with schedule (once / monthly / every N months / yearly) | non-monthly and one-off payments |
 | 2026-10-20 | Uniform amount fields Net / VatPercent / Vat / Gross | consistency |
+| 2026-11-01 | One content pane on every device; editors are pages (no list + editor split) | tablet two-pane too cramped; one layout to maintain |
 | 2026-10-19 | Coding sessions run in the cloud (Linux) | Windows target is verified only by CI and the owner |
