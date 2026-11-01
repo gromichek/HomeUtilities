@@ -39,6 +39,11 @@
                     <Label Text="{Binding HeaderText}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
                     <Label Text="{Binding NotSupportedText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding IsNotSupported}" />
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding NotificationsBlocked}">
+                        <Label Text="{Binding NotificationsBlockedText}" Style="{StaticResource ErrorLabel}" />
+                        <Button Text="{Binding OpenNotificationSettingsText}" Command="{Binding OpenNotificationSettingsCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding IsEnabled}" />
                         <Label Grid.Column="1" Text="{Binding EnabledLabel}" VerticalOptions="Center" />

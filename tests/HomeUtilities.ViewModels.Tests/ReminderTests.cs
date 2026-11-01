@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
@@ -71,14 +72,14 @@ public class ReminderTests : IDisposable
     // ---- Scheduler ------------------------------------------------------------------------------------------------
 
     [Fact]
-    public async Task Reschedule_cancels_the_old_notifications_and_schedules_the_plan()
+    public async Task Reschedule_hands_the_plan_over_as_a_whole_without_cancelling_first()
     {
         TurnOn();
         var scheduler = CreateScheduler();
 
         await scheduler.RescheduleAsync();
 
-        Assert.Equal(1, _notifications.CancelCalls);
+        Assert.Equal(0, _notifications.CancelCalls);
         var scheduled = Assert.Single(_notifications.Batches);
         Assert.Equal([new DateTime(2026, 11, 4, 9, 0, 0), new DateTime(2026, 11, 6, 9, 0, 0)], scheduled.Select(n => n.At));
         Assert.Equal("ReminderBillTitle [en]", scheduled[0].Title);
@@ -96,7 +97,7 @@ public class ReminderTests : IDisposable
         await scheduler.RescheduleAsync();
         await scheduler.RescheduleAsync();
 
-        Assert.Equal(2, _notifications.CancelCalls);
+        Assert.Equal(0, _notifications.CancelCalls);
         Assert.Equal(2, _notifications.Batches.Count);
         Assert.Equal(_notifications.Batches[0], _notifications.Batches[1]);
     }
@@ -167,6 +168,206 @@ public class ReminderTests : IDisposable
         await WaitAsync(() => _errorLog.Entries.Count == 1);
 
         Assert.Equal("Reminder scheduling", Assert.Single(_errorLog.Entries).Source);
+    }
+
+    // ---- Hand-over paths, flush on leaving, diagnostics (T-028e) ---------------------------------------------------
+
+    [Fact]
+    public async Task A_planning_failure_leaves_the_old_notifications_in_place()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+        await scheduler.RescheduleAsync();
+        var held = _notifications.Pending.ToList();
+        Assert.NotEmpty(held);
+
+        _loader.Failure = new InvalidOperationException("boom");
+        await Assert.ThrowsAsync<InvalidOperationException>(() => scheduler.RescheduleAsync());
+
+        Assert.Equal(0, _notifications.CancelCalls);
+        Assert.Equal(held.Order(), _notifications.Pending.Order());
+        Assert.Single(_notifications.Batches);
+    }
+
+    [Fact]
+    public async Task Flush_hands_over_a_change_that_still_waits_for_the_debounce()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler(TimeSpan.FromSeconds(30));
+
+        _changes.Notify();
+        Assert.Empty(_notifications.Batches);
+        await scheduler.FlushAsync();
+
+        Assert.Single(_notifications.Batches);
+        Assert.Equal(ReminderRescheduleReason.LeavingApp, scheduler.LastStatus!.Reason);
+        Assert.Equal(2, scheduler.LastStatus.Planned);
+    }
+
+    [Fact]
+    public async Task Flush_runs_once_and_the_cancelled_debounce_does_not_schedule_again()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler(TimeSpan.FromMilliseconds(150));
+
+        _changes.Notify();
+        await scheduler.FlushAsync();
+        await Task.Delay(400);
+
+        Assert.Single(_notifications.Batches);
+        Assert.Equal(1, _loader.Calls);
+    }
+
+    [Fact]
+    public async Task Flush_without_a_waiting_change_schedules_nothing()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+
+        await scheduler.FlushAsync();
+
+        Assert.Empty(_notifications.Batches);
+        Assert.Null(scheduler.LastStatus);
+    }
+
+    [Fact]
+    public async Task Flush_after_the_debounce_already_ran_does_not_schedule_again()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+
+        _changes.Notify();
+        await WaitAsync(() => _notifications.Batches.Count == 1);
+        await scheduler.FlushAsync();
+
+        Assert.Single(_notifications.Batches);
+        Assert.Equal(ReminderRescheduleReason.Change, scheduler.LastStatus!.Reason);
+    }
+
+    [Fact]
+    public async Task Flush_waits_for_a_run_that_is_in_progress()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+        var release = new TaskCompletionSource();
+        _loader.Gate = release.Task;
+
+        _changes.Notify();
+        await WaitAsync(() => _loader.Calls == 1);
+        var flush = scheduler.FlushAsync();
+        await Task.Delay(50);
+        Assert.False(flush.IsCompleted);
+
+        release.SetResult();
+        await flush;
+
+        Assert.Single(_notifications.Batches);
+    }
+
+    [Fact]
+    public async Task Flush_reports_a_failure_to_the_error_log_instead_of_throwing()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler(TimeSpan.FromSeconds(30));
+        _loader.Failure = new InvalidOperationException("boom");
+
+        _changes.Notify();
+        await scheduler.FlushAsync();
+
+        Assert.Equal("Reminder scheduling", Assert.Single(_errorLog.Entries).Source);
+    }
+
+    [Theory]
+    [InlineData(ReminderRescheduleReason.Start)]
+    [InlineData(ReminderRescheduleReason.Resume)]
+    [InlineData(ReminderRescheduleReason.Settings)]
+    public async Task Every_requested_reason_is_kept_in_the_status(ReminderRescheduleReason reason)
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+
+        scheduler.RequestReschedule(reason);
+        await WaitAsync(() => scheduler.LastStatus is not null);
+
+        Assert.Equal(reason, scheduler.LastStatus!.Reason);
+        Assert.Equal(LocalNow, scheduler.LastStatus.At);
+    }
+
+    [Fact]
+    public async Task A_data_change_and_a_language_change_have_their_own_reasons()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+
+        _changes.Notify();
+        await WaitAsync(() => scheduler.LastStatus is not null);
+        Assert.Equal(ReminderRescheduleReason.Change, scheduler.LastStatus!.Reason);
+
+        _language.SetLanguage("ru");
+        await WaitAsync(() => scheduler.LastStatus!.Reason == ReminderRescheduleReason.Language);
+        Assert.Equal(ReminderRescheduleReason.Language, scheduler.LastStatus.Reason);
+    }
+
+    [Fact]
+    public async Task The_last_reason_within_the_debounce_counts()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler(TimeSpan.FromMilliseconds(100));
+
+        scheduler.RequestReschedule(ReminderRescheduleReason.Start);
+        scheduler.RequestReschedule(ReminderRescheduleReason.Change);
+        await WaitAsync(() => scheduler.LastStatus is not null);
+
+        Assert.Equal(ReminderRescheduleReason.Change, scheduler.LastStatus!.Reason);
+        Assert.Single(_notifications.Batches);
+    }
+
+    [Fact]
+    public async Task Refused_reminders_are_logged_with_id_and_time_and_counted()
+    {
+        TurnOn();
+        _notifications.RefuseFirst = true;
+        var scheduler = CreateScheduler();
+
+        await scheduler.RescheduleAsync();
+
+        var entry = Assert.Single(_errorLog.Entries);
+        Assert.Equal("Reminder scheduling", entry.Source);
+        var first = _notifications.Batches[0][0];
+        Assert.Contains(first.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), entry.Exception.Message, StringComparison.Ordinal);
+        Assert.Contains("2026-11-04 09:00", entry.Exception.Message, StringComparison.Ordinal);
+        Assert.Equal(2, scheduler.LastStatus!.Planned);
+        Assert.Equal(1, scheduler.LastStatus.Failed);
+    }
+
+    [Fact]
+    public async Task Switched_off_system_notifications_are_logged_once_and_do_not_stop_the_hand_over()
+    {
+        TurnOn();
+        _notifications.NotificationsEnabled = false;
+        var scheduler = CreateScheduler();
+
+        await scheduler.RescheduleAsync();
+        await scheduler.RescheduleAsync();
+
+        Assert.Equal(2, _notifications.Batches.Count);
+        Assert.Single(_errorLog.Entries);
+        Assert.Contains("switched off", _errorLog.Entries[0].Exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task The_status_is_announced_to_open_screens()
+    {
+        TurnOn();
+        var scheduler = CreateScheduler();
+        ReminderScheduleStatus? received = null;
+        var recipient = new object();
+        WeakReferenceMessenger.Default.Register<object, ReminderScheduleChangedMessage>(recipient, (_, m) => received = m.Status);
+
+        await scheduler.RescheduleAsync(ReminderRescheduleReason.Resume);
+        WeakReferenceMessenger.Default.UnregisterAll(recipient);
+
+        Assert.Equal(ReminderRescheduleReason.Resume, received!.Reason);
     }
 
     [Fact]
@@ -468,7 +669,7 @@ public class ReminderTests : IDisposable
         Assert.False(card.Planned[1].HasProblem);
         Assert.Equal("ReminderPlannedNotInSystem [en]", card.Planned[0].Problem);
         var handedOver = LocalNow.ToString("g", System.Globalization.CultureInfo.CurrentCulture);
-        Assert.Contains($"ReminderPlannedInSystem 1|2|{handedOver}", card.PlannedSummary, StringComparison.Ordinal);
+        Assert.Contains($"ReminderPlannedInSystem 1|2|{handedOver}|ReminderReason_Settings [en]", card.PlannedSummary, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -483,7 +684,7 @@ public class ReminderTests : IDisposable
 
         Assert.All(card.Planned, row => Assert.False(row.HasProblem));
         var handedOver = LocalNow.ToString("g", System.Globalization.CultureInfo.CurrentCulture);
-        Assert.Contains($"ReminderPlannedInSystem 2|2|{handedOver}", card.PlannedSummary, StringComparison.Ordinal);
+        Assert.Contains($"ReminderPlannedInSystem 2|2|{handedOver}|ReminderReason_Settings [en]", card.PlannedSummary, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -501,6 +702,49 @@ public class ReminderTests : IDisposable
         Assert.Equal(2, _notifications.Batches.Count);
         Assert.Equal(expected, card.Planned[0].When);
         Assert.False(card.Planned[0].HasProblem);
+    }
+
+    [Fact]
+    public async Task Planned_list_asks_the_system_about_exactly_the_planned_ids()
+    {
+        TurnOn();
+        var card = CreateCard();
+
+        await card.TogglePlannedCommand.ExecuteAsync(null);
+
+        var query = Assert.Single(_notifications.HeldQueries);
+        Assert.Equal(2, query.Count);
+        Assert.Equal(_notifications.Batches[0].Select(n => n.Id).Order(), query.Order());
+    }
+
+    [Fact]
+    public async Task The_card_warns_and_opens_the_system_settings_when_notifications_are_switched_off()
+    {
+        TurnOn();
+        _notifications.NotificationsEnabled = false;
+        var card = CreateCard();
+        await card.RefreshNotificationStateAsync();
+
+        Assert.True(card.NotificationsBlocked);
+        Assert.Equal("SettingsRemindersBlocked [en]", card.NotificationsBlockedText);
+
+        await card.OpenNotificationSettingsCommand.ExecuteAsync(null);
+        Assert.Equal(1, _notifications.OpenSettingsCalls);
+
+        _notifications.NotificationsEnabled = true;
+        await card.RefreshNotificationStateAsync();
+        Assert.False(card.NotificationsBlocked);
+    }
+
+    [Fact]
+    public async Task No_warning_while_the_reminders_are_off()
+    {
+        _notifications.NotificationsEnabled = false;
+        var card = CreateCard();
+
+        await card.RefreshNotificationStateAsync();
+
+        Assert.False(card.NotificationsBlocked);
     }
 
     [Fact]
@@ -666,10 +910,26 @@ public class ReminderTests : IDisposable
             return Task.FromResult(PermissionGranted);
         }
 
-        public Task ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications)
+        public Task<IReadOnlyList<ScheduleFailure>> ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications)
         {
             Batches.Add(notifications);
-            Pending.UnionWith(notifications.Skip(RefuseFirst ? 1 : 0).Select(n => n.Id));
+            var refused = RefuseFirst ? notifications.Take(1).ToList() : [];
+            Pending.Clear();
+            Pending.UnionWith(notifications.Except(refused).Select(n => n.Id));
+            return Task.FromResult<IReadOnlyList<ScheduleFailure>>([.. refused.Select(n => new ScheduleFailure(n.Id, n.At, "refused by the test"))]);
+        }
+
+        public bool NotificationsEnabled { get; set; } = true;
+
+        public int OpenSettingsCalls { get; private set; }
+
+        public List<IReadOnlyCollection<int>> HeldQueries { get; } = [];
+
+        public Task<bool> AreNotificationsEnabledAsync() => Task.FromResult(NotificationsEnabled);
+
+        public Task OpenNotificationSettingsAsync()
+        {
+            OpenSettingsCalls++;
             return Task.CompletedTask;
         }
 
@@ -683,10 +943,14 @@ public class ReminderTests : IDisposable
         /// <summary>If true, the "system" does not accept the first notification of each batch.</summary>
         public bool RefuseFirst { get; set; }
 
-        /// <summary>What the "system" holds: the ids of the batches scheduled since the last cancel.</summary>
+        /// <summary>What the "system" holds: the ids of the last batch (a batch replaces the earlier ones).</summary>
         public HashSet<int> Pending { get; } = [];
 
-        public Task<IReadOnlyCollection<int>> GetPendingIdsAsync() => Task.FromResult<IReadOnlyCollection<int>>([.. Pending]);
+        public Task<IReadOnlyCollection<int>> GetHeldIdsAsync(IReadOnlyCollection<int> ids)
+        {
+            HeldQueries.Add(ids);
+            return Task.FromResult<IReadOnlyCollection<int>>([.. ids.Where(Pending.Contains)]);
+        }
 
         public Task ShowNowAsync(string title, string body, string data)
         {
@@ -701,12 +965,20 @@ public class ReminderTests : IDisposable
 
         public Exception? Failure { get; set; }
 
+        /// <summary>If set, a load completes only after this task does (simulates a slow run).</summary>
+        public Task? Gate { get; set; }
+
         public int Calls { get; private set; }
 
-        public Task<OverviewData> LoadAsync(DateOnly today, CancellationToken ct = default)
+        public async Task<OverviewData> LoadAsync(DateOnly today, CancellationToken ct = default)
         {
             Calls++;
-            return Failure is null ? Task.FromResult(Data) : Task.FromException<OverviewData>(Failure);
+            if (Gate is { } gate)
+            {
+                await gate;
+            }
+
+            return Failure is null ? Data : throw Failure;
         }
     }
 

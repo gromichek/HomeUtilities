@@ -1,7 +1,10 @@
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using AndroidX.Activity;
+using HomeUtilities.App.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HomeUtilities.App;
 
@@ -18,6 +21,32 @@ public class MainActivity : MauiAppCompatActivity
         // the system Back minimized the app on the phone while the in-app arrow worked (owner, 2026-10-31). The AndroidX
         // dispatcher is delivered on every Android version; the callback runs the same path as the toolbar arrow.
         OnBackPressedDispatcher.AddCallback(this, new ShellBackCallback(this));
+
+        // A recreated activity (savedInstanceState != null) carries the old intent: that tap was already handled.
+        if (savedInstanceState is null)
+        {
+            OpenReminderTarget(Intent);
+        }
+    }
+
+    protected override void OnNewIntent(Intent? intent)
+    {
+        base.OnNewIntent(intent);
+        OpenReminderTarget(intent);
+    }
+
+    // A tap on a reminder (shown by ReminderAlarms) carries the serialized target; the router opens it now, or as soon as
+    // the window is ready if the tap started the app.
+    private static void OpenReminderTarget(Intent? intent)
+    {
+        var target = intent?.GetStringExtra(ReminderAlarms.TargetExtra);
+        if (target is null)
+        {
+            return;
+        }
+
+        intent!.RemoveExtra(ReminderAlarms.TargetExtra);
+        IPlatformApplication.Current?.Services.GetService<NotificationTapRouter>()?.Submit(target);
     }
 
     /// <summary>Routes the system Back to the MAUI window (modal dialog → page → Shell); when nothing handles it, the default (leave the app).</summary>

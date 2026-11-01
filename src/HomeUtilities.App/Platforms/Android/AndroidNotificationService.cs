@@ -1,3 +1,5 @@
+using Android.Content;
+using Android.Provider;
 using HomeUtilities.ViewModels;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
@@ -6,20 +8,17 @@ using Plugin.LocalNotification.Core.Models.AndroidOption;
 namespace HomeUtilities.App.Services;
 
 /// <summary>
-/// Local notifications on Android through Plugin.LocalNotification. The reminders are scheduled with the system alarm
-/// manager as inexact alarms ahead of time; the app runs no service, no periodic work and no wake lock.
+/// Local notifications on Android. The reminders are scheduled by our own code (<see cref="ReminderAlarms"/>: inexact
+/// alarms of the system alarm manager, nothing runs in the background, no exact-alarm permission, no wake lock). The
+/// Plugin.LocalNotification package is used only for the permission request, the channel, the tap event and notifications
+/// shown at once; it schedules nothing, so exactly one component owns the alarms.
 /// </summary>
 public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotificationService
 {
     /// <summary>Id of the notification channel "Reminders".</summary>
-    public const string ChannelId = "reminders";
+    public const string ChannelId = ReminderAlarms.ChannelId;
 
-    /// <summary>
-    /// How late a scheduled reminder may still be shown. An inexact alarm is often delivered minutes (in Doze, hours) after
-    /// its time, and the plugin's default of one minute silently dropped those late alarms — owner test 2026-10-31.
-    /// The same limit applies after a reboot: reminders missed while the phone was off are shown if not older than this.
-    /// </summary>
-    public static readonly TimeSpan AllowedDelay = TimeSpan.FromHours(6);
+    private static Context AppContext => Android.App.Application.Context;
 
     public bool IsSupported => true;
 
@@ -39,48 +38,96 @@ public sealed class AndroidNotificationService : HomeUtilities.ViewModels.INotif
         }
     }
 
-    public async Task ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications)
-    {
-        foreach (var notification in notifications)
+    public Task<IReadOnlyList<ScheduleFailure>> ScheduleAsync(IReadOnlyList<ScheduledNotification> notifications) =>
+        Task.Run<IReadOnlyList<ScheduleFailure>>(() =>
         {
-            await LocalNotificationCenter.Current.Show(Request(notification, notification.At));
-        }
-    }
+            var context = AppContext;
+            RemoveLegacyPluginAlarms(context);
 
-    public async Task<IReadOnlyCollection<int>> GetPendingIdsAsync()
-    {
-        var pending = await LocalNotificationCenter.Current.GetPendingNotificationList();
-        return [.. pending.Select(r => r.NotificationId)];
-    }
+            var failures = new List<ScheduleFailure>();
+            var registered = new List<StoredReminder>();
+            foreach (var notification in notifications)
+            {
+                try
+                {
+                    var reminder = new StoredReminder(
+                        notification.Id, ReminderAlarms.ToUtcMillis(notification.At), notification.Title, notification.Body, notification.Data);
+                    ReminderAlarms.Register(context, reminder);
+                    registered.Add(reminder);
+                }
+                catch (Exception ex)
+                {
+                    failures.Add(new ScheduleFailure(notification.Id, notification.At, ex.Message));
+                }
+            }
 
-    public Task CancelAllAsync()
+            // The new alarms are in place; only now the stored plan is replaced and the alarms that are no longer planned go.
+            var old = ReminderAlarms.LoadPlan(context);
+            ReminderAlarms.SavePlan(context, registered);
+            var keep = registered.Select(r => r.Id).ToHashSet();
+            foreach (var stale in old.Where(r => !keep.Contains(r.Id)))
+            {
+                ReminderAlarms.Cancel(context, stale.Id);
+            }
+
+            return failures;
+        });
+
+    public Task<IReadOnlyCollection<int>> GetHeldIdsAsync(IReadOnlyCollection<int> ids) =>
+        Task.FromResult<IReadOnlyCollection<int>>([.. ids.Where(id => ReminderAlarms.IsHeld(AppContext, id))]);
+
+    public Task<bool> AreNotificationsEnabledAsync() => Task.FromResult(ReminderAlarms.AreNotificationsEnabled(AppContext));
+
+    public Task OpenNotificationSettingsAsync()
     {
-        LocalNotificationCenter.Current.CancelAll();
+        var context = AppContext;
+        var intent = new Intent(Settings.ActionAppNotificationSettings);
+        intent.PutExtra(Settings.ExtraAppPackage, context.PackageName);
+        intent.AddFlags(ActivityFlags.NewTask);
+        context.StartActivity(intent);
         return Task.CompletedTask;
     }
 
-    public async Task ShowNowAsync(string title, string body, string data) =>
-        await LocalNotificationCenter.Current.Show(Request(new ScheduledNotification(int.MaxValue, DateTime.Now, title, body, data), null));
-
-    // Always the inexact, idle-tolerant alarm (AlarmManager.setAndAllowWhileIdle): it needs no SCHEDULE_EXACT_ALARM, which
-    // the manifest removes on purpose. The plugin's default mode would pick an exact alarm if that permission were granted.
-    private static NotificationRequest Request(ScheduledNotification notification, DateTime? at) => new()
-    {
-        NotificationId = notification.Id,
-        Title = notification.Title,
-        Description = notification.Body,
-        ReturningData = notification.Data,
-        Android = new AndroidOptions { ChannelId = ChannelId },
-        Schedule = new NotificationRequestSchedule
+    public Task CancelAllAsync() =>
+        Task.Run(() =>
         {
-            // The planned time is local wall-clock time; an unspecified kind is easy to read as UTC.
-            NotifyTime = at is { } local ? DateTime.SpecifyKind(local, DateTimeKind.Local) : null,
-            Android = new AndroidScheduleOptions
+            var context = AppContext;
+            RemoveLegacyPluginAlarms(context);
+            var old = ReminderAlarms.LoadPlan(context);
+            ReminderAlarms.SavePlan(context, []);
+            foreach (var reminder in old)
             {
-                AlarmType = AndroidAlarmType.RtcWakeup,
-                ScheduleMode = AndroidScheduleMode.InexactAllowWhileIdle,
-                AllowedDelay = AllowedDelay,
-            },
-        },
-    };
+                ReminderAlarms.Cancel(context, reminder.Id);
+            }
+        });
+
+    public async Task ShowNowAsync(string title, string body, string data) =>
+        await LocalNotificationCenter.Current.Show(new NotificationRequest
+        {
+            NotificationId = int.MaxValue,
+            Title = title,
+            Description = body,
+            ReturningData = data,
+            Android = new AndroidOptions { ChannelId = ChannelId },
+        });
+
+    // Versions before T-028e scheduled through the plugin, which keeps its own list of alarms and re-registers them after a
+    // restart. Once per device they are removed, so that no second component can deliver a reminder twice.
+    private static void RemoveLegacyPluginAlarms(Context context)
+    {
+        if (ReminderAlarms.LegacyCleared(context))
+        {
+            return;
+        }
+
+        try
+        {
+            LocalNotificationCenter.Current.CancelAll();
+            ReminderAlarms.MarkLegacyCleared(context);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Removing the plugin alarms failed: {ex}");
+        }
+    }
 }

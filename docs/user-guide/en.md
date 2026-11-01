@@ -827,17 +827,28 @@ no longer reminds you.
 installment, meter verification, draft bills), the text of the notification and the screen a tap opens. Use it when a
 reminder you expected does not arrive: if it is not in the list, nothing is due (or its time has already passed — a reminder
 is planned only for a time in the future). Opening the list first hands the current plan to Android, so the list and Android
-always compare the same plan. Under the count the list says
-how many of the planned reminders Android really holds and when the app last handed them over ("Handed to the system: 13 of
-13. Last update: …"); a reminder Android does not hold is marked in red. While the list is open, changing the time or a
+always compare the same plan. Every row is checked with Android itself: a reminder Android holds for later has no mark, one it
+does not hold is marked in red ("not handed to the system — this reminder will not arrive"). Under the count the list says
+how many of the planned reminders Android really holds, when the app last handed them over and why: "Handed to the system:
+13 of 13. Last update: … (change)". The reason is one of *start*, *app opened again*, *change* (bills, payments, readings…
+were saved), *settings*, *language change* or *leaving the app*. While the list is open, changing the time or a
 switch updates it at once. For a test, set the bill's due date or the time of day a few minutes ahead and open the list.
 Android delivers reminders without waking the phone exactly on time, so a reminder may come a few minutes late (in deep
 sleep even later); a reminder that is more than 6 hours late is skipped.
 
+**If a reminder does not arrive.** (1) Open *Planned reminders*: if the row is missing, nothing is due (or its time has
+passed). (2) If the row is red, Android does not hold it — open *Settings → Error log*, tap *Copy log* and send the text to
+the developer; failures are written there with the reminder and its time. (3) If the row is fine but nothing comes, check
+that notifications are allowed for the app: if you switched them off in the Android settings, the Reminders card shows a
+red warning with the button **Open notification settings**.
+
 **Android.** When you switch the reminders on, Android asks for the permission to show notifications; if you refuse, the
 switch goes back off — allow notifications for the app in the system settings and try again. The app does nothing in the
 background: the notifications are handed to Android in advance, and are shown by the system a little after the set time (Android
-may delay them by a few minutes to save battery). They are kept after a restart of the phone. Reminders are stored on each
+may delay them by a few minutes to save battery). A change you save is handed over a couple of seconds later, and at once when
+you leave the app, so you can add a bill and close the app right away. After a restart of the phone or an update of the app the
+reminders are registered again without opening the app (a reminder missed while the phone was off is shown after the start
+if it is not more than 6 hours late). Reminders are stored on each
 device separately, so every phone and PC has its own switch.
 
 **Windows.** Notifications of a closed app are not available. The setting says *Notifications are not available on this
