@@ -83,6 +83,16 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
+### New findings (owner, 2026-11-01, after T-028a/T-028e)
+
+5. **Tablet (portrait and landscape with the menu open):** list + editor two-pane leaves the list ~450 dp; the filter
+   card is cramped (period buttons cut to "Вс/Го/Ме", the year "2026" wraps per digit). Owner: go to **one content pane**
+   (plus the menu). Decision pending (see lead's question). Period buttons → a drop-down like the other filters.
+6. **Scrolling stutters** on phone and tablet in all lists/panes. To check: Release build (Debug is much slower on
+   Android), then profile (T-028b): card templates (nested layouts, shadows), `CollectionView` item sizing, images.
+7. **Reminder for a paid bill arrived once** (not reproduced on the second try). Watch; ask the owner for the steps
+   (Paid on the card / in the editor, undo, how soon before the reminder time).
+
 ### T-028a findings (owner, real phone + tablet + Windows) → tasks T-028a (1, 2, 4), T-028d (3), T-028e (reminders)
 
 1. **Bills, Payments (phone, 2026-10-31):** the filter block (property, period buttons + year, category/contract, status,
@@ -147,7 +157,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-29 | #110 | T-023a report filters | Works, but: choice dialogs look foreign (Windows gap, Android centred list, period presets cut off), report buttons do not fit on phones, wheel over the table stops page scroll (Windows), Android spinner still turning → T-023b; UI_GUIDELINES §3a added |
 | 2026-10-31 | #143 | T-028c: long lists, contract → All bills selection, gas import window warning, help links (Android) | OK. Overview settlement cap of 24 months accepted. Import "unpaid gas bills" was the owner's own experiments — no bug. **Bugs**: reminders listed but not delivered; Windows help link to `ru.md`/`en.md` opens the browser → #147 |
 | 2026-10-31 | #147 | Reminders on a real phone (release build), help link on Windows | OK, reminders arrive ~1 min late (inexact alarm). Occasional "not handed" marks were a stale comparison; owner asked to drop quiet hours → #149 |
-| | #157 + #158 | T-028a layouts/Back (phone, tablet, Windows); T-028e reminders scenarios a–d | pending |
+| 2026-11-01 | #157 + #158 | T-028a layouts/Back (phone, tablet, Windows); T-028e reminders scenarios a–d | Reminders OK (new, changed, restart, notifications off); **once** a paid bill still notified (not reproduced). Layouts OK on phone, Back OK. **Tablet**: two panes too cramped (filters: "Вс/Го/Ме", year "202/6" wrapped) → owner wants one content pane. Lock screen showed no text → #160. Scrolling stutters on phone and tablet in all lists. |
+| | #160 | Reminder text on the lock screen (new public channel) | pending |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
