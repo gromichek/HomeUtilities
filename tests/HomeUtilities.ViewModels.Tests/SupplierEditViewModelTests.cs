@@ -341,7 +341,6 @@ public class SupplierEditViewModelTests
     public async Task Save_InPage_StaysOpen_AndCancelGoesBack()
     {
         var vm = await CreateNewAsync();
-        vm.IsHostedInPage = true;
         vm.Name = "Supplier";
 
         await vm.SaveCommand.ExecuteAsync(null);
@@ -356,17 +355,15 @@ public class SupplierEditViewModelTests
     }
 
     [Fact]
-    public async Task DeleteVisibility_FollowsHostingAndNewState()
+    public async Task DeleteVisibility_FollowsTheNewState()
     {
         var vm = await CreateNewAsync();
-        vm.IsHostedInPage = true;
         Assert.False(vm.ShowFormDelete);
 
         vm.Name = "Supplier";
         await vm.SaveCommand.ExecuteAsync(null);
 
         Assert.True(vm.ShowFormDelete);
-        Assert.False(vm.ShowFooter);
     }
 
     [Fact]

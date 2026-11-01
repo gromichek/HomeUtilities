@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>The list of properties; two-pane like Suppliers, with a switch that also shows archived properties.</summary>
+/// <summary>The list of properties; with a switch that also shows archived properties.</summary>
 public sealed partial class PropertiesViewModel : MasterDetailViewModel<PropertyEditViewModel>
 {
     protected override HelpTopic GuideTopic => HelpTopic.Properties;
@@ -64,7 +64,6 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
         AddText = _localizer["PropertyAdd"];
         HelpText = _localizer["SectionHelp"];
         ShowArchivedText = _localizer["PropertiesShowArchived"];
-        SelectHintText = _localizer["PropertySelectHint"];
         RebuildItems();
     }
 
@@ -74,7 +73,7 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
     }
 

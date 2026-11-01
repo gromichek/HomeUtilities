@@ -280,7 +280,6 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     private async Task OpenContractEditorAsync(Guid? id)
     {
         var editor = _contractEditorFactory();
-        editor.IsHostedInPage = true;
         editor.Finished = _ => ReloadContractsAsync();
         await editor.LoadAsync(_property.Id, id);
         await _navigation.GoToAsync(Routes.ContractEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });
@@ -295,7 +294,6 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     private async Task OpenMeterEditorAsync(Guid? id)
     {
         var editor = _meterEditorFactory();
-        editor.IsHostedInPage = true;
         editor.Finished = _ => ReloadMetersAsync();
         await editor.LoadAsync(_property.Id, id);
         await _navigation.GoToAsync(Routes.MeterEdit, new Dictionary<string, object> { [EditorNavigation.EditorParameter] = editor });

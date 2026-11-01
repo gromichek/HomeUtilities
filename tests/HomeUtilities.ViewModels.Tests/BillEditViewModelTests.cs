@@ -783,7 +783,6 @@ public class BillEditViewModelTests : IDisposable
     {
         var contract = _kit.AddWaterContract(tariff: false);
         var vm = await NewEditorAsync(contract);
-        vm.IsHostedInPage = true;
         vm.Amounts.GrossText = "46,02";
 
         await vm.SaveCommand.ExecuteAsync(null);

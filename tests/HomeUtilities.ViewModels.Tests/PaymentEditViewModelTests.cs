@@ -512,7 +512,6 @@ public class PaymentEditViewModelTests : IDisposable
             outcome = o;
             return Task.CompletedTask;
         };
-        vm.IsHostedInPage = true;
 
         await vm.SaveCommand.ExecuteAsync(null);
 

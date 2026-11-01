@@ -78,7 +78,6 @@ public class ContractEditViewModelTests
         var visit = Assert.Single(_kit.Navigation.Visited);
         Assert.Equal(Routes.SupplierEdit, visit.Route);
         var editor = Assert.IsType<SupplierEditViewModel>(visit.Parameters![EditorNavigation.EditorParameter]);
-        Assert.True(editor.IsHostedInPage);
         Assert.Null(vm.SelectedSupplier);
 
         editor.Name = "Internet provider";
@@ -645,7 +644,6 @@ public class ContractEditViewModelTests
         var contract = AddContract(ServiceKind.ColdWater);
         var vm = _kit.CreateContractEditor();
         await vm.LoadAsync(contract.PropertyId, contract.Id);
-        vm.IsHostedInPage = true;
         EditOutcome? outcome = null;
         vm.Finished = o =>
         {
@@ -995,7 +993,6 @@ public class ContractEditViewModelTests
         Assert.Equal(Routes.BillTemplateEdit, route);
         var editor = Assert.IsType<BillTemplateEditViewModel>(parameters![EditorNavigation.EditorParameter]);
         Assert.True(editor.IsNew);
-        Assert.True(editor.IsHostedInPage);
         Assert.Equal(contract.Id, editor.SelectedContract!.Id);
     }
 
@@ -1217,7 +1214,6 @@ public class ContractEditViewModelTests
     private async Task<ContractEditViewModel> CreateNewAsync()
     {
         var vm = _kit.CreateContractEditor();
-        vm.IsHostedInPage = true;
         await vm.LoadAsync(_kit.Property.Id, null);
         return vm;
     }

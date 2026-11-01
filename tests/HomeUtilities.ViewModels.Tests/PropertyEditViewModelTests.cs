@@ -61,7 +61,6 @@ public class PropertyEditViewModelTests
     public async Task Save_InPage_StaysOpenAndReportsOutcome()
     {
         var vm = await CreateNewAsync();
-        vm.IsHostedInPage = true;
         EditOutcome? outcome = null;
         vm.Finished = o =>
         {
@@ -340,7 +339,6 @@ public class PropertyEditViewModelTests
         _store.Stored.Add(stored);
         var vm = Create();
         await vm.LoadAsync(stored.Id);
-        vm.IsHostedInPage = true;
         Assert.False(vm.IsDirty);
 
         vm.IsArchived = true;
@@ -365,7 +363,6 @@ public class PropertyEditViewModelTests
         _store.Stored.Add(stored);
         var vm = Create();
         await vm.LoadAsync(stored.Id);
-        vm.IsHostedInPage = true;
         vm.IsArchived = true;
         _dialogs.UnsavedChoice = UnsavedChangesChoice.Save;
 
@@ -379,7 +376,6 @@ public class PropertyEditViewModelTests
     public async Task Back_WithoutChanges_LeavesImmediately()
     {
         var vm = await CreateNewAsync();
-        vm.IsHostedInPage = true;
 
         await vm.CancelCommand.ExecuteAsync(null);
 
@@ -403,7 +399,6 @@ public class PropertyEditViewModelTests
     public async Task Save_ClearsIsDirtyAndStaysOpen()
     {
         var vm = await CreateNewAsync();
-        vm.IsHostedInPage = true;
         EditOutcome? outcome = null;
         vm.Finished = o =>
         {
@@ -426,7 +421,6 @@ public class PropertyEditViewModelTests
         _store.Stored.Add(stored);
         var vm = Create();
         await vm.LoadAsync(stored.Id);
-        vm.IsHostedInPage = true;
         EditOutcome? outcome = null;
         vm.Finished = o =>
         {
@@ -488,19 +482,13 @@ public class PropertyEditViewModelTests
     }
 
     [Fact]
-    public async Task Footer_IsShownInPaneAndDeleteInFormOnPage()
+    public async Task DeleteInForm_IsShownForASavedItemOnly()
     {
         var stored = new Property { Name = "Cottage" };
         _store.Stored.Add(stored);
         var vm = Create();
         await vm.LoadAsync(stored.Id);
 
-        Assert.True(vm.ShowFooter);
-        Assert.False(vm.ShowFormDelete);
-
-        vm.IsHostedInPage = true;
-
-        Assert.False(vm.ShowFooter);
         Assert.True(vm.ShowFormDelete);
     }
 
@@ -721,7 +709,6 @@ public class PropertyEditViewModelTests
         Assert.Equal(Routes.MeterEdit, route);
         var editor = Assert.IsType<MeterEditViewModel>(parameters![EditorNavigation.EditorParameter]);
         Assert.Equal(meter.Id, editor.EntityId);
-        Assert.True(editor.IsHostedInPage);
 
         kit.Meters.Stored.Add(new Meter { PropertyId = property, Resource = MeterResource.Gas, Unit = MeterUnit.M3, InstalledOn = new DateOnly(2020, 1, 1) });
         await editor.Finished!(EditOutcome.Saved);
@@ -866,7 +853,6 @@ public class PropertyEditViewModelTests
         var visit = Assert.Single(kit.Navigation.Visited);
         Assert.Equal(Routes.ContractEdit, visit.Route);
         var editor = Assert.IsType<ContractEditViewModel>(visit.Parameters![EditorNavigation.EditorParameter]);
-        Assert.True(editor.IsHostedInPage);
         Assert.True(editor.IsNew);
         editor.ContractTitle = "Water";
         editor.SelectedSupplier = new ChoiceOption(supplier.Id, supplier.Name, string.Empty);

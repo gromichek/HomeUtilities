@@ -88,43 +88,33 @@ public class PropertiesViewModelTests
         Assert.False(vm.HasItems);
     }
 
-    [Fact]
-    public async Task Add_InTwoPaneLayout_CreatesNewEditorWithoutNavigation()
+    [Theory]
+    [InlineData(LayoutMode.Compact)]
+    [InlineData(LayoutMode.Medium)]
+    [InlineData(LayoutMode.Expanded)]
+    public async Task Add_OpensANewEditorPage_OnEveryLayout(LayoutMode mode)
     {
-        _layout.Change(LayoutMode.Expanded);
+        _layout.Change(mode);
         var vm = Create();
 
         await vm.AddCommand.ExecuteAsync(null);
 
         Assert.NotNull(vm.SelectedEditor);
         Assert.True(vm.SelectedEditor.IsNew);
-        Assert.False(vm.SelectedEditor.IsHostedInPage);
-        Assert.Empty(_navigation.Visited);
-        Assert.True(vm.IsTwoPane);
+        var visit = Assert.Single(_navigation.Visited);
+        Assert.Equal(Routes.PropertyEdit, visit.Route);
+        Assert.Same(vm.SelectedEditor, visit.Parameters![EditorNavigation.EditorParameter]);
     }
 
-    [Fact]
-    public async Task Select_InTwoPaneLayout_LoadsTheProperty()
+    [Theory]
+    [InlineData(LayoutMode.Compact)]
+    [InlineData(LayoutMode.Medium)]
+    [InlineData(LayoutMode.Expanded)]
+    public async Task Select_NavigatesToTheEditPageWithTheLoadedEditor_OnEveryLayout(LayoutMode mode)
     {
-        _layout.Change(LayoutMode.Medium);
+        _layout.Change(mode);
         var flat = Prop("Flat");
         _store.Stored.Add(flat);
-        var vm = Create();
-        await vm.ReloadAsync();
-
-        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
-
-        Assert.Equal(flat.Id, vm.SelectedEditor!.EntityId);
-        Assert.Equal("Flat", vm.SelectedEditor.Name);
-        Assert.False(vm.SelectedEditor.IsNew);
-        Assert.True(vm.Items[0].IsSelected);
-    }
-
-    [Fact]
-    public async Task Select_InCompactLayout_NavigatesToEditPageWithTheEditor()
-    {
-        _layout.Change(LayoutMode.Compact);
-        _store.Stored.Add(Prop("Flat"));
         var vm = Create();
         await vm.ReloadAsync();
 
@@ -133,105 +123,15 @@ public class PropertiesViewModelTests
         var visit = Assert.Single(_navigation.Visited);
         Assert.Equal(Routes.PropertyEdit, visit.Route);
         Assert.Same(vm.SelectedEditor, visit.Parameters![EditorNavigation.EditorParameter]);
-        Assert.True(vm.SelectedEditor!.IsHostedInPage);
+        Assert.Equal(flat.Id, vm.SelectedEditor!.EntityId);
+        Assert.Equal("Flat", vm.SelectedEditor.Name);
+        Assert.False(vm.SelectedEditor.IsNew);
+        Assert.True(vm.Items[0].IsSelected);
     }
 
     [Fact]
-    public async Task SelectingAnother_WithUnsavedChanges_AsksUnsavedChangesDialog()
+    public async Task Saving_KeepsTheEditorPageOpenAndRefreshesTheList()
     {
-        _layout.Change(LayoutMode.Expanded);
-        _store.Stored.AddRange([Prop("Flat"), Prop("House", sortOrder: 1)]);
-        var vm = Create();
-        await vm.ReloadAsync();
-        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
-        var first = vm.SelectedEditor!;
-        first.Name = "Changed";
-        _dialogs.UnsavedChoice = UnsavedChangesChoice.Cancel;
-
-        await vm.SelectCommand.ExecuteAsync(vm.Items[1].Id);
-
-        Assert.Same(first, vm.SelectedEditor);
-        Assert.Equal(1, _dialogs.UnsavedAsked);
-
-        _dialogs.UnsavedChoice = UnsavedChangesChoice.DontSave;
-        await vm.SelectCommand.ExecuteAsync(vm.Items[1].Id);
-
-        Assert.NotSame(first, vm.SelectedEditor);
-        Assert.Equal("House", vm.SelectedEditor!.Name);
-    }
-
-    [Fact]
-    public async Task NarrowingTheWindowWhileEditing_MovesTheSameEditorToAPage()
-    {
-        _layout.Change(LayoutMode.Expanded);
-        var vm = Create();
-        await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedEditor!;
-        editor.Name = "Typed but not saved";
-
-        _layout.Change(LayoutMode.Compact);
-        await vm.PendingLayoutChange;
-
-        Assert.Same(editor, vm.SelectedEditor);
-        Assert.Equal("Typed but not saved", editor.Name);
-        Assert.True(editor.IsHostedInPage);
-        Assert.Same(editor, _navigation.Visited.Single().Parameters![EditorNavigation.EditorParameter]);
-        Assert.False(vm.IsTwoPane);
-    }
-
-    [Fact]
-    public async Task WideningTheWindowWhileEditing_PopsThePageAndKeepsTheEditor()
-    {
-        _layout.Change(LayoutMode.Compact);
-        var vm = Create();
-        await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedEditor!;
-
-        _layout.Change(LayoutMode.Expanded);
-        await vm.PendingLayoutChange;
-
-        Assert.Same(editor, vm.SelectedEditor);
-        Assert.False(editor.IsHostedInPage);
-        Assert.Equal(1, _navigation.BackCount);
-    }
-
-    [Fact]
-    public async Task WideningTheWindowWhileAChildPageIsOpen_DoesNotPopTheChildPage()
-    {
-        _layout.Change(LayoutMode.Compact);
-        var vm = Create();
-        await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedEditor!;
-        _navigation.Top = new object(); // e.g. the contract page is on top of the property editor page
-
-        _layout.Change(LayoutMode.Expanded);
-        await vm.PendingLayoutChange;
-
-        Assert.Same(editor, vm.SelectedEditor);
-        Assert.False(editor.IsHostedInPage);
-        Assert.Equal(0, _navigation.BackCount);
-    }
-
-    [Fact]
-    public async Task SavingInCompactLayout_KeepsTheEditorOpenAndSelected()
-    {
-        _layout.Change(LayoutMode.Compact);
-        var vm = Create();
-        await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedEditor!;
-        ((PropertyEditViewModel)editor).Name = "Flat";
-
-        await editor.SaveCommand.ExecuteAsync(null);
-
-        Assert.Same(editor, vm.SelectedEditor);
-        Assert.Equal(0, _navigation.BackCount);
-        Assert.Single(_store.Saved);
-    }
-
-    [Fact]
-    public async Task SavingInTwoPaneLayout_RefreshesTheListAndKeepsTheEditor()
-    {
-        _layout.Change(LayoutMode.Expanded);
         var vm = Create();
         await vm.ReloadAsync();
         await vm.AddCommand.ExecuteAsync(null);
@@ -241,14 +141,30 @@ public class PropertiesViewModelTests
         await editor.SaveCommand.ExecuteAsync(null);
 
         Assert.Same(editor, vm.SelectedEditor);
+        Assert.Equal(0, _navigation.BackCount);
+        Assert.Single(_store.Saved);
         Assert.Equal(["Flat"], vm.Items.Select(i => i.Name));
         Assert.True(vm.Items[0].IsSelected);
     }
 
     [Fact]
-    public async Task DeletingInTwoPaneLayout_ClosesTheEditorAndRefreshesTheList()
+    public async Task Cancelling_GoesBackAndKeepsTheOpenedItemHighlighted()
     {
-        _layout.Change(LayoutMode.Expanded);
+        _store.Stored.Add(Prop("Flat"));
+        var vm = Create();
+        await vm.ReloadAsync();
+        await vm.SelectCommand.ExecuteAsync(vm.Items[0].Id);
+
+        await vm.SelectedEditor!.CancelCommand.ExecuteAsync(null);
+
+        Assert.Null(vm.SelectedEditor);
+        Assert.Equal(1, _navigation.BackCount);
+        Assert.True(vm.Items[0].IsSelected);
+    }
+
+    [Fact]
+    public async Task Deleting_GoesBackAndRefreshesTheList()
+    {
         _store.Stored.Add(Prop("Flat"));
         var vm = Create();
         await vm.ReloadAsync();
@@ -258,7 +174,7 @@ public class PropertiesViewModelTests
 
         Assert.Null(vm.SelectedEditor);
         Assert.Empty(vm.Items);
-        Assert.Equal(0, _navigation.BackCount);
+        Assert.Equal(1, _navigation.BackCount);
     }
 
     [Fact]

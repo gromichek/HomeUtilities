@@ -96,12 +96,11 @@ public class SuppliersViewModelTests
         var visit = Assert.Single(_navigation.Visited);
         Assert.Equal(Routes.SupplierEdit, visit.Route);
         var editor = Assert.IsType<SupplierEditViewModel>(visit.Parameters![EditorNavigation.EditorParameter]);
-        Assert.True(editor.IsHostedInPage);
         Assert.True(editor.IsNew);
     }
 
     [Fact]
-    public async Task Select_InTwoPaneLayout_ShowsEditorNextToTheList()
+    public async Task Select_OnAWideLayout_OpensTheEditorPageToo()
     {
         var supplier = new Supplier { Name = "Water" };
         _store.Stored.Add(supplier);
@@ -111,17 +110,16 @@ public class SuppliersViewModelTests
 
         await vm.SelectCommand.ExecuteAsync(supplier.Id);
 
-        Assert.Empty(_navigation.Visited);
-        Assert.True(vm.HasSelection);
-        Assert.True(vm.IsTwoPane);
+        var visit = Assert.Single(_navigation.Visited);
+        Assert.Equal(Routes.SupplierEdit, visit.Route);
+        Assert.True(vm.IsWide);
         Assert.Equal("Water", vm.SelectedEditor!.Name);
         Assert.True(vm.Items[0].IsSelected);
     }
 
     [Fact]
-    public async Task SavingInSidePane_ReloadsTheListAndKeepsTheEditor()
+    public async Task Saving_ReloadsTheListAndKeepsTheEditorPage()
     {
-        _layout.Change(LayoutMode.Expanded);
         var vm = Create();
         await vm.ReloadAsync();
         await vm.AddCommand.ExecuteAsync(null);
@@ -133,21 +131,6 @@ public class SuppliersViewModelTests
         Assert.Same(editor, vm.SelectedEditor);
         Assert.Equal(["New supplier"], vm.Items.Select(i => i.Name));
         Assert.True(vm.Items[0].IsSelected);
-    }
-
-    [Fact]
-    public async Task SwitchingToCompactLayout_MovesTheEditorToAPage()
-    {
-        _layout.Change(LayoutMode.Expanded);
-        var vm = Create();
-        await vm.AddCommand.ExecuteAsync(null);
-        var editor = vm.SelectedEditor!;
-
-        _layout.Change(LayoutMode.Compact);
-        await vm.PendingLayoutChange;
-
-        Assert.True(editor.IsHostedInPage);
-        Assert.Equal(Routes.SupplierEdit, Assert.Single(_navigation.Visited).Route);
     }
 
     [Fact]

@@ -10,7 +10,7 @@ namespace HomeUtilities.ViewModels;
 
 /// <summary>
 /// The Payments screen: the payments filtered by property, period (all years, year or month) and contract with what each one pays and its prepayment, and
-/// the totals of the list. Two-pane like Bills; the editor is <see cref="PaymentEditViewModel"/>.
+/// the totals of the list. The editor is <see cref="PaymentEditViewModel"/>.
 /// </summary>
 public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEditViewModel>
 {
@@ -142,7 +142,6 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         EmptyText = _localizer["PaymentsEmpty"];
         AddText = _localizer["PaymentAdd"];
         HelpText = _localizer["SectionHelp"];
-        SelectHintText = _localizer["PaymentSelectHint"];
         NothingFoundText = _localizer["PaymentsNothingFound"];
         Texts = new PaymentsListTexts(_localizer);
         FilterPanel.RefreshTexts();
@@ -155,7 +154,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
     }
 

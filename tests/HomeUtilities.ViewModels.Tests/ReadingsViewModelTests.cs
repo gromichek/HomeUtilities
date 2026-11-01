@@ -616,7 +616,7 @@ public class ReadingsViewModelTests
     }
 
     [Fact]
-    public async Task Tapping_a_card_opens_the_history_page_on_a_phone_and_the_pane_on_a_tablet()
+    public async Task Tapping_a_card_opens_the_history_page_and_keeps_the_card_highlighted()
     {
         var kitchen = AddMeter("Kitchen");
         Read(kitchen, new DateOnly(2026, 9, 26), 100m);
@@ -629,35 +629,8 @@ public class ReadingsViewModelTests
         Assert.Equal(Routes.ReadingHistory, route);
         var history = Assert.IsType<ReadingHistoryViewModel>(parameters!["editor"]);
         Assert.Equal(kitchen.Id, history.MeterId);
-        Assert.Null(vm.SelectedHistory);
 
-        _kit.Layout.Change(LayoutMode.Expanded);
-        Assert.True(vm.IsTwoPane);
-        Assert.True(vm.ShowHistoryHint);
-        Card(vm, "Kitchen").OpenHistoryCommand.Execute(null);
-        await WaitAsync(() => vm.SelectedHistory is not null);
-
-        Assert.Equal(kitchen.Id, vm.SelectedHistory!.MeterId);
         Assert.True(Card(vm, "Kitchen").IsSelected);
-        Assert.Single(_kit.Navigation.Visited);
-    }
-
-    [Fact]
-    public async Task Changing_a_reading_in_the_history_pane_refreshes_the_last_value()
-    {
-        var kitchen = AddMeter("Kitchen");
-        var reading = Read(kitchen, new DateOnly(2026, 9, 26), 100m);
-        _kit.Layout.Change(LayoutMode.Expanded);
-        var vm = await LoadAsync();
-        Card(vm, "Kitchen").OpenHistoryCommand.Execute(null);
-        await WaitAsync(() => vm.SelectedHistory is not null);
-        Assert.Contains("100", Card(vm, "Kitchen").Rows[0].LastText);
-
-        _kit.Dialogs.ConfirmResult = true;
-        await vm.SelectedHistory!.Groups[0].Rows[0].DeleteCommand.ExecuteAsync(null);
-
-        Assert.Equal([reading.Id], _kit.Meters.DeletedReadings);
-        Assert.Contains("ReadingsNoLast", Card(vm, "Kitchen").Rows[0].LastText);
     }
 
     [Fact]

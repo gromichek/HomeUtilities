@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>The list of bill templates (opened from Settings); two-pane like Properties, the editor is <see cref="BillTemplateEditViewModel"/>.</summary>
+/// <summary>The list of bill templates (opened from Settings); the editor is <see cref="BillTemplateEditViewModel"/>.</summary>
 public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillTemplateEditViewModel>
 {
     protected override HelpTopic GuideTopic => HelpTopic.BillTemplates;
@@ -59,7 +59,6 @@ public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillT
         EmptyText = _localizer["BillTemplatesEmpty"];
         AddText = _localizer["BillTemplateAdd"];
         HelpText = _localizer["SectionHelp"];
-        SelectHintText = _localizer["BillTemplateSelectHint"];
         RebuildItems();
     }
 
@@ -69,7 +68,7 @@ public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillT
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
     }
 

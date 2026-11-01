@@ -5,7 +5,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>The list of suppliers with a search box; two-pane like Properties.</summary>
+/// <summary>The list of suppliers with a search box.</summary>
 public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierEditViewModel>
 {
     protected override HelpTopic GuideTopic => HelpTopic.Suppliers;
@@ -56,7 +56,6 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
         EmptyText = _localizer["SuppliersEmpty"];
         AddText = _localizer["SupplierAdd"];
         HelpText = _localizer["SectionHelp"];
-        SelectHintText = _localizer["SupplierSelectHint"];
         SearchPlaceholder = _localizer["SuppliersSearch"];
         RebuildItems();
     }
@@ -67,7 +66,7 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
     }
 

@@ -5,7 +5,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>The list of payment categories (built-in and own), ordered by sort order; two-pane like Properties.</summary>
+/// <summary>The list of payment categories (built-in and own), ordered by sort order.</summary>
 public sealed partial class CategoriesViewModel : MasterDetailViewModel<CategoryEditViewModel>
 {
     protected override HelpTopic GuideTopic => HelpTopic.Categories;
@@ -57,7 +57,6 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
         EmptyText = _localizer["CategoriesEmpty"];
         AddText = _localizer["CategoryAdd"];
         HelpText = _localizer["SectionHelp"];
-        SelectHintText = _localizer["CategorySelectHint"];
         ShowArchivedText = _localizer["CategoriesShowArchived"];
         RebuildItems();
     }
@@ -68,7 +67,7 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
     {
         foreach (var item in Items)
         {
-            item.IsSelected = SelectedEditor is { IsNew: false } editor && editor.EntityId == item.Id;
+            item.IsSelected = HighlightedId == item.Id;
         }
     }
 
