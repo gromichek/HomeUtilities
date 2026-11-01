@@ -7,6 +7,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-028e | Reliable reminders on Android | Ready | | first: own inexact AlarmManager scheduler, every save path, flush on leaving the app, real system check |
+| T-028a | Device polish: layouts, cut texts, Android Back | Ready | | findings 1, 2, 4 + Windows Bills/Payments + system Back on the phone |
+| T-028d | Settings as a list of sections | Ready | | finding 3; after T-028a and T-028e |
 
 ## Done
 
@@ -80,7 +83,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
-### T-028a findings (owner, real phone; collected, not started)
+### T-028a findings (owner, real phone + tablet + Windows) → tasks T-028a (1, 2, 4), T-028d (3), T-028e (reminders)
 
 1. **Bills, Payments (phone, 2026-10-31):** the filter block (property, period buttons + year, category/contract, status,
    totals) is fixed at the top and does not scroll with the list → little room for the cards in portrait; in **landscape

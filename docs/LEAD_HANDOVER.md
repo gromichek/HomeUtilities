@@ -105,15 +105,17 @@ Prompt for a new lead session:
   on the 1st belong to the previous month), use the meter-link repair, re-import gas after fixing plans.
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
-## 5. Current state (2026-10-31)
-- All tasks up to **T-028c** are merged, plus fixes #147 (late reminders were dropped by the plugin — `AllowedDelay` 6 h; help
-  link on Windows) and #149 (no quiet hours; the Planned reminders list reschedules before comparing). No task is `Ready`.
-- Reminders confirmed working on the owner's real phone (release build). Waiting only for his quick check of #149.
-- Overview settlement cap of 24 months: accepted by the owner (2026-10-31).
-- Several older "pending" rows in the PROGRESS manual test log — ask him only if relevant.
+## 5. Current state (2026-11-01)
+- All tasks up to **T-028c** are merged, plus fixes #147 and #149 (reminders, help link on Windows, no quiet hours).
+- **Ready** (owner runs the sessions): **T-028e** reliable reminders on Android (still broken after #149: a new bill's
+  reminder is not handed over / every row "not handed"; cause not confirmed — task asks for an own AlarmManager
+  scheduler), **T-028a** layouts + cut texts + Android system Back, **T-028d** Settings as a section list (after both).
+- Owner findings from phone/tablet/Windows are in PROGRESS "T-028a findings". Tablet has the same UI issues as the phone.
+- Owner question pending: Android versions of phone and tablet (Back works on the tablet, minimizes on the phone —
+  suspected predictive back with targetSdk 36).
 
 ## 6. Next steps (ROADMAP)
-1. After the #149 check: log the result. Then ask the owner whether he has collected T-028a findings (real phone/tablet).
+1. Review and merge T-028e, T-028a, T-028d as the owner finishes the sessions.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
