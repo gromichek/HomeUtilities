@@ -1,3 +1,5 @@
+using HomeUtilities.Core;
+using HomeUtilities.Core.Abstractions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -25,6 +27,17 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
     /// exceptions are rethrown, so a test notices a handler that fails.
     /// </summary>
     public static IErrorReporter? ErrorReporter { get; set; }
+
+    /// <summary>
+    /// Source of the data version for <see cref="ReloadGate"/>; set once at app startup together with <see cref="GateClock"/>.
+    /// When null (most unit tests) nothing is skipped and every appearance reloads.
+    /// </summary>
+    public static IDataChangeNotifier? DataChanges { get; set; }
+
+    /// <summary>The clock of the reload gates (a new day reloads).</summary>
+    public static IClock? GateClock { get; set; }
+
+    private ReloadGate? _reloadGate;
 
     public virtual Task OnAppearingAsync() => Task.CompletedTask;
 
@@ -84,6 +97,40 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
         }
     }
 
+    /// <summary>
+    /// Like <see cref="RunLoadAsync"/>, but skipped when nothing was saved since this view model last loaded, the day and the
+    /// language are the same and <paramref name="hasData"/> says it still shows data (T-028i). The skip is logged in Debug.
+    /// </summary>
+    protected async Task RunGatedLoadAsync(Func<CancellationToken, Task> load, Func<int>? countItems = null, bool hasData = true)
+    {
+        ArgumentNullException.ThrowIfNull(load);
+
+        var gate = _reloadGate ??= DataChanges is { } changes && GateClock is { } clock ? new ReloadGate(changes, clock) : null;
+        if (gate is { IsFresh: true } && hasData)
+        {
+            PerformanceLog.ReportSkipped(GetType().Name);
+            return;
+        }
+
+        // Read before the data is read: a save during the load makes the load stale.
+        var snapshot = gate?.Snapshot();
+        var completed = false;
+        await RunLoadAsync(
+            async ct =>
+            {
+                await load(ct);
+                completed = !ct.IsCancellationRequested;
+            },
+            countItems);
+        if (completed && snapshot is { } taken)
+        {
+            gate?.MarkLoaded(taken);
+        }
+    }
+
+    /// <summary>The next appearance reloads even if nothing was saved (e.g. a filter or the data source changed).</summary>
+    protected void InvalidateReloadGate() => _reloadGate?.Invalidate();
+
     /// <summary>Runs database / calculation work on a pool thread; the caller assigns the result on the UI thread afterwards.</summary>
     protected static Task<T> OffUiAsync<T>(Func<Task<T>> work, CancellationToken ct) => Task.Run(work, ct);
 
@@ -92,7 +139,11 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
     {
     }
 
-    void IRecipient<LanguageChangedMessage>.Receive(LanguageChangedMessage message) => RefreshTexts();
+    void IRecipient<LanguageChangedMessage>.Receive(LanguageChangedMessage message)
+    {
+        InvalidateReloadGate();
+        RefreshTexts();
+    }
 
     /// <summary>
     /// Runs a command handler so that an unexpected exception is logged and shown with the standard error dialog

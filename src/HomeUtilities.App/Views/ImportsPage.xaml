@@ -21,7 +21,7 @@
             <!-- The reverse of the import: the data as a workbook like the owner's own. -->
             <VerticalStackLayout Spacing="4">
                 <Button Text="{Binding ExportExcelText}" Command="{Binding ExportExcelCommand}"
-                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
                 <Label Text="{Binding ExportExcelHint}" Style="{StaticResource MutedLabel}" FontSize="13" />
             </VerticalStackLayout>
 
@@ -38,7 +38,7 @@
                                     <Label Text="{Binding TitleText}" FontAttributes="Bold" />
                                     <Label Text="{Binding DetailText}" Style="{StaticResource MutedLabel}" FontSize="13" />
                                     <Button Text="{Binding UndoText}" Command="{Binding UndoCommand}"
-                                            Style="{StaticResource DestructiveButton}" HorizontalOptions="Start" />
+                                            Style="{StaticResource DestructiveButton}" HorizontalOptions="Fill" />
                                 </VerticalStackLayout>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -72,7 +72,7 @@
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
                     <Button Text="{Binding ImportProfileText}" Command="{Binding ImportProfileCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
                 </VerticalStackLayout>
             </Border>
 
@@ -90,7 +90,7 @@
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
                     <Button Text="{Binding LinkRepairButtonText}" Command="{Binding RepairLinksCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" IsVisible="{Binding HasLinkRepair}" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" IsVisible="{Binding HasLinkRepair}" />
                 </VerticalStackLayout>
             </Border>
 

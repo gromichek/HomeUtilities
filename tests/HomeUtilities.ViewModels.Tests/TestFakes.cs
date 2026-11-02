@@ -228,8 +228,13 @@ internal sealed class FakeCategoryStore : ICategoryStore
 
     public List<Guid> Deleted { get; } = [];
 
-    public Task<IReadOnlyList<Category>> ListAsync(CancellationToken ct = default) =>
-        Task.FromResult<IReadOnlyList<Category>>([.. Stored]);
+    public int ListCalls { get; private set; }
+
+    public Task<IReadOnlyList<Category>> ListAsync(CancellationToken ct = default)
+    {
+        ListCalls++;
+        return Task.FromResult<IReadOnlyList<Category>>([.. Stored]);
+    }
 
     public Task<Category?> GetAsync(Guid id, CancellationToken ct = default) =>
         Task.FromResult(Stored.FirstOrDefault(c => c.Id == id));

@@ -21,67 +21,39 @@ public sealed class ThemeService : IThemeService
     {
         Current = theme;
         Preferences.Default.Set(PreferenceKey, theme.ToString());
-        if (Application.Current is { } app)
+        if (Application.Current is not { } app)
         {
-            var target = theme switch
-            {
-                AppThemeChoice.Light => AppTheme.Light,
-                AppThemeChoice.Dark => AppTheme.Dark,
-                _ => AppTheme.Unspecified,
-            };
+            return;
+        }
+
+        var target = theme switch
+        {
+            AppThemeChoice.Light => AppTheme.Light,
+            AppThemeChoice.Dark => AppTheme.Dark,
+            _ => AppTheme.Unspecified,
+        };
+        // Applied after the current UI event has finished: the choice comes from a Picker, and on Windows its drop-down is
+        // still open (a separate popup root) while SelectionChanged runs. Switching the theme at that moment re-themes the
+        // page but can leave the native parts on the old resources; one dispatch later the popup is closed.
+        void Apply()
+        {
+            Log("before", app);
             app.UserAppTheme = target;
-#if WINDOWS
-            ApplyNativeTheme(app, target);
-#endif
+            Log("after", app);
+        }
+
+        if (app.Dispatcher.IsDispatchRequired || app.Windows.Count > 0)
+        {
+            app.Dispatcher.Dispatch(Apply);
+        }
+        else
+        {
+            Apply(); // startup: no window yet, nothing to wait for
         }
     }
 
-#if WINDOWS
-    /// <summary>
-    /// Windows (T-028h): MAUI only sets the root element's <c>RequestedTheme</c>; WinUI re-resolves the theme resources of the
-    /// native parts (navigation pane, page background, pickers) only when the <b>effective</b> theme of the element tree really
-    /// changes. Re-applying the same value (the attempts of #174 and #177) does nothing, and the first choice from "System" can
-    /// leave those parts on the old resources, while the second choice - a real change - fixed them. So the root is first
-    /// flipped to the opposite theme and then set to the wanted one, which always makes WinUI re-resolve everything.
-    /// </summary>
-    private void ApplyNativeTheme(Application app, AppTheme theme)
-    {
-        var wanted = theme switch
-        {
-            AppTheme.Light => Microsoft.UI.Xaml.ElementTheme.Light,
-            AppTheme.Dark => Microsoft.UI.Xaml.ElementTheme.Dark,
-            _ => Microsoft.UI.Xaml.ElementTheme.Default,
-        };
-        var opposite = wanted switch
-        {
-            Microsoft.UI.Xaml.ElementTheme.Light => Microsoft.UI.Xaml.ElementTheme.Dark,
-            Microsoft.UI.Xaml.ElementTheme.Dark => Microsoft.UI.Xaml.ElementTheme.Light,
-            _ => SystemIsDark() ? Microsoft.UI.Xaml.ElementTheme.Light : Microsoft.UI.Xaml.ElementTheme.Dark,
-        };
-        foreach (var window in app.Windows)
-        {
-            if (window.Handler?.PlatformView is Microsoft.UI.Xaml.Window { Content: Microsoft.UI.Xaml.FrameworkElement root })
-            {
-                Log("before", app, root);
-                root.RequestedTheme = opposite;
-                root.UpdateLayout();
-                root.RequestedTheme = wanted;
-                root.UpdateLayout();
-                Log("after", app, root);
-            }
-        }
-    }
-
-    private static bool SystemIsDark()
-    {
-        var background = new Windows.UI.ViewManagement.UISettings().GetColorValue(Windows.UI.ViewManagement.UIColorType.Background);
-        return background.R + background.G + background.B < 3 * 128;
-    }
-
+    // Debug only (T-028i): the values MAUI reports after a switch; removed from Release builds by the attribute.
     [System.Diagnostics.Conditional("DEBUG")]
-    private void Log(string moment, Application app, Microsoft.UI.Xaml.FrameworkElement root) =>
-        _errorLog?.Note(
-            "Theme",
-            $"{moment}: choice={Current}, UserAppTheme={app.UserAppTheme}, RequestedTheme={app.RequestedTheme}, root.RequestedTheme={root.RequestedTheme}, root.ActualTheme={root.ActualTheme}");
-#endif
+    private void Log(string moment, Application app) =>
+        _errorLog?.Note("Theme", $"{moment}: choice={Current}, UserAppTheme={app.UserAppTheme}, RequestedTheme={app.RequestedTheme}");
 }

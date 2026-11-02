@@ -668,6 +668,34 @@ public class SettingsViewModelTests
         Assert.Equal(1, Backup.Wipes);
     }
 
+    [Fact]
+    public async Task DeleteAllData_WhenTheCopyFailsAndTheUserCancels_NothingIsStaged()
+    {
+        AutoBackup.BackupSucceeds = false;
+        AutoBackup.LastError = "disk full";
+        Dialogs.ConfirmAnswers.Enqueue(true);  // Delete all data?
+        Dialogs.ConfirmAnswers.Enqueue(false); // Continue without a copy? -> Cancel
+        var vm = Create(out _, out _, out _);
+
+        await vm.DeleteAllDataCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, Backup.Wipes);
+        Assert.Contains("disk full", Dialogs.Confirmations[^1].Message);
+    }
+
+    [Fact]
+    public async Task DeleteAllData_WhenTheCopyFailsAndTheUserContinues_TheWipeIsStaged()
+    {
+        AutoBackup.BackupSucceeds = false;
+        Dialogs.ConfirmAnswers.Enqueue(true);
+        Dialogs.ConfirmAnswers.Enqueue(true); // Continue
+        var vm = Create(out _, out _, out _);
+
+        await vm.DeleteAllDataCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, Backup.Wipes);
+    }
+
     [Theory]
     [InlineData("DataExportWithAttachments [en]", true, "data.zip", "application/zip")]
     [InlineData("DataExportJsonOnly [en]", false, "data.json", "application/json")]

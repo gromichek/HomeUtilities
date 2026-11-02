@@ -1480,6 +1480,10 @@
   <data name="BackupInterval_7" xml:space="preserve"><value>Раз в 7 дней</value></data>
   <data name="SettingsBackupAutoLast" xml:space="preserve"><value>Последняя автоматическая копия: {0:g} ({1})</value></data>
   <data name="SettingsBackupAutoNever" xml:space="preserve"><value>Автоматических копий пока нет.</value></data>
+  <data name="BackupFailedTitle" xml:space="preserve"><value>Копия не создана</value></data>
+  <data name="BackupFailedContinue" xml:space="preserve"><value>Не удалось сделать резервную копию: {0}. Продолжить без копии?</value></data>
+  <data name="BackupFailedContinueAction" xml:space="preserve"><value>Продолжить</value></data>
+  <data name="BackupFailedUnknownReason" xml:space="preserve"><value>неизвестная причина</value></data>
   <data name="SettingsBackupAutoFailed" xml:space="preserve"><value>Последняя автоматическая копия не удалась: {0}</value></data>
   <data name="SettingsBackupCopiesHeader" xml:space="preserve"><value>Автоматические копии на этом устройстве</value></data>
   <data name="SettingsBackupCopiesEmpty" xml:space="preserve"><value>Автоматических копий пока нет.</value></data>

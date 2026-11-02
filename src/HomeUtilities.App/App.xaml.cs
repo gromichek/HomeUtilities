@@ -20,11 +20,15 @@ public partial class App : Application
         LayoutModeService layoutModeService,
         IThemeService themeService,
         IErrorReporter errorReporter,
-        IErrorLog errorLog)
+        IErrorLog errorLog,
+        HomeUtilities.Core.Abstractions.IDataChangeNotifier dataChanges,
+        HomeUtilities.Core.IClock clock)
     {
         _ = languageService.CurrentLanguage;
         ViewModelBase.ErrorReporter = errorReporter;
         PerformanceLog.Sink = errorLog;
+        ViewModelBase.DataChanges = dataChanges;
+        ViewModelBase.GateClock = clock;
         PerformanceLog.AppStarted = ProcessStart();
         InitializeComponent();
         _services = services;

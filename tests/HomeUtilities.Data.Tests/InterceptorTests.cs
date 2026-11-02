@@ -27,18 +27,18 @@ public class InterceptorTests
         await using (var db = new HomeUtilitiesDbContext(options))
         {
             await db.SaveChangesAsync();
-            Assert.Equal(1, raised);
+            Assert.Equal(0, raised); // nothing written: not a data change (T-028i)
 
             db.Properties.Add(new Property { Name = "P" });
             await db.SaveChangesAsync();
-            Assert.Equal(2, raised);
+            Assert.Equal(1, raised);
         }
 
         notifier.Changed += (_, _) => throw new InvalidOperationException("handler failure");
         await using var second = new HomeUtilitiesDbContext(options);
         second.Properties.Add(new Property { Name = "Q" });
         await second.SaveChangesAsync(); // a failing handler must not break the save
-        Assert.Equal(3, raised);
+        Assert.Equal(2, raised);
     }
 
     [Fact]
