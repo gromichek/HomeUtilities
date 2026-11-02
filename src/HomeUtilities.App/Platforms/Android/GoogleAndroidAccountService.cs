@@ -138,13 +138,16 @@ public sealed class GoogleAndroidAccountService : ISyncAccountService
         }
     }
 
-    // GoogleAuthUtil.ClearToken does blocking work and must not run on the main thread. A failure only means the cache
-    // keeps the token; the sign-in then reports the revoked access as before, so it is logged and ignored.
+    // AuthorizationClient.clearToken (Play services auth 21.4+) removes the token from the Play services cache. A failure
+    // only means the cache keeps the token; the sign-in then reports the revoked access as before, so it is logged.
     private static async System.Threading.Tasks.Task ClearCachedTokenAsync(string token)
     {
         try
         {
-            await System.Threading.Tasks.Task.Run(() => global::Android.Gms.Auth.GoogleAuthUtil.ClearToken(Platform.AppContext, token));
+            global::Android.Content.Context context = Platform.AppContext;
+            var client = Identity.GetAuthorizationClient(context);
+            var request = ClearTokenRequest.InvokeBuilder().SetToken(token).Build();
+            await AwaitAsync(client.ClearToken(request), CancellationToken.None);
         }
         catch (Exception ex)
         {
