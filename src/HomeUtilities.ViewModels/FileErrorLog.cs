@@ -36,6 +36,8 @@ public sealed class FileErrorLog : IErrorLog
         }
     }
 
+    public void Note(string source, string message) => Append(source, new NoteException(message));
+
     public string ReadAll()
     {
         try

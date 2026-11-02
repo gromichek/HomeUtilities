@@ -100,22 +100,19 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SelectCommand}" />
                         </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="2">
+                        <!-- One flat grid per card (no nested stack layouts): cheaper to measure while scrolling (T-028b). -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="0">
                             <Border Grid.Column="0" Grid.Row="0" WidthRequest="14" HeightRequest="14" StrokeShape="RoundRectangle 7"
                                     StrokeThickness="0" VerticalOptions="Center"
                                     BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}" />
-                            <VerticalStackLayout Grid.Column="1" Grid.Row="0" Spacing="0">
-                                <Label Text="{Binding Title}" FontAttributes="Bold" />
-                                <Label Text="{Binding SupplierName}" Style="{StaticResource MutedLabel}" FontSize="13" IsVisible="{Binding HasSupplier}" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="2" Grid.Row="0" HorizontalOptions="End" Spacing="0">
-                                <Label Text="{Binding TotalText}" FontAttributes="Bold" HorizontalTextAlignment="End" />
-                                <Label Text="{Binding PeriodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalTextAlignment="End" />
-                            </VerticalStackLayout>
+                            <Label Grid.Column="1" Grid.Row="0" Text="{Binding Title}" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Grid.Row="1" Text="{Binding SupplierName}" Style="{StaticResource MutedLabel}" FontSize="13" IsVisible="{Binding HasSupplier}" />
+                            <Label Grid.Column="2" Grid.Row="0" Text="{Binding TotalText}" FontAttributes="Bold" HorizontalOptions="End" HorizontalTextAlignment="End" />
+                            <Label Grid.Column="2" Grid.Row="1" Text="{Binding PeriodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalOptions="End" HorizontalTextAlignment="End" />
 
                             <!-- Status badge: grey unpaid, yellow partially paid, red overdue, green paid. -->
-                            <Label Grid.Column="1" Grid.Row="1" Text="{Binding BadgeText}" FontAttributes="Bold" FontSize="13"
-                                   Style="{StaticResource MutedLabel}">
+                            <Label Grid.Column="1" Grid.Row="2" Text="{Binding BadgeText}" FontAttributes="Bold" FontSize="13"
+                                   Style="{StaticResource MutedLabel}" Margin="0,2,0,0">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgePaid}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
@@ -128,8 +125,8 @@
                                     </DataTrigger>
                                 </Label.Triggers>
                             </Label>
-                            <Label Grid.Column="2" Grid.Row="1" Text="{Binding DifferenceText}" FontSize="13" HorizontalTextAlignment="End"
-                                   Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDifference}">
+                            <Label Grid.Column="2" Grid.Row="2" Text="{Binding DifferenceText}" FontSize="13" HorizontalTextAlignment="End"
+                                   Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDifference}" Margin="0,2,0,0">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding DifferenceHigher}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
@@ -141,7 +138,7 @@
                             </Label>
 
                             <!-- Quick action on open bills. -->
-                            <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Text="{Binding MarkPaidText}" Command="{Binding MarkPaidCommand}"
+                            <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Text="{Binding MarkPaidText}" Command="{Binding MarkPaidCommand}"
                                     ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
                                     Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,6,0,0"
                                     IsVisible="{Binding CanMarkPaid}"
@@ -149,7 +146,7 @@
                                     SemanticProperties.Description="{Binding MarkPaidText}" />
 
                             <!-- Quick action on drafts: confirm (opens the editor when the amount is still missing). -->
-                            <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Text="{Binding ConfirmText}" Command="{Binding ConfirmCommand}"
+                            <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Text="{Binding ConfirmText}" Command="{Binding ConfirmCommand}"
                                     ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
                                     Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,6,0,0"
                                     IsVisible="{Binding IsDraft}"

@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
@@ -15,8 +16,8 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
 
     private IReadOnlyList<Supplier> _suppliers = [];
 
-    [ObservableProperty]
-    private IReadOnlyList<SupplierItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<SupplierItemViewModel> Items { get; } = [];
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -40,9 +41,11 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
 
     protected override int TotalCount => _suppliers.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        _suppliers = await _store.ListAsync();
+        var loaded = await OffUiAsync(() => _store.ListAsync(ct), ct);
+        ct.ThrowIfCancellationRequested();
+        _suppliers = loaded;
         RebuildItems();
         IsLoaded = true;
         RaiseItemsChanged();
@@ -70,16 +73,21 @@ public sealed partial class SuppliersViewModel : MasterDetailViewModel<SupplierE
         }
     }
 
+    private void SetItems(IReadOnlyList<SupplierItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+    }
+
     private void RebuildItems()
     {
         var query = SearchText.Trim();
-        Items =
+        SetItems(
         [
             .. _suppliers
                 .Where(s => query.Length == 0 || s.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase))
                 .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Select(s => new SupplierItemViewModel(s, _localizer, id => SelectCommand.Execute(id))),
-        ];
+        ]);
         MarkSelectedItem();
     }
 }

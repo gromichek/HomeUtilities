@@ -227,15 +227,16 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
     });
 
-    public override Task OnAppearingAsync() => RunSafeAsync(ReloadAsync);
+    public override Task OnAppearingAsync() => RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => Cards.Count));
 
     /// <summary>Re-reads the property list and recalculates; called whenever the screen appears (tariffs and readings may have changed).</summary>
-    public async Task ReloadAsync()
+    public async Task ReloadAsync(CancellationToken ct = default)
     {
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(ct);
         try
         {
-            var properties = await _propertyStore.ListAsync(false);
+            var properties = await OffUiAsync(() => _propertyStore.ListAsync(false, ct), ct);
+            ct.ThrowIfCancellationRequested();
             Properties = [.. properties.Select(p => new ChoiceOption(p.Id, p.Name, string.Empty))];
 
             var remembered = Guid.TryParse(_settings.GetString(LastPropertyKey), out var saved) ? saved : (Guid?)null;
@@ -244,7 +245,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
                 : Properties.Any(p => p.Id == remembered) ? remembered
                 : Properties.FirstOrDefault()?.Id;
 
-            await CalculateAsync();
+            await CalculateAsync(ct);
             IsLoaded = true;
             OnPropertyChanged(nameof(SelectedPropertyIndex));
         }
@@ -343,7 +344,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     });
 
     /// <summary>Loads the contracts of the selected property and calculates each one; a failing contract becomes an error card.</summary>
-    private async Task CalculateAsync()
+    private async Task CalculateAsync(CancellationToken ct = default)
     {
         if (_selectedPropertyId is not { } propertyId)
         {
@@ -354,15 +355,31 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             return;
         }
 
-        var contracts = await _contractStore.ListByPropertyAsync(propertyId);
+        var monthChosen = _monthChosen;
+        var chosenMonth = Month;
+        var today = _clock.Today;
+
+        // Database reads and the calculation of every contract run on a pool thread; only the final assignment is on the UI thread.
+        var data = await OffUiAsync(async () => await CalculateCoreAsync(propertyId, monthChosen, chosenMonth, today, ct), ct);
+        ct.ThrowIfCancellationRequested();
         if (!_monthChosen)
         {
-            Month = ChargePeriodDefaults.For(contracts, _clock.Today);
+            Month = data.Period;
         }
 
-        var period = Month;
-        var suppliers = (await _supplierStore.ListAsync()).ToDictionary(s => s.Id, s => s.Name);
-        var categories = (await _categoryStore.ListAsync()).ToDictionary(c => c.Id, c => c.Color);
+        _calculated = data.Results;
+        _billOfContract = data.Bills;
+        _equalizedOfContract = data.Equalized;
+        Rebuild();
+    }
+
+    private async Task<(YearMonth Period, List<Calculated> Results, Dictionary<Guid, (Bill Bill, BillState State)> Bills, Dictionary<Guid, EqualizedReport> Equalized)>
+        CalculateCoreAsync(Guid propertyId, bool monthChosen, YearMonth chosenMonth, DateOnly today, CancellationToken ct)
+    {
+        var contracts = await _contractStore.ListByPropertyAsync(propertyId, ct);
+        var period = monthChosen ? chosenMonth : ChargePeriodDefaults.For(contracts, today);
+        var suppliers = (await _supplierStore.ListAsync(ct)).ToDictionary(s => s.Id, s => s.Name);
+        var categories = (await _categoryStore.ListAsync(ct)).ToDictionary(c => c.Id, c => c.Color);
 
         var results = new List<Calculated>();
         var active = contracts
@@ -374,7 +391,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             var color = categories.GetValueOrDefault(contract.CategoryId, "#808080");
             try
             {
-                var input = await _loader.LoadAsync(contract.Id, period);
+                var input = await _loader.LoadAsync(contract.Id, period, ct);
                 results.Add(input is null
                     ? new Calculated(contract, supplier, color, null, null)
                     : new Calculated(contract, supplier, color, input, ChargeCalculator.Calculate(input)));
@@ -386,21 +403,20 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             }
         }
 
-        _calculated = results;
-        _billOfContract = await LoadBillsAsync(propertyId, period);
-        _equalizedOfContract = await LoadEqualizedAsync(active);
-        Rebuild();
+        var bills = await LoadBillsAsync(propertyId, period, today, ct);
+        var equalized = await LoadEqualizedAsync(active, ct);
+        return (period, results, bills, equalized);
     }
 
     /// <summary>The settlement report of each equalized contract; a failing one is logged and left out.</summary>
-    private async Task<Dictionary<Guid, EqualizedReport>> LoadEqualizedAsync(IEnumerable<Contract> contracts)
+    private async Task<Dictionary<Guid, EqualizedReport>> LoadEqualizedAsync(IEnumerable<Contract> contracts, CancellationToken ct)
     {
         var result = new Dictionary<Guid, EqualizedReport>();
         foreach (var contract in contracts.Where(c => c.BillingMode == BillingMode.Equalized))
         {
             try
             {
-                result[contract.Id] = await _equalized.LoadAsync(contract.Id);
+                result[contract.Id] = await _equalized.LoadAsync(contract.Id, ct);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -412,10 +428,10 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     }
 
     /// <summary>The bill of each contract for the month (the first one entered) with its payment state.</summary>
-    private async Task<Dictionary<Guid, (Bill Bill, BillState State)>> LoadBillsAsync(Guid propertyId, YearMonth period)
+    private async Task<Dictionary<Guid, (Bill Bill, BillState State)>> LoadBillsAsync(Guid propertyId, YearMonth period, DateOnly today, CancellationToken ct)
     {
         var result = new Dictionary<Guid, (Bill, BillState)>();
-        var bills = (await _billStore.ListByPropertyAsync(propertyId, period, period))
+        var bills = (await _billStore.ListByPropertyAsync(propertyId, period, period, ct))
             .Where(b => b.ContractId is not null)
             .OrderBy(b => b.CreatedAt);
         foreach (var bill in bills)
@@ -425,8 +441,8 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
                 continue;
             }
 
-            var payments = await _paymentStore.ListByBillAsync(bill.Id);
-            result[bill.ContractId.Value] = (bill, BillStatus.Of(bill, payments, _clock.Today));
+            var payments = await _paymentStore.ListByBillAsync(bill.Id, ct);
+            result[bill.ContractId.Value] = (bill, BillStatus.Of(bill, payments, today));
         }
 
         return result;

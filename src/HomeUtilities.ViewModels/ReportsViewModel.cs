@@ -210,18 +210,20 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     public override async Task OnAppearingAsync()
     {
         await base.OnAppearingAsync();
-        await RunSafeAsync(ReloadAsync);
+        await RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct)));
     }
 
     /// <summary>Loads the data again (the screen appears, or the owner changed something elsewhere) and recalculates the table.</summary>
-    public async Task ReloadAsync()
+    public async Task ReloadAsync(CancellationToken ct = default)
     {
         // A counter, not a flag: two overlapping loads (appearing + language change) must not leave the spinner on.
         _busyCount++;
         IsBusy = true;
         try
         {
-            _data = await _loader.LoadAsync();
+            var data = await OffUiAsync(() => _loader.LoadAsync(ct), ct);
+            ct.ThrowIfCancellationRequested();
+            _data = data;
             BuildChoices();
             await RebuildAsync();
         }

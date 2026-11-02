@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
@@ -34,8 +35,8 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     private Guid? _highlightContractId;
     private readonly ListPaging _paging = new();
 
-    [ObservableProperty]
-    private IReadOnlyList<PaymentItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<PaymentItemViewModel> Items { get; } = [];
 
     [ObservableProperty]
     private PaymentsListTexts _texts;
@@ -101,12 +102,20 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     protected override int TotalCount => _payments.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        _payments = await _paymentStore.ListAsync();
-        _properties = await _propertyStore.ListAsync(true);
-        _contracts = (await _contractStore.ListAsync()).ToDictionary(c => c.Id);
-        _billsById = (await _billStore.ListAsync()).ToDictionary(b => b.Id);
+        var (payments, properties, contracts, bills) = await OffUiAsync(
+            async () => (
+                await _paymentStore.ListAsync(ct),
+                await _propertyStore.ListAsync(true, ct),
+                (await _contractStore.ListAsync(ct)).ToDictionary(c => c.Id),
+                (await _billStore.ListAsync(ct)).ToDictionary(b => b.Id)),
+            ct);
+        ct.ThrowIfCancellationRequested();
+        _payments = payments;
+        _properties = properties;
+        _contracts = contracts;
+        _billsById = bills;
 
         if (_filter.PropertyId is { } property && _properties.All(p => p.Id != property))
         {
@@ -215,11 +224,16 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     // ---- Rows and totals ------------------------------------------------------------------------------------------
 
+    private void SetItems(IReadOnlyList<PaymentItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+    }
+
     private void RebuildItems()
     {
         var rows = _payments.Where(Matches).ToList();
         _paging.Track($"{_filter.PropertyId}|{_filter.ContractId}|{Period.Current}");
-        Items =
+        SetItems(
         [
             .. rows
                 .OrderByDescending(p => p.PaidOn)
@@ -239,7 +253,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
                     p.CreatedByQuickAction ? _localizer["PaymentQuickMarker"] : string.Empty,
                     _highlightContractId is { } highlighted && ContractIdsOf(p).Contains(highlighted),
                     id => SelectCommand.Execute(id))),
-        ];
+        ]);
 
         PropertyFilterName = _filter.PropertyId is { } id
             ? _properties.FirstOrDefault(p => p.Id == id)?.Name ?? _localizer["PaymentsAllProperties"]

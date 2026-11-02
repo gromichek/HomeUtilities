@@ -82,7 +82,11 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
     protected abstract int TotalCount { get; }
 
     /// <summary>Loads the data from the store and rebuilds the items.</summary>
-    public abstract Task ReloadAsync();
+    /// <remarks>
+    /// Implementations read the data on a pool thread (<c>OffUiAsync</c>, passing <paramref name="ct"/> to the stores), check
+    /// <c>ct.ThrowIfCancellationRequested()</c> and only then assign the result on the UI thread.
+    /// </remarks>
+    public abstract Task ReloadAsync(CancellationToken ct = default);
 
     /// <summary>Whether the loaded list contains the item (archived items hidden by a filter are not contained).</summary>
     protected abstract bool ContainsItem(Guid id);
@@ -98,7 +102,7 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
             Detach(editor, forget: false);
         }
 
-        await ReloadAsync();
+        await RunSafeAsync(() => RunLoadAsync(ReloadAsync, () => TotalCount));
     }
 
     [RelayCommand]
@@ -153,7 +157,7 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
             Detach(editor, forget: outcome == EditOutcome.Deleted);
         }
 
-        await ReloadAsync();
+        await RunSafeAsync(() => RunLoadAsync(ReloadAsync, () => TotalCount));
     }
 
     private void Detach(TEditor editor, bool forget)

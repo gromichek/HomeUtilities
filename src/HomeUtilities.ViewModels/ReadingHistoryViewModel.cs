@@ -66,19 +66,22 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     public Task LoadAsync(Guid meterId)
     {
         MeterId = meterId;
-        return RunSafeAsync(ReloadAsync);
+        return RunSafeAsync(() => ReloadAsync());
     }
 
     /// <summary>Back on the page (e.g. from the meter editor): the readings may have changed meanwhile.</summary>
-    public override Task OnAppearingAsync() => MeterId == Guid.Empty ? Task.CompletedTask : RunSafeAsync(ReloadAsync);
+    public override Task OnAppearingAsync() => MeterId == Guid.Empty ? Task.CompletedTask : RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => Groups.Sum(g => g.Rows.Count)));
 
     /// <summary>Reads the meter again and rebuilds the rows.</summary>
-    public async Task ReloadAsync()
+    public async Task ReloadAsync(CancellationToken ct = default)
     {
         IsLoading = true;
         try
         {
-            _meter = MeterId == Guid.Empty ? null : await _store.GetAsync(MeterId);
+            var meterId = MeterId;
+            var meter = meterId == Guid.Empty ? null : await OffUiAsync(() => _store.GetAsync(meterId, ct), ct);
+            ct.ThrowIfCancellationRequested();
+            _meter = meter;
             await RebuildAsync();
         }
         finally

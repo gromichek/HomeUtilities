@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
@@ -15,8 +16,8 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
 
     private IReadOnlyList<Category> _categories = [];
 
-    [ObservableProperty]
-    private IReadOnlyList<CategoryItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<CategoryItemViewModel> Items { get; } = [];
 
     [ObservableProperty]
     private bool _showArchived;
@@ -40,16 +41,17 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
 
     protected override int TotalCount => Items.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        _categories = await _store.ListAsync();
+        var loaded = await OffUiAsync(() => _store.ListAsync(ct), ct);
+        ct.ThrowIfCancellationRequested();
+        _categories = loaded;
         RebuildItems();
         IsLoaded = true;
     }
 
     partial void OnShowArchivedChanged(bool value) => RebuildItems();
 
-    partial void OnItemsChanged(IReadOnlyList<CategoryItemViewModel> value) => RaiseItemsChanged();
 
     protected override void RefreshTexts()
     {
@@ -71,16 +73,22 @@ public sealed partial class CategoriesViewModel : MasterDetailViewModel<Category
         }
     }
 
+    private void SetItems(IReadOnlyList<CategoryItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+        RaiseItemsChanged();
+    }
+
     private void RebuildItems()
     {
-        Items =
+        SetItems(
         [
             .. _categories
                 .Where(c => ShowArchived || !c.IsArchived)
                 .OrderBy(c => c.SortOrder)
                 .ThenBy(c => CategoryNames.DisplayName(c, _localizer), StringComparer.CurrentCultureIgnoreCase)
                 .Select(c => new CategoryItemViewModel(c, _localizer, id => SelectCommand.Execute(id))),
-        ];
+        ]);
         MarkSelectedItem();
     }
 }

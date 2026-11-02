@@ -170,7 +170,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
 
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
-        await ReloadAsync();
+        await RunLoadAsync(ct => ReloadAsync(ct), () => Groups.Count);
         await AskAboutReturnFromSubmitPageAsync();
     });
 
@@ -181,9 +181,10 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
     public Task CheckReturnFromSubmitPageAsync() => RunSafeAsync(AskAboutReturnFromSubmitPageAsync);
 
     /// <summary>Re-reads properties, meters and contracts; typed values are kept.</summary>
-    public async Task ReloadAsync()
+    public async Task ReloadAsync(CancellationToken ct = default)
     {
-        var properties = await _propertyStore.ListAsync(false);
+        var properties = await OffUiAsync(() => _propertyStore.ListAsync(false, ct), ct);
+        ct.ThrowIfCancellationRequested();
         Properties = [.. properties.Select(p => new ChoiceOption(p.Id, p.Name, string.Empty))];
 
         var remembered = Guid.TryParse(_settings.GetString(LastPropertyKey), out var saved) ? saved : (Guid?)null;
@@ -199,7 +200,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
             : Properties.Any(p => p.Id == remembered) ? remembered
             : Properties.FirstOrDefault()?.Id;
 
-        await LoadPropertyAsync();
+        await LoadPropertyAsync(ct);
         IsLoaded = true;
         OnPropertyChanged(nameof(SelectedPropertyIndex));
     }
@@ -465,7 +466,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
         }
     }
 
-    private async Task LoadPropertyAsync()
+    private async Task LoadPropertyAsync(CancellationToken ct = default)
     {
         var entries = KeepEntries();
         if (_selectedPropertyId is not { } propertyId)
@@ -476,20 +477,30 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
             return;
         }
 
-        _meters = await _meterStore.ListByPropertyAsync(propertyId);
-
         var today = _clock.Today;
-        var installed = _meters.Where(m => m.RemovedOn is null).Select(m => m.Id).ToHashSet();
+        var (meters, contracts) = await OffUiAsync(async () => await ReadPropertyAsync(propertyId, today, ct), ct);
+        ct.ThrowIfCancellationRequested();
+        _meters = meters;
+        _contracts = contracts;
+        Rebuild(entries);
+    }
+
+    /// <summary>The meters and active contracts of a property; runs on a pool thread.</summary>
+    private async Task<(IReadOnlyList<Meter> Meters, List<ContractInfo> Contracts)> ReadPropertyAsync(Guid propertyId, DateOnly today, CancellationToken ct)
+    {
+        var meters = await _meterStore.ListByPropertyAsync(propertyId, ct);
+
+        var installed = meters.Where(m => m.RemovedOn is null).Select(m => m.Id).ToHashSet();
         var suppliers = new Dictionary<Guid, Supplier?>();
         var contracts = new List<ContractInfo>();
-        foreach (var contract in await _contractStore.ListByPropertyAsync(propertyId))
+        foreach (var contract in await _contractStore.ListByPropertyAsync(propertyId, ct))
         {
             if (contract.IsArchived || contract.ValidFrom > today || contract.ValidTo is { } end && end < today)
             {
                 continue;
             }
 
-            var meterIds = (await _contractStore.ListContractMetersAsync(contract.Id))
+            var meterIds = (await _contractStore.ListContractMetersAsync(contract.Id, ct))
                 .Where(l => MeterContractLink.IsOpen(l, today) && installed.Contains(l.MeterId))
                 .Select(l => l.MeterId)
                 .ToHashSet();
@@ -500,7 +511,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
 
             if (!suppliers.TryGetValue(contract.SupplierId, out var supplier))
             {
-                supplier = await _supplierStore.GetAsync(contract.SupplierId);
+                supplier = await _supplierStore.GetAsync(contract.SupplierId, ct);
                 suppliers[contract.SupplierId] = supplier;
             }
 
@@ -510,8 +521,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
             contracts.Add(new ContractInfo(contract, supplier, meterIds, link, buttonLink?.TryGetUri()));
         }
 
-        _contracts = contracts;
-        Rebuild(entries);
+
+        return (meters, contracts);
     }
 
     /// <summary>The typed values and notes by register, to survive a rebuild of the cards.</summary>

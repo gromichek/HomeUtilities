@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
@@ -43,8 +44,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private Guid? _highlightContractId;
     private readonly ListPaging _paging = new();
 
-    [ObservableProperty]
-    private IReadOnlyList<BillItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<BillItemViewModel> Items { get; } = [];
 
     [ObservableProperty]
     private BillsListTexts _texts;
@@ -134,29 +135,44 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     protected override int TotalCount => _bills.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        // Drafts of the templates that came due since the last visit appear before the list is read.
-        await _templateStore.GenerateDraftsAsync(_clock.Today);
-        _bills = await _billStore.ListAsync();
-        _properties = await _propertyStore.ListAsync(true);
-        _contracts = (await _contractStore.ListAsync()).ToDictionary(c => c.Id);
-        _supplierNames = (await _supplierStore.ListAsync()).ToDictionary(s => s.Id, s => s.Name);
-        _categories = await _categoryStore.ListAsync();
-        _categoryColors = _categories.ToDictionary(c => c.Id, c => c.Color);
-        _paymentsByBill = [];
-        foreach (var payment in await _paymentStore.ListAsync())
-        {
-            foreach (var billId in payment.Allocations.Where(a => !a.IsDeleted).Select(a => a.BillId).Distinct())
+        var today = _clock.Today;
+        var data = await OffUiAsync(
+            async () =>
             {
-                if (!_paymentsByBill.TryGetValue(billId, out var list))
+                // Drafts of the templates that came due since the last visit appear before the list is read.
+                await _templateStore.GenerateDraftsAsync(today, ct);
+                var bills = await _billStore.ListAsync(ct);
+                var properties = await _propertyStore.ListAsync(true, ct);
+                var contracts = (await _contractStore.ListAsync(ct)).ToDictionary(c => c.Id);
+                var supplierNames = (await _supplierStore.ListAsync(ct)).ToDictionary(s => s.Id, s => s.Name);
+                var categories = await _categoryStore.ListAsync(ct);
+                var paymentsByBill = new Dictionary<Guid, List<Payment>>();
+                foreach (var payment in await _paymentStore.ListAsync(ct))
                 {
-                    _paymentsByBill[billId] = list = [];
+                    foreach (var billId in payment.Allocations.Where(a => !a.IsDeleted).Select(a => a.BillId).Distinct())
+                    {
+                        if (!paymentsByBill.TryGetValue(billId, out var list))
+                        {
+                            paymentsByBill[billId] = list = [];
+                        }
+
+                        list.Add(payment);
+                    }
                 }
 
-                list.Add(payment);
-            }
-        }
+                return (bills, properties, contracts, supplierNames, categories, paymentsByBill);
+            },
+            ct);
+        ct.ThrowIfCancellationRequested();
+        _bills = data.bills;
+        _properties = data.properties;
+        _contracts = data.contracts;
+        _supplierNames = data.supplierNames;
+        _categories = data.categories;
+        _categoryColors = _categories.ToDictionary(c => c.Id, c => c.Color);
+        _paymentsByBill = data.paymentsByBill;
 
         if (_filter.PropertyId is { } filtered && _properties.All(p => p.Id != filtered))
         {
@@ -340,6 +356,11 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     // ---- Rows and totals ------------------------------------------------------------------------------------------
 
+    private void SetItems(IReadOnlyList<BillItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+    }
+
     private void RebuildItems()
     {
         var today = _clock.Today;
@@ -377,7 +398,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         }
 
         _paging.Track($"{_filter.PropertyId}|{_filter.CategoryId}|{_filter.Status}|{Period.Current}");
-        Items =
+        SetItems(
         [
             .. rows
                 .OrderByDescending(r => r.Bill.Period)
@@ -395,7 +416,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
                     id => SelectCommand.Execute(id),
                     id => _ = MarkPaidAsync(id),
                     id => _ = ConfirmDraftAsync(id))),
-        ];
+        ]);
 
         PropertyFilterName = _filter.PropertyId is { } id
             ? _properties.FirstOrDefault(p => p.Id == id)?.Name ?? _localizer["BillAllProperties"]
