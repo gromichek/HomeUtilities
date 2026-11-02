@@ -65,6 +65,9 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   `MinColumnWidth="560" MaxColumns="2"`); fields are never stretched across the whole screen.
   Buttons and notes that are direct children of that grid (Delete …, Save as template) get
   `views:AdaptiveFieldGrid.FullRow="True"` — otherwise they become a cell next to a card and stretch to its height.
+- On compact width **every stacked action button inside a card has full width** (`HorizontalOptions=Fill`), also outside
+  `AdaptiveFieldGrid` (T-028i). Exception: the full-row Delete … / Save as template buttons under editor cards keep their
+  natural width.
 - **Stacked buttons have the same width** (T-028h): buttons that do not fit in a row go into an `AdaptiveFieldGrid`
   (`MinColumnWidth` = the width each needs); it makes its buttons fill their cell, so a stacked group is as wide as the card.
   Never stack buttons with `HorizontalOptions="Start"` (each would get the width of its text).
