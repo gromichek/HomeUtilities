@@ -7,8 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028h | Collected fixes and speed (dark theme on Windows, help tables, button widths, Overview/Charges reload) | Ready | | C1–C4; parallel with T-029 |
-| T-029 | Automatic local backups, full JSON export/import, Android backup rules | Ready | | parallel with T-028h |
 
 ## Done
 
@@ -46,6 +44,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-029 | Automatic backups, JSON export/import, Android backup rules | 2026-11-02, #184 | `backups/auto` zips (1/3/7 days, only if changed; always before import/restore/JSON import/wipe/migration), keep N (3/7/14) + 3 monthly; Settings → Backup list with Restore / Save copy; `DataExchangeService` JSON (all tables incl. deleted, decimals as numbers, strict import, staged); Android Auto Backup only `files/backups/system-copy/` (newest zip). A failed pre-operation copy does not block the operation (open question to the owner). |
+| T-028h | Collected fixes and speed | 2026-11-02, #181 | Windows theme: root `RequestedTheme` flipped to the opposite and back (not verified); help tables in scroll blocks; stacked grid buttons fill their cell (lead: not FullRow buttons); `ReloadGate` (Overview, Charges reload only after a change / new day / language); `LoadManyAsync` batches charge inputs (Overview, settlement, Charges). Other section roots not gated yet. |
 | T-028b | Performance: menu switching, scrolling, memory | 2026-11-02, #175 | Loads off the UI thread (Sqlite "async" is synchronous — likely ANR cause), latest-wins cancellation on leave/new load, `ItemsSync` keeps scroll position, Bills/Payments cards flattened; `Performance:` lines ≥ 300 ms + startup time in the error log. No device numbers yet; root pages not made singletons (Shell caches root pages). Editors (Bill, Contract) still load on the UI thread. |
 | T-028g | UI fixes round 3 | 2026-11-02, #174 | Imports help, profile buttons wrap/stack, payment row with a small cancel icon, help pinch zoom (Android), Windows dark theme re-applied (cause not confirmed). |
 | T-028d | Settings as a list of sections | 2026-11-01, #165 | 10 rows (icon, title, value); Language, Theme, Reminders, Backup, Error log, About open `SettingsSectionPage`; Categories, VAT rates, Bill templates, Imports open their screens; buttons stacked; Clear log confirmed; new HelpTopics. Segoe glyphs chosen from memory — owner to check icons on Windows. |
@@ -90,7 +90,11 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
-### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02) — C1–C4 → T-028h
+### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02)
+
+(C1–C4 done in T-028h #181. Suggestions for later: `ReloadGate` for the other section roots; `MeterStore.IncludeAll` loads all readings.)
+
+### Done batch C1–C4 (T-028h)
 
 - C1. **Windows: first switch to the dark theme** — texts switch, native backgrounds (menu pane, page, pickers) stay light;
   choosing the theme again fixes it. Two blind attempts failed (#174 native `RequestedTheme` + re-apply, #177 delayed
@@ -188,6 +192,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-01 | #166 | Reminders pop-up / lock screen | Pop-up OK when unlocked; **locked: sound only**, notification is in the shade after unlocking. App settings correct (lock screen allowed, show content). Delayed test added (#168) to check. |
 | 2026-11-02 | #168 + #170 | Reminders on the locked screen | **OK**: the screen lights up with the notification (also real reminders), bell icon. Cause was the coloured app icon used as the small icon. |
 | 2026-11-02 | #174 + #175 (Windows) | Windows maximised; error log | Two-column editors: "Save as template"/Delete stretched as cells; dark theme first switch still mixed; WinUI crash in `ListColumns` on resize during `ItemsSync` → #177. Timings (Windows): Overview 1.3–1.7 s, startup to Overview 3.8 s, Charges ~0.35 s. |
+| | #181 + #184 | T-028h (Windows theme once, help tables, button widths, Overview/Charges second visit); T-029 backups | pending |
 | 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
 | 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
