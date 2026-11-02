@@ -1006,6 +1006,91 @@ internal sealed class FakeBackupFileService : IBackupFileService
     }
 
     public Task<Stream?> PickAsync() => Task.FromResult(Picked);
+
+    public Stream? PickedData { get; set; }
+
+    public List<(string Name, string ContentType)> SavedFiles { get; } = [];
+
+    public Task<FileSaveResult> SaveAsync(string fileName, string contentType, Func<Stream, Task> write)
+    {
+        SavedFiles.Add((fileName, contentType));
+        return SaveAsync(fileName, write);
+    }
+
+    public Task<Stream?> PickDataFileAsync() => Task.FromResult(PickedData);
+}
+
+internal sealed class FakeAutoBackupService : IAutoBackupService
+{
+    public event EventHandler? Changed
+    {
+        add { }
+        remove { }
+    }
+
+    public AutoBackupSettings Settings { get; set; } = AutoBackupSettings.Default;
+
+    public string? LastError { get; set; }
+
+    public List<AutoBackupInfo> CopyList { get; } = [];
+
+    public List<AutoBackupReason> Backups { get; } = [];
+
+    public bool BackupSucceeds { get; set; } = true;
+
+    public Dictionary<string, byte[]> Files { get; } = [];
+
+    public int RunIfDueCalls { get; private set; }
+
+    public void Save(AutoBackupSettings settings) => Settings = settings.Normalized();
+
+    public IReadOnlyList<AutoBackupInfo> Copies() => CopyList;
+
+    public Stream? Open(string name) => Files.TryGetValue(name, out var bytes) ? new MemoryStream(bytes) : null;
+
+    public Task RunIfDueAsync(CancellationToken ct = default)
+    {
+        RunIfDueCalls++;
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> BackupBeforeAsync(AutoBackupReason reason, CancellationToken ct = default)
+    {
+        Backups.Add(reason);
+        return Task.FromResult(BackupSucceeds);
+    }
+}
+
+internal sealed class FakeDataExchangeService : IDataExchangeService
+{
+    public DataImportResult Validation { get; set; } = new([], new DateTimeOffset(2026, 10, 1, 12, 0, 0, TimeSpan.Zero), 42);
+
+    public DataImportResult? StageResult { get; set; }
+
+    public int Staged { get; private set; }
+
+    public List<bool> Exports { get; } = [];
+
+    public string SuggestFileName(bool withAttachments) => withAttachments ? "data.zip" : "data.json";
+
+    public async Task ExportAsync(Stream output, bool withAttachments, CancellationToken ct = default)
+    {
+        Exports.Add(withAttachments);
+        await output.WriteAsync(new byte[] { 7, 7 }, ct);
+    }
+
+    public Task<DataImportResult> ValidateAsync(Stream input, CancellationToken ct = default) => Task.FromResult(Validation);
+
+    public Task<DataImportResult> StageImportAsync(Stream input, CancellationToken ct = default)
+    {
+        var result = StageResult ?? Validation;
+        if (result.IsValid)
+        {
+            Staged++;
+        }
+
+        return Task.FromResult(result);
+    }
 }
 
 internal sealed class FakeAppLifecycle : IAppLifecycle

@@ -31,6 +31,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private readonly ISettingsStore _settings;
     private readonly ISampleDataGenerator _sampleData;
     private readonly IClock _clock;
+    private readonly IAutoBackupService _auto;
+    private readonly IDataExchangeService _exchange;
 
     private bool _refreshing;
 
@@ -98,6 +100,66 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     private string _lastBackupText = string.Empty;
 
     [ObservableProperty]
+    private string _manualBackupHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _autoBackupHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _autoBackupHint = string.Empty;
+
+    [ObservableProperty]
+    private string _autoBackupEnabledLabel = string.Empty;
+
+    [ObservableProperty]
+    private bool _autoBackupEnabled;
+
+    [ObservableProperty]
+    private string _autoIntervalLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _autoIntervalValue = string.Empty;
+
+    [ObservableProperty]
+    private string _autoKeepLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _autoKeepValue = string.Empty;
+
+    [ObservableProperty]
+    private string _lastAutoBackupText = string.Empty;
+
+    [ObservableProperty]
+    private string _lastAutoBackupErrorText = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasLastAutoBackupError;
+
+    [ObservableProperty]
+    private string _copiesHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _copiesEmptyText = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasCopies;
+
+    [ObservableProperty]
+    private IReadOnlyList<AutoBackupRowViewModel> _copies = [];
+
+    [ObservableProperty]
+    private string _dataExportHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _dataExportHint = string.Empty;
+
+    [ObservableProperty]
+    private string _exportJsonText = string.Empty;
+
+    [ObservableProperty]
+    private string _importJsonText = string.Empty;
+
+    [ObservableProperty]
     private string _testDataHeader = string.Empty;
 
     [ObservableProperty]
@@ -124,9 +186,13 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         ISettingsStore settings,
         ISampleDataGenerator sampleData,
         IClock clock,
+        IAutoBackupService autoBackup,
+        IDataExchangeService dataExchange,
         ReminderSettingsViewModel reminders)
     {
         Reminders = reminders;
+        _auto = autoBackup;
+        _exchange = dataExchange;
         _backup = backup;
         _backupFiles = backupFiles;
         _dialogs = dialogs;
@@ -170,6 +236,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     /// <summary>Settings key of the time the last backup was created on this device (ISO 8601).</summary>
     public const string LastBackupKey = "LastBackupAt";
+
+    /// <summary>Settings key of the size in bytes of the last backup saved by the owner.</summary>
+    public const string LastBackupSizeKey = "LastBackupSize";
 
     /// <summary>
     /// Opens a row: the settings pages of Language, Theme, Reminders, Backup, Error log and About are pushed with this view
@@ -254,6 +323,52 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         return Task.CompletedTask;
     }
 
+    /// <summary>Re-reads the automatic copies (off the UI thread) and the backup texts; called when the Backup page appears.</summary>
+    public async Task RefreshBackupSectionAsync()
+    {
+        var copies = await Task.Run(() => _auto.Copies());
+        _refreshing = true;
+        try
+        {
+            AutoBackupEnabled = _auto.Settings.Enabled;
+        }
+        finally
+        {
+            _refreshing = false;
+        }
+
+        RefreshAutoSettingsTexts();
+        Copies = [.. copies.Select(CreateRow)];
+        HasCopies = copies.Count > 0;
+        LastAutoBackupText = copies.Count > 0
+            ? _localizer.Get("SettingsBackupAutoLast", copies[0].CreatedAt.ToLocalTime(), FormatSize(copies[0].SizeBytes))
+            : _localizer["SettingsBackupAutoNever"];
+        var error = _auto.LastError;
+        HasLastAutoBackupError = error is not null;
+        LastAutoBackupErrorText = error is null ? string.Empty : _localizer.Get("SettingsBackupAutoFailed", error);
+        RefreshLastBackupText();
+    }
+
+    private AutoBackupRowViewModel CreateRow(AutoBackupInfo copy) => new(
+        copy,
+        copy.CreatedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+        $"{_localizer[$"AutoBackupReason_{copy.Reason}"]} · {FormatSize(copy.SizeBytes)}",
+        _localizer["BackupCopyRestore"],
+        _localizer["BackupCopySave"],
+        RestoreCopyAsync,
+        SaveCopyAsync);
+
+    private void RefreshAutoSettingsTexts()
+    {
+        var settings = _auto.Settings;
+        AutoIntervalValue = IntervalName(settings.IntervalDays);
+        AutoKeepValue = settings.KeepCopies.ToString(CultureInfo.CurrentCulture);
+    }
+
+    private string FormatSize(long bytes) => bytes >= 1024 * 1024
+        ? _localizer.Get("BackupSizeMb", bytes / (1024.0 * 1024.0))
+        : _localizer.Get("BackupSizeKb", Math.Max(1, bytes / 1024.0));
+
     /// <summary>Puts the error log on the clipboard so the owner can send it; an empty log says so instead.</summary>
     [RelayCommand]
     private Task CopyLogAsync() => RunSafeAsync(async () =>
@@ -273,13 +388,20 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     [RelayCommand]
     private Task SaveBackupAsync() => RunSafeAsync(async () =>
     {
-        var result = await _backupFiles.SaveAsync(_backup.SuggestFileName(), stream => _backup.CreateAsync(stream));
+        long size = 0;
+        var result = await _backupFiles.SaveAsync(_backup.SuggestFileName(), async stream =>
+        {
+            var counting = new CountingStream(stream);
+            await _backup.CreateAsync(counting);
+            size = counting.Size;
+        });
         if (!result.Saved)
         {
             return;
         }
 
         _settings.SetString(LastBackupKey, _clock.UtcNow.ToString("O", System.Globalization.CultureInfo.InvariantCulture));
+        _settings.SetString(LastBackupSizeKey, size.ToString(CultureInfo.InvariantCulture));
         RefreshLastBackupText();
         _snackbar.Notify(result.Location is { } location ? _localizer.Get("BackupSavedTo", location) : _localizer["BackupSaved"]);
     });
@@ -296,34 +418,202 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
         await using (stream)
         {
-            var validation = await _backup.ValidateAsync(stream);
-            if (validation.Manifest is not { } manifest)
+            await RestoreFromAsync(stream);
+        }
+    });
+
+    // Checks the backup, asks for confirmation, saves an automatic copy of the current data, stages the restore and offers to
+    // close the app so that it is applied at the next start.
+    private async Task RestoreFromAsync(Stream stream)
+    {
+        var validation = await _backup.ValidateAsync(stream);
+        if (validation.Manifest is not { } manifest)
+        {
+            await ShowBackupErrorAsync(validation.Error);
+            return;
+        }
+
+        var title = _localizer["BackupRestoreTitle"];
+        var confirmed = await _dialogs.ConfirmAsync(
+            title,
+            _localizer.Get("BackupRestoreConfirm", manifest.CreatedAt.ToLocalTime()),
+            _localizer["BackupRestoreAction"],
+            _localizer["Cancel"]);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await _auto.BackupBeforeAsync(AutoBackupReason.BeforeRestore);
+        var staged = await _backup.StageRestoreAsync(stream);
+        if (!staged.IsValid)
+        {
+            await ShowBackupErrorAsync(staged.Error);
+            return;
+        }
+
+        await AskToCloseAppAsync("BackupRestartMessage");
+    }
+
+    private Task RestoreCopyAsync(AutoBackupInfo copy) => RunSafeAsync(async () =>
+    {
+        var stream = _auto.Open(copy.Name);
+        if (stream is null)
+        {
+            await _dialogs.AlertAsync(_localizer["BackupRestoreTitle"], _localizer["BackupCopyMissing"]);
+            await RefreshBackupSectionAsync();
+            return;
+        }
+
+        await using (stream)
+        {
+            await RestoreFromAsync(stream);
+        }
+
+        await RefreshBackupSectionAsync();
+    });
+
+    private Task SaveCopyAsync(AutoBackupInfo copy) => RunSafeAsync(async () =>
+    {
+        var name = $"HomeUtilities-backup-{copy.CreatedAt.ToLocalTime():yyyy-MM-dd-HHmm}.zip";
+        var missing = false;
+        var result = await _backupFiles.SaveAsync(name, async target =>
+        {
+            await using var source = _auto.Open(copy.Name);
+            if (source is null)
             {
-                await ShowBackupErrorAsync(validation.Error);
+                missing = true;
                 return;
             }
 
-            var title = _localizer["BackupRestoreTitle"];
+            await source.CopyToAsync(target);
+        });
+        if (missing)
+        {
+            await _dialogs.AlertAsync(_localizer["BackupRestoreTitle"], _localizer["BackupCopyMissing"]);
+            await RefreshBackupSectionAsync();
+        }
+        else if (result.Saved)
+        {
+            _snackbar.Notify(result.Location is { } location ? _localizer.Get("BackupSavedTo", location) : _localizer["BackupSaved"]);
+        }
+    });
+
+    /// <summary>Opens the interval choice (every 1 / 3 / 7 days).</summary>
+    [RelayCommand]
+    private Task ChooseIntervalAsync() => RunSafeAsync(async () =>
+    {
+        var days = await ChooseNumberAsync("SettingsBackupAutoInterval", AutoBackupSettings.IntervalChoices, IntervalName);
+        if (days is { } chosen)
+        {
+            _auto.Save(_auto.Settings with { IntervalDays = chosen });
+            RefreshAutoSettingsTexts();
+        }
+    });
+
+    /// <summary>Opens the choice of how many copies are kept (3 / 7 / 14).</summary>
+    [RelayCommand]
+    private Task ChooseKeepAsync() => RunSafeAsync(async () =>
+    {
+        var count = await ChooseNumberAsync("SettingsBackupAutoKeep", AutoBackupSettings.KeepChoices, n => n.ToString(CultureInfo.CurrentCulture));
+        if (count is { } chosen)
+        {
+            _auto.Save(_auto.Settings with { KeepCopies = chosen });
+            RefreshAutoSettingsTexts();
+        }
+    });
+
+    partial void OnAutoBackupEnabledChanged(bool value)
+    {
+        if (!_refreshing && value != _auto.Settings.Enabled)
+        {
+            _auto.Save(_auto.Settings with { Enabled = value });
+        }
+    }
+
+    private async Task<int?> ChooseNumberAsync(string titleKey, IReadOnlyList<int> choices, Func<int, string> name)
+    {
+        var names = choices.Select(name).ToList();
+        var picked = await _dialogs.ChooseAsync(_localizer[titleKey], names);
+        var index = picked is null ? -1 : names.IndexOf(picked);
+        return index < 0 ? null : choices[index];
+    }
+
+    private string IntervalName(int days) => _localizer[$"BackupInterval_{days}"];
+
+    /// <summary>
+    /// Exports every table as JSON (optionally zipped with the attachments) and lets the owner save the file somewhere
+    /// outside the app.
+    /// </summary>
+    [RelayCommand]
+    private Task ExportJsonAsync() => RunSafeAsync(async () =>
+    {
+        var withAttachments = _localizer["DataExportWithAttachments"];
+        var jsonOnly = _localizer["DataExportJsonOnly"];
+        var choice = await _dialogs.ChooseAsync(_localizer["DataExportChoiceTitle"], [withAttachments, jsonOnly]);
+        if (choice is null)
+        {
+            return;
+        }
+
+        var zipped = choice == withAttachments;
+        var result = await _backupFiles.SaveAsync(
+            _exchange.SuggestFileName(zipped),
+            zipped ? "application/zip" : "application/json",
+            stream => _exchange.ExportAsync(stream, zipped));
+        if (result.Saved)
+        {
+            _snackbar.Notify(result.Location is { } location ? _localizer.Get("DataExportSavedTo", location) : _localizer["DataExportSaved"]);
+        }
+    });
+
+    /// <summary>Picks a JSON data file, checks it (nothing is written if it is bad), asks, and stages it to replace all data.</summary>
+    [RelayCommand]
+    private Task ImportJsonAsync() => RunSafeAsync(async () =>
+    {
+        var stream = await _backupFiles.PickDataFileAsync();
+        if (stream is null)
+        {
+            return;
+        }
+
+        await using (stream)
+        {
+            var check = await _exchange.ValidateAsync(stream);
+            if (!check.IsValid)
+            {
+                await ShowImportIssuesAsync(check);
+                return;
+            }
+
             var confirmed = await _dialogs.ConfirmAsync(
-                title,
-                _localizer.Get("BackupRestoreConfirm", manifest.CreatedAt.ToLocalTime()),
-                _localizer["BackupRestoreAction"],
+                _localizer["DataImportTitle"],
+                _localizer.Get("DataImportConfirm", check.ExportedAt?.ToLocalTime() ?? default, check.RowCount),
+                _localizer["DataImportAction"],
                 _localizer["Cancel"]);
             if (!confirmed)
             {
                 return;
             }
 
-            var staged = await _backup.StageRestoreAsync(stream);
+            await _auto.BackupBeforeAsync(AutoBackupReason.BeforeRestore);
+            var staged = await _exchange.StageImportAsync(stream);
             if (!staged.IsValid)
             {
-                await ShowBackupErrorAsync(staged.Error);
+                await ShowImportIssuesAsync(staged);
                 return;
             }
         }
 
         await AskToCloseAppAsync("BackupRestartMessage");
     });
+
+    private Task ShowImportIssuesAsync(DataImportResult result)
+    {
+        var lines = result.Issues.Take(DataImportResult.Max).Select(i => _localizer.Get(
+            $"DataImportIssue_{i.Code}", i.Table ?? string.Empty, i.Row is { } row ? row + 1 : 0, i.Column ?? string.Empty));
+        return _dialogs.AlertAsync(_localizer["DataImportTitle"], _localizer["DataImportRefused"] + "\n\n" + string.Join("\n", lines));
+    }
 
     /// <summary>Debug builds only: fills an empty app with invented data.</summary>
     [RelayCommand]
@@ -367,6 +657,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             return;
         }
 
+        await _auto.BackupBeforeAsync(AutoBackupReason.BeforeWipe);
         _backup.StageWipe();
         await AskToCloseAppAsync("TestDataDeleteRestart");
     });
@@ -435,6 +726,18 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             BackupHint = _localizer["SettingsBackupHint"];
             SaveBackupText = _localizer["SettingsBackupSave"];
             RestoreBackupText = _localizer["SettingsBackupRestore"];
+            ManualBackupHeader = _localizer["SettingsBackupManualHeader"];
+            AutoBackupHeader = _localizer["SettingsBackupAutoHeader"];
+            AutoBackupHint = _localizer["SettingsBackupAutoHint"];
+            AutoBackupEnabledLabel = _localizer["SettingsBackupAutoEnabled"];
+            AutoIntervalLabel = _localizer["SettingsBackupAutoInterval"];
+            AutoKeepLabel = _localizer["SettingsBackupAutoKeep"];
+            CopiesHeader = _localizer["SettingsBackupCopiesHeader"];
+            CopiesEmptyText = _localizer["SettingsBackupCopiesEmpty"];
+            DataExportHeader = _localizer["SettingsBackupDataHeader"];
+            DataExportHint = _localizer["SettingsBackupDataHint"];
+            ExportJsonText = _localizer["SettingsBackupExportJson"];
+            ImportJsonText = _localizer["SettingsBackupImportJson"];
             TestDataHeader = _localizer["SettingsTestData"];
             FillSampleDataText = _localizer["SettingsTestDataFill"];
             DeleteAllDataText = _localizer["SettingsTestDataDelete"];
@@ -472,7 +775,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     private void RefreshLastBackupText() =>
         LastBackupText = DateTimeOffset.TryParse(_settings.GetString(LastBackupKey), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out var last)
-            ? _localizer.Get("SettingsBackupLast", last.ToLocalTime())
+            ? long.TryParse(_settings.GetString(LastBackupSizeKey), NumberStyles.Integer, CultureInfo.InvariantCulture, out var size) && size > 0
+                ? _localizer.Get("SettingsBackupLastSize", last.ToLocalTime(), FormatSize(size))
+                : _localizer.Get("SettingsBackupLast", last.ToLocalTime())
             : _localizer["SettingsBackupNever"];
 
     private void RefreshLayoutText() =>

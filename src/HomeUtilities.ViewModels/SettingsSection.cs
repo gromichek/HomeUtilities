@@ -98,6 +98,9 @@ public sealed partial class SettingsSectionViewModel : ViewModelBase
     [RelayCommand]
     private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, GuideTopic));
 
+    public override Task OnAppearingAsync() =>
+        Section == SettingsSection.Backup ? RunSafeAsync(Settings.RefreshBackupSectionAsync) : Task.CompletedTask;
+
     protected override void RefreshTexts()
     {
         Title = Settings.TitleOf(Section);

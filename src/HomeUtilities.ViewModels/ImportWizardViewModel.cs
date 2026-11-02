@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Backup;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
@@ -75,6 +76,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     private readonly IEqualizedPlanStore _plans;
     private readonly IImportProfileStore _profiles;
     private readonly IImportBatchStore _batches;
+    private readonly IAutoBackupService _autoBackup;
     private readonly IDialogService _dialogs;
     private readonly INavigationService _navigation;
     private readonly ISnackbarService _snackbar;
@@ -287,8 +289,10 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         IDialogService dialogs,
         INavigationService navigation,
         ISnackbarService snackbar,
+        IAutoBackupService autoBackup,
         ILocalizer localizer)
     {
+        _autoBackup = autoBackup;
         _files = files;
         _reader = reader;
         _properties = properties;
@@ -715,6 +719,8 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         IsBusy = true;
         try
         {
+            // A safety copy first (always made; a failure is logged and shown in Settings → Backup, the import goes on).
+            await _autoBackup.BackupBeforeAsync(AutoBackupReason.BeforeImport);
             var saved = await SaveProfileAsync(profile);
             var batch = await _batches.ApplyAsync(new ImportApplyRequest(_plan, _fileName, profile.SheetName, _contract.Id, saved.Id));
             ResultText = _localizer.Get("ImportDone", batch.ReadingCount, batch.BillCount, batch.PaymentCount, batch.SkippedCount, batch.ReplacementCount);
