@@ -140,6 +140,13 @@ public sealed class AdaptiveFieldGrid : Grid
             var column = 0;
             foreach (var view in visible)
             {
+                // Buttons in a cell fill it, so stacked buttons have the same (full) width (T-028h). A FullRow button (Delete …,
+                // Save as template under the cards) keeps its natural width: on a wide window it would span the whole page.
+                if (!GetFullRow(view) && view is Button { HorizontalOptions.Alignment: not LayoutAlignment.Fill } button)
+                {
+                    button.HorizontalOptions = LayoutOptions.Fill;
+                }
+
                 if (GetFullRow(view))
                 {
                     if (column > 0)

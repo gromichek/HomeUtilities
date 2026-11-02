@@ -87,6 +87,19 @@ public class HelpContentServiceTests
     }
 
     [Fact]
+    public async Task LoadAsync_WrapsEveryTableInItsOwnScrollBlock()
+    {
+        var service = Create(Reader("| A | B |\n|---|---|\n| 1 | 2 |\n\nText\n\n| C |\n|---|\n| 3 |\n"));
+
+        var html = (await service.LoadAsync("en")).Html;
+
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(html, "<div class=\"table-wrap\"><table>").Count);
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(html, "</table></div>").Count);
+        Assert.Contains(".table-wrap { overflow-x: auto", html);
+        Assert.Contains("width: max-content", html);
+    }
+
+    [Fact]
     public async Task LoadAsync_StripsHtmlComments()
     {
         var service = Create(Reader("# Title\n\n<!-- maintained by sessions,\n     two lines -->\n\nText <!-- inline --> end\n"));

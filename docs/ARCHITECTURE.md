@@ -133,6 +133,12 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 - Periodic compacted snapshot (`snapshot.json.gz`) so a new device does not replay the full history.
 - Attachments are uploaded as separate files, referenced by GUID.
 - Never sync the raw SQLite file (risk of corruption and lost edits).
+- **Storage provider is replaceable** (owner decision 2026-11-02): the sync engine talks only to a small interface
+  (`ISyncStorage`: list / upload / download / delete files in the app's own folder, plus sign-in / sign-out of the
+  account). Google Drive (`appDataFolder`) is implemented first; OneDrive (`Apps/HomeUtilities`, MSAL + Graph) and
+  Dropbox (App folder) — or WebDAV — can be added later as separate adapters for users without Google Drive. The user
+  picks **one** provider for all devices; the merge logic does not depend on it. Provider folders that are visible to the
+  user (OneDrive, Dropbox) must survive missing or foreign files.
 - Consequence for all phases: every write goes through repositories that set `UpdatedAt` and never
   hard-delete. The `SyncEntity` base class enforces this.
 
@@ -174,4 +180,5 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-20 | Bills without contract (one-off), BillTemplate with schedule (once / monthly / every N months / yearly) | non-monthly and one-off payments |
 | 2026-10-20 | Uniform amount fields Net / VatPercent / Vat / Gross | consistency |
 | 2026-11-01 | One content pane on every device; editors are pages (no list + editor split) | tablet two-pane too cramped; one layout to maintain |
+| 2026-11-02 | Sync storage behind `ISyncStorage`; Google Drive first, OneDrive/Dropbox/WebDAV later if needed (one provider per user) | users without Google Drive |
 | 2026-10-19 | Coding sessions run in the cloud (Linux) | Windows target is verified only by CI and the owner |

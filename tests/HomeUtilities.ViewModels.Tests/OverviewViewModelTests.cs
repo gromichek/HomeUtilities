@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using System.Globalization;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
@@ -31,6 +32,64 @@ public class OverviewViewModelTests : IDisposable
     private OverviewViewModel Create() =>
         new(_kit.Kit.Localizer, _kit.Kit.Clock, _initializer, _loader, _kit.Templates, _kit.QuickPay, _kit.Kit.Toast, _kit.Kit.Navigation, _kit.Kit.Dialogs,
             _kit.Kit.Settings, _kit.Kit.Layout);
+
+    private DataChangeNotifier? _changes;
+
+    private OverviewViewModel CreateWithChanges()
+    {
+        _changes = new DataChangeNotifier();
+        return new(_kit.Kit.Localizer, _kit.Kit.Clock, _initializer, _loader, _kit.Templates, _kit.QuickPay, _kit.Kit.Toast, _kit.Kit.Navigation, _kit.Kit.Dialogs,
+            _kit.Kit.Settings, _kit.Kit.Layout, _changes);
+    }
+
+    [Fact]
+    public async Task Appearing_again_without_a_change_does_not_reload()
+    {
+        var vm = CreateWithChanges();
+        await vm.OnAppearingAsync();
+        Assert.Equal(1, _loader.Loads);
+
+        await vm.OnAppearingAsync();
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(1, _loader.Loads);
+    }
+
+    [Fact]
+    public async Task Appearing_after_a_save_reloads()
+    {
+        var vm = CreateWithChanges();
+        await vm.OnAppearingAsync();
+
+        _changes!.Notify();
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(2, _loader.Loads);
+    }
+
+    [Fact]
+    public async Task Appearing_on_a_new_day_reloads()
+    {
+        var vm = CreateWithChanges();
+        await vm.OnAppearingAsync();
+
+        _kit.Kit.Clock.Today = _kit.Kit.Clock.Today.AddDays(1);
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(2, _loader.Loads);
+    }
+
+    [Fact]
+    public async Task Appearing_after_a_language_change_reloads()
+    {
+        var vm = CreateWithChanges();
+        await vm.OnAppearingAsync();
+
+        WeakReferenceMessenger.Default.Send(new LanguageChangedMessage("ru"));
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(2, _loader.Loads);
+    }
 
     private async Task<OverviewViewModel> LoadAsync()
     {

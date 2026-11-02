@@ -6,8 +6,11 @@ public sealed class ThemeService : IThemeService
 {
     private const string PreferenceKey = "theme";
 
-    public ThemeService()
+    private readonly IErrorLog? _errorLog;
+
+    public ThemeService(IErrorLog? errorLog = null)
     {
+        _errorLog = errorLog;
         var saved = Preferences.Default.Get(PreferenceKey, nameof(AppThemeChoice.System));
         Current = Enum.TryParse<AppThemeChoice>(saved, out var parsed) ? parsed : AppThemeChoice.System;
     }
@@ -28,33 +31,57 @@ public sealed class ThemeService : IThemeService
             };
             app.UserAppTheme = target;
 #if WINDOWS
-            // Windows: on the first change MAUI's texts switch, but the native (WinUI) backgrounds - menu pane, page, pickers -
-            // keep the old theme; choosing the theme a second time fixes it (owner, 2026-11-02, also after the immediate
-            // re-apply of #174). MAUI applies its own theme to the window while handling the change, so the native theme
-            // is set again a moment later, like the owner's second choice does.
             ApplyNativeTheme(app, target);
-            app.Dispatcher.Dispatch(() => ApplyNativeTheme(app, target));
-            app.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(300), () => ApplyNativeTheme(app, target));
 #endif
         }
     }
 
 #if WINDOWS
-    private static void ApplyNativeTheme(Application app, AppTheme theme)
+    /// <summary>
+    /// Windows (T-028h): MAUI only sets the root element's <c>RequestedTheme</c>; WinUI re-resolves the theme resources of the
+    /// native parts (navigation pane, page background, pickers) only when the <b>effective</b> theme of the element tree really
+    /// changes. Re-applying the same value (the attempts of #174 and #177) does nothing, and the first choice from "System" can
+    /// leave those parts on the old resources, while the second choice - a real change - fixed them. So the root is first
+    /// flipped to the opposite theme and then set to the wanted one, which always makes WinUI re-resolve everything.
+    /// </summary>
+    private void ApplyNativeTheme(Application app, AppTheme theme)
     {
-        var native = theme switch
+        var wanted = theme switch
         {
             AppTheme.Light => Microsoft.UI.Xaml.ElementTheme.Light,
             AppTheme.Dark => Microsoft.UI.Xaml.ElementTheme.Dark,
             _ => Microsoft.UI.Xaml.ElementTheme.Default,
         };
+        var opposite = wanted switch
+        {
+            Microsoft.UI.Xaml.ElementTheme.Light => Microsoft.UI.Xaml.ElementTheme.Dark,
+            Microsoft.UI.Xaml.ElementTheme.Dark => Microsoft.UI.Xaml.ElementTheme.Light,
+            _ => SystemIsDark() ? Microsoft.UI.Xaml.ElementTheme.Light : Microsoft.UI.Xaml.ElementTheme.Dark,
+        };
         foreach (var window in app.Windows)
         {
             if (window.Handler?.PlatformView is Microsoft.UI.Xaml.Window { Content: Microsoft.UI.Xaml.FrameworkElement root })
             {
-                root.RequestedTheme = native;
+                Log("before", app, root);
+                root.RequestedTheme = opposite;
+                root.UpdateLayout();
+                root.RequestedTheme = wanted;
+                root.UpdateLayout();
+                Log("after", app, root);
             }
         }
     }
+
+    private static bool SystemIsDark()
+    {
+        var background = new Windows.UI.ViewManagement.UISettings().GetColorValue(Windows.UI.ViewManagement.UIColorType.Background);
+        return background.R + background.G + background.B < 3 * 128;
+    }
+
+    [System.Diagnostics.Conditional("DEBUG")]
+    private void Log(string moment, Application app, Microsoft.UI.Xaml.FrameworkElement root) =>
+        _errorLog?.Note(
+            "Theme",
+            $"{moment}: choice={Current}, UserAppTheme={app.UserAppTheme}, RequestedTheme={app.RequestedTheme}, root.RequestedTheme={root.RequestedTheme}, root.ActualTheme={root.ActualTheme}");
 #endif
 }

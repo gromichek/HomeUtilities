@@ -65,6 +65,9 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   `MinColumnWidth="560" MaxColumns="2"`); fields are never stretched across the whole screen.
   Buttons and notes that are direct children of that grid (Delete …, Save as template) get
   `views:AdaptiveFieldGrid.FullRow="True"` — otherwise they become a cell next to a card and stretch to its height.
+- **Stacked buttons have the same width** (T-028h): buttons that do not fit in a row go into an `AdaptiveFieldGrid`
+  (`MinColumnWidth` = the width each needs); it makes its buttons fill their cell, so a stacked group is as wide as the card.
+  Never stack buttons with `HorizontalOptions="Start"` (each would get the width of its text).
 - **Low windows are phones** (T-028a): a window lower than 480 dp (a phone in landscape, ~900 x 400 dp) is `Compact`
   whatever its width (`LayoutModes.FromSize`).
 - **Filter blocks above long lists** (Bills, Payments) are the list **header** (they scroll with the cards) and collapse to
