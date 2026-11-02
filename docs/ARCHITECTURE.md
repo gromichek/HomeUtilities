@@ -120,7 +120,12 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 - EF Core migrations are applied at startup.
 - Attachments (bill PDFs, meter photos) are files in an `attachments/` folder, referenced by
   `Attachment` records; file name = attachment GUID + extension.
-- Automatic local backup (copy of the DB) on startup if the last backup is older than N days; keep last K.
+- Automatic local backups (T-029): the backup zip (`manifest.json`, SQLite copy via the online backup API,
+  `attachments/`) in `backups/auto/`, at start if older than the interval (1/3/7 days) and data changed, and always
+  before an import, a restore, a JSON import, "Delete all data" and pending migrations; keep the newest N (3/7/14) plus the
+  newest copy of each of the 3 previous months. Android Auto Backup includes only `files/backups/system-copy/` (the
+  newest zip). Full JSON export/import (`DataExchangeService`): one row per entity incl. soft-deleted rows — the row
+  shape the sync change logs reuse (§8).
 
 ## 8. Synchronization (design now, build in phase 9)
 
