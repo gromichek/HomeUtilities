@@ -7,6 +7,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-028g | UI fixes round 3 (Imports help + buttons, payment row, help zoom, dark theme on Windows) | Ready | | parallel with T-028b |
+| T-028b | Performance: menu switching (ANR on tablet), scrolling, memory, battery | Ready | | measure first |
 
 ## Done
 
@@ -97,8 +99,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
    pane** everywhere (variant A) → done in T-028f (#163).
 6. **Scrolling stutters** on phone and tablet in all lists/panes — **in Release builds** (owner tests speed only in
    Release). Profile in T-028b: card templates (nested layouts, shadows), `CollectionView` item sizing, images.
-7. **Reminder for a paid bill arrived once** (not reproduced on the second try). Watch; ask the owner for the steps
-   (Paid on the card / in the editor, undo, how soon before the reminder time).
+7. **Reminder for a paid bill arrived once** — not reproduced in several tries (2026-11-02). Closed unless it recurs.
 
 ### T-028a findings (owner, real phone + tablet + Windows) → tasks T-028a (1, 2, 4), T-028d (3), T-028e (reminders)
 
@@ -169,7 +170,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-01 | #160 | Reminder text on the lock screen | **Not shown** on the lock screen (sound only) → high-importance channel #166 |
 | 2026-11-01 | #166 | Reminders pop-up / lock screen | Pop-up OK when unlocked; **locked: sound only**, notification is in the shade after unlocking. App settings correct (lock screen allowed, show content). Delayed test added (#168) to check. |
 | 2026-11-02 | #168 + #170 | Reminders on the locked screen | **OK**: the screen lights up with the notification (also real reminders), bell icon. Cause was the coloured app icon used as the small icon. |
-| | #165 | T-028d Settings sections, icons on Windows | pending |
+| 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
