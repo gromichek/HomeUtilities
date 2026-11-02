@@ -10,4 +10,13 @@ public interface IErrorLog
     string ReadAll();
 
     void Clear();
+
+    /// <summary>Appends a plain message (no exception), e.g. a "Performance: …" line. Default: logged as an exception-less entry.</summary>
+    void Note(string source, string message) => Append(source, new NoteException(message));
+}
+
+/// <summary>Carries a plain message through <see cref="IErrorLog.Append"/> for logs that only implement the exception overload.</summary>
+public sealed class NoteException(string message) : Exception(message)
+{
+    public override string ToString() => Message;
 }

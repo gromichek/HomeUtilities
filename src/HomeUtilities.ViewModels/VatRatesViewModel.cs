@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
@@ -17,8 +18,8 @@ public sealed partial class VatRatesViewModel : MasterDetailViewModel<VatRateEdi
 
     private IReadOnlyList<VatRate> _rates = [];
 
-    [ObservableProperty]
-    private IReadOnlyList<VatRateItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<VatRateItemViewModel> Items { get; } = [];
 
     [ObservableProperty]
     private string _bannerText = string.Empty;
@@ -41,14 +42,15 @@ public sealed partial class VatRatesViewModel : MasterDetailViewModel<VatRateEdi
 
     protected override int TotalCount => Items.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        _rates = await _store.ListAsync();
+        var loaded = await OffUiAsync(() => _store.ListAsync(ct), ct);
+        ct.ThrowIfCancellationRequested();
+        _rates = loaded;
         RebuildItems();
         IsLoaded = true;
     }
 
-    partial void OnItemsChanged(IReadOnlyList<VatRateItemViewModel> value) => RaiseItemsChanged();
 
     protected override void RefreshTexts()
     {
@@ -70,14 +72,20 @@ public sealed partial class VatRatesViewModel : MasterDetailViewModel<VatRateEdi
         }
     }
 
+    private void SetItems(IReadOnlyList<VatRateItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+        RaiseItemsChanged();
+    }
+
     private void RebuildItems()
     {
-        Items =
+        SetItems(
         [
             .. _rates
                 .OrderBy(v => v.Code, StringComparer.Ordinal)
                 .Select(v => new VatRateItemViewModel(v, _clock.Today, _localizer, id => SelectCommand.Execute(id))),
-        ];
+        ]);
         MarkSelectedItem();
     }
 }

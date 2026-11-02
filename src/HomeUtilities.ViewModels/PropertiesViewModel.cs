@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
@@ -17,8 +18,8 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
 
     private IReadOnlyList<Property> _properties = [];
 
-    [ObservableProperty]
-    private IReadOnlyList<PropertyItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<PropertyItemViewModel> Items { get; } = [];
 
     [ObservableProperty]
     private bool _showArchived;
@@ -47,9 +48,12 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
 
     protected override int TotalCount => _properties.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        _properties = await _store.ListAsync(ShowArchived);
+        var showArchived = ShowArchived;
+        var loaded = await OffUiAsync(() => _store.ListAsync(showArchived, ct), ct);
+        ct.ThrowIfCancellationRequested();
+        _properties = loaded;
         RebuildItems();
         IsLoaded = true;
         RaiseItemsChanged();
@@ -77,10 +81,15 @@ public sealed partial class PropertiesViewModel : MasterDetailViewModel<Property
         }
     }
 
+    private void SetItems(IReadOnlyList<PropertyItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+    }
+
     private void RebuildItems()
     {
         var today = _clock.Today;
-        Items = [.. _properties.OrderBy(p => p.SortOrder).ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).Select(p => new PropertyItemViewModel(p, today, _localizer, item => SelectCommand.Execute(item.Id)))];
+        SetItems([.. _properties.OrderBy(p => p.SortOrder).ThenBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).Select(p => new PropertyItemViewModel(p, today, _localizer, item => SelectCommand.Execute(item.Id)))]);
         MarkSelectedItem();
     }
 }

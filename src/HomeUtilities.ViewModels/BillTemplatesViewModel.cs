@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
@@ -20,8 +21,8 @@ public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillT
     private IReadOnlyList<Property> _properties = [];
     private IReadOnlyList<Category> _categories = [];
 
-    [ObservableProperty]
-    private IReadOnlyList<BillTemplateItemViewModel> _items = [];
+    /// <summary>The cards; updated in place so the list keeps its scroll position.</summary>
+    public ObservableCollection<BillTemplateItemViewModel> Items { get; } = [];
 
     public BillTemplatesViewModel(
         IBillTemplateStore store,
@@ -43,11 +44,15 @@ public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillT
 
     protected override int TotalCount => _templates.Count;
 
-    public override async Task ReloadAsync()
+    public override async Task ReloadAsync(CancellationToken ct = default)
     {
-        _templates = await _store.ListAsync();
-        _properties = await _propertyStore.ListAsync(true);
-        _categories = await _categoryStore.ListAsync();
+        var (templates, properties, categories) = await OffUiAsync(
+            async () => (await _store.ListAsync(ct), await _propertyStore.ListAsync(true, ct), await _categoryStore.ListAsync(ct)),
+            ct);
+        ct.ThrowIfCancellationRequested();
+        _templates = templates;
+        _properties = properties;
+        _categories = categories;
         RebuildItems();
         IsLoaded = true;
         RaiseItemsChanged();
@@ -72,11 +77,16 @@ public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillT
         }
     }
 
+    private void SetItems(IReadOnlyList<BillTemplateItemViewModel> items)
+    {
+        ItemsSync.Update(Items, items, item => item.Id);
+    }
+
     private void RebuildItems()
     {
         var names = _properties.ToDictionary(p => p.Id, p => p.Name);
         var colors = _categories.ToDictionary(c => c.Id, c => c.Color);
-        Items =
+        SetItems(
         [
             .. _templates
                 .OrderByDescending(t => t.IsActive)
@@ -87,7 +97,7 @@ public sealed partial class BillTemplatesViewModel : MasterDetailViewModel<BillT
                     colors.GetValueOrDefault(t.CategoryId, "#808080"),
                     _localizer,
                     id => SelectCommand.Execute(id))),
-        ];
+        ]);
         MarkSelectedItem();
     }
 }

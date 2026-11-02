@@ -19,14 +19,30 @@ public partial class App : Application
         ILanguageService languageService,
         LayoutModeService layoutModeService,
         IThemeService themeService,
-        IErrorReporter errorReporter)
+        IErrorReporter errorReporter,
+        IErrorLog errorLog)
     {
         _ = languageService.CurrentLanguage;
         ViewModelBase.ErrorReporter = errorReporter;
+        PerformanceLog.Sink = errorLog;
+        PerformanceLog.AppStarted = ProcessStart();
         InitializeComponent();
         _services = services;
         _layoutModeService = layoutModeService;
         themeService.Set(themeService.Current);
+    }
+
+    // Cold start is measured from the start of the process (T-028b).
+    private static DateTimeOffset ProcessStart()
+    {
+        try
+        {
+            return new DateTimeOffset(System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime());
+        }
+        catch (Exception)
+        {
+            return DateTimeOffset.UtcNow;
+        }
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

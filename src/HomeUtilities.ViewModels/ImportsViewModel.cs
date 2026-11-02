@@ -219,28 +219,35 @@ public sealed partial class ImportsViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasNoProfiles));
     }
 
-    public override Task OnAppearingAsync() => RunSafeAsync(ReloadAsync);
+    public override Task OnAppearingAsync() => RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => BatchItems.Count + ProfileItems.Count));
 
     /// <summary>Reloads both lists.</summary>
-    public async Task ReloadAsync()
+    public async Task ReloadAsync(CancellationToken ct = default)
     {
-        var batches = await _batches.ListAsync();
-        var profiles = await _profiles.ListAsync();
+        var (batches, profiles) = await OffUiAsync(async () => (await _batches.ListAsync(ct), await _profiles.ListAsync(ct)), ct);
+        ct.ThrowIfCancellationRequested();
         BatchItems = [.. batches.Select(b => new ImportBatchItemViewModel(b, _localizer, UndoAsync))];
         ProfileItems = [.. profiles.Select(p => new ImportProfileItemViewModel(p, _localizer, SaveNameAsync, ExportAsync, DeleteProfileAsync))];
-        await LoadLinkRepairAsync();
+        await LoadLinkRepairAsync(ct);
     }
 
-    private async Task LoadLinkRepairAsync()
+    private async Task LoadLinkRepairAsync(CancellationToken ct = default)
     {
-        var contracts = await _contracts.ListAsync();
-        var links = new List<ContractMeter>();
-        foreach (var contract in contracts)
-        {
-            links.AddRange(await _contracts.ListContractMetersAsync(contract.Id));
-        }
+        var repair = await OffUiAsync(
+            async () =>
+            {
+                var contracts = await _contracts.ListAsync(ct);
+                var links = new List<ContractMeter>();
+                foreach (var contract in contracts)
+                {
+                    links.AddRange(await _contracts.ListContractMetersAsync(contract.Id, ct));
+                }
 
-        _repairItems = MeterLinkRepair.Find(await _meters.ListAsync(), contracts, links);
+                return MeterLinkRepair.Find(await _meters.ListAsync(ct), contracts, links);
+            },
+            ct);
+        ct.ThrowIfCancellationRequested();
+        _repairItems = repair;
         LinkRepairLines =
         [
             .. _repairItems.Select(i => _localizer.Get(

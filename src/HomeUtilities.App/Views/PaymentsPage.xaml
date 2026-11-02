@@ -95,34 +95,29 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SelectCommand}" />
                         </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto" RowSpacing="2">
-                            <VerticalStackLayout Grid.Column="0" Grid.Row="0" Spacing="0">
-                                <Label Text="{Binding TitleText}" FontAttributes="Bold" />
-                                <Label Text="{Binding DateText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Grid.Row="0" HorizontalOptions="End" Spacing="0">
-                                <!-- A refund received is green. -->
-                                <Label Text="{Binding AmountText}" FontAttributes="Bold" HorizontalTextAlignment="End">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsRefund}" Value="True">
-                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-                                <Label Text="{Binding MethodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalTextAlignment="End" />
-                            </VerticalStackLayout>
+                        <!-- One flat grid per card (no nested layouts): cheaper to measure while scrolling (T-028b). -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="0">
+                            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" Text="{Binding TitleText}" FontAttributes="Bold" />
+                            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding DateText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                            <!-- A refund received is green. -->
+                            <Label Grid.Column="2" Grid.Row="0" Text="{Binding AmountText}" FontAttributes="Bold" HorizontalOptions="End" HorizontalTextAlignment="End">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" x:DataType="vm:PaymentItemViewModel" Binding="{Binding IsRefund}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Grid.Column="2" Grid.Row="1" Text="{Binding MethodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalOptions="End" HorizontalTextAlignment="End" />
 
-                            <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding PaysText}" FontSize="13"
+                            <Label Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="2" Text="{Binding PaysText}" FontSize="13" Margin="0,2,0,0"
                                    IsVisible="{Binding HasPays}" />
 
-                            <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                <!-- Money no bill uses yet: a prepayment (yellow). -->
-                                <Label Grid.Column="0" Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13"
-                                       TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
-                                       IsVisible="{Binding HasPrepayment}" />
-                                <Label Grid.Column="1" Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}"
-                                       IsVisible="{Binding IsQuick}" />
-                            </Grid>
+                            <!-- Money no bill uses yet: a prepayment (yellow). -->
+                            <Label Grid.Column="0" Grid.Row="3" Text="{Binding PrepaymentText}" FontAttributes="Bold" FontSize="13" Margin="0,2,0,0"
+                                   TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
+                                   IsVisible="{Binding HasPrepayment}" />
+                            <Label Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Text="{Binding QuickText}" FontSize="12" Style="{StaticResource MutedLabel}" Margin="0,2,0,0"
+                                   IsVisible="{Binding IsQuick}" />
                         </Grid>
                     </Border>
                 </DataTemplate>

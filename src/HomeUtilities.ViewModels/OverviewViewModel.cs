@@ -153,24 +153,34 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
         await InitializeDatabaseAsync();
-        await ReloadAsync();
+        await RunLoadAsync(ct => ReloadAsync(ct), () => PropertyCount);
+        PerformanceLog.ReportStartupOnce(PropertyCount);
     });
 
     void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) =>
         IsWide = _layoutModeService.Current != LayoutMode.Compact;
 
     /// <summary>Re-reads the data and rebuilds the three cards.</summary>
-    public async Task ReloadAsync()
+    public async Task ReloadAsync(CancellationToken ct = default)
     {
         if (_databaseError.Length > 0)
         {
             return;
         }
 
-        // Drafts of the templates that came due since the last visit are created before the data is read.
-        await _templateStore.GenerateDraftsAsync(_clock.Today);
-        _data = await _loader.LoadAsync(_clock.Today);
-        _todo = TodoBuilder.Build(_data, _clock.Today);
+        var today = _clock.Today;
+        var (data, todo) = await OffUiAsync(
+            async () =>
+            {
+                // Drafts of the templates that came due since the last visit are created before the data is read.
+                await _templateStore.GenerateDraftsAsync(today, ct);
+                var loaded = await _loader.LoadAsync(today, ct);
+                return (loaded, TodoBuilder.Build(loaded, today));
+            },
+            ct);
+        ct.ThrowIfCancellationRequested();
+        _data = data;
+        _todo = todo;
         PropertyCount = _data.Properties.Count;
         if (_propertyFilter is { } filter && _data.Properties.All(p => p.Id != filter))
         {
