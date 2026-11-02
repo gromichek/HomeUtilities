@@ -12,6 +12,14 @@
         <On Platform="WinUI" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
     </OnPlatform>
 
+    <!-- FontImageSource needs ONE font family: on Windows MAUI turns a comma-separated fallback list into a relative URI and
+         crashes ("not supported for a relative URI") when the image is rendered — e.g. on a theme change, when the
+         AppThemeBinding colour re-renders every image (owner, 2026-11-02). Segoe MDL2 Assets exists on Windows 10 and 11. -->
+    <OnPlatform x:Key="IconImageFontFamily" x:TypeArguments="x:String">
+        <On Platform="Android" Value="MaterialIcons" />
+        <On Platform="WinUI" Value="Segoe MDL2 Assets" />
+    </OnPlatform>
+
     <OnPlatform x:Key="IconAdd" x:TypeArguments="x:String">
         <On Platform="Android" Value="&#xE145;" />
         <On Platform="WinUI" Value="&#xE710;" />
@@ -170,27 +178,27 @@
 
     <!-- Image sources for toolbar items and buttons with an icon next to the text. -->
     <FontImageSource x:Key="IconAddSource"
-                     FontFamily="{StaticResource IconFontFamily}"
+                     FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource IconAdd}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconOpenLinkSource"
-                     FontFamily="{StaticResource IconFontFamily}"
+                     FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource IconOpenLink}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconPaidSource"
-                     FontFamily="{StaticResource IconFontFamily}"
+                     FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource IconPaid}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconHelpSource"
-                     FontFamily="{StaticResource IconFontFamily}"
+                     FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource IconHelp}"
                      Size="24"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconSaveSource"
-                     FontFamily="{StaticResource IconFontFamily}"
+                     FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource IconSave}"
                      Size="24"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
