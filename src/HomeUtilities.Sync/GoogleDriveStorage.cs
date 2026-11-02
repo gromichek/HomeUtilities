@@ -9,8 +9,14 @@ namespace HomeUtilities.Sync.Google;
 /// <see cref="ISyncStorage"/> on the hidden Google Drive <c>appDataFolder</c> through the Drive v3 REST API. The path of a
 /// file is its Drive file name (a name may contain "/"), so the folder stays flat; scope <c>drive.appdata</c> only.
 /// </summary>
-public sealed class GoogleDriveStorage(HttpClient http, ISyncAccountService account, TimeProvider time) : ISyncStorage
+public sealed class GoogleDriveStorage(HttpClient http, ISyncAccountService account, TimeProvider time) : ISyncStorage, IServerClock
 {
+    /// <inheritdoc />
+    public DateTimeOffset? ServerTime { get; private set; }
+
+    /// <inheritdoc />
+    public DateTimeOffset? ObservedAt { get; private set; }
+
     public const string FilesUrl = "https://www.googleapis.com/drive/v3/files";
     public const string UploadUrl = "https://www.googleapis.com/upload/drive/v3/files";
     private const string Space = "appDataFolder";
@@ -122,6 +128,12 @@ public sealed class GoogleDriveStorage(HttpClient http, ISyncAccountService acco
         using var request = new HttpRequestMessage(method, url) { Content = content };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await account.GetAccessTokenAsync(ct));
         var response = await GoogleHttp.SendAsync(http, request, ct);
+        if (response.Headers.Date is { } serverDate)
+        {
+            ServerTime = serverDate;
+            ObservedAt = time.GetUtcNow();
+        }
+
         try
         {
             await GoogleHttp.EnsureSuccessAsync(response, time.GetUtcNow(), ct);
