@@ -12,13 +12,15 @@ internal sealed class BackupFixture : IDisposable
 {
     private readonly ServiceProvider _services;
 
-    public BackupFixture()
+    public BackupFixture(bool systemCopy = false)
     {
         Root = Path.Combine(Path.GetTempPath(), "hu-backup-tests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Root);
         Clock = new FakeClock(new DateTimeOffset(2026, 10, 24, 9, 30, 0, TimeSpan.Zero));
-        Options = new BackupOptions(DatabasePath, AttachmentsFolder, Path.Combine(Root, "restore"), Path.Combine(Root, "backups"), "1.0.0", "Test");
+        Options = new BackupOptions(DatabasePath, AttachmentsFolder, Path.Combine(Root, "restore"), Path.Combine(Root, "backups"), "1.0.0", "Test", systemCopy ? Path.Combine(Root, "system-backup") : null);
         Backup = new BackupService(Options, Clock);
+        AutoBackups = new AutoBackupStorage(Options, Backup, Clock);
+        DataExchange = new DataExchangeService(Options, Clock, Backup);
         _services = new ServiceCollection()
             .AddSingleton<IClock>(Clock)
             .AddHomeUtilitiesData(DatabasePath, AttachmentsFolder)
@@ -36,6 +38,15 @@ internal sealed class BackupFixture : IDisposable
     public BackupOptions Options { get; }
 
     public BackupService Backup { get; }
+
+    public AutoBackupStorage AutoBackups { get; }
+
+    public DataExchangeService DataExchange { get; }
+
+    public T Get<T>()
+        where T : notnull => _services.GetRequiredService<T>();
+
+    public async Task FillSampleAsync() => Assert.True(await _services.GetRequiredService<ISampleDataGenerator>().FillAsync());
 
     public IPropertyStore Properties => _services.GetRequiredService<IPropertyStore>();
 

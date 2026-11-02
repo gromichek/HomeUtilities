@@ -58,7 +58,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
             var dbCopy = Path.Combine(work, DatabaseEntry);
             CopyDatabase(options.DatabasePath, dbCopy);
             var attachments = ListAttachments();
-            var manifest = ReadManifestData(dbCopy, attachments.Count);
+            var manifest = ReadManifestData(dbCopy, attachments.Count, options, clock.UtcNow);
 
             using var zip = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true);
             var manifestEntry = zip.CreateEntry(ManifestEntry, CompressionLevel.Optimal);
@@ -109,6 +109,51 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
 
         File.Move(temp, PendingPath, overwrite: true);
         return validation;
+    }
+
+    /// <summary>
+    /// Stages a finished database file (plus the <c>attachments/</c> entries of an optional zip) as a restore: builds a backup
+    /// zip in the staging folder, validates it and keeps it as <c>pending.zip</c> for the next start.
+    /// </summary>
+    internal async Task StageDatabaseAsync(string databaseFile, ZipArchive? attachmentsFrom, CancellationToken ct)
+    {
+        Directory.CreateDirectory(options.RestoreFolder);
+        var temp = Path.Combine(options.RestoreFolder, "import-" + Guid.NewGuid().ToString("N") + ".zip");
+        try
+        {
+            var attachments = attachmentsFrom?.Entries
+                .Where(e => e.FullName.StartsWith(AttachmentsPrefix, StringComparison.Ordinal) && e.Name.Length > 0).ToList() ?? [];
+            var manifest = ReadManifestData(databaseFile, attachments.Count, options, clock.UtcNow);
+            await using (var file = new FileStream(temp, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+            {
+                using var zip = new ZipArchive(file, ZipArchiveMode.Create, leaveOpen: true);
+                var manifestEntry = zip.CreateEntry(ManifestEntry, CompressionLevel.Optimal);
+                await using (var stream = manifestEntry.Open())
+                {
+                    await JsonSerializer.SerializeAsync(stream, manifest, Json, ct);
+                }
+
+                await AddFileAsync(zip, DatabaseEntry, databaseFile, ct);
+                foreach (var entry in attachments)
+                {
+                    var target = zip.CreateEntry(entry.FullName, CompressionLevel.Optimal);
+                    await using var to = target.Open();
+                    await using var from = entry.Open();
+                    await from.CopyToAsync(to, ct);
+                }
+            }
+
+            await using var staged = new FileStream(temp, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var validation = await StageRestoreAsync(staged, ct);
+            if (!validation.IsValid)
+            {
+                throw new InvalidDataException($"The imported data could not be staged ({validation.Error}).");
+            }
+        }
+        finally
+        {
+            TryDeleteFile(temp);
+        }
     }
 
     /// <inheritdoc />
@@ -342,7 +387,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         }
     }
 
-    private BackupManifest ReadManifestData(string databaseCopy, int attachmentCount)
+    internal static BackupManifest ReadManifestData(string databaseCopy, int attachmentCount, BackupOptions options, DateTimeOffset now)
     {
         using var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = databaseCopy, Pooling = false }.ToString());
         connection.Open();
@@ -351,7 +396,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
             BackupManifest.CurrentFormatVersion,
             options.AppVersion,
             migration,
-            clock.UtcNow,
+            now,
             options.Platform,
             (int)Scalar<long>(connection, "SELECT COUNT(*) FROM Properties WHERE IsDeleted = 0"),
             (int)Scalar<long>(connection, "SELECT COUNT(*) FROM MeterReadings WHERE IsDeleted = 0"),
@@ -366,7 +411,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         return value is null or DBNull ? default : (T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
     }
 
-    private static void CopyDatabase(string source, string destination)
+    internal static void CopyDatabase(string source, string destination)
     {
         if (!File.Exists(source))
         {
@@ -387,7 +432,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         }
     }
 
-    private List<(string Relative, string Full)> ListAttachments()
+    internal List<(string Relative, string Full)> ListAttachments()
     {
         if (!Directory.Exists(options.AttachmentsFolder))
         {
@@ -400,7 +445,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
             .OrderBy(f => f.Relative, StringComparer.Ordinal)];
     }
 
-    private static async Task AddFileAsync(ZipArchive zip, string entryName, string path, CancellationToken ct)
+    internal static async Task AddFileAsync(ZipArchive zip, string entryName, string path, CancellationToken ct)
     {
         var entry = zip.CreateEntry(entryName, CompressionLevel.Optimal);
         await using var target = entry.Open();
@@ -408,7 +453,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         await source.CopyToAsync(target, ct);
     }
 
-    private string NewWorkFolder()
+    internal string NewWorkFolder()
     {
         var path = Path.Combine(options.RestoreFolder, "work-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
@@ -421,7 +466,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         TryDeleteFile(options.DatabasePath + "-shm");
     }
 
-    private static void TryDeleteFile(string path)
+    internal static void TryDeleteFile(string path)
     {
         try
         {
@@ -433,7 +478,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         }
     }
 
-    private static void TryDeleteDirectory(string path)
+    internal static void TryDeleteDirectory(string path)
     {
         try
         {

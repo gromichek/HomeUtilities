@@ -7,10 +7,18 @@ namespace HomeUtilities.Data.Backup;
 /// <param name="BackupsFolder">Folder for the <c>before-restore-*.zip</c> copies of the replaced data.</param>
 /// <param name="AppVersion">Version written to the manifest.</param>
 /// <param name="Platform">Platform name written to the manifest.</param>
+/// <param name="SystemCopyFolder">
+/// Folder that holds only the newest automatic copy, for the Android system backup (Auto Backup); null on other platforms.
+/// </param>
 public sealed record BackupOptions(
     string DatabasePath,
     string AttachmentsFolder,
     string RestoreFolder,
     string BackupsFolder,
     string AppVersion,
-    string Platform);
+    string Platform,
+    string? SystemCopyFolder = null)
+{
+    /// <summary>Folder of the automatic copies (<c>auto</c> below <see cref="BackupsFolder"/>).</summary>
+    public string AutoBackupsFolder => Path.Combine(BackupsFolder, "auto");
+}
