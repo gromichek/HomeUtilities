@@ -737,16 +737,33 @@ public class ImportWizardViewModelTests
     }
 
     [Fact]
-    public async Task Import_makes_an_automatic_copy_first_and_goes_on_even_if_it_fails()
+    public async Task Import_makes_an_automatic_copy_first_and_goes_on_when_the_user_continues_without_it()
     {
         _autoBackup.BackupSucceeds = false;
         var vm = await ToMappingStepAsync();
         await vm.NextCommand.ExecuteAsync(null);
+        _dialogs.ConfirmAnswers.Enqueue(true); // Import?
+        _dialogs.ConfirmAnswers.Enqueue(true); // Continue without a copy?
 
         await vm.ImportCommand.ExecuteAsync(null);
 
         Assert.Equal([AutoBackupReason.BeforeImport], _autoBackup.Backups);
         Assert.Equal(ImportWizardStep.Done, vm.Step);
+    }
+
+    [Fact]
+    public async Task Import_stops_when_the_copy_fails_and_the_user_cancels()
+    {
+        _autoBackup.BackupSucceeds = false;
+        var vm = await ToMappingStepAsync();
+        await vm.NextCommand.ExecuteAsync(null);
+        _dialogs.ConfirmAnswers.Enqueue(true);  // Import?
+        _dialogs.ConfirmAnswers.Enqueue(false); // Continue without a copy? -> Cancel
+
+        await vm.ImportCommand.ExecuteAsync(null);
+
+        Assert.NotEqual(ImportWizardStep.Done, vm.Step);
+        Assert.True(vm.CanImport);
     }
 
     [Fact]

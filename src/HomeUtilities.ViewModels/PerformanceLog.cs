@@ -32,6 +32,10 @@ public static class PerformanceLog
         return true;
     }
 
+    /// <summary>Debug builds only: a section that skipped its reload because nothing changed (T-028i).</summary>
+    [Conditional("DEBUG")]
+    public static void ReportSkipped(string name) => Sink?.Note("Performance", $"Performance: {name} skipped (no change)");
+
     /// <summary>When the process started (set by the app at startup); used for the cold-start line.</summary>
     public static DateTimeOffset? AppStarted { get; set; }
 

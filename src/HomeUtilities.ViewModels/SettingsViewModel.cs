@@ -449,7 +449,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             return;
         }
 
-        await _auto.BackupBeforeAsync(AutoBackupReason.BeforeRestore);
+        if (!await _auto.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeRestore))
+        {
+            return;
+        }
+
         var staged = await _backup.StageRestoreAsync(stream);
         if (!staged.IsValid)
         {
@@ -601,7 +605,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
                 return;
             }
 
-            await _auto.BackupBeforeAsync(AutoBackupReason.BeforeRestore);
+            if (!await _auto.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeRestore))
+        {
+            return;
+        }
+
             var staged = await _exchange.StageImportAsync(stream);
             if (!staged.IsValid)
             {
@@ -662,7 +670,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             return;
         }
 
-        await _auto.BackupBeforeAsync(AutoBackupReason.BeforeWipe);
+        if (!await _auto.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeWipe))
+        {
+            return;
+        }
+
         _backup.StageWipe();
         await AskToCloseAppAsync("TestDataDeleteRestart");
     });

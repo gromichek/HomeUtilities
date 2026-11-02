@@ -719,8 +719,12 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            // A safety copy first (always made; a failure is logged and shown in Settings → Backup, the import goes on).
-            await _autoBackup.BackupBeforeAsync(AutoBackupReason.BeforeImport);
+            // A safety copy first (always made); if it fails the user decides whether to go on without it.
+            if (!await _autoBackup.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeImport))
+            {
+                return;
+            }
+
             var saved = await SaveProfileAsync(profile);
             var batch = await _batches.ApplyAsync(new ImportApplyRequest(_plan, _fileName, profile.SheetName, _contract.Id, saved.Id));
             ResultText = _localizer.Get("ImportDone", batch.ReadingCount, batch.BillCount, batch.PaymentCount, batch.SkippedCount, batch.ReplacementCount);

@@ -63,6 +63,8 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
 
     partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsEmpty));
 
+    private Guid _loadedMeterId;
+
     public Task LoadAsync(Guid meterId)
     {
         MeterId = meterId;
@@ -70,7 +72,7 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     }
 
     /// <summary>Back on the page (e.g. from the meter editor): the readings may have changed meanwhile.</summary>
-    public override Task OnAppearingAsync() => MeterId == Guid.Empty ? Task.CompletedTask : RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => Groups.Sum(g => g.Rows.Count)));
+    public override Task OnAppearingAsync() => MeterId == Guid.Empty ? Task.CompletedTask : RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), () => Groups.Sum(g => g.Rows.Count), _loadedMeterId == MeterId));
 
     /// <summary>Reads the meter again and rebuilds the rows.</summary>
     public async Task ReloadAsync(CancellationToken ct = default)
@@ -83,6 +85,7 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
             ct.ThrowIfCancellationRequested();
             _meter = meter;
             await RebuildAsync();
+            _loadedMeterId = meterId;
         }
         finally
         {

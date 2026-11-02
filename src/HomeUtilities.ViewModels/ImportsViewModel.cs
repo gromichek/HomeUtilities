@@ -219,7 +219,9 @@ public sealed partial class ImportsViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasNoProfiles));
     }
 
-    public override Task OnAppearingAsync() => RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => BatchItems.Count + ProfileItems.Count));
+    public override Task OnAppearingAsync() => RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), () => BatchItems.Count + ProfileItems.Count, _loaded));
+
+    private bool _loaded;
 
     /// <summary>Reloads both lists.</summary>
     public async Task ReloadAsync(CancellationToken ct = default)
@@ -229,6 +231,7 @@ public sealed partial class ImportsViewModel : ViewModelBase
         BatchItems = [.. batches.Select(b => new ImportBatchItemViewModel(b, _localizer, UndoAsync))];
         ProfileItems = [.. profiles.Select(p => new ImportProfileItemViewModel(p, _localizer, SaveNameAsync, ExportAsync, DeleteProfileAsync))];
         await LoadLinkRepairAsync(ct);
+        _loaded = true;
     }
 
     private async Task LoadLinkRepairAsync(CancellationToken ct = default)

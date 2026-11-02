@@ -210,7 +210,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     public override async Task OnAppearingAsync()
     {
         await base.OnAppearingAsync();
-        await RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct)));
+        await RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), null, _data is not null));
     }
 
     /// <summary>Loads the data again (the screen appears, or the owner changed something elsewhere) and recalculates the table.</summary>
