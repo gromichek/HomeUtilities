@@ -441,3 +441,6 @@ secrets.json
 
 # Local agent worktrees (project lead tooling)
 .claude/worktrees/
+
+# OAuth client values for Sync (T-030); copy secrets.template.json to secrets.json and fill it in
+src/HomeUtilities.App/secrets.json

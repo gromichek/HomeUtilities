@@ -36,6 +36,11 @@
     <MauiAsset Include="..\..\docs\user-guide\**\*" Exclude="..\..\docs\user-guide\**\*.mmd" LogicalName="guide\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!-- OAuth client values for Sync (T-030): the git-ignored secrets.json is embedded when present; CI builds without it. -->
+  <ItemGroup Condition="Exists('secrets.json')">
+    <EmbeddedResource Include="secrets.json" LogicalName="secrets.json" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Maui" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
@@ -46,10 +51,23 @@
     <PackageReference Include="Plugin.LocalNotification" />
   </ItemGroup>
 
+  <!-- Android sign-in for Drive scopes: Google Identity Services Authorization API (Google Play services). The .NET binding is
+       published by Microsoft (MIT); the Play services SDK is free but closed source - licence exception granted by the owner
+       for Google Play services only (2026-11-02). -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <PackageReference Include="Xamarin.GooglePlayServices.Auth" />
+  </ItemGroup>
+
+  <!-- Windows: tokens are protected with DPAPI (MIT). -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\HomeUtilities.Core\HomeUtilities.Core.csproj" />
     <ProjectReference Include="..\HomeUtilities.Data\HomeUtilities.Data.csproj" />
     <ProjectReference Include="..\HomeUtilities.Import\HomeUtilities.Import.csproj" />
+    <ProjectReference Include="..\HomeUtilities.Sync\HomeUtilities.Sync.csproj" />
     <ProjectReference Include="..\HomeUtilities.ViewModels\HomeUtilities.ViewModels.csproj" />
   </ItemGroup>
 

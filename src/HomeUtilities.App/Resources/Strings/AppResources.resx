@@ -1514,4 +1514,42 @@
   <data name="DataImportIssue_MissingColumn" xml:space="preserve"><value>{0}, record {1}: the field “{2}” is missing.</value></data>
   <data name="DataImportIssue_BadValue" xml:space="preserve"><value>{0}, record {1}: the field “{2}” has an unsuitable value.</value></data>
   <data name="DataImportIssue_ConstraintViolation" xml:space="preserve"><value>The records do not fit together: a duplicate or a missing linked record.</value></data>
+  <data name="SettingsSync" xml:space="preserve"><value>Sync</value></data>
+  <data name="SettingsValueSyncNotConfigured" xml:space="preserve"><value>Not configured in this build</value></data>
+  <data name="SettingsValueSyncSignedOut" xml:space="preserve"><value>Not connected</value></data>
+  <data name="SettingsValueSyncError" xml:space="preserve"><value>Connection lost</value></data>
+  <data name="SyncHint" xml:space="preserve"><value>Sync will keep your data the same on your phone and your PC. It uses a hidden folder in your own Google Drive that only this app can see: it does not show up in the Drive app or on the Drive website. Here you connect the Google account and check the access; the data sync itself comes with a later version.</value></data>
+  <data name="SyncProvider" xml:space="preserve"><value>Storage: {0}</value></data>
+  <data name="SyncStatusNotConfigured" xml:space="preserve"><value>Sync is not configured in this build.</value></data>
+  <data name="SyncStatusSignedOut" xml:space="preserve"><value>Not connected</value></data>
+  <data name="SyncStatusSignedIn" xml:space="preserve"><value>Connected</value></data>
+  <data name="SyncStatusError" xml:space="preserve"><value>Connection lost</value></data>
+  <data name="SyncAccount" xml:space="preserve"><value>Account: {0}</value></data>
+  <data name="SyncConnect" xml:space="preserve"><value>Connect Google account</value></data>
+  <data name="SyncCancelSignIn" xml:space="preserve"><value>Cancel sign-in</value></data>
+  <data name="SyncSigningIn" xml:space="preserve"><value>Waiting for the sign-in. Finish it in the browser or in the Google window.</value></data>
+  <data name="SyncCheck" xml:space="preserve"><value>Check connection</value></data>
+  <data name="SyncChecking" xml:space="preserve"><value>Checking…</value></data>
+  <data name="SyncCheckOk" xml:space="preserve"><value>OK (write, list, read, delete)</value></data>
+  <data name="SyncCheckFailed" xml:space="preserve"><value>The check failed at the step “{0}”: {1}</value></data>
+  <data name="SyncStep_Write" xml:space="preserve"><value>write</value></data>
+  <data name="SyncStep_List" xml:space="preserve"><value>list</value></data>
+  <data name="SyncStep_Read" xml:space="preserve"><value>read</value></data>
+  <data name="SyncStep_Delete" xml:space="preserve"><value>delete</value></data>
+  <data name="SyncDisconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="SyncDisconnectConfirm" xml:space="preserve"><value>Remove the Google account from this device and revoke the access of HomeUtilities to your Google Drive? The data in the app stay as they are.</value></data>
+  <data name="SyncDisconnected" xml:space="preserve"><value>Disconnected.</value></data>
+  <data name="SyncDisconnectedRevokeFailed" xml:space="preserve"><value>Disconnected on this device, but Google could not be reached to revoke the access. You can remove it in your Google account under Security → Third-party access.</value></data>
+  <data name="SyncLoopbackTitle" xml:space="preserve"><value>HomeUtilities</value></data>
+  <data name="SyncLoopbackMessage" xml:space="preserve"><value>The sign-in is finished. You can close this tab and go back to the app.</value></data>
+  <data name="SyncError_Other" xml:space="preserve"><value>The sign-in or the access failed. The details are in the error log.</value></data>
+  <data name="SyncError_NotConfigured" xml:space="preserve"><value>Sync is not configured in this build.</value></data>
+  <data name="SyncError_NoNetwork" xml:space="preserve"><value>No connection to Google. Check the internet connection and try again.</value></data>
+  <data name="SyncError_Cancelled" xml:space="preserve"><value>The sign-in was cancelled.</value></data>
+  <data name="SyncError_ConsentDenied" xml:space="preserve"><value>The access was not allowed. HomeUtilities needs it to keep its data in the hidden Drive folder.</value></data>
+  <data name="SyncError_TokenRevoked" xml:space="preserve"><value>The access was removed or has expired. Connect the account again.</value></data>
+  <data name="SyncError_ApiDisabled" xml:space="preserve"><value>The Google Drive API is switched off in the Google Cloud project of this build. Enable it in the Cloud Console and try again.</value></data>
+  <data name="SyncError_ClockSkew" xml:space="preserve"><value>The clock of this device is wrong (more than 5 minutes off). Set the date and time automatically and try again.</value></data>
+  <data name="SyncError_Timeout" xml:space="preserve"><value>Google did not answer in time. Try again.</value></data>
+  <data name="SyncError_NotFound" xml:space="preserve"><value>The file was not found in the hidden Drive folder.</value></data>
 </root>

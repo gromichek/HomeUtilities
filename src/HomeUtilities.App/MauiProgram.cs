@@ -8,6 +8,8 @@ using HomeUtilities.Core.Export;
 using HomeUtilities.Data.Backup;
 using HomeUtilities.Data;
 using HomeUtilities.Core.Reports;
+using HomeUtilities.Core.Sync;
+using HomeUtilities.Sync.Google;
 using HomeUtilities.Import;
 using HomeUtilities.ViewModels;
 using HomeUtilities.ViewModels.Common;
@@ -139,6 +141,31 @@ public static class MauiProgram
         builder.Services.AddTransient<ImportsViewModel>();
         builder.Services.AddTransient<ReportsViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();
+        // Sync (T-030): Google account + hidden Drive folder. Client ids come from the embedded secrets.json (absent in CI).
+        builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddSingleton(SyncSecrets.Load());
+        builder.Services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromSeconds(30) });
+        builder.Services.AddSingleton<GoogleTokenClient>();
+        builder.Services.AddSingleton<IUrlOpener, UrlOpener>();
+#if WINDOWS
+        builder.Services.AddSingleton<ISecretStore, DpapiSecretStore>();
+        builder.Services.AddSingleton<ISyncAccountService>(sp => new GoogleDesktopAccountService(
+            sp.GetRequiredService<GoogleOAuthOptions>(),
+            sp.GetRequiredService<GoogleTokenClient>(),
+            sp.GetRequiredService<ISecretStore>(),
+            sp.GetRequiredService<IUrlOpener>(),
+            sp.GetRequiredService<TimeProvider>(),
+            () =>
+            {
+                var texts = sp.GetRequiredService<ILocalizer>();
+                return new LoopbackPage(texts["SyncLoopbackTitle"], texts["SyncLoopbackMessage"]);
+            }));
+#elif ANDROID
+        builder.Services.AddSingleton<ISecretStore, SecureStorageSecretStore>();
+        builder.Services.AddSingleton<ISyncAccountService, GoogleAndroidAccountService>();
+#endif
+        builder.Services.AddSingleton<ISyncStorage, GoogleDriveStorage>();
+        builder.Services.AddTransient<SyncSettingsViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<PlaceholderViewModel>();
         builder.Services.AddTransient<HelpViewModel>();

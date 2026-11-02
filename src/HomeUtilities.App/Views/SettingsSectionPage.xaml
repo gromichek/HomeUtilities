@@ -187,6 +187,36 @@
                 </VerticalStackLayout>
             </ContentView>
 
+            <ContentView IsVisible="{Binding IsSync}">
+                <VerticalStackLayout Spacing="12" BindingContext="{Binding Settings.Sync}" x:DataType="vm:SyncSettingsViewModel">
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding ProviderText}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding StatusText}" FontAttributes="Bold" />
+                            <Label Text="{Binding AccountText}" IsVisible="{Binding ShowAccount}" />
+                            <Label Text="{Binding MessageText}" IsVisible="{Binding HasMessage}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding HasError}" Value="True">
+                                        <Setter Property="Style" Value="{StaticResource ErrorLabel}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Start" />
+                            <!-- One primary action per state; stacked buttons share the full width (CLAUDE.md UI checklist). -->
+                            <Button Text="{Binding ConnectText}" Command="{Binding ConnectCommand}"
+                                    IsEnabled="{Binding CanConnect}" IsVisible="{Binding ShowConnect}" Style="{StaticResource PrimaryButton}" />
+                            <Button Text="{Binding CancelSignInText}" Command="{Binding CancelSignInCommand}"
+                                    IsVisible="{Binding IsConnecting}" Style="{StaticResource SecondaryButton}" />
+                            <Button Text="{Binding CheckText}" Command="{Binding CheckConnectionCommand}"
+                                    IsVisible="{Binding IsSignedIn}" Style="{StaticResource PrimaryButton}" />
+                            <Button Text="{Binding DisconnectText}" Command="{Binding DisconnectCommand}"
+                                    IsVisible="{Binding CanDisconnect}" Style="{StaticResource DestructiveButton}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ContentView>
+
             <ContentView IsVisible="{Binding IsErrorLog}">
                 <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
                     <Label Text="{Binding ErrorLogHint}" Style="{StaticResource MutedLabel}" />

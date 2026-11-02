@@ -138,6 +138,11 @@
         <On Platform="Android" Value="&#xE864;" />
         <On Platform="WinUI" Value="&#xE898;" />
     </OnPlatform>
+    <!-- Sync (T-030): sync (Material, checked in the bundled font) / Sync (Segoe MDL2 E895). -->
+    <OnPlatform x:Key="IconSettingsSync" x:TypeArguments="x:String">
+        <On Platform="Android" Value="&#xE627;" />
+        <On Platform="WinUI" Value="&#xE895;" />
+    </OnPlatform>
     <OnPlatform x:Key="IconSettingsCategories" x:TypeArguments="x:String">
         <On Platform="Android" Value="&#xE574;" />
         <On Platform="WinUI" Value="&#xE8EC;" />

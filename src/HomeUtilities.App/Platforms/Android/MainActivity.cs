@@ -29,6 +29,13 @@ public class MainActivity : MauiAppCompatActivity
         }
     }
 
+    // The consent page of Google Play services (Sync sign-in) answers here.
+    protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
+    {
+        base.OnActivityResult(requestCode, resultCode, data);
+        AndroidAuthBridge.OnActivityResult(requestCode, resultCode, data);
+    }
+
     protected override void OnNewIntent(Intent? intent)
     {
         base.OnNewIntent(intent);
