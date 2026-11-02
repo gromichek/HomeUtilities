@@ -110,6 +110,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   every section root (Bills, Payments, Readings, Reports, Properties, Suppliers, Contracts, Meters, Settings lists) and
   check why Overview/Charges still feel slow (log whether the gate skipped: add "Performance: <VM> skipped (no change)" in
   Debug).
+- C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
+  a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
+  Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
+  startup keeps logging only (no dialog before the first screen).
 
 ### Done batch C1–C4 (T-028h)
 
