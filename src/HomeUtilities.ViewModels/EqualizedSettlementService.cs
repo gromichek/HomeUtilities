@@ -26,10 +26,18 @@ public sealed class EqualizedSettlementService(
         var current = YearMonth.From(clock.Today);
         var (from, to) = EqualizedSettlement.Range(planList, billList, current);
 
+        var requests = new List<(Guid, YearMonth)>();
+        for (var month = from; month <= to; month = month.AddMonths(1))
+        {
+            requests.Add((contractId, month));
+        }
+
+        // One read for all months (T-028h) instead of one database round trip per month.
+        var inputs = await loader.LoadManyAsync(requests, ct);
         var charges = new Dictionary<YearMonth, CalculatedCharge>();
         for (var month = from; month <= to; month = month.AddMonths(1))
         {
-            if (await loader.LoadAsync(contractId, month, ct) is { } input)
+            if (inputs.TryGetValue((contractId, month), out var input))
             {
                 charges[month] = ChargeCalculator.Calculate(input);
             }

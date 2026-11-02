@@ -1,3 +1,5 @@
+using HomeUtilities.Core.Abstractions;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Globalization;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
@@ -98,6 +100,66 @@ public class ChargesViewModelTests : IDisposable
         var vm = _kit.CreateCharges();
         await vm.ReloadAsync();
         return vm;
+    }
+
+    // ---- Reload only when needed (T-028h) --------------------------------------------------------------------------
+
+    private async Task<(ChargesViewModel Vm, DataChangeNotifier Changes)> AppearedAsync()
+    {
+        AddWater();
+        var changes = new DataChangeNotifier();
+        var vm = _kit.CreateCharges(changes: changes);
+        await vm.OnAppearingAsync();
+        return (vm, changes);
+    }
+
+    [Fact]
+    public async Task Appearing_again_without_a_change_does_not_recalculate()
+    {
+        var (vm, _) = await AppearedAsync();
+        var calls = _kit.ChargeLoader.Calls;
+        Assert.True(calls > 0);
+
+        await vm.OnAppearingAsync();
+        await vm.OnAppearingAsync();
+
+        Assert.Equal(calls, _kit.ChargeLoader.Calls);
+    }
+
+    [Fact]
+    public async Task Appearing_after_a_save_recalculates()
+    {
+        var (vm, changes) = await AppearedAsync();
+        var calls = _kit.ChargeLoader.Calls;
+
+        changes.Notify();
+        await vm.OnAppearingAsync();
+
+        Assert.True(_kit.ChargeLoader.Calls > calls);
+    }
+
+    [Fact]
+    public async Task Appearing_on_a_new_day_recalculates()
+    {
+        var (vm, _) = await AppearedAsync();
+        var calls = _kit.ChargeLoader.Calls;
+
+        _kit.Clock.Today = _kit.Clock.Today.AddDays(1);
+        await vm.OnAppearingAsync();
+
+        Assert.True(_kit.ChargeLoader.Calls > calls);
+    }
+
+    [Fact]
+    public async Task Appearing_after_a_language_change_recalculates()
+    {
+        var (vm, _) = await AppearedAsync();
+        var calls = _kit.ChargeLoader.Calls;
+
+        WeakReferenceMessenger.Default.Send(new LanguageChangedMessage("ru"));
+        await vm.OnAppearingAsync();
+
+        Assert.True(_kit.ChargeLoader.Calls > calls);
     }
 
     /// <summary>A water contract with Sep 26 = 100.000 and Oct 26 = 105.500 on a cold meter and a 1.41 price.</summary>

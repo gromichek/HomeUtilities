@@ -48,6 +48,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     private readonly ILayoutModeService _layoutModeService;
     private readonly IErrorLog _errorLog;
     private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly ReloadGate? _reloadGate;
     private readonly Dictionary<Guid, bool> _expanded = [];
 
     private IReadOnlyList<Calculated> _calculated = [];
@@ -127,8 +128,10 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         INavigationService navigation,
         ISettingsStore settings,
         ILayoutModeService layoutModeService,
-        IErrorLog errorLog)
+        IErrorLog errorLog,
+        IDataChangeNotifier? changes = null)
     {
+        _reloadGate = changes is null ? null : new ReloadGate(changes, clock);
         _propertyStore = propertyStore;
         _contractStore = contractStore;
         _supplierStore = supplierStore;
@@ -227,7 +230,16 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
     });
 
-    public override Task OnAppearingAsync() => RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => Cards.Count));
+    public override Task OnAppearingAsync() => RunSafeAsync(async () =>
+    {
+        if (_reloadGate is { IsFresh: true } && IsLoaded)
+        {
+            // Nothing was saved since the last calculation, same day, same language: keep the cards (T-028h).
+            return;
+        }
+
+        await RunLoadAsync(ct => ReloadAsync(ct), () => Cards.Count);
+    });
 
     /// <summary>Re-reads the property list and recalculates; called whenever the screen appears (tariffs and readings may have changed).</summary>
     public async Task ReloadAsync(CancellationToken ct = default)
@@ -235,6 +247,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         await _gate.WaitAsync(ct);
         try
         {
+            var snapshot = _reloadGate?.Snapshot();
             var properties = await OffUiAsync(() => _propertyStore.ListAsync(false, ct), ct);
             ct.ThrowIfCancellationRequested();
             Properties = [.. properties.Select(p => new ChoiceOption(p.Id, p.Name, string.Empty))];
@@ -248,6 +261,10 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             await CalculateAsync(ct);
             IsLoaded = true;
             OnPropertyChanged(nameof(SelectedPropertyIndex));
+            if (snapshot is { } taken)
+            {
+                _reloadGate?.MarkLoaded(taken);
+            }
         }
         finally
         {
@@ -268,6 +285,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         NoPropertiesText = _localizer["ReadingsNoProperties"];
         NoContractsText = _localizer["ChargesNoContracts"];
         OnPropertyChanged(nameof(MonthText));
+        _reloadGate?.Invalidate();
         if (IsLoaded)
         {
             Rebuild();
@@ -385,13 +403,27 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         var active = contracts
             .Where(c => !c.IsDeleted && c.ValidFrom <= period.LastDay && (c.ValidTo is null || c.ValidTo >= period.FirstDay))
             .OrderBy(c => c.Title, StringComparer.CurrentCultureIgnoreCase);
-        foreach (var contract in active)
+        var activeList = active.ToList();
+
+        // One read for all contracts of the property (T-028h); if it fails, each contract is loaded alone so only the broken one gets an error card.
+        IReadOnlyDictionary<(Guid ContractId, YearMonth Period), ChargeInput>? batch = null;
+        try
+        {
+            batch = await _loader.LoadManyAsync([.. activeList.Select(c => (c.Id, period))], ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Not logged here: the per-contract loads below hit the same error and log it for the contract concerned.
+            batch = null;
+        }
+
+        foreach (var contract in activeList)
         {
             var supplier = suppliers.GetValueOrDefault(contract.SupplierId, string.Empty);
             var color = categories.GetValueOrDefault(contract.CategoryId, "#808080");
             try
             {
-                var input = await _loader.LoadAsync(contract.Id, period, ct);
+                var input = batch is null ? await _loader.LoadAsync(contract.Id, period, ct) : batch.GetValueOrDefault((contract.Id, period));
                 results.Add(input is null
                     ? new Calculated(contract, supplier, color, null, null)
                     : new Calculated(contract, supplier, color, input, ChargeCalculator.Calculate(input)));

@@ -140,6 +140,12 @@ public sealed class AdaptiveFieldGrid : Grid
             var column = 0;
             foreach (var view in visible)
             {
+                // Buttons in this grid always fill their cell, so stacked buttons have the same (full) width (T-028h).
+                if (view is Button { HorizontalOptions.Alignment: not LayoutAlignment.Fill } button)
+                {
+                    button.HorizontalOptions = LayoutOptions.Fill;
+                }
+
                 if (GetFullRow(view))
                 {
                     if (column > 0)

@@ -59,7 +59,7 @@ public sealed partial class HelpContentService : IHelpContentService
 
             var document = Markdown.Parse(HtmlComment().Replace(markdown, string.Empty), Pipeline);
             await PrepareLinksAsync(document);
-            var body = document.ToHtml(Pipeline);
+            var body = WrapTables(document.ToHtml(Pipeline));
             return new HelpDocument(WrapPage(body, anchor, _theme.Current), false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -130,6 +130,14 @@ public sealed partial class HelpContentService : IHelpContentService
         url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
         || url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Puts every table into its own scrolling block. A table that is itself the scroll container shrinks to the page width,
+    /// so a wide table is squeezed instead of scrolled sideways.
+    /// </summary>
+    internal static string WrapTables(string html) =>
+        html.Replace("<table>", "<div class=\"table-wrap\"><table>", StringComparison.Ordinal)
+            .Replace("</table>", "</table></div>", StringComparison.Ordinal);
+
     private static string WrapPage(string body, string? anchor, AppThemeChoice theme)
     {
         // In-page "#section" links scroll in the page itself: the WebView then never reports a navigation (its URL differs per platform).
@@ -168,9 +176,9 @@ public sealed partial class HelpContentService : IHelpContentService
         a { color: var(--accent); }
         code { background: var(--code); padding: 1px 4px; border-radius: 4px; }
         img { max-width: 100%; height: auto; background: #ffffff; border-radius: 6px; }
-        table { border-collapse: collapse; display: block; overflow-x: auto; max-width: 100%; margin: 12px 0; }
-        th, td { min-width: 4em; }
-        th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+        .table-wrap { overflow-x: auto; max-width: 100%; margin: 12px 0; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: collapse; width: max-content; min-width: 100%; }
+        th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; white-space: normal; overflow-wrap: normal; word-break: normal; min-width: 7em; max-width: 22em; }
         th { background: var(--head); }
         .error { color: var(--muted); margin-top: 40px; text-align: center; }
         """;
