@@ -72,7 +72,6 @@ is written; the list below is the plan and will change.
 - T-031 Sync engine (change logs, merge, conflict tests) behind `ISyncStorage`; Google Drive adapter
 - T-032 Attachments sync
 - T-032a (optional) More storage providers: OneDrive, Dropbox, WebDAV — one adapter + sign-in each, when needed
-- T-032 Attachments sync
 
 ## Phase 10 — iOS
 - T-033 Enable `net10.0-ios`, macOS CI job, platform services for iOS
