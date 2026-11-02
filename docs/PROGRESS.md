@@ -8,6 +8,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
 | T-028i | Windows theme regression, reload gate everywhere, button widths, confirm without backup | Ready | | C5–C8 |
+| T-030 | Google sign-in per platform (Settings → Sync, Drive appDataFolder check) | Ready | | needs the owner's Cloud Console setup + `secrets.json`; Android via Google Play services (licence exception granted 2026-11-02) |
 
 ## Done
 

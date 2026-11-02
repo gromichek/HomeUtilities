@@ -62,6 +62,9 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   copyleft (GPL/AGPL) packages, fonts or assets (e.g. not EPPlus, Syncfusion, DevExpress, Telerik, FluentAssertions 8+;
   for Excel use ClosedXML/MiniExcel, for charts LiveCharts2/Microcharts). Name the package and its licence in the PR.
   Check transitive licences too; keep `SixLabors.*` at 1.x (2.x+ uses the non-permissive Six Labors Split License).
+  **Single exception** (owner decision 2026-11-02): **Google Play services** on Android (free, closed source, Android SDK
+  terms), via the MIT .NET bindings `Xamarin.GooglePlayServices.*`, **only for Google sign-in / authorization** (T-030) —
+  there is no Google-supported open alternative for Drive access on Android. Nothing else from Play services.
 
 ## UI checklist (every task that changes a screen) — copy it into the PR and tick it
 Collected from the owner's device tests (T-028a…T-028h). The owner does not run a full UI pass after every task, so these

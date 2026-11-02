@@ -42,4 +42,6 @@ must report no pending changes (a test checks this too). The design-time databas
 
 ## Licence
 
-See [LICENSE](LICENSE).
+See [LICENSE](LICENSE). Dependencies are free, permissive open-source packages, with one exception: the Android build uses
+**Google Play services** (free, closed source, under the Android SDK terms) for signing in to Google, needed for sync via
+Google Drive.
