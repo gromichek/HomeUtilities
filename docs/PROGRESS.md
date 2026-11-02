@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-028i | Windows theme regression, reload gate everywhere, button widths, confirm without backup | Ready | | C5–C8 |
 
 ## Done
 
