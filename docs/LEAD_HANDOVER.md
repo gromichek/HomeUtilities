@@ -107,16 +107,16 @@ Prompt for a new lead session:
   on the 1st belong to the previous month), use the meter-link repair, re-import gas after fixing plans.
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
-## 5. Current state (2026-11-01)
-- Merged up to **T-028d** (#165, Settings sections) and #166 (reminder channel `reminder_alerts`, high importance).
-  T-028f tested OK by the owner (2-column editors: keep).
-- Waiting for the owner's tests of #165 and #166 (lock screen / pop-up; Settings sections; icons on Windows).
-- **Next:** T-028b performance (task file not written yet): scrolling stutters in **Release** on phone and tablet in all
-  lists. Then T-029 backups.
-- Watch: one reminder for a paid bill (PROGRESS finding 7).
+## 5. Current state (2026-11-02)
+- Merged up to **T-028d** (#165) plus reminder fixes #166, #168, #170 (high-importance channel `reminder_alerts`,
+  delayed test notification, one-colour small icon) — reminders on the locked screen confirmed by the owner.
+- **Ready (owner can run both in parallel):** **T-028g** UI fixes round 3, **T-028b** performance (menu switching → ANR on
+  the tablet, scrolling; measure first).
+- Later: notification icon = white house from the real app icon (PROGRESS finding 8). Then T-029 backups.
+- Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner tests of #165/#166 → log results; write T-028b (performance) with his observations.
+1. Review and merge T-028g and T-028b; then T-029.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
