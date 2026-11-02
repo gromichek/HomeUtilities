@@ -104,12 +104,11 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   (back to the T-011 `ThemeService`), then find the change that broke it (theme choice on a pushed page? implicit styles,
   `StaticResource` colours in the new pages/controls — `SettingsSectionPage`, `AdaptiveFieldGrid`, `ListColumns`,
   `FilterPanel`, Shell flyout styles?) by comparing with the T-011…T-028c XAML/styles.
-  **Key observation (owner, 2026-11-02):** only the **first switch after the app starts** is wrong — in any direction
-  (log: start with saved Dark → System wrong; then Dark correct; later Dark → System correct). So the theme state set at
-  startup (saved choice applied in the `App` constructor/`CreateWindow`, before the window and resources exist) is out of
-  step with MAUI's internal "last theme" until the first change; check what changed in the startup order since T-011
-  (T-028b startup timing, T-028e/T-029 work in `CreateWindow`, `ThemeService` resolution) and whether the first
-  `RequestedThemeChanged` is raised/handled.
+  **Log of three switches (owner, 2026-11-02; each switch writes a "before" and an "after" line):** 12:30:16 Dark → System
+  **wrong**, 12:30:17 System → Dark **wrong**, 12:32:20 Dark → System **correct**. In all three the logged native values
+  (`root.RequestedTheme`, `ActualTheme`, `Application.RequestedTheme`) match the choice — so what is drawn does not follow
+  what is logged; the logged values alone do not show the problem. (The lead first misread this as "only the first switch
+  after start is wrong" — that is not established.)
 - C6. **Imports card buttons (phone):** Export / Delete are now equal and full width, but "Load profile from file" below
   them has its natural width and "Cancel import" too — within one card all stacked action buttons on compact width have
   the same full width (rule in UI_GUIDELINES §3 must cover buttons outside `AdaptiveFieldGrid` too).

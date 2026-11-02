@@ -5,20 +5,22 @@ Owner findings C5–C8 of 2026-11-02 (PROGRESS "Collected for the next session t
 Release builds; phone Android 16, tablet Android 13, Windows.
 
 ## C5. Windows: the first theme switch after start draws mixed colours (regression)
-- Symptom: after the app starts, the **first** theme choice (any direction) leaves the native parts (menu pane, page
-  background, pickers) in the old theme while texts switch; every **later** choice works. Owner: theme switching worked
-  correctly after T-011 and broke later.
+- Symptom: a theme choice often leaves the native parts (menu pane, page background, pickers) in the old theme while
+  texts switch; choosing again sometimes fixes it. Owner's log of three switches: 12:30:16 Dark → System **wrong**,
+  12:30:17 System → Dark **wrong**, 12:32:20 Dark → System **correct** (each switch writes a "before" and an "after"
+  line). Owner: theme switching worked correctly after T-011 and broke later.
 - Facts: `ThemeService` was unchanged from T-011 until #174; #174, #177 and #181 added workarounds (re-apply, delayed
   re-apply, flip to the opposite theme) — none helped. The Debug log (`Theme` entries) shows the native root
   `RequestedTheme`/`ActualTheme` and `Application.RequestedTheme` now follow the choice, so the switch itself happens.
 - Do:
   1. **Remove the workarounds** — back to the T-011 `ThemeService.Set` (keep the Debug log lines while investigating).
-  2. Find what changed in the **startup order** since T-011 (`git log` of `App.xaml.cs`, `MauiProgram.cs`,
-     `ThemeService`, `AppShell`): where the saved theme is applied (App constructor vs `CreateWindow`, before the window
-     and the resource dictionaries exist), what T-028b (startup timing), T-028e (reminders in `CreateWindow`) and T-029
-     (backup 5 s after start) added there, and whether MAUI raises `RequestedThemeChanged` on the first change. Also check
-     the theme-dependent resources added after T-011 (`SettingsSectionPage`, `FilterPanel`, `ListColumns`,
-     `AdaptiveFieldGrid`, flyout styles) for `StaticResource` colours instead of `AppThemeBinding`.
+  2. Find the change since T-011 that broke it — the logged native values are right in wrong and right cases alike, so
+     look at what is drawn: resources and styles added or changed after T-011 that use `StaticResource` colours or
+     `{x:Static}` instead of `AppThemeBinding` (`SettingsSectionPage` — the theme is now chosen on a pushed page since
+     T-028d —, `FilterPanel`, `ListColumns`, `AdaptiveFieldGrid`, flyout/Shell styles, `ResourceKeyConverter`), whether
+     MAUI raises `RequestedThemeChanged` and re-evaluates `AppThemeBinding`s each time, timing (choice made while a page
+     is pushed, quick successive choices), and the startup order (`App` constructor vs `CreateWindow`). Compare with the
+     T-011…T-028c versions (`git log -p`); if needed, test the theme choice on the old Settings page path to bisect.
   3. Fix the cause so that **the first** choice after start works in every direction (Light ↔ Dark ↔ System), on Windows
      and Android. Explain the cause in the PR. Remove the Debug log lines at the end (or keep them behind Debug only).
 
