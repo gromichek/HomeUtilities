@@ -186,4 +186,5 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 | 2026-10-20 | Uniform amount fields Net / VatPercent / Vat / Gross | consistency |
 | 2026-11-01 | One content pane on every device; editors are pages (no list + editor split) | tablet two-pane too cramped; one layout to maintain |
 | 2026-11-02 | Sync storage behind `ISyncStorage`; Google Drive first, OneDrive/Dropbox/WebDAV later if needed (one provider per user) | users without Google Drive |
+| 2026-11-02 | Exception to the licence rule: Google Play services (Android) only for Google sign-in | no Google-supported open way to authorize Drive scopes on Android |
 | 2026-10-19 | Coding sessions run in the cloud (Linux) | Windows target is verified only by CI and the owner |

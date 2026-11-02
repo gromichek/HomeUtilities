@@ -78,7 +78,7 @@ Prompt for a new lead session:
 | 2026-10-24 | Bilingual **user guide** `docs/user-guide/en.md` + `ru.md`, updated by every task with visible changes; shown in the app (Help, "?" opens the section). Diagrams: `.mmd` → `.svg` via `scripts/render-guide-diagrams.sh`. |
 | 2026-10-24 | Every task with new entities extends `SampleDataGenerator` (Debug sample data is the owner's test bed). |
 | 2026-10-24 | Menu always opens the section root; unsaved-changes dialog on every exit (menu, Back, window ✕). |
-| 2026-10-25 | Only **free, permissive open-source** dependencies (MIT/Apache/BSD/MS-PL), transitive ones too. `SixLabors.*` stays at 1.x. Charts are drawn with Microsoft.Maui.Graphics; Excel via ClosedXML. |
+| 2026-10-25 | Only **free, permissive open-source** dependencies (MIT/Apache/BSD/MS-PL), transitive ones too (one exception, see 2026-11-02). `SixLabors.*` stays at 1.x. Charts are drawn with Microsoft.Maui.Graphics; Excel via ClosedXML. |
 | 2026-10-25 | VAT is computed from the **rounded net**. |
 | 2026-10-26 | VAT on the bill total by default (`Contract.VatCalculation = OnTotal`, PerLine optional) — matches his heating bill. |
 | 2026-10-26 | Quantity from the bill (heating) with an optional **line amount from the bill** (the supplier multiplies the unrounded quantity, so 0.233 × price ≠ printed amount). |
@@ -94,6 +94,8 @@ Prompt for a new lead session:
 | 2026-10-31 | Reminders: **no quiet hours** — the configured time of day is used exactly. Inexact alarms (≈1 min late) are fine. |
 | 2026-11-01 | A window **lower than 480 dp** (phone in landscape) uses the phone layout (single pane, ✓ Save at the top), whatever its width (T-028a). |
 | 2026-11-01 | **One content pane everywhere** (variant A): no list + editor split on tablet/Windows; editors are pages with ✓ at the top on every device; lists in 2–3 columns on wide windows; period filter as a drop-down (T-028f). Owner tests speed only in **Release** builds. |
+| 2026-11-02 | **Licence exception:** Google Play services on Android (MIT bindings `Xamarin.GooglePlayServices.*`) only for Google sign-in (T-030). README and CLAUDE.md updated. |
+| 2026-11-02 | Sync storage replaceable (`ISyncStorage`); Google Drive first; one provider per user; OneDrive/Dropbox/WebDAV later if needed (T-032a). |
 | 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |
 
 ## 4. The owner's data (private — never in the repo)
@@ -112,7 +114,8 @@ Prompt for a new lead session:
 ## 5. Current state (2026-11-02)
 - Merged up to **T-029** (#184, automatic backups + JSON export/import) and **T-028h** (#181, fixes C1–C4 + reload gate).
   Waiting for the owner's checks (short steps of both PRs).
-- **Ready:** T-028i (C5 Windows theme regression — only the first switch after start fails; C6 button widths; C7 reload
+- **Ready:** T-030 Google sign-in (owner is registering the app in Google Cloud Console; values go to a git-ignored
+  `secrets.json`, never to the lead or the repo). T-028i (C5 Windows theme regression — only the first switch after start fails; C6 button widths; C7 reload
   gate for all sections; C8 confirm without backup copy).
 - Next: **T-030** Google sign-in (owner registers the app in Google Cloud Console; lead writes instructions), then T-031
   sync behind `ISyncStorage` (reuse `DataExchangeService` rows), T-032 attachments; T-032a other providers optional.
