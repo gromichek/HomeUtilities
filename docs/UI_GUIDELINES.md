@@ -131,6 +131,9 @@ Use these wordings everywhere (resx keys in brackets):
 - Read-only summary lines ("Now: 54.7 m² since 20.10.2026") in muted colour.
 
 ## 6a. Known MAUI pitfalls (found in owner tests)
+- **Windows: `FontImageSource` needs ONE font family.** A comma-separated fallback ("Segoe Fluent Icons, Segoe MDL2 Assets")
+  crashes MAUI ("not supported for a relative URI") when the image is rendered, e.g. on a theme change. Use
+  `IconImageFontFamily` for images; the fallback list (`IconFontFamily`) only for text labels (#197).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the
   **new** context — wrap it: `<ContentView IsVisible="{Binding HasSelection}"><views:Editor BindingContext="{Binding Selected}"/></ContentView>`.
 - Bundled fonts need `<MauiFont Include="Resources\Fonts\*.otf;Resources\Fonts\*.ttf" />` in the App csproj;
