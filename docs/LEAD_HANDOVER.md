@@ -33,8 +33,9 @@ Prompt for a new lead session:
 - **Squash-merges** (REST, see §2 commands), then a small docs PR that updates PROGRESS
   (Current → Done with a one-line note, Known issues, Manual test log). Coding sessions never edit PROGRESS.
 - Maintains ROADMAP, PROGRESS, WORKFLOW, UI_GUIDELINES, DATA_MODEL, ARCHITECTURE decision log, CLAUDE.md.
-- **Who fixes what** (owner decision 2026-10-24, WORKFLOW.md): trivial PR blockers and urgent breakage on `main`
-  → the lead fixes directly; small fixes after the owner's tests → the lead may start **helper agents, always
+- **Who fixes what** (owner decisions 2026-10-24 and 2026-11-02, WORKFLOW.md): trivial PR blockers (CI build errors,
+  merge conflicts) and real breakage on `main` → the lead fixes directly; **owner findings are collected and handed over
+  together as one task** (not fixed one by one); small fixes after the owner's tests → the lead may start **helper agents, always
   `model: sonnet`** (never the lead's own model — "the worker is cheaper than the lead"); everything else → a task
   file for a session.
 - The lead's own sandbox cannot restore NuGet packages → **CI is the only build and test** for the lead.
@@ -93,6 +94,7 @@ Prompt for a new lead session:
 | 2026-10-31 | Reminders: **no quiet hours** — the configured time of day is used exactly. Inexact alarms (≈1 min late) are fine. |
 | 2026-11-01 | A window **lower than 480 dp** (phone in landscape) uses the phone layout (single pane, ✓ Save at the top), whatever its width (T-028a). |
 | 2026-11-01 | **One content pane everywhere** (variant A): no list + editor split on tablet/Windows; editors are pages with ✓ at the top on every device; lists in 2–3 columns on wide windows; period filter as a drop-down (T-028f). Owner tests speed only in **Release** builds. |
+| 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |
 
 ## 4. The owner's data (private — never in the repo)
 - He keeps ~20 years (2004–2026) of history in an Excel workbook: one sheet per supplier, one row per month,
@@ -108,15 +110,14 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-02)
-- Merged up to **T-028g** (#174) and **T-028b** (#175). Waiting for the owner's device tests and his `Performance:` lines
-  from the error log (Release, tablet). If the tablet still hangs: next candidates are the Bill/Contract editor loads (still
-  on the UI thread) and page construction.
-- Reminders confirmed on the locked screen (#166/#168/#170).
-- Later: notification icon = white house from the real app icon (PROGRESS finding 8). Next phase: T-029 backups.
+- Merged up to **T-028b** (#175), **T-028g** (#174) and fix #177 (FullRow buttons, ListColumns crash). Phone: much faster.
+- Collecting findings C1–C4 in PROGRESS (Windows dark theme, help tables, Imports button widths, Overview/Charges speed)
+  → one task when the owner has also tested the tablet.
+- Later: notification icon = white house from the real app icon (finding 8). Next phase: T-029 backups.
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner tests of #174/#175 → log, fix findings (performance numbers). Then T-029 (write the task).
+1. After the tablet test: write one task from C1–C4 (+ new findings). Then T-029 (write the task).
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.

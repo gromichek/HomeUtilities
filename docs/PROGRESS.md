@@ -88,6 +88,21 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
+### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02)
+
+- C1. **Windows: first switch to the dark theme** — texts switch, native backgrounds (menu pane, page, pickers) stay light;
+  choosing the theme again fixes it. Two blind attempts failed (#174 native `RequestedTheme` + re-apply, #177 delayed
+  re-apply). Needs a real investigation (MAUI Windows theme handling, WinUI `RequestedTheme` of the window content vs
+  `Application.RequestedTheme`, styles using `StaticResource` colours).
+- C2. **Help: wide tables** are squeezed to the page width and do not scroll sideways (T-028g asked for `overflow-x: auto`
+  per table block; check the generated HTML/CSS in `HelpContentService` and the Android WebView).
+- C3. **Imports → saved profiles (phone portrait):** the stacked Export / Delete buttons have different widths — stacked
+  buttons must have the same (full) width.
+- C4. **Performance (phone, Release, `Performance:` lines):** Overview 0.5–0.9 s on **every** appearance (reloads each
+  time), Charges 0.9–1.2 s per switch, Reading history 0.4 s (269 items), startup to Overview 2.9 s (Windows: Overview
+  1.3–1.7 s, startup 3.8 s). Ideas: reload only when data changed since the last load (`IDataChangeNotifier`), cache
+  calculation inputs, profile `OverviewDataLoader`/`ChargeCalculator`; startup: show the Overview shell first.
+
 ### New findings (owner, 2026-11-01, after T-028a/T-028e)
 
 8. **Later (owner, 2026-11-02):** the notification small icon should be the **white house from the app icon** instead of
@@ -171,7 +186,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-01 | #166 | Reminders pop-up / lock screen | Pop-up OK when unlocked; **locked: sound only**, notification is in the shade after unlocking. App settings correct (lock screen allowed, show content). Delayed test added (#168) to check. |
 | 2026-11-02 | #168 + #170 | Reminders on the locked screen | **OK**: the screen lights up with the notification (also real reminders), bell icon. Cause was the coloured app icon used as the small icon. |
 | 2026-11-02 | #174 + #175 (Windows) | Windows maximised; error log | Two-column editors: "Save as template"/Delete stretched as cells; dark theme first switch still mixed; WinUI crash in `ListColumns` on resize during `ItemsSync` → #177. Timings (Windows): Overview 1.3–1.7 s, startup to Overview 3.8 s, Charges ~0.35 s. |
-| | #174 + #175 + #177 | Phone/tablet: T-028g fixes, rapid menu switching, scrolling; Windows: buttons, theme, no crash on resize | pending |
+| 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
 | 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |

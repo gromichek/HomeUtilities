@@ -20,17 +20,17 @@
 6. Owner pulls `main` in Visual Studio, tests, reports results. Bugs become new tasks;
    a broken merge is reverted.
 
-## Who fixes what (owner decision 2026-10-24)
+## Who fixes what (owner decisions 2026-10-24, 2026-11-02)
 - **Trivial blockers** of a PR (missing `using`, a test broken by merging two parallel PRs, a typo): the lead
   fixes them directly on the PR branch.
 - **Urgent breakage** on `main` (the app does not start, data loss): the lead fixes it at once as a hotfix PR.
 - **Everything else** (bugs from the owner's tests, anything that needs analysis and tests):
   - PR still open → the lead writes a review comment; the owner tells the same session
     "Fix the review comments on the PR";
-  - already merged → the lead writes a small fix task (`T-NNNx`), the owner runs it in a new session, **or**
-  - for small fixes the lead may start a helper agent itself, in its own worktree and branch, and reviews the
-    result like any PR. **Helpers always run on Sonnet** (coding sessions use Sonnet too: the worker is cheaper
-    than the lead). The lead never uses its own model for helpers.
+  - already merged → the lead **collects** the findings (PROGRESS "Collected for the next session task") and, once
+    a batch is ready, writes **one** fix task (`T-NNNx`) for a session — owner decision 2026-11-02: do not fix
+    findings one by one;
+  - helper agents only when the owner asks; **helpers always run on Sonnet** (the worker is cheaper than the lead).
 
 ## Owner troubleshooting
 - **Android shows boxes instead of icons** (or other resources look old) although `main` is fine: a stale local
