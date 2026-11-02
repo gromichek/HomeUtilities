@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and older (fullBackupContent): the same rule as data_extraction_rules.xml — only the newest automatic backup zip. -->
+<full-backup-content>
+    <include domain="file" path="backups/system-copy" />
+</full-backup-content>

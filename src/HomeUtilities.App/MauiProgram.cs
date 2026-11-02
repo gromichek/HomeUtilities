@@ -75,15 +75,17 @@ public static class MauiProgram
         builder.Services.AddSingleton<IClock>(clock);
 
         // A staged restore (or wipe) replaces the database file, so it runs before anything can open the database.
-        var backup = new BackupService(
-            new BackupOptions(
-                appPaths.DatabasePath,
-                appPaths.AttachmentsFolder,
-                appPaths.RestoreFolder,
-                appPaths.BackupsFolder,
-                AppInfo.Current.VersionString,
-                DeviceInfo.Platform.ToString()),
-            clock);
+        // On Android the newest automatic copy is also kept in its own folder, the only one the system backup carries
+        // (Platforms/Android/Resources/xml/*_rules.xml).
+        var backupOptions = new BackupOptions(
+            appPaths.DatabasePath,
+            appPaths.AttachmentsFolder,
+            appPaths.RestoreFolder,
+            appPaths.BackupsFolder,
+            AppInfo.Current.VersionString,
+            DeviceInfo.Platform.ToString(),
+            DeviceInfo.Platform == DevicePlatform.Android ? appPaths.SystemBackupFolder : null);
+        var backup = new BackupService(backupOptions, clock);
         // Off the UI thread: the restore blocks on async file work, which would deadlock on the UI thread.
         var restore = Task.Run(backup.ApplyPendingRestore).GetAwaiter().GetResult();
         if (restore is { Succeeded: false })
@@ -93,6 +95,9 @@ public static class MauiProgram
 
         builder.Services.AddSingleton(new StartupNotice { RestoreFailure = restore is { Succeeded: false } ? restore.Message : null });
         builder.Services.AddSingleton<IBackupService>(backup);
+        builder.Services.AddSingleton<IAutoBackupStorage>(new AutoBackupStorage(backupOptions, backup, clock));
+        builder.Services.AddSingleton<IDataExchangeService>(new DataExchangeService(backupOptions, clock, backup));
+        builder.Services.AddSingleton<IAutoBackupService, AutoBackupService>();
         builder.Services.AddSingleton<IFileSaveService, FileSaveService>();
         builder.Services.AddSingleton<IBackupFileService, BackupFileService>();
         builder.Services.AddSingleton<IAppLifecycle, AppLifecycle>();

@@ -29,6 +29,12 @@ public interface IBackupFileService
     /// </summary>
     Task<FileSaveResult> SaveAsync(string fileName, Func<Stream, Task> write);
 
+    /// <summary>The same for another file type (e.g. the JSON export): <paramref name="contentType"/> is its media type.</summary>
+    Task<FileSaveResult> SaveAsync(string fileName, string contentType, Func<Stream, Task> write);
+
+    /// <summary>Lets the owner pick a data file (<c>.json</c> or <c>.zip</c>); returns a readable, seekable stream or null if cancelled.</summary>
+    Task<Stream?> PickDataFileAsync();
+
     /// <summary>Lets the owner pick a backup file; returns a readable, seekable stream or null if cancelled.</summary>
     Task<Stream?> PickAsync();
 }

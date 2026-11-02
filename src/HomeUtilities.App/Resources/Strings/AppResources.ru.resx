@@ -1468,4 +1468,50 @@
   <data name="SettingsValueImports" xml:space="preserve"><value>Импорт из Excel, профили, отмена, исправление</value></data>
   <data name="SettingsValueErrorLog" xml:space="preserve"><value>Записей: {0}</value></data>
   <data name="SettingsErrorLogClearConfirm" xml:space="preserve"><value>Очистить журнал ошибок? Записи нельзя будет вернуть.</value></data>
+  <data name="SettingsBackupManualHeader" xml:space="preserve"><value>Файл резервной копии</value></data>
+  <data name="SettingsBackupLastSize" xml:space="preserve"><value>Последняя сохранённая вами копия: {0:g} ({1})</value></data>
+  <data name="SettingsBackupAutoHeader" xml:space="preserve"><value>Автоматические копии</value></data>
+  <data name="SettingsBackupAutoHint" xml:space="preserve"><value>Приложение само хранит копии всех ваших данных на этом устройстве: при запуске, если последней копии больше установленного срока и с тех пор что-то изменилось, а также всегда перед импортом, восстановлением и удалением данных. Эти копии лежат на этом устройстве и удаляются вместе с приложением — время от времени сохраняйте копию в другом месте кнопкой «Сохранить копию…».</value></data>
+  <data name="SettingsBackupAutoEnabled" xml:space="preserve"><value>Делать автоматические копии</value></data>
+  <data name="SettingsBackupAutoInterval" xml:space="preserve"><value>Как часто</value></data>
+  <data name="SettingsBackupAutoKeep" xml:space="preserve"><value>Сколько копий хранить</value></data>
+  <data name="BackupInterval_1" xml:space="preserve"><value>Каждый день</value></data>
+  <data name="BackupInterval_3" xml:space="preserve"><value>Раз в 3 дня</value></data>
+  <data name="BackupInterval_7" xml:space="preserve"><value>Раз в 7 дней</value></data>
+  <data name="SettingsBackupAutoLast" xml:space="preserve"><value>Последняя автоматическая копия: {0:g} ({1})</value></data>
+  <data name="SettingsBackupAutoNever" xml:space="preserve"><value>Автоматических копий пока нет.</value></data>
+  <data name="SettingsBackupAutoFailed" xml:space="preserve"><value>Последняя автоматическая копия не удалась: {0}</value></data>
+  <data name="SettingsBackupCopiesHeader" xml:space="preserve"><value>Автоматические копии на этом устройстве</value></data>
+  <data name="SettingsBackupCopiesEmpty" xml:space="preserve"><value>Автоматических копий пока нет.</value></data>
+  <data name="BackupCopyRestore" xml:space="preserve"><value>Восстановить</value></data>
+  <data name="BackupCopySave" xml:space="preserve"><value>Сохранить копию…</value></data>
+  <data name="BackupCopyMissing" xml:space="preserve"><value>Этой копии больше нет.</value></data>
+  <data name="AutoBackupReason_Scheduled" xml:space="preserve"><value>Автоматически</value></data>
+  <data name="AutoBackupReason_BeforeImport" xml:space="preserve"><value>Перед импортом</value></data>
+  <data name="AutoBackupReason_BeforeRestore" xml:space="preserve"><value>Перед восстановлением</value></data>
+  <data name="AutoBackupReason_BeforeWipe" xml:space="preserve"><value>Перед удалением всех данных</value></data>
+  <data name="AutoBackupReason_BeforeMigration" xml:space="preserve"><value>Перед обновлением базы данных</value></data>
+  <data name="BackupSizeKb" xml:space="preserve"><value>{0:0} КБ</value></data>
+  <data name="BackupSizeMb" xml:space="preserve"><value>{0:0.0} МБ</value></data>
+  <data name="SettingsBackupDataHeader" xml:space="preserve"><value>Все данные одним файлом (JSON)</value></data>
+  <data name="SettingsBackupDataHint" xml:space="preserve"><value>Экспорт записывает все записи, включая удалённые, в виде читаемого текста (JSON), при желании вместе с вложениями. Импорт такого файла заменяет все текущие данные; копия текущих данных сохраняется.</value></data>
+  <data name="SettingsBackupExportJson" xml:space="preserve"><value>Экспорт всех данных (JSON)…</value></data>
+  <data name="SettingsBackupImportJson" xml:space="preserve"><value>Импорт всех данных (JSON)…</value></data>
+  <data name="DataExportChoiceTitle" xml:space="preserve"><value>Экспорт всех данных</value></data>
+  <data name="DataExportWithAttachments" xml:space="preserve"><value>JSON с вложениями (.zip)</value></data>
+  <data name="DataExportJsonOnly" xml:space="preserve"><value>Только JSON (.json)</value></data>
+  <data name="DataExportSaved" xml:space="preserve"><value>Данные экспортированы.</value></data>
+  <data name="DataExportSavedTo" xml:space="preserve"><value>Данные экспортированы в {0}</value></data>
+  <data name="DataImportTitle" xml:space="preserve"><value>Импорт всех данных</value></data>
+  <data name="DataImportConfirm" xml:space="preserve"><value>Заменить ВСЕ текущие данные данными из этого файла (экспортировано {0:g}, записей: {1})? Копия текущих данных сохраняется.</value></data>
+  <data name="DataImportAction" xml:space="preserve"><value>Заменить данные</value></data>
+  <data name="DataImportRefused" xml:space="preserve"><value>Этот файл нельзя импортировать. Ничего не изменено.</value></data>
+  <data name="DataImportIssue_NotADataFile" xml:space="preserve"><value>Это не файл экспорта данных HomeUtilities.</value></data>
+  <data name="DataImportIssue_NewerFormat" xml:space="preserve"><value>Файл создан более новой версией приложения. Сначала обновите приложение.</value></data>
+  <data name="DataImportIssue_UnknownTable" xml:space="preserve"><value>Неизвестная таблица «{0}».</value></data>
+  <data name="DataImportIssue_BadRow" xml:space="preserve"><value>{0}, запись {1}: некорректная запись.</value></data>
+  <data name="DataImportIssue_UnknownColumn" xml:space="preserve"><value>{0}, запись {1}: неизвестное поле «{2}».</value></data>
+  <data name="DataImportIssue_MissingColumn" xml:space="preserve"><value>{0}, запись {1}: нет поля «{2}».</value></data>
+  <data name="DataImportIssue_BadValue" xml:space="preserve"><value>{0}, запись {1}: недопустимое значение в поле «{2}».</value></data>
+  <data name="DataImportIssue_ConstraintViolation" xml:space="preserve"><value>Записи не согласуются между собой: дубликат или отсутствует связанная запись.</value></data>
 </root>

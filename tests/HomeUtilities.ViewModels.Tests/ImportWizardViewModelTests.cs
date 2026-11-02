@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Backup;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
@@ -23,6 +24,7 @@ public class ImportWizardViewModelTests
     private readonly FakeDialogService _dialogs = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeSnackbarService _snackbar = new();
+    private readonly FakeAutoBackupService _autoBackup = new();
 
     private Property _flat = new() { Name = "Flat" };
     private Contract _contract = new();
@@ -41,7 +43,7 @@ public class ImportWizardViewModelTests
             _contracts.Links.Add(new ContractMeter { ContractId = _contract.Id, MeterId = _meter.Id, ValidFrom = new DateOnly(2000, 1, 1) });
         }
 
-        return new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        return new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, _autoBackup, new FakeLocalizer(_language));
     }
 
     private static SheetData Water()
@@ -156,7 +158,7 @@ public class ImportWizardViewModelTests
     [Fact]
     public async Task Without_properties_the_target_step_says_to_create_them_first()
     {
-        var vm = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        var vm = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, _autoBackup, new FakeLocalizer(_language));
         await vm.OnAppearingAsync();
         _reader.Sheets["Water"] = Water();
         _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
@@ -735,6 +737,19 @@ public class ImportWizardViewModelTests
     }
 
     [Fact]
+    public async Task Import_makes_an_automatic_copy_first_and_goes_on_even_if_it_fails()
+    {
+        _autoBackup.BackupSucceeds = false;
+        var vm = await ToMappingStepAsync();
+        await vm.NextCommand.ExecuteAsync(null);
+
+        await vm.ImportCommand.ExecuteAsync(null);
+
+        Assert.Equal([AutoBackupReason.BeforeImport], _autoBackup.Backups);
+        Assert.Equal(ImportWizardStep.Done, vm.Step);
+    }
+
+    [Fact]
     public async Task A_saved_profile_brings_back_the_period_settings()
     {
         var vm = await ToMappingStepAsync();
@@ -744,7 +759,7 @@ public class ImportWizardViewModelTests
         await vm.NextCommand.ExecuteAsync(null);
         await vm.ImportCommand.ExecuteAsync(null);
 
-        var again = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language));
+        var again = new ImportWizardViewModel(_files, _reader, _properties, _contracts, _meters, _bills, _plans, _profiles, _batches, _dialogs, _navigation, _snackbar, _autoBackup, new FakeLocalizer(_language));
         await again.OnAppearingAsync();
         _files.Workbook = new ImportPickedFile("book.xlsx", new MemoryStream([1]));
         await again.PickFileCommand.ExecuteAsync(null);

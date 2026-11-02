@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Backup;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -21,6 +22,10 @@ public class SettingsViewModelTests
     private FakeSettingsStore Settings { get; } = new();
 
     private FakeSampleDataGenerator Sample { get; } = new();
+
+    private FakeAutoBackupService AutoBackup { get; } = new();
+
+    private FakeDataExchangeService DataExchange { get; } = new();
 
     private bool IsDebug { get; set; } = true;
 
@@ -294,7 +299,9 @@ public class SettingsViewModelTests
         Assert.Equal(new byte[] { 1, 2, 3 }, BackupFiles.SavedBytes);
         Assert.Equal(1, Backup.Created);
         Assert.Equal("2026-10-24T09:30:00.0000000+00:00", Settings.Values[SettingsViewModel.LastBackupKey]);
-        Assert.StartsWith("SettingsBackupLast ", vm.LastBackupText);
+        Assert.Equal("3", Settings.Values[SettingsViewModel.LastBackupSizeKey]);
+        Assert.StartsWith("SettingsBackupLastSize ", vm.LastBackupText);
+        Assert.EndsWith("BackupSizeKb 1 [en] [en]", vm.LastBackupText);
         Assert.Equal(["BackupSavedTo C:\\Backups [en]"], Toast.Messages);
     }
 
@@ -489,6 +496,242 @@ public class SettingsViewModelTests
         return new ReminderSettingsViewModel(store, scheduler, notifications, new FakeDialogService(), new FakeLocalizer(language));
     }
 
+    private static readonly AutoBackupInfo OldCopy =
+        new("auto-20261020-080000.zip", new DateTimeOffset(2026, 10, 20, 8, 0, 0, TimeSpan.Zero), 3 * 1024 * 1024, AutoBackupReason.Scheduled);
+
+    private static readonly AutoBackupInfo NewCopy =
+        new("auto-20261024-090000-import.zip", new DateTimeOffset(2026, 10, 24, 9, 0, 0, TimeSpan.Zero), 2048, AutoBackupReason.BeforeImport);
+
+    [Fact]
+    public async Task BackupSection_ListsTheCopiesNewestFirstWithReasonAndSize()
+    {
+        AutoBackup.CopyList.AddRange([NewCopy, OldCopy]);
+        var vm = Create(out _, out _, out _);
+
+        await vm.RefreshBackupSectionAsync();
+
+        Assert.True(vm.HasCopies);
+        Assert.Equal(["auto-20261024-090000-import.zip", "auto-20261020-080000.zip"], vm.Copies.Select(c => c.Copy.Name));
+        Assert.Equal("AutoBackupReason_BeforeImport [en] · BackupSizeKb 2 [en]", vm.Copies[0].Details);
+        Assert.Equal("AutoBackupReason_Scheduled [en] · BackupSizeMb 3 [en]", vm.Copies[1].Details);
+        Assert.StartsWith("SettingsBackupAutoLast ", vm.LastAutoBackupText);
+        Assert.False(vm.HasLastAutoBackupError);
+    }
+
+    [Fact]
+    public async Task BackupSection_WithoutCopies_SaysSo()
+    {
+        var vm = Create(out _, out _, out _);
+
+        await vm.RefreshBackupSectionAsync();
+
+        Assert.False(vm.HasCopies);
+        Assert.Equal("SettingsBackupAutoNever [en]", vm.LastAutoBackupText);
+    }
+
+    [Fact]
+    public async Task BackupSection_ShowsTheLastFailure()
+    {
+        AutoBackup.LastError = "disk full";
+        var vm = Create(out _, out _, out _);
+
+        await vm.RefreshBackupSectionAsync();
+
+        Assert.True(vm.HasLastAutoBackupError);
+        Assert.Equal("SettingsBackupAutoFailed disk full [en]", vm.LastAutoBackupErrorText);
+    }
+
+    [Fact]
+    public async Task AutoBackupSwitch_IsStoredButOnlyWhenTheOwnerChangesIt()
+    {
+        AutoBackup.Settings = AutoBackupSettings.Default with { Enabled = false };
+        var vm = Create(out _, out _, out _);
+
+        await vm.RefreshBackupSectionAsync();
+        Assert.False(vm.AutoBackupEnabled);
+        Assert.False(AutoBackup.Settings.Enabled);
+
+        vm.AutoBackupEnabled = true;
+
+        Assert.True(AutoBackup.Settings.Enabled);
+    }
+
+    [Fact]
+    public async Task ChoosingTheIntervalAndTheNumberOfCopies_StoresThem()
+    {
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+        Assert.Equal("BackupInterval_1 [en]", vm.AutoIntervalValue);
+        Assert.Equal("7", vm.AutoKeepValue);
+
+        Dialogs.ChooseScript = _ => "BackupInterval_7 [en]";
+        await vm.ChooseIntervalCommand.ExecuteAsync(null);
+        Dialogs.ChooseScript = _ => "14";
+        await vm.ChooseKeepCommand.ExecuteAsync(null);
+
+        Assert.Equal(new AutoBackupSettings(true, 7, 14), AutoBackup.Settings);
+        Assert.Equal("BackupInterval_7 [en]", vm.AutoIntervalValue);
+        Assert.Equal("14", vm.AutoKeepValue);
+    }
+
+    [Fact]
+    public async Task CancellingAChoice_ChangesNothing()
+    {
+        var vm = Create(out _, out _, out _);
+        Dialogs.ChooseScript = _ => null;
+
+        await vm.ChooseIntervalCommand.ExecuteAsync(null);
+
+        Assert.Equal(AutoBackupSettings.Default, AutoBackup.Settings);
+    }
+
+    [Fact]
+    public async Task RestoreCopy_BacksUpTheCurrentDataFirstThenStagesAndOffersToClose()
+    {
+        AutoBackup.CopyList.Add(OldCopy);
+        AutoBackup.Files[OldCopy.Name] = [1, 2, 3];
+        Dialogs.ConfirmResult = true;
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+
+        await vm.Copies[0].RestoreCommand.ExecuteAsync(null);
+
+        Assert.Equal([AutoBackupReason.BeforeRestore], AutoBackup.Backups);
+        Assert.Equal(1, Backup.Staged);
+        Assert.Equal("BackupRestartMessage [en]", Dialogs.Confirmations.Last().Message);
+    }
+
+    [Fact]
+    public async Task RestoreCopy_WhenCancelled_BacksUpAndStagesNothing()
+    {
+        AutoBackup.CopyList.Add(OldCopy);
+        AutoBackup.Files[OldCopy.Name] = [1];
+        Dialogs.ConfirmResult = false;
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+
+        await vm.Copies[0].RestoreCommand.ExecuteAsync(null);
+
+        Assert.Empty(AutoBackup.Backups);
+        Assert.Equal(0, Backup.Staged);
+    }
+
+    [Fact]
+    public async Task RestoreCopy_WhenTheFileIsGone_SaysSo()
+    {
+        AutoBackup.CopyList.Add(OldCopy);
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+
+        await vm.Copies[0].RestoreCommand.ExecuteAsync(null);
+
+        Assert.Equal("BackupCopyMissing [en]", Assert.Single(Dialogs.Alerts).Message);
+        Assert.Equal(0, Backup.Staged);
+    }
+
+    [Fact]
+    public async Task SaveCopy_PassesTheCopyToTheFileService()
+    {
+        AutoBackup.CopyList.Add(OldCopy);
+        AutoBackup.Files[OldCopy.Name] = [9, 8, 7];
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+
+        await vm.Copies[0].SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(["HomeUtilities-backup-2026-10-20-0800.zip".Replace("0800", OldCopy.CreatedAt.ToLocalTime().ToString("HHmm", System.Globalization.CultureInfo.InvariantCulture))], BackupFiles.SavedNames);
+        Assert.Equal(new byte[] { 9, 8, 7 }, BackupFiles.SavedBytes);
+    }
+
+    [Fact]
+    public async Task RestoreFromFile_AlsoMakesAnAutomaticCopyFirst()
+    {
+        BackupFiles.Picked = new MemoryStream([1]);
+        Dialogs.ConfirmResult = true;
+        var vm = Create(out _, out _, out _);
+
+        await vm.RestoreBackupCommand.ExecuteAsync(null);
+
+        Assert.Equal([AutoBackupReason.BeforeRestore], AutoBackup.Backups);
+        Assert.Equal(1, Backup.Staged);
+    }
+
+    [Fact]
+    public async Task DeleteAllData_MakesAnAutomaticCopyBeforeStagingTheWipe()
+    {
+        Dialogs.ConfirmResult = true;
+        var vm = Create(out _, out _, out _);
+
+        await vm.DeleteAllDataCommand.ExecuteAsync(null);
+
+        Assert.Equal([AutoBackupReason.BeforeWipe], AutoBackup.Backups);
+        Assert.Equal(1, Backup.Wipes);
+    }
+
+    [Theory]
+    [InlineData("DataExportWithAttachments [en]", true, "data.zip", "application/zip")]
+    [InlineData("DataExportJsonOnly [en]", false, "data.json", "application/json")]
+    public async Task ExportJson_SavesTheChosenKind(string choice, bool withAttachments, string fileName, string contentType)
+    {
+        Dialogs.ChooseScript = _ => choice;
+        var vm = Create(out _, out _, out _);
+
+        await vm.ExportJsonCommand.ExecuteAsync(null);
+
+        Assert.Equal([withAttachments], DataExchange.Exports);
+        Assert.Equal([(fileName, contentType)], BackupFiles.SavedFiles);
+        Assert.Equal(new byte[] { 7, 7 }, BackupFiles.SavedBytes);
+        Assert.Equal(["DataExportSavedTo C:\\Backups [en]"], Toast.Messages);
+    }
+
+    [Fact]
+    public async Task ImportJson_BacksUpConfirmsStagesAndOffersToClose()
+    {
+        BackupFiles.PickedData = new MemoryStream([1]);
+        Dialogs.ConfirmResult = true;
+        var vm = Create(out _, out _, out _);
+
+        await vm.ImportJsonCommand.ExecuteAsync(null);
+
+        Assert.Equal([AutoBackupReason.BeforeRestore], AutoBackup.Backups);
+        Assert.Equal(1, DataExchange.Staged);
+        Assert.StartsWith("DataImportConfirm ", Dialogs.Confirmations.First().Message);
+        Assert.Contains("|42 [en]", Dialogs.Confirmations.First().Message);
+        Assert.Equal("BackupRestartMessage [en]", Dialogs.Confirmations.Last().Message);
+    }
+
+    [Fact]
+    public async Task ImportJson_OfABadFile_ListsTheProblemsAndChangesNothing()
+    {
+        BackupFiles.PickedData = new MemoryStream([1]);
+        DataExchange.Validation = new DataImportResult(
+            [new DataImportIssue(DataImportIssueCode.BadValue, "Bills", 4, "Gross"), new DataImportIssue(DataImportIssueCode.NewerFormat)], null, 10);
+        var vm = Create(out _, out _, out _);
+
+        await vm.ImportJsonCommand.ExecuteAsync(null);
+
+        var alert = Assert.Single(Dialogs.Alerts).Message;
+        Assert.Contains("DataImportRefused [en]", alert);
+        Assert.Contains("DataImportIssue_BadValue Bills|5|Gross [en]", alert);
+        Assert.Contains("DataImportIssue_NewerFormat |0| [en]", alert);
+        Assert.Empty(AutoBackup.Backups);
+        Assert.Equal(0, DataExchange.Staged);
+        Assert.Empty(Dialogs.Confirmations);
+    }
+
+    [Fact]
+    public async Task ImportJson_WhenCancelled_StagesNothing()
+    {
+        BackupFiles.PickedData = new MemoryStream([1]);
+        Dialogs.ConfirmResult = false;
+        var vm = Create(out _, out _, out _);
+
+        await vm.ImportJsonCommand.ExecuteAsync(null);
+
+        Assert.Empty(AutoBackup.Backups);
+        Assert.Equal(0, DataExchange.Staged);
+    }
+
     private SettingsViewModel Create(
         out FakeLanguageService language, out FakeThemeService theme, out FakeLayoutModeService layout, FakeNavigationService? navigation = null)
     {
@@ -496,7 +739,7 @@ public class SettingsViewModelTests
         language = new FakeLanguageService();
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
-        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), Reminders());
+        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders());
     }
 
     private sealed class FakeAppInfo(bool isDebug) : IAppInfo

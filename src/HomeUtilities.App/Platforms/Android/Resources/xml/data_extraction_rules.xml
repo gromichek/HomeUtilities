@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ (API 31): what the system may copy to the Google account (cloud backup) or to a new device (device transfer).
+    T-029 decision: NOT the live database (SQLite + WAL files may be copied half-written and restore as an old or inconsistent
+    state), not the attachments, not the settings. Only the folder that holds the newest automatic backup zip, which is a
+    complete, consistent copy (see AutoBackupStorage.UpdateSystemCopy). If that zip makes the backup exceed the Auto Backup
+    limit (25 MB), nothing is backed up, which is no worse than excluding everything.
+    After a reinstall the zip reappears in Settings → Backup → automatic copies, where it can be restored.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="backups/system-copy" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="backups/system-copy" />
+    </device-transfer>
+</data-extraction-rules>
