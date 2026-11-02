@@ -477,12 +477,12 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Button Text="{Binding Texts.SaveAsTemplateText}" Command="{Binding SaveAsTemplateCommand}"
+                <Button views:AdaptiveFieldGrid.FullRow="True" Text="{Binding Texts.SaveAsTemplateText}" Command="{Binding SaveAsTemplateCommand}"
                         Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
                         IsVisible="{Binding CanSaveAsTemplate}" />
 
                 <!-- Destructive action at the end of the form. -->
-                <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                <Button views:AdaptiveFieldGrid.FullRow="True" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                         Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
                         IsVisible="{Binding ShowFormDelete}" />
             </views:AdaptiveFieldGrid>

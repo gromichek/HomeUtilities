@@ -102,7 +102,7 @@
                 </Border>
 
                 <!-- Destructive action at the end of the form (user categories only). -->
-                <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+                <Button views:AdaptiveFieldGrid.FullRow="True" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                         Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
                         IsVisible="{Binding ShowFormDelete}" />
             </views:AdaptiveFieldGrid>

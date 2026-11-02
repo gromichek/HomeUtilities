@@ -30,6 +30,21 @@ public sealed class AdaptiveFieldGrid : Grid
         3,
         propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).Arrange());
 
+    /// <summary>
+    /// A child with <c>FullRow="True"</c> starts a new row and spans all columns (buttons and notes under the cards: on a wide
+    /// window they must not become a cell next to a card and stretch to its height — owner, 2026-11-02).
+    /// </summary>
+    public static readonly BindableProperty FullRowProperty = BindableProperty.CreateAttached(
+        "FullRow",
+        typeof(bool),
+        typeof(AdaptiveFieldGrid),
+        false,
+        propertyChanged: (child, _, _) => ((child as Element)?.Parent as AdaptiveFieldGrid)?.Arrange());
+
+    public static bool GetFullRow(BindableObject view) => (bool)view.GetValue(FullRowProperty);
+
+    public static void SetFullRow(BindableObject view, bool value) => view.SetValue(FullRowProperty, value);
+
     private bool _arranging;
     private int _arrangedColumns;
 
@@ -121,15 +136,40 @@ public sealed class AdaptiveFieldGrid : Grid
             }
 
             RowDefinitions.Clear();
-            for (var row = 0; row < (visible.Count + columns - 1) / columns; row++)
+            var row = 0;
+            var column = 0;
+            foreach (var view in visible)
             {
-                RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+                if (GetFullRow(view))
+                {
+                    if (column > 0)
+                    {
+                        row++;
+                        column = 0;
+                    }
+
+                    SetRow((IView)view, row);
+                    SetColumn((IView)view, 0);
+                    SetColumnSpan((IView)view, columns);
+                    row++;
+                    continue;
+                }
+
+                SetRow((IView)view, row);
+                SetColumn((IView)view, column);
+                SetColumnSpan((IView)view, 1);
+                column++;
+                if (column == columns)
+                {
+                    row++;
+                    column = 0;
+                }
             }
 
-            for (var i = 0; i < visible.Count; i++)
+            var rows = column > 0 ? row + 1 : row;
+            for (var r = 0; r < rows; r++)
             {
-                SetRow((IView)visible[i], i / columns);
-                SetColumn((IView)visible[i], i % columns);
+                RowDefinitions.Add(new RowDefinition(GridLength.Auto));
             }
         }
         finally
