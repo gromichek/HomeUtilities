@@ -44,23 +44,44 @@ public static class ListColumns
         }
     }
 
+    private static readonly BindableProperty PendingProperty = BindableProperty.CreateAttached(
+        "Pending", typeof(bool), typeof(ListColumns), false);
+
+    // The size changes while the list is being arranged, often in the middle of an items update. Replacing the items layout
+    // there makes WinUI throw "Cannot complete a collection modification while another modification is in progress"
+    // (owner's error log, 2026-11-02), so the change is posted and done once the current layout pass and update are over.
     private static void Apply(CollectionView view)
+    {
+        if (TargetSpan(view) is not { } span || span == CurrentSpan(view) || (bool)view.GetValue(PendingProperty))
+        {
+            return;
+        }
+
+        view.SetValue(PendingProperty, true);
+        view.Dispatcher.Dispatch(() =>
+        {
+            view.SetValue(PendingProperty, false);
+            if (TargetSpan(view) is not { } target || target == CurrentSpan(view))
+            {
+                return;
+            }
+
+            view.ItemsLayout = target == 1
+                ? new LinearItemsLayout(ItemsLayoutOrientation.Vertical)
+                : new GridItemsLayout(target, ItemsLayoutOrientation.Vertical) { HorizontalItemSpacing = Spacing };
+        });
+    }
+
+    private static int? TargetSpan(CollectionView view)
     {
         var minWidth = GetMinItemWidth(view);
         if (minWidth <= 0 || view.Width <= 0)
         {
-            return;
+            return null;
         }
 
-        var span = Math.Clamp((int)Math.Floor((view.Width + Spacing) / (minWidth + Spacing)), 1, MaxColumns);
-        var current = view.ItemsLayout is GridItemsLayout grid ? grid.Span : 1;
-        if (current == span)
-        {
-            return;
-        }
-
-        view.ItemsLayout = span == 1
-            ? new LinearItemsLayout(ItemsLayoutOrientation.Vertical)
-            : new GridItemsLayout(span, ItemsLayoutOrientation.Vertical) { HorizontalItemSpacing = Spacing };
+        return Math.Clamp((int)Math.Floor((view.Width + Spacing) / (minWidth + Spacing)), 1, MaxColumns);
     }
+
+    private static int CurrentSpan(CollectionView view) => view.ItemsLayout is GridItemsLayout grid ? grid.Span : 1;
 }

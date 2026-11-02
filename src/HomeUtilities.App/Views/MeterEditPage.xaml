@@ -214,10 +214,10 @@
             </Border>
 
             <!-- Destructive action at the end of the form, apart from Save; a meter with readings is replaced, not deleted. -->
-            <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+            <Button views:AdaptiveFieldGrid.FullRow="True" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                     Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
                     IsVisible="{Binding ShowFormDelete}" />
-            <Label Text="{Binding Texts.DeleteBlockedText}" Style="{StaticResource MutedLabel}"
+            <Label views:AdaptiveFieldGrid.FullRow="True" Text="{Binding Texts.DeleteBlockedText}" Style="{StaticResource MutedLabel}"
                    IsVisible="{Binding ShowDeleteBlocked}" />
         </views:AdaptiveFieldGrid>
     </ScrollView>

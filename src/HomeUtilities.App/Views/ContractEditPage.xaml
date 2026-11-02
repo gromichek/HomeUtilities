@@ -630,7 +630,7 @@
             </Border>
 
             <!-- Destructive action at the end of the form, apart from Save. -->
-            <Button Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
+            <Button views:AdaptiveFieldGrid.FullRow="True" Text="{Binding DeleteWholeText}" Command="{Binding DeleteCommand}"
                     Style="{StaticResource DestructiveButton}" HorizontalOptions="Start"
                     IsVisible="{Binding ShowFormDelete}" />
         </views:AdaptiveFieldGrid>

@@ -28,14 +28,13 @@ public sealed class ThemeService : IThemeService
             };
             app.UserAppTheme = target;
 #if WINDOWS
-            // Windows: the first change is applied to the MAUI resources but the native window root (WinUI) keeps its
-            // old RequestedTheme until a second change. Set it explicitly, now and once more after the layout pass.
+            // Windows: on the first change MAUI's texts switch, but the native (WinUI) backgrounds - menu pane, page, pickers -
+            // keep the old theme; choosing the theme a second time fixes it (owner, 2026-11-02, also after the immediate
+            // re-apply of #174). MAUI applies its own theme to the window while handling the change, so the native theme
+            // is set again a moment later, like the owner's second choice does.
             ApplyNativeTheme(app, target);
-            app.Dispatcher.Dispatch(() =>
-            {
-                app.UserAppTheme = target;
-                ApplyNativeTheme(app, target);
-            });
+            app.Dispatcher.Dispatch(() => ApplyNativeTheme(app, target));
+            app.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(300), () => ApplyNativeTheme(app, target));
 #endif
         }
     }
