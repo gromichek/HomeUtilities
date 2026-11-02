@@ -125,13 +125,15 @@ Prompt for a new lead session:
 
 ## 6. Next steps (ROADMAP)
 1. Owner tests of #191/#194 → log; if sign-in works on Windows and the phone, write T-031.
-2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
-   wrap on narrow screens).
-3. **T-028b** memory and battery optimisation.
-4. **T-029** automatic local backups, JSON export/import (manual backup file exists since T-017c).
-5. **T-030–T-032** Google sign-in, sync engine (change logs in Drive appDataFolder), attachments sync.
-   Secrets per ARCHITECTURE §9. Note: saving an id that exists only as a soft-deleted row needs "resurrect" for sync.
-6. **T-033** iOS. **T-025b** contract templates (optional, low priority).
+2. **T-031** sync engine behind `ISyncStorage` (change logs `changes/<deviceId>/<seq>.json`, row shape of
+   `DataExchangeService`, last-writer-wins by `UpdatedAt`, soft deletes, snapshot; sync on start/resume, after saves,
+   "Sync now"; nothing in the background on Android). Note: saving an id that exists only as a soft-deleted row needs
+   "resurrect".
+3. **T-032** attachments sync. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
+4. **T-034** release identity: permanent signing key (+ its SHA-1 as Android OAuth client), real app icon/splash, white
+   house notification icon.
+5. **T-033** iOS. **T-025b** contract templates (optional, low priority).
+6. Collected owner findings go into one batch task when the owner asks (PROGRESS "Collected …").
 
 ## 7. Pitfalls learned (details in UI_GUIDELINES §6a and PROGRESS)
 - Shell re-applies plain query dictionaries on Back → editors must apply a query once (`EditorPageBase._queryApplied`).
