@@ -7,7 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-031 | Sync engine (change logs via `ISyncStorage`, merge, first join, Sync now) | Ready | | after T-030; first-join default to confirm with the owner |
+| T-031 | Sync engine (change logs via `ISyncStorage`, merge, first join, Sync now) | Ready | | after T-030; first join: "Replace with cloud data" preselected (owner decision 2026-11-02) |
 
 ## Done
 
