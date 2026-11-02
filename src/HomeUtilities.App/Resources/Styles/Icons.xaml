@@ -12,13 +12,30 @@
         <On Platform="WinUI" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
     </OnPlatform>
 
-    <!-- FontImageSource needs ONE font family: on Windows MAUI turns a comma-separated fallback list into a relative URI and
-         crashes ("not supported for a relative URI") when the image is rendered — e.g. on a theme change, when the
-         AppThemeBinding colour re-renders every image (owner, 2026-11-02). Segoe MDL2 Assets exists on Windows 10 and 11. -->
-    <OnPlatform x:Key="IconImageFontFamily" x:TypeArguments="x:String">
-        <On Platform="Android" Value="MaterialIcons" />
-        <On Platform="WinUI" Value="Segoe MDL2 Assets" />
-    </OnPlatform>
+    <!-- Font of every FontImageSource (toolbar icons, menu icons): the font FILE bundled with the app, on all platforms.
+         In an unpackaged Windows app MAUI's FontImageSourceService turns the font of an image into a file URI
+         (FontImageSourceService.Windows.cs, GetFontSource → new Uri(source).LocalPath); a system font ("Segoe MDL2 Assets"),
+         a fallback list or the default font gives a relative URI and throws "This operation is not supported for a relative
+         URI" — images stay empty, and on a theme change (AppThemeBinding colour re-renders every image) the app crashed
+         (owner, 2026-11-02; MAUI issue 26441 is the same family of unpackaged-font bugs). Labels may keep IconFontFamily. -->
+    <x:String x:Key="IconImageFontFamily">MaterialIcons</x:String>
+
+    <!-- Glyphs of the image icons: Material Icons Outlined code points (all present in the bundled font). -->
+    <x:String x:Key="ImageGlyphAdd">&#xE145;</x:String>
+    <x:String x:Key="ImageGlyphOpenLink">&#xE89E;</x:String>
+    <x:String x:Key="ImageGlyphPaid">&#xE2E6;</x:String>
+    <x:String x:Key="ImageGlyphHelp">&#xE8FD;</x:String>
+    <x:String x:Key="ImageGlyphSave">&#xE5CA;</x:String>
+    <x:String x:Key="MenuGlyphOverview">&#xE88A;</x:String>
+    <x:String x:Key="MenuGlyphProperties">&#xEA40;</x:String>
+    <x:String x:Key="MenuGlyphSuppliers">&#xE8D1;</x:String>
+    <x:String x:Key="MenuGlyphReadings">&#xE9E4;</x:String>
+    <x:String x:Key="MenuGlyphCharges">&#xE24A;</x:String>
+    <x:String x:Key="MenuGlyphBills">&#xEF6E;</x:String>
+    <x:String x:Key="MenuGlyphPayments">&#xEA15;</x:String>
+    <x:String x:Key="MenuGlyphReports">&#xE26B;</x:String>
+    <x:String x:Key="MenuGlyphHelp">&#xE8FD;</x:String>
+    <x:String x:Key="MenuGlyphSettings">&#xE8B8;</x:String>
 
     <OnPlatform x:Key="IconAdd" x:TypeArguments="x:String">
         <On Platform="Android" Value="&#xE145;" />
@@ -179,27 +196,27 @@
     <!-- Image sources for toolbar items and buttons with an icon next to the text. -->
     <FontImageSource x:Key="IconAddSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
-                     Glyph="{StaticResource IconAdd}"
+                     Glyph="{StaticResource ImageGlyphAdd}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconOpenLinkSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
-                     Glyph="{StaticResource IconOpenLink}"
+                     Glyph="{StaticResource ImageGlyphOpenLink}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconPaidSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
-                     Glyph="{StaticResource IconPaid}"
+                     Glyph="{StaticResource ImageGlyphPaid}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconHelpSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
-                     Glyph="{StaticResource IconHelp}"
+                     Glyph="{StaticResource ImageGlyphHelp}"
                      Size="24"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     <FontImageSource x:Key="IconSaveSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
-                     Glyph="{StaticResource IconSave}"
+                     Glyph="{StaticResource ImageGlyphSave}"
                      Size="24"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
 
