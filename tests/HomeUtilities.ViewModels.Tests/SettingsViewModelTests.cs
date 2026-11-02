@@ -93,7 +93,7 @@ public class SettingsViewModelTests
 
         Assert.Equal(
             [
-                SettingsSection.Language, SettingsSection.Theme, SettingsSection.Reminders, SettingsSection.Backup,
+                SettingsSection.Language, SettingsSection.Theme, SettingsSection.Reminders, SettingsSection.Backup, SettingsSection.Sync,
                 SettingsSection.Categories, SettingsSection.VatRates, SettingsSection.BillTemplates, SettingsSection.Imports,
                 SettingsSection.ErrorLog, SettingsSection.About,
             ],
@@ -739,7 +739,7 @@ public class SettingsViewModelTests
         language = new FakeLanguageService();
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
-        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders());
+        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language));
     }
 
     private sealed class FakeAppInfo(bool isDebug) : IAppInfo

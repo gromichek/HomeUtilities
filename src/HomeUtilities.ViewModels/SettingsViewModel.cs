@@ -193,9 +193,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         IClock clock,
         IAutoBackupService autoBackup,
         IDataExchangeService dataExchange,
-        ReminderSettingsViewModel reminders)
+        ReminderSettingsViewModel reminders,
+        SyncSettingsViewModel sync)
     {
         Reminders = reminders;
+        Sync = sync;
         _auto = autoBackup;
         _exchange = dataExchange;
         _backup = backup;
@@ -223,6 +225,13 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
                 RefreshSectionValues();
             }
         };
+        Sync.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SyncSettingsViewModel.SummaryText))
+            {
+                RefreshSectionValues();
+            }
+        };
         RefreshTexts();
     }
 
@@ -231,6 +240,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     /// <summary>The Reminders card.</summary>
     public ReminderSettingsViewModel Reminders { get; }
+
+    /// <summary>The Sync section (Google account).</summary>
+    public SyncSettingsViewModel Sync { get; }
 
     public string Version { get; }
 
@@ -277,6 +289,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         SettingsSection.Theme => "SettingsTheme",
         SettingsSection.Reminders => "SettingsReminders",
         SettingsSection.Backup => "SettingsBackup",
+        SettingsSection.Sync => "SettingsSync",
         SettingsSection.Categories => "SectionCategories",
         SettingsSection.VatRates => "SectionVatRates",
         SettingsSection.BillTemplates => "SectionBillTemplates",
@@ -296,6 +309,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         SettingsSection.Backup => DateTimeOffset.TryParse(_settings.GetString(LastBackupKey), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var last)
             ? _localizer.Get("SettingsValueBackupLast", last.ToLocalTime())
             : _localizer["SettingsValueBackupNever"],
+        SettingsSection.Sync => Sync.SummaryText,
         SettingsSection.Categories => _localizer["SettingsValueCategories"],
         SettingsSection.VatRates => _localizer["SettingsValueVatRates"],
         SettingsSection.BillTemplates => _localizer["SettingsValueBillTemplates"],
