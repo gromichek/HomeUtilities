@@ -8,6 +8,10 @@
                 x:DataType="vm:ImportWizardViewModel"
                 Title="{Binding Title}">
 
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
     <Grid RowDefinitions="Auto,*,Auto" Padding="12" RowSpacing="8">
 
         <Label Grid.Row="0" Text="{Binding StepText}" FontAttributes="Bold" />

@@ -24,6 +24,7 @@ public enum HelpTopic
     Reminders,
     Backup,
     ErrorLog,
+    Imports,
     About,
 }
 
@@ -54,6 +55,7 @@ public static class HelpTopics
         [HelpTopic.Reminders] = ("reminders", "напоминания"),
         [HelpTopic.Backup] = ("backup", "резервная-копия"),
         [HelpTopic.ErrorLog] = ("error-log", "журнал-ошибок"),
+        [HelpTopic.Imports] = ("imports-and-profiles", "импорты-и-профили"),
         [HelpTopic.About] = ("about", "о-приложении"),
     };
 

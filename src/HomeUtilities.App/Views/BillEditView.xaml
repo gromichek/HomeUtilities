@@ -455,8 +455,10 @@
                                             <Label Text="{Binding Text}" />
                                             <Label Text="{Binding Detail}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDetail}" />
                                         </VerticalStackLayout>
-                                        <Button Grid.Column="1" Text="{Binding RemoveText}" Command="{Binding RemoveCommand}"
-                                                Style="{StaticResource DestructiveButton}" />
+                                        <Button Grid.Column="1" Style="{StaticResource IconButton}" VerticalOptions="Start"
+                                                Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
+                                                ToolTipProperties.Text="{Binding RemoveText}"
+                                                SemanticProperties.Description="{Binding RemoveText}" />
                                     </Grid>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>

@@ -145,7 +145,7 @@ public sealed partial class HelpContentService : IHelpContentService
             <html{themeAttribute}>
             <head>
             <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
             <meta name="color-scheme" content="light dark">
             <style>{Css}</style>
             </head>
@@ -169,6 +169,7 @@ public sealed partial class HelpContentService : IHelpContentService
         code { background: var(--code); padding: 1px 4px; border-radius: 4px; }
         img { max-width: 100%; height: auto; background: #ffffff; border-radius: 6px; }
         table { border-collapse: collapse; display: block; overflow-x: auto; max-width: 100%; margin: 12px 0; }
+        th, td { min-width: 4em; }
         th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
         th { background: var(--head); }
         .error { color: var(--muted); margin-top: 40px; text-align: center; }
