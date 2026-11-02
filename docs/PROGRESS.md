@@ -7,8 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-028g | UI fixes round 3 (Imports help + buttons, payment row, help zoom, dark theme on Windows) | Ready | | parallel with T-028b |
-| T-028b | Performance: menu switching (ANR on tablet), scrolling, memory, battery | Ready | | measure first |
 
 ## Done
 
@@ -46,6 +44,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-028b | Performance: menu switching, scrolling, memory | 2026-11-02, #175 | Loads off the UI thread (Sqlite "async" is synchronous — likely ANR cause), latest-wins cancellation on leave/new load, `ItemsSync` keeps scroll position, Bills/Payments cards flattened; `Performance:` lines ≥ 300 ms + startup time in the error log. No device numbers yet; root pages not made singletons (Shell caches root pages). Editors (Bill, Contract) still load on the UI thread. |
+| T-028g | UI fixes round 3 | 2026-11-02, #174 | Imports help, profile buttons wrap/stack, payment row with a small cancel icon, help pinch zoom (Android), Windows dark theme re-applied (cause not confirmed). |
 | T-028d | Settings as a list of sections | 2026-11-01, #165 | 10 rows (icon, title, value); Language, Theme, Reminders, Backup, Error log, About open `SettingsSectionPage`; Categories, VAT rates, Bill templates, Imports open their screens; buttons stacked; Clear log confirmed; new HelpTopics. Segoe glyphs chosen from memory — owner to check icons on Windows. |
 | — | Reminders pop up and show on the lock screen | 2026-11-01, #166 | Channel `reminder_alerts` with **high** importance (default importance: no pop-up, not on the owner's lock screen); old channels deleted. |
 | T-028f | One content pane everywhere | 2026-11-01, #163 | No list + editor split; editors are pages with ✓ everywhere (desktop footer removed); lists in 1–3 columns (`ListColumns`), editor cards in up to 2 columns; highlight + scroll to the last opened card; period filter as a drop-down; side-pane code and 8 resx keys removed. Owner to check the 2-column long editors (Bill, Contract) — `MaxColumns="1"` if they look bad. |
@@ -170,6 +170,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-01 | #160 | Reminder text on the lock screen | **Not shown** on the lock screen (sound only) → high-importance channel #166 |
 | 2026-11-01 | #166 | Reminders pop-up / lock screen | Pop-up OK when unlocked; **locked: sound only**, notification is in the shade after unlocking. App settings correct (lock screen allowed, show content). Delayed test added (#168) to check. |
 | 2026-11-02 | #168 + #170 | Reminders on the locked screen | **OK**: the screen lights up with the notification (also real reminders), bell icon. Cause was the coloured app icon used as the small icon. |
+| | #174 + #175 | T-028g fixes; T-028b rapid menu switching on the tablet, scrolling, `Performance:` lines | pending |
 | 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |

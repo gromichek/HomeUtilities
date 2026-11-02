@@ -108,15 +108,15 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-02)
-- Merged up to **T-028d** (#165) plus reminder fixes #166, #168, #170 (high-importance channel `reminder_alerts`,
-  delayed test notification, one-colour small icon) — reminders on the locked screen confirmed by the owner.
-- **Ready (owner can run both in parallel):** **T-028g** UI fixes round 3, **T-028b** performance (menu switching → ANR on
-  the tablet, scrolling; measure first).
-- Later: notification icon = white house from the real app icon (PROGRESS finding 8). Then T-029 backups.
+- Merged up to **T-028g** (#174) and **T-028b** (#175). Waiting for the owner's device tests and his `Performance:` lines
+  from the error log (Release, tablet). If the tablet still hangs: next candidates are the Bill/Contract editor loads (still
+  on the UI thread) and page construction.
+- Reminders confirmed on the locked screen (#166/#168/#170).
+- Later: notification icon = white house from the real app icon (PROGRESS finding 8). Next phase: T-029 backups.
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Review and merge T-028g and T-028b; then T-029.
+1. Owner tests of #174/#175 → log, fix findings (performance numbers). Then T-029 (write the task).
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
