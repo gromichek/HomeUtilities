@@ -113,18 +113,18 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-02)
-- Merged up to **T-029** (#184, automatic backups + JSON export/import) and **T-028h** (#181, fixes C1–C4 + reload gate).
-  Waiting for the owner's checks (short steps of both PRs).
-- **Ready:** T-030 Google sign-in (owner is registering the app in Google Cloud Console; values go to a git-ignored
-  `secrets.json`, never to the lead or the repo). T-028i (C5 Windows theme regression — only the first switch after start fails; C6 button widths; C7 reload
-  gate for all sections; C8 confirm without backup copy).
-- Next: **T-030** Google sign-in (owner registers the app in Google Cloud Console; lead writes instructions), then T-031
-  sync behind `ISyncStorage` (reuse `DataExchangeService` rows), T-032 attachments; T-032a other providers optional.
-- Later: notification icon = white house from the real app icon (finding 8); `ReloadGate` for the other section roots.
+- Merged up to **T-030** (#194, Google sign-in: Settings → Sync, Drive `appDataFolder` check) and **T-028i** (#191).
+  The owner registered the Google Cloud project; he fills `src/HomeUtilities.App/secrets.json` himself (keys
+  `googleDesktopClientId`, `googleDesktopClientSecret`, `googleAndroidClientId`). Waiting for his tests of both.
+- Windows theme (C5): third attempt is a hypothesis (deferred apply after the Picker closes); if it still fails → bisect
+  with the old Settings page path.
+- Next: **T-031** sync engine (change logs via `ISyncStorage`, reuse `DataExchangeService` row shape, merge last-writer-wins,
+  soft-delete resurrect) — write the task after the owner confirms sign-in works. Then T-032 attachments, T-034 release
+  identity (permanent key, real icon, house notification icon).
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner checks of #181/#184 → log, collect findings. Write T-030 (+ Google Cloud Console instructions for the owner).
+1. Owner tests of #191/#194 → log; if sign-in works on Windows and the phone, write T-031.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.
