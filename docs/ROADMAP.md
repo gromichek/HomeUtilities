@@ -69,7 +69,9 @@ is written; the list below is the plan and will change.
 ## Phase 9 — Backup and sync
 - T-029 Automatic local backups, export/import full data as JSON (manual backup file exists since T-017c)
 - T-030 Google sign-in per platform
-- T-031 Sync engine (change logs in appDataFolder, merge, conflict tests)
+- T-031 Sync engine (change logs, merge, conflict tests) behind `ISyncStorage`; Google Drive adapter
+- T-032 Attachments sync
+- T-032a (optional) More storage providers: OneDrive, Dropbox, WebDAV — one adapter + sign-in each, when needed
 - T-032 Attachments sync
 
 ## Phase 10 — iOS
