@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-031 | Sync engine (change logs via `ISyncStorage`, merge, first join, Sync now) | Ready | | after T-030; first-join default to confirm with the owner |
 
 ## Done
 
@@ -98,7 +99,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 (C1–C4 done in T-028h #181. Suggestions for later: `ReloadGate` for the other section roots; `MeterStore.IncludeAll` loads all readings.)
 
-- C5. **Windows theme — a regression.** Owner: switching worked correctly after the first implementation (T-011) and broke
+- C5. **(Solved by #199)** **Windows theme — a regression.** Owner: switching worked correctly after the first implementation (T-011) and broke
   later. `ThemeService` itself was unchanged from T-011 until #174, so the break came from another change between T-011
   and T-028d (owner first reported it after T-028d: Settings sections — the theme choice now lives on a pushed
   `SettingsSectionPage`; T-028f one pane may also matter). #174/#177/#181 workarounds did not help. Debug log of the
@@ -227,7 +228,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-02 | #174 + #175 (Windows) | Windows maximised; error log | Two-column editors: "Save as template"/Delete stretched as cells; dark theme first switch still mixed; WinUI crash in `ListColumns` on resize during `ItemsSync` → #177. Timings (Windows): Overview 1.3–1.7 s, startup to Overview 3.8 s, Charges ~0.35 s. |
 | 2026-11-02 | #191 + #194 | T-028i, T-030 with the owner's `secrets.json` | Sign-in, check, disconnect/reconnect OK on Windows; phone sign-in + check OK, but reconnect after Disconnect said "access revoked" → #197. Theme switch on Windows **crashed** (FontImageSource with comma-separated font family) → #197. Second visits fast, Imports buttons OK. Airplane-mode check pending. |
 | 2026-11-02 | #197 | Windows theme change; Android Disconnect → Connect | Android reconnect OK. Windows **still crashed**: every `FontImageSource` failed ("Unable to generate font image", relative URI) → #199. |
-| | #199 | Windows: menu icons visible, theme change without crash and with all parts switched | pending |
+| 2026-11-02 | #199 + #194 | Windows menu icons, theme change; sync sign-in in airplane mode | **OK**: icons visible, themes switch correctly at once (C5 solved — the root cause was the failing `FontImageSource` rendering), no crash; offline check shows a clear message. |
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |
 | 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
 | 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
