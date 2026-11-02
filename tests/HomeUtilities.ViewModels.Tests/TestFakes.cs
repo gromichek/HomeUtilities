@@ -763,8 +763,8 @@ internal sealed class ContractTestKit
     public ReadingsViewModel CreateReadings() =>
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, CreateHistory);
 
-    public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null) =>
-        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Settlement, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog);
+    public ChargesViewModel CreateCharges(FakeChargeInputLoader? loader = null, IDataChangeNotifier? changes = null) =>
+        new(Properties, Contracts, Suppliers, Categories, loader ?? ChargeLoader, Settlement, Bills, Payments, Clock, Localizer, Navigation, Settings, Layout, ErrorLog, changes);
 
     public BillTemplateEditViewModel CreateTemplateEditor() =>
         new(Templates, Bills, Properties, Contracts, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast);
@@ -784,8 +784,12 @@ internal sealed class FakeChargeInputLoader(ContractTestKit kit) : IChargeInputL
     /// <summary>Contracts whose loading throws.</summary>
     public Dictionary<Guid, Exception> Failures { get; } = [];
 
+    /// <summary>How many inputs were assembled.</summary>
+    public int Calls { get; private set; }
+
     public Task<ChargeInput?> LoadAsync(Guid contractId, YearMonth period, CancellationToken ct = default)
     {
+        Calls++;
         if (Failures.TryGetValue(contractId, out var failure))
         {
             throw failure;

@@ -1,3 +1,4 @@
+using HomeUtilities.Data.Sample;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
@@ -128,5 +129,79 @@ public class OverviewDataLoaderTests
             Months.Add(period);
             return inner.LoadAsync(contractId, period, ct);
         }
+    }
+
+    /// <summary>Counts how the Overview loader reads charge inputs.</summary>
+    private sealed class CountingChargeLoader(IChargeInputLoader inner) : IChargeInputLoader
+    {
+        public int SingleCalls { get; private set; }
+
+        public int BatchCalls { get; private set; }
+
+        public int Requested { get; private set; }
+
+        public Task<ChargeInput?> LoadAsync(Guid contractId, YearMonth period, CancellationToken ct = default)
+        {
+            SingleCalls++;
+            return inner.LoadAsync(contractId, period, ct);
+        }
+
+        public Task<IReadOnlyDictionary<(Guid ContractId, YearMonth Period), ChargeInput>> LoadManyAsync(
+            IReadOnlyCollection<(Guid ContractId, YearMonth Period)> requests, CancellationToken ct = default)
+        {
+            BatchCalls++;
+            Requested += requests.Count;
+            return inner.LoadManyAsync(requests, ct);
+        }
+    }
+
+    [Fact]
+    public async Task Settlements_of_all_equalized_contracts_are_read_with_one_batched_charge_query()
+    {
+        using var test = new TestDb();
+        test.Clock.UtcNow = new DateTimeOffset(2026, 10, 20, 8, 0, 0, TimeSpan.Zero);
+        using (var db = test.NewContext())
+        {
+            await DataSeeder.SeedAsync(db, CancellationToken.None);
+        }
+
+        var factory = test.Factory;
+        var generator = new SampleDataGenerator(
+            new PropertyStore(factory), new SupplierStore(factory), new CategoryStore(factory), new ContractStore(factory),
+            new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillTemplateStore(factory, test.Clock), new BillStore(factory),
+            new PaymentStore(factory), new ImportProfileStore(factory), new ChargeInputLoader(factory), test.Clock);
+        Assert.True(await generator.FillAsync());
+
+        var counting = new CountingChargeLoader(new ChargeInputLoader(factory));
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var data = await new OverviewDataLoader(factory, counting).LoadAsync(test.Clock.Today);
+        watch.Stop();
+
+        Assert.NotEmpty(data.ExpectedSettlements);
+        Assert.Equal(0, counting.SingleCalls);
+        Assert.Equal(1, counting.BatchCalls);
+        Assert.True(counting.Requested <= OverviewDataLoader.SettlementMaxMonths * data.ExpectedSettlements.Count);
+
+        // Only a limit for gross slowdowns: CI machines vary.
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(10), $"Overview load took {watch.ElapsedMilliseconds} ms");
+    }
+
+    [Fact]
+    public async Task Batch_load_gives_the_same_input_as_the_single_load()
+    {
+        using var test = new TestDb();
+        var (_, water, _) = await ArrangeAsync(test);
+        var loader = new ChargeInputLoader(test.Factory);
+        var month = new YearMonth(2026, 9);
+        var other = new YearMonth(2026, 8);
+
+        var single = await loader.LoadAsync(water.Id, month);
+        var many = await loader.LoadManyAsync([(water.Id, month), (water.Id, other), (Guid.NewGuid(), month)]);
+
+        Assert.Equal(2, many.Count);
+        Assert.NotNull(single);
+        Assert.Equal(single.Contract.Id, many[(water.Id, month)].Contract.Id);
+        Assert.Equal(single.PropertyMeters.Count, many[(water.Id, month)].PropertyMeters.Count);
+        Assert.Equal(other, many[(water.Id, other)].Period);
     }
 }

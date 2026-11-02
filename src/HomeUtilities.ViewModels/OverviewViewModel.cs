@@ -32,6 +32,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     private readonly IDialogService _dialogs;
     private readonly ISettingsStore _settings;
     private readonly ILayoutModeService _layoutModeService;
+    private readonly ReloadGate? _gate;
 
     private OverviewData _data = OverviewData.Empty;
     private IReadOnlyList<TodoItem> _todo = [];
@@ -110,8 +111,10 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         INavigationService navigation,
         IDialogService dialogs,
         ISettingsStore settings,
-        ILayoutModeService layoutModeService)
+        ILayoutModeService layoutModeService,
+        IDataChangeNotifier? changes = null)
     {
+        _gate = changes is null ? null : new ReloadGate(changes, clock);
         _localizer = localizer;
         _clock = clock;
         _databaseInitializer = databaseInitializer;
@@ -153,6 +156,13 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
         await InitializeDatabaseAsync();
+        if (_gate is { IsFresh: true } && IsLoaded)
+        {
+            // Nothing was saved since the last load, same day, same language: keep what is shown (T-028h).
+            PerformanceLog.ReportStartupOnce(PropertyCount);
+            return;
+        }
+
         await RunLoadAsync(ct => ReloadAsync(ct), () => PropertyCount);
         PerformanceLog.ReportStartupOnce(PropertyCount);
     });
@@ -169,11 +179,13 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         }
 
         var today = _clock.Today;
+        (long Version, DateOnly Day)? snapshot = null;
         var (data, todo) = await OffUiAsync(
             async () =>
             {
                 // Drafts of the templates that came due since the last visit are created before the data is read.
                 await _templateStore.GenerateDraftsAsync(today, ct);
+                snapshot = _gate?.Snapshot();
                 var loaded = await _loader.LoadAsync(today, ct);
                 return (loaded, TodoBuilder.Build(loaded, today));
             },
@@ -189,6 +201,10 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
         IsLoaded = true;
         Rebuild();
+        if (snapshot is { } taken)
+        {
+            _gate?.MarkLoaded(taken);
+        }
     }
 
     /// <summary>Pull-to-refresh.</summary>
@@ -281,6 +297,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         YearEmptyText = _localizer["OverviewYearEmpty"];
         PropertyFilterLabel = _localizer["OverviewPropertyFilter"];
         RefreshDatabaseStatus();
+        _gate?.Invalidate();
         if (IsLoaded)
         {
             Rebuild();

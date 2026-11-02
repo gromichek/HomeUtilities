@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
@@ -44,8 +45,9 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
         var templates = await db.BillTemplates.AsNoTracking().Where(t => !t.IsDeleted).ToListAsync(ct);
         var plans = await db.EqualizedPlans.AsNoTracking().ToListAsync(ct);
 
-        var settlements = new Dictionary<Guid, decimal>();
+        // Plan the months of every equalized contract first, then read all charge inputs in one go (T-028h).
         var current = YearMonth.From(today);
+        var ranges = new List<(Contract Contract, List<EqualizedPlan> Plans, List<Bill> Bills, YearMonth From, YearMonth To)>();
         foreach (var contract in contracts.Where(c => c.BillingMode == BillingMode.Equalized && !c.IsArchived && c.IsActiveOn(today)))
         {
             var contractPlans = plans.Where(p => p.ContractId == contract.Id).OrderBy(p => p.ValidFrom).ToList();
@@ -57,10 +59,26 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
                 from = earliest;
             }
 
+            ranges.Add((contract, contractPlans, contractBills, from, to));
+        }
+
+        var requests = new List<(Guid, YearMonth)>();
+        foreach (var range in ranges)
+        {
+            for (var month = range.From; month <= range.To; month = month.AddMonths(1))
+            {
+                requests.Add((range.Contract.Id, month));
+            }
+        }
+
+        var inputs = await chargeLoader.LoadManyAsync(requests, ct);
+        var settlements = new Dictionary<Guid, decimal>();
+        foreach (var (contract, contractPlans, contractBills, from, to) in ranges)
+        {
             var charges = new Dictionary<YearMonth, CalculatedCharge>();
             for (var month = from; month <= to; month = month.AddMonths(1))
             {
-                if (await chargeLoader.LoadAsync(contract.Id, month, ct) is { } input)
+                if (inputs.TryGetValue((contract.Id, month), out var input))
                 {
                     charges[month] = ChargeCalculator.Calculate(input);
                 }
