@@ -170,7 +170,13 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
 
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
-        await RunLoadAsync(ct => ReloadAsync(ct), () => Groups.Count);
+        // A requested property (opened from a notification or a link) always reloads.
+        if (_requestedPropertyId is not null)
+        {
+            InvalidateReloadGate();
+        }
+
+        await RunGatedLoadAsync(ct => ReloadAsync(ct), () => Groups.Count, Groups.Count > 0 || Properties.Count > 0);
         await AskAboutReturnFromSubmitPageAsync();
     });
 

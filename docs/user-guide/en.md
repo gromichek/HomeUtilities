@@ -935,7 +935,9 @@ You do not have to remember to make backups: the app keeps copies of all your da
   lost phone loses them too — **from time to time save a copy elsewhere**: tap *Save copy…* on a copy in the list and put the
   file in Downloads, Drive or on the computer.
 - **If it fails** (for example the device is full), the app does not stop: the problem goes to the error log and the card shows
-  *Last automatic backup failed: …*; the next attempt happens at the next start.
+  *Last automatic backup failed: …*; the next attempt happens at the next start. If the copy **before a risky action** (import,
+  restore, *Delete all data*) fails, the app asks *Could not make a backup copy: …. Continue without a copy?* — *Cancel* stops
+  the action, *Continue* goes on without a copy.
 
 On the card: the switch *Make automatic backups*, the choices *How often* and *Number of copies to keep*, the line with the
 last automatic copy (date and size) and the list of copies. A copy shows its date, why it was made (*Automatic*, *Before an

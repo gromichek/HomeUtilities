@@ -102,7 +102,8 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
             Detach(editor, forget: false);
         }
 
-        await RunSafeAsync(() => RunLoadAsync(ReloadAsync, () => TotalCount));
+        // Skipped when nothing was saved since the last load (T-028i); a change made elsewhere bumps the data version.
+        await RunSafeAsync(() => RunGatedLoadAsync(ReloadAsync, () => TotalCount, IsLoaded));
     }
 
     [RelayCommand]

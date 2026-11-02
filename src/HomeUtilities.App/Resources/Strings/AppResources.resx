@@ -1480,6 +1480,10 @@
   <data name="BackupInterval_7" xml:space="preserve"><value>Every 7 days</value></data>
   <data name="SettingsBackupAutoLast" xml:space="preserve"><value>Last automatic backup: {0:g} ({1})</value></data>
   <data name="SettingsBackupAutoNever" xml:space="preserve"><value>No automatic backup yet.</value></data>
+  <data name="BackupFailedTitle" xml:space="preserve"><value>Backup copy failed</value></data>
+  <data name="BackupFailedContinue" xml:space="preserve"><value>Could not make a backup copy: {0}. Continue without a copy?</value></data>
+  <data name="BackupFailedContinueAction" xml:space="preserve"><value>Continue</value></data>
+  <data name="BackupFailedUnknownReason" xml:space="preserve"><value>unknown reason</value></data>
   <data name="SettingsBackupAutoFailed" xml:space="preserve"><value>Last automatic backup failed: {0}</value></data>
   <data name="SettingsBackupCopiesHeader" xml:space="preserve"><value>Automatic copies on this device</value></data>
   <data name="SettingsBackupCopiesEmpty" xml:space="preserve"><value>There are no automatic copies yet.</value></data>

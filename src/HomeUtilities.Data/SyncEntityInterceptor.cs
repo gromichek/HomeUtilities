@@ -15,7 +15,7 @@ public sealed class SyncEntityInterceptor(IClock clock, IDataChangeNotifier? not
     /// <inheritdoc />
     public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
     {
-        notifier?.Notify();
+        NotifyIfChanged(result);
         return result;
     }
 
@@ -23,8 +23,17 @@ public sealed class SyncEntityInterceptor(IClock clock, IDataChangeNotifier? not
     public override ValueTask<int> SavedChangesAsync(
         SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default)
     {
-        notifier?.Notify();
+        NotifyIfChanged(result);
         return ValueTask.FromResult(result);
+    }
+
+    // A save that wrote no rows is not a data change (T-028i): it must not make every section reload.
+    private void NotifyIfChanged(int rowsWritten)
+    {
+        if (rowsWritten > 0)
+        {
+            notifier?.Notify();
+        }
     }
 
     /// <inheritdoc />
