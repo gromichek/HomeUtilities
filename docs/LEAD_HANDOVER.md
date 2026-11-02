@@ -112,8 +112,8 @@ Prompt for a new lead session:
 ## 5. Current state (2026-11-02)
 - Merged up to **T-029** (#184, automatic backups + JSON export/import) and **T-028h** (#181, fixes C1–C4 + reload gate).
   Waiting for the owner's checks (short steps of both PRs).
-- Collected for the next task: C5 (Windows theme regression), C6 (Imports button widths), C7 (reload gate for all
-  sections), C8 (ask "continue without a copy?" when the copy before a risky operation fails — owner agreed).
+- **Ready:** T-028i (C5 Windows theme regression — only the first switch after start fails; C6 button widths; C7 reload
+  gate for all sections; C8 confirm without backup copy).
 - Next: **T-030** Google sign-in (owner registers the app in Google Cloud Console; lead writes instructions), then T-031
   sync behind `ISyncStorage` (reuse `DataExchangeService` rows), T-032 attachments; T-032a other providers optional.
 - Later: notification icon = white house from the real app icon (finding 8); `ReloadGate` for the other section roots.
