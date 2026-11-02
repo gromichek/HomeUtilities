@@ -32,7 +32,7 @@ later, T-032a). Attachments are T-032 — rows of `Attachment` sync here, their 
 - **Clock skew:** `UpdatedAt` comes from device clocks. Warn in the status if the device clock differs from the server
   time (`Date` header) by more than 5 minutes; do not try to correct timestamps.
 
-## 2. First join (decision — see the lead's question to the owner; default below)
+## 2. First join (owner decision 2026-11-02: "Replace this device's data with the data from the cloud" is the recommended, preselected choice)
 When an account is connected and sync is switched on for the first time on a device:
 - **Cloud folder empty** → upload this device's data as the first snapshot ("This device starts the sync").
 - **Cloud has data and this device has data** → ask: **"Replace this device's data with the data from the cloud"**
