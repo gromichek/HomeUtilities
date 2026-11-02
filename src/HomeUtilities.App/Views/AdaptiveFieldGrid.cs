@@ -130,7 +130,7 @@ public sealed class AdaptiveFieldGrid : Grid
             _arrangedColumns = columns;
             var visible = Children.OfType<View>().Where(v => v.IsVisible).ToList();
             ColumnDefinitions.Clear();
-            for (var column = 0; column < columns; column++)
+            for (var c = 0; c < columns; c++)
             {
                 ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
             }
