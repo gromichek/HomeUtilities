@@ -63,6 +63,8 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   There is no desktop footer any more (T-028f).
 - **Editor pages on wide windows**: the cards of the form flow into up to 2 columns (`AdaptiveFieldGrid`
   `MinColumnWidth="560" MaxColumns="2"`); fields are never stretched across the whole screen.
+  Buttons and notes that are direct children of that grid (Delete …, Save as template) get
+  `views:AdaptiveFieldGrid.FullRow="True"` — otherwise they become a cell next to a card and stretch to its height.
 - **Low windows are phones** (T-028a): a window lower than 480 dp (a phone in landscape, ~900 x 400 dp) is `Compact`
   whatever its width (`LayoutModes.FromSize`).
 - **Filter blocks above long lists** (Bills, Payments) are the list **header** (they scroll with the cards) and collapse to
