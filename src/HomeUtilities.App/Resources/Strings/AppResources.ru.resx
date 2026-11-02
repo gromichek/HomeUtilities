@@ -1518,4 +1518,42 @@
   <data name="DataImportIssue_MissingColumn" xml:space="preserve"><value>{0}, запись {1}: нет поля «{2}».</value></data>
   <data name="DataImportIssue_BadValue" xml:space="preserve"><value>{0}, запись {1}: недопустимое значение в поле «{2}».</value></data>
   <data name="DataImportIssue_ConstraintViolation" xml:space="preserve"><value>Записи не согласуются между собой: дубликат или отсутствует связанная запись.</value></data>
+  <data name="SettingsSync" xml:space="preserve"><value>Синхронизация</value></data>
+  <data name="SettingsValueSyncNotConfigured" xml:space="preserve"><value>Не настроена в этой сборке</value></data>
+  <data name="SettingsValueSyncSignedOut" xml:space="preserve"><value>Не подключено</value></data>
+  <data name="SettingsValueSyncError" xml:space="preserve"><value>Связь потеряна</value></data>
+  <data name="SyncHint" xml:space="preserve"><value>Синхронизация будет держать данные одинаковыми на телефоне и на компьютере. Она использует скрытую папку в вашем собственном Google Диске, которую видит только это приложение: в приложении и на сайте Google Диска её нет. Здесь вы подключаете аккаунт Google и проверяете доступ; сама синхронизация данных появится в следующей версии.</value></data>
+  <data name="SyncProvider" xml:space="preserve"><value>Хранилище: {0}</value></data>
+  <data name="SyncStatusNotConfigured" xml:space="preserve"><value>Синхронизация не настроена в этой сборке.</value></data>
+  <data name="SyncStatusSignedOut" xml:space="preserve"><value>Не подключено</value></data>
+  <data name="SyncStatusSignedIn" xml:space="preserve"><value>Подключено</value></data>
+  <data name="SyncStatusError" xml:space="preserve"><value>Связь потеряна</value></data>
+  <data name="SyncAccount" xml:space="preserve"><value>Аккаунт: {0}</value></data>
+  <data name="SyncConnect" xml:space="preserve"><value>Подключить аккаунт Google</value></data>
+  <data name="SyncCancelSignIn" xml:space="preserve"><value>Отменить вход</value></data>
+  <data name="SyncSigningIn" xml:space="preserve"><value>Ожидание входа. Завершите его в браузере или в окне Google.</value></data>
+  <data name="SyncCheck" xml:space="preserve"><value>Проверить соединение</value></data>
+  <data name="SyncChecking" xml:space="preserve"><value>Проверка…</value></data>
+  <data name="SyncCheckOk" xml:space="preserve"><value>Всё в порядке (запись, список, чтение, удаление)</value></data>
+  <data name="SyncCheckFailed" xml:space="preserve"><value>Проверка не прошла на шаге «{0}»: {1}</value></data>
+  <data name="SyncStep_Write" xml:space="preserve"><value>запись</value></data>
+  <data name="SyncStep_List" xml:space="preserve"><value>список</value></data>
+  <data name="SyncStep_Read" xml:space="preserve"><value>чтение</value></data>
+  <data name="SyncStep_Delete" xml:space="preserve"><value>удаление</value></data>
+  <data name="SyncDisconnect" xml:space="preserve"><value>Отключить</value></data>
+  <data name="SyncDisconnectConfirm" xml:space="preserve"><value>Удалить аккаунт Google с этого устройства и отозвать доступ HomeUtilities к вашему Google Диску? Данные в приложении останутся как есть.</value></data>
+  <data name="SyncDisconnected" xml:space="preserve"><value>Отключено.</value></data>
+  <data name="SyncDisconnectedRevokeFailed" xml:space="preserve"><value>На этом устройстве аккаунт отключён, но связаться с Google и отозвать доступ не удалось. Его можно убрать в аккаунте Google: Безопасность → Доступ третьих сторон.</value></data>
+  <data name="SyncLoopbackTitle" xml:space="preserve"><value>HomeUtilities</value></data>
+  <data name="SyncLoopbackMessage" xml:space="preserve"><value>Вход выполнен. Эту вкладку можно закрыть и вернуться в приложение.</value></data>
+  <data name="SyncError_Other" xml:space="preserve"><value>Вход или доступ не удался. Подробности — в журнале ошибок.</value></data>
+  <data name="SyncError_NotConfigured" xml:space="preserve"><value>Синхронизация не настроена в этой сборке.</value></data>
+  <data name="SyncError_NoNetwork" xml:space="preserve"><value>Нет связи с Google. Проверьте интернет и повторите.</value></data>
+  <data name="SyncError_Cancelled" xml:space="preserve"><value>Вход отменён.</value></data>
+  <data name="SyncError_ConsentDenied" xml:space="preserve"><value>Доступ не разрешён. Он нужен HomeUtilities, чтобы хранить данные в скрытой папке Диска.</value></data>
+  <data name="SyncError_TokenRevoked" xml:space="preserve"><value>Доступ отозван или истёк. Подключите аккаунт заново.</value></data>
+  <data name="SyncError_ApiDisabled" xml:space="preserve"><value>Google Drive API выключен в проекте Google Cloud этой сборки. Включите его в Cloud Console и повторите.</value></data>
+  <data name="SyncError_ClockSkew" xml:space="preserve"><value>Часы устройства неверны (расхождение больше 5 минут). Включите автоматическую установку даты и времени и повторите.</value></data>
+  <data name="SyncError_Timeout" xml:space="preserve"><value>Google не ответил вовремя. Повторите.</value></data>
+  <data name="SyncError_NotFound" xml:space="preserve"><value>Файл не найден в скрытой папке Диска.</value></data>
 </root>

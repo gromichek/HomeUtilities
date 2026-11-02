@@ -809,6 +809,7 @@ and the value is updated. The **?** button in the toolbar opens this chapter; in
 | **Theme** | System / Light / Dark: [Language and theme](#language-and-theme). |
 | **Reminders** | [Reminders](#reminders): what, when, planned reminders, a test notification. |
 | **Backup** | [Backup](#backup): save a copy of all data, automatic copies, restore, export and import all data as JSON. |
+| **Sync** | [Sync](#sync): connect your Google account for the later data sync and check the access. |
 | **Categories** | The categories of contracts and payments, see [Categories](#8-categories). |
 | **VAT rates** | The catalog of VAT percentages, see [VAT rates](#vat-rates). |
 | **Bill templates** | Payments without a meter, see [Bill templates and drafts](#bill-templates-and-drafts). |
@@ -968,6 +969,33 @@ automatic copy (one `.zip`) is offered to Android. If it fits into Android's lim
 and appears in the list of automatic copies — tap *Restore* to get your data back. If your data and attachments are bigger, Android
 simply makes no copy: then only a file you saved yourself (*Save backup…*, *Save copy…*) helps. Do not rely on the system
 backup alone.
+
+### Sync
+
+Sync is meant to keep the data the same on your phone and on your PC. **This version only connects the account and proves that
+the access works; the data itself is not synchronised yet** (that comes with the next version).
+
+**What is stored where.** The app uses a **hidden folder of your own Google Drive** (the "app data folder"). It does not show up in
+the Drive app or on the Drive website, and **only HomeUtilities can see it** — the app cannot see any of your other Drive files.
+Google asks for exactly one permission: *See, create and delete its own configuration data in your Google Drive*. Nothing is sent
+anywhere else, and the app never stores your Google password: the sign-in happens in Google's own page.
+
+**Settings → Sync** shows the state (*Not connected* / *Connected* / *Connection lost*) and, when connected, the e-mail of the account.
+
+- **Connect Google account** — on Windows your browser opens with Google's sign-in page; choose the account and allow the access, then
+  go back to the app (the browser tab can be closed). On Android Google's own account window opens over the app. While the app waits,
+  **Cancel sign-in** stops it; after 5 minutes without an answer it stops by itself.
+- **Check connection** — writes a small test file into the hidden folder, lists the folder, reads the file back and deletes it. The
+  result is *OK (write, list, read, delete)*, or the step that failed and the reason (for example *No connection to Google…*).
+- **Disconnect** — asks for confirmation, removes the sign-in from this device and withdraws the access of HomeUtilities at Google. If
+  Google cannot be reached (no internet), the sign-in is still removed here and the app says so; you can then remove the access in your
+  Google account under *Security → Third-party access*. Your data in the app are not changed.
+
+The sign-in stays after you close the app, until you press *Disconnect* or remove the access in your Google account (then the state
+becomes *Connection lost* and you connect again). If a build of the app has no Google settings, the page says *Sync is not configured
+in this build.* and *Connect* is disabled.
+
+Every device needs its own sign-in with the same Google account; the account is not part of a backup.
 
 ### Import from Excel
 
@@ -1148,4 +1176,4 @@ desktop). In test builds it also holds *Fill with sample data* and *Delete all d
 
 ## 17. Coming soon
 
-Charts on the Overview and Google Drive sync.
+Charts on the Overview and the synchronisation of the data through Google Drive (the account connection is already in [Sync](#sync)).

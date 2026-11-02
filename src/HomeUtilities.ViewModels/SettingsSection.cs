@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 namespace HomeUtilities.ViewModels;
 
 /// <summary>
-/// A row of the Settings list. Language, Theme, Reminders, Backup, Error log and About open a settings page
+/// A row of the Settings list. Language, Theme, Reminders, Backup, Sync, Error log and About open a settings page
 /// (<see cref="Routes.SettingsSection"/>); Categories, VAT rates, Bill templates and Imports open the screen that already exists.
 /// </summary>
 public enum SettingsSection
@@ -13,6 +13,7 @@ public enum SettingsSection
     Theme,
     Reminders,
     Backup,
+    Sync,
     Categories,
     VatRates,
     BillTemplates,
@@ -80,6 +81,8 @@ public sealed partial class SettingsSectionViewModel : ViewModelBase
 
     public bool IsBackup => Section == SettingsSection.Backup;
 
+    public bool IsSync => Section == SettingsSection.Sync;
+
     public bool IsErrorLog => Section == SettingsSection.ErrorLog;
 
     public bool IsAbout => Section == SettingsSection.About;
@@ -90,6 +93,7 @@ public sealed partial class SettingsSectionViewModel : ViewModelBase
         SettingsSection.Language or SettingsSection.Theme => HelpTopic.LanguageAndTheme,
         SettingsSection.Reminders => HelpTopic.Reminders,
         SettingsSection.Backup => HelpTopic.Backup,
+        SettingsSection.Sync => HelpTopic.Sync,
         SettingsSection.ErrorLog => HelpTopic.ErrorLog,
         SettingsSection.About => HelpTopic.About,
         _ => HelpTopic.Settings,
@@ -98,8 +102,12 @@ public sealed partial class SettingsSectionViewModel : ViewModelBase
     [RelayCommand]
     private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, GuideTopic));
 
-    public override Task OnAppearingAsync() =>
-        Section == SettingsSection.Backup ? RunSafeAsync(Settings.RefreshBackupSectionAsync) : Task.CompletedTask;
+    public override Task OnAppearingAsync() => Section switch
+    {
+        SettingsSection.Backup => RunSafeAsync(Settings.RefreshBackupSectionAsync),
+        SettingsSection.Sync => Settings.Sync.OnAppearingAsync(),
+        _ => Task.CompletedTask,
+    };
 
     protected override void RefreshTexts()
     {

@@ -7,6 +7,14 @@
     <PackageVersion Include="ClosedXML" Version="0.105.0" />
     <PackageVersion Include="CommunityToolkit.Maui" Version="15.0.1" />
     <PackageVersion Include="Plugin.LocalNotification" Version="14.1.2" />
+    <PackageVersion Include="Xamarin.GooglePlayServices.Auth" Version="122.0.0" />
+    <!-- Play services Auth pulls newer AndroidX packages than MAUI's own Ktx companions allow (NU1608): align the companions. -->
+    <PackageVersion Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.11.0.1" />
+    <PackageVersion Include="Xamarin.AndroidX.Lifecycle.LiveData.Core.Ktx" Version="2.11.0.1" />
+    <PackageVersion Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.11.0.1" />
+    <PackageVersion Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.0" />
+    <PackageVersion Include="Xamarin.AndroidX.Collection.Ktx" Version="1.6.0.1" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
     <PackageVersion Include="Markdig" Version="1.4.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
