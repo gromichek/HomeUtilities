@@ -809,7 +809,7 @@ and the value is updated. The **?** button in the toolbar opens this chapter; in
 | **Theme** | System / Light / Dark: [Language and theme](#language-and-theme). |
 | **Reminders** | [Reminders](#reminders): what, when, planned reminders, a test notification. |
 | **Backup** | [Backup](#backup): save a copy of all data, automatic copies, restore, export and import all data as JSON. |
-| **Sync** | [Sync](#sync): connect your Google account for the later data sync and check the access. |
+| **Sync** | [Sync](#sync): connect your Google account, switch the data sync on, *Sync now*. |
 | **Categories** | The categories of contracts and payments, see [Categories](#8-categories). |
 | **VAT rates** | The catalog of VAT percentages, see [VAT rates](#vat-rates). |
 | **Bill templates** | Payments without a meter, see [Bill templates and drafts](#bill-templates-and-drafts). |
@@ -972,8 +972,9 @@ backup alone.
 
 ### Sync
 
-Sync is meant to keep the data the same on your phone and on your PC. **This version only connects the account and proves that
-the access works; the data itself is not synchronised yet** (that comes with the next version).
+Sync keeps the data the same on your phone, your tablet and your PC: a bill marked as paid on the phone appears on the PC, a reading
+entered on the PC appears on the phone. First you **connect the Google account** (once per device), then you switch on
+**Sync on this device**.
 
 **What is stored where.** The app uses a **hidden folder of your own Google Drive** (the "app data folder"). It does not show up in
 the Drive app or on the Drive website, and **only HomeUtilities can see it** — the app cannot see any of your other Drive files.
@@ -996,6 +997,49 @@ becomes *Connection lost* and you connect again). If a build of the app has no G
 in this build.* and *Connect* is disabled.
 
 Every device needs its own sign-in with the same Google account; the account is not part of a backup.
+
+#### Switching the data sync on
+
+Once the account is connected, **Sync on this device** appears. The first time you switch it on, the app looks into the hidden folder:
+
+- **The folder is empty** — this is the first device. Its data is uploaded as the starting point ("This device starts the sync").
+- **The folder has data and this device is empty** (a new phone, a fresh install) — the data is downloaded, no question asked.
+- **The folder has data and this device has data too** — you choose:
+  - **Replace this device's data with the data from the cloud** (recommended, preselected). The app first makes an automatic backup copy
+    of this device's data (*Settings → Backup*), then the device shows exactly what the cloud holds.
+  - **Merge** keeps both. Be careful: the same record entered on both devices (for example the same bill typed twice) will appear twice.
+  - *Cancel* leaves sync off and changes nothing.
+
+#### How it works
+
+Every change you save is remembered. The app sends the changes to the hidden folder and takes the changes of your other devices from
+it. **Nothing runs in the background** (this saves the battery): the app syncs shortly after it starts, when you come back to it, about
+10 seconds after the last change you saved, when you leave the app, and when you press **Sync now**.
+
+If the same record was changed on two devices before they met, **the later change wins** (by the time of the change; if the times are
+exactly equal, the same device wins on both sides). A deletion is also a change: a record deleted after the other device's last edit
+stays deleted; a record edited after the other device deleted it comes back. For this to work well, keep the date and time of your
+devices set automatically — the status line warns if the clock is more than 5 minutes off.
+
+Some records are special: the built-in categories and the VAT rates have unique names. If two devices created the same one, the app
+keeps one as it is and gives the other a different code (VAT rate) or turns it into an ordinary category; such cases are counted in the
+status line as *conflicts* and listed in **Details**.
+
+#### The status line
+
+- *Synced 18:42* — all good. *Syncing…* — a run is in progress.
+- *Waiting for the network* — you are offline or Google did not answer. Your changes are kept and go up with the next run; there are no
+  error pop-ups during automatic runs, only this line.
+- *Error: …* — for example the access was removed (connect the account again).
+- *Update the app on this device to continue syncing* — another device already uses a newer version of the app. Nothing is applied until
+  you update this one; your data is not touched.
+- On the **Overview** a short note appears if the sync has not worked for more than a day.
+
+**Details** lists what was sent and received last and any conflicts. **Disconnect** also switches sync off on this device; your data
+stays on the device and in the cloud folder.
+
+**Not synced yet:** the files attached to bills, meters and readings (photos, PDFs). The records of the attachments are synced, the files
+themselves are not.
 
 ### Import from Excel
 
@@ -1176,4 +1220,4 @@ desktop). In test builds it also holds *Fill with sample data* and *Delete all d
 
 ## 17. Coming soon
 
-Charts on the Overview and the synchronisation of the data through Google Drive (the account connection is already in [Sync](#sync)).
+Charts on the Overview.

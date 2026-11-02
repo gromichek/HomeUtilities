@@ -56,6 +56,7 @@ public partial class App : Application
         ShowRestoreFailureOnce(window);
         StartReminders(window);
         StartAutomaticBackup(window);
+        StartSync(window);
         return window;
     }
 
@@ -117,6 +118,45 @@ public partial class App : Application
             await Task.Delay(TimeSpan.FromSeconds(5));
             await backups.RunIfDueAsync();
         });
+    }
+
+    // Data sync (T-031): nothing runs in the background. A run starts a few seconds after the first screen, on resume, shortly
+    // after a saved change (debounced in the scheduler) and when the app is left with a change still waiting.
+    private void StartSync(Window window)
+    {
+        var scheduler = _services.GetRequiredService<SyncScheduler>();
+        var account = _services.GetRequiredService<HomeUtilities.Core.Sync.ISyncAccountService>();
+        var errorLog = _services.GetRequiredService<IErrorLog>();
+        var justCreated = false;
+        window.Created += (_, _) =>
+        {
+            justCreated = true;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    await account.InitializeAsync();
+                    await scheduler.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    errorLog.Append("Sync start", ex);
+                }
+            });
+        };
+        window.Resumed += (_, _) =>
+        {
+            if (justCreated)
+            {
+                justCreated = false;
+                return;
+            }
+
+            _ = Task.Run(() => scheduler.ResumeAsync());
+        };
+        window.Deactivated += (_, _) => _ = Task.Run(() => scheduler.FlushAsync());
+        window.Stopped += (_, _) => _ = Task.Run(() => scheduler.FlushAsync());
     }
 
     // A failed startup restore is reported once, when the first page is on screen.

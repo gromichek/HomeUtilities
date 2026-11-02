@@ -208,8 +208,21 @@
                                     IsEnabled="{Binding CanConnect}" IsVisible="{Binding ShowConnect}" Style="{StaticResource PrimaryButton}" />
                             <Button Text="{Binding CancelSignInText}" Command="{Binding CancelSignInCommand}"
                                     IsVisible="{Binding IsConnecting}" Style="{StaticResource SecondaryButton}" />
+                            <!-- Data sync (T-031): shown when an account is connected. Switch row = Grid Auto,* with a wrapping label. -->
+                            <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowDataSync}">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Label Grid.Column="0" Text="{Binding SyncSwitchText}" VerticalOptions="Center" />
+                                    <Switch Grid.Column="1" IsToggled="{Binding SyncOn}" IsEnabled="{Binding IsNotBusy}" VerticalOptions="Center" />
+                                </Grid>
+                                <Label Text="{Binding SyncRunText}" FontAttributes="Bold" />
+                                <Label Text="{Binding LastSyncText}" Style="{StaticResource MutedLabel}" />
+                                <Button Text="{Binding SyncNowText}" Command="{Binding SyncNowCommand}"
+                                        IsVisible="{Binding SyncOn}" Style="{StaticResource PrimaryButton}" />
+                                <Label Text="{Binding DetailsHeader}" Style="{StaticResource SectionHeader}" IsVisible="{Binding HasDetails}" />
+                                <Label Text="{Binding DetailsText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDetails}" />
+                            </VerticalStackLayout>
                             <Button Text="{Binding CheckText}" Command="{Binding CheckConnectionCommand}"
-                                    IsVisible="{Binding IsSignedIn}" Style="{StaticResource PrimaryButton}" />
+                                    IsVisible="{Binding IsSignedIn}" Style="{StaticResource SecondaryButton}" />
                             <Button Text="{Binding DisconnectText}" Command="{Binding DisconnectCommand}"
                                     IsVisible="{Binding CanDisconnect}" Style="{StaticResource DestructiveButton}" />
                         </VerticalStackLayout>

@@ -23,6 +23,7 @@
                 <!-- Header: today and the property filter (remembered). -->
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding TodayText}" Style="{StaticResource MutedLabel}" />
+                    <Label Text="{Binding SyncHintText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasSyncHint}" />
                     <Label Text="{Binding DatabaseStatusText}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding DatabaseStatusText, Converter={StaticResource HasText}}" />
                     <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowPropertyFilter}">

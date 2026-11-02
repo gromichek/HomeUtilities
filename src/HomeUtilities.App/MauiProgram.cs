@@ -165,6 +165,15 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISyncAccountService, GoogleAndroidAccountService>();
 #endif
         builder.Services.AddSingleton<ISyncStorage, GoogleDriveStorage>();
+        // Data sync (T-031): the engine works on the local database and talks to the cloud only through ISyncStorage.
+        builder.Services.AddSingleton<ISyncEngine>(sp => new HomeUtilities.Data.Sync.SyncEngine(
+            sp.GetRequiredService<Microsoft.EntityFrameworkCore.IDbContextFactory<HomeUtilities.Data.HomeUtilitiesDbContext>>(),
+            sp.GetRequiredService<ISyncStorage>(),
+            sp.GetRequiredService<HomeUtilities.Core.IClock>(),
+            sp.GetRequiredService<HomeUtilities.Core.Abstractions.IDataChangeNotifier>(),
+            new HomeUtilities.Data.Sync.SyncOptions(AppInfo.Current.VersionString),
+            (source, error) => sp.GetRequiredService<IErrorLog>().Append(source, error)));
+        builder.Services.AddSingleton<SyncScheduler>();
         builder.Services.AddTransient<SyncSettingsViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<PlaceholderViewModel>();
