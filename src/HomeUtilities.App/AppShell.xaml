@@ -16,70 +16,70 @@
 
     <FlyoutItem Title="{Binding OverviewTitle}" Route="Overview">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="⌂" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphOverview}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent ContentTemplate="{DataTemplate views:OverviewPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding PropertiesTitle}" Route="Properties">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="▦" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphProperties}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding PropertiesTitle}" ContentTemplate="{DataTemplate views:PropertiesPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding SuppliersTitle}" Route="Suppliers">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="✉" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphSuppliers}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding SuppliersTitle}" ContentTemplate="{DataTemplate views:SuppliersPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding ReadingsTitle}" Route="Readings">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="◔" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphReadings}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding ReadingsTitle}" ContentTemplate="{DataTemplate views:ReadingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding ChargesTitle}" Route="Charges">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="∑" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphCharges}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding ChargesTitle}" ContentTemplate="{DataTemplate views:ChargesPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding BillsTitle}" Route="Bills">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="☰" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphBills}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding BillsTitle}" ContentTemplate="{DataTemplate views:BillsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding PaymentsTitle}" Route="Payments">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="€" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphPayments}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding PaymentsTitle}" ContentTemplate="{DataTemplate views:PaymentsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding ReportsTitle}" Route="Reports">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="▤" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphReports}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding ReportsTitle}" ContentTemplate="{DataTemplate views:ReportsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding HelpTitle}" Route="Help">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="?" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphHelp}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent Title="{Binding HelpTitle}" ContentTemplate="{DataTemplate views:HelpPage}" />
     </FlyoutItem>
 
     <FlyoutItem Title="{Binding SettingsTitle}" Route="Settings">
         <FlyoutItem.Icon>
-            <FontImageSource Glyph="⚙" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+            <FontImageSource FontFamily="{StaticResource IconImageFontFamily}" Glyph="{StaticResource MenuGlyphSettings}" Size="20" Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         </FlyoutItem.Icon>
         <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" />
     </FlyoutItem>
