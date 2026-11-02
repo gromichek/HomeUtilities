@@ -100,6 +100,9 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     private Task _loadTask = Task.CompletedTask;
 
     [ObservableProperty]
+    private string _helpText = string.Empty;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFileStep), nameof(IsTargetStep), nameof(IsMappingStep), nameof(IsPreviewStep), nameof(IsDoneStep), nameof(StepText), nameof(ShowBack), nameof(ShowNext), nameof(IsScrollStep), nameof(ShowImport), nameof(ShowOpenImports))]
     private ImportWizardStep _step = ImportWizardStep.File;
 
@@ -728,9 +731,14 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     [RelayCommand]
     private Task OpenImportsAsync() => RunSafeAsync(() => _navigation.GoToAsync(Routes.Imports));
 
+    /// <summary>The "?" button: the import part of the user guide.</summary>
+    [RelayCommand]
+    private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, HelpTopic.Imports));
+
     protected override void RefreshTexts()
     {
         Title = _localizer["ImportTitle"];
+        HelpText = _localizer["SectionHelp"];
         NextText = _localizer["ImportNext"];
         BackText = _localizer["ImportBack"];
         ImportText = _localizer["ImportAction"];

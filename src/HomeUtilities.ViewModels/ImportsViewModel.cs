@@ -117,6 +117,9 @@ public sealed partial class ImportsViewModel : ViewModelBase
     private IReadOnlyList<ImportProfileItemViewModel> _profileItems = [];
 
     [ObservableProperty]
+    private string _helpText = string.Empty;
+
+    [ObservableProperty]
     private string _batchesHeader = string.Empty;
 
     [ObservableProperty]
@@ -319,9 +322,14 @@ public sealed partial class ImportsViewModel : ViewModelBase
         _snackbar.Notify(_localizer.Get("ImportProfileImported", name));
     });
 
+    /// <summary>The "?" button: the Imports chapter of the user guide.</summary>
+    [RelayCommand]
+    private Task OpenHelpAsync() => RunSafeAsync(() => HelpNavigation.OpenAsync(_navigation, HelpTopic.Imports));
+
     protected override void RefreshTexts()
     {
         Title = _localizer["ImportsTitle"];
+        HelpText = _localizer["SectionHelp"];
         BatchesHeader = _localizer["ImportBatchesHeader"];
         BatchesEmpty = _localizer["ImportBatchesEmpty"];
         ProfilesHeader = _localizer["ImportProfilesHeader"];

@@ -40,7 +40,7 @@ with ☰; on a wide window it is always visible.
 
 **Help:** this guide is built into the app and works offline, in the language of the app. Open it from the menu
 item **Help**. Screens such as Overview, Properties, Suppliers, Readings, Charges, Bills, Payments, Reports, Settings (and each of its sections), Categories, VAT rates and the contract, meter and tariff component
-editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen.
+editors have a **?** button in the toolbar that opens the guide at the matching section; **Back** returns to the screen. On a phone or tablet you can zoom the guide with two fingers (wide tables scroll sideways); on Windows use Ctrl + mouse wheel.
 
 **Layout:** every screen has **one content area**. A list fills it, and tapping a record (or **New …**) opens its editor as a
 **separate page** — on a phone, a tablet and a Windows window alike. The editor always has the ✓ **Save** button at the top and
@@ -1041,6 +1041,8 @@ date, that part is skipped — so importing the same sheet twice adds nothing. A
 (or updated) under the name you gave it.
 
 ### Imports and profiles
+
+The **?** button on *Imports* and on the import wizard opens this part of the guide.
 
 **Settings → Imports** lists the finished imports (date, file, sheet, how many readings, bills, payments and meter replacements) and the saved profiles.
 

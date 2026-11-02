@@ -8,6 +8,10 @@
                 x:DataType="vm:ImportsViewModel"
                 Title="{Binding Title}">
 
+    <views:PageBase.ToolbarItems>
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+    </views:PageBase.ToolbarItems>
+
     <ScrollView>
         <VerticalStackLayout Padding="12" Spacing="12">
 
@@ -29,14 +33,13 @@
                     <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding BatchItems}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:ImportBatchItemViewModel">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                        <Label Text="{Binding TitleText}" FontAttributes="Bold" />
-                                        <Label Text="{Binding DetailText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                    </VerticalStackLayout>
-                                    <Button Grid.Column="1" Text="{Binding UndoText}" Command="{Binding UndoCommand}"
-                                            Style="{StaticResource DestructiveButton}" VerticalOptions="Center" />
-                                </Grid>
+                                <!-- Texts use the full width; the Undo button goes under them (T-028g). -->
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding TitleText}" FontAttributes="Bold" />
+                                    <Label Text="{Binding DetailText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                    <Button Text="{Binding UndoText}" Command="{Binding UndoCommand}"
+                                            Style="{StaticResource DestructiveButton}" HorizontalOptions="Start" />
+                                </VerticalStackLayout>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
@@ -55,15 +58,15 @@
                                 <VerticalStackLayout Spacing="4">
                                     <Entry Text="{Binding Name}" MaxLength="{x:Static core:InputLimits.Name}" />
                                     <Label Text="{Binding SheetText}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                                    <!-- Equal columns: the texts wrap inside the buttons instead of being cut (T-028a). -->
-                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                                        <Button Grid.Column="0" Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                                    <!-- Buttons in a row only while each gets 150 dp; otherwise stacked full width, Delete last (T-028g). -->
+                                    <views:AdaptiveFieldGrid MinColumnWidth="150" MaxColumns="3">
+                                        <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}"
                                                 Style="{StaticResource SecondaryButton}" IsVisible="{Binding IsChanged}" />
-                                        <Button Grid.Column="1" Text="{Binding ExportText}" Command="{Binding ExportCommand}"
+                                        <Button Text="{Binding ExportText}" Command="{Binding ExportCommand}"
                                                 Style="{StaticResource SecondaryButton}" />
-                                        <Button Grid.Column="2" Text="{Binding DeleteText}" Command="{Binding DeleteCommand}"
+                                        <Button Text="{Binding DeleteText}" Command="{Binding DeleteCommand}"
                                                 Style="{StaticResource DestructiveButton}" />
-                                    </Grid>
+                                    </views:AdaptiveFieldGrid>
                                 </VerticalStackLayout>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
