@@ -110,14 +110,19 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-02)
-- Merged up to **T-028b** (#175), **T-028g** (#174) and fix #177 (FullRow buttons, ListColumns crash). Phone: much faster.
-- Collecting findings C1–C4 in PROGRESS (Windows dark theme, help tables, Imports button widths, Overview/Charges speed)
-  → one task when the owner has also tested the tablet.
-- Later: notification icon = white house from the real app icon (finding 8). Next phase: T-029 backups.
+- Merged up to **T-028b** (#175), **T-028g** (#174), fix #177. Phone much faster.
+- **Ready (parallel):** **T-028h** (C1–C4: Windows dark theme, help tables, equal-width stacked buttons, Overview/Charges
+  reload only on change) and **T-029** (automatic backups, JSON export/import, Android backup rules).
+- Owner decision 2026-11-02: move forward with new features; no full UI pass after every task — CLAUDE.md now has a **UI
+  checklist** each UI PR must tick; owner checks only the short manual steps. New findings are collected (PROGRESS) and
+  handed over together.
+- Owner asked whether fast navigation can lose input: **no** — editors save without cancellation tokens (only list loads
+  are cancelled, T-028b), each save is one `SaveChanges` (one transaction), and leaving an editor with changes asks first.
+- Later: notification icon = white house from the real app icon (finding 8). Then T-030–T-032 (Google sign-in, sync).
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. After the tablet test: write one task from C1–C4 (+ new findings). Then T-029 (write the task).
+1. Review and merge T-028h and T-029 (they may conflict in Settings/App startup — check the merge). Then write T-030.
 2. **T-028a** device polish (after the owner collects findings on a real phone/tablet; known: some texts do not
    wrap on narrow screens).
 3. **T-028b** memory and battery optimisation.

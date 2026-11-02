@@ -7,6 +7,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-028h | Collected fixes and speed (dark theme on Windows, help tables, button widths, Overview/Charges reload) | Ready | | C1–C4; parallel with T-029 |
+| T-029 | Automatic local backups, full JSON export/import, Android backup rules | Ready | | parallel with T-028h |
 
 ## Done
 
@@ -88,7 +90,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues / tech debt
 
-### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02)
+### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02) — C1–C4 → T-028h
 
 - C1. **Windows: first switch to the dark theme** — texts switch, native backgrounds (menu pane, page, pickers) stay light;
   choosing the theme again fixes it. Two blind attempts failed (#174 native `RequestedTheme` + re-apply, #177 delayed
