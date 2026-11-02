@@ -97,13 +97,93 @@
             </ContentView>
 
             <ContentView IsVisible="{Binding IsBackup}">
-                <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
-                    <Label Text="{Binding BackupHint}" Style="{StaticResource MutedLabel}" />
-                    <Label Text="{Binding LastBackupText}" />
-                    <Button Text="{Binding SaveBackupText}" Command="{Binding SaveBackupCommand}"
-                            Style="{StaticResource PrimaryButton}" />
-                    <Button Text="{Binding RestoreBackupText}" Command="{Binding RestoreBackupCommand}"
-                            Style="{StaticResource SecondaryButton}" />
+                <VerticalStackLayout Spacing="12" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
+
+                    <!-- Backup file that the owner keeps outside the app. -->
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding ManualBackupHeader}" Style="{StaticResource SectionHeader}" />
+                            <Label Text="{Binding BackupHint}" Style="{StaticResource MutedLabel}" />
+                            <Label Text="{Binding LastBackupText}" />
+                            <Button Text="{Binding SaveBackupText}" Command="{Binding SaveBackupCommand}"
+                                    Style="{StaticResource PrimaryButton}" />
+                            <Button Text="{Binding RestoreBackupText}" Command="{Binding RestoreBackupCommand}"
+                                    Style="{StaticResource SecondaryButton}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Automatic copies on this device (T-029). -->
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding AutoBackupHeader}" Style="{StaticResource SectionHeader}" />
+                            <Label Text="{Binding AutoBackupHint}" Style="{StaticResource MutedLabel}" />
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Switch IsToggled="{Binding AutoBackupEnabled}" />
+                                <Label Grid.Column="1" Text="{Binding AutoBackupEnabledLabel}" VerticalOptions="Center" />
+                            </Grid>
+                            <Label Text="{Binding AutoIntervalLabel}" Style="{StaticResource MutedLabel}" />
+                            <Border Padding="12,10" StrokeShape="RoundRectangle 8"
+                                    Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ChooseIntervalCommand}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding AutoIntervalValue}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                           VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                </Grid>
+                            </Border>
+                            <Label Text="{Binding AutoKeepLabel}" Style="{StaticResource MutedLabel}" />
+                            <Border Padding="12,10" StrokeShape="RoundRectangle 8"
+                                    Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ChooseKeepCommand}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding AutoKeepValue}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}"
+                                           VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                </Grid>
+                            </Border>
+                            <Label Text="{Binding LastAutoBackupText}" />
+                            <Label Text="{Binding LastAutoBackupErrorText}" Style="{StaticResource ErrorLabel}"
+                                   IsVisible="{Binding HasLastAutoBackupError}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding CopiesHeader}" Style="{StaticResource SectionHeader}" />
+                            <Label Text="{Binding CopiesEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoCopies}" />
+                            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Copies}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:AutoBackupRowViewModel">
+                                        <VerticalStackLayout Spacing="6">
+                                            <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                            <Label Text="{Binding Details}" Style="{StaticResource MutedLabel}" />
+                                            <Button Text="{Binding RestoreText}" Command="{Binding RestoreCommand}"
+                                                    Style="{StaticResource SecondaryButton}" />
+                                            <Button Text="{Binding SaveText}" Command="{Binding SaveCommand}"
+                                                    Style="{StaticResource SecondaryButton}" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Everything as one readable file (JSON). -->
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding DataExportHeader}" Style="{StaticResource SectionHeader}" />
+                            <Label Text="{Binding DataExportHint}" Style="{StaticResource MutedLabel}" />
+                            <Button Text="{Binding ExportJsonText}" Command="{Binding ExportJsonCommand}"
+                                    Style="{StaticResource SecondaryButton}" />
+                            <Button Text="{Binding ImportJsonText}" Command="{Binding ImportJsonCommand}"
+                                    Style="{StaticResource SecondaryButton}" />
+                        </VerticalStackLayout>
+                    </Border>
+
                 </VerticalStackLayout>
             </ContentView>
 

@@ -147,6 +147,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     [ObservableProperty]
     private IReadOnlyList<AutoBackupRowViewModel> _copies = [];
 
+    /// <summary>True when the list of automatic copies is empty (the "no copies yet" line is shown).</summary>
+    public bool HasNoCopies => !HasCopies;
+
+    partial void OnHasCopiesChanged(bool value) => OnPropertyChanged(nameof(HasNoCopies));
+
     [ObservableProperty]
     private string _dataExportHeader = string.Empty;
 

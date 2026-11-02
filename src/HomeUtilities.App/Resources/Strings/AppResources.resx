@@ -1468,4 +1468,50 @@
   <data name="SettingsValueImports" xml:space="preserve"><value>Excel import, profiles, undo, repair</value></data>
   <data name="SettingsValueErrorLog" xml:space="preserve"><value>Entries: {0}</value></data>
   <data name="SettingsErrorLogClearConfirm" xml:space="preserve"><value>Clear the error log? The entries cannot be restored.</value></data>
+  <data name="SettingsBackupManualHeader" xml:space="preserve"><value>Backup file</value></data>
+  <data name="SettingsBackupLastSize" xml:space="preserve"><value>Last backup you saved: {0:g} ({1})</value></data>
+  <data name="SettingsBackupAutoHeader" xml:space="preserve"><value>Automatic backups</value></data>
+  <data name="SettingsBackupAutoHint" xml:space="preserve"><value>The app keeps copies of all your data on this device by itself: when it starts, if the last copy is older than the interval and something has changed since, and always before an import, a restore or deleting data. These copies stay on this device and are deleted together with the app — from time to time keep a copy elsewhere with “Save copy…”.</value></data>
+  <data name="SettingsBackupAutoEnabled" xml:space="preserve"><value>Make automatic backups</value></data>
+  <data name="SettingsBackupAutoInterval" xml:space="preserve"><value>How often</value></data>
+  <data name="SettingsBackupAutoKeep" xml:space="preserve"><value>Number of copies to keep</value></data>
+  <data name="BackupInterval_1" xml:space="preserve"><value>Every day</value></data>
+  <data name="BackupInterval_3" xml:space="preserve"><value>Every 3 days</value></data>
+  <data name="BackupInterval_7" xml:space="preserve"><value>Every 7 days</value></data>
+  <data name="SettingsBackupAutoLast" xml:space="preserve"><value>Last automatic backup: {0:g} ({1})</value></data>
+  <data name="SettingsBackupAutoNever" xml:space="preserve"><value>No automatic backup yet.</value></data>
+  <data name="SettingsBackupAutoFailed" xml:space="preserve"><value>Last automatic backup failed: {0}</value></data>
+  <data name="SettingsBackupCopiesHeader" xml:space="preserve"><value>Automatic copies on this device</value></data>
+  <data name="SettingsBackupCopiesEmpty" xml:space="preserve"><value>There are no automatic copies yet.</value></data>
+  <data name="BackupCopyRestore" xml:space="preserve"><value>Restore</value></data>
+  <data name="BackupCopySave" xml:space="preserve"><value>Save copy…</value></data>
+  <data name="BackupCopyMissing" xml:space="preserve"><value>This copy no longer exists.</value></data>
+  <data name="AutoBackupReason_Scheduled" xml:space="preserve"><value>Automatic</value></data>
+  <data name="AutoBackupReason_BeforeImport" xml:space="preserve"><value>Before an import</value></data>
+  <data name="AutoBackupReason_BeforeRestore" xml:space="preserve"><value>Before a restore</value></data>
+  <data name="AutoBackupReason_BeforeWipe" xml:space="preserve"><value>Before deleting all data</value></data>
+  <data name="AutoBackupReason_BeforeMigration" xml:space="preserve"><value>Before a database update</value></data>
+  <data name="BackupSizeKb" xml:space="preserve"><value>{0:0} KB</value></data>
+  <data name="BackupSizeMb" xml:space="preserve"><value>{0:0.0} MB</value></data>
+  <data name="SettingsBackupDataHeader" xml:space="preserve"><value>All data as a file (JSON)</value></data>
+  <data name="SettingsBackupDataHint" xml:space="preserve"><value>The export writes every record, including deleted ones, as readable text (JSON), optionally with the attachments. Importing such a file replaces all current data; a copy of the current data is kept.</value></data>
+  <data name="SettingsBackupExportJson" xml:space="preserve"><value>Export all data (JSON)…</value></data>
+  <data name="SettingsBackupImportJson" xml:space="preserve"><value>Import all data (JSON)…</value></data>
+  <data name="DataExportChoiceTitle" xml:space="preserve"><value>Export all data</value></data>
+  <data name="DataExportWithAttachments" xml:space="preserve"><value>JSON with attachments (.zip)</value></data>
+  <data name="DataExportJsonOnly" xml:space="preserve"><value>JSON only (.json)</value></data>
+  <data name="DataExportSaved" xml:space="preserve"><value>Data exported.</value></data>
+  <data name="DataExportSavedTo" xml:space="preserve"><value>Data exported to {0}</value></data>
+  <data name="DataImportTitle" xml:space="preserve"><value>Import all data</value></data>
+  <data name="DataImportConfirm" xml:space="preserve"><value>Replace ALL current data with the data from this file (exported {0:g}, {1} records)? A copy of the current data is kept.</value></data>
+  <data name="DataImportAction" xml:space="preserve"><value>Replace data</value></data>
+  <data name="DataImportRefused" xml:space="preserve"><value>This file cannot be imported. Nothing was changed.</value></data>
+  <data name="DataImportIssue_NotADataFile" xml:space="preserve"><value>This is not a HomeUtilities data export.</value></data>
+  <data name="DataImportIssue_NewerFormat" xml:space="preserve"><value>The file was exported by a newer version of the app. Update the app first.</value></data>
+  <data name="DataImportIssue_UnknownTable" xml:space="preserve"><value>Unknown table “{0}”.</value></data>
+  <data name="DataImportIssue_BadRow" xml:space="preserve"><value>{0}, record {1}: not a valid record.</value></data>
+  <data name="DataImportIssue_UnknownColumn" xml:space="preserve"><value>{0}, record {1}: unknown field “{2}”.</value></data>
+  <data name="DataImportIssue_MissingColumn" xml:space="preserve"><value>{0}, record {1}: the field “{2}” is missing.</value></data>
+  <data name="DataImportIssue_BadValue" xml:space="preserve"><value>{0}, record {1}: the field “{2}” has an unsuitable value.</value></data>
+  <data name="DataImportIssue_ConstraintViolation" xml:space="preserve"><value>The records do not fit together: a duplicate or a missing linked record.</value></data>
 </root>

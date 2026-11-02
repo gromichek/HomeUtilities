@@ -808,7 +808,7 @@ and the value is updated. The **?** button in the toolbar opens this chapter; in
 | **Language** | The language of the app: [Language and theme](#language-and-theme). |
 | **Theme** | System / Light / Dark: [Language and theme](#language-and-theme). |
 | **Reminders** | [Reminders](#reminders): what, when, planned reminders, a test notification. |
-| **Backup** | [Backup](#backup): save a copy of all data, restore from a copy. |
+| **Backup** | [Backup](#backup): save a copy of all data, automatic copies, restore, export and import all data as JSON. |
 | **Categories** | The categories of contracts and payments, see [Categories](#8-categories). |
 | **VAT rates** | The catalog of VAT percentages, see [VAT rates](#vat-rates). |
 | **Bill templates** | Payments without a meter, see [Bill templates and drafts](#bill-templates-and-drafts). |
@@ -899,7 +899,7 @@ you how many components use it. A component can also skip the catalog and use it
 
 ### Backup
 
-**Settings → Backup** holds two buttons, **Save backup…** and **Restore from backup…**, one under the other, and the line with the date of the last backup (also shown on the row in the list).
+**Settings → Backup** has three cards: the **backup file** you keep yourself (*Save backup…*, *Restore from backup…*), the **automatic copies** the app keeps on the device, and **all data as one JSON file**. The row in the list shows the date of the last backup you saved.
 
 Everything you type (properties, suppliers, contracts, meters, readings) and all attachments and photos live only
 inside the app. If you uninstall the app, they are deleted with it. A backup is a single file
@@ -916,7 +916,56 @@ device (for example Windows → Android).
   backup made by a newer version of the app, you get a message and nothing changes.
 
 After reinstalling the app: open *Settings → Backup → Restore from backup…*, pick your file, confirm, close the app and open it
-again. The backup file contains **all your data and is not encrypted** — keep it somewhere private.
+again. The backup file contains **all your data and is not encrypted** — keep it somewhere private. The line under the
+two buttons shows when and how large (in KB/MB) the last backup you saved was.
+
+#### Automatic backups
+
+You do not have to remember to make backups: the app keeps copies of all your data **on this device** by itself.
+
+- **When.** A little after the app starts (the first screen is already shown, nothing is delayed) the app makes a copy
+  if the last automatic copy is older than the chosen interval (*Every day*, *Every 3 days*, *Every 7 days*) **and** you
+  changed something since then. If you changed nothing, no copy is made. In addition, a copy is **always** made right
+  before something risky: an Excel import, a restore from a backup or from a JSON file, *Delete all data* (test builds) and
+  a database update after an app update. These copies are made even if automatic backups are switched off.
+- **How many.** The newest 3, 7 or 14 copies (your choice, default 7) are kept, and in addition the newest copy of each of the
+  last three months, so you can go back some months. Older copies are deleted by the app. Backups you saved yourself with
+  *Save backup…* and the copies made before a restore are never deleted by the app.
+- **Where.** In the app's own storage on the device (not in Drive, not on the PC). They are deleted together with the app, and a
+  lost phone loses them too — **from time to time save a copy elsewhere**: tap *Save copy…* on a copy in the list and put the
+  file in Downloads, Drive or on the computer.
+- **If it fails** (for example the device is full), the app does not stop: the problem goes to the error log and the card shows
+  *Last automatic backup failed: …*; the next attempt happens at the next start.
+
+On the card: the switch *Make automatic backups*, the choices *How often* and *Number of copies to keep*, the line with the
+last automatic copy (date and size) and the list of copies. A copy shows its date, why it was made (*Automatic*, *Before an
+import*, *Before a restore*, *Before deleting all data*, *Before a database update*) and its size. **Restore** works like
+*Restore from backup…*: the app asks for confirmation, first makes a copy of the current data (*Before a restore*),
+and after you close and reopen the app the data are as they were at the time of that copy. **Save copy…** puts the file where
+you want it.
+
+#### All data as one JSON file
+
+**Export all data (JSON)…** writes every record of the app — properties, suppliers, contracts, meters, readings, tariffs, bills, payments and
+the rest, **including records you deleted** — into one text file that can be opened in any text editor. You choose either only
+the `.json` file or a `.zip` that also holds the attachments (photos, PDFs). Amounts are plain numbers without rounding,
+dates are written as `2026-10-24`, times as `2026-10-24T09:30:00.0000000Z` (UTC). Use it to keep a file you can read without
+the app, or to move the data. For safe keeping use the backup file above: it also carries the database exactly as it is.
+
+**Import all data (JSON)…** reads such a file (`.json` or `.zip`). The app first checks it; if anything is wrong you get a list
+of the problems (for example *Bills, record 5: the field “Gross” has an unsuitable value*) and **nothing changes**. A file from a newer
+version of the app is refused with the message to update the app. If the file is fine, the app asks for confirmation (with the export date),
+makes a copy of the current data (*Before a restore*), and after you close and reopen the app **all current data are replaced** by
+the data of the file. There is no merge: it replaces everything.
+
+#### What Android's own backup does
+
+Android can copy app data to your Google account and restore it when you reinstall the app. HomeUtilities keeps the live
+database **out of** this system backup (a half-copied database could come back damaged or old). Only the newest
+automatic copy (one `.zip`) is offered to Android. If it fits into Android's limit (25 MB), it comes back after a reinstall
+and appears in the list of automatic copies — tap *Restore* to get your data back. If your data and attachments are bigger, Android
+simply makes no copy: then only a file you saved yourself (*Save backup…*, *Save copy…*) helps. Do not rely on the system
+backup alone.
 
 ### Import from Excel
 
@@ -1097,5 +1146,4 @@ desktop). In test builds it also holds *Fill with sample data* and *Delete all d
 
 ## 17. Coming soon
 
-Charts on the Overview,
-automatic backups and Google Drive sync.
+Charts on the Overview and Google Drive sync.

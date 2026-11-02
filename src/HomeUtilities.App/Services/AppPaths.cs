@@ -14,5 +14,8 @@ public sealed class AppPaths : IAppPaths
     /// <summary>Copies of the data that a restore replaced (<c>before-restore-*.zip</c>).</summary>
     public string BackupsFolder { get; } = Path.Combine(FileSystem.AppDataDirectory, "backups");
 
+    /// <summary>Holds only the newest automatic copy; the one folder of the Android system backup (see the backup rules).</summary>
+    public string SystemBackupFolder { get; } = Path.Combine(FileSystem.AppDataDirectory, "backups", "system-copy");
+
     public string AttachmentsFolder { get; } = Path.Combine(FileSystem.AppDataDirectory, "attachments");
 }

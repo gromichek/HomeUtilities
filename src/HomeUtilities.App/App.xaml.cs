@@ -51,6 +51,7 @@ public partial class App : Application
         _layoutModeService.Attach(window);
         ShowRestoreFailureOnce(window);
         StartReminders(window);
+        StartAutomaticBackup(window);
         return window;
     }
 
@@ -100,6 +101,18 @@ public partial class App : Application
         };
         window.Deactivated += (_, _) => Flush();
         window.Stopped += (_, _) => Flush();
+    }
+
+    // The regular automatic backup runs in the background a few seconds after the first screen is shown, so it never delays the
+    // start. It waits for the database (migration) and makes a copy only if the interval has elapsed and data changed.
+    private void StartAutomaticBackup(Window window)
+    {
+        var backups = _services.GetRequiredService<IAutoBackupService>();
+        window.Created += (_, _) => _ = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            await backups.RunIfDueAsync();
+        });
     }
 
     // A failed startup restore is reported once, when the first page is on screen.
