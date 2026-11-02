@@ -136,6 +136,9 @@ Prompt for a new lead session:
 6. Collected owner findings go into one batch task when the owner asks (PROGRESS "Collected …").
 
 ## 7. Pitfalls learned (details in UI_GUIDELINES §6a and PROGRESS)
+- **Read the framework source/issues before guessing** (owner, 2026-11-02): three blind theme workarounds failed; the real
+  cause (unpackaged Windows `FontImageSource` needs a bundled font file) was found in MAUI's `FontImageSourceService.Windows.cs`.
+  The MAUI repo can be sparse-cloned from GitHub in the sandbox (`git sparse-checkout`); raw.githubusercontent is blocked.
 - Shell re-applies plain query dictionaries on Back → editors must apply a query once (`EditorPageBase._queryApplied`).
 - Never sync-over-async on the UI thread (restore deadlock #66) — use `Task.Run(...).GetAwaiter().GetResult()` where
   a synchronous call is unavoidable at startup.
