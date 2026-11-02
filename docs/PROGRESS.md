@@ -94,6 +94,23 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 (C1–C4 done in T-028h #181. Suggestions for later: `ReloadGate` for the other section roots; `MeterStore.IncludeAll` loads all readings.)
 
+- C5. **Windows theme — a regression.** Owner: switching worked correctly after the first implementation (T-011) and broke
+  later. `ThemeService` itself was unchanged from T-011 until #174, so the break came from another change between T-011
+  and T-028d (owner first reported it after T-028d: Settings sections — the theme choice now lives on a pushed
+  `SettingsSectionPage`; T-028f one pane may also matter). #174/#177/#181 workarounds did not help. Debug log of the
+  current build shows the native root theme now changes as asked (`root.RequestedTheme`/`ActualTheme` follow the choice,
+  `Application.RequestedTheme` correct), yet the first switch still looks mixed. Next task: **remove the workarounds**
+  (back to the T-011 `ThemeService`), then find the change that broke it (theme choice on a pushed page? implicit styles,
+  `StaticResource` colours in the new pages/controls — `SettingsSectionPage`, `AdaptiveFieldGrid`, `ListColumns`,
+  `FilterPanel`, Shell flyout styles?) by comparing with the T-011…T-028c XAML/styles.
+- C6. **Imports card buttons (phone):** Export / Delete are now equal and full width, but "Load profile from file" below
+  them has its natural width and "Cancel import" too — within one card all stacked action buttons on compact width have
+  the same full width (rule in UI_GUIDELINES §3 must cover buttons outside `AdaptiveFieldGrid` too).
+- C7. **Sections still feel reloaded on every visit** (phone). `ReloadGate` covers only Overview and Charges; apply it to
+  every section root (Bills, Payments, Readings, Reports, Properties, Suppliers, Contracts, Meters, Settings lists) and
+  check why Overview/Charges still feel slow (log whether the gate skipped: add "Performance: <VM> skipped (no change)" in
+  Debug).
+
 ### Done batch C1–C4 (T-028h)
 
 - C1. **Windows: first switch to the dark theme** — texts switch, native backgrounds (menu pane, page, pickers) stay light;
@@ -192,7 +209,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-01 | #166 | Reminders pop-up / lock screen | Pop-up OK when unlocked; **locked: sound only**, notification is in the shade after unlocking. App settings correct (lock screen allowed, show content). Delayed test added (#168) to check. |
 | 2026-11-02 | #168 + #170 | Reminders on the locked screen | **OK**: the screen lights up with the notification (also real reminders), bell icon. Cause was the coloured app icon used as the small icon. |
 | 2026-11-02 | #174 + #175 (Windows) | Windows maximised; error log | Two-column editors: "Save as template"/Delete stretched as cells; dark theme first switch still mixed; WinUI crash in `ListColumns` on resize during `ItemsSync` → #177. Timings (Windows): Overview 1.3–1.7 s, startup to Overview 3.8 s, Charges ~0.35 s. |
-| | #181 + #184 | T-028h (Windows theme once, help tables, button widths, Overview/Charges second visit); T-029 backups | pending |
+| 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |
 | 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
 | 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
 | | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
