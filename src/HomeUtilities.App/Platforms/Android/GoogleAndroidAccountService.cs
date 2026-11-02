@@ -66,7 +66,20 @@ public sealed class GoogleAndroidAccountService : ISyncAccountService
         }
 
         var token = await AuthorizeAsync(interactive: true, ct);
-        var email = await _tokens.GetEmailAsync(token.Value, ct);
+        string email;
+        try
+        {
+            email = await _tokens.GetEmailAsync(token.Value, ct);
+        }
+        catch (SyncException ex) when (ex.Kind == SyncErrorKind.TokenRevoked)
+        {
+            // Play services still hands out the token revoked by an earlier Disconnect (owner, 2026-11-02: reconnecting
+            // said "access revoked"). Drop it from the Play services cache and ask again — Google shows the consent anew.
+            await ClearCachedTokenAsync(token.Value);
+            token = await AuthorizeAsync(interactive: true, ct);
+            email = await _tokens.GetEmailAsync(token.Value, ct);
+        }
+
         await _secrets.SetAsync(SecretKey, email);
         _access = token;
         SetState(SyncAccountState.SignedIn(email));
@@ -88,7 +101,11 @@ public sealed class GoogleAndroidAccountService : ISyncAccountService
         try
         {
             var token = cached ?? await AuthorizeAsync(interactive: false, ct);
-            return await _tokens.RevokeAsync(token.Value, ct) ? SignOutResult.Done : SignOutResult.RevokeFailed;
+            var revoked = await _tokens.RevokeAsync(token.Value, ct);
+
+            // Also forget the token in Play services, otherwise the next Connect receives the revoked token again.
+            await ClearCachedTokenAsync(token.Value);
+            return revoked ? SignOutResult.Done : SignOutResult.RevokeFailed;
         }
         catch (SyncException)
         {
@@ -118,6 +135,20 @@ public sealed class GoogleAndroidAccountService : ISyncAccountService
             _access = null;
             SetState(SyncAccountState.Failed(SyncErrorKind.TokenRevoked, State.Email));
             throw;
+        }
+    }
+
+    // GoogleAuthUtil.ClearToken does blocking work and must not run on the main thread. A failure only means the cache
+    // keeps the token; the sign-in then reports the revoked access as before, so it is logged and ignored.
+    private static async System.Threading.Tasks.Task ClearCachedTokenAsync(string token)
+    {
+        try
+        {
+            await System.Threading.Tasks.Task.Run(() => global::Android.Gms.Auth.GoogleAuthUtil.ClearToken(Platform.AppContext, token));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Clearing the cached Google token failed: {ex.Message}");
         }
     }
 
