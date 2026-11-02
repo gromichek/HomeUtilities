@@ -94,6 +94,7 @@ Prompt for a new lead session:
 | 2026-10-31 | Reminders: **no quiet hours** — the configured time of day is used exactly. Inexact alarms (≈1 min late) are fine. |
 | 2026-11-01 | A window **lower than 480 dp** (phone in landscape) uses the phone layout (single pane, ✓ Save at the top), whatever its width (T-028a). |
 | 2026-11-01 | **One content pane everywhere** (variant A): no list + editor split on tablet/Windows; editors are pages with ✓ at the top on every device; lists in 2–3 columns on wide windows; period filter as a drop-down (T-028f). Owner tests speed only in **Release** builds. |
+| 2026-11-02 | Owner registered the Google Cloud project (Drive API, consent screen External + In production, scopes openid/email/drive.appdata, Desktop client, Android client with the debug-keystore SHA-1). Permanent signing key planned as T-034 (with the real app icon). |
 | 2026-11-02 | **Licence exception:** Google Play services on Android (MIT bindings `Xamarin.GooglePlayServices.*`) only for Google sign-in (T-030). README and CLAUDE.md updated. |
 | 2026-11-02 | Sync storage replaceable (`ISyncStorage`); Google Drive first; one provider per user; OneDrive/Dropbox/WebDAV later if needed (T-032a). |
 | 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |

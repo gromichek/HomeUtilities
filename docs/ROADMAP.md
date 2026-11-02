@@ -72,6 +72,10 @@ is written; the list below is the plan and will change.
 - T-031 Sync engine (change logs, merge, conflict tests) behind `ISyncStorage`; Google Drive adapter
 - T-032 Attachments sync
 - T-032a (optional) More storage providers: OneDrive, Dropbox, WebDAV — one adapter + sign-in each, when needed
+- T-034 Release identity: own permanent Android signing key (used on every PC and later in CI; its SHA-1 registered as the
+  Android OAuth client), real app icon + splash, notification icon = white house from the app icon (owner requests
+  2026-11-02). Owner keeps the keystore and passwords outside the repo; migration from the debug key needs one reinstall
+  (backup → uninstall → install → restore).
 
 ## Phase 10 — iOS
 - T-033 Enable `net10.0-ios`, macOS CI job, platform services for iOS

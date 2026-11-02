@@ -142,6 +142,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 8. **Later (owner, 2026-11-02):** the notification small icon should be the **white house from the app icon** instead of
    the bell (`drawable/ic_stat_reminder.xml`, one colour + alpha). Do it with the real app icon (the current app icon and
    splash are placeholders — PROGRESS tech debt).
+9. **Later (owner, 2026-11-02): permanent signing key** instead of the per-PC debug keystore (Google sign-in on Android
+   checks the SHA-1; a different key also blocks updating over an installed build). Planned as T-034 together with 8.
+   Until then the owner copies `%LocalAppData%\Xamarin\Mono for Android\debug.keystore` to other PCs.
 
 5. **Tablet (portrait and landscape with the menu open):** list + editor two-pane leaves the list ~450 dp; the filter
    card is cramped (period buttons cut to "Вс/Го/Ме", the year "2026" wraps per digit). Owner decision: **one content
