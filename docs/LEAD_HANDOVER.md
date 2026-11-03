@@ -95,6 +95,7 @@ Prompt for a new lead session:
 | 2026-11-01 | A window **lower than 480 dp** (phone in landscape) uses the phone layout (single pane, ✓ Save at the top), whatever its width (T-028a). |
 | 2026-11-01 | **One content pane everywhere** (variant A): no list + editor split on tablet/Windows; editors are pages with ✓ at the top on every device; lists in 2–3 columns on wide windows; period filter as a drop-down (T-028f). Owner tests speed only in **Release** builds. |
 | 2026-11-02 | Owner registered the Google Cloud project (Drive API, consent screen External + In production, scopes openid/email/drive.appdata, Desktop client, Android client with the debug-keystore SHA-1). Permanent signing key planned as T-034 (with the real app icon). |
+| 2026-11-03 | Restore / JSON import / delete-all switch sync off on that device; re-joining offers "replace this device's data with the cloud" or "replace the cloud data with this device's data" (C9). |
 | 2026-11-02 | Sync first join on a device with data: **replace this device's data with the cloud data** (backup first) is the recommended, preselected choice; merge stays possible with a duplicate warning (T-031). |
 | 2026-11-02 | **Licence exception:** Google Play services on Android (MIT bindings `Xamarin.GooglePlayServices.*`) only for Google sign-in (T-030). README and CLAUDE.md updated. |
 | 2026-11-02 | Sync storage replaceable (`ISyncStorage`); Google Drive first; one provider per user; OneDrive/Dropbox/WebDAV later if needed (T-032a). |
@@ -116,13 +117,13 @@ Prompt for a new lead session:
 ## 5. Current state (2026-11-03)
 - Merged up to **T-031** (#203, sync engine) on top of T-030 (sign-in) and fixes #197/#199 (Android reconnect, Windows
   icon images → themes work). Waiting for the owner's sync test (PC first, phone "Replace").
-- Open owner question C9: restore / JSON import / delete-all on a syncing device (proposal: switch sync off, re-join with a
-  new "Replace the cloud data with this device's data" option).
+- C9 decided (owner, 2026-11-03): restore / JSON import / delete-all switch sync off; re-join offers "Replace this device's
+  data with the cloud data" or the new "Replace the cloud data with this device's data". Goes into the next batch task.
 - Next: T-032 attachments sync; T-034 release identity (permanent key, real icon, house notification icon).
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner sync test of #203 → log, collect findings; answer C9; then write T-032 (attachments sync).
+1. Owner sync test of #203 → log, collect findings; then one task with C9 + sync findings, and T-032 (attachments sync).
 3. **T-032** attachments sync. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
 4. **T-034** release identity: permanent signing key (+ its SHA-1 as Android OAuth client), real app icon/splash, white
    house notification icon.
