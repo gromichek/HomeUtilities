@@ -1522,7 +1522,7 @@
   <data name="SettingsValueSyncNotConfigured" xml:space="preserve"><value>Не настроена в этой сборке</value></data>
   <data name="SettingsValueSyncSignedOut" xml:space="preserve"><value>Не подключено</value></data>
   <data name="SettingsValueSyncError" xml:space="preserve"><value>Связь потеряна</value></data>
-  <data name="SyncHint" xml:space="preserve"><value>Синхронизация будет держать данные одинаковыми на телефоне и на компьютере. Она использует скрытую папку в вашем собственном Google Диске, которую видит только это приложение: в приложении и на сайте Google Диска её нет. Здесь вы подключаете аккаунт Google и проверяете доступ; сама синхронизация данных появится в следующей версии.</value></data>
+  <data name="SyncHint" xml:space="preserve"><value>Синхронизация держит данные одинаковыми на телефоне и на компьютере. Она использует скрытую папку в вашем собственном Google Диске, которую видит только это приложение: в приложении и на сайте Google Диска её нет. Подключите здесь аккаунт Google и включите «Синхронизация на этом устройстве». Фотографии и файлы, прикреплённые к записям, пока не синхронизируются.</value></data>
   <data name="SyncProvider" xml:space="preserve"><value>Хранилище: {0}</value></data>
   <data name="SyncStatusNotConfigured" xml:space="preserve"><value>Синхронизация не настроена в этой сборке.</value></data>
   <data name="SyncStatusSignedOut" xml:space="preserve"><value>Не подключено</value></data>
@@ -1556,4 +1556,21 @@
   <data name="SyncError_ClockSkew" xml:space="preserve"><value>Часы устройства неверны (расхождение больше 5 минут). Включите автоматическую установку даты и времени и повторите.</value></data>
   <data name="SyncError_Timeout" xml:space="preserve"><value>Google не ответил вовремя. Повторите.</value></data>
   <data name="SyncError_NotFound" xml:space="preserve"><value>Файл не найден в скрытой папке Диска.</value></data>
+  <data name="SyncSwitch" xml:space="preserve"><value>Синхронизация на этом устройстве</value></data>
+  <data name="SyncNow" xml:space="preserve"><value>Синхронизировать сейчас</value></data>
+  <data name="SyncDetails" xml:space="preserve"><value>Подробности</value></data>
+  <data name="SyncRunOff" xml:space="preserve"><value>Синхронизация на этом устройстве выключена.</value></data>
+  <data name="SyncRunSyncing" xml:space="preserve"><value>Синхронизация…</value></data>
+  <data name="SyncRunWaiting" xml:space="preserve"><value>Ожидание сети. Изменения сохранены и будут отправлены позже.</value></data>
+  <data name="SyncRunUpdate" xml:space="preserve"><value>Обновите приложение на этом устройстве, чтобы продолжить синхронизацию.</value></data>
+  <data name="SyncRunFailed" xml:space="preserve"><value>Ошибка: {0}</value></data>
+  <data name="SyncRunSynced" xml:space="preserve"><value>Синхронизировано {0}</value></data>
+  <data name="SyncConflicts" xml:space="preserve"><value>Конфликтов: {0} (см. «Подробности»).</value></data>
+  <data name="SyncClockSkew" xml:space="preserve"><value>Часы этого устройства отличаются от серверных больше чем на 5 минут — включите автоматическую установку даты и времени.</value></data>
+  <data name="SyncNever" xml:space="preserve"><value>Ещё не синхронизировалось.</value></data>
+  <data name="SyncLastSync" xml:space="preserve"><value>Последняя синхронизация: {0}</value></data>
+  <data name="SyncJoinQuestion" xml:space="preserve"><value>В облаке уже есть данные, и на этом устройстве тоже. «Заменить» оставит только данные из облака (сначала будет сделана резервная копия данных этого устройства). «Объединить» оставит всё, но записи, введённые на обоих устройствах, появятся дважды.</value></data>
+  <data name="SyncJoinReplace" xml:space="preserve"><value>Заменить данные этого устройства данными из облака (рекомендуется)</value></data>
+  <data name="SyncJoinMerge" xml:space="preserve"><value>Объединить</value></data>
+  <data name="OverviewSyncHint" xml:space="preserve"><value>Синхронизация не работает больше суток. Причина — в «Настройки → Синхронизация».</value></data>
 </root>

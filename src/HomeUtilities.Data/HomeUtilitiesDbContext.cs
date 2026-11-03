@@ -24,6 +24,9 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
     /// <summary>When true the interceptor leaves the given timestamps alone (used when applying synced rows).</summary>
     public bool PreserveTimestamps { get; set; }
 
+    /// <summary>When true the changes of this context are not recorded in the sync outbox.</summary>
+    public bool SuppressOutbox { get; set; }
+
     public DbSet<Property> Properties => Set<Property>();
 
     public DbSet<PropertyParameter> PropertyParameters => Set<PropertyParameter>();

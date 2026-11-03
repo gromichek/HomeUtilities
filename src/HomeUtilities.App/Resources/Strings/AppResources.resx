@@ -1522,7 +1522,7 @@
   <data name="SettingsValueSyncNotConfigured" xml:space="preserve"><value>Not configured in this build</value></data>
   <data name="SettingsValueSyncSignedOut" xml:space="preserve"><value>Not connected</value></data>
   <data name="SettingsValueSyncError" xml:space="preserve"><value>Connection lost</value></data>
-  <data name="SyncHint" xml:space="preserve"><value>Sync will keep your data the same on your phone and your PC. It uses a hidden folder in your own Google Drive that only this app can see: it does not show up in the Drive app or on the Drive website. Here you connect the Google account and check the access; the data sync itself comes with a later version.</value></data>
+  <data name="SyncHint" xml:space="preserve"><value>Sync keeps your data the same on your phone and your PC. It uses a hidden folder in your own Google Drive that only this app can see: it does not show up in the Drive app or on the Drive website. Connect the Google account here, then switch on “Sync on this device”. Photos and files attached to records are not synced yet.</value></data>
   <data name="SyncProvider" xml:space="preserve"><value>Storage: {0}</value></data>
   <data name="SyncStatusNotConfigured" xml:space="preserve"><value>Sync is not configured in this build.</value></data>
   <data name="SyncStatusSignedOut" xml:space="preserve"><value>Not connected</value></data>
@@ -1556,4 +1556,21 @@
   <data name="SyncError_ClockSkew" xml:space="preserve"><value>The clock of this device is wrong (more than 5 minutes off). Set the date and time automatically and try again.</value></data>
   <data name="SyncError_Timeout" xml:space="preserve"><value>Google did not answer in time. Try again.</value></data>
   <data name="SyncError_NotFound" xml:space="preserve"><value>The file was not found in the hidden Drive folder.</value></data>
+  <data name="SyncSwitch" xml:space="preserve"><value>Sync on this device</value></data>
+  <data name="SyncNow" xml:space="preserve"><value>Sync now</value></data>
+  <data name="SyncDetails" xml:space="preserve"><value>Details</value></data>
+  <data name="SyncRunOff" xml:space="preserve"><value>Sync is off on this device.</value></data>
+  <data name="SyncRunSyncing" xml:space="preserve"><value>Syncing…</value></data>
+  <data name="SyncRunWaiting" xml:space="preserve"><value>Waiting for the network. The changes are kept and will be sent later.</value></data>
+  <data name="SyncRunUpdate" xml:space="preserve"><value>Update the app on this device to continue syncing.</value></data>
+  <data name="SyncRunFailed" xml:space="preserve"><value>Error: {0}</value></data>
+  <data name="SyncRunSynced" xml:space="preserve"><value>Synced {0}</value></data>
+  <data name="SyncConflicts" xml:space="preserve"><value>{0} conflicts (see Details).</value></data>
+  <data name="SyncClockSkew" xml:space="preserve"><value>The clock of this device differs from the server's by more than 5 minutes — set the date and time automatically.</value></data>
+  <data name="SyncNever" xml:space="preserve"><value>Not synced yet.</value></data>
+  <data name="SyncLastSync" xml:space="preserve"><value>Last sync: {0}</value></data>
+  <data name="SyncJoinQuestion" xml:space="preserve"><value>The cloud already holds data and so does this device. Replace keeps only the cloud data (a backup copy of this device's data is made first). Merge keeps both, but records entered on both devices will appear twice.</value></data>
+  <data name="SyncJoinReplace" xml:space="preserve"><value>Replace this device's data with the data from the cloud (recommended)</value></data>
+  <data name="SyncJoinMerge" xml:space="preserve"><value>Merge</value></data>
+  <data name="OverviewSyncHint" xml:space="preserve"><value>Sync has not worked for more than a day. Open Settings → Sync to see why.</value></data>
 </root>

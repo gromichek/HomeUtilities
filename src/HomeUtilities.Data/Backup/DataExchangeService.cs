@@ -29,9 +29,9 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
     /// <summary>Entry name of the JSON document inside an export zip.</summary>
     public const string DataEntry = "data.json";
 
-    private const string TimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'";
-    private static readonly Lazy<IReadOnlyList<TableInfo>> Tables = new(BuildTables);
-    private static readonly Lazy<string> LatestMigration = new(() =>
+    internal const string TimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'";
+    internal static readonly Lazy<IReadOnlyList<TableInfo>> Tables = new(BuildTables);
+    internal static readonly Lazy<string> LatestMigration = new(() =>
     {
         using var db = NewModelContext();
         return db.Database.GetMigrations().Max() ?? string.Empty;
@@ -183,7 +183,7 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
         }
     }
 
-    private static void WriteValue(Utf8JsonWriter writer, ColumnInfo column, object value)
+    internal static void WriteValue(Utf8JsonWriter writer, ColumnInfo column, object value)
     {
         switch (column.Kind)
         {
@@ -349,7 +349,7 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
         return new DataImportResult([], exportedAt, count);
     }
 
-    private static object?[] ConvertRow(TableInfo table, JsonElement row, int index, List<DataImportIssue> issues)
+    internal static object?[] ConvertRow(TableInfo table, JsonElement row, int index, List<DataImportIssue> issues)
     {
         var values = new object?[table.Columns.Count];
         if (row.ValueKind != JsonValueKind.Object)
@@ -402,7 +402,7 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
         return values;
     }
 
-    private static void Add(List<DataImportIssue> issues, DataImportIssue issue)
+    internal static void Add(List<DataImportIssue> issues, DataImportIssue issue)
     {
         if (issues.Count < DataImportResult.Max)
         {
@@ -581,7 +581,7 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
         return command.ExecuteScalar() is { } value and not DBNull ? Convert.ToString(value, CultureInfo.InvariantCulture) : null;
     }
 
-    private static string Quote(string name) => "\"" + name.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"";
+    internal static string Quote(string name) => "\"" + name.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"";
 
     // ---- Model ----------------------------------------------------------------------------------------------------
 
@@ -620,7 +620,7 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
         return new ColumnInfo(column.Name, kind, clr.IsEnum ? clr : null, column.IsNullable);
     }
 
-    private enum ColumnKind
+    internal enum ColumnKind
     {
         Text,
         Guid,
@@ -635,7 +635,7 @@ public sealed class DataExchangeService(BackupOptions options, IClock clock, Bac
         Json,
     }
 
-    private sealed record ColumnInfo(string Name, ColumnKind Kind, Type? EnumType, bool Nullable);
+    internal sealed record ColumnInfo(string Name, ColumnKind Kind, Type? EnumType, bool Nullable);
 
-    private sealed record TableInfo(string Name, IReadOnlyList<ColumnInfo> Columns);
+    internal sealed record TableInfo(string Name, IReadOnlyList<ColumnInfo> Columns);
 }

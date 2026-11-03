@@ -66,9 +66,16 @@ public sealed class SyncEntityInterceptor(IClock clock, IDataChangeNotifier? not
         // Finds children removed from collections and changed JSON columns before the states are read.
         context.ChangeTracker.DetectChanges();
 
+        var changed = new List<(string Table, Guid Id)>();
         foreach (var entry in context.ChangeTracker.Entries<SyncEntity>().ToList())
         {
             var entity = entry.Entity;
+            if (entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted
+                && entry.Metadata.GetTableName() is { } tableName)
+            {
+                changed.Add((tableName, entity.Id));
+            }
+
             switch (entry.State)
             {
                 case EntityState.Added when !preserve:
@@ -95,6 +102,13 @@ public sealed class SyncEntityInterceptor(IClock clock, IDataChangeNotifier? not
                     entry.State = EntityState.Modified;
                     break;
             }
+        }
+
+        // T-031: the changed rows go to the sync outbox. Written before the save: a failed save leaves a harmless extra upload,
+        // a crash after the save cannot lose a change.
+        if (changed.Count > 0 && !(context is HomeUtilitiesDbContext { SuppressOutbox: true }))
+        {
+            SyncOutbox.Record(context, changed);
         }
     }
 }

@@ -7,6 +7,7 @@ using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Overview;
+using HomeUtilities.Core.Sync;
 using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
@@ -112,8 +113,15 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         IDialogService dialogs,
         ISettingsStore settings,
         ILayoutModeService layoutModeService,
-        IDataChangeNotifier? changes = null)
+        IDataChangeNotifier? changes = null,
+        ISyncEngine? sync = null)
     {
+        _sync = sync;
+        if (sync is not null)
+        {
+            sync.StatusChanged += (_, _) => UpdateSyncHint();
+        }
+
         _gate = changes is null ? null : new ReloadGate(changes, clock);
         _localizer = localizer;
         _clock = clock;
@@ -129,6 +137,23 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         _isWide = layoutModeService.Current != LayoutMode.Compact;
         _propertyFilter = Guid.TryParse(settings.GetString(PropertyFilterKey), out var remembered) ? remembered : null;
         RefreshTexts();
+    }
+
+    private readonly ISyncEngine? _sync;
+
+    /// <summary>Shown only when the sync is on and has not worked for more than a day (T-031).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSyncHint))]
+    private string _syncHintText = string.Empty;
+
+    public bool HasSyncHint => SyncHintText.Length > 0;
+
+    private void UpdateSyncHint()
+    {
+        var status = _sync?.Status;
+        var stale = _sync is { IsEnabled: true } && status is { Kind: SyncStateKind.Failed or SyncStateKind.WaitingForNetwork or SyncStateKind.UpdateRequired }
+            && _clock.UtcNow - (status.LastSyncAt ?? DateTimeOffset.MinValue) > TimeSpan.FromDays(1);
+        SyncHintText = stale ? _localizer["OverviewSyncHint"] : string.Empty;
     }
 
     public DateOnly Today => _clock.Today;
@@ -287,6 +312,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     protected override void RefreshTexts()
     {
         Title = _localizer["SectionOverview"];
+        UpdateSyncHint();
         HelpText = _localizer["SectionHelp"];
         TodayText = _localizer.Get("TodayIs", Today);
         TodoHeader = _localizer["OverviewTodoHeader"];
