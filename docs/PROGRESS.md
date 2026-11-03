@@ -142,7 +142,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   sync stages — "Syncing…", "Synced: 3 received, 1 sent", "Sync failed: <reason>" — visible 1–2 s, never blocking.
   To avoid noise from the automatic syncs (start, resume, 10 s after a change): "Syncing…" only for Sync now and the
   first sync after start; "Synced" only when something was received or sent; errors always (once per kind until the next
-  success). A switch "Show sync messages" (default on) in Settings → Sync. Duration and rules to be tuned with the owner.
+  success). A switch "Show sync messages" (default on) in Settings → Sync. Rules agreed by the owner (2026-11-03); the
+  duration is tuned after his test.
 - C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
   a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
   Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
