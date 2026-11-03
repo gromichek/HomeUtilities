@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-031 | Sync engine (change logs via `ISyncStorage`, merge, first join, Sync now) | Ready | | after T-030; first join: "Replace with cloud data" preselected (owner decision 2026-11-02) |
 
 ## Done
 
@@ -45,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-031 | Sync engine | 2026-11-03, #203 | `SyncOutbox` filled by the interceptor (received rows via raw SQL → no echo); `changes/<deviceId>/<seq:D10>.json` (≤ 500 rows), `snapshot/<deviceId>-<ts>.json.gz`; LWW by `UpdatedAt`, tie → higher deviceId; resurrect; unique clashes only `Categories.SystemKey` / `VatRates.Code` (lower id keeps it); newer format/migration stops; first join (Replace preselected + backup, Merge, empty device); `SyncScheduler` (start +3 s, resume ≥ 30 s, 10 s after a change, flush on leave, Sync now). New DeviceId per first join. Open: restore/JSON import on a syncing device (C9). |
 | — | Fix: icon images use the bundled font on all platforms | 2026-11-02, #199 | Unpackaged Windows: MAUI resolves an image font to a file URI; only a bundled font file works (system/default font → relative URI → exception; menu icons were invisible, theme change crashed). Possibly also the root of C5 (mixed colours). |
 | — | Fix: theme-switch crash on Windows, Google reconnect on Android | 2026-11-02, #197 | `IconImageFontFamily` (one family for `FontImageSource` on Windows); Android Disconnect/Connect clears the cached token (`AuthorizationClient.ClearToken`). |
 | T-030 | Google sign-in per platform | 2026-11-02, #194 | New `HomeUtilities.Sync` project: PKCE + loopback (Windows, DPAPI for the refresh token), Google Identity Services Authorization API (Android, `Xamarin.GooglePlayServices.Auth` — licence exception), `GoogleDriveStorage` (Drive v3 REST, `appDataFolder`), `ISyncAccountService`/`ISyncStorage` in Core; Settings → Sync (connect, check, disconnect); `secrets.json` git-ignored, template committed. Lead aligned AndroidX Ktx companions (NU1608). Open: Android sign-out may need `RevokeAccess`. |
@@ -120,6 +120,11 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   every section root (Bills, Payments, Readings, Reports, Properties, Suppliers, Contracts, Meters, Settings lists) and
   check why Overview/Charges still feel slow (log whether the gate skipped: add "Performance: <VM> skipped (no change)" in
   Debug).
+- C9. **Restore / JSON import / "Delete all data" on a device with sync on** (T-031 open question): the restored database
+  carries an old sync state (applied sequences, outbox), so the next sync re-applies newer cloud changes over the restored
+  data, and the restore is silently undone. Proposal: these operations switch sync off; switching it on again asks
+  "Replace this device's data with the cloud data" **or "Replace the cloud data with this device's data"** (new: upload this
+  device as the new source — needed to bring a backup back to all devices). Ask the owner.
 - C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
   a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
   Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
@@ -228,6 +233,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-02 | #174 + #175 (Windows) | Windows maximised; error log | Two-column editors: "Save as template"/Delete stretched as cells; dark theme first switch still mixed; WinUI crash in `ListColumns` on resize during `ItemsSync` → #177. Timings (Windows): Overview 1.3–1.7 s, startup to Overview 3.8 s, Charges ~0.35 s. |
 | 2026-11-02 | #191 + #194 | T-028i, T-030 with the owner's `secrets.json` | Sign-in, check, disconnect/reconnect OK on Windows; phone sign-in + check OK, but reconnect after Disconnect said "access revoked" → #197. Theme switch on Windows **crashed** (FontImageSource with comma-separated font family) → #197. Second visits fast, Imports buttons OK. Airplane-mode check pending. |
 | 2026-11-02 | #197 | Windows theme change; Android Disconnect → Connect | Android reconnect OK. Windows **still crashed**: every `FontImageSource` failed ("Unable to generate font image", relative URI) → #199. |
+| | #203 | T-031 sync: PC first, phone "Replace", paid bill → PC, reading → phone, airplane mode, same bill edited on both | pending |
 | 2026-11-02 | #199 + #194 | Windows menu icons, theme change; sync sign-in in airplane mode | **OK**: icons visible, themes switch correctly at once (C5 solved — the root cause was the failing `FontImageSource` rendering), no crash; offline check shows a clear message. |
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |
 | 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
