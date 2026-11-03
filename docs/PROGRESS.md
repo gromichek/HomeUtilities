@@ -124,7 +124,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   carries an old sync state (applied sequences, outbox), so the next sync re-applies newer cloud changes over the restored
   data, and the restore is silently undone. Proposal: these operations switch sync off; switching it on again asks
   "Replace this device's data with the cloud data" **or "Replace the cloud data with this device's data"** (new: upload this
-  device as the new source — needed to bring a backup back to all devices). Ask the owner.
+  device as the new source — needed to bring a backup back to all devices). **Owner agreed (2026-11-03).**
 - C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
   a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
   Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
