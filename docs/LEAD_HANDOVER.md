@@ -113,23 +113,16 @@ Prompt for a new lead session:
   on the 1st belong to the previous month), use the meter-link repair, re-import gas after fixing plans.
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
-## 5. Current state (2026-11-02)
-- Merged up to **T-030** (#194, Google sign-in: Settings → Sync, Drive `appDataFolder` check) and **T-028i** (#191).
-  The owner registered the Google Cloud project; he fills `src/HomeUtilities.App/secrets.json` himself (keys
-  `googleDesktopClientId`, `googleDesktopClientSecret`, `googleAndroidClientId`). Waiting for his tests of both.
-- Windows theme (C5): third attempt is a hypothesis (deferred apply after the Picker closes); if it still fails → bisect
-  with the old Settings page path.
-- Next: **T-031** sync engine (change logs via `ISyncStorage`, reuse `DataExchangeService` row shape, merge last-writer-wins,
-  soft-delete resurrect) — write the task after the owner confirms sign-in works. Then T-032 attachments, T-034 release
-  identity (permanent key, real icon, house notification icon).
+## 5. Current state (2026-11-03)
+- Merged up to **T-031** (#203, sync engine) on top of T-030 (sign-in) and fixes #197/#199 (Android reconnect, Windows
+  icon images → themes work). Waiting for the owner's sync test (PC first, phone "Replace").
+- Open owner question C9: restore / JSON import / delete-all on a syncing device (proposal: switch sync off, re-join with a
+  new "Replace the cloud data with this device's data" option).
+- Next: T-032 attachments sync; T-034 release identity (permanent key, real icon, house notification icon).
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner tests of #191/#194 → log; if sign-in works on Windows and the phone, write T-031.
-2. **T-031** sync engine behind `ISyncStorage` (change logs `changes/<deviceId>/<seq>.json`, row shape of
-   `DataExchangeService`, last-writer-wins by `UpdatedAt`, soft deletes, snapshot; sync on start/resume, after saves,
-   "Sync now"; nothing in the background on Android). Note: saving an id that exists only as a soft-deleted row needs
-   "resurrect".
+1. Owner sync test of #203 → log, collect findings; answer C9; then write T-032 (attachments sync).
 3. **T-032** attachments sync. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
 4. **T-034** release identity: permanent signing key (+ its SHA-1 as Android OAuth client), real app icon/splash, white
    house notification icon.
