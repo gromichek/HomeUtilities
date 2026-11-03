@@ -133,6 +133,11 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   thread and `SyncSettingsViewModel` updates bindable properties and `NotifyCanExecuteChanged` directly → WinUI throws on
   a wrong thread / stale button states. Marshal to the UI thread (captured `SynchronizationContext` or a dispatcher
   interface); unsubscribe the transient VM from the singleton engine (leak). Check the same for the Overview sync hint.
+- C12. **"Files in the cloud"** (owner, 2026-11-03): the hidden Drive `appDataFolder` is not visible in Google Drive. Add a
+  read-only list in Settings → Sync: change files grouped by device (device id short form, which one is "this device",
+  count, total size, newest date), snapshots (date, size), foreign files; total size. Nothing can be deleted from there.
+  Guide EN + RU: where to see the hidden data in Google Drive (Settings → Manage apps → HomeUtilities, "Delete hidden app
+  data" wipes the cloud copy only).
 - C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
   a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
   Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
