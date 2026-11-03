@@ -125,6 +125,14 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   data, and the restore is silently undone. Proposal: these operations switch sync off; switching it on again asks
   "Replace this device's data with the cloud data" **or "Replace the cloud data with this device's data"** (new: upload this
   device as the new source — needed to bring a backup back to all devices). **Owner agreed (2026-11-03).**
+- C10. **Sync after the network returns** (owner, 2026-11-03): the status stays "Waiting for the network" until the next
+  trigger (resume/change/Sync now). While the app is **in the foreground**: listen to connectivity changes
+  (MAUI `Connectivity.ConnectivityChanged` behind an interface) and sync when the network is back; plus a retry every
+  ~60 s while the status is "waiting"/"failed" and the app is in the foreground. Nothing in the background (battery rule).
+- C11. **Sync status events off the UI thread** (lead review of #203): `SyncEngine.StatusChanged` is raised on the sync
+  thread and `SyncSettingsViewModel` updates bindable properties and `NotifyCanExecuteChanged` directly → WinUI throws on
+  a wrong thread / stale button states. Marshal to the UI thread (captured `SynchronizationContext` or a dispatcher
+  interface); unsubscribe the transient VM from the singleton engine (leak). Check the same for the Overview sync hint.
 - C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
   a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
   Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
@@ -233,7 +241,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-02 | #174 + #175 (Windows) | Windows maximised; error log | Two-column editors: "Save as template"/Delete stretched as cells; dark theme first switch still mixed; WinUI crash in `ListColumns` on resize during `ItemsSync` → #177. Timings (Windows): Overview 1.3–1.7 s, startup to Overview 3.8 s, Charges ~0.35 s. |
 | 2026-11-02 | #191 + #194 | T-028i, T-030 with the owner's `secrets.json` | Sign-in, check, disconnect/reconnect OK on Windows; phone sign-in + check OK, but reconnect after Disconnect said "access revoked" → #197. Theme switch on Windows **crashed** (FontImageSource with comma-separated font family) → #197. Second visits fast, Imports buttons OK. Airplane-mode check pending. |
 | 2026-11-02 | #197 | Windows theme change; Android Disconnect → Connect | Android reconnect OK. Windows **still crashed**: every `FontImageSource` failed ("Unable to generate font image", relative URI) → #199. |
-| | #203 | T-031 sync: PC first, phone "Replace", paid bill → PC, reading → phone, airplane mode, same bill edited on both | pending |
+| 2026-11-03 | #203 | T-031 sync (PC first, phone "Replace", paid bill → PC, reading → phone, airplane mode) | OK; after the network came back the status stayed "Waiting for the network" until the app was resumed (screen off/on) → C10. Same-bill conflict test pending. (Connect "not working" on Windows was a build without `secrets.json`.) |
 | 2026-11-02 | #199 + #194 | Windows menu icons, theme change; sync sign-in in airplane mode | **OK**: icons visible, themes switch correctly at once (C5 solved — the root cause was the failing `FontImageSource` rendering), no crash; offline check shows a clear message. |
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |
 | 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
