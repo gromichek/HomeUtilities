@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-034 | Release identity: permanent signing key, real app icon, house notification icon | Ready | | findings 8 and 9 |
 
 ## Done
 
@@ -266,6 +267,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-04 | #213 | T-032: pause/resume, airplane mode, files in the cloud, meter photo phone → PC, restore + "replace the cloud", help | 1–4 and 6 OK. Step 5: restoring an older (pre-sync) backup gave the generic first-join question without "Replace the cloud", text cut off on Windows → T-032b. |
 | 2026-11-04 | #217 | T-032b: restore of a pre-sync copy → two choices, "Replace the cloud" → phone asked and replaced; never-joined device → three choices | **OK** (all 6 steps). The owner had not noticed any sync snackbar yet → separate check of the C13 messages given. |
 | 2026-11-04 | #219 | Sync messages (C13) | **No snackbar on PC or phone.** Cause: `SnackbarHost` had a constant `IsVisible="False"` since T-019 (never bound) — so Paid → Undo and the Windows reminder summary were never visible either → fixed in #220. |
+| 2026-11-04 | #220 | Snackbar visible: Paid → Undo, start/Sync now/sent/received messages, waiting for the network once, switch off hides all, Windows reminder summary | **OK** (all 7 steps). |
 | 2026-11-04 | #203 | Same bill renamed differently on both devices (sync off on both, then on with "Merge") | OK — the later edit won on both devices. Found C14 (off/on is a new first join). |
 | 2026-11-02 | #199 + #194 | Windows menu icons, theme change; sync sign-in in airplane mode | **OK**: icons visible, themes switch correctly at once (C5 solved — the root cause was the failing `FontImageSource` rendering), no crash; offline check shows a clear message. |
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |

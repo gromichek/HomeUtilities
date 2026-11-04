@@ -117,7 +117,7 @@ Prompt for a new lead session:
 
 ## 5. Current state (2026-11-04)
 - Merged up to **T-032b** (#217: restore of any older copy on a syncing device → re-join with both replace directions;
-  three first-join choices; readable choice dialog) on top of T-032 (#213). Waiting for the owner's T-032b test.
+  three first-join choices; readable choice dialog) on top of T-032 (#213). Owner tests OK; snackbar fix #220 (host was never visible since T-019) OK.
 - Google OAuth app is **In production** (branding pages on `gh-pages`). The owner keeps a personal step-by-step Google
   Cloud registration guide (a Claude doc, Russian) — not in the repo.
 - Next: T-034 release identity (permanent key + its SHA-1 as a new Android client, real icon, house notification icon);
@@ -125,7 +125,8 @@ Prompt for a new lead session:
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner tests of #217 (T-032b) → log, collect findings; then write T-034.
+1. **T-034** is Ready (task file written 2026-11-04); owner creates the key + new Android OAuth client per `docs/SIGNING.md`
+   from that PR. T-032b and the snackbar fix (#220) passed the owner's tests.
 3. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
 4. **T-034** release identity: permanent signing key (+ its SHA-1 as Android OAuth client), real app icon/splash, white
    house notification icon.
