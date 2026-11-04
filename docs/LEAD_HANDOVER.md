@@ -114,16 +114,17 @@ Prompt for a new lead session:
   on the 1st belong to the previous month), use the meter-link repair, re-import gas after fixing plans.
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
-## 5. Current state (2026-11-03)
-- Merged up to **T-031** (#203, sync engine) on top of T-030 (sign-in) and fixes #197/#199 (Android reconnect, Windows
-  icon images → themes work). Waiting for the owner's sync test (PC first, phone "Replace").
-- C9 decided (owner, 2026-11-03): restore / JSON import / delete-all switch sync off; re-join offers "Replace this device's
-  data with the cloud data" or the new "Replace the cloud data with this device's data". Goes into the next batch task.
-- Next: T-032 attachments sync; T-034 release identity (permanent key, real icon, house notification icon).
+## 5. Current state (2026-11-04)
+- Merged up to **T-031** (#203, sync engine). Owner tested all five sync scenarios OK on Windows + phone.
+- **Ready:** **T-032** = sync polish C9–C14 (pause/resume, restore and sync, network back, UI thread, cloud files, sync
+  messages) + attachment files sync — one task (owner, 2026-11-04).
+- Owner reminder 2026-11-04: **the user guide must be updated with every visible change** — check it in every PR review.
+- Next after T-032: T-034 release identity (permanent key, real icon, house notification icon); T-032a other providers
+  (optional); T-033 iOS.
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Owner sync test of #203 → log, collect findings; then one task with C9 + sync findings, and T-032 (attachments sync).
+1. Review T-032 (check the guide EN + RU changes); then T-034.
 3. **T-032** attachments sync. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
 4. **T-034** release identity: permanent signing key (+ its SHA-1 as Android OAuth client), real app icon/splash, white
    house notification icon.
