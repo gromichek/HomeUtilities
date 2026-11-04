@@ -1,0 +1,18 @@
+<Project>
+  <!--
+    Permanent Android signing key (T-034). Copy this file to signing.props (git-ignored, same folder) and fill it in.
+    When signing.props exists it is used for EVERY Android build (Debug and Release), so the APK has the same
+    SHA-1 on every PC and a build from one PC installs over a build from another. Without it the per-PC debug key is used.
+    The keystore and the password files live OUTSIDE the repository. See docs/SIGNING.md.
+
+    Passwords: use "file:<absolute path to a one-line text file>" or "env:<ENVIRONMENT VARIABLE NAME>".
+  -->
+  <PropertyGroup>
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>C:\path\outside\the\repo\homeutilities.keystore</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias>homeutilities</AndroidSigningKeyAlias>
+    <AndroidSigningStorePass>file:C:\path\outside\the\repo\homeutilities.pass</AndroidSigningStorePass>
+    <AndroidSigningKeyPass>file:C:\path\outside\the\repo\homeutilities.pass</AndroidSigningKeyPass>
+    <!-- Alternative: <AndroidSigningStorePass>env:HOMEUTILITIES_KEYSTORE_PASS</AndroidSigningStorePass> -->
+  </PropertyGroup>
+</Project>

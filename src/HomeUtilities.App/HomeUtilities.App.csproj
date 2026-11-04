@@ -24,9 +24,13 @@
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
 
+  <!-- Permanent Android signing key (T-030 follow-up, T-034): optional git-ignored signing.props, see docs/SIGNING.md.
+       Without it the per-PC debug key is used (CI). -->
+  <Import Project="signing.props" Condition="Exists('signing.props') And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+
   <ItemGroup>
-    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
-    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#2F5D8A" />
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#2F5D8A" BaseSize="128,128" />
     <!-- Bundles the icon font into the app (Android needs it; Windows uses system icon fonts). -->
     <MauiFont Include="Resources\Fonts\*.otf;Resources\Fonts\*.ttf" />
   </ItemGroup>

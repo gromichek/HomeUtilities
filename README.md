@@ -12,6 +12,9 @@ Built with .NET MAUI.
 3. Set `HomeUtilities.App` as the startup project and select the **Windows Machine** target.
 4. Press F5.
 
+Optional files next to the App project (both git-ignored, templates are committed): `secrets.json` (Google OAuth client
+values for Sync) and `signing.props` (permanent Android signing key, see [docs/SIGNING.md](docs/SIGNING.md)).
+
 ## Tests
 
 ```

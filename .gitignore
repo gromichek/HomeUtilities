@@ -444,3 +444,9 @@ secrets.json
 
 # OAuth client values for Sync (T-030); copy secrets.template.json to secrets.json and fill it in
 src/HomeUtilities.App/secrets.json
+
+# Android signing key (T-034): keystore and passwords never enter the repo; copy signing.template.props to signing.props
+src/HomeUtilities.App/signing.props
+*.keystore
+*.jks
+*.pass
