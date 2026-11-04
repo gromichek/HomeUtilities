@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-032 | Sync polish (C9–C14) and attachment files sync | Ready | | one task (owner, 2026-11-04); guide EN + RU updated with every visible change |
 
 ## Done
 
@@ -45,6 +44,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016 | Readings entry, history, submit link | 2026-10-24, #48 | 1271 tests. Windows: no "saved" toast (rows clearing is the feedback) until T-019. |
 | — | User guide EN/RU started (covers T-011…T-016a) | 2026-10-24 | sessions extend it with every visible change |
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
+| T-032 | Sync polish (C9–C14) + attachment files | 2026-11-04, #213 | Pause/resume (`FirstJoinChoice.Resume`, account stored with the join; Disconnect forgets the join); restore/JSON import mark NeedsRejoin; "Replace the cloud" = snapshot generation `-g<N>` + old files deleted, other devices stop with `CloudReplaced` and are asked; `ISyncConnectivity` + 60 s foreground retry; `IUiDispatcher` for engine events; Files in the cloud; `SyncNotifier` 1.5 s (switch also silences errors); attachments `attachments/<id><ext>` (reconcile on every sync, SHA-256, Wi-Fi auto / mobile on demand, 30-day cloud clean-up). Guide EN + RU updated. Open: Drive download buffers in memory. |
 | T-031 | Sync engine | 2026-11-03, #203 | `SyncOutbox` filled by the interceptor (received rows via raw SQL → no echo); `changes/<deviceId>/<seq:D10>.json` (≤ 500 rows), `snapshot/<deviceId>-<ts>.json.gz`; LWW by `UpdatedAt`, tie → higher deviceId; resurrect; unique clashes only `Categories.SystemKey` / `VatRates.Code` (lower id keeps it); newer format/migration stops; first join (Replace preselected + backup, Merge, empty device); `SyncScheduler` (start +3 s, resume ≥ 30 s, 10 s after a change, flush on leave, Sync now). New DeviceId per first join. Open: restore/JSON import on a syncing device (C9). |
 | — | Fix: icon images use the bundled font on all platforms | 2026-11-02, #199 | Unpackaged Windows: MAUI resolves an image font to a file URI; only a bundled font file works (system/default font → relative URI → exception; menu icons were invisible, theme change crashed). Possibly also the root of C5 (mixed colours). |
 | — | Fix: theme-switch crash on Windows, Google reconnect on Android | 2026-11-02, #197 | `IconImageFontFamily` (one family for `FontImageSource` on Windows); Android Disconnect/Connect clears the cached token (`AuthorizationClient.ClearToken`). |
@@ -121,7 +121,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   every section root (Bills, Payments, Readings, Reports, Properties, Suppliers, Contracts, Meters, Settings lists) and
   check why Overview/Charges still feel slow (log whether the gate skipped: add "Performance: <VM> skipped (no change)" in
   Debug).
-- (C9–C14 → T-032.) C9. **Restore / JSON import / "Delete all data" on a device with sync on** (T-031 open question): the restored database
+- (C9–C14 done in T-032 #213.) C9. **Restore / JSON import / "Delete all data" on a device with sync on** (T-031 open question): the restored database
   carries an old sync state (applied sequences, outbox), so the next sync re-applies newer cloud changes over the restored
   data, and the restore is silently undone. Proposal: these operations switch sync off; switching it on again asks
   "Replace this device's data with the cloud data" **or "Replace the cloud data with this device's data"** (new: upload this
@@ -262,6 +262,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-02 | #191 + #194 | T-028i, T-030 with the owner's `secrets.json` | Sign-in, check, disconnect/reconnect OK on Windows; phone sign-in + check OK, but reconnect after Disconnect said "access revoked" → #197. Theme switch on Windows **crashed** (FontImageSource with comma-separated font family) → #197. Second visits fast, Imports buttons OK. Airplane-mode check pending. |
 | 2026-11-02 | #197 | Windows theme change; Android Disconnect → Connect | Android reconnect OK. Windows **still crashed**: every `FontImageSource` failed ("Unable to generate font image", relative URI) → #199. |
 | 2026-11-03 | #203 | T-031 sync (PC first, phone "Replace", paid bill → PC, reading → phone, airplane mode) | OK; after the network came back the status stayed "Waiting for the network" until the app was resumed (screen off/on) → C10. (Connect "not working" on Windows was a build without `secrets.json`.) |
+| | #213 | T-032: pause/resume, airplane mode, files in the cloud, meter photo phone → PC, restore + "replace the cloud", messages, help | pending |
 | 2026-11-04 | #203 | Same bill renamed differently on both devices (sync off on both, then on with "Merge") | OK — the later edit won on both devices. Found C14 (off/on is a new first join). |
 | 2026-11-02 | #199 + #194 | Windows menu icons, theme change; sync sign-in in airplane mode | **OK**: icons visible, themes switch correctly at once (C5 solved — the root cause was the failing `FontImageSource` rendering), no crash; offline check shows a clear message. |
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |

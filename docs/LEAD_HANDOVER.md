@@ -116,16 +116,15 @@ Prompt for a new lead session:
 - He also shared a real heating bill (PDF) — used only to verify the T-020a rules; never commit it.
 
 ## 5. Current state (2026-11-04)
-- Merged up to **T-031** (#203, sync engine). Owner tested all five sync scenarios OK on Windows + phone.
-- **Ready:** **T-032** = sync polish C9–C14 (pause/resume, restore and sync, network back, UI thread, cloud files, sync
-  messages) + attachment files sync — one task (owner, 2026-11-04).
-- Owner reminder 2026-11-04: **the user guide must be updated with every visible change** — check it in every PR review.
-- Next after T-032: T-034 release identity (permanent key, real icon, house notification icon); T-032a other providers
-  (optional); T-033 iOS.
+- Merged up to **T-032** (#213: sync polish C9–C14 + attachment files sync) on top of T-031. Waiting for the owner's tests.
+- Google OAuth app is **In production** (branding pages on `gh-pages`). The owner keeps a personal step-by-step Google
+  Cloud registration guide (a Claude doc, Russian) — not in the repo.
+- Next: T-034 release identity (permanent key + its SHA-1 as a new Android client, real icon, house notification icon);
+  T-032a other providers (optional); T-033 iOS.
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. Review T-032 (check the guide EN + RU changes); then T-034.
+1. Owner tests of #213 → log, collect findings; then write T-034.
 3. **T-032** attachments sync. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
 4. **T-034** release identity: permanent signing key (+ its SHA-1 as Android OAuth client), real app icon/splash, white
    house notification icon.
