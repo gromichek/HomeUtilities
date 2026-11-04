@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-034 | Release identity: permanent signing key, real app icon, house notification icon | Ready | | findings 8 and 9 |
 
 ## Done
 
@@ -47,6 +46,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-020a | Quantity from the bill, VAT on the total | 2026-10-26, #93 | Sample FromBill component moved to cottage electricity. Newest bill of a month supplies the quantities. |
 | T-032 | Sync polish (C9–C14) + attachment files | 2026-11-04, #213 | Pause/resume (`FirstJoinChoice.Resume`, account stored with the join; Disconnect forgets the join); restore/JSON import mark NeedsRejoin; "Replace the cloud" = snapshot generation `-g<N>` + old files deleted, other devices stop with `CloudReplaced` and are asked; `ISyncConnectivity` + 60 s foreground retry; `IUiDispatcher` for engine events; Files in the cloud; `SyncNotifier` 1.5 s (switch also silences errors — confirmed by the owner 2026-11-04); attachments `attachments/<id><ext>` (reconcile on every sync, SHA-256, Wi-Fi auto / mobile on demand, 30-day cloud clean-up). Guide EN + RU updated. Open: Drive download buffers in memory. |
 | T-032b | Re-join after restoring an older backup; readable sync choice dialogs | 2026-11-04, #217 | Restore carries THIS device's join identity (device id, account, generation) into the restored file with Enabled=0, NeedsRejoin=1, outbox/state of the copy reset (tables created if missing). First join with data on both sides offers three choices; choice dialogs use `SingleChoiceDialogViewModel` with a wrapping message (`ChooseWithMessageAsync`). Guide EN + RU updated. Owner test OK (2026-11-04). |
+| T-034 | Release identity: signing key, app icon, house notification icon | 2026-11-04, #222 | Optional git-ignored `signing.props` imported for every Android build (template + `docs/SIGNING.md`); icon/splash = white house with a drop cut-out on `#2F5D8A`; `ic_stat_reminder.xml` = same house. Signed path not buildable in the sandbox — owner test pending (key, new Android OAuth client, one reinstall). |
 | T-031 | Sync engine | 2026-11-03, #203 | `SyncOutbox` filled by the interceptor (received rows via raw SQL → no echo); `changes/<deviceId>/<seq:D10>.json` (≤ 500 rows), `snapshot/<deviceId>-<ts>.json.gz`; LWW by `UpdatedAt`, tie → higher deviceId; resurrect; unique clashes only `Categories.SystemKey` / `VatRates.Code` (lower id keeps it); newer format/migration stops; first join (Replace preselected + backup, Merge, empty device); `SyncScheduler` (start +3 s, resume ≥ 30 s, 10 s after a change, flush on leave, Sync now). New DeviceId per first join. Open: restore/JSON import on a syncing device (C9). |
 | — | Fix: icon images use the bundled font on all platforms | 2026-11-02, #199 | Unpackaged Windows: MAUI resolves an image font to a file URI; only a bundled font file works (system/default font → relative URI → exception; menu icons were invisible, theme change crashed). Possibly also the root of C5 (mixed colours). |
 | — | Fix: theme-switch crash on Windows, Google reconnect on Android | 2026-11-02, #197 | `IconImageFontFamily` (one family for `FontImageSource` on Windows); Android Disconnect/Connect clears the cached token (`AuthorizationClient.ClearToken`). |
@@ -177,10 +177,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ### New findings (owner, 2026-11-01, after T-028a/T-028e)
 
-8. **Later (owner, 2026-11-02):** the notification small icon should be the **white house from the app icon** instead of
+8. **Done in T-034 (#222).** ~~Later (owner, 2026-11-02):~~ the notification small icon should be the **white house from the app icon** instead of
    the bell (`drawable/ic_stat_reminder.xml`, one colour + alpha). Do it with the real app icon (the current app icon and
    splash are placeholders — PROGRESS tech debt).
-9. **Later (owner, 2026-11-02): permanent signing key** instead of the per-PC debug keystore (Google sign-in on Android
+9. **Done in T-034 (#222).** Permanent signing key instead of the per-PC debug keystore (Google sign-in on Android
    checks the SHA-1; a different key also blocks updating over an installed build). Planned as T-034 together with 8.
    Until then the owner copies `%LocalAppData%\Xamarin\Mono for Android\debug.keystore` to other PCs.
 
