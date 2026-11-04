@@ -961,6 +961,19 @@ version of the app is refused with the message to update the app. If the file is
 makes a copy of the current data (*Before a restore*), and after you close and reopen the app **all current data are replaced** by
 the data of the file. There is no merge: it replaces everything.
 
+#### Restore and sync
+
+If sync is on, a restore (from a backup file or an automatic copy), a JSON import and *Delete all data* **switch sync off** on this
+device. The restored file carries an old sync state; if sync simply went on, the newer data in the cloud would be applied over the
+restored data and the restore would be undone. After the restart the Sync page shows that sync is off. When you switch **Sync on this
+device** on again, the app asks which side wins:
+
+- **Replace this device's data with the data from the cloud** — the cloud stays as it is; this device shows what the cloud holds (a
+  backup copy is made first).
+- **Replace the data in the cloud with this device's data** — this device becomes the source: it uploads a fresh snapshot and removes the
+  old change files and snapshots from the cloud. Use it to bring a backup back to **all** your devices. Your other devices ask on their
+  next sync (see *Sync* below).
+
 #### What Android's own backup does
 
 Android can copy app data to your Google account and restore it when you reinstall the app. HomeUtilities keeps the live
@@ -1007,14 +1020,30 @@ Once the account is connected, **Sync on this device** appears. The first time y
 - **The folder has data and this device has data too** — you choose:
   - **Replace this device's data with the data from the cloud** (recommended, preselected). The app first makes an automatic backup copy
     of this device's data (*Settings → Backup*), then the device shows exactly what the cloud holds.
-  - **Merge** keeps both. Be careful: the same record entered on both devices (for example the same bill typed twice) will appear twice.
+  - **Merge** keeps both. Records that were already synced before are merged by their latest edit; only records created **separately**
+    on both devices (for example the same bill typed twice) will appear twice.
   - *Cancel* leaves sync off and changes nothing.
+
+#### Switching sync off and on again (pause)
+
+Switching **Sync on this device** off is a **pause**, not a leave: the app remembers this device, what it already received and the changes
+you make while sync is off. Switching it on again — with the same Google account and the same data on the device — **continues without any
+question**: your changes made meanwhile go up, the changes of the other devices come down, and for a record changed on both sides the later
+change wins. The first-join question above appears only when this device never joined this cloud, after a restore or an import (see
+*Backup → Restore and sync*), or after *Disconnect* or a sign-in with another Google account.
+
+If another device chose **Replace the data in the cloud with this device's data**, the next sync here stops with *The data in the cloud
+was replaced on another device. Replace this device's data to continue syncing.* and asks *Replace this device's data with the data from the
+cloud?* (*Replace* makes a backup copy of this device first; *Not now* keeps the question until you press **Replace this device's data…**
+on the Sync page). Changes made here since the cloud was replaced are not sent.
 
 #### How it works
 
 Every change you save is remembered. The app sends the changes to the hidden folder and takes the changes of your other devices from
 it. **Nothing runs in the background** (this saves the battery): the app syncs shortly after it starts, when you come back to it, about
-10 seconds after the last change you saved, when you leave the app, and when you press **Sync now**.
+10 seconds after the last change you saved, when you leave the app, and when you press **Sync now**. While the app is open and the
+status is *Waiting for the network* or an error, it syncs again **by itself** as soon as the network is back and tries again about every
+minute. When you leave the app these retries stop.
 
 If the same record was changed on two devices before they met, **the later change wins** (by the time of the change; if the times are
 exactly equal, the same device wins on both sides). A deletion is also a change: a record deleted after the other device's last edit
@@ -1031,15 +1060,37 @@ status line as *conflicts* and listed in **Details**.
 - *Waiting for the network* — you are offline or Google did not answer. Your changes are kept and go up with the next run; there are no
   error pop-ups during automatic runs, only this line.
 - *Error: …* — for example the access was removed (connect the account again).
+- *The data in the cloud was replaced on another device…* — see *Switching sync off and on again (pause)* above.
 - *Update the app on this device to continue syncing* — another device already uses a newer version of the app. Nothing is applied until
   you update this one; your data is not touched.
 - On the **Overview** a short note appears if the sync has not worked for more than a day.
 
-**Details** lists what was sent and received last and any conflicts. **Disconnect** also switches sync off on this device; your data
-stays on the device and in the cloud folder.
+**Details** lists what was sent and received last and any conflicts. **Disconnect** also switches sync off on this device and forgets that
+it joined; your data stays on the device and in the cloud folder, and switching sync on again later is a first join.
 
-**Not synced yet:** the files attached to bills, meters and readings (photos, PDFs). The records of the attachments are synced, the files
-themselves are not.
+#### Messages
+
+While you use the app, short messages appear at the bottom for about a second and a half and never block anything:
+*Syncing…* (only for **Sync now** and the first sync after the start), *Synced: 3 received, 1 sent* (only when something was received or
+sent) and the errors (*Sync failed: …*, *Sync is waiting for the network.*) — the same error only **once** until the next successful sync.
+The switch **Show sync messages** (on by default) turns them all off; the status line on the Sync page always stays.
+
+#### Photos and documents
+
+Photos of meters and readings and the documents attached to bills are synced too, as separate files in the same hidden folder. A file is
+uploaded once, after the record it belongs to. On another device the file is downloaded **automatically on Wi-Fi or Ethernet**; on
+**mobile data** only when you open the photo or document: the app says *Not downloaded yet* and offers **Download**. The switch
+**Download photos and documents on mobile data** (off by default) allows the automatic download on mobile data as well. The app checks every
+downloaded file (a damaged one is downloaded again once and otherwise not kept). A photo or document you delete is removed from the cloud
+folder after 30 days by the device that deleted it. Backups already contain the photos and documents of the device.
+
+#### Files in the cloud
+
+**Files in the cloud → Show files in the cloud** lists what the hidden folder holds, read-only (nothing can be deleted there): the change
+files of each device (the first 8 characters of its id, *this device* is marked, number of files, size, newest date), the snapshots (date,
+size), the photo and document files, other files, and the total. The folder is not visible in the Drive app; in a browser open
+drive.google.com → *Settings* → *Manage apps* → *HomeUtilities*: it shows the size of the hidden data, and *Delete hidden app data* wipes
+**only the cloud copy** of HomeUtilities (the data on your devices stay; switch sync on again and choose what to do).
 
 ### Import from Excel
 

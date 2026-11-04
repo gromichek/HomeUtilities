@@ -171,8 +171,16 @@ public static class MauiProgram
             sp.GetRequiredService<ISyncStorage>(),
             sp.GetRequiredService<HomeUtilities.Core.IClock>(),
             sp.GetRequiredService<HomeUtilities.Core.Abstractions.IDataChangeNotifier>(),
-            new HomeUtilities.Data.Sync.SyncOptions(AppInfo.Current.VersionString),
-            (source, error) => sp.GetRequiredService<IErrorLog>().Append(source, error)));
+            new HomeUtilities.Data.Sync.SyncOptions(AppInfo.Current.VersionString, AttachmentsFolder: appPaths.AttachmentsFolder),
+            (source, error) => sp.GetRequiredService<IErrorLog>().Append(source, error),
+            () => sp.GetRequiredService<ISyncAccountService>().State.Email,
+            sp.GetRequiredService<ISyncConnectivity>(),
+            () => sp.GetRequiredService<SyncSettings>().DownloadOnMobileData));
+        builder.Services.AddSingleton<IAttachmentFileSync>(sp => (IAttachmentFileSync)sp.GetRequiredService<ISyncEngine>());
+        builder.Services.AddSingleton<ISyncConnectivity, MauiSyncConnectivity>();
+        builder.Services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
+        builder.Services.AddSingleton<SyncSettings>();
+        builder.Services.AddSingleton<SyncNotifier>();
         builder.Services.AddSingleton<SyncScheduler>();
         builder.Services.AddTransient<SyncSettingsViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
