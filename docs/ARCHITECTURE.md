@@ -152,6 +152,10 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 - Google OAuth client id: per platform. Desktop/installed-app client ids are not truly secret, but are
   still kept out of the repo: provided via a git-ignored `secrets.json` / build property and injected at
   build time. Details in the sync phase task.
+- The Android signing key is a permanent keystore kept outside the repo (plus a second copy on another medium). Builds
+  reference it through the git-ignored `src/HomeUtilities.App/signing.props` (path, alias, `file:`/`env:` password
+  references); CI keeps the debug key. The key's SHA-1 is registered in the Android OAuth client in Google Cloud. See
+  `docs/SIGNING.md` (T-034).
 - Supplier portal passwords are **never stored** by the app. Links open in the system browser, whose
   password manager fills credentials. Only an optional login name may be kept on the contract.
 
