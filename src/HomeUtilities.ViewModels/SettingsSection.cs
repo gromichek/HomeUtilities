@@ -109,6 +109,9 @@ public sealed partial class SettingsSectionViewModel : ViewModelBase
         _ => Task.CompletedTask,
     };
 
+    public override Task OnDisappearingAsync() =>
+        Section == SettingsSection.Sync ? Settings.Sync.OnDisappearingAsync() : base.OnDisappearingAsync();
+
     protected override void RefreshTexts()
     {
         Title = Settings.TitleOf(Section);

@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
+using HomeUtilities.Core.Sync;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Charges;
@@ -52,6 +53,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private readonly IChargeInputLoader _chargeLoader;
     private readonly IEqualizedPlanStore _planStore;
     private readonly IAttachmentStore _attachmentStore;
+    private readonly IAttachmentFileSync? _fileSync;
     private readonly IMediaService _media;
     private readonly IFileViewer _viewer;
     private readonly QuickPayService _quickPay;
@@ -291,9 +293,11 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         IDialogService dialogs,
         INavigationService navigation,
         ISnackbarService snackbar,
-        IErrorLog errorLog)
+        IErrorLog errorLog,
+        IAttachmentFileSync? fileSync = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        _fileSync = fileSync;
         _bills = bills;
         _paymentStore = paymentStore;
         _contractStore = contractStore;

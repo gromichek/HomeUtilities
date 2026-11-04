@@ -755,10 +755,9 @@ public sealed partial class BillEditViewModel
 
     private async Task OpenAttachmentAsync(Attachment attachment)
     {
-        var path = await _attachmentStore.GetFilePathAsync(attachment.Id);
+        var path = await AttachmentFileResolver.ResolveAsync(_attachmentStore, _fileSync, Dialogs, _localizer, attachment.Id, "BillAttachmentMissing");
         if (path is null)
         {
-            await Dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["BillAttachmentMissing"]);
             return;
         }
 

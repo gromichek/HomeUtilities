@@ -14,6 +14,25 @@ public class SyncEngineViewModelTests
 
         public bool IsEnabled { get; set; }
 
+        public bool NeedsRejoin { get; set; }
+
+        public int ForgetCalls { get; private set; }
+
+        public CloudFilesReport Report { get; set; } = new([], [], 0, 0, 0, 0);
+
+        public Task ForgetJoinAsync(CancellationToken ct = default)
+        {
+            ForgetCalls++;
+            IsEnabled = false;
+            Status = SyncStatus.Off;
+            StatusChanged?.Invoke(this, EventArgs.Empty);
+            return Task.CompletedTask;
+        }
+
+        public Task<CloudFilesReport> ListCloudFilesAsync(CancellationToken ct = default) => Task.FromResult(Report);
+
+        public void Raise() => StatusChanged?.Invoke(this, EventArgs.Empty);
+
         public FirstJoinInfo Info { get; set; } = new(false, false);
 
         public Exception? InspectFailure { get; set; }
@@ -182,7 +201,7 @@ public class SyncEngineViewModelTests
         Assert.Equal([SyncTrigger.Manual], _engine.Runs);
 
         await vm.DisconnectCommand.ExecuteAsync(null);
-        Assert.Equal(1, _engine.DisableCalls);
+        Assert.Equal(1, _engine.ForgetCalls);
         Assert.False(vm.SyncOn);
     }
 
@@ -256,5 +275,396 @@ public class SyncEngineViewModelTests
         clock.UtcNow = clock.UtcNow.AddMinutes(1);
         await scheduler.ResumeAsync();
         Assert.Equal([SyncTrigger.Start, SyncTrigger.Resume], _engine.Runs);
+    }
+
+    // ---- T-032 ----
+
+    private sealed class FakeNetwork : ISyncConnectivity
+    {
+        public bool IsConnected { get; set; } = true;
+
+        public bool IsUnmetered { get; set; } = true;
+
+        public event EventHandler? Changed;
+
+        public void Raise() => Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private sealed class InlineDispatcher : IUiDispatcher
+    {
+        public List<int> Threads { get; } = [];
+
+        public void Post(Action action)
+        {
+            // Hands the action to one fixed "UI thread" and records which thread ran it.
+            Task.Run(() =>
+            {
+                Threads.Add(Environment.CurrentManagedThreadId);
+                action();
+            }).GetAwaiter().GetResult();
+        }
+    }
+
+    private static async Task WaitForAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 200 && !condition(); i++)
+        {
+            await Task.Delay(10);
+        }
+    }
+
+    [Fact]
+    public async Task The_network_coming_back_syncs_in_the_foreground_only()
+    {
+        var network = new FakeNetwork();
+        _engine.IsEnabled = true;
+        _engine.Status = new SyncStatus(SyncStateKind.WaitingForNetwork);
+        using var scheduler = new SyncScheduler(_engine, new DataChangeNotifier(), new Clock(), connectivity: network);
+
+        network.Raise();
+        await Task.Delay(100);
+        Assert.Empty(_engine.Runs);
+
+        await scheduler.StartAsync();
+        _engine.Runs.Clear();
+        network.Raise();
+        await WaitForAsync(() => _engine.Runs.Count > 0);
+        Assert.Equal([SyncTrigger.Network], _engine.Runs);
+
+        await scheduler.FlushAsync();
+        _engine.Runs.Clear();
+        network.Raise();
+        await Task.Delay(100);
+        Assert.Empty(_engine.Runs);
+    }
+
+    [Fact]
+    public async Task The_retry_timer_runs_only_in_the_foreground_and_only_while_waiting_or_failed()
+    {
+        _engine.IsEnabled = true;
+        _engine.Status = new SyncStatus(SyncStateKind.Synced);
+        using var scheduler = new SyncScheduler(_engine, new DataChangeNotifier(), new Clock(), retryInterval: TimeSpan.FromMilliseconds(40));
+        Assert.False(scheduler.IsForeground);
+
+        // Not started: no timer, no run.
+        await Task.Delay(150);
+        Assert.Empty(_engine.Runs);
+
+        await scheduler.StartAsync();
+        Assert.True(scheduler.IsForeground);
+        _engine.Runs.Clear();
+
+        // Synced: the ticks do nothing.
+        await Task.Delay(150);
+        Assert.Empty(_engine.Runs);
+
+        _engine.Status = new SyncStatus(SyncStateKind.WaitingForNetwork);
+        await WaitForAsync(() => _engine.Runs.Count > 0);
+        Assert.Contains(SyncTrigger.Retry, _engine.Runs);
+
+        _engine.Status = new SyncStatus(SyncStateKind.Failed, Error: SyncErrorKind.Other);
+        _engine.Runs.Clear();
+        await WaitForAsync(() => _engine.Runs.Count > 0);
+        Assert.Contains(SyncTrigger.Retry, _engine.Runs);
+
+        // Leaving the foreground stops the timer.
+        await scheduler.FlushAsync();
+        Assert.False(scheduler.IsForeground);
+        await Task.Delay(100);
+        _engine.Runs.Clear();
+        await Task.Delay(200);
+        Assert.Empty(_engine.Runs);
+
+        // The default interval is a minute.
+        Assert.Equal(TimeSpan.FromSeconds(60), SyncScheduler.RetryInterval);
+    }
+
+    [Fact]
+    public async Task The_retry_waits_while_there_is_no_connection()
+    {
+        var network = new FakeNetwork { IsConnected = false };
+        _engine.IsEnabled = true;
+        _engine.Status = new SyncStatus(SyncStateKind.WaitingForNetwork);
+        using var scheduler = new SyncScheduler(_engine, new DataChangeNotifier(), new Clock(), connectivity: network);
+        await scheduler.StartAsync();
+        _engine.Runs.Clear();
+
+        await scheduler.RetryTickAsync();
+        Assert.Empty(_engine.Runs);
+
+        network.IsConnected = true;
+        await scheduler.RetryTickAsync();
+        Assert.Equal([SyncTrigger.Retry], _engine.Runs);
+    }
+
+    // ---- C11: events from another thread ----
+
+    [Fact]
+    public async Task Engine_events_raised_on_another_thread_reach_the_view_model_through_the_dispatcher()
+    {
+        var dispatcher = new InlineDispatcher();
+        _engine.IsEnabled = true;
+        var vm = new SyncSettingsViewModel(
+            _account, new NoStorage(), new FakeLocalizer(new FakeLanguageService()), _dialogs, new FakeErrorLog(), _engine, _backups, null, dispatcher);
+        var changed = new List<string?>();
+        vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        _engine.Status = new SyncStatus(SyncStateKind.WaitingForNetwork);
+        var raiser = Environment.CurrentManagedThreadId;
+        await Task.Run(() => _engine.Raise());
+
+        Assert.NotEmpty(dispatcher.Threads);
+        Assert.Contains(nameof(SyncSettingsViewModel.SyncRunText), changed);
+        Assert.Equal("SyncRunWaiting [en]", vm.SyncRunText);
+        Assert.NotEqual(raiser, dispatcher.Threads[0]);
+    }
+
+    [Fact]
+    public async Task A_left_page_no_longer_listens_to_the_singleton_engine()
+    {
+        var dispatcher = new InlineDispatcher();
+        _engine.IsEnabled = true;
+        var vm = new SyncSettingsViewModel(
+            _account, new NoStorage(), new FakeLocalizer(new FakeLanguageService()), _dialogs, new FakeErrorLog(), _engine, _backups, null, dispatcher);
+
+        await vm.OnDisappearingAsync();
+        _engine.Status = new SyncStatus(SyncStateKind.WaitingForNetwork);
+        _engine.Raise();
+        Assert.Empty(dispatcher.Threads);
+
+        await vm.OnAppearingAsync();
+        dispatcher.Threads.Clear();
+        _engine.Raise();
+        Assert.NotEmpty(dispatcher.Threads);
+
+        vm.Dispose();
+        dispatcher.Threads.Clear();
+        _engine.Raise();
+        Assert.Empty(dispatcher.Threads);
+    }
+
+    // ---- C14 / C9 questions ----
+
+    [Fact]
+    public async Task Switching_on_again_on_the_same_account_resumes_without_a_question_or_a_backup()
+    {
+        _engine.Info = new FirstJoinInfo(true, true, CanResume: true);
+        var vm = Vm();
+        vm.SyncOn = true;
+        await SettleAsync(vm);
+
+        Assert.Equal([FirstJoinChoice.Resume], _engine.Enabled);
+        Assert.Empty(_dialogs.Confirmations);
+        Assert.Empty(_backups.Backups);
+    }
+
+    [Fact]
+    public async Task After_a_restore_switching_on_offers_both_directions()
+    {
+        _engine.Info = new FirstJoinInfo(true, true, NeedsRejoin: true);
+        IReadOnlyList<string>? offered = null;
+        _dialogs.ChooseScript = options =>
+        {
+            offered = options;
+            return options[1];
+        };
+        var vm = Vm();
+        vm.SyncOn = true;
+        await SettleAsync(vm);
+
+        Assert.Equal(["SyncRejoinFromCloud [en]", "SyncRejoinToCloud [en]"], offered);
+        Assert.Equal([FirstJoinChoice.ReplaceCloud], _engine.Enabled);
+        Assert.Empty(_backups.Backups);
+    }
+
+    [Fact]
+    public async Task After_a_restore_replacing_this_device_makes_a_backup_first()
+    {
+        _engine.Info = new FirstJoinInfo(true, true, NeedsRejoin: true);
+        _dialogs.ChooseScript = options => options[0];
+        var vm = Vm();
+        vm.SyncOn = true;
+        await SettleAsync(vm);
+
+        Assert.Equal([FirstJoinChoice.Replace], _engine.Enabled);
+        Assert.Single(_backups.Backups);
+    }
+
+    [Fact]
+    public async Task A_replaced_cloud_asks_to_replace_this_device_with_a_backup_first_and_declining_changes_nothing()
+    {
+        _engine.Info = new FirstJoinInfo(true, true, CloudReplaced: true);
+        _dialogs.ConfirmResult = false;
+        var vm = Vm();
+        vm.SyncOn = true;
+        await SettleAsync(vm);
+
+        Assert.Single(_dialogs.Confirmations);
+        Assert.Empty(_engine.Enabled);
+        Assert.False(vm.SyncOn);
+
+        _dialogs.ConfirmResult = true;
+        vm.SyncOn = true;
+        await SettleAsync(vm);
+        Assert.Equal([FirstJoinChoice.Replace], _engine.Enabled);
+        Assert.Single(_backups.Backups);
+    }
+
+    // ---- C13 messages ----
+
+    private (SyncNotifier Notifier, FakeSnackbarService Snackbar, SyncSettings Settings) Messages(IDialogService? dialogs = null)
+    {
+        var snackbar = new FakeSnackbarService();
+        var settings = new SyncSettings(new FakeSettingsStore());
+        var notifier = new SyncNotifier(_engine, snackbar, new FakeLocalizer(new FakeLanguageService()), settings, null, dialogs, _backups, new FakeErrorLog());
+        return (notifier, snackbar, settings);
+    }
+
+    private void Raise(SyncStateKind kind, SyncTrigger trigger, int received = 0, int sent = 0, SyncErrorKind? error = null)
+    {
+        _engine.Status = new SyncStatus(kind, Error: error, Trigger: trigger, Received: received, Sent: sent);
+        _engine.Raise();
+    }
+
+    [Fact]
+    public void Syncing_is_announced_only_for_sync_now_and_the_first_sync_after_the_start()
+    {
+        var (notifier, snackbar, _) = Messages();
+        using (notifier)
+        {
+            Raise(SyncStateKind.Syncing, SyncTrigger.Start);
+            Raise(SyncStateKind.Synced, SyncTrigger.Start);
+            Raise(SyncStateKind.Syncing, SyncTrigger.Debounced);
+            Raise(SyncStateKind.Synced, SyncTrigger.Debounced);
+            Raise(SyncStateKind.Syncing, SyncTrigger.Resume);
+            Raise(SyncStateKind.Synced, SyncTrigger.Resume);
+            Raise(SyncStateKind.Syncing, SyncTrigger.Manual);
+            Raise(SyncStateKind.Synced, SyncTrigger.Manual);
+
+            Assert.Equal(["SyncMsgSyncing [en]", "SyncMsgSyncing [en]"], snackbar.Messages);
+            Assert.All(snackbar.Calls, c => Assert.Equal(SyncNotifier.MessageDuration, c.Duration));
+        }
+    }
+
+    [Fact]
+    public void Synced_is_shown_only_when_something_was_received_or_sent()
+    {
+        var (notifier, snackbar, _) = Messages();
+        using (notifier)
+        {
+            Raise(SyncStateKind.Synced, SyncTrigger.Debounced);
+            Assert.Empty(snackbar.Messages);
+
+            Raise(SyncStateKind.Synced, SyncTrigger.Retry, received: 0, sent: 1);
+            Raise(SyncStateKind.Synced, SyncTrigger.Debounced, received: 3, sent: 0);
+
+            Assert.Equal(["SyncMsgSynced 0|1 [en]", "SyncMsgSynced 3|0 [en]"], snackbar.Messages);
+            Assert.InRange(SyncNotifier.MessageDuration.TotalSeconds, 1, 2);
+        }
+    }
+
+    [Fact]
+    public void An_error_is_shown_once_per_kind_until_the_next_success()
+    {
+        var (notifier, snackbar, _) = Messages();
+        using (notifier)
+        {
+            Raise(SyncStateKind.WaitingForNetwork, SyncTrigger.Retry, error: SyncErrorKind.NoNetwork);
+            Raise(SyncStateKind.WaitingForNetwork, SyncTrigger.Retry, error: SyncErrorKind.NoNetwork);
+            Raise(SyncStateKind.WaitingForNetwork, SyncTrigger.Retry, error: SyncErrorKind.NoNetwork);
+            Assert.Equal(["SyncMsgWaiting [en]"], snackbar.Messages);
+
+            Raise(SyncStateKind.Failed, SyncTrigger.Retry, error: SyncErrorKind.TokenRevoked);
+            Raise(SyncStateKind.Failed, SyncTrigger.Retry, error: SyncErrorKind.TokenRevoked);
+            Assert.Equal(2, snackbar.Messages.Count);
+            Assert.Equal("SyncMsgFailed SyncError_TokenRevoked [en] [en]", snackbar.Messages[1]);
+
+            Raise(SyncStateKind.Synced, SyncTrigger.Retry);
+            Raise(SyncStateKind.WaitingForNetwork, SyncTrigger.Retry, error: SyncErrorKind.NoNetwork);
+            Assert.Equal(3, snackbar.Messages.Count);
+        }
+    }
+
+    [Fact]
+    public void The_switch_turns_all_messages_off_and_the_setting_is_kept()
+    {
+        var (notifier, snackbar, settings) = Messages();
+        using (notifier)
+        {
+            Assert.True(settings.ShowMessages);
+            settings.ShowMessages = false;
+            Raise(SyncStateKind.Syncing, SyncTrigger.Manual);
+            Raise(SyncStateKind.Failed, SyncTrigger.Manual, error: SyncErrorKind.Other);
+            Assert.Empty(snackbar.Messages);
+            Assert.False(settings.DownloadOnMobileData);
+        }
+    }
+
+    [Fact]
+    public async Task A_replaced_cloud_is_asked_once_per_episode_after_a_sync()
+    {
+        var (notifier, _, _) = Messages(_dialogs);
+        using (notifier)
+        {
+            _dialogs.ConfirmResult = false;
+            Raise(SyncStateKind.CloudReplaced, SyncTrigger.Debounced);
+            Raise(SyncStateKind.CloudReplaced, SyncTrigger.Retry);
+            await Task.Delay(50);
+            Assert.Single(_dialogs.Confirmations);
+
+            _dialogs.ConfirmResult = true;
+            Raise(SyncStateKind.Synced, SyncTrigger.Manual);
+            Raise(SyncStateKind.CloudReplaced, SyncTrigger.Debounced);
+            await WaitForAsync(() => _engine.Enabled.Count > 0);
+            Assert.Equal(2, _dialogs.Confirmations.Count);
+            Assert.Equal([FirstJoinChoice.Replace], _engine.Enabled);
+            Assert.Single(_backups.Backups);
+        }
+    }
+
+    // ---- C12 ----
+
+    [Fact]
+    public async Task The_cloud_file_list_is_read_only_text_with_a_total()
+    {
+        _engine.IsEnabled = true;
+        _engine.Status = new SyncStatus(SyncStateKind.Synced);
+        _engine.Report = new CloudFilesReport(
+            [new CloudDeviceFiles("aaaaaaaabbbbbbbbccccccccdddddddd", true, 3, 1500, null), new CloudDeviceFiles("11112222333344445555666677778888", false, 2, 3 * 1024 * 1024, null)],
+            [new CloudSnapshotFile("aaaaaaaabbbbbbbbccccccccdddddddd", new DateTimeOffset(2026, 11, 2, 8, 0, 0, TimeSpan.Zero), 2048, 0)],
+            4,
+            4096,
+            1,
+            10);
+        var vm = Vm();
+        Assert.False(vm.HasCloudFiles);
+
+        await vm.LoadCloudFilesCommand.ExecuteAsync(null);
+
+        var lines = vm.CloudFilesText.Split(Environment.NewLine);
+        Assert.Equal(6, lines.Length);
+        Assert.StartsWith("SyncCloudDeviceThis aaaaaaaa|3|1.5 KB|", lines[0]);
+        Assert.StartsWith("SyncCloudDevice 11112222|2|3 MB|", lines[1]);
+        Assert.StartsWith("SyncCloudSnapshot ", lines[2]);
+        Assert.StartsWith("SyncCloudAttachments 4|4 KB", lines[3]);
+        Assert.StartsWith("SyncCloudForeign 1|10 B", lines[4]);
+        Assert.StartsWith("SyncCloudTotal 11|", lines[5]);
+        Assert.True(vm.HasCloudFiles);
+        Assert.Equal(1500 + (3 * 1024 * 1024) + 2048 + 4096 + 10, _engine.Report.TotalBytes);
+    }
+
+    [Fact]
+    public void The_options_are_written_to_the_settings()
+    {
+        var store = new FakeSettingsStore();
+        var settings = new SyncSettings(store);
+        var vm = new SyncSettingsViewModel(
+            _account, new NoStorage(), new FakeLocalizer(new FakeLanguageService()), _dialogs, new FakeErrorLog(), _engine, _backups, settings);
+
+        vm.ShowMessages = false;
+        vm.DownloadOnMobile = true;
+
+        Assert.False(settings.ShowMessages);
+        Assert.True(settings.DownloadOnMobileData);
     }
 }

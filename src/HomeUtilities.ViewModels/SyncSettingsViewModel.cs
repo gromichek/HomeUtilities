@@ -9,7 +9,7 @@ namespace HomeUtilities.ViewModels;
 /// The Sync section of the Settings (T-030): connects the Google account, shows the state and the e-mail, checks the access
 /// to the hidden app folder (write, list, read, delete a test file) and disconnects. Since T-031 it also switches the data sync on and off, shows its status and runs "Sync now".
 /// </summary>
-public sealed partial class SyncSettingsViewModel : ViewModelBase
+public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
 {
     private readonly ISyncAccountService _account;
     private readonly ISyncStorage _storage;
@@ -18,7 +18,11 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
     private readonly IErrorLog _errorLog;
     private readonly ISyncEngine? _engine;
     private readonly IAutoBackupService? _backups;
+    private readonly SyncSettings? _syncSettings;
+    private readonly IUiDispatcher? _dispatcher;
     private bool _updatingSwitch;
+    private bool _updatingOptions;
+    private bool _subscribed;
 
     private CancellationTokenSource? _signInCts;
 
@@ -83,6 +87,33 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _detailsText = string.Empty;
 
+    // ---- T-032: messages, mobile data, replace, files in the cloud ----
+
+    [ObservableProperty]
+    private bool _showMessages = true;
+
+    [ObservableProperty]
+    private string _showMessagesText = string.Empty;
+
+    [ObservableProperty]
+    private bool _downloadOnMobile;
+
+    [ObservableProperty]
+    private string _downloadOnMobileText = string.Empty;
+
+    [ObservableProperty]
+    private string _replaceFromCloudText = string.Empty;
+
+    [ObservableProperty]
+    private string _cloudFilesHeader = string.Empty;
+
+    [ObservableProperty]
+    private string _cloudFilesButtonText = string.Empty;
+
+    /// <summary>The read-only list "Files in the cloud" as text lines; empty until loaded.</summary>
+    [ObservableProperty]
+    private string _cloudFilesText = string.Empty;
+
     public SyncSettingsViewModel(
         ISyncAccountService account,
         ISyncStorage storage,
@@ -90,13 +121,20 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         IDialogService dialogs,
         IErrorLog errorLog,
         ISyncEngine? engine = null,
-        IAutoBackupService? backups = null)
+        IAutoBackupService? backups = null,
+        SyncSettings? syncSettings = null,
+        IUiDispatcher? dispatcher = null)
     {
         _engine = engine;
         _backups = backups;
-        if (engine is not null)
+        _syncSettings = syncSettings;
+        _dispatcher = dispatcher;
+        if (syncSettings is not null)
         {
-            engine.StatusChanged += (_, _) => RefreshTexts();
+            _updatingOptions = true;
+            ShowMessages = syncSettings.ShowMessages;
+            DownloadOnMobile = syncSettings.DownloadOnMobileData;
+            _updatingOptions = false;
         }
 
         _account = account;
@@ -104,8 +142,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         _localizer = localizer;
         _dialogs = dialogs;
         _errorLog = errorLog;
-        // One instance lives with the Settings page, like the account service: no unsubscribe needed.
-        _account.StateChanged += (_, _) => RefreshTexts();
+        Subscribe();
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(IsBusy))
@@ -117,7 +154,90 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         _ = RunSafeAsync(() => _account.InitializeAsync());
     }
 
+    // The engine and the account service are singletons raising events on the sync thread (C11): every handler goes to the UI
+    // thread first, and the page unsubscribes when it is left (a transient view model must not stay alive through the singleton).
+    private void Subscribe()
+    {
+        if (_subscribed)
+        {
+            return;
+        }
+
+        _subscribed = true;
+        if (_engine is not null)
+        {
+            _engine.StatusChanged += OnEngineChanged;
+        }
+
+        _account.StateChanged += OnEngineChanged;
+    }
+
+    private void Unsubscribe()
+    {
+        if (!_subscribed)
+        {
+            return;
+        }
+
+        _subscribed = false;
+        if (_engine is not null)
+        {
+            _engine.StatusChanged -= OnEngineChanged;
+        }
+
+        _account.StateChanged -= OnEngineChanged;
+    }
+
+    private void OnEngineChanged(object? sender, EventArgs e)
+    {
+        if (_dispatcher is null)
+        {
+            RefreshTexts();
+        }
+        else
+        {
+            _dispatcher.Post(() =>
+            {
+                if (_subscribed)
+                {
+                    RefreshTexts();
+                }
+            });
+        }
+    }
+
+    public void Dispose() => Unsubscribe();
+
+    /// <inheritdoc />
+    public override Task OnDisappearingAsync()
+    {
+        Unsubscribe();
+        return base.OnDisappearingAsync();
+    }
+
     public SyncAccountState State => _account.State;
+
+    public bool ShowReplaceFromCloud => _engine is { Status.Kind: SyncStateKind.CloudReplaced };
+
+    public bool HasCloudFiles => CloudFilesText.Length > 0;
+
+    partial void OnCloudFilesTextChanged(string value) => OnPropertyChanged(nameof(HasCloudFiles));
+
+    partial void OnShowMessagesChanged(bool value)
+    {
+        if (!_updatingOptions && _syncSettings is not null)
+        {
+            _syncSettings.ShowMessages = value;
+        }
+    }
+
+    partial void OnDownloadOnMobileChanged(bool value)
+    {
+        if (!_updatingOptions && _syncSettings is not null)
+        {
+            _syncSettings.DownloadOnMobileData = value;
+        }
+    }
 
     public bool IsNotConfigured => State.Status == SyncAccountStatus.NotConfigured;
 
@@ -187,7 +307,42 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         {
             var info = await _engine.InspectAsync();
             var choice = FirstJoinChoice.StartHere;
-            if (info.CloudHasData)
+            if (info.CanResume)
+            {
+                // C14: switched off before on this account with this data: continue, no question.
+                choice = FirstJoinChoice.Resume;
+            }
+            else if (info.CloudReplaced)
+            {
+                if (!await SyncReplaceFlow.AskAndReplaceAsync(_engine, _dialogs, _localizer, _backups))
+                {
+                    SetSwitch(false);
+                }
+
+                return;
+            }
+            else if (info.NeedsRejoin && info.CloudHasData)
+            {
+                // C9: a restore or import replaced the data of this device after it joined.
+                var fromCloud = _localizer["SyncRejoinFromCloud"];
+                var toCloud = _localizer["SyncRejoinToCloud"];
+                var picked = await _dialogs.ChooseAsync(_localizer["SyncRejoinQuestion"], [fromCloud, toCloud]);
+                if (picked is null)
+                {
+                    SetSwitch(false);
+                    return;
+                }
+
+                choice = picked == toCloud ? FirstJoinChoice.ReplaceCloud : FirstJoinChoice.Replace;
+                if (choice == FirstJoinChoice.Replace
+                    && _backups is not null
+                    && !await _backups.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeRestore))
+                {
+                    SetSwitch(false);
+                    return;
+                }
+            }
+            else if (info.CloudHasData)
             {
                 choice = FirstJoinChoice.Replace;
                 if (info.NeedsChoice)
@@ -249,6 +404,58 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         }
     });
 
+    /// <summary>Replaces this device's data with the cloud data after another device replaced the cloud (C9).</summary>
+    [RelayCommand(CanExecute = nameof(ShowReplaceFromCloud))]
+    private Task ReplaceFromCloudAsync() => RunSafeAsync(async () =>
+    {
+        if (_engine is null)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            await SyncReplaceFlow.AskAndReplaceAsync(_engine, _dialogs, _localizer, _backups);
+        }
+        catch (SyncException ex)
+        {
+            ShowError(ex, "Sync.Replace");
+        }
+        finally
+        {
+            IsBusy = false;
+            RefreshTexts();
+        }
+    });
+
+    /// <summary>Reads the file list of the cloud folder (read-only, C12).</summary>
+    [RelayCommand(CanExecute = nameof(CanSyncNow))]
+    private Task LoadCloudFilesAsync() => RunSafeAsync(async () =>
+    {
+        if (_engine is null)
+        {
+            return;
+        }
+
+        MessageText = string.Empty;
+        HasError = false;
+        IsBusy = true;
+        try
+        {
+            CloudFilesText = SyncCloudFilesFormatter.Format(await _engine.ListCloudFilesAsync(), _localizer);
+        }
+        catch (SyncException ex)
+        {
+            ShowError(ex, "Sync.CloudFiles");
+        }
+        finally
+        {
+            IsBusy = false;
+            RefreshTexts();
+        }
+    });
+
     /// <summary>Connect is shown until connected (disabled when this build is not configured); while waiting, Cancel takes its place.</summary>
     public bool ShowConnect => !IsSignedIn && !IsConnecting;
 
@@ -259,6 +466,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
     /// <summary>Re-reads the stored sign-in when the page opens.</summary>
     public override Task OnAppearingAsync()
     {
+        Subscribe();
         RefreshTexts();
         return RunSafeAsync(() => _account.InitializeAsync());
     }
@@ -335,9 +543,10 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            if (_engine is { IsEnabled: true })
+            if (_engine is not null)
             {
-                await _engine.DisableAsync();
+                // Disconnect forgets the join: switching on again later is a first join (C14).
+                await _engine.ForgetJoinAsync();
             }
 
             var result = await _account.SignOutAsync();
@@ -406,7 +615,10 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         DisconnectCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanSyncNow));
         OnPropertyChanged(nameof(IsNotBusy));
+        OnPropertyChanged(nameof(ShowReplaceFromCloud));
         SyncNowCommand.NotifyCanExecuteChanged();
+        LoadCloudFilesCommand.NotifyCanExecuteChanged();
+        ReplaceFromCloudCommand.NotifyCanExecuteChanged();
     }
 
     private void RefreshDataSyncTexts()
@@ -414,6 +626,11 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
         SyncSwitchText = _localizer["SyncSwitch"];
         SyncNowText = _localizer["SyncNow"];
         DetailsHeader = _localizer["SyncDetails"];
+        ShowMessagesText = _localizer["SyncShowMessages"];
+        DownloadOnMobileText = _localizer["SyncDownloadOnMobile"];
+        ReplaceFromCloudText = _localizer["SyncReplaceFromCloud"];
+        CloudFilesHeader = _localizer["SyncCloudFiles"];
+        CloudFilesButtonText = _localizer["SyncCloudFilesShow"];
         if (_engine is null)
         {
             return;
@@ -431,6 +648,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase
             SyncStateKind.Syncing => _localizer["SyncRunSyncing"],
             SyncStateKind.WaitingForNetwork => _localizer["SyncRunWaiting"],
             SyncStateKind.UpdateRequired => _localizer["SyncRunUpdate"],
+            SyncStateKind.CloudReplaced => _localizer["SyncRunCloudReplaced"],
             SyncStateKind.Failed => _localizer.Get("SyncRunFailed", _localizer[ErrorKey(status.Error ?? SyncErrorKind.Other)]),
             _ => _localizer.Get("SyncRunSynced", Local(status.LastSyncAt)),
         };
