@@ -70,7 +70,7 @@ is written; the list below is the plan and will change.
 - T-029 Automatic local backups, export/import full data as JSON (manual backup file exists since T-017c)
 - T-030 Google sign-in per platform
 - T-031 Sync engine (change logs, merge, conflict tests) behind `ISyncStorage`; Google Drive adapter
-- T-032 Attachments sync
+- T-032 Sync polish (pause/resume, restore and sync, network, messages, cloud files) and attachment files sync
 - T-032a (optional) More storage providers: OneDrive, Dropbox, WebDAV — one adapter + sign-in each, when needed
 - T-034 Release identity: own permanent Android signing key (used on every PC and later in CI; its SHA-1 registered as the
   Android OAuth client), real app icon + splash, notification icon = white house from the app icon (owner requests

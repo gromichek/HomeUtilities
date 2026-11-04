@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-032 | Sync polish (C9–C14) and attachment files sync | Ready | | one task (owner, 2026-11-04); guide EN + RU updated with every visible change |
 
 ## Done
 
@@ -120,7 +121,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   every section root (Bills, Payments, Readings, Reports, Properties, Suppliers, Contracts, Meters, Settings lists) and
   check why Overview/Charges still feel slow (log whether the gate skipped: add "Performance: <VM> skipped (no change)" in
   Debug).
-- C9. **Restore / JSON import / "Delete all data" on a device with sync on** (T-031 open question): the restored database
+- (C9–C14 → T-032.) C9. **Restore / JSON import / "Delete all data" on a device with sync on** (T-031 open question): the restored database
   carries an old sync state (applied sequences, outbox), so the next sync re-applies newer cloud changes over the restored
   data, and the restore is silently undone. Proposal: these operations switch sync off; switching it on again asks
   "Replace this device's data with the cloud data" **or "Replace the cloud data with this device's data"** (new: upload this
