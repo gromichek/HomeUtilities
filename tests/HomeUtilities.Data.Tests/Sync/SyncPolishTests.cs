@@ -129,6 +129,73 @@ public class SyncPolishTests
         }
     }
 
+    private static async Task<Dictionary<string, string>> StateOfAsync(SyncDevice device)
+    {
+        await using var db = await device.Factory.CreateDbContextAsync();
+        var rows = await db.Database.SqlQueryRaw<string>("SELECT \"Key\" || '=' || \"Value\" AS \"Value\" FROM \"SyncState\"").ToListAsync();
+        return rows.Select(r => r.Split('=', 2)).ToDictionary(p => p[0], p => p[1]);
+    }
+
+    [Fact]
+    public async Task A_copy_made_before_sync_was_switched_on_still_asks_to_join_again_on_a_device_that_was_syncing()
+    {
+        var cloud = new FakeSyncStorage();
+        using var a = await SyncDevice.CreateAsync(cloud);
+        using var b = await SyncDevice.CreateAsync(cloud);
+        await b.AddPropertyAsync("Old data");
+        var oldCopy = await b.Fixture.BackupToMemoryAsync();
+        await a.Engine.EnableAsync(FirstJoinChoice.StartHere);
+        await b.Engine.EnableAsync(FirstJoinChoice.Merge);
+        await b.AddPropertyAsync("Added while syncing");
+        var deviceBefore = b.Engine.DeviceId;
+        Assert.NotEmpty(deviceBefore);
+
+        await RestoreAsync(b, oldCopy);
+        var restarted = NewEngineOver(b);
+        await restarted.InitializeAsync();
+
+        Assert.False(restarted.IsEnabled);
+        Assert.True(restarted.NeedsRejoin);
+        Assert.Equal(deviceBefore, restarted.DeviceId);
+        var info = await restarted.InspectAsync();
+        Assert.True(info.NeedsRejoin);
+        Assert.False(info.CanResume);
+        Assert.False(info.NeedsChoice);
+
+        var state = await StateOfAsync(b);
+        Assert.Equal("0", state["Enabled"]);
+        Assert.Equal("1", state["NeedsRejoin"]);
+        Assert.Equal("anna@example.test", state["JoinedAccount"]);
+        Assert.Equal("0", state["CloudGeneration"]);
+        Assert.DoesNotContain(state.Keys, k => k.StartsWith("Applied:", StringComparison.Ordinal) || k == "LocalSequence");
+        Assert.Equal(0, await b.OutboxCountAsync());
+
+        // The restored data is the old copy, and "replace the cloud" works from here (the owner's scenario).
+        Assert.Equal(["Old data"], await b.LivePropertyNamesAsync());
+        await restarted.EnableAsync(FirstJoinChoice.ReplaceCloud);
+        Assert.Contains(cloud.Files.Keys, k => k.EndsWith("-g1.json.gz", StringComparison.Ordinal));
+        await a.SyncAsync();
+        Assert.Equal(SyncStateKind.CloudReplaced, a.Engine.Status.Kind);
+    }
+
+    [Fact]
+    public async Task A_restore_on_a_device_that_never_joined_changes_nothing_about_sync()
+    {
+        var cloud = new FakeSyncStorage();
+        using var b = await SyncDevice.CreateAsync(cloud);
+        await b.AddPropertyAsync("Data");
+        var copy = await b.Fixture.BackupToMemoryAsync();
+
+        await RestoreAsync(b, copy);
+        var restarted = NewEngineOver(b);
+        await restarted.InitializeAsync();
+
+        Assert.False(restarted.NeedsRejoin);
+        Assert.False(restarted.IsEnabled);
+        Assert.Equal(string.Empty, restarted.DeviceId);
+        Assert.DoesNotContain("NeedsRejoin", (await StateOfAsync(b)).Keys);
+    }
+
     [Fact]
     public async Task Replacing_the_cloud_with_a_restored_device_makes_the_other_device_ask_and_then_follow()
     {

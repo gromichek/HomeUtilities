@@ -321,19 +321,17 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
 
                 return;
             }
-            else if (info.NeedsRejoin && info.CloudHasData)
+            else if (info.CloudHasData && (info.NeedsRejoin || info.NeedsChoice))
             {
-                // C9: a restore or import replaced the data of this device after it joined.
-                var fromCloud = _localizer["SyncRejoinFromCloud"];
-                var toCloud = _localizer["SyncRejoinToCloud"];
-                var picked = await _dialogs.ChooseAsync(_localizer["SyncRejoinQuestion"], [fromCloud, toCloud]);
+                // C9: after a restore / import only the two replace directions; a first join with data on both sides also offers Merge.
+                var picked = await SyncReplaceFlow.AskJoinChoiceAsync(_dialogs, _localizer, rejoin: info.NeedsRejoin);
                 if (picked is null)
                 {
                     SetSwitch(false);
                     return;
                 }
 
-                choice = picked == toCloud ? FirstJoinChoice.ReplaceCloud : FirstJoinChoice.Replace;
+                choice = picked.Value;
                 if (choice == FirstJoinChoice.Replace
                     && _backups is not null
                     && !await _backups.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeRestore))
@@ -344,27 +342,8 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
             }
             else if (info.CloudHasData)
             {
+                // This device holds no data of its own: the cloud data is simply downloaded.
                 choice = FirstJoinChoice.Replace;
-                if (info.NeedsChoice)
-                {
-                    var replace = _localizer["SyncJoinReplace"];
-                    var merge = _localizer["SyncJoinMerge"];
-                    var picked = await _dialogs.ChooseAsync(_localizer["SyncJoinQuestion"], [replace, merge]);
-                    if (picked is null)
-                    {
-                        SetSwitch(false);
-                        return;
-                    }
-
-                    choice = picked == merge ? FirstJoinChoice.Merge : FirstJoinChoice.Replace;
-                    if (choice == FirstJoinChoice.Replace
-                        && _backups is not null
-                        && !await _backups.BackupOrConfirmAsync(_dialogs, _localizer, AutoBackupReason.BeforeRestore))
-                    {
-                        SetSwitch(false);
-                        return;
-                    }
-                }
             }
 
             await _engine.EnableAsync(choice);

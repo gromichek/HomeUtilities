@@ -1569,21 +1569,19 @@
   <data name="SyncClockSkew" xml:space="preserve"><value>The clock of this device differs from the server's by more than 5 minutes — set the date and time automatically.</value></data>
   <data name="SyncNever" xml:space="preserve"><value>Not synced yet.</value></data>
   <data name="SyncLastSync" xml:space="preserve"><value>Last sync: {0}</value></data>
-  <data name="SyncJoinQuestion" xml:space="preserve"><value>The cloud already holds data and so does this device. Replace keeps only the cloud data (a backup copy of this device's data is made first). Merge keeps both: records that were already synced before are merged by their latest edit, but records created separately on both devices will appear twice.</value></data>
+  <data name="SyncJoinQuestion" xml:space="preserve"><value>The cloud already holds data and so does this device. What should happen?</value></data>
   <data name="SyncJoinReplace" xml:space="preserve"><value>Replace this device's data with the data from the cloud (recommended)</value></data>
   <data name="SyncJoinMerge" xml:space="preserve"><value>Merge</value></data>
   <data name="OverviewSyncHint" xml:space="preserve"><value>Sync has not worked for more than a day. Open Settings → Sync to see why.</value></data>
   <data name="SyncCloudReplacedTitle" xml:space="preserve"><value>Data in the cloud replaced</value></data>
   <data name="SyncCloudReplacedQuestion" xml:space="preserve"><value>The data in the cloud was replaced on another device. Replace this device's data with the data from the cloud? A backup copy of this device's data is made first.</value></data>
-  <data name="SyncCloudReplacedAccept" xml:space="preserve"><value>Replace</value></data>
+  <data name="SyncCloudReplacedAccept" xml:space="preserve"><value>Replace this device's data with the data from the cloud</value></data>
   <data name="SyncNotNow" xml:space="preserve"><value>Not now</value></data>
   <data name="SyncMsgSyncing" xml:space="preserve"><value>Syncing…</value></data>
   <data name="SyncMsgSynced" xml:space="preserve"><value>Synced: {0} received, {1} sent</value></data>
   <data name="SyncMsgWaiting" xml:space="preserve"><value>Sync is waiting for the network.</value></data>
   <data name="SyncMsgFailed" xml:space="preserve"><value>Sync failed: {0}</value></data>
   <data name="SyncRejoinQuestion" xml:space="preserve"><value>The data on this device was replaced by a restore or an import, so sync was switched off. Which data should win?</value></data>
-  <data name="SyncRejoinFromCloud" xml:space="preserve"><value>Replace this device's data with the data from the cloud</value></data>
-  <data name="SyncRejoinToCloud" xml:space="preserve"><value>Replace the data in the cloud with this device's data</value></data>
   <data name="SyncShowMessages" xml:space="preserve"><value>Show sync messages</value></data>
   <data name="SyncDownloadOnMobile" xml:space="preserve"><value>Download photos and documents on mobile data</value></data>
   <data name="SyncReplaceFromCloud" xml:space="preserve"><value>Replace this device's data…</value></data>
@@ -1600,4 +1598,10 @@
   <data name="AttachmentNotDownloaded" xml:space="preserve"><value>This photo or document comes from another device and has not been downloaded to this device yet.</value></data>
   <data name="AttachmentDownload" xml:space="preserve"><value>Download</value></data>
   <data name="AttachmentDownloadFailed" xml:space="preserve"><value>The file could not be downloaded. It may not be uploaded by the other device yet, or it is damaged. Try again later.</value></data>
+  <data name="SyncJoinTitle" xml:space="preserve"><value>Join the cloud data</value></data>
+  <data name="SyncRejoinTitle" xml:space="preserve"><value>Sync was switched off</value></data>
+  <data name="SyncJoinReplaceCloud" xml:space="preserve"><value>Replace the data in the cloud with this device's data</value></data>
+  <data name="SyncBackupFirstHint" xml:space="preserve"><value>A backup copy of this device's data is made first.</value></data>
+  <data name="SyncReplaceCloudHint" xml:space="preserve"><value>Warning: the other devices will be asked to replace their data with the data of this device.</value></data>
+  <data name="SyncMergeHint" xml:space="preserve"><value>Records that were synced before are merged by their latest edit; records created separately on both devices will appear twice.</value></data>
 </root>

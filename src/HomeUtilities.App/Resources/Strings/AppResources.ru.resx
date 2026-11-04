@@ -1569,21 +1569,19 @@
   <data name="SyncClockSkew" xml:space="preserve"><value>Часы этого устройства отличаются от серверных больше чем на 5 минут — включите автоматическую установку даты и времени.</value></data>
   <data name="SyncNever" xml:space="preserve"><value>Ещё не синхронизировалось.</value></data>
   <data name="SyncLastSync" xml:space="preserve"><value>Последняя синхронизация: {0}</value></data>
-  <data name="SyncJoinQuestion" xml:space="preserve"><value>В облаке уже есть данные, и на этом устройстве тоже. «Заменить» оставит только данные из облака (сначала будет сделана резервная копия данных этого устройства). «Объединить» оставит всё: записи, которые уже синхронизировались раньше, объединятся по последней правке, а записи, созданные отдельно на обоих устройствах, появятся дважды.</value></data>
+  <data name="SyncJoinQuestion" xml:space="preserve"><value>В облаке уже есть данные, и на этом устройстве тоже. Что сделать?</value></data>
   <data name="SyncJoinReplace" xml:space="preserve"><value>Заменить данные этого устройства данными из облака (рекомендуется)</value></data>
   <data name="SyncJoinMerge" xml:space="preserve"><value>Объединить</value></data>
   <data name="OverviewSyncHint" xml:space="preserve"><value>Синхронизация не работает больше суток. Причина — в «Настройки → Синхронизация».</value></data>
   <data name="SyncCloudReplacedTitle" xml:space="preserve"><value>Данные в облаке заменены</value></data>
   <data name="SyncCloudReplacedQuestion" xml:space="preserve"><value>Данные в облаке были заменены на другом устройстве. Заменить данные этого устройства данными из облака? Сначала будет сделана резервная копия данных этого устройства.</value></data>
-  <data name="SyncCloudReplacedAccept" xml:space="preserve"><value>Заменить</value></data>
+  <data name="SyncCloudReplacedAccept" xml:space="preserve"><value>Заменить данные этого устройства данными из облака</value></data>
   <data name="SyncNotNow" xml:space="preserve"><value>Не сейчас</value></data>
   <data name="SyncMsgSyncing" xml:space="preserve"><value>Синхронизация…</value></data>
   <data name="SyncMsgSynced" xml:space="preserve"><value>Синхронизировано: получено {0}, отправлено {1}</value></data>
   <data name="SyncMsgWaiting" xml:space="preserve"><value>Синхронизация ждёт сеть.</value></data>
   <data name="SyncMsgFailed" xml:space="preserve"><value>Ошибка синхронизации: {0}</value></data>
   <data name="SyncRejoinQuestion" xml:space="preserve"><value>Данные на этом устройстве заменены восстановлением или импортом, поэтому синхронизация была выключена. Чьи данные оставить?</value></data>
-  <data name="SyncRejoinFromCloud" xml:space="preserve"><value>Заменить данные этого устройства данными из облака</value></data>
-  <data name="SyncRejoinToCloud" xml:space="preserve"><value>Заменить данные в облаке данными этого устройства</value></data>
   <data name="SyncShowMessages" xml:space="preserve"><value>Показывать сообщения о синхронизации</value></data>
   <data name="SyncDownloadOnMobile" xml:space="preserve"><value>Скачивать фото и документы по мобильной сети</value></data>
   <data name="SyncReplaceFromCloud" xml:space="preserve"><value>Заменить данные этого устройства…</value></data>
@@ -1600,4 +1598,10 @@
   <data name="AttachmentNotDownloaded" xml:space="preserve"><value>Это фото или документ получено с другого устройства и ещё не скачано на это устройство.</value></data>
   <data name="AttachmentDownload" xml:space="preserve"><value>Скачать</value></data>
   <data name="AttachmentDownloadFailed" xml:space="preserve"><value>Не удалось скачать файл. Возможно, другое устройство ещё не загрузило его, или файл повреждён. Попробуйте позже.</value></data>
+  <data name="SyncJoinTitle" xml:space="preserve"><value>Подключение к данным в облаке</value></data>
+  <data name="SyncRejoinTitle" xml:space="preserve"><value>Синхронизация была выключена</value></data>
+  <data name="SyncJoinReplaceCloud" xml:space="preserve"><value>Заменить данные в облаке данными этого устройства</value></data>
+  <data name="SyncBackupFirstHint" xml:space="preserve"><value>Сначала будет сделана резервная копия данных этого устройства.</value></data>
+  <data name="SyncReplaceCloudHint" xml:space="preserve"><value>Внимание: другие устройства получат вопрос, заменить ли их данные данными этого устройства.</value></data>
+  <data name="SyncMergeHint" xml:space="preserve"><value>Записи, которые уже синхронизировались раньше, объединяются по последней правке; записи, созданные отдельно на обоих устройствах, появятся дважды.</value></data>
 </root>
