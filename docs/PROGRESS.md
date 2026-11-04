@@ -144,6 +144,14 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   first sync after start; "Synced" only when something was received or sent; errors always (once per kind until the next
   success). A switch "Show sync messages" (default on) in Settings → Sync. Rules agreed by the owner (2026-11-03); the
   duration is tuned after his test.
+- C14. **Switching sync off and on is a new first join** (owner test 2026-11-04): `DisableAsync` only clears "enabled";
+  `EnableAsync` always creates a new device id, clears the applied sequences and asks Replace/Merge again (Merge re-uploads
+  every row). Owner expects **pause / resume**: switching on again on the same account and an unchanged local database
+  continues with the same device id, applied sequences and outbox, without a question (changes made while off are in the
+  outbox and go up; the others' changes come down, last writer wins). The first-join question only for a device that never
+  joined this cloud, after a restore / JSON import / delete-all (C9) or after Disconnect/another account. Also the dialog
+  text: "appear twice" applies only to records created separately on both devices, not to records synced before (same ids
+  merge by last edit) — reword.
 - C8. **Backup before a risky operation failed** (owner decision 2026-11-02, T-029 open question): before an Excel import,
   a restore, a JSON import or "Delete all data", if the automatic copy fails, ask "Could not make a backup copy: <reason>.
   Continue without a copy?" (Cancel = default/secondary safe choice, Continue = destructive style). The migration copy at
