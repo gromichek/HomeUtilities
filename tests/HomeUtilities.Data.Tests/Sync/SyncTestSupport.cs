@@ -21,10 +21,13 @@ internal sealed class FakeSyncStorage : ISyncStorage
 
     public int Uploads { get; private set; }
 
+    /// <summary>Modification date reported for every file (the provider's date is not used by the sync itself).</summary>
+    public DateTimeOffset? Modified { get; set; }
+
     public Task<IReadOnlyList<SyncFileInfo>> ListAsync(string prefix, CancellationToken ct = default)
     {
         Check();
-        return Task.FromResult<IReadOnlyList<SyncFileInfo>>([.. Files.Where(f => f.Key.StartsWith(prefix, StringComparison.Ordinal)).Select(f => new SyncFileInfo(f.Key, f.Value.Length, null))]);
+        return Task.FromResult<IReadOnlyList<SyncFileInfo>>([.. Files.Where(f => f.Key.StartsWith(prefix, StringComparison.Ordinal)).Select(f => new SyncFileInfo(f.Key, f.Value.Length, Modified))]);
     }
 
     public Task UploadAsync(string path, Stream content, CancellationToken ct = default)
@@ -66,6 +69,18 @@ internal sealed class FakeSyncStorage : ISyncStorage
     }
 }
 
+/// <summary>A network that can be switched between Wi-Fi, mobile data and nothing.</summary>
+internal sealed class FakeConnectivity : ISyncConnectivity
+{
+    public bool IsConnected { get; set; } = true;
+
+    public bool IsUnmetered { get; set; } = true;
+
+    public event EventHandler? Changed;
+
+    public void Raise() => Changed?.Invoke(this, EventArgs.Empty);
+}
+
 /// <summary>One device with its own database, clock and sync engine over a shared cloud.</summary>
 internal sealed class SyncDevice : IDisposable
 {
@@ -73,6 +88,7 @@ internal sealed class SyncDevice : IDisposable
 
     public SyncDevice(FakeSyncStorage cloud, SyncOptions? options = null)
     {
+        Connectivity = new FakeConnectivity();
         Fixture = new BackupFixture();
         Fixture.Clock.UtcNow = Start;
         Cloud = cloud;
@@ -82,9 +98,31 @@ internal sealed class SyncDevice : IDisposable
             cloud,
             Fixture.Clock,
             Notifier,
-            options ?? new SyncOptions("test"),
-            (source, ex) => throw new InvalidOperationException($"{source}: {ex}", ex));
+            (options ?? new SyncOptions("test")) with { AttachmentsFolder = Fixture.AttachmentsFolder },
+            (source, ex) =>
+            {
+                if (ex is InvalidDataException)
+                {
+                    Logged.Add(ex.Message);
+                    return;
+                }
+
+                throw new InvalidOperationException($"{source}: {ex}", ex);
+            },
+            () => Email,
+            Connectivity,
+            () => MobileDataAllowed);
     }
+
+    /// <summary>The e-mail of the signed-in account.</summary>
+    public string Email { get; set; } = "anna@example.test";
+
+    public bool MobileDataAllowed { get; set; }
+
+    public FakeConnectivity Connectivity { get; }
+
+    /// <summary>Errors the engine logged and survived (for example a wrong checksum).</summary>
+    public List<string> Logged { get; } = [];
 
     public BackupFixture Fixture { get; }
 

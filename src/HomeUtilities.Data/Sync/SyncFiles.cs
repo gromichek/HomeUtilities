@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using HomeUtilities.Core.Sync;
 using HomeUtilities.Data.Backup;
 using Microsoft.Data.Sqlite;
 
@@ -14,14 +15,26 @@ internal static class SyncFormat
     internal const int Version = 1;
     internal const string ChangesPrefix = "changes/";
     internal const string SnapshotPrefix = "snapshot/";
+    internal const string AttachmentsPrefix = "attachments/";
 
     private static readonly Regex ChangePath = new(@"^changes/(?<device>[^/]+)/(?<seq>\d{10})\.json$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    private static readonly Regex SnapshotPath = new(@"^snapshot/(?<device>[^/]+)-(?<at>\d{14})\.json\.gz$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex SnapshotPath = new(@"^snapshot/(?<device>[^/]+)-(?<at>\d{14})(?:-g(?<gen>\d+))?\.json\.gz$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     internal static string ChangePathFor(string device, long sequence) => $"{ChangesPrefix}{device}/{sequence:D10}.json";
 
-    internal static string SnapshotPathFor(string device, DateTimeOffset at) =>
-        $"{SnapshotPrefix}{device}-{at.UtcDateTime.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture)}.json.gz";
+    /// <summary>
+    /// Snapshot path. The cloud generation (C9) is part of the name: 0 (the first generation) has no suffix, a snapshot written by
+    /// "replace the cloud" carries <c>-g&lt;n&gt;</c>. A device that sees a higher generation than the one it joined knows the
+    /// cloud was replaced without opening any file.
+    /// </summary>
+    internal static string SnapshotPathFor(string device, DateTimeOffset at, int generation = 0) =>
+        $"{SnapshotPrefix}{device}-{at.UtcDateTime.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture)}{(generation > 0 ? "-g" + generation.ToString(CultureInfo.InvariantCulture) : string.Empty)}.json.gz";
+
+    internal static string AttachmentPathFor(Guid id, string extension) => $"{AttachmentsPrefix}{id}{extension}";
+
+    /// <summary>The newest cloud generation found in the snapshot names (0 when none).</summary>
+    internal static int MaxGeneration(IEnumerable<SyncFileInfo> files) =>
+        files.Select(f => ParseSnapshot(f.Path)).Where(s => s is not null).Select(s => s!.Value.Generation).DefaultIfEmpty(0).Max();
 
     /// <summary>Device and sequence of a change file path; null for anything else (foreign files are ignored).</summary>
     internal static (string Device, long Sequence)? ParseChange(string path)
@@ -31,7 +44,7 @@ internal static class SyncFormat
     }
 
     /// <summary>Device and creation time of a snapshot path; null for anything else.</summary>
-    internal static (string Device, DateTimeOffset At)? ParseSnapshot(string path)
+    internal static (string Device, DateTimeOffset At, int Generation)? ParseSnapshot(string path)
     {
         var m = SnapshotPath.Match(path);
         if (!m.Success
@@ -40,7 +53,8 @@ internal static class SyncFormat
             return null;
         }
 
-        return (m.Groups["device"].Value, at);
+        var generation = m.Groups["gen"].Success ? int.Parse(m.Groups["gen"].Value, CultureInfo.InvariantCulture) : 0;
+        return (m.Groups["device"].Value, at, generation);
     }
 
     /// <summary>The tables the sync handles: every synced entity table (Id, UpdatedAt, IsDeleted).</summary>

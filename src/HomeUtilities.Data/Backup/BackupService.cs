@@ -251,6 +251,8 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
             ExtractAttachments(zip, newAttachments);
         }
 
+        MarkSyncNeedsRejoin(newDb);
+
         try
         {
             SaveCopyOfCurrentData();
@@ -288,6 +290,39 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         }
 
         File.Delete(PendingPath);
+    }
+
+    // C9 (T-032): a restored database carries the sync state of the moment the copy was made. Left as it is, the next sync would apply
+    // newer cloud changes over the restored data and undo the restore. So sync is switched off in the restored file and marked
+    // "needs re-join"; switching it on again asks which side replaces the other. A copy of a device that never joined is left alone.
+    private static void MarkSyncNeedsRejoin(string databaseFile)
+    {
+        try
+        {
+            using var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = databaseFile, Pooling = false }.ToString());
+            connection.Open();
+            using var probe = connection.CreateCommand();
+            probe.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'SyncState'";
+            if ((long)probe.ExecuteScalar()! == 0)
+            {
+                return;
+            }
+
+            using var joined = connection.CreateCommand();
+            joined.CommandText = "SELECT COUNT(*) FROM \"SyncState\" WHERE \"Key\" = 'DeviceId' AND \"Value\" <> ''";
+            if ((long)joined.ExecuteScalar()! == 0)
+            {
+                return;
+            }
+
+            using var mark = connection.CreateCommand();
+            mark.CommandText = "INSERT OR REPLACE INTO \"SyncState\" (\"Key\", \"Value\") VALUES ('Enabled', '0'), ('NeedsRejoin', '1')";
+            mark.ExecuteNonQuery();
+        }
+        catch (SqliteException)
+        {
+            // The marker is a safety net; a copy that cannot be opened here fails in the validation or the migration anyway.
+        }
     }
 
     private void SaveCopyOfCurrentData()
