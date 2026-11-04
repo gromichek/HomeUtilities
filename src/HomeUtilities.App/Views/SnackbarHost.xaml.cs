@@ -38,19 +38,37 @@ public partial class SnackbarHost : ContentView
         {
             _service.PropertyChanged -= OnServicePropertyChanged;
             _service = null;
+            IsVisible = false;
         }
 
         if (Handler?.MauiContext?.Services.GetService<SnackbarService>() is { } service)
         {
             _service = service;
             BindingContext = service;
+            // The bar is hidden in XAML and then follows the service (set here, not bound: a binding resolved against the
+            // page's view model before this point would show an empty bar).
+            IsVisible = service.IsVisible;
             service.PropertyChanged += OnServicePropertyChanged;
         }
     }
 
-    // Screen readers do not notice a view that appears on its own, so the message is announced.
+    // Shows and hides the bar; screen readers do not notice a view that appears on its own, so the message is announced.
     private void OnServicePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(SnackbarService.IsVisible) && _service is { } shown)
+        {
+            // Some callers (the reminder summary) show a message from a worker thread; views change on the UI thread only.
+            var visible = shown.IsVisible;
+            if (Dispatcher.IsDispatchRequired)
+            {
+                Dispatcher.Dispatch(() => IsVisible = visible);
+            }
+            else
+            {
+                IsVisible = visible;
+            }
+        }
+
         if (e.PropertyName == nameof(SnackbarService.Message) && _service is { IsVisible: true, Message.Length: > 0 } service)
         {
             try

@@ -135,6 +135,9 @@ Use these wordings everywhere (resx keys in brackets):
   MaterialIcons, glyphs `ImageGlyph*`/`MenuGlyph*`). MAUI turns the font of an image into a file URI; a system font
   (Segoe …), a fallback list or no `FontFamily` at all gives a relative URI → "This operation is not supported for a
   relative URI": the image stays empty and a theme change crashed the app (#197, #199). Text labels may use `IconFontFamily`.
+- **A view that is shown later must have its `IsVisible` bound** (or set in code). The snackbar host had a constant
+  `IsVisible="False"` from T-019 to #220, so no snackbar (Undo, sync messages, reminder summary) was ever visible; unit
+  tests of the service passed. A new UI element that appears on its own goes into the manual test steps.
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the
   **new** context — wrap it: `<ContentView IsVisible="{Binding HasSelection}"><views:Editor BindingContext="{Binding Selected}"/></ContentView>`.
 - Bundled fonts need `<MauiFont Include="Resources\Fonts\*.otf;Resources\Fonts\*.ttf" />` in the App csproj;
