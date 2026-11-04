@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-032b | Re-join after restoring an older backup; readable sync choice dialogs | Ready | | from the owner's T-032 test, step 5 |
 
 ## Done
 
@@ -262,7 +263,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-02 | #191 + #194 | T-028i, T-030 with the owner's `secrets.json` | Sign-in, check, disconnect/reconnect OK on Windows; phone sign-in + check OK, but reconnect after Disconnect said "access revoked" → #197. Theme switch on Windows **crashed** (FontImageSource with comma-separated font family) → #197. Second visits fast, Imports buttons OK. Airplane-mode check pending. |
 | 2026-11-02 | #197 | Windows theme change; Android Disconnect → Connect | Android reconnect OK. Windows **still crashed**: every `FontImageSource` failed ("Unable to generate font image", relative URI) → #199. |
 | 2026-11-03 | #203 | T-031 sync (PC first, phone "Replace", paid bill → PC, reading → phone, airplane mode) | OK; after the network came back the status stayed "Waiting for the network" until the app was resumed (screen off/on) → C10. (Connect "not working" on Windows was a build without `secrets.json`.) |
-| | #213 | T-032: pause/resume, airplane mode, files in the cloud, meter photo phone → PC, restore + "replace the cloud", messages, help | pending |
+| 2026-11-04 | #213 | T-032: pause/resume, airplane mode, files in the cloud, meter photo phone → PC, restore + "replace the cloud", help | 1–4 and 6 OK. Step 5: restoring an older (pre-sync) backup gave the generic first-join question without "Replace the cloud", text cut off on Windows → T-032b. |
 | 2026-11-04 | #203 | Same bill renamed differently on both devices (sync off on both, then on with "Merge") | OK — the later edit won on both devices. Found C14 (off/on is a new first join). |
 | 2026-11-02 | #199 + #194 | Windows menu icons, theme change; sync sign-in in airplane mode | **OK**: icons visible, themes switch correctly at once (C5 solved — the root cause was the failing `FontImageSource` rendering), no crash; offline check shows a clear message. |
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |
