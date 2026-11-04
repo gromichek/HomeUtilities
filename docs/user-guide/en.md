@@ -1267,6 +1267,20 @@ many entries the log holds. Besides errors the log contains lines *Performance: 
 there when a screen needed 0.3 s or more to show its data (and once per start how long it took until the Overview appeared). They
 help to find slow screens — send them together with the log. **Clear** empties the log after a confirmation (*Clear the error log? The entries cannot be restored.*).
 
+### Installing a new version
+
+Normally a new build installs **over** the old one and your data stays. The one exception is the switch to the permanent
+signing key (a build made on a PC with a different key cannot update the installed app): then install once like this,
+and from then on every PC that uses the same key updates the app in place.
+
+1. On the phone and on the PC press *Sync now* (*Settings → Sync*) so that the cloud holds everything.
+2. On the phone uninstall the app (this deletes its data and its own backup folder).
+3. Install the new build.
+4. *Settings → Sync → Connect Google account*, then choose *Replace this device's data with the data from the cloud (recommended)*.
+
+Without sync: before uninstalling, use *Settings → Backup → Save backup…* and keep the file outside the app (Downloads,
+Drive); after installing use *Restore from backup…*. The setup of the key itself is described in `docs/SIGNING.md`.
+
 ### About
 
 **Settings → About** shows the version of the app, the path of the database file and the current layout (phone / tablet /
