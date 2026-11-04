@@ -251,7 +251,7 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
             ExtractAttachments(zip, newAttachments);
         }
 
-        MarkSyncNeedsRejoin(newDb);
+        MarkSyncNeedsRejoin(newDb, options.DatabasePath);
 
         try
         {
@@ -292,37 +292,96 @@ public sealed class BackupService(BackupOptions options, IClock clock) : IBackup
         File.Delete(PendingPath);
     }
 
-    // C9 (T-032): a restored database carries the sync state of the moment the copy was made. Left as it is, the next sync would apply
-    // newer cloud changes over the restored data and undo the restore. So sync is switched off in the restored file and marked
-    // "needs re-join"; switching it on again asks which side replaces the other. A copy of a device that never joined is left alone.
-    private static void MarkSyncNeedsRejoin(string databaseFile)
+    // C9 (T-032, T-032b): what matters is whether THIS device was syncing before the restore, not whether the restored copy was.
+    // If the current database had joined, its join identity (device id, account, cloud generation) is carried into the restored
+    // file with Enabled=0 and NeedsRejoin=1; the outbox and applied sequences of the copy belong to an older moment and are reset.
+    // Without that, a copy made before sync was switched on would make the device look new and the re-join choice would be lost.
+    // If the current database never joined, a restored copy that had joined is still marked (older behaviour); a copy that never
+    // joined on a device that never joined is left alone.
+    private static void MarkSyncNeedsRejoin(string restoredFile, string currentFile)
     {
         try
         {
-            using var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = databaseFile, Pooling = false }.ToString());
-            connection.Open();
-            using var probe = connection.CreateCommand();
-            probe.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'SyncState'";
-            if ((long)probe.ExecuteScalar()! == 0)
+            var identity = ReadJoinIdentity(currentFile);
+            using var connection = Open(restoredFile);
+            if (identity is null)
             {
-                return;
+                identity = ReadJoinIdentity(connection);
+                if (identity is null)
+                {
+                    return;
+                }
             }
 
-            using var joined = connection.CreateCommand();
-            joined.CommandText = "SELECT COUNT(*) FROM \"SyncState\" WHERE \"Key\" = 'DeviceId' AND \"Value\" <> ''";
-            if ((long)joined.ExecuteScalar()! == 0)
+            using (var create = connection.CreateCommand())
             {
-                return;
+                // Same definitions as the AddSyncTables migration (IF NOT EXISTS there too), so a copy from before sync works.
+                create.CommandText =
+                    "CREATE TABLE IF NOT EXISTS \"SyncOutbox\" (\"TableName\" TEXT NOT NULL, \"RowId\" TEXT NOT NULL, \"Stamp\" INTEGER NOT NULL, PRIMARY KEY (\"TableName\", \"RowId\"));"
+                    + "CREATE TABLE IF NOT EXISTS \"SyncState\" (\"Key\" TEXT NOT NULL PRIMARY KEY, \"Value\" TEXT NOT NULL);"
+                    + "DELETE FROM \"SyncOutbox\"; DELETE FROM \"SyncState\";";
+                create.ExecuteNonQuery();
             }
 
             using var mark = connection.CreateCommand();
-            mark.CommandText = "INSERT OR REPLACE INTO \"SyncState\" (\"Key\", \"Value\") VALUES ('Enabled', '0'), ('NeedsRejoin', '1')";
+            mark.CommandText =
+                "INSERT OR REPLACE INTO \"SyncState\" (\"Key\", \"Value\") VALUES "
+                + "('DeviceId', $device), ('JoinedAccount', $account), ('CloudGeneration', $generation), ('Enabled', '0'), ('NeedsRejoin', '1')";
+            mark.Parameters.AddWithValue("$device", identity.Value.DeviceId);
+            mark.Parameters.AddWithValue("$account", identity.Value.Account);
+            mark.Parameters.AddWithValue("$generation", identity.Value.Generation);
             mark.ExecuteNonQuery();
         }
         catch (SqliteException)
         {
             // The marker is a safety net; a copy that cannot be opened here fails in the validation or the migration anyway.
         }
+    }
+
+    private static SqliteConnection Open(string file)
+    {
+        var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = file, Pooling = false }.ToString());
+        connection.Open();
+        return connection;
+    }
+
+    private static (string DeviceId, string Account, string Generation)? ReadJoinIdentity(string file)
+    {
+        if (!File.Exists(file))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var connection = Open(file);
+            return ReadJoinIdentity(connection);
+        }
+        catch (SqliteException)
+        {
+            return null;
+        }
+    }
+
+    private static (string DeviceId, string Account, string Generation)? ReadJoinIdentity(SqliteConnection connection)
+    {
+        using var probe = connection.CreateCommand();
+        probe.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'SyncState'";
+        if ((long)probe.ExecuteScalar()! == 0)
+        {
+            return null;
+        }
+
+        string Value(string key)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT \"Value\" FROM \"SyncState\" WHERE \"Key\" = $key";
+            command.Parameters.AddWithValue("$key", key);
+            return command.ExecuteScalar() as string ?? string.Empty;
+        }
+
+        var device = Value("DeviceId");
+        return device.Length == 0 ? null : (device, Value("JoinedAccount"), Value("CloudGeneration") is { Length: > 0 } g ? g : "0");
     }
 
     private void SaveCopyOfCurrentData()

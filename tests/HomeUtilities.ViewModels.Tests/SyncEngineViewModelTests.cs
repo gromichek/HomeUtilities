@@ -137,29 +137,44 @@ public class SyncEngineViewModelTests
     }
 
     [Fact]
-    public async Task Replace_is_listed_first_and_makes_a_backup_copy_before_the_join()
+    public async Task A_first_join_with_data_on_both_sides_offers_three_choices_with_Replace_preselected_and_a_backup_first()
     {
         _engine.Info = new FirstJoinInfo(true, true);
-        IReadOnlyList<string>? shown = null;
-        _dialogs.ChooseScript = options =>
-        {
-            shown = options;
-            return options[0];
-        };
+        Pick(_ => 0);
         var vm = Vm();
         vm.SyncOn = true;
         await SettleAsync(vm);
 
-        Assert.Equal(["SyncJoinReplace [en]", "SyncJoinMerge [en]"], shown);
+        var dialog = _shownDialog!;
+        Assert.Equal(
+            ["SyncJoinReplace [en]", "SyncJoinReplaceCloud [en]", "SyncJoinMerge [en]"],
+            dialog.Items.Select(i => i.Text));
+        Assert.Equal([FirstJoinChoice.Replace, FirstJoinChoice.ReplaceCloud, FirstJoinChoice.Merge], dialog.Items.Select(i => (FirstJoinChoice)i.Value!));
+        Assert.All(dialog.Items, i => Assert.True(i.HasDescription));
+        Assert.Equal("SyncJoinTitle [en]", dialog.Title);
+        Assert.Equal("SyncJoinQuestion [en]", dialog.Message);
         Assert.Equal([AutoBackupReason.BeforeRestore], _backups.Backups);
         Assert.Equal([FirstJoinChoice.Replace], _engine.Enabled);
+    }
+
+    [Fact]
+    public async Task The_replace_cloud_choice_works_from_a_first_join_and_needs_no_backup()
+    {
+        _engine.Info = new FirstJoinInfo(true, true);
+        Pick(_ => 1);
+        var vm = Vm();
+        vm.SyncOn = true;
+        await SettleAsync(vm);
+
+        Assert.Equal([FirstJoinChoice.ReplaceCloud], _engine.Enabled);
+        Assert.Empty(_backups.Backups);
     }
 
     [Fact]
     public async Task Merge_needs_no_backup_and_cancel_leaves_sync_off()
     {
         _engine.Info = new FirstJoinInfo(true, true);
-        _dialogs.ChooseScript = options => options[1];
+        Pick(_ => 2);
         var vm = Vm();
         vm.SyncOn = true;
         await SettleAsync(vm);
@@ -167,7 +182,7 @@ public class SyncEngineViewModelTests
         Assert.Empty(_backups.Backups);
 
         var second = new FakeEngine { Info = new FirstJoinInfo(true, true) };
-        _dialogs.ChooseScript = _ => null;
+        Pick(_ => null);
         var vm2 = new SyncSettingsViewModel(_account, new NoStorage(), new FakeLocalizer(new FakeLanguageService()), _dialogs, new FakeErrorLog(), second, _backups);
         vm2.SyncOn = true;
         await SettleAsync(vm2);
@@ -175,6 +190,19 @@ public class SyncEngineViewModelTests
         Assert.False(vm2.SyncOn);
     }
 
+    [Fact]
+    public void The_dialog_view_model_carries_the_full_long_text_and_sizes_the_popup_for_it()
+    {
+        var localizer = new FakeLocalizer(new FakeLanguageService());
+        var longText = string.Join(' ', Enumerable.Repeat("The cloud already holds data and so does this device.", 6));
+        var withText = new SingleChoiceDialogViewModel(localizer, "T", [new SingleChoiceOption(1, "A"), new SingleChoiceOption(2, "B")], 1, longText);
+        var without = new SingleChoiceDialogViewModel(localizer, "T", [new SingleChoiceOption(1, "A"), new SingleChoiceOption(2, "B")], 1);
+
+        Assert.Equal(longText, withText.Message);
+        Assert.True(withText.HasMessage);
+        Assert.False(without.HasMessage);
+        Assert.True(withText.RowCountHint > without.RowCountHint);
+    }
     [Fact]
     public async Task A_failed_check_of_the_cloud_shows_the_reason_and_leaves_the_switch_off()
     {
@@ -278,6 +306,26 @@ public class SyncEngineViewModelTests
     }
 
     // ---- T-032 ----
+
+    /// <summary>The last choice dialog shown (title, full message, rows).</summary>
+    private SingleChoiceDialogViewModel? _shownDialog;
+
+    /// <summary>Scripts the user in the app's own choice dialog: the index of the row to pick, or null to cancel.</summary>
+    private void Pick(Func<SingleChoiceDialogViewModel, int?> pick) =>
+        _dialogs.EditorScript = editor =>
+        {
+            var dialog = (SingleChoiceDialogViewModel)editor;
+            _shownDialog = dialog;
+            if (pick(dialog) is { } index)
+            {
+                dialog.Items[index].ChooseCommand.Execute(null);
+                dialog.ConfirmCommand.Execute(null);
+            }
+            else
+            {
+                dialog.CancelCommand.Execute(null);
+            }
+        };
 
     private sealed class FakeNetwork : ISyncConnectivity
     {
@@ -462,17 +510,14 @@ public class SyncEngineViewModelTests
     public async Task After_a_restore_switching_on_offers_both_directions()
     {
         _engine.Info = new FirstJoinInfo(true, true, NeedsRejoin: true);
-        IReadOnlyList<string>? offered = null;
-        _dialogs.ChooseScript = options =>
-        {
-            offered = options;
-            return options[1];
-        };
+        Pick(_ => 1);
         var vm = Vm();
         vm.SyncOn = true;
         await SettleAsync(vm);
 
-        Assert.Equal(["SyncRejoinFromCloud [en]", "SyncRejoinToCloud [en]"], offered);
+        Assert.Equal(["SyncJoinReplace [en]", "SyncJoinReplaceCloud [en]"], _shownDialog!.Items.Select(i => i.Text));
+        Assert.Equal("SyncRejoinTitle [en]", _shownDialog.Title);
+        Assert.Equal("SyncRejoinQuestion [en]", _shownDialog.Message);
         Assert.Equal([FirstJoinChoice.ReplaceCloud], _engine.Enabled);
         Assert.Empty(_backups.Backups);
     }
@@ -481,7 +526,7 @@ public class SyncEngineViewModelTests
     public async Task After_a_restore_replacing_this_device_makes_a_backup_first()
     {
         _engine.Info = new FirstJoinInfo(true, true, NeedsRejoin: true);
-        _dialogs.ChooseScript = options => options[0];
+        Pick(_ => 0);
         var vm = Vm();
         vm.SyncOn = true;
         await SettleAsync(vm);
@@ -494,16 +539,17 @@ public class SyncEngineViewModelTests
     public async Task A_replaced_cloud_asks_to_replace_this_device_with_a_backup_first_and_declining_changes_nothing()
     {
         _engine.Info = new FirstJoinInfo(true, true, CloudReplaced: true);
-        _dialogs.ConfirmResult = false;
+        Pick(_ => 1);
         var vm = Vm();
         vm.SyncOn = true;
         await SettleAsync(vm);
 
-        Assert.Single(_dialogs.Confirmations);
+        Assert.Equal(1, _dialogs.EditorsShown);
+        Assert.Equal("SyncCloudReplacedQuestion [en]", _shownDialog!.Message);
         Assert.Empty(_engine.Enabled);
         Assert.False(vm.SyncOn);
 
-        _dialogs.ConfirmResult = true;
+        Pick(_ => 0);
         vm.SyncOn = true;
         await SettleAsync(vm);
         Assert.Equal([FirstJoinChoice.Replace], _engine.Enabled);
@@ -606,17 +652,17 @@ public class SyncEngineViewModelTests
         var (notifier, _, _) = Messages(_dialogs);
         using (notifier)
         {
-            _dialogs.ConfirmResult = false;
+            Pick(_ => 1);
             Raise(SyncStateKind.CloudReplaced, SyncTrigger.Debounced);
             Raise(SyncStateKind.CloudReplaced, SyncTrigger.Retry);
             await Task.Delay(50);
-            Assert.Single(_dialogs.Confirmations);
+            Assert.Equal(1, _dialogs.EditorsShown);
 
-            _dialogs.ConfirmResult = true;
+            Pick(_ => 0);
             Raise(SyncStateKind.Synced, SyncTrigger.Manual);
             Raise(SyncStateKind.CloudReplaced, SyncTrigger.Debounced);
             await WaitForAsync(() => _engine.Enabled.Count > 0);
-            Assert.Equal(2, _dialogs.Confirmations.Count);
+            Assert.Equal(2, _dialogs.EditorsShown);
             Assert.Equal([FirstJoinChoice.Replace], _engine.Enabled);
             Assert.Single(_backups.Backups);
         }

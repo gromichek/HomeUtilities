@@ -13,7 +13,10 @@
         <Label Grid.Row="0" Text="{Binding Title}" Style="{StaticResource SectionHeader}" VerticalOptions="Start" />
 
         <ScrollView Grid.Row="1" VerticalOptions="Start">
-            <views:RadioChoiceList Items="{Binding Items}" />
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{Binding Message}" IsVisible="{Binding HasMessage}" Style="{StaticResource MutedLabel}" />
+                <views:RadioChoiceList Items="{Binding Items}" />
+            </VerticalStackLayout>
         </ScrollView>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">

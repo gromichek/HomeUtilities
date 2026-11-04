@@ -12,8 +12,17 @@ internal static class SyncReplaceFlow
     /// <summary>Asks, makes the backup copy and replaces the local data with the cloud data. False when the user said no.</summary>
     internal static async Task<bool> AskAndReplaceAsync(ISyncEngine engine, IDialogService dialogs, ILocalizer localizer, IAutoBackupService? backups)
     {
-        if (!await dialogs.ConfirmAsync(
-                localizer["SyncCloudReplacedTitle"], localizer["SyncCloudReplacedQuestion"], localizer["SyncCloudReplacedAccept"], localizer["SyncNotNow"]))
+        // The app's own choice dialog (UI_GUIDELINES §3a): the whole explanation is readable, not clipped like an action sheet.
+        var picked = await dialogs.ChooseWithMessageAsync(
+            localizer,
+            localizer["SyncCloudReplacedTitle"],
+            localizer["SyncCloudReplacedQuestion"],
+            [
+                new SingleChoiceOption(true, localizer["SyncCloudReplacedAccept"], localizer["SyncBackupFirstHint"]),
+                new SingleChoiceOption(false, localizer["SyncNotNow"]),
+            ],
+            true);
+        if (picked is not true)
         {
             return false;
         }
@@ -25,5 +34,30 @@ internal static class SyncReplaceFlow
 
         await engine.EnableAsync(FirstJoinChoice.Replace);
         return true;
+    }
+
+    /// <summary>
+    /// The first-join question of a device with data on both sides (<paramref name="rejoin"/> false: Replace, Replace the cloud,
+    /// Merge) or after a restore / import (<paramref name="rejoin"/> true: the first two). Null when the user cancelled.
+    /// </summary>
+    internal static async Task<FirstJoinChoice?> AskJoinChoiceAsync(IDialogService dialogs, ILocalizer localizer, bool rejoin)
+    {
+        var options = new List<SingleChoiceOption>
+        {
+            new(FirstJoinChoice.Replace, localizer["SyncJoinReplace"], localizer["SyncBackupFirstHint"]),
+            new(FirstJoinChoice.ReplaceCloud, localizer["SyncJoinReplaceCloud"], localizer["SyncReplaceCloudHint"]),
+        };
+        if (!rejoin)
+        {
+            options.Add(new SingleChoiceOption(FirstJoinChoice.Merge, localizer["SyncJoinMerge"], localizer["SyncMergeHint"]));
+        }
+
+        var picked = await dialogs.ChooseWithMessageAsync(
+            localizer,
+            localizer[rejoin ? "SyncRejoinTitle" : "SyncJoinTitle"],
+            localizer[rejoin ? "SyncRejoinQuestion" : "SyncJoinQuestion"],
+            options,
+            FirstJoinChoice.Replace);
+        return picked as FirstJoinChoice?;
     }
 }

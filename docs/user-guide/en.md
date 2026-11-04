@@ -965,7 +965,8 @@ the data of the file. There is no merge: it replaces everything.
 
 If sync is on, a restore (from a backup file or an automatic copy), a JSON import and *Delete all data* **switch sync off** on this
 device. The restored file carries an old sync state; if sync simply went on, the newer data in the cloud would be applied over the
-restored data and the restore would be undone. After the restart the Sync page shows that sync is off. When you switch **Sync on this
+restored data and the restore would be undone. This also holds for an **older copy made before you ever switched sync on**: what counts
+is that *this device* was syncing before the restore. After the restart the Sync page shows that sync is off. When you switch **Sync on this
 device** on again, the app asks which side wins:
 
 - **Replace this device's data with the data from the cloud** — the cloud stays as it is; this device shows what the cloud holds (a
@@ -1017,9 +1018,11 @@ Once the account is connected, **Sync on this device** appears. The first time y
 
 - **The folder is empty** — this is the first device. Its data is uploaded as the starting point ("This device starts the sync").
 - **The folder has data and this device is empty** (a new phone, a fresh install) — the data is downloaded, no question asked.
-- **The folder has data and this device has data too** — you choose:
+- **The folder has data and this device has data too** — a dialog with the full explanation opens and you choose one of three:
   - **Replace this device's data with the data from the cloud** (recommended, preselected). The app first makes an automatic backup copy
     of this device's data (*Settings → Backup*), then the device shows exactly what the cloud holds.
+  - **Replace the data in the cloud with this device's data** — this device becomes the source. Be careful: your other devices will be
+    asked to replace their data with the data of this device (see below).
   - **Merge** keeps both. Records that were already synced before are merged by their latest edit; only records created **separately**
     on both devices (for example the same bill typed twice) will appear twice.
   - *Cancel* leaves sync off and changes nothing.
