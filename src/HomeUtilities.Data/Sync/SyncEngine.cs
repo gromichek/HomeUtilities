@@ -14,7 +14,13 @@ namespace HomeUtilities.Data.Sync;
 /// <param name="MaxRowsPerFile">Rows per change file.</param>
 /// <param name="SnapshotEvery">A snapshot is written after this many own change files.</param>
 /// <param name="KeepCoveredFiles">Change files covered by a snapshot older than this are deleted by their device.</param>
-public sealed record SyncOptions(string AppVersion = "0", int MaxRowsPerFile = 500, int SnapshotEvery = 200, TimeSpan? KeepCoveredFiles = null)
+/// <param name="AttachmentsFolder">Folder of the local attachment files; null switches the attachment file sync off.</param>
+public sealed record SyncOptions(
+    string AppVersion = "0",
+    int MaxRowsPerFile = 500,
+    int SnapshotEvery = 200,
+    TimeSpan? KeepCoveredFiles = null,
+    string? AttachmentsFolder = null)
 {
     internal TimeSpan Retention => KeepCoveredFiles ?? TimeSpan.FromDays(30);
 }
@@ -24,7 +30,7 @@ public sealed record SyncOptions(string AppVersion = "0", int MaxRowsPerFile = 5
 /// "newest <c>UpdatedAt</c> wins" per row, writes snapshots and handles the first join. All work goes through raw SQL in the
 /// row shape of <see cref="DataExchangeService"/>; the storage is only <see cref="ISyncStorage"/>.
 /// </summary>
-public sealed class SyncEngine : ISyncEngine
+public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
 {
     private const int MaxDetails = 30;
     private static readonly TimeSpan MaxSkew = TimeSpan.FromMinutes(5);
@@ -39,7 +45,11 @@ public sealed class SyncEngine : ISyncEngine
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly List<SyncDetail> _details = [];
     private SyncStatus _status = SyncStatus.Off;
+    private readonly Func<string?>? _accountEmail;
+    private readonly ISyncConnectivity? _connectivity;
+    private readonly Func<bool>? _downloadOnMobile;
     private string _deviceId = string.Empty;
+    private int _generation;
 
     public SyncEngine(
         IDbContextFactory<HomeUtilitiesDbContext> factory,
@@ -47,8 +57,14 @@ public sealed class SyncEngine : ISyncEngine
         IClock clock,
         IDataChangeNotifier? notifier = null,
         SyncOptions? options = null,
-        Action<string, Exception>? log = null)
+        Action<string, Exception>? log = null,
+        Func<string?>? accountEmail = null,
+        ISyncConnectivity? connectivity = null,
+        Func<bool>? downloadOnMobile = null)
     {
+        _accountEmail = accountEmail;
+        _connectivity = connectivity;
+        _downloadOnMobile = downloadOnMobile;
         _factory = factory;
         _storage = storage;
         _clock = clock;
@@ -66,6 +82,9 @@ public sealed class SyncEngine : ISyncEngine
 
     /// <inheritdoc />
     public bool IsEnabled { get; private set; }
+
+    /// <inheritdoc />
+    public bool NeedsRejoin { get; private set; }
 
     /// <inheritdoc />
     public IReadOnlyList<SyncDetail> Details
@@ -86,7 +105,9 @@ public sealed class SyncEngine : ISyncEngine
     public async Task InitializeAsync(CancellationToken ct = default)
     {
         _deviceId = await _state.GetAsync(SyncStateStore.DeviceIdKey, ct) ?? string.Empty;
-        IsEnabled = _deviceId.Length > 0 && await _state.GetAsync(SyncStateStore.EnabledKey, ct) == "1";
+        NeedsRejoin = _deviceId.Length > 0 && await _state.GetAsync(SyncStateStore.NeedsRejoinKey, ct) == "1";
+        _generation = (int)await _state.GetLongAsync(SyncStateStore.CloudGenerationKey, ct);
+        IsEnabled = _deviceId.Length > 0 && !NeedsRejoin && await _state.GetAsync(SyncStateStore.EnabledKey, ct) == "1";
         var last = DateTimeOffset.TryParse(await _state.GetAsync(SyncStateStore.LastSyncKey, ct), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var at)
             ? at
             : (DateTimeOffset?)null;
@@ -97,12 +118,30 @@ public sealed class SyncEngine : ISyncEngine
     public async Task<FirstJoinInfo> InspectAsync(CancellationToken ct = default)
     {
         var files = await _storage.ListAsync(string.Empty, ct);
-        return new FirstJoinInfo(CloudHasData(files, ownDevice: null), await _state.HasUserDataAsync(ct));
+        var joined = _deviceId.Length > 0 && !NeedsRejoin
+            && string.Equals(await _state.GetAsync(SyncStateStore.JoinedAccountKey, ct), CurrentAccount(), StringComparison.OrdinalIgnoreCase)
+            && await _state.GetLongAsync(SyncStateStore.BootstrappedKey, ct) == 1;
+        var replaced = joined && SyncFormat.MaxGeneration(files) > _generation;
+        return new FirstJoinInfo(
+            CloudHasData(files, ownDevice: null),
+            await _state.HasUserDataAsync(ct),
+            CanResume: joined && !replaced,
+            NeedsRejoin: NeedsRejoin,
+            CloudReplaced: replaced);
     }
+
+    private string CurrentAccount() => _accountEmail?.Invoke() ?? string.Empty;
 
     /// <inheritdoc />
     public async Task EnableAsync(FirstJoinChoice choice, CancellationToken ct = default)
     {
+        if (choice == FirstJoinChoice.Resume)
+        {
+            await ResumeCoreAsync(ct);
+            await SyncAsync(SyncTrigger.Manual, ct);
+            return;
+        }
+
         await _gate.WaitAsync(ct);
         try
         {
@@ -111,6 +150,12 @@ public sealed class SyncEngine : ISyncEngine
             if (choice == FirstJoinChoice.StartHere && cloudHasData)
             {
                 choice = FirstJoinChoice.Merge;
+            }
+
+            var cloudGeneration = SyncFormat.MaxGeneration(files);
+            if (choice == FirstJoinChoice.ReplaceCloud)
+            {
+                cloudGeneration++;
             }
 
             // A fresh id per join: sequences of an earlier join in the same cloud can never collide.
@@ -122,7 +167,12 @@ public sealed class SyncEngine : ISyncEngine
             await _state.SetAsync(SyncStateStore.OwnSnapshotsKey, string.Empty, ct);
             await _state.SetLongAsync(SyncStateStore.BootstrappedKey, 0, ct);
             await _state.ClearAppliedAsync(ct);
+            await _state.SetLongAsync(SyncStateStore.CloudGenerationKey, cloudGeneration, ct);
+            await _state.SetAsync(SyncStateStore.JoinedAccountKey, CurrentAccount(), ct);
+            await _state.SetAsync(SyncStateStore.NeedsRejoinKey, "0", ct);
             _deviceId = device;
+            _generation = cloudGeneration;
+            NeedsRejoin = false;
 
             switch (choice)
             {
@@ -131,6 +181,19 @@ public sealed class SyncEngine : ISyncEngine
                     await WriteSnapshotAsync(ct);
                     await _state.SetLongAsync(SyncStateStore.BootstrappedKey, 1, ct);
                     AddDetail("This device started the sync with a snapshot.");
+                    break;
+
+                case FirstJoinChoice.ReplaceCloud:
+                    await _state.ClearOutboxAsync(ct);
+                    await WriteSnapshotAsync(ct);
+                    await _state.SetLongAsync(SyncStateStore.BootstrappedKey, 1, ct);
+                    // The new snapshot is safe in the cloud: now the old generation can go (other devices are asked on their next sync).
+                    foreach (var file in files.Where(f => SyncFormat.ParseSnapshot(f.Path) is not null || SyncFormat.ParseChange(f.Path) is not null))
+                    {
+                        await _storage.DeleteAsync(file.Path, ct);
+                    }
+
+                    AddDetail($"This device replaced the data in the cloud (generation {cloudGeneration}).");
                     break;
 
                 case FirstJoinChoice.Replace:
@@ -146,7 +209,7 @@ public sealed class SyncEngine : ISyncEngine
 
             await _state.SetAsync(SyncStateStore.EnabledKey, "1", ct);
             IsEnabled = true;
-            if (choice != FirstJoinChoice.StartHere)
+            if (choice is not (FirstJoinChoice.StartHere or FirstJoinChoice.ReplaceCloud))
             {
                 _notifier?.Notify();
             }
@@ -159,12 +222,34 @@ public sealed class SyncEngine : ISyncEngine
         await SyncAsync(SyncTrigger.Manual, ct);
     }
 
+    private async Task ResumeCoreAsync(CancellationToken ct)
+    {
+        await _gate.WaitAsync(ct);
+        try
+        {
+            if (_deviceId.Length == 0 || NeedsRejoin)
+            {
+                throw new InvalidOperationException("This device never joined the cloud; there is nothing to resume.");
+            }
+
+            await _state.SetAsync(SyncStateStore.EnabledKey, "1", ct);
+            IsEnabled = true;
+            SetStatus(new SyncStatus(SyncStateKind.Synced, await LastSyncAsync(ct)));
+            AddDetail("Sync resumed.");
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     /// <inheritdoc />
     public async Task DisableAsync(CancellationToken ct = default)
     {
         await _gate.WaitAsync(ct);
         try
         {
+            // A pause (C14): the device id, the applied sequences and the outbox stay.
             await _state.SetAsync(SyncStateStore.EnabledKey, "0", ct);
             IsEnabled = false;
             SetStatus(SyncStatus.Off);
@@ -174,6 +259,32 @@ public sealed class SyncEngine : ISyncEngine
             _gate.Release();
         }
     }
+
+    /// <inheritdoc />
+    public async Task ForgetJoinAsync(CancellationToken ct = default)
+    {
+        await _gate.WaitAsync(ct);
+        try
+        {
+            await _state.SetAsync(SyncStateStore.EnabledKey, "0", ct);
+            await _state.SetAsync(SyncStateStore.DeviceIdKey, string.Empty, ct);
+            await _state.SetAsync(SyncStateStore.JoinedAccountKey, string.Empty, ct);
+            await _state.SetAsync(SyncStateStore.NeedsRejoinKey, "0", ct);
+            _deviceId = string.Empty;
+            IsEnabled = false;
+            NeedsRejoin = false;
+            SetStatus(SyncStatus.Off);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    private async Task<DateTimeOffset?> LastSyncAsync(CancellationToken ct) =>
+        DateTimeOffset.TryParse(await _state.GetAsync(SyncStateStore.LastSyncKey, ct), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var at)
+            ? at
+            : null;
 
     /// <inheritdoc />
     public async Task<bool> SyncAsync(SyncTrigger trigger, CancellationToken ct = default)
@@ -187,12 +298,21 @@ public sealed class SyncEngine : ISyncEngine
         var previous = _status;
         try
         {
-            SetStatus(previous with { Kind = SyncStateKind.Syncing, LastAttemptAt = attempt });
+            SetStatus(previous with { Kind = SyncStateKind.Syncing, LastAttemptAt = attempt, Trigger = trigger });
             var files = await _storage.ListAsync(string.Empty, ct);
+            if (SyncFormat.MaxGeneration(files) > _generation)
+            {
+                // Another device replaced the data in the cloud: uploading or applying anything would mix two generations.
+                AddDetail("The data in the cloud was replaced on another device.");
+                SetStatus(previous with { Kind = SyncStateKind.CloudReplaced, LastAttemptAt = attempt, Trigger = trigger });
+                return true;
+            }
+
             var conflicts = new List<string>();
             var applied = await ApplyRemoteAsync(files, replace: false, ct);
             conflicts.AddRange(applied.Conflicts);
-            var uploaded = await UploadAsync(files, ct);
+            var (uploaded, rowsSent) = await UploadAsync(files, ct);
+            await SyncAttachmentFilesAsync(files, ct);
             await WriteSnapshotIfDueAsync(ct);
             await CleanUpAsync(files, ct);
 
@@ -203,7 +323,7 @@ public sealed class SyncEngine : ISyncEngine
                 AddDetail("The clock of this device differs from the server's by more than five minutes.");
             }
 
-            SetStatus(new SyncStatus(SyncStateKind.Synced, attempt, attempt, null, conflicts.Count, skew));
+            SetStatus(new SyncStatus(SyncStateKind.Synced, attempt, attempt, null, conflicts.Count, skew, trigger, applied.RowsApplied, rowsSent));
             if (applied.RowsApplied > 0)
             {
                 _notifier?.Notify();
@@ -213,18 +333,18 @@ public sealed class SyncEngine : ISyncEngine
         }
         catch (UpdateRequiredException)
         {
-            SetStatus(previous with { Kind = SyncStateKind.UpdateRequired, LastAttemptAt = attempt });
+            SetStatus(previous with { Kind = SyncStateKind.UpdateRequired, LastAttemptAt = attempt, Trigger = trigger });
             return true;
         }
         catch (SyncException ex) when (ex.Kind is SyncErrorKind.NoNetwork or SyncErrorKind.Timeout)
         {
-            SetStatus(previous with { Kind = SyncStateKind.WaitingForNetwork, LastAttemptAt = attempt, Error = ex.Kind });
+            SetStatus(previous with { Kind = SyncStateKind.WaitingForNetwork, LastAttemptAt = attempt, Error = ex.Kind, Trigger = trigger });
             return true;
         }
         catch (SyncException ex)
         {
             _log?.Invoke("Sync", ex);
-            SetStatus(previous with { Kind = SyncStateKind.Failed, LastAttemptAt = attempt, Error = ex.Kind });
+            SetStatus(previous with { Kind = SyncStateKind.Failed, LastAttemptAt = attempt, Error = ex.Kind, Trigger = trigger });
             return true;
         }
         catch (OperationCanceledException)
@@ -235,7 +355,7 @@ public sealed class SyncEngine : ISyncEngine
         catch (Exception ex)
         {
             _log?.Invoke("Sync", ex);
-            SetStatus(previous with { Kind = SyncStateKind.Failed, LastAttemptAt = attempt, Error = SyncErrorKind.Other });
+            SetStatus(previous with { Kind = SyncStateKind.Failed, LastAttemptAt = attempt, Error = SyncErrorKind.Other, Trigger = trigger });
             return true;
         }
         finally
@@ -265,6 +385,7 @@ public sealed class SyncEngine : ISyncEngine
         // 1. Download everything that is needed before anything is changed (a failure here leaves the data untouched).
         RemoteDocument? snapshot = null;
         var snapshots = files.Select(f => (File: f, Info: SyncFormat.ParseSnapshot(f.Path))).Where(x => x.Info is not null)
+            .Where(x => x.Info!.Value.Generation == _generation)
             .OrderByDescending(x => x.Info!.Value.At).ToList();
         var pending = PendingChanges(files, applied);
         var gap = pending.Any(g => g.Value[0].Sequence > applied.GetValueOrDefault(g.Key) + 1);
@@ -482,12 +603,12 @@ public sealed class SyncEngine : ISyncEngine
 
     // ---- Upload, snapshot, clean-up ------------------------------------------------------------------------------
 
-    private async Task<int> UploadAsync(IReadOnlyList<SyncFileInfo> files, CancellationToken ct)
+    private async Task<(int Files, int Rows)> UploadAsync(IReadOnlyList<SyncFileInfo> files, CancellationToken ct)
     {
         var entries = (await _state.ReadOutboxAsync(ct)).ToList();
         if (entries.Count == 0)
         {
-            return 0;
+            return (0, 0);
         }
 
         var known = SyncFormat.Tables.ToDictionary(t => t.Name, StringComparer.Ordinal);
@@ -503,6 +624,7 @@ public sealed class SyncEngine : ISyncEngine
             .Select(c => c!.Value.Sequence).DefaultIfEmpty(0).Max();
         var sequence = Math.Max(await _state.GetLongAsync(SyncStateStore.LocalSequenceKey, ct), remoteMax);
         var uploaded = 0;
+        var rows = 0;
         foreach (var chunk in entries.Chunk(_options.MaxRowsPerFile))
         {
             sequence++;
@@ -510,11 +632,13 @@ public sealed class SyncEngine : ISyncEngine
             await _storage.UploadAsync(SyncFormat.ChangePathFor(_deviceId, sequence), new MemoryStream(content), ct);
             await _state.SetLongAsync(SyncStateStore.LocalSequenceKey, sequence, ct);
             await _state.RemoveFromOutboxAsync(chunk, ct);
+            await RecordDeletedAttachmentsAsync(chunk, ct);
             uploaded++;
+            rows += chunk.Length;
             AddDetail($"Uploaded {SyncFormat.ChangePathFor(_deviceId, sequence)} ({chunk.Length} rows).");
         }
 
-        return uploaded;
+        return (uploaded, rows);
     }
 
     private async Task<byte[]> BuildChangeFileAsync(
@@ -594,7 +718,7 @@ public sealed class SyncEngine : ISyncEngine
             await db.Database.CloseConnectionAsync();
         }
 
-        var path = SyncFormat.SnapshotPathFor(_deviceId, now);
+        var path = SyncFormat.SnapshotPathFor(_deviceId, now, _generation);
         await _storage.UploadAsync(path, new MemoryStream(bytes), ct);
         await _state.SetLongAsync(SyncStateStore.LastSnapshotSequenceKey, own, ct);
         var history = await _state.GetAsync(SyncStateStore.OwnSnapshotsKey, ct) ?? string.Empty;
@@ -615,6 +739,7 @@ public sealed class SyncEngine : ISyncEngine
     // newest two stay. Files of other devices are never touched. Foreign files in the folder are ignored.
     private async Task CleanUpAsync(IReadOnlyList<SyncFileInfo> files, CancellationToken ct)
     {
+        await CleanUpDeletedAttachmentsAsync(ct);
         var history = (await _state.GetAsync(SyncStateStore.OwnSnapshotsKey, ct) ?? string.Empty)
             .Split(';', StringSplitOptions.RemoveEmptyEntries)
             .Select(e => e.Split(':'))
@@ -633,7 +758,7 @@ public sealed class SyncEngine : ISyncEngine
             }
         }
 
-        var keep = history.OrderByDescending(h => h.At).Take(2).Select(h => SyncFormat.SnapshotPathFor(_deviceId, h.At)).ToHashSet(StringComparer.Ordinal);
+        var keep = history.OrderByDescending(h => h.At).Take(2).Select(h => SyncFormat.SnapshotPathFor(_deviceId, h.At, _generation)).ToHashSet(StringComparer.Ordinal);
         foreach (var file in files)
         {
             if (SyncFormat.ParseSnapshot(file.Path) is { } snapshot && snapshot.Device == _deviceId && !keep.Contains(file.Path) && history.Count > 2)

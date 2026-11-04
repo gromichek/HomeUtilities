@@ -114,12 +114,24 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         ISettingsStore settings,
         ILayoutModeService layoutModeService,
         IDataChangeNotifier? changes = null,
-        ISyncEngine? sync = null)
+        ISyncEngine? sync = null,
+        IUiDispatcher? dispatcher = null)
     {
         _sync = sync;
         if (sync is not null)
         {
-            sync.StatusChanged += (_, _) => UpdateSyncHint();
+            // The engine raises the event on the sync thread; the hint is bound to the UI (C11).
+            sync.StatusChanged += (_, _) =>
+            {
+                if (dispatcher is null)
+                {
+                    UpdateSyncHint();
+                }
+                else
+                {
+                    dispatcher.Post(UpdateSyncHint);
+                }
+            };
         }
 
         _gate = changes is null ? null : new ReloadGate(changes, clock);

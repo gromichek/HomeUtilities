@@ -342,6 +342,13 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         return Task.CompletedTask;
     }
 
+    /// <summary>Leaving the Settings list: the Sync part stops listening to the singleton sync engine (C11).</summary>
+    public override async Task OnDisappearingAsync()
+    {
+        await Sync.OnDisappearingAsync();
+        await base.OnDisappearingAsync();
+    }
+
     /// <summary>Re-reads the automatic copies (off the UI thread) and the backup texts; called when the Backup page appears.</summary>
     public async Task RefreshBackupSectionAsync()
     {

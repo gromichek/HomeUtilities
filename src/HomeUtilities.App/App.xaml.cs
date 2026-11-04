@@ -69,6 +69,7 @@ public partial class App : Application
         var router = _services.GetRequiredService<NotificationTapRouter>();
         var tapHandler = _services.GetRequiredService<NotificationTapHandler>();
         var errorLog = _services.GetRequiredService<IErrorLog>();
+        _ = _services.GetRequiredService<SyncNotifier>(); // subscribes to the engine: messages and the "cloud replaced" question
         var justCreated = false;
 
         void Refresh(ReminderRescheduleReason reason) => _ = Task.Run(async () =>
@@ -127,6 +128,7 @@ public partial class App : Application
         var scheduler = _services.GetRequiredService<SyncScheduler>();
         var account = _services.GetRequiredService<HomeUtilities.Core.Sync.ISyncAccountService>();
         var errorLog = _services.GetRequiredService<IErrorLog>();
+        _ = _services.GetRequiredService<SyncNotifier>(); // subscribes to the engine: messages and the "cloud replaced" question
         var justCreated = false;
         window.Created += (_, _) =>
         {
@@ -155,6 +157,7 @@ public partial class App : Application
 
             _ = Task.Run(() => scheduler.ResumeAsync());
         };
+        window.Activated += (_, _) => scheduler.NotifyForeground();
         window.Deactivated += (_, _) => _ = Task.Run(() => scheduler.FlushAsync());
         window.Stopped += (_, _) => _ = Task.Run(() => scheduler.FlushAsync());
     }

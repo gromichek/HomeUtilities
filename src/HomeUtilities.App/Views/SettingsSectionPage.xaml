@@ -216,8 +216,22 @@
                                 </Grid>
                                 <Label Text="{Binding SyncRunText}" FontAttributes="Bold" />
                                 <Label Text="{Binding LastSyncText}" Style="{StaticResource MutedLabel}" />
+                                <Button Text="{Binding ReplaceFromCloudText}" Command="{Binding ReplaceFromCloudCommand}"
+                                        IsVisible="{Binding ShowReplaceFromCloud}" Style="{StaticResource PrimaryButton}" />
                                 <Button Text="{Binding SyncNowText}" Command="{Binding SyncNowCommand}"
                                         IsVisible="{Binding SyncOn}" Style="{StaticResource PrimaryButton}" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Label Grid.Column="0" Text="{Binding ShowMessagesText}" VerticalOptions="Center" />
+                                    <Switch Grid.Column="1" IsToggled="{Binding ShowMessages}" VerticalOptions="Center" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Label Grid.Column="0" Text="{Binding DownloadOnMobileText}" VerticalOptions="Center" />
+                                    <Switch Grid.Column="1" IsToggled="{Binding DownloadOnMobile}" VerticalOptions="Center" />
+                                </Grid>
+                                <Label Text="{Binding CloudFilesHeader}" Style="{StaticResource SectionHeader}" />
+                                <Button Text="{Binding CloudFilesButtonText}" Command="{Binding LoadCloudFilesCommand}"
+                                        Style="{StaticResource SecondaryButton}" />
+                                <Label Text="{Binding CloudFilesText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasCloudFiles}" />
                                 <Label Text="{Binding DetailsHeader}" Style="{StaticResource SectionHeader}" IsVisible="{Binding HasDetails}" />
                                 <Label Text="{Binding DetailsText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDetails}" />
                             </VerticalStackLayout>

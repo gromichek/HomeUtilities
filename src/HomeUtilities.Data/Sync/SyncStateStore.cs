@@ -17,6 +17,10 @@ internal sealed class SyncStateStore(IDbContextFactory<HomeUtilitiesDbContext> f
     internal const string LastSnapshotSequenceKey = "LastSnapshotSequence";
     internal const string OwnSnapshotsKey = "OwnSnapshots";
     internal const string AppliedPrefix = "Applied:";
+    internal const string JoinedAccountKey = "JoinedAccount";
+    internal const string NeedsRejoinKey = "NeedsRejoin";
+    internal const string CloudGenerationKey = "CloudGeneration";
+    internal const string DeletedAttachmentPrefix = "AttDel:";
 
     internal async Task<string?> GetAsync(string key, CancellationToken ct)
     {
@@ -43,6 +47,21 @@ internal sealed class SyncStateStore(IDbContextFactory<HomeUtilitiesDbContext> f
             "SELECT \"Key\" || '=' || \"Value\" AS \"Value\" FROM \"SyncState\" WHERE \"Key\" LIKE 'Applied:%'").ToListAsync(ct);
         return rows.Select(r => r.Split('=', 2))
             .ToDictionary(p => p[0][AppliedPrefix.Length..], p => long.Parse(p[1], CultureInfo.InvariantCulture), StringComparer.Ordinal);
+    }
+
+    internal async Task RemoveAsync(string key, CancellationToken ct)
+    {
+        await using var db = await factory.CreateDbContextAsync(ct);
+        await db.Database.ExecuteSqlRawAsync("DELETE FROM \"SyncState\" WHERE \"Key\" = {0}", [key], ct);
+    }
+
+    /// <summary>All entries whose key starts with <paramref name="prefix"/> (key without the prefix, value).</summary>
+    internal async Task<List<(string Key, string Value)>> ListPrefixAsync(string prefix, CancellationToken ct)
+    {
+        await using var db = await factory.CreateDbContextAsync(ct);
+        var rows = await db.Database.SqlQueryRaw<string>(
+            "SELECT \"Key\" || '=' || \"Value\" AS \"Value\" FROM \"SyncState\" WHERE substr(\"Key\", 1, {0}) = {1}", prefix.Length, prefix).ToListAsync(ct);
+        return [.. rows.Select(r => r.Split('=', 2)).Select(p => (p[0][prefix.Length..], p[1]))];
     }
 
     internal async Task ClearAppliedAsync(CancellationToken ct)

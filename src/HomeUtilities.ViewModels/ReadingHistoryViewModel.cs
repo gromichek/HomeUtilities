@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
+using HomeUtilities.Core.Sync;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.ViewModels.Common;
@@ -15,6 +16,7 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
 {
     private readonly IMeterStore _store;
     private readonly IAttachmentStore _attachments;
+    private readonly IAttachmentFileSync? _fileSync;
     private readonly IFileViewer _viewer;
     private readonly IMediaService _media;
     private readonly ILocalizer _localizer;
@@ -43,8 +45,10 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
         IFileViewer viewer,
         IMediaService media,
         ILocalizer localizer,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IAttachmentFileSync? fileSync = null)
     {
+        _fileSync = fileSync;
         _store = store;
         _attachments = attachments;
         _viewer = viewer;
@@ -230,15 +234,11 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
             return;
         }
 
-        var attachment = await _attachments.GetAsync(id);
-        var path = attachment is null ? null : await _attachments.GetFilePathAsync(id);
-        if (attachment is null || path is null)
+        var path = await AttachmentFileResolver.ResolveAsync(_attachments, _fileSync, _dialogs, _localizer, id, "PhotoMissing");
+        if (path is not null && await _attachments.GetAsync(id) is { } attachment)
         {
-            await _dialogs.AlertAsync(_localizer["Dialog_Error_Title"], _localizer["PhotoMissing"]);
-            return;
+            await _viewer.OpenAsync(path, attachment.ContentType);
         }
-
-        await _viewer.OpenAsync(path, attachment.ContentType);
     }
 
     private async Task DeleteAsync(Guid registerId, Guid readingId)

@@ -1522,7 +1522,7 @@
   <data name="SettingsValueSyncNotConfigured" xml:space="preserve"><value>Not configured in this build</value></data>
   <data name="SettingsValueSyncSignedOut" xml:space="preserve"><value>Not connected</value></data>
   <data name="SettingsValueSyncError" xml:space="preserve"><value>Connection lost</value></data>
-  <data name="SyncHint" xml:space="preserve"><value>Sync keeps your data the same on your phone and your PC. It uses a hidden folder in your own Google Drive that only this app can see: it does not show up in the Drive app or on the Drive website. Connect the Google account here, then switch on “Sync on this device”. Photos and files attached to records are not synced yet.</value></data>
+  <data name="SyncHint" xml:space="preserve"><value>Sync keeps your data the same on your phone and your PC. It uses a hidden folder in your own Google Drive that only this app can see: it does not show up in the Drive app or on the Drive website. Connect the Google account here, then switch on “Sync on this device”. Photos and documents attached to records are synced too; on mobile data they are downloaded only when you open them (unless you allow it below).</value></data>
   <data name="SyncProvider" xml:space="preserve"><value>Storage: {0}</value></data>
   <data name="SyncStatusNotConfigured" xml:space="preserve"><value>Sync is not configured in this build.</value></data>
   <data name="SyncStatusSignedOut" xml:space="preserve"><value>Not connected</value></data>
@@ -1569,8 +1569,35 @@
   <data name="SyncClockSkew" xml:space="preserve"><value>The clock of this device differs from the server's by more than 5 minutes — set the date and time automatically.</value></data>
   <data name="SyncNever" xml:space="preserve"><value>Not synced yet.</value></data>
   <data name="SyncLastSync" xml:space="preserve"><value>Last sync: {0}</value></data>
-  <data name="SyncJoinQuestion" xml:space="preserve"><value>The cloud already holds data and so does this device. Replace keeps only the cloud data (a backup copy of this device's data is made first). Merge keeps both, but records entered on both devices will appear twice.</value></data>
+  <data name="SyncJoinQuestion" xml:space="preserve"><value>The cloud already holds data and so does this device. Replace keeps only the cloud data (a backup copy of this device's data is made first). Merge keeps both: records that were already synced before are merged by their latest edit, but records created separately on both devices will appear twice.</value></data>
   <data name="SyncJoinReplace" xml:space="preserve"><value>Replace this device's data with the data from the cloud (recommended)</value></data>
   <data name="SyncJoinMerge" xml:space="preserve"><value>Merge</value></data>
   <data name="OverviewSyncHint" xml:space="preserve"><value>Sync has not worked for more than a day. Open Settings → Sync to see why.</value></data>
+  <data name="SyncCloudReplacedTitle" xml:space="preserve"><value>Data in the cloud replaced</value></data>
+  <data name="SyncCloudReplacedQuestion" xml:space="preserve"><value>The data in the cloud was replaced on another device. Replace this device's data with the data from the cloud? A backup copy of this device's data is made first.</value></data>
+  <data name="SyncCloudReplacedAccept" xml:space="preserve"><value>Replace</value></data>
+  <data name="SyncNotNow" xml:space="preserve"><value>Not now</value></data>
+  <data name="SyncMsgSyncing" xml:space="preserve"><value>Syncing…</value></data>
+  <data name="SyncMsgSynced" xml:space="preserve"><value>Synced: {0} received, {1} sent</value></data>
+  <data name="SyncMsgWaiting" xml:space="preserve"><value>Sync is waiting for the network.</value></data>
+  <data name="SyncMsgFailed" xml:space="preserve"><value>Sync failed: {0}</value></data>
+  <data name="SyncRejoinQuestion" xml:space="preserve"><value>The data on this device was replaced by a restore or an import, so sync was switched off. Which data should win?</value></data>
+  <data name="SyncRejoinFromCloud" xml:space="preserve"><value>Replace this device's data with the data from the cloud</value></data>
+  <data name="SyncRejoinToCloud" xml:space="preserve"><value>Replace the data in the cloud with this device's data</value></data>
+  <data name="SyncShowMessages" xml:space="preserve"><value>Show sync messages</value></data>
+  <data name="SyncDownloadOnMobile" xml:space="preserve"><value>Download photos and documents on mobile data</value></data>
+  <data name="SyncReplaceFromCloud" xml:space="preserve"><value>Replace this device's data…</value></data>
+  <data name="SyncRunCloudReplaced" xml:space="preserve"><value>The data in the cloud was replaced on another device. Replace this device's data to continue syncing.</value></data>
+  <data name="SyncCloudFiles" xml:space="preserve"><value>Files in the cloud</value></data>
+  <data name="SyncCloudFilesShow" xml:space="preserve"><value>Show files in the cloud</value></data>
+  <data name="SyncCloudDeviceThis" xml:space="preserve"><value>Changes of this device ({0}): {1} files, {2}, newest {3}</value></data>
+  <data name="SyncCloudDevice" xml:space="preserve"><value>Changes of device {0}: {1} files, {2}, newest {3}</value></data>
+  <data name="SyncCloudSnapshot" xml:space="preserve"><value>Snapshot {0}: {1}</value></data>
+  <data name="SyncCloudAttachments" xml:space="preserve"><value>Photos and documents: {0} files, {1}</value></data>
+  <data name="SyncCloudForeign" xml:space="preserve"><value>Other files: {0} files, {1}</value></data>
+  <data name="SyncCloudTotal" xml:space="preserve"><value>Total: {0} files, {1}</value></data>
+  <data name="AttachmentNotDownloadedTitle" xml:space="preserve"><value>Not downloaded yet</value></data>
+  <data name="AttachmentNotDownloaded" xml:space="preserve"><value>This photo or document comes from another device and has not been downloaded to this device yet.</value></data>
+  <data name="AttachmentDownload" xml:space="preserve"><value>Download</value></data>
+  <data name="AttachmentDownloadFailed" xml:space="preserve"><value>The file could not be downloaded. It may not be uploaded by the other device yet, or it is damaged. Try again later.</value></data>
 </root>

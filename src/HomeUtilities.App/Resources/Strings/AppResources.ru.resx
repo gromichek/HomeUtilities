@@ -1522,7 +1522,7 @@
   <data name="SettingsValueSyncNotConfigured" xml:space="preserve"><value>Не настроена в этой сборке</value></data>
   <data name="SettingsValueSyncSignedOut" xml:space="preserve"><value>Не подключено</value></data>
   <data name="SettingsValueSyncError" xml:space="preserve"><value>Связь потеряна</value></data>
-  <data name="SyncHint" xml:space="preserve"><value>Синхронизация держит данные одинаковыми на телефоне и на компьютере. Она использует скрытую папку в вашем собственном Google Диске, которую видит только это приложение: в приложении и на сайте Google Диска её нет. Подключите здесь аккаунт Google и включите «Синхронизация на этом устройстве». Фотографии и файлы, прикреплённые к записям, пока не синхронизируются.</value></data>
+  <data name="SyncHint" xml:space="preserve"><value>Синхронизация держит данные одинаковыми на телефоне и на компьютере. Она использует скрытую папку в вашем собственном Google Диске, которую видит только это приложение: в приложении и на сайте Google Диска её нет. Подключите здесь аккаунт Google и включите «Синхронизация на этом устройстве». Фотографии и документы, прикреплённые к записям, тоже синхронизируются; по мобильной сети они скачиваются только когда вы их открываете (если не разрешить это ниже).</value></data>
   <data name="SyncProvider" xml:space="preserve"><value>Хранилище: {0}</value></data>
   <data name="SyncStatusNotConfigured" xml:space="preserve"><value>Синхронизация не настроена в этой сборке.</value></data>
   <data name="SyncStatusSignedOut" xml:space="preserve"><value>Не подключено</value></data>
@@ -1569,8 +1569,35 @@
   <data name="SyncClockSkew" xml:space="preserve"><value>Часы этого устройства отличаются от серверных больше чем на 5 минут — включите автоматическую установку даты и времени.</value></data>
   <data name="SyncNever" xml:space="preserve"><value>Ещё не синхронизировалось.</value></data>
   <data name="SyncLastSync" xml:space="preserve"><value>Последняя синхронизация: {0}</value></data>
-  <data name="SyncJoinQuestion" xml:space="preserve"><value>В облаке уже есть данные, и на этом устройстве тоже. «Заменить» оставит только данные из облака (сначала будет сделана резервная копия данных этого устройства). «Объединить» оставит всё, но записи, введённые на обоих устройствах, появятся дважды.</value></data>
+  <data name="SyncJoinQuestion" xml:space="preserve"><value>В облаке уже есть данные, и на этом устройстве тоже. «Заменить» оставит только данные из облака (сначала будет сделана резервная копия данных этого устройства). «Объединить» оставит всё: записи, которые уже синхронизировались раньше, объединятся по последней правке, а записи, созданные отдельно на обоих устройствах, появятся дважды.</value></data>
   <data name="SyncJoinReplace" xml:space="preserve"><value>Заменить данные этого устройства данными из облака (рекомендуется)</value></data>
   <data name="SyncJoinMerge" xml:space="preserve"><value>Объединить</value></data>
   <data name="OverviewSyncHint" xml:space="preserve"><value>Синхронизация не работает больше суток. Причина — в «Настройки → Синхронизация».</value></data>
+  <data name="SyncCloudReplacedTitle" xml:space="preserve"><value>Данные в облаке заменены</value></data>
+  <data name="SyncCloudReplacedQuestion" xml:space="preserve"><value>Данные в облаке были заменены на другом устройстве. Заменить данные этого устройства данными из облака? Сначала будет сделана резервная копия данных этого устройства.</value></data>
+  <data name="SyncCloudReplacedAccept" xml:space="preserve"><value>Заменить</value></data>
+  <data name="SyncNotNow" xml:space="preserve"><value>Не сейчас</value></data>
+  <data name="SyncMsgSyncing" xml:space="preserve"><value>Синхронизация…</value></data>
+  <data name="SyncMsgSynced" xml:space="preserve"><value>Синхронизировано: получено {0}, отправлено {1}</value></data>
+  <data name="SyncMsgWaiting" xml:space="preserve"><value>Синхронизация ждёт сеть.</value></data>
+  <data name="SyncMsgFailed" xml:space="preserve"><value>Ошибка синхронизации: {0}</value></data>
+  <data name="SyncRejoinQuestion" xml:space="preserve"><value>Данные на этом устройстве заменены восстановлением или импортом, поэтому синхронизация была выключена. Чьи данные оставить?</value></data>
+  <data name="SyncRejoinFromCloud" xml:space="preserve"><value>Заменить данные этого устройства данными из облака</value></data>
+  <data name="SyncRejoinToCloud" xml:space="preserve"><value>Заменить данные в облаке данными этого устройства</value></data>
+  <data name="SyncShowMessages" xml:space="preserve"><value>Показывать сообщения о синхронизации</value></data>
+  <data name="SyncDownloadOnMobile" xml:space="preserve"><value>Скачивать фото и документы по мобильной сети</value></data>
+  <data name="SyncReplaceFromCloud" xml:space="preserve"><value>Заменить данные этого устройства…</value></data>
+  <data name="SyncRunCloudReplaced" xml:space="preserve"><value>Данные в облаке заменены на другом устройстве. Замените данные этого устройства, чтобы продолжить синхронизацию.</value></data>
+  <data name="SyncCloudFiles" xml:space="preserve"><value>Файлы в облаке</value></data>
+  <data name="SyncCloudFilesShow" xml:space="preserve"><value>Показать файлы в облаке</value></data>
+  <data name="SyncCloudDeviceThis" xml:space="preserve"><value>Изменения этого устройства ({0}): файлов {1}, {2}, последнее {3}</value></data>
+  <data name="SyncCloudDevice" xml:space="preserve"><value>Изменения устройства {0}: файлов {1}, {2}, последнее {3}</value></data>
+  <data name="SyncCloudSnapshot" xml:space="preserve"><value>Снимок {0}: {1}</value></data>
+  <data name="SyncCloudAttachments" xml:space="preserve"><value>Фото и документы: файлов {0}, {1}</value></data>
+  <data name="SyncCloudForeign" xml:space="preserve"><value>Прочие файлы: {0}, {1}</value></data>
+  <data name="SyncCloudTotal" xml:space="preserve"><value>Всего: файлов {0}, {1}</value></data>
+  <data name="AttachmentNotDownloadedTitle" xml:space="preserve"><value>Ещё не скачано</value></data>
+  <data name="AttachmentNotDownloaded" xml:space="preserve"><value>Это фото или документ получено с другого устройства и ещё не скачано на это устройство.</value></data>
+  <data name="AttachmentDownload" xml:space="preserve"><value>Скачать</value></data>
+  <data name="AttachmentDownloadFailed" xml:space="preserve"><value>Не удалось скачать файл. Возможно, другое устройство ещё не загрузило его, или файл повреждён. Попробуйте позже.</value></data>
 </root>
