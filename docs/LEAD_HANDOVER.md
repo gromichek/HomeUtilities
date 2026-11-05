@@ -127,7 +127,7 @@ Prompt for a new lead session:
 
 ## 6. Next steps (ROADMAP)
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
-   **T-035** merged (#227), owner test pending. Owner is preparing a UI review by a designer (screenshots + prompt) →
+   **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). Owner is preparing a UI review by a designer (screenshots + prompt) →
    collect the findings into one task. iOS (T-033) and contract templates
    (T-025b) dropped; second cloud (T-032a) postponed. T-032b and the snackbar fix (#220) passed the owner's tests.
 3. **T-032a** postponed (Dropbox possible later; OneDrive declined — needs an Azure tenant).
