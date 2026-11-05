@@ -15,15 +15,29 @@ to the devices by hand. There is no auto-update: to update, install the new file
 
 ## Making a release
 
-In PowerShell, in the repository folder (best on a clean `main`; the script warns about uncommitted changes and other branches):
+Best on a clean, up-to-date `main` (`git pull`; the script warns about uncommitted changes and other branches).
 
-```powershell
-.\scripts\publish-release.ps1
-```
+1. Open the repository folder (`HomeUtilities`, the one with `scripts`, `src`, `docs`) in File Explorer.
+2. Click into the **address bar**, type `powershell` and press Enter — PowerShell opens in this folder.
+3. Run:
 
-`-AndroidOnly` or `-WindowsOnly` builds just one file. The script stops with a clear message if `secrets.json`,
-`signing.props` (a release is never signed with the debug key) or Inno Setup is missing, and shows the last lines of the
-build output when a step fails; the full logs are in `release\work\`.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\scripts\publish-release.ps1
+   ```
+
+   `-ExecutionPolicy Bypass` is needed because Windows blocks running `.ps1` files by default; it applies to this one run
+   only and changes no system setting.
+4. The first run takes several minutes (Android AOT + Windows self-contained). At the end the script prints the version
+   and the paths of the two files.
+
+Add `-AndroidOnly` or `-WindowsOnly` at the end of the command to build just one file. The script stops with a clear message if `secrets.json`,
+`signing.props` (a release is never signed with the debug key) or Inno Setup is missing, and shows the error lines of the
+build output when a step fails; the full logs are in `release\work\` (`android.log`, `windows.log`, `iscc.log`).
+
+**Known errors**
+- `"java.exe" exited with code 2` while signing (Android): the password file has one line — it needs the password on
+  **two** lines, see [SIGNING.md](SIGNING.md).
+- `NU1102 … Microsoft.NETCore.App.Runtime.Mono.win-x64` (Windows): an old script that used `-r win-x64` — `git pull`.
 
 Result in `release\` (git-ignored):
 
