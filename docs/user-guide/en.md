@@ -61,13 +61,26 @@ bottom right. *Settings → About* shows the current layout (phone / tablet / de
   After you close an editor, the list shows the same place again and the record you opened is **highlighted**.
 - **Delete** hides the record; its history is kept. Many records can instead be **archived** — hidden from lists and
   pickers but still used in history. Use "Show archived" to see them again.
+- **Choosing from a list.** Every choice (supplier, contract, category, property, period, template…) opens the same dialog:
+  the options as rows with a round mark, the **current value already marked**, **Cancel** and **OK** at the bottom. The
+  record you pick is the one that is saved, even if two records have the same name (two contracts called *Gas*).
+- **Months** (the bill's month, the month of the charges, a template's start, report periods) are written in the app
+  language (*November 2026*) also on Windows; tap the month to pick another one.
+- **Empty lists** say what to do: *No bills yet. Tap ＋ to add one.* A list that is still loading shows *Loading…* (only if it
+  takes longer than a moment).
+- **Amounts** are never split over two lines (*1 234,56 €*, *Total 49,22 €*). A value that could not be calculated is
+  **—**, never *0,00*; **≈ 12,30** is a value based on incomplete data. Short month names are always three letters
+  (*Jan … Dec* / *янв … дек*), in the report charts too.
+- **Colours.** The bar at the top and the icons on it (✓, ?, ☰, ←) are readable in the light and the dark theme. The dot of a
+  category is never the pure green or red of a status; categories you created earlier keep their colours.
 - Fields marked * are required. A wrong value shows a red message under the field; the app does not save until
   it is fixed.
 - Numbers accept both `,` and `.` as the decimal separator.
 
 **Short messages.** After *Save* or *Copy* a small bar with **Saved** or **Copied** appears at the bottom of the window for a few
 seconds. Some messages have a button, for example **Bill marked as paid · Undo** (it stays a bit longer). The bar does not
-block anything — just carry on.
+block anything — just carry on. On a phone the bar is at least 56 dp high and the button (**Undo**) takes the whole right part of
+it, so it is easy to hit; the bar sits above the ＋ button.
 
 **Child rows** (parameters, links, registers, custom fields…): the card header has ＋ to add; tap a row to edit it
 in a dialog; the trash icon deletes it (with confirmation).
@@ -91,7 +104,7 @@ open the matching screen; **Back** returns to the Overview and the row is gone i
 | Row | When it appears | When it disappears | Tap / button |
 |---|---|---|---|
 | **Submit readings: Water, Heating** | A contract's *reading window* (set on the contract, e.g. 25–28) is open, opens within the next 3 days, or ended less than 4 days ago — and none of the contract's meters has a reading dated inside that window. Contracts with the same window share one row. | You save a reading of the meter inside the window, or 3 days after the window ended. | Opens **Readings** of that property for today. |
-| **Pay {contract} for {month}** (a bill, and **Pay Property tax …** for a tax installment) | An open bill whose due date is within the next 7 days, is today, or has passed. The amount is what is still open. | The bill is paid in full. | Tap opens the bill. **Paid** (the ✓ button) marks the open amount as paid today and shows **Bill marked as paid · Undo**; **Undo** takes it back and the row returns. |
+| **Pay {contract} for {month}** (a bill, and **Pay Property tax …** for a tax installment) | An open bill whose due date is within the next 7 days, is today, or has passed. The amount is what is still open. | The bill is paid in full. | Tap opens the bill. **Mark as paid** (the ✓ button) marks the open amount as paid today and shows **Bill marked as paid · Undo**; **Undo** takes it back and the row returns. |
 | **Bill for {month} from {contract} not entered yet** | A contract with a *bill day* has no bill for its expected month yet: the **previous** month for a contract billed in arrears, the **next** month for a prepaid one — and today is on or after the bill day (in the month after the period, or in the month before it when prepaid). Tax contracts are not checked. | You enter a bill for that contract and month. | **Enter bill** opens a new bill with the contract and the month filled in. |
 | **Draft bills to confirm: 3** | One or more **draft bills** created from your bill templates wait for you (one row per property). Information only. | You confirm or delete the drafts. | Opens **Bills** of that property, filtered to **Drafts**. |
 | **Verify meter …** | A meter in use has its verification due within 60 days, or it is overdue. | The verification date of the meter is moved forward. | Opens the meter. |
@@ -185,7 +198,7 @@ Open a property → card **Meters** → **Add meter**.
 - **Installation and verification:** installed on, last verified, verification interval (water meters usually 72
   months) → the app shows "Next verification" and warns when it is overdue.
 - **Contracts:** switch on every contract that uses this meter. A hot water meter is usually linked to both the
-  water and the heating contract. Each linked contract shows the dates of the link (*from 01.05.2004*, and *to …* if it
+  water and the heating contract (this hint is shown for hot water meters only). Each linked contract shows the dates of the link (*from 01.05.2004*, and *to …* if it
   ended). **The link decides which readings belong to the contract:** charges and reports (consumption by contract, unit
   cost, calculated vs billed) count a meter's readings only inside the link. A new link therefore starts on the later of the
   meter's *installed on* date and the contract's *Valid from* — not today — so the whole history of an old meter is counted.
@@ -319,16 +332,21 @@ this month (for example the window is 25–28 October: from 25 October the scree
 **previous** month. The top of the screen shows the total of all contracts: net, VAT and total, and says
 *Incomplete* when some amount could not be calculated.
 
-**One card per contract** that is active in the month, with its category colour, supplier, status (*Complete*,
-*Incomplete*, *From the bill*, *No tariff*) and the month's total. Tap the header to expand it (on a phone the cards
-start collapsed, on a wide window expanded). A contract without a tariff shows *No tariff — add it in the contract*
-with a link to the contract.
+**One card per contract** that is active in the month, with its category colour, supplier, status (*✓ Calculated*,
+*⚠ Incomplete*, *From the bill*, *No tariff*) and the month's total. The total is shown only when it was really
+calculated: **—** when nothing could be calculated for the contract (never *0,00 €*, which would look like a real zero) and
+**≈ 12,10 €** when only a part could be — the sum of the lines that were calculated. Tap the header to expand it (on a
+phone the cards start collapsed, on a wide window expanded). A contract without a tariff shows *No tariff — add it in the
+contract* with a link to the contract.
 
 **Reading a line.** Each line shows the component, the quantity with its unit (*5,500 m³*, *52,30 m²*,
 *2 residents*, *1 month*; for a quantity from the bill *0,210 MWh (from bill 10.2026)* or *quantity from the bill* while it
-is missing), the unit price (*× 1,41 € excl. VAT* or *incl. VAT*, as the supplier quotes it), the net
-amount, the VAT percent and amount, and the line total. A stepped price shows one line per step. A line *Amount from
-the supplier's bill* has no amounts.
+is missing), the unit price (*× 1,41 € excl. VAT* or *incl. VAT*, as the supplier quotes it), the line total on
+the right and under it, once, how it is made up: *excl. VAT 10,00 € + VAT 21 % 2,10 €* (with VAT calculated on the
+total, only *excl. VAT 10,00 €* — the VAT is then given once per percent under the lines). A line that could not be
+calculated shows **—** and the reason in amber (*no price*, *no readings*, *no parameter value*, *no meter linked*…).
+A stepped price shows one line per step. A line *Amount from the supplier's bill* has no amounts. At the end of a fully
+calculated card the totals have labels: *Net · VAT · Total*.
 
 **The readings behind a quantity.** Tap a metered line to see, per meter register, the start reading and the end
 reading with their dates and the consumption. If the meter was replaced in the month, both meters are shown:
@@ -340,12 +358,15 @@ estimated reading, a reading taken outside the reading window, and unusually hig
 
 | Warning | What it means | How to fix |
 |---|---|---|
-| *No price valid on … for «…»* | The component has no price for that date. | **Open tariff**, add a price with a *Valid from* date on or before it. |
+| *The tariff has no price for the service «…» on …* | The component has no price for that date. | **Open tariff**, add a price with a *Valid from* date on or before it. |
+| *No readings for October 2026 — the last one is from 15.03.2023* | The meter has no reading in the month (the price is looked up on the date of the last reading, so a missing price can be only a consequence). | **Open readings**, enter the reading. |
 | *«…» has no value on …* | The area or residents used by the line are not entered for that date. | **Open property**, add the parameter value. |
-| *Readings missing for …* | The meter has no usable start or end reading. | **Open readings**, enter the missing reading. |
+| *Readings missing for …* | The meter has no usable start or end reading, although it has readings in the month. | **Open readings**, enter the missing reading. |
 | *No meter is linked for «…»* | The line counts meter consumption, but no meter of the contract fits. | **Open contract**, link a meter. |
 | VAT code unknown, currency differs, stepped price on a net export line | The tariff itself is wrong. | **Open tariff** or *Settings → VAT rates*. |
-| *Enter the quantity of «…» from the supplier's bill* | A *Quantity from the bill* line has no quantity yet. | Enter the bill of the month (**Enter bill**) and type the quantity in the card *Quantities from the bill*. |
+
+Several findings of the same tariff show one **Open tariff** button, not one per line.
+| *Enter the quantity of «…» from the supplier's bill* | A *Quantity from the bill* line has no quantity yet. | Enter the bill of the month (**New bill**) and type the quantity in the card *Quantities from the bill*. |
 | *«…»: the amount on the bill does not match quantity × price — the price may have changed.* | The *Amount on the bill (excl. VAT)* typed for a *Quantity from the bill* line is not what the quantity and the tariff price give (more than rounding of the printed quantity explains). | Check the amount and the quantity in the bill, and the price in the tariff; if the supplier changed the price, add the new price with its *Valid from* date. The line still uses the amount from the bill. |
 | *The contract is not active in this month* | The contract ended or has not started yet. | Check the contract's dates. |
 
@@ -353,7 +374,7 @@ In the contract editor the tariff card has a **Show charges** button that opens 
 property, scrolled to that contract.
 
 **The bill of the month.** Under the header of each card you see either the bill — *Bill: 46,02 € · +0,92 € · Paid ✓*
-(the total, the difference to the calculation, the status); tap it to open the bill — or the button **Enter bill**. It
+(the total, the difference to the calculation, the status); tap it to open the bill — or the button **New bill**. It
 opens a new bill with the contract and the month already chosen, and the calculated total shown in the empty *Total*
 field as a hint (you still type the real amount from the supplier's bill).
 
@@ -385,12 +406,12 @@ the list shows only the bills of that category, that property and that month.
 
 | Badge | Meaning |
 |---|---|
-| *Unpaid* (grey) | Nothing paid yet. |
-| *Partially paid · open 26,02 €* (yellow) | Part of the total is paid. |
-| *Overdue* (red) | Something is open and the due date has passed. |
+| *Unpaid* (normal text) | Nothing paid yet — this is the state that needs action, so it is not dimmed. |
+| *⚠ Partially paid · open 26,02 €* (amber) | Part of the total is paid. |
+| *⚠ Overdue* (red) | Something is open and the due date has passed. |
 | *Paid ✓* (green) | Everything is paid. |
 | *Prepaid ✓* (green) | Paid, and the month of the bill has not started yet (internet paid in October for November). |
-| *Draft* (muted row) | Created from a [bill template](#bill-templates-and-drafts) and not confirmed yet. It has a **Confirm** button instead of **Paid**, and it counts nowhere (not in the totals, balances, reports or the Overview) until you confirm it. *Draft · enter the amount* means the template has no amount. |
+| *Draft* (muted row) | Created from a [bill template](#bill-templates-and-drafts) and not confirmed yet. It has a **Confirm** button instead of **Mark as paid**, and it counts nowhere (not in the totals, balances, reports or the Overview) until you confirm it. *Draft · enter the amount* means the template has no amount. |
 
 **Which month does a bill belong to?** To the month of the **service**, not to the month it was issued: readings of
 25–28 October, bill arrives in November → the bill is for **October**. Services paid **in advance** (internet, TV; set
@@ -440,7 +461,7 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
 6. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*).
 7. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
-8. **Payment** — the status, how much is paid and open, and the payments of this bill. **Paid** records the open amount
+8. **Payment** — the status, how much is paid and open, and the payments of this bill. **Mark as paid** records the open amount
    at once; **Add payment** opens the [payment editor](#12-payments) for this bill (tap a payment to open it);
    **Use prepayment** appears when the contract has money that pays no bill yet.
 9. **Comment.**
@@ -451,17 +472,17 @@ with a **Confirm** button; **Save** keeps it a draft, **Confirm** saves it as a 
 *Payment* card.
 
 Saving keeps you in the editor. Deleting a bill asks first; the money you paid for it stays on the contract as
-prepayment (a payment made with the **Paid** button for this bill alone is removed together with the bill).
+prepayment (a payment made with **Mark as paid** for this bill alone is removed together with the bill).
 
 ### Paid, Undo and Remove payment
 
-The **Paid** button (on a row of the list and in the *Payment* card) records that you paid the bill: one bank
+The **Mark as paid** button (on a row of the list and in the *Payment* card; the hint under it appears together with the button) records that you paid the bill: one bank
 transfer for the **open amount**, dated **today**, with the payment purpose of the contract as its reference. The bill turns
 *Paid ✓* and a bar appears for a few seconds: **Bill marked as paid · Undo**. A wrong tap costs nothing — **Undo**
 removes that payment again.
 
 Later, in the *Payment* card of the bill, **Remove payment** takes a payment away (the dialog shows the amount and the
-date). A payment made with the **Paid** button for this bill alone is hidden completely; a payment that also covers other
+date). A payment made with **Mark as paid** for this bill alone is hidden completely; a payment that also covers other
 bills only loses this bill's share, and *the rest stays on the contract as prepayment*. Nothing is ever erased — the
 history is kept. Payments for another date or amount, or for several bills, are entered on the [Payments](#12-payments)
 screen.
@@ -505,11 +526,11 @@ empty values for the custom fields, and the issue and due dates from the schedul
 **Confirming.** Drafts are listed on **Bills** (muted, badge *Draft*; filter *Status → Drafts*) and on **Overview** (*Draft bills to
 confirm: N*, one row per property). **Confirm** on a row makes it a normal bill at once; if the amount is missing, the bill opens
 instead so you can type it. In the editor use **Confirm** after you have checked the draft. A confirmed bill behaves like any other:
-**Paid**, balances, reports.
+**Mark as paid**, balances, reports.
 
 **What drafts do not affect.** Until you confirm them, drafts are not counted in the *Billed / Paid / Open* totals, bill status
 and *Overdue*, contract balances, payment allocation, the Charges comparison, the reports or the *Money* and *This year* cards of the
-Overview, and **Paid** is not offered.
+Overview, and **Mark as paid** is not offered.
 
 **Once templates.** A template with *Once (by hand)* never creates drafts. Use it for something you buy now and then, for example
 *Water meter replacement*: **Bills → New bill → From template…**, pick it, and you get a normal bill (not a draft) filled in for the month
@@ -524,7 +545,7 @@ same from that bill. Both open the template editor: check it and **Save**.
 Menu **Payments**: the money you actually paid (or got back). The *bill* says what the supplier asked for, the *payment*
 says what left your account, and the **allocation** says which bill the money settles. There are two ways to record it:
 
-- **The Paid button** on a bill — one tap records a bank transfer for the open amount, dated today
+- **The Mark as paid button** on a bill — one tap records a bank transfer for the open amount, dated today
   (see [Bills](#11-bills)). It is enough for the usual case: one bill, one payment.
 - **A real payment** on this screen (or **Add payment** in a bill) — for another date or amount, one transfer that pays
   several bills, money paid before the bill arrived, a partial payment or a refund.
@@ -537,7 +558,7 @@ the chosen period. Below them the totals of the list: *Paid · of it unallocated
 shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for
 example *Water 09.2026, Water 10.2026 +1* (two bills are named, then *+N*). A yellow badge **Prepayment 12,30 €** means that
 part of the payment pays no bill; a refund is shown in green as *−12,00 € refund*; the small word *quick* marks a
-payment made with the **Paid** button. **New payment** (＋ on a phone) starts a new one.
+payment made with **Mark as paid** (marked *quick payment*). **New payment** (＋ on a phone) starts a new one.
 
 ### Entering a payment
 
@@ -588,8 +609,8 @@ payments (tap one to open it), **All payments** (this screen filtered to the con
 
 ### Changing and deleting
 
-Tap a payment to change its date, amount, method or bills. A payment made with the **Paid** button is an ordinary payment
-here; if you turn it into a partial payment or add other bills, it stops being a "Paid button" payment. **Delete** hides the
+Tap a payment to change its date, amount, method or bills. A payment made with **Mark as paid** is an ordinary payment
+here; if you turn it into a partial payment or add other bills, it stops being a "quick payment". **Delete** hides the
 payment — *the bills it paid become unpaid again* — and the history is kept.
 
 ## 13. Equalized payments
@@ -642,7 +663,7 @@ bill per installment, titled for example *Property tax 2026, installment 2 of 4*
 and its service period is the whole year, so reports can spread the tax over the year.
 
 The card lists every year with the yearly total, the installments (due date, amount, status: *Unpaid*, *Overdue*, *Paid ✓*…),
-how much is paid and what remains. Tap an installment to open its bill; pay it with **Paid** or in the payment editor like
+how much is paid and what remains. Tap an installment to open its bill; pay it with **Mark as paid** or in the payment editor like
 any other bill ([Payments](#12-payments)).
 
 **Paying the whole year at once.** **Pay whole year** opens the payment editor with all unpaid installments of that year
@@ -783,7 +804,8 @@ year** (the chart says so), which keeps long periods fast and readable.
 
 A number with **≈** rests on incomplete data and is shown in a muted colour: a reading is missing or is only an
 estimate, an amount was calculated because there is no bill yet, or a bill was spread over several months. Check the
-readings and bills behind it when it matters.
+readings and bills behind it when it matters. The short explanation below the table appears only when the table really has a
+**≈** value.
 
 ### Export to Excel and CSV
 
@@ -1068,7 +1090,9 @@ status line as *conflicts* and listed in **Details**.
   you update this one; your data is not touched.
 - On the **Overview** a short note appears if the sync has not worked for more than a day.
 
-**Details** lists what was sent and received last and any conflicts. **Disconnect** also switches sync off on this device and forgets that
+**Details** (collapsed until you tap it) lists, in short lines, what was sent and received last and any conflicts — for example
+*14:52 Received changes (records: 2).* File names and technical identifiers are not shown there, only in the error log (Settings →
+Error log). The button **Disconnect Google account…** (after a confirmation) also switches sync off on this device and forgets that
 it joined; your data stays on the device and in the cloud folder, and switching sync on again later is a first join.
 
 #### Messages
