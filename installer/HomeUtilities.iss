@@ -22,6 +22,8 @@ VersionInfoVersion={#AppVersion}.0
 DefaultDirName={localappdata}\Programs\HomeUtilities
 DefaultGroupName=HomeUtilities
 DisableProgramGroupPage=yes
+; Fixed per-user folder: [InstallDelete] empties {app}, so the user must not be able to point it at a folder with other files.
+DisableDirPage=yes
 ; Per-user install, no administrator rights.
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
