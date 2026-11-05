@@ -156,9 +156,9 @@
                             <Button Text="{Binding AddRuleChangeText}" Command="{Binding AddRuleChangeCommand}"
                                     Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
 
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <Label Grid.Column="0" Text="{Binding DateIsPaymentDateLabel}" VerticalOptions="Center" />
-                                <Switch Grid.Column="1" IsToggled="{Binding DateIsPaymentDate}" />
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Switch IsToggled="{Binding DateIsPaymentDate}" />
+                                <Label Grid.Column="1" Text="{Binding DateIsPaymentDateLabel}" VerticalOptions="Center" />
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
@@ -202,9 +202,9 @@
                     <Border Style="{StaticResource SectionCard}">
                         <VerticalStackLayout Spacing="8">
                             <Label Text="{Binding ReadingsHeader}" Style="{StaticResource SectionHeader}" />
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <Label Grid.Column="0" Text="{Binding DetectReplacementsLabel}" VerticalOptions="Center" />
-                                <Switch Grid.Column="1" IsToggled="{Binding DetectReplacements}" />
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Switch IsToggled="{Binding DetectReplacements}" />
+                                <Label Grid.Column="1" Text="{Binding DetectReplacementsLabel}" VerticalOptions="Center" />
                             </Grid>
                             <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding RegisterMappings}">
                                 <BindableLayout.ItemTemplate>

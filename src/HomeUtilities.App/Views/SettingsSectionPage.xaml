@@ -46,26 +46,26 @@
                         <Button Text="{Binding OpenNotificationSettingsText}" Command="{Binding OpenNotificationSettingsCommand}"
                                 Style="{StaticResource SecondaryButton}" />
                     </VerticalStackLayout>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                        <Switch IsToggled="{Binding IsEnabled}" />
-                        <Label Grid.Column="1" Text="{Binding EnabledLabel}" VerticalOptions="Center" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <Label Text="{Binding EnabledLabel}" VerticalOptions="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding IsEnabled}" VerticalOptions="Center" />
                     </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowDetails}">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding ReadingsOn}" />
-                            <Label Grid.Column="1" Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="{Binding ReadingsLabel}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding ReadingsOn}" VerticalOptions="Center" />
                         </Grid>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding BillsOn}" />
-                            <Label Grid.Column="1" Text="{Binding BillsLabel}" VerticalOptions="Center" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="{Binding BillsLabel}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding BillsOn}" VerticalOptions="Center" />
                         </Grid>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding VerificationOn}" />
-                            <Label Grid.Column="1" Text="{Binding VerificationLabel}" VerticalOptions="Center" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="{Binding VerificationLabel}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding VerificationOn}" VerticalOptions="Center" />
                         </Grid>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Switch IsToggled="{Binding DraftsOn}" />
-                            <Label Grid.Column="1" Text="{Binding DraftsLabel}" VerticalOptions="Center" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="{Binding DraftsLabel}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding DraftsOn}" VerticalOptions="Center" />
                         </Grid>
                         <Label Text="{Binding TimeLabel}" Style="{StaticResource MutedLabel}" />
                         <TimePicker Time="{Binding Time}" Format="HH:mm" HorizontalOptions="Start" />
@@ -117,9 +117,9 @@
                         <VerticalStackLayout Spacing="8">
                             <Label Text="{Binding AutoBackupHeader}" Style="{StaticResource SectionHeader}" />
                             <Label Text="{Binding AutoBackupHint}" Style="{StaticResource MutedLabel}" />
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                                <Switch IsToggled="{Binding AutoBackupEnabled}" />
-                                <Label Grid.Column="1" Text="{Binding AutoBackupEnabledLabel}" VerticalOptions="Center" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding AutoBackupEnabledLabel}" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding AutoBackupEnabled}" VerticalOptions="Center" />
                             </Grid>
                             <Label Text="{Binding AutoIntervalLabel}" Style="{StaticResource MutedLabel}" />
                             <Border Padding="12,10" StrokeShape="RoundRectangle 8"

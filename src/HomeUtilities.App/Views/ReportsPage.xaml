@@ -72,9 +72,9 @@
                                     SelectedIndex="{Binding RowModeIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
 
-                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowYearOverYear}">
-                            <Label Grid.Column="0" Text="{Binding YearOverYearText}" VerticalOptions="Center" />
-                            <Switch Grid.Column="1" IsToggled="{Binding YearOverYear}" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding ShowYearOverYear}">
+                            <Switch IsToggled="{Binding YearOverYear}" />
+                            <Label Grid.Column="1" Text="{Binding YearOverYearText}" VerticalOptions="Center" />
                         </Grid>
 
                     </views:AdaptiveFieldGrid>
