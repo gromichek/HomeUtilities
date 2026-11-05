@@ -102,6 +102,11 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     protected override int TotalCount => _payments.Count;
 
+    protected override bool LoadingHintApplies => !IsLoaded;
+
+    /// <summary>"Loading…" shown in place of the list while the first load takes longer than 300 ms (R-52).</summary>
+    public string LoadingText => _localizer["Loading"];
+
     public override async Task ReloadAsync(CancellationToken ct = default)
     {
         var (payments, properties, contracts, bills) = await OffUiAsync(

@@ -190,6 +190,11 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     /// <summary>The remembered property filter; null = all properties.</summary>
     public Guid? PropertyFilterId => _propertyFilter;
 
+    protected override bool LoadingHintApplies => !IsLoaded;
+
+    /// <summary>"Loading…" shown in place of the content while the first load takes longer than 300 ms (R-52).</summary>
+    public string LoadingText => _localizer["Loading"];
+
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
         await InitializeDatabaseAsync();

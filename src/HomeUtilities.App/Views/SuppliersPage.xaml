@@ -21,9 +21,13 @@
                    IsVisible="{Binding HasItems}" />
 
         <CollectionView x:Name="ItemList" Grid.Row="2" ItemsSource="{Binding Items}" views:ListColumns.MinItemWidth="360" IsVisible="{Binding HasItems}">
+            <!-- 88 dp of space at the end, so the last card can be scrolled clear of the floating button (R-19). -->
+            <CollectionView.Footer>
+                <BoxView HeightRequest="88" Color="Transparent" />
+            </CollectionView.Footer>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SupplierItemViewModel">
-                    <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                    <Border Style="{StaticResource ListCard}" Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Margin="0,4" StrokeShape="RoundRectangle 8">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" x:DataType="vm:SupplierItemViewModel" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />

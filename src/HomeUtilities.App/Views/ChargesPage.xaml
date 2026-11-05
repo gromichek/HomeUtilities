@@ -35,14 +35,14 @@
 
                     <Label Text="{Binding MonthLabel}" Style="{StaticResource MutedLabel}" />
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
                                 Command="{Binding PreviousMonthCommand}"
                                 ToolTipProperties.Text="{Binding PreviousMonthText}"
                                 SemanticProperties.Description="{Binding PreviousMonthText}" />
                         <!-- Tap to pick a month and year; only the month and year of the chosen date count. -->
                         <DatePicker x:Name="MonthPicker" Grid.Column="1" Format="MMMM yyyy" HorizontalOptions="Center"
                                     Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
-                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24"
                                 Command="{Binding NextMonthCommand}"
                                 ToolTipProperties.Text="{Binding NextMonthText}"
                                 SemanticProperties.Description="{Binding NextMonthText}" />

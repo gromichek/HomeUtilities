@@ -135,6 +135,11 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
     protected override int TotalCount => _bills.Count;
 
+    protected override bool LoadingHintApplies => !IsLoaded;
+
+    /// <summary>"Loading…" shown in place of the list while the first load takes longer than 300 ms (R-52).</summary>
+    public string LoadingText => _localizer["Loading"];
+
     public override async Task ReloadAsync(CancellationToken ct = default)
     {
         var today = _clock.Today;

@@ -230,6 +230,11 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
     });
 
+    protected override bool LoadingHintApplies => !IsLoaded;
+
+    /// <summary>"Loading…" shown in place of the content while the first load takes longer than 300 ms (R-52).</summary>
+    public string LoadingText => _localizer["Loading"];
+
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
         if (_reloadGate is { IsFresh: true } && IsLoaded)

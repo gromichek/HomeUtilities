@@ -98,6 +98,9 @@ public sealed partial class BillItemViewModel : ObservableObject, ISelectableLis
 
     public bool IsBadgeOverdue => Badge == BillBadgeKind.Overdue;
 
+    /// <summary>Overdue and partially paid bills carry a warning icon next to the status text (status is never colour alone).</summary>
+    public bool ShowBadgeIcon => IsBadgePartial || IsBadgeOverdue;
+
     /// <summary>"+2,15 € (+3,4 %)", empty when the bill has no calculation to compare with.</summary>
     public string DifferenceText { get; } = string.Empty;
 
