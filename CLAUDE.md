@@ -67,16 +67,20 @@ and by the owner (Sergej) who tests the app manually. You implement **exactly on
   there is no Google-supported open alternative for Drive access on Android. Nothing else from Play services.
 
 ## UI checklist (every task that changes a screen) — copy it into the PR and tick it
-Collected from the owner's device tests (T-028a…T-028h). The owner does not run a full UI pass after every task, so these
+Collected from the owner's device tests (T-028a…T-028h) and the UI review 2026-11-05 (UI_GUIDELINES revision 1). The owner does not run a full UI pass after every task, so these
 are checked by you, in the XAML and the layout code:
-- [ ] **One content pane**: lists fill the content area (1–3 columns via `ListColumns`), editors are pages with ✓ Save at
-      the top, Back cancels, Delete in the ⋮ menu or a red button at the end of the form (UI_GUIDELINES §3).
+- [ ] **One content pane**: catalog lists 1–3 columns via `ListColumns`, date lists (Bills, Payments) one column; editors
+      are pages with ✓ Save at the top, Back cancels, Delete only as a red button at the end of the form (UI_GUIDELINES §3).
 - [ ] **No cut texts** — every label, switch/check box text, button text and card line wraps; checked in **Russian** at
       **360 dp width** and in **landscape** (phone ~900 × 400 dp). Switch rows are `Grid Auto,*` with a wrapping label.
 - [ ] **Buttons**: one primary per screen; buttons that do not fit in a row are **stacked with equal (full) width**;
       no side-by-side buttons on compact width unless both texts surely fit; never `FlexLayout`.
 - [ ] Buttons/notes that are direct children of a two-column editor grid have `views:AdaptiveFieldGrid.FullRow="True"`.
-- [ ] Choices use drop-downs/choice dialogs (UI_GUIDELINES §3a), not rows of toggle buttons.
+- [ ] Choices use the choice field + choice dialog returning the **Id** (UI_GUIDELINES §3a), never a match by display
+      text; no rows of toggle buttons.
+- [ ] **Touch targets ≥ 48 dp** on Android; icons from the Material font only (§1); toolbar icons readable in both themes.
+- [ ] Visible numbers/dates formatted in the ViewModel with the app culture (§9): no `DatePicker.Format` text, `—` for
+      "not calculated", never `0,00`; empty / loading states per §5.2 and §10.
 - [ ] **Loading** runs off the UI thread with cancellation on leaving (`RunLoadAsync`/`BeginLoad`), no `.Result`/`.Wait()`;
       lists updated in place (`ItemsSync`), never more than ~100 row views at once.
 - [ ] **Light and dark theme**: colours only via styles/`AppThemeBinding`, no hard-coded colours.
