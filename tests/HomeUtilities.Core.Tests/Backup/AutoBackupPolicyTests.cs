@@ -120,6 +120,7 @@ public class AutoBackupPolicyTests
     [InlineData(AutoBackupReason.BeforeRestore, "auto-20261102-143005-restore.zip")]
     [InlineData(AutoBackupReason.BeforeWipe, "auto-20261102-143005-wipe.zip")]
     [InlineData(AutoBackupReason.BeforeMigration, "auto-20261102-143005-migration.zip")]
+    [InlineData(AutoBackupReason.BeforeCleanUp, "auto-20261102-143005-cleanup.zip")]
     public void Names_RoundTripTimeAndReason(AutoBackupReason reason, string name)
     {
         var at = new DateTimeOffset(2026, 11, 2, 14, 30, 5, TimeSpan.Zero);

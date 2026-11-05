@@ -1641,4 +1641,24 @@
   <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Старый файл вложения удалён из облака.</value></data>
   <data name="SyncDisconnectButton" xml:space="preserve"><value>Отключить аккаунт Google…</value></data>
   <data name="BillBadgeDueSoon" xml:space="preserve"><value>Не оплачен · срок {0}</value></data>
+  <data name="AutoBackupReason_BeforeCleanUp" xml:space="preserve"><value>Перед очисткой базы данных</value></data>
+  <data name="CleanUpTitle" xml:space="preserve"><value>Очистка базы данных</value></data>
+  <data name="CleanUpHint" xml:space="preserve"><value>Окончательно удаляет записи, которые вы удалили, и файлы удалённых фото и документов, и уменьшает базу данных. Потом удалённые записи нельзя вернуть. Запускайте после ввода данных и время от времени.</value></data>
+  <data name="CleanUpButton" xml:space="preserve"><value>Очистить базу данных…</value></data>
+  <data name="CleanUpAction" xml:space="preserve"><value>Очистить</value></data>
+  <data name="CleanUpNothing" xml:space="preserve"><value>Очищать нечего: нет удалённых записей и неиспользуемых файлов.</value></data>
+  <data name="CleanUpConfirm" xml:space="preserve"><value>Удалённых записей: {0} · файлов удалённых фото и документов: {1} ({2}).
+
+После очистки удалённые записи нельзя вернуть, кроме как из резервной копии, которая будет сделана сейчас.</value></data>
+  <data name="CleanUpConfirmSync" xml:space="preserve"><value>Синхронизация включена: очищенные данные будут загружены как новые данные в облаке, а другие устройства попросят заменить свои данные.</value></data>
+  <data name="CleanUpRunning" xml:space="preserve"><value>Очищаю базу данных…</value></data>
+  <data name="CleanUpDone" xml:space="preserve"><value>Удалено: записей {0}, файлов {1} ({2}).
+Размер базы данных: {3} → {4}.</value></data>
+  <data name="CleanUpKept" xml:space="preserve"><value>В таблицах ({0}) остались удалённые записи, на которые ссылаются другие записи; они сохранены. Подробности — в журнале ошибок.</value></data>
+  <data name="CleanUpNotCompacted" xml:space="preserve"><value>Размер файла базы данных сейчас уменьшить не удалось: {0}</value></data>
+  <data name="CleanUpReplaceCloudQuestion" xml:space="preserve"><value>Очищенные данные этого устройства станут новыми данными в облаке. Другие устройства попросят заменить свои данные ими. Если выбрать «Не сейчас», синхронизация будет выключена, пока вы не решите в Настройки → Синхронизация.</value></data>
+  <data name="CleanUpReplaceCloudAction" xml:space="preserve"><value>Заменить облако</value></data>
+  <data name="CleanUpCloudReplaced" xml:space="preserve"><value>Теперь в облаке очищенные данные.</value></data>
+  <data name="CleanUpCloudFailed" xml:space="preserve"><value>Облако сейчас заменить не удалось ({0}). Синхронизация выключена; включите её в Настройки → Синхронизация и выберите «Заменить данные в облаке данными этого устройства».</value></data>
+  <data name="CleanUpSyncOff" xml:space="preserve"><value>Синхронизация выключена. Включите её в Настройки → Синхронизация и выберите «Заменить данные в облаке данными этого устройства».</value></data>
 </root>

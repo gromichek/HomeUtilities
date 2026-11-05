@@ -29,6 +29,16 @@ public class SyncEngineViewModelTests
             return Task.CompletedTask;
         }
 
+        public int MarkNeedsRejoinCalls { get; private set; }
+
+        public Task MarkNeedsRejoinAsync(CancellationToken ct = default)
+        {
+            MarkNeedsRejoinCalls++;
+            IsEnabled = false;
+            NeedsRejoin = true;
+            return Task.CompletedTask;
+        }
+
         public Task<CloudFilesReport> ListCloudFilesAsync(CancellationToken ct = default) => Task.FromResult(Report);
 
         public void Raise() => StatusChanged?.Invoke(this, EventArgs.Empty);
