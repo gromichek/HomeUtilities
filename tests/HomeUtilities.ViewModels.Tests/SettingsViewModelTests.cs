@@ -281,7 +281,7 @@ public class SettingsViewModelTests
     {
         // 2026.11.5 + build 446000 -> "SettingsVersionBuild 2026.11.5 446000 [en]" through the fake localizer.
         var language = new FakeLanguageService();
-        var vm = new SettingsViewModel(new FakeLocalizer(language), language, new FakeThemeService(), new FakeLayoutModeService(), new FakeAppInfo(false, "446000"), new FakeAppPaths(), new FakeNavigationService(), ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language));
+        var vm = new SettingsViewModel(new FakeLocalizer(language), language, new FakeThemeService(), new FakeLayoutModeService(), new FakeAppInfo(false, "446000"), new FakeAppPaths(), new FakeNavigationService(), ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language), CleanUpVm(language));
 
         Assert.Equal("SettingsVersionBuild 1.2.3|446000 [en]", vm.VersionText);
         Assert.Equal("SettingsVersionBuild 1.2.3|446000 [en]", Row(vm, SettingsSection.About).Value);
@@ -778,8 +778,11 @@ public class SettingsViewModelTests
         language = new FakeLanguageService();
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
-        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language));
+        return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language), CleanUpVm(language));
     }
+
+    private DatabaseCleanUpViewModel CleanUpVm(FakeLanguageService language) =>
+        new(new FakeDatabaseCleaner(), AutoBackup, Dialogs, new FakeLocalizer(language), Toast, ErrorLog);
 
     private sealed class FakeAppInfo(bool isDebug, string? build = null) : IAppInfo
     {

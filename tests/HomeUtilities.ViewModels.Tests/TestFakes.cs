@@ -1087,9 +1087,13 @@ internal sealed class FakeAutoBackupService : IAutoBackupService
         return Task.CompletedTask;
     }
 
+    /// <summary>Called when a copy is requested (lets a test record the order of events).</summary>
+    public Action<AutoBackupReason>? OnBackup { get; set; }
+
     public Task<bool> BackupBeforeAsync(AutoBackupReason reason, CancellationToken ct = default)
     {
         Backups.Add(reason);
+        OnBackup?.Invoke(reason);
         return Task.FromResult(BackupSucceeds);
     }
 }

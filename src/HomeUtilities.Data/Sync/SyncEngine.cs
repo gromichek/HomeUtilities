@@ -281,6 +281,29 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
         }
     }
 
+    /// <inheritdoc />
+    public async Task MarkNeedsRejoinAsync(CancellationToken ct = default)
+    {
+        await _gate.WaitAsync(ct);
+        try
+        {
+            if (_deviceId.Length == 0)
+            {
+                return;
+            }
+
+            await _state.SetAsync(SyncStateStore.EnabledKey, "0", ct);
+            await _state.SetAsync(SyncStateStore.NeedsRejoinKey, "1", ct);
+            IsEnabled = false;
+            NeedsRejoin = true;
+            SetStatus(SyncStatus.Off);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     private async Task<DateTimeOffset?> LastSyncAsync(CancellationToken ct) =>
         DateTimeOffset.TryParse(await _state.GetAsync(SyncStateStore.LastSyncKey, ct), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var at)
             ? at

@@ -1641,4 +1641,24 @@
   <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Removed an old attachment file from the cloud.</value></data>
   <data name="SyncDisconnectButton" xml:space="preserve"><value>Disconnect Google account…</value></data>
   <data name="BillBadgeDueSoon" xml:space="preserve"><value>Unpaid · due {0}</value></data>
+  <data name="AutoBackupReason_BeforeCleanUp" xml:space="preserve"><value>Before the database clean-up</value></data>
+  <data name="CleanUpTitle" xml:space="preserve"><value>Clean up the database</value></data>
+  <data name="CleanUpHint" xml:space="preserve"><value>Removes the records you deleted for good, together with the files of deleted photos and documents, and makes the database smaller. Deleted records cannot be brought back afterwards. Use it once after entering your data, and now and then.</value></data>
+  <data name="CleanUpButton" xml:space="preserve"><value>Clean up the database…</value></data>
+  <data name="CleanUpAction" xml:space="preserve"><value>Clean up</value></data>
+  <data name="CleanUpNothing" xml:space="preserve"><value>Nothing to clean up: there are no deleted records and no unused files.</value></data>
+  <data name="CleanUpConfirm" xml:space="preserve"><value>Deleted records: {0} · files of deleted photos and documents: {1} ({2}).
+
+Deleted records cannot be brought back afterwards, except from the backup copy that is made now.</value></data>
+  <data name="CleanUpConfirmSync" xml:space="preserve"><value>Sync is on: the cleaned data will be uploaded as the new cloud data, and your other devices will be asked to replace theirs.</value></data>
+  <data name="CleanUpRunning" xml:space="preserve"><value>Cleaning up the database…</value></data>
+  <data name="CleanUpDone" xml:space="preserve"><value>Removed: {0} records and {1} files ({2}).
+Database size: {3} → {4}.</value></data>
+  <data name="CleanUpKept" xml:space="preserve"><value>{0} table(s) still hold deleted records that other records refer to; they were kept. Details are in the error log.</value></data>
+  <data name="CleanUpNotCompacted" xml:space="preserve"><value>The database file could not be made smaller now: {0}</value></data>
+  <data name="CleanUpReplaceCloudQuestion" xml:space="preserve"><value>The cleaned data of this device becomes the new data in the cloud. Your other devices will be asked to replace their data with it. If you choose "Not now", sync is switched off until you decide in Settings → Sync.</value></data>
+  <data name="CleanUpReplaceCloudAction" xml:space="preserve"><value>Replace the cloud</value></data>
+  <data name="CleanUpCloudReplaced" xml:space="preserve"><value>The cloud now holds the cleaned data.</value></data>
+  <data name="CleanUpCloudFailed" xml:space="preserve"><value>The cloud could not be replaced now ({0}). Sync was switched off; switch it on in Settings → Sync and choose "Replace the data in the cloud with this device's data".</value></data>
+  <data name="CleanUpSyncOff" xml:space="preserve"><value>Sync was switched off. Switch it on in Settings → Sync and choose "Replace the data in the cloud with this device's data".</value></data>
 </root>

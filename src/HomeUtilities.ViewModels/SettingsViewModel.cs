@@ -195,10 +195,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         IAutoBackupService autoBackup,
         IDataExchangeService dataExchange,
         ReminderSettingsViewModel reminders,
-        SyncSettingsViewModel sync)
+        SyncSettingsViewModel sync,
+        DatabaseCleanUpViewModel cleanUp)
     {
         Reminders = reminders;
         Sync = sync;
+        CleanUp = cleanUp;
         _auto = autoBackup;
         _exchange = dataExchange;
         _backup = backup;
@@ -245,6 +247,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     /// <summary>The Sync section (Google account).</summary>
     public SyncSettingsViewModel Sync { get; }
+
+    /// <summary>The "Clean up the database…" card of the Backup section (T-037).</summary>
+    public DatabaseCleanUpViewModel CleanUp { get; }
 
     public string Version { get; }
 

@@ -275,6 +275,12 @@ public interface ISyncEngine
     /// <summary>Forgets that this device joined the cloud (Disconnect): switching on again is a first join.</summary>
     Task ForgetJoinAsync(CancellationToken ct = default);
 
+    /// <summary>
+    /// Switches sync off and marks the device as needing the re-join question, as after a restore (C9): used when the local data
+    /// was changed in a way the cloud must not merge back (database clean-up, T-037). Nothing happens if the device never joined.
+    /// </summary>
+    Task MarkNeedsRejoinAsync(CancellationToken ct = default);
+
     /// <summary>Lists the files in the cloud folder, grouped (C12). Throws <see cref="SyncException"/>.</summary>
     Task<CloudFilesReport> ListCloudFilesAsync(CancellationToken ct = default);
 

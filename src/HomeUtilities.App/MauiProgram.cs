@@ -99,6 +99,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IBackupService>(backup);
         builder.Services.AddSingleton<IAutoBackupStorage>(new AutoBackupStorage(backupOptions, backup, clock));
         builder.Services.AddSingleton<IDataExchangeService>(new DataExchangeService(backupOptions, clock, backup));
+        builder.Services.AddSingleton<IDatabaseCleaner>(new DatabaseCleaner(backupOptions));
         builder.Services.AddSingleton<IAutoBackupService, AutoBackupService>();
         builder.Services.AddSingleton<IFileSaveService, FileSaveService>();
         builder.Services.AddSingleton<IBackupFileService, BackupFileService>();
@@ -183,6 +184,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<SyncNotifier>();
         builder.Services.AddSingleton<SyncScheduler>();
         builder.Services.AddTransient<SyncSettingsViewModel>();
+        builder.Services.AddTransient<DatabaseCleanUpViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<HelpViewModel>();
         builder.Services.AddTransient<PropertiesViewModel>();

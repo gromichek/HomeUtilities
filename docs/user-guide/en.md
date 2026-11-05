@@ -831,7 +831,7 @@ and the value is updated. The **?** button in the toolbar opens this chapter; in
 | **Language** | The language of the app: [Language and theme](#language-and-theme). |
 | **Theme** | System / Light / Dark: [Language and theme](#language-and-theme). |
 | **Reminders** | [Reminders](#reminders): what, when, planned reminders, a test notification. |
-| **Backup** | [Backup](#backup): save a copy of all data, automatic copies, restore, export and import all data as JSON. |
+| **Backup** | [Backup](#backup): save a copy of all data, automatic copies, restore, export and import all data as JSON, clean up the database. |
 | **Sync** | [Sync](#sync): connect your Google account, switch the data sync on, *Sync now*. |
 | **Categories** | The categories of contracts and payments, see [Categories](#8-categories). |
 | **VAT rates** | The catalog of VAT percentages, see [VAT rates](#vat-rates). |
@@ -923,7 +923,7 @@ you how many components use it. A component can also skip the catalog and use it
 
 ### Backup
 
-**Settings → Backup** has three cards: the **backup file** you keep yourself (*Save backup…*, *Restore from backup…*), the **automatic copies** the app keeps on the device, and **all data as one JSON file**. The row in the list shows the date of the last backup you saved.
+**Settings → Backup** has four cards: the **backup file** you keep yourself (*Save backup…*, *Restore from backup…*), the **automatic copies** the app keeps on the device, **all data as one JSON file**, and *Clean up the database…* (see below). The row in the list shows the date of the last backup you saved.
 
 Everything you type (properties, suppliers, contracts, meters, readings) and all attachments and photos live only
 inside the app. If you uninstall the app, they are deleted with it. A backup is a single file
@@ -950,7 +950,7 @@ You do not have to remember to make backups: the app keeps copies of all your da
 - **When.** A little after the app starts (the first screen is already shown, nothing is delayed) the app makes a copy
   if the last automatic copy is older than the chosen interval (*Every day*, *Every 3 days*, *Every 7 days*) **and** you
   changed something since then. If you changed nothing, no copy is made. In addition, a copy is **always** made right
-  before something risky: an Excel import, a restore from a backup or from a JSON file, *Delete all data* (test builds) and
+  before something risky: an Excel import, a restore from a backup or from a JSON file, *Delete all data* (test builds), *Clean up the database…* and
   a database update after an app update. These copies are made even if automatic backups are switched off.
 - **How many.** The newest 3, 7 or 14 copies (your choice, default 7) are kept, and in addition the newest copy of each of the
   last three months, so you can go back some months. Older copies are deleted by the app. Backups you saved yourself with
@@ -965,7 +965,7 @@ You do not have to remember to make backups: the app keeps copies of all your da
 
 On the card: the switch *Make automatic backups*, the choices *How often* and *Number of copies to keep*, the line with the
 last automatic copy (date and size) and the list of copies. A copy shows its date, why it was made (*Automatic*, *Before an
-import*, *Before a restore*, *Before deleting all data*, *Before a database update*) and its size. **Restore** works like
+import*, *Before a restore*, *Before deleting all data*, *Before the database clean-up*, *Before a database update*) and its size. **Restore** works like
 *Restore from backup…*: the app asks for confirmation, first makes a copy of the current data (*Before a restore*),
 and after you close and reopen the app the data are as they were at the time of that copy. **Save copy…** puts the file where
 you want it.
@@ -997,6 +997,33 @@ device** on again, the app asks which side wins:
 - **Replace the data in the cloud with this device's data** — this device becomes the source: it uploads a fresh snapshot and removes the
   old change files and snapshots from the cloud. Use it to bring a backup back to **all** your devices. Your other devices ask on their
   next sync (see *Sync* below).
+
+#### Clean up the database
+
+When you delete something in the app (a payment, a reading, a photo), it disappears from every screen, but the record is only
+**marked as deleted** and stays in the database, and the file of a deleted photo or document stays on the device. This keeps *Undo*
+and the sync working, but over time the database collects records you will never see again.
+
+*Settings → Backup → Clean up the database…* removes them **for good**: the deleted records, the files of deleted photos and
+documents (and files that belong to no record at all), and then it makes the database file smaller. A good moment is **once after
+you have entered your data** (when you made and deleted some mistakes), and later now and then. Nothing you can see changes — lists,
+the Overview and the reports look exactly as before.
+
+- The dialog first shows what would go: *Deleted records: 37 · files of deleted photos and documents: 5 (2.3 MB)*. If there is
+  nothing to remove, you only get a short message.
+- Deleted records **cannot be brought back** afterwards, except from the backup copy. That is why the app makes an automatic copy
+  first (*Before the database clean-up*, see the list of copies on the same page). If that copy fails, the app asks whether to go on
+  without it.
+- When it is done, a message shows how many records and files were removed and the size of the database before → after.
+- If a deleted record is still used by a record you can see (this should not happen), it is **kept** and listed in *Settings → Error
+  log*; nothing visible is touched.
+
+**With sync on** the cleaned data becomes the new cloud data: after the clean-up the app asks *Replace the cloud* (the same as
+*Replace the data in the cloud with this device's data*, see above) and your other devices ask to replace theirs on their next sync.
+If you choose *Not now* (or the cloud cannot be reached), sync is switched off on this device until you decide in *Settings → Sync* —
+otherwise old changes from the cloud could bring the removed records back. The simplest way is to clean **before** switching sync on,
+on one device, and then bring the result to the other devices: either restore the backup there, or in *Settings → Sync* choose
+*Replace this device's data with the data from the cloud*.
 
 #### What Android's own backup does
 

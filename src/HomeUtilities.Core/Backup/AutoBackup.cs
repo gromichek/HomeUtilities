@@ -19,6 +19,9 @@ public enum AutoBackupReason
 
     /// <summary>Made at startup just before pending database migrations are applied.</summary>
     BeforeMigration,
+
+    /// <summary>Made just before "Clean up the database" removes the deleted records for good.</summary>
+    BeforeCleanUp,
 }
 
 /// <summary>One automatic backup copy on this device.</summary>
@@ -106,6 +109,7 @@ public static class AutoBackupNames
         AutoBackupReason.BeforeImport => "-import",
         AutoBackupReason.BeforeRestore => "-restore",
         AutoBackupReason.BeforeWipe => "-wipe",
+        AutoBackupReason.BeforeCleanUp => "-cleanup",
         _ => "-migration",
     };
 }

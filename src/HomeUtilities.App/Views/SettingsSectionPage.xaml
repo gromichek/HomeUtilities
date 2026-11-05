@@ -172,6 +172,16 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <!-- Hard-delete the records the user deleted, and the files of deleted attachments (T-037). -->
+                    <Border Style="{StaticResource SectionCard}" BindingContext="{Binding CleanUp}" x:DataType="vm:DatabaseCleanUpViewModel">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding Header}" Style="{StaticResource SectionHeader}" />
+                            <Label Text="{Binding Hint}" Style="{StaticResource MutedLabel}" />
+                            <Button Text="{Binding ButtonText}" Command="{Binding CleanUpCommand}"
+                                    Style="{StaticResource SecondaryButton}" />
+                        </VerticalStackLayout>
+                    </Border>
+
                     <!-- Everything as one readable file (JSON). -->
                     <Border Style="{StaticResource SectionCard}">
                         <VerticalStackLayout Spacing="8">
