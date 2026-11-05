@@ -6,13 +6,13 @@
        x:Class="HomeUtilities.App.AppShell"
        x:DataType="vm:ShellViewModel"
        FlyoutBehavior="Flyout"
-       FlyoutWidth="{Binding FlyoutWidth}"
-       Shell.BackgroundColor="{AppThemeBinding Light={StaticResource ToolbarLight}, Dark={StaticResource ToolbarDark}}"
-       Shell.ForegroundColor="{AppThemeBinding Light={StaticResource OnToolbarLight}, Dark={StaticResource OnToolbarDark}}"
-       Shell.TitleColor="{AppThemeBinding Light={StaticResource OnToolbarLight}, Dark={StaticResource OnToolbarDark}}">
+       FlyoutWidth="{Binding FlyoutWidth}">
 
-    <!-- R-01 / UI_GUIDELINES §8: the toolbar is accent blue in the light theme and dark in the dark theme (C-17); its icons
-         (☰ ← ✓ ?) use the OnToolbar colour, readable in both themes. The status bar is set in code-behind. -->
+    <!-- R-01 / UI_GUIDELINES §8: on Android the toolbar is accent blue in the light theme and dark in the dark theme (C-17);
+         its icons (☰ ← ✓ ?) use the OnToolbar colour. The toolbar colours are set in code-behind for Android only: on
+         Windows Shell.ForegroundColor also colours the Back and ☰ buttons, which stand outside the toolbar on the light
+         window background (MAUI MauiToolbar.UpdateIconColor) — white on white. Windows keeps its default toolbar. -->
+
 
     <Shell.Triggers>
         <DataTrigger TargetType="Shell" x:DataType="vm:ShellViewModel" Binding="{Binding IsFlyoutLocked}" Value="True">
