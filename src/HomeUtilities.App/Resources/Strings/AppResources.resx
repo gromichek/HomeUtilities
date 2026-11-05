@@ -55,7 +55,7 @@
   <data name="Enum_PropertyParameterKind_CadastralValueBuilding" xml:space="preserve"><value>Cadastral value, building</value></data>
   <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Cadastral value, land</value></data>
   <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Custom</value></data>
-  <data name="PropertiesEmpty" xml:space="preserve"><value>No properties yet. Add your first one.</value></data>
+  <data name="PropertiesEmpty" xml:space="preserve"><value>No properties yet. Tap ＋ to add one.</value></data>
   <data name="PropertyAdd" xml:space="preserve"><value>New property</value></data>
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>Archived</value></data>
@@ -68,7 +68,7 @@
   <data name="PropertyNotes" xml:space="preserve"><value>Notes</value></data>
   <data name="PropertyArchived" xml:space="preserve"><value>Archived (hidden from the list)</value></data>
   <data name="ParametersHeader" xml:space="preserve"><value>Parameters</value></data>
-  <data name="ParametersEmpty" xml:space="preserve"><value>No parameters yet.</value></data>
+  <data name="ParametersEmpty" xml:space="preserve"><value>No parameters yet. Tap ＋ to add one.</value></data>
   <data name="ParameterAdd" xml:space="preserve"><value>Add parameter</value></data>
   <data name="ParameterKind" xml:space="preserve"><value>Parameter</value></data>
   <data name="ParameterName" xml:space="preserve"><value>Name</value></data>
@@ -95,7 +95,7 @@
   <data name="ParameterHistory" xml:space="preserve"><value>History ({0})</value></data>
   <data name="SectionSuppliers" xml:space="preserve"><value>Suppliers</value></data>
   <data name="SectionCategories" xml:space="preserve"><value>Categories</value></data>
-  <data name="SuppliersEmpty" xml:space="preserve"><value>No suppliers yet.</value></data>
+  <data name="SuppliersEmpty" xml:space="preserve"><value>No suppliers yet. Tap ＋ to add one.</value></data>
   <data name="SupplierAdd" xml:space="preserve"><value>New supplier</value></data>
   <data name="SuppliersSearch" xml:space="preserve"><value>Search by name</value></data>
   <data name="SupplierLinksCount" xml:space="preserve"><value>Links: {0}</value></data>
@@ -109,7 +109,7 @@
   <data name="SupplierNotes" xml:space="preserve"><value>Notes</value></data>
   <data name="SupplierDelete" xml:space="preserve"><value>Delete supplier</value></data>
   <data name="LinksHeader" xml:space="preserve"><value>Links</value></data>
-  <data name="LinksEmpty" xml:space="preserve"><value>No links yet.</value></data>
+  <data name="LinksEmpty" xml:space="preserve"><value>No links yet. Tap ＋ to add one.</value></data>
   <data name="LinkAdd" xml:space="preserve"><value>Add link</value></data>
   <data name="LinkNew" xml:space="preserve"><value>New link</value></data>
   <data name="LinkEdit" xml:space="preserve"><value>Edit link</value></data>
@@ -172,7 +172,7 @@
   <data name="Error_category_name_required" xml:space="preserve"><value>Enter a name.</value></data>
   <data name="Error_category_name_too_long" xml:space="preserve"><value>The name is longer than {0} characters.</value></data>
   <data name="Error_category_color_invalid" xml:space="preserve"><value>Enter a colour as #RRGGBB, e.g. #1E88E5.</value></data>
-  <data name="CategoriesEmpty" xml:space="preserve"><value>No categories.</value></data>
+  <data name="CategoriesEmpty" xml:space="preserve"><value>No categories yet. Tap ＋ to add one.</value></data>
   <data name="CategoryAdd" xml:space="preserve"><value>New category</value></data>
   <data name="CategoriesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="CategoryBuiltInBadge" xml:space="preserve"><value>Built-in</value></data>
@@ -187,7 +187,7 @@
   <data name="CategoryArchived" xml:space="preserve"><value>Archived (hidden from pickers)</value></data>
   <data name="CategoryDelete" xml:space="preserve"><value>Delete category</value></data>
   <data name="ContractsHeader" xml:space="preserve"><value>Contracts</value></data>
-  <data name="ContractsEmpty" xml:space="preserve"><value>No contracts yet.</value></data>
+  <data name="ContractsEmpty" xml:space="preserve"><value>No contracts yet. Tap ＋ to add one.</value></data>
   <data name="ContractsSaveFirst" xml:space="preserve"><value>Save the property first</value></data>
   <data name="ContractAdd" xml:space="preserve"><value>Add contract</value></data>
   <data name="ContractsShowEnded" xml:space="preserve"><value>Show ended/archived</value></data>
@@ -232,7 +232,7 @@
   <data name="LinkFromSupplier" xml:space="preserve"><value>from supplier</value></data>
   <data name="CustomFieldsHeader" xml:space="preserve"><value>Custom fields</value></data>
   <data name="CustomFieldsHint" xml:space="preserve"><value>These fields appear when you enter a bill.</value></data>
-  <data name="CustomFieldsEmpty" xml:space="preserve"><value>No custom fields.</value></data>
+  <data name="CustomFieldsEmpty" xml:space="preserve"><value>No custom fields yet. Tap ＋ to add one.</value></data>
   <data name="CustomFieldAdd" xml:space="preserve"><value>Add field</value></data>
   <data name="CustomFieldNew" xml:space="preserve"><value>New field</value></data>
   <data name="CustomFieldEdit" xml:space="preserve"><value>Edit field</value></data>
@@ -285,7 +285,7 @@
   <data name="Enum_EnergyDirection_Import" xml:space="preserve"><value>Consumption</value></data>
   <data name="Enum_EnergyDirection_Export" xml:space="preserve"><value>Fed into grid</value></data>
   <data name="MetersHeader" xml:space="preserve"><value>Meters</value></data>
-  <data name="MetersEmpty" xml:space="preserve"><value>No meters yet.</value></data>
+  <data name="MetersEmpty" xml:space="preserve"><value>No meters yet. Tap ＋ to add one.</value></data>
   <data name="MeterAdd" xml:space="preserve"><value>Add meter</value></data>
   <data name="MetersShowRemoved" xml:space="preserve"><value>Show removed</value></data>
   <data name="MeterRemoved" xml:space="preserve"><value>Removed {0:d}</value></data>
@@ -599,7 +599,7 @@
   <data name="Error_tariff_quantity_parameter_not_allowed" xml:space="preserve"><value>This basis does not use a property parameter.</value></data>
   <data name="Error_tariff_quantity_parameter_name_required" xml:space="preserve"><value>Enter the name of the parameter.</value></data>
   <data name="SectionVatRates" xml:space="preserve"><value>VAT rates</value></data>
-  <data name="VatRatesEmpty" xml:space="preserve"><value>No VAT rates.</value></data>
+  <data name="VatRatesEmpty" xml:space="preserve"><value>No VAT rates yet. Tap ＋ to add one.</value></data>
   <data name="VatRateAdd" xml:space="preserve"><value>New VAT rate</value></data>
   <data name="VatRatesBanner" xml:space="preserve"><value>Default Latvian rates — please check them against your bills.</value></data>
   <data name="VatPercentValue" xml:space="preserve"><value>{0} %</value></data>
@@ -786,7 +786,7 @@
   <data name="BillMarkedPaid" xml:space="preserve"><value>Bill marked as paid</value></data>
   <data name="BillUndo" xml:space="preserve"><value>Undo</value></data>
   <data name="BillSaveFirst" xml:space="preserve"><value>Save the bill first, then mark it as paid.</value></data>
-  <data name="BillsEmpty" xml:space="preserve"><value>There are no bills yet. Add the first one with the button below.</value></data>
+  <data name="BillsEmpty" xml:space="preserve"><value>No bills yet. Tap ＋ to add one.</value></data>
   <data name="BillsNothingFound" xml:space="preserve"><value>No bills match the filters.</value></data>
   <data name="BillAdd" xml:space="preserve"><value>New bill</value></data>
   <data name="BillTotals" xml:space="preserve"><value>Billed {0} · Paid {1} · Open {2}</value></data>
@@ -843,7 +843,7 @@
   <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Direct debit</value></data>
   <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Other</value></data>
   <data name="PaymentAdd" xml:space="preserve"><value>New payment</value></data>
-  <data name="PaymentsEmpty" xml:space="preserve"><value>No payments yet. Add the first one with the button below.</value></data>
+  <data name="PaymentsEmpty" xml:space="preserve"><value>No payments yet. Tap ＋ to add one.</value></data>
   <data name="PaymentsNothingFound" xml:space="preserve"><value>No payments match the filters.</value></data>
   <data name="PaymentsPropertyFilter" xml:space="preserve"><value>Property</value></data>
   <data name="PaymentsAllProperties" xml:space="preserve"><value>All properties</value></data>
@@ -1127,7 +1127,7 @@
   <data name="TodoDrafts" xml:space="preserve"><value>Draft bills to confirm: {0}</value></data>
   <data name="TodoDraftsDetail" xml:space="preserve"><value>Created from templates</value></data>
   <data name="SectionBillTemplates" xml:space="preserve"><value>Bill templates</value></data>
-  <data name="BillTemplatesEmpty" xml:space="preserve"><value>No bill templates yet. A template describes a payment that comes regularly or more than once, so you do not type it from scratch.</value></data>
+  <data name="BillTemplatesEmpty" xml:space="preserve"><value>No bill templates yet. Tap ＋ to add one. A template describes a payment that comes regularly or more than once, so you do not type it from scratch.</value></data>
   <data name="BillTemplateAdd" xml:space="preserve"><value>New template</value></data>
   <data name="BillTemplateInactiveBadge" xml:space="preserve"><value>Inactive — creates no drafts</value></data>
   <data name="BillTemplateScheduleOnce" xml:space="preserve"><value>Used by hand (New bill › From template)</value></data>

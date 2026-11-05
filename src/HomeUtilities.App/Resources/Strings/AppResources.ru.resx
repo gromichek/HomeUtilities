@@ -55,7 +55,7 @@
   <data name="Enum_PropertyParameterKind_CadastralValueBuilding" xml:space="preserve"><value>Кадастровая стоимость, здание</value></data>
   <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Кадастровая стоимость, земля</value></data>
   <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Другой параметр</value></data>
-  <data name="PropertiesEmpty" xml:space="preserve"><value>Объектов пока нет. Добавьте первый.</value></data>
+  <data name="PropertiesEmpty" xml:space="preserve"><value>Объектов пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="PropertyAdd" xml:space="preserve"><value>Новый объект</value></data>
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
@@ -68,7 +68,7 @@
   <data name="PropertyNotes" xml:space="preserve"><value>Заметки</value></data>
   <data name="PropertyArchived" xml:space="preserve"><value>В архиве (скрыт из списка)</value></data>
   <data name="ParametersHeader" xml:space="preserve"><value>Параметры</value></data>
-  <data name="ParametersEmpty" xml:space="preserve"><value>Параметров пока нет.</value></data>
+  <data name="ParametersEmpty" xml:space="preserve"><value>Параметров пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="ParameterAdd" xml:space="preserve"><value>Добавить параметр</value></data>
   <data name="ParameterKind" xml:space="preserve"><value>Параметр</value></data>
   <data name="ParameterName" xml:space="preserve"><value>Название</value></data>
@@ -95,7 +95,7 @@
   <data name="ParameterHistory" xml:space="preserve"><value>История ({0})</value></data>
   <data name="SectionSuppliers" xml:space="preserve"><value>Поставщики</value></data>
   <data name="SectionCategories" xml:space="preserve"><value>Категории</value></data>
-  <data name="SuppliersEmpty" xml:space="preserve"><value>Поставщиков пока нет.</value></data>
+  <data name="SuppliersEmpty" xml:space="preserve"><value>Поставщиков пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="SupplierAdd" xml:space="preserve"><value>Новый поставщик</value></data>
   <data name="SuppliersSearch" xml:space="preserve"><value>Поиск по названию</value></data>
   <data name="SupplierLinksCount" xml:space="preserve"><value>Ссылок: {0}</value></data>
@@ -109,7 +109,7 @@
   <data name="SupplierNotes" xml:space="preserve"><value>Заметки</value></data>
   <data name="SupplierDelete" xml:space="preserve"><value>Удалить поставщика</value></data>
   <data name="LinksHeader" xml:space="preserve"><value>Ссылки</value></data>
-  <data name="LinksEmpty" xml:space="preserve"><value>Ссылок пока нет.</value></data>
+  <data name="LinksEmpty" xml:space="preserve"><value>Ссылок пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="LinkAdd" xml:space="preserve"><value>Добавить ссылку</value></data>
   <data name="LinkNew" xml:space="preserve"><value>Новая ссылка</value></data>
   <data name="LinkEdit" xml:space="preserve"><value>Изменить ссылку</value></data>
@@ -172,7 +172,7 @@
   <data name="Error_category_name_required" xml:space="preserve"><value>Введите название.</value></data>
   <data name="Error_category_name_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
   <data name="Error_category_color_invalid" xml:space="preserve"><value>Введите цвет в формате #RRGGBB, например #1E88E5.</value></data>
-  <data name="CategoriesEmpty" xml:space="preserve"><value>Категорий нет.</value></data>
+  <data name="CategoriesEmpty" xml:space="preserve"><value>Категорий пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="CategoryAdd" xml:space="preserve"><value>Новая категория</value></data>
   <data name="CategoriesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="CategoryBuiltInBadge" xml:space="preserve"><value>Встроенная</value></data>
@@ -187,7 +187,7 @@
   <data name="CategoryArchived" xml:space="preserve"><value>В архиве (скрыта в списках выбора)</value></data>
   <data name="CategoryDelete" xml:space="preserve"><value>Удалить категорию</value></data>
   <data name="ContractsHeader" xml:space="preserve"><value>Договоры</value></data>
-  <data name="ContractsEmpty" xml:space="preserve"><value>Договоров пока нет.</value></data>
+  <data name="ContractsEmpty" xml:space="preserve"><value>Договоров пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="ContractsSaveFirst" xml:space="preserve"><value>Сначала сохраните объект</value></data>
   <data name="ContractAdd" xml:space="preserve"><value>Добавить договор</value></data>
   <data name="ContractsShowEnded" xml:space="preserve"><value>Показывать завершённые и архивные</value></data>
@@ -232,7 +232,7 @@
   <data name="LinkFromSupplier" xml:space="preserve"><value>от поставщика</value></data>
   <data name="CustomFieldsHeader" xml:space="preserve"><value>Дополнительные поля</value></data>
   <data name="CustomFieldsHint" xml:space="preserve"><value>Эти поля появятся при вводе счёта.</value></data>
-  <data name="CustomFieldsEmpty" xml:space="preserve"><value>Дополнительных полей нет.</value></data>
+  <data name="CustomFieldsEmpty" xml:space="preserve"><value>Дополнительных полей пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="CustomFieldAdd" xml:space="preserve"><value>Добавить поле</value></data>
   <data name="CustomFieldNew" xml:space="preserve"><value>Новое поле</value></data>
   <data name="CustomFieldEdit" xml:space="preserve"><value>Изменить поле</value></data>
@@ -285,7 +285,7 @@
   <data name="Enum_EnergyDirection_Import" xml:space="preserve"><value>Потребление</value></data>
   <data name="Enum_EnergyDirection_Export" xml:space="preserve"><value>Отдача в сеть</value></data>
   <data name="MetersHeader" xml:space="preserve"><value>Счётчики</value></data>
-  <data name="MetersEmpty" xml:space="preserve"><value>Счётчиков пока нет.</value></data>
+  <data name="MetersEmpty" xml:space="preserve"><value>Счётчиков пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="MeterAdd" xml:space="preserve"><value>Добавить счётчик</value></data>
   <data name="MetersShowRemoved" xml:space="preserve"><value>Показать снятые</value></data>
   <data name="MeterRemoved" xml:space="preserve"><value>Снят {0:d}</value></data>
@@ -599,7 +599,7 @@
   <data name="Error_tariff_quantity_parameter_not_allowed" xml:space="preserve"><value>Эта основа не использует параметр объекта.</value></data>
   <data name="Error_tariff_quantity_parameter_name_required" xml:space="preserve"><value>Введите название параметра.</value></data>
   <data name="SectionVatRates" xml:space="preserve"><value>Ставки НДС</value></data>
-  <data name="VatRatesEmpty" xml:space="preserve"><value>Ставок НДС нет.</value></data>
+  <data name="VatRatesEmpty" xml:space="preserve"><value>Ставок НДС пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="VatRateAdd" xml:space="preserve"><value>Новая ставка НДС</value></data>
   <data name="VatRatesBanner" xml:space="preserve"><value>Латвийские ставки по умолчанию — проверьте их по своим счетам.</value></data>
   <data name="VatPercentValue" xml:space="preserve"><value>{0} %</value></data>
@@ -786,7 +786,7 @@
   <data name="BillMarkedPaid" xml:space="preserve"><value>Счёт отмечен оплаченным</value></data>
   <data name="BillUndo" xml:space="preserve"><value>Отменить</value></data>
   <data name="BillSaveFirst" xml:space="preserve"><value>Сначала сохраните счёт, затем отметьте его оплаченным.</value></data>
-  <data name="BillsEmpty" xml:space="preserve"><value>Счетов пока нет. Добавьте первый кнопкой ниже.</value></data>
+  <data name="BillsEmpty" xml:space="preserve"><value>Счетов пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="BillsNothingFound" xml:space="preserve"><value>По выбранным фильтрам счетов нет.</value></data>
   <data name="BillAdd" xml:space="preserve"><value>Новый счёт</value></data>
   <data name="BillTotals" xml:space="preserve"><value>Выставлено {0} · Оплачено {1} · Осталось {2}</value></data>
@@ -843,7 +843,7 @@
   <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Прямое списание</value></data>
   <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Другое</value></data>
   <data name="PaymentAdd" xml:space="preserve"><value>Новый платёж</value></data>
-  <data name="PaymentsEmpty" xml:space="preserve"><value>Платежей пока нет. Добавьте первый кнопкой ниже.</value></data>
+  <data name="PaymentsEmpty" xml:space="preserve"><value>Платежей пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="PaymentsNothingFound" xml:space="preserve"><value>По выбранным фильтрам платежей нет.</value></data>
   <data name="PaymentsPropertyFilter" xml:space="preserve"><value>Объект</value></data>
   <data name="PaymentsAllProperties" xml:space="preserve"><value>Все объекты</value></data>
@@ -1127,7 +1127,7 @@
   <data name="TodoDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению: {0}</value></data>
   <data name="TodoDraftsDetail" xml:space="preserve"><value>Созданы по шаблонам</value></data>
   <data name="SectionBillTemplates" xml:space="preserve"><value>Шаблоны счетов</value></data>
-  <data name="BillTemplatesEmpty" xml:space="preserve"><value>Шаблонов пока нет. Шаблон описывает платёж, который приходит регулярно или повторяется, чтобы не вводить его каждый раз заново.</value></data>
+  <data name="BillTemplatesEmpty" xml:space="preserve"><value>Шаблонов пока нет. Нажмите ＋, чтобы добавить. Шаблон описывает платёж, который приходит регулярно или повторяется, чтобы не вводить его каждый раз заново.</value></data>
   <data name="BillTemplateAdd" xml:space="preserve"><value>Новый шаблон</value></data>
   <data name="BillTemplateInactiveBadge" xml:space="preserve"><value>Не активен — черновики не создаются</value></data>
   <data name="BillTemplateScheduleOnce" xml:space="preserve"><value>Вручную (Новый счёт › Из шаблона)</value></data>
