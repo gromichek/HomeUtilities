@@ -88,6 +88,9 @@ is written; the list below is the plan and will change.
   does not work on Windows; try keeping one `GridItemsLayout` and changing only its `Span` instead of replacing
   `ItemsLayout`, read the MAUI Windows handler first), choice field everywhere, field look, dialog frame on the phone, date lists in one
   column, compact-by-height on Android only, Delete at the end of the form + delete with Undo, segmented control;
+  also (owner 2026-11-05): Android navigation bar (◁ ○ ▢) in the page colour with matching button contrast — Android
+  13/14 `SetNavigationBarColor` + light/dark nav icons, Android 15+ edge-to-edge (draw the page colour behind the bar,
+  `isNavigationBarContrastEnforced = false`); Android Entry underline is black in the dark theme (bordered field look);
   c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
 
 - T-037 Database clean-up (owner, 2026-11-05): purge soft-deleted rows + orphan attachment files, VACUUM, backup first;
