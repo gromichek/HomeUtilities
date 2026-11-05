@@ -5,11 +5,14 @@ namespace HomeUtilities.ViewModels.Common;
 /// <summary>Display names and colours of payment categories.</summary>
 public static class CategoryNames
 {
-    /// <summary>The 12 swatches offered by the category editor.</summary>
+    /// <summary>
+    /// The 12 swatches offered by the category editor. Without the pure status green and red (UI_GUIDELINES §8): a category
+    /// dot must not look like "paid" or "overdue". Categories that already have another colour keep it.
+    /// </summary>
     public static IReadOnlyList<string> Palette { get; } =
     [
-        "#1E88E5", "#E53935", "#8E24AA", "#FB8C00", "#43A047", "#FDD835",
-        "#00897B", "#6D4C41", "#3949AB", "#D81B60", "#7CB342", "#757575",
+        "#1E88E5", "#039BE5", "#8E24AA", "#FB8C00", "#5E35B1", "#FDD835",
+        "#00ACC1", "#6D4C41", "#3949AB", "#D81B60", "#546E7A", "#757575",
     ];
 
     /// <summary>The name set by the user; for a built-in category without one, the localized name of its service kind.</summary>

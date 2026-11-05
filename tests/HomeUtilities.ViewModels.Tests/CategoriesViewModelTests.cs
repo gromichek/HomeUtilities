@@ -127,6 +127,13 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
+    public void Palette_HasNoStatusRedOrGreen()
+    {
+        // A category dot must not look like "paid" (green) or "overdue" (red), UI_GUIDELINES §8.
+        Assert.All(CategoryNames.Palette, ColorChecks.AssertNotStatusColor);
+    }
+
+    [Fact]
     public async Task Add_InCompactLayout_OpensEditorPage()
     {
         var vm = Create();
