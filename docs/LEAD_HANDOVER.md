@@ -129,7 +129,8 @@ Prompt for a new lead session:
 ## 6. Next steps (ROADMAP)
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
    **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). UI review 2026-11-05 done (review/ui-2026-11-05 branch → `docs/UI_REVIEW_2026-11-05.md`); UI_GUIDELINES revision 1
-   adopted with the owner's decisions; **T-036a Ready**, then write T-036b and T-036c (scope in ROADMAP). iOS (T-033) and contract templates
+   adopted with the owner's decisions; **T-036a Ready**, then write T-036b and T-036c (scope in ROADMAP). R-21 confirmed by the owner: catalog
+   lists show one column on Windows (`ListColumns` broken there) → T-036b. Old branches deleted by the owner. iOS (T-033) and contract templates
    (T-025b) dropped; second cloud (T-032a) postponed. T-032b and the snackbar fix (#220) passed the owner's tests.
 3. **T-032a** postponed (Dropbox possible later; OneDrive declined — needs an Azure tenant).
 5. ~~T-033 iOS~~, ~~T-025b~~ dropped (owner, 2026-11-05).

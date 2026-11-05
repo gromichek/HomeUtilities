@@ -84,7 +84,9 @@ is written; the list below is the plan and will change.
   data kept); no auto-update, files copied by hand (owner, 2026-11-05).
 
 - T-036a/b/c UI review 2026-11-05 (`docs/UI_REVIEW_2026-11-05.md`, UI_GUIDELINES revision 1): a = bugs, theme, styles,
-  formatting, Charges, texts; b = choice field everywhere, field look, dialog frame on the phone, date lists in one
+  formatting, Charges, texts; b = R-21 (owner 2026-11-05: Properties in a maximised Windows window show **one** column — `ListColumns`
+  does not work on Windows; try keeping one `GridItemsLayout` and changing only its `Span` instead of replacing
+  `ItemsLayout`, read the MAUI Windows handler first), choice field everywhere, field look, dialog frame on the phone, date lists in one
   column, compact-by-height on Android only, Delete at the end of the form + delete with Undo, segmented control;
   c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
 
