@@ -90,5 +90,8 @@ is written; the list below is the plan and will change.
   column, compact-by-height on Android only, Delete at the end of the form + delete with Undo, segmented control;
   c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
 
+- T-037 Database clean-up (owner, 2026-11-05): purge soft-deleted rows + orphan attachment files, VACUUM, backup first;
+  with sync on → replace the cloud or NeedsRejoin.
+
 ## Phase 10 — iOS (dropped)
 - ~~T-033 iOS~~ — dropped (owner, 2026-11-05: no Mac to develop on). Windows + Android only.
