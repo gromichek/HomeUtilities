@@ -13,8 +13,12 @@
 
     <ApplicationTitle>HomeUtilities</ApplicationTitle>
     <ApplicationId>io.github.gromichek.homeutilities</ApplicationId>
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+    <!-- Version of every build (T-035), nothing to edit or commit. Display version = yyyy.M.d of the build date (UTC);
+         ApplicationVersion (Android versionCode) = whole minutes since 2026-01-01 00:00 UTC (639028224000000000 ticks), so it only
+         grows and a Debug deploy never downgrades a release build. Both can be overridden with -p:ApplicationVersion=... (the
+         release script does that so the APK and the Windows build of one release carry the same numbers). -->
+    <ApplicationDisplayVersion>$([System.DateTime]::UtcNow.ToString('yyyy.M.d'))</ApplicationDisplayVersion>
+    <ApplicationVersion>$([System.Math]::Floor($([MSBuild]::Divide($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks), 639028224000000000)), 600000000))))</ApplicationVersion>
 
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained Condition="'$(WindowsPackageType)' == 'None'">true</WindowsAppSDKSelfContained>
@@ -27,6 +31,19 @@
   <!-- Permanent Android signing key (T-030 follow-up, T-034): optional git-ignored signing.props, see docs/SIGNING.md.
        Without it the per-PC debug key is used (CI). -->
   <Import Project="signing.props" Condition="Exists('signing.props') And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+
+  <!-- The same version text on both platforms (a Windows file version cannot hold the build number: parts are limited to 65535).
+       Read by AppInfoService; evaluated after command-line overrides, so it always matches the manifest. -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DisplayVersion</_Parameter1>
+      <_Parameter2>$(ApplicationDisplayVersion)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>BuildNumber</_Parameter1>
+      <_Parameter2>$(ApplicationVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#2F5D8A" />

@@ -450,3 +450,6 @@ src/HomeUtilities.App/signing.props
 *.keystore
 *.jks
 *.pass
+
+# Release builds made by scripts/publish-release.ps1 (T-035)
+/release/

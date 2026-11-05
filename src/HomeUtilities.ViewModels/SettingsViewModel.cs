@@ -217,6 +217,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         _layoutModeService = layoutModeService;
         _navigation = navigation;
         Version = appInfo.Version;
+        BuildNumber = appInfo.BuildNumber;
         DatabasePath = appPaths.DatabasePath;
         Reminders.PropertyChanged += (_, e) =>
         {
@@ -245,6 +246,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     public SyncSettingsViewModel Sync { get; }
 
     public string Version { get; }
+
+    /// <summary>The build number shown after the version, or <c>null</c>.</summary>
+    public string? BuildNumber { get; }
+
+    /// <summary>The version line of Settings → About, e.g. <c>Version: 2026.11.5 (build 446000)</c>.</summary>
+    private string VersionLine() => string.IsNullOrEmpty(BuildNumber)
+        ? _localizer.Get("SettingsVersion", Version)
+        : _localizer.Get("SettingsVersionBuild", Version, BuildNumber);
 
     public string DatabasePath { get; }
 
@@ -315,7 +324,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         SettingsSection.BillTemplates => _localizer["SettingsValueBillTemplates"],
         SettingsSection.Imports => _localizer["SettingsValueImports"],
         SettingsSection.ErrorLog => _localizer.Get("SettingsValueErrorLog", CountLogEntries()),
-        _ => _localizer.Get("SettingsVersion", Version),
+        _ => VersionLine(),
     };
 
     /// <summary>Number of entries in the error log: every entry starts with a <c>[timestamp]</c> line.</summary>
@@ -782,7 +791,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             RefreshLastBackupText();
             LanguageLabel = _localizer["SettingsLanguage"];
             ThemeLabel = _localizer["SettingsTheme"];
-            VersionText = _localizer.Get("SettingsVersion", Version);
+            VersionText = VersionLine();
             DatabasePathText = _localizer.Get("SettingsDatabaseFile", DatabasePath);
 
             Languages = [.. _languageService.SupportedLanguages.Select(c => new LanguageOption(c, _localizer[$"LanguageName_{c}"]))];

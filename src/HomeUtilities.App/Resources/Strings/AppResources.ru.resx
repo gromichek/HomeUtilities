@@ -20,6 +20,7 @@
   <data name="SettingsLanguage" xml:space="preserve"><value>Язык</value></data>
   <data name="SettingsTheme" xml:space="preserve"><value>Тема</value></data>
   <data name="SettingsVersion" xml:space="preserve"><value>Версия: {0}</value></data>
+  <data name="SettingsVersionBuild" xml:space="preserve"><value>Версия: {0} (сборка {1})</value></data>
   <data name="SettingsDatabaseFile" xml:space="preserve"><value>Файл базы данных: {0}</value></data>
   <data name="SettingsLayout" xml:space="preserve"><value>Макет: {0}</value></data>
   <data name="LanguageName_en" xml:space="preserve"><value>English</value></data>
