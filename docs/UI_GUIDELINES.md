@@ -297,7 +297,8 @@ Use these wordings everywhere (resx keys in brackets).
 
 ## 8. Colours and contrast [NEW]
 - Colours only from `Colors.xaml` via styles / `AppThemeBinding`; no hard-coded colours.
-- **Toolbar / status bar** colours are set explicitly in `AppShell` (`Shell.BackgroundColor`, `Shell.ForegroundColor`,
+- **Toolbar / status bar:** accent blue (`ToolbarLight`) in the light theme, a **dark bar** (`ToolbarDark` #25282D) in the
+  dark theme — the light-blue bar was too bright at night (owner 2026-11-05, C-17); icons in `OnToolbar*`. The colours are set explicitly in `AppShell` (`Shell.BackgroundColor`, `Shell.ForegroundColor`,
   `Shell.TitleColor`) for both themes, and every toolbar icon uses the toolbar foreground colour (`OnPrimary` style
   sources, e.g. `IconSaveToolbarSource`) — never the accent colour, which is nearly invisible on the dark toolbar
   (1.6 : 1).

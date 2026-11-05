@@ -123,7 +123,8 @@ toolbar (≈ #25282D) with light icons; the accent stays for buttons and selecti
 
 ## Status (project lead, 2026-11-05)
 C-01, C-02, C-03, C-13 fixed right away (#242). C-04, C-06, C-07, C-09, C-10, C-11 go into T-036b; C-05, C-08, C-12, C-14,
-C-15, C-16, C-18 into T-036c; C-17 (dark toolbar) — owner's decision.
+C-15, C-16, C-18 into T-036c; C-17: owner chose the dark toolbar (2026-11-05), done in #243. C-06: owner agreed (rows without extra inputs
+select and close at once) → T-036b with the §3a change.
 
 ## Suggested handling
 - **Now (small, before the owner's test of T-036a):** C-01, C-02, C-03, C-13 — one-line or few-line fixes.

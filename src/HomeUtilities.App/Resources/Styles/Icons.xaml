@@ -104,17 +104,17 @@
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
 
-    <!-- Toolbar items: the toolbar is drawn in the accent colour (AppShell), so its icons use the colour ON the accent
-         (OnPrimary), never the accent itself (R-01: 1.6 : 1 before). -->
+    <!-- Toolbar items: the toolbar colour comes from ToolbarLight/ToolbarDark (AppShell), so its icons use the
+         OnToolbar colour, never the accent (R-01: 1.6 : 1 before; C-17 dark bar). -->
     <FontImageSource x:Key="IconHelpToolbarSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource ImageGlyphHelp}"
                      Size="24"
-                     Color="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                     Color="{AppThemeBinding Light={StaticResource OnToolbarLight}, Dark={StaticResource OnToolbarDark}}" />
     <FontImageSource x:Key="IconSaveToolbarSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource ImageGlyphSave}"
                      Size="24"
-                     Color="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                     Color="{AppThemeBinding Light={StaticResource OnToolbarLight}, Dark={StaticResource OnToolbarDark}}" />
 
 </ResourceDictionary>

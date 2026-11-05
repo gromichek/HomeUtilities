@@ -52,11 +52,11 @@ public partial class AppShell : Shell
         try
         {
             var dark = Application.Current?.RequestedTheme == AppTheme.Dark;
-            if (Application.Current?.Resources.TryGetValue(dark ? "PrimaryDark" : "PrimaryLight", out var value) == true && value is Color color)
+            if (Application.Current?.Resources.TryGetValue(dark ? "ToolbarDark" : "ToolbarLight", out var value) == true && value is Color color)
             {
                 CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(color);
                 CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(
-                    dark ? CommunityToolkit.Maui.Core.StatusBarStyle.DarkContent : CommunityToolkit.Maui.Core.StatusBarStyle.LightContent);
+                    CommunityToolkit.Maui.Core.StatusBarStyle.LightContent);
             }
         }
         catch (Exception)
