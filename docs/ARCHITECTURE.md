@@ -168,6 +168,9 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 
 `main` is protected: merging requires green CI.
 
+Release files are built locally on the owner's PC by `scripts/publish-release.ps1` (signed APK + Inno Setup installer,
+version = build date + minutes since 2026-01-01); CI only builds and tests. No auto-update, no GitHub Releases (T-035).
+
 ## 11. Decision log
 
 | Date | Decision | Reason |
