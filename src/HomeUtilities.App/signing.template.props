@@ -5,7 +5,9 @@
     SHA-1 on every PC and a build from one PC installs over a build from another. Without it the per-PC debug key is used.
     The keystore and the password files live OUTSIDE the repository. See docs/SIGNING.md.
 
-    Passwords: use "file:<absolute path to a one-line text file>" or "env:<ENVIRONMENT VARIABLE NAME>".
+    Passwords: use "file:<absolute path to a text file>" or "env:<ENVIRONMENT VARIABLE NAME>". When both point to the SAME
+    file, apksigner reads the store password from line 1 and the key password from line 2: write the password on two lines.
+    Paths may use $(USERPROFILE), e.g. $(USERPROFILE)\Keys\homeutilities.keystore.
   -->
   <PropertyGroup>
     <AndroidKeyStore>true</AndroidKeyStore>
