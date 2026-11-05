@@ -45,12 +45,23 @@ public partial class AppShell : Shell
         }
     }
 
-    // Toolbar colours (R-01, C-17), Android only. On Windows Shell.ForegroundColor is also the colour of the Back and ☰
-    // buttons, which stand outside the toolbar on the light window background (MAUI MauiToolbar.UpdateIconColor): white on
-    // white in the light theme. Windows keeps its default toolbar.
+    // Toolbar colours (R-01, C-17). Android: blue / dark bar with light icons. Windows keeps its default toolbar background,
+    // but Shell.ForegroundColor is also the colour of the Back and ☰ buttons, which stand on the window background (MAUI
+    // MauiToolbar.UpdateIconColor sets their foreground and their PointerOver / Pressed / Disabled colours from it). Unset, WinUI
+    // takes the hover colours from the system theme, which may differ from the app theme: in the dark app theme Back
+    // vanished after a hover (owner, 2026-11-05). So on Windows it is the theme's text colour — readable on the window
+    // background in both themes, also while hovered.
     private void ApplyToolbarColors()
     {
-#if ANDROID
+#if WINDOWS
+        if (Application.Current?.Resources is { } windowsResources
+            && windowsResources.TryGetValue("TextLight", out var textLightValue) && textLightValue is Color textLight
+            && windowsResources.TryGetValue("TextDark", out var textDarkValue) && textDarkValue is Color textDark)
+        {
+            this.SetAppThemeColor(Shell.ForegroundColorProperty, textLight, textDark);
+            this.SetAppThemeColor(Shell.TitleColorProperty, textLight, textDark);
+        }
+#elif ANDROID
         var resources = Application.Current?.Resources;
         if (resources is null
             || !resources.TryGetValue("ToolbarLight", out var barLight) || barLight is not Color toolbarLight

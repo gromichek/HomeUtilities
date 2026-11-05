@@ -268,7 +268,9 @@ Use these wordings everywhere (resx keys in brackets).
   Use the app's own short month names (§9).
 - **Windows: `Shell.ForegroundColor` also colours the NavigationView Back and ☰ buttons** (`MauiToolbar.UpdateIconColor`),
   which stand outside the toolbar on the window background — a light foreground made them invisible in the light theme
-  (#244). Do not set Shell toolbar colours on Windows.
+  (#244). On Windows only `Shell.ForegroundColor` / `TitleColor` are set, to the theme's **text** colour (`TextLight` /
+  `TextDark`): unset, WinUI took the hover colours of Back from the system theme and Back vanished in the dark app theme (#246).
+  Never a toolbar background colour on Windows.
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.
