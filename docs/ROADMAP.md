@@ -83,5 +83,10 @@ is written; the list below is the plan and will change.
   minutes since 2026-01-01), signed release APK, self-contained Windows build + Inno Setup installer (per user, no admin,
   data kept); no auto-update, files copied by hand (owner, 2026-11-05).
 
+- T-036a/b/c UI review 2026-11-05 (`docs/UI_REVIEW_2026-11-05.md`, UI_GUIDELINES revision 1): a = bugs, theme, styles,
+  formatting, Charges, texts; b = choice field everywhere, field look, dialog frame on the phone, date lists in one
+  column, compact-by-height on Android only, Delete at the end of the form + delete with Undo, segmented control;
+  c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
+
 ## Phase 10 — iOS (dropped)
 - ~~T-033 iOS~~ — dropped (owner, 2026-11-05: no Mac to develop on). Windows + Android only.

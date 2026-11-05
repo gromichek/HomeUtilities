@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-036a | UI review part 1: bugs, theme and styles, formatting, Charges, texts | Ready | | UI review 2026-11-05; T-036b/c follow |
 
 ## Done
 

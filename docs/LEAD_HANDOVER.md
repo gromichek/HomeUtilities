@@ -101,6 +101,7 @@ Prompt for a new lead session:
 | 2026-11-02 | **Licence exception:** Google Play services on Android (MIT bindings `Xamarin.GooglePlayServices.*`) only for Google sign-in (T-030). README and CLAUDE.md updated. |
 | 2026-11-02 | Sync storage replaceable (`ISyncStorage`); Google Drive first; one provider per user; OneDrive/Dropbox/WebDAV later if needed (T-032a). |
 | 2026-11-05 | iOS dropped (no Mac); Windows + Android only. Second cloud provider postponed (OneDrive declined: needs an Azure tenant; Dropbox possible later). Contract templates (T-025b) dropped. |
+| 2026-11-05 | UI_GUIDELINES revision 1 (UI review): date lists one column; compact-by-height Android only; Delete only as red button at the end of the form; single delete with Undo snackbar instead of a confirmation — snackbar ≥ 56 dp, action ≥ 48 dp (owner: easy to hit); Material icons on both platforms. Review split into T-036a/b/c. |
 | 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |
 
 ## 4. The owner's data (private — never in the repo)
@@ -127,8 +128,8 @@ Prompt for a new lead session:
 
 ## 6. Next steps (ROADMAP)
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
-   **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). Owner is preparing a UI review by a designer (screenshots + prompt) →
-   collect the findings into one task. iOS (T-033) and contract templates
+   **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). UI review 2026-11-05 done (review/ui-2026-11-05 branch → `docs/UI_REVIEW_2026-11-05.md`); UI_GUIDELINES revision 1
+   adopted with the owner's decisions; **T-036a Ready**, then write T-036b and T-036c (scope in ROADMAP). iOS (T-033) and contract templates
    (T-025b) dropped; second cloud (T-032a) postponed. T-032b and the snackbar fix (#220) passed the owner's tests.
 3. **T-032a** postponed (Dropbox possible later; OneDrive declined — needs an Azure tenant).
 5. ~~T-033 iOS~~, ~~T-025b~~ dropped (owner, 2026-11-05).
