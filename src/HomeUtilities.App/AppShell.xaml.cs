@@ -45,9 +45,10 @@ public partial class AppShell : Shell
     }
 
     // The status bar takes the toolbar colour in the current theme (R-01); content colour is the opposite of the bar.
-    // A no-op on Windows.
+    // Android only (Windows has no status bar API: CA1416).
     private static void ApplyStatusBar()
     {
+#if ANDROID
         try
         {
             var dark = Application.Current?.RequestedTheme == AppTheme.Dark;
@@ -62,6 +63,7 @@ public partial class AppShell : Shell
         {
             // Cosmetic only: a platform without a status bar API must not stop the app.
         }
+#endif
     }
 
     // One central check for every way out of a page: menu item, toolbar / hardware Back, in-app "..". Pushing a page
