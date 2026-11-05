@@ -53,7 +53,7 @@ is written; the list below is the plan and will change.
 
 ## Phase 7 — Templates and import
 - T-025 Bill templates with schedules (once / monthly / every N months / yearly), draft bills
-- T-025b Contract templates (optional)
+- ~~T-025b Contract templates~~ — dropped (owner, 2026-11-05: no real use)
 - T-026 Excel import framework (column mapping, preview, dry run)
 - T-027 Import for the owner's workbook: reading dates and period rules, meter positions, automatic replacements, fallback totals
 - T-027a Export "like my workbook" (one sheet per contract from the import profile; round trip)
@@ -71,11 +71,13 @@ is written; the list below is the plan and will change.
 - T-030 Google sign-in per platform
 - T-031 Sync engine (change logs, merge, conflict tests) behind `ISyncStorage`; Google Drive adapter
 - T-032 Sync polish (pause/resume, restore and sync, network, messages, cloud files) and attachment files sync
-- T-032a (optional) More storage providers: OneDrive, Dropbox, WebDAV — one adapter + sign-in each, when needed
+- T-032a (optional, postponed by the owner 2026-11-05) More storage providers. Notes: OneDrive needs an Entra tenant
+  (Azure account) to register the app — owner declined; Dropbox = App Console, app folder, PKCE, Development status is
+  enough for personal use (≤ 50 users without review) — possible later. Google Drive stays the only provider.
 - T-034 Release identity: own permanent Android signing key (used on every PC and later in CI; its SHA-1 registered as the
   Android OAuth client), real app icon + splash, notification icon = white house from the app icon (owner requests
   2026-11-02). Owner keeps the keystore and passwords outside the repo; migration from the debug key needs one reinstall
   (backup → uninstall → install → restore).
 
-## Phase 10 — iOS
-- T-033 Enable `net10.0-ios`, macOS CI job, platform services for iOS
+## Phase 10 — iOS (dropped)
+- ~~T-033 iOS~~ — dropped (owner, 2026-11-05: no Mac to develop on). Windows + Android only.
