@@ -49,8 +49,11 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     private IReadOnlyList<EnumOption> _resources = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectedResourceIndex))]
+    [NotifyPropertyChangedFor(nameof(SelectedResourceIndex), nameof(ShowContractsHint))]
     private EnumOption? _selectedResource;
+
+    /// <summary>The hint "a hot water meter is usually linked to both contracts" is shown for hot-water meters only (R-33).</summary>
+    public bool ShowContractsHint => SelectedResource?.As<MeterResource>() == MeterResource.HotWater;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedUnitIndex))]

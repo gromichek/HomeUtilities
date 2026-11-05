@@ -297,7 +297,7 @@
   <data name="MeterNextVerification" xml:space="preserve"><value>Следующая поверка: {0:d}</value></data>
   <data name="MeterNew" xml:space="preserve"><value>Новый счётчик</value></data>
   <data name="MeterDelete" xml:space="preserve"><value>Удалить счётчик</value></data>
-  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Счётчики с показаниями удалить нельзя — используйте «Заменить».</value></data>
+  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Счётчики с показаниями удалить нельзя — используйте «Заменить счётчик…».</value></data>
   <data name="MeterGeneral" xml:space="preserve"><value>Основное</value></data>
   <data name="MeterResourceLabel" xml:space="preserve"><value>Ресурс *</value></data>
   <data name="MeterUnitLabel" xml:space="preserve"><value>Единица *</value></data>
@@ -325,7 +325,7 @@
   <data name="MeterContractsHint" xml:space="preserve"><value>Счётчик горячей воды обычно привязан и к договору на воду, и к договору на отопление.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>В этом объекте пока нет договоров.</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>История</value></data>
-  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Заменил счётчик {0} {1:d}</value></data>
+  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Замена: снят счётчик № {0} · {1:d}</value></data>
   <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Заменён счётчиком {0} {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>Новый регистр</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Регистр</value></data>
@@ -728,10 +728,10 @@
   <data name="BillPayment" xml:space="preserve"><value>Оплата</value></data>
   <data name="BillPaidAmountLabel" xml:space="preserve"><value>Оплачено</value></data>
   <data name="BillOpenAmountLabel" xml:space="preserve"><value>Осталось оплатить</value></data>
-  <data name="BillPaid" xml:space="preserve"><value>Оплачено</value></data>
+  <data name="BillPaid" xml:space="preserve"><value>Отметить оплаченным</value></data>
   <data name="BillPaymentsEmpty" xml:space="preserve"><value>Платежей пока нет.</value></data>
   <data name="BillRemovePayment" xml:space="preserve"><value>Отменить оплату</value></data>
-  <data name="BillPaymentsHint" xml:space="preserve"><value>Кнопка «Оплачено» записывает банковский перевод на оставшуюся сумму с сегодняшней датой. «Добавить платёж» — для другой даты или суммы и для платежа сразу за несколько счетов.</value></data>
+  <data name="BillPaymentsHint" xml:space="preserve"><value>«Отметить оплаченным» записывает банковский перевод на оставшуюся сумму с сегодняшней датой. «Добавить платёж» — для другой даты или суммы и для платежа сразу за несколько счетов.</value></data>
   <data name="BillNotesLabel" xml:space="preserve"><value>Комментарий</value></data>
   <data name="BillDelete" xml:space="preserve"><value>Удалить счёт</value></data>
   <data name="BillLineDescriptionLabel" xml:space="preserve"><value>Описание</value></data>
@@ -791,13 +791,13 @@
   <data name="BillAdd" xml:space="preserve"><value>Новый счёт</value></data>
   <data name="BillTotals" xml:space="preserve"><value>Выставлено {0} · Оплачено {1} · Осталось {2}</value></data>
   <data name="BillPaymentRow" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
-  <data name="BillPaymentQuick" xml:space="preserve"><value>кнопка «Оплачено»</value></data>
+  <data name="BillPaymentQuick" xml:space="preserve"><value>быстрая оплата</value></data>
   <data name="BillPaymentOfBill" xml:space="preserve"><value>На этот счёт приходится {0} из {1}</value></data>
   <data name="BillRemovePaymentTitle" xml:space="preserve"><value>Отменить оплату {0} от {1}?</value></data>
   <data name="BillRemovePaymentRest" xml:space="preserve"><value>Остаток останется на договоре как предоплата.</value></data>
   <data name="BillRemovePaymentHidden" xml:space="preserve"><value>Платёж будет скрыт, история сохранится.</value></data>
   <data name="BillPaymentRemoved" xml:space="preserve"><value>Оплата отменена</value></data>
-  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Платежи по этому счёту останутся на договоре как предоплата; платёж, сделанный кнопкой «Оплачено» только за этот счёт, будет удалён вместе с ним.</value></data>
+  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Платежи по этому счёту останутся на договоре как предоплата; платёж, сделанный кнопкой «Отметить оплаченным» только за этот счёт, будет удалён вместе с ним.</value></data>
   <data name="BillAttachmentPending" xml:space="preserve"><value>{0} (сохранится вместе со счётом)</value></data>
   <data name="BillAttachmentMissing" xml:space="preserve"><value>Файл этого вложения не найден.</value></data>
   <data name="BillAttachmentChoose" xml:space="preserve"><value>Добавить документ</value></data>
@@ -871,7 +871,7 @@
   <data name="PaymentReferenceLabel" xml:space="preserve"><value>Назначение платежа</value></data>
   <data name="PaymentFillReference" xml:space="preserve"><value>Заполнить по договору</value></data>
   <data name="PaymentNotesLabel" xml:space="preserve"><value>Комментарий</value></data>
-  <data name="PaymentQuickNote" xml:space="preserve"><value>Создан кнопкой «Оплачено». Если сделать его частичным или добавить другие счета, он станет обычным платежом.</value></data>
+  <data name="PaymentQuickNote" xml:space="preserve"><value>Создан кнопкой «Отметить оплаченным». Если сделать его частичным или добавить другие счета, он станет обычным платежом.</value></data>
   <data name="PaymentAllocations" xml:space="preserve"><value>Оплаченные счета</value></data>
   <data name="PaymentAllocationAdd" xml:space="preserve"><value>Добавить счёт</value></data>
   <data name="PaymentAutoAllocate" xml:space="preserve"><value>Распределить автоматически</value></data>

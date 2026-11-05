@@ -52,7 +52,7 @@
                    IsVisible="{Binding VatPercentError, Converter={StaticResource HasText}}" />
 
             <Label Text="{Binding Common.VatLabel}" Style="{StaticResource MutedLabel}" />
-            <Label Text="{Binding Amounts.VatText}" />
+            <Label Text="{Binding Amounts.VatDisplayText}" />
 
             <Label Text="{Binding Common.GrossLabel}" Style="{StaticResource MutedLabel}" />
             <Entry Text="{Binding Amounts.GrossText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />

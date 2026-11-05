@@ -204,7 +204,7 @@
                                IsVisible="{Binding VatPercentError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding Texts.VatLabel}" Style="{StaticResource MutedLabel}" />
-                        <Label Text="{Binding Amounts.VatText}" />
+                        <Label Text="{Binding Amounts.VatDisplayText}" />
 
                         <Label Text="{Binding Texts.GrossLabel}" Style="{StaticResource MutedLabel}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">

@@ -297,7 +297,7 @@
   <data name="MeterNextVerification" xml:space="preserve"><value>Next verification: {0:d}</value></data>
   <data name="MeterNew" xml:space="preserve"><value>New meter</value></data>
   <data name="MeterDelete" xml:space="preserve"><value>Delete meter</value></data>
-  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Meters with readings cannot be deleted — use Replace.</value></data>
+  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Meters with readings cannot be deleted — use “Replace meter…”.</value></data>
   <data name="MeterGeneral" xml:space="preserve"><value>General</value></data>
   <data name="MeterResourceLabel" xml:space="preserve"><value>Resource *</value></data>
   <data name="MeterUnitLabel" xml:space="preserve"><value>Unit *</value></data>
@@ -325,7 +325,7 @@
   <data name="MeterContractsHint" xml:space="preserve"><value>A hot water meter is usually linked to both the water and the heating contract.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>No contracts in this property yet.</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>History</value></data>
-  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Replaced meter {0} on {1:d}</value></data>
+  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Replacement: removed meter no. {0} · {1:d}</value></data>
   <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replaced by {0} on {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>New register</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Register</value></data>
@@ -728,10 +728,10 @@
   <data name="BillPayment" xml:space="preserve"><value>Payment</value></data>
   <data name="BillPaidAmountLabel" xml:space="preserve"><value>Paid</value></data>
   <data name="BillOpenAmountLabel" xml:space="preserve"><value>Open</value></data>
-  <data name="BillPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillPaid" xml:space="preserve"><value>Mark as paid</value></data>
   <data name="BillPaymentsEmpty" xml:space="preserve"><value>No payments yet.</value></data>
   <data name="BillRemovePayment" xml:space="preserve"><value>Remove payment</value></data>
-  <data name="BillPaymentsHint" xml:space="preserve"><value>The Paid button records a bank transfer for the open amount, dated today. Use Add payment for another date or amount, or for a payment that covers several bills.</value></data>
+  <data name="BillPaymentsHint" xml:space="preserve"><value>“Mark as paid” records a bank transfer for the open amount, dated today. Use Add payment for another date or amount, or for a payment that covers several bills.</value></data>
   <data name="BillNotesLabel" xml:space="preserve"><value>Comment</value></data>
   <data name="BillDelete" xml:space="preserve"><value>Delete bill</value></data>
   <data name="BillLineDescriptionLabel" xml:space="preserve"><value>Description</value></data>
@@ -791,13 +791,13 @@
   <data name="BillAdd" xml:space="preserve"><value>New bill</value></data>
   <data name="BillTotals" xml:space="preserve"><value>Billed {0} · Paid {1} · Open {2}</value></data>
   <data name="BillPaymentRow" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
-  <data name="BillPaymentQuick" xml:space="preserve"><value>Paid button</value></data>
+  <data name="BillPaymentQuick" xml:space="preserve"><value>quick payment</value></data>
   <data name="BillPaymentOfBill" xml:space="preserve"><value>{0} of {1} goes to this bill</value></data>
   <data name="BillRemovePaymentTitle" xml:space="preserve"><value>Remove payment of {0} from {1}?</value></data>
   <data name="BillRemovePaymentRest" xml:space="preserve"><value>The rest stays on the contract as prepayment.</value></data>
   <data name="BillRemovePaymentHidden" xml:space="preserve"><value>The payment will be hidden; history is kept.</value></data>
   <data name="BillPaymentRemoved" xml:space="preserve"><value>Payment removed</value></data>
-  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Payments for this bill stay on the contract as prepayment; a payment made with the Paid button for this bill alone is removed with it.</value></data>
+  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Payments for this bill stay on the contract as prepayment; a payment made with “Mark as paid” for this bill alone is removed with it.</value></data>
   <data name="BillAttachmentPending" xml:space="preserve"><value>{0} (will be saved with the bill)</value></data>
   <data name="BillAttachmentMissing" xml:space="preserve"><value>The file of this attachment is missing.</value></data>
   <data name="BillAttachmentChoose" xml:space="preserve"><value>Add a document</value></data>
@@ -871,7 +871,7 @@
   <data name="PaymentReferenceLabel" xml:space="preserve"><value>Reference (payment purpose)</value></data>
   <data name="PaymentFillReference" xml:space="preserve"><value>Fill from contract</value></data>
   <data name="PaymentNotesLabel" xml:space="preserve"><value>Comment</value></data>
-  <data name="PaymentQuickNote" xml:space="preserve"><value>Created with the Paid button. If you turn it into a partial payment or add more bills, it becomes a normal payment.</value></data>
+  <data name="PaymentQuickNote" xml:space="preserve"><value>Created with “Mark as paid”. If you turn it into a partial payment or add more bills, it becomes a normal payment.</value></data>
   <data name="PaymentAllocations" xml:space="preserve"><value>Bills paid</value></data>
   <data name="PaymentAllocationAdd" xml:space="preserve"><value>Add a bill</value></data>
   <data name="PaymentAutoAllocate" xml:space="preserve"><value>Allocate automatically</value></data>

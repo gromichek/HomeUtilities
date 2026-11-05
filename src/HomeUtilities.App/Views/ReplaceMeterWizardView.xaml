@@ -93,7 +93,7 @@
 
                 <!-- 4. Contracts -->
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsContractsStep}">
-                    <Label Text="{Binding Texts.ContractsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                    <Label Text="{Binding Texts.ContractsHint}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding ShowContractsHint}" />
                     <Label Text="{Binding Texts.ContractsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoContracts}" />
                     <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ContractRows}">
                         <BindableLayout.ItemTemplate>

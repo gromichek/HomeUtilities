@@ -210,7 +210,7 @@
                                IsVisible="{Binding VatPercentError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding Texts.VatLabel}" Style="{StaticResource MutedLabel}" />
-                        <Label Text="{Binding Amounts.VatText}" />
+                        <Label Text="{Binding Amounts.VatDisplayText}" />
 
                         <Label Text="{Binding Texts.GrossLabel}" Style="{StaticResource MutedLabel}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
@@ -437,15 +437,16 @@
                             </VerticalStackLayout>
                         </Grid>
 
+                        <!-- Stacked action buttons: full width, all the same (UI_GUIDELINES §3.3). -->
                         <Button Text="{Binding Texts.PaidText}" Command="{Binding MarkPaidCommand}"
                                 ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill"
                                 IsVisible="{Binding CanMarkPaid}" />
                         <Button Text="{Binding Texts.AddPaymentText}" Command="{Binding AddPaymentCommand}"
                                 ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
                         <Button Text="{Binding UsePrepaymentText}" Command="{Binding UsePrepaymentCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill"
                                 IsVisible="{Binding CanUsePrepayment}" />
 
                         <Label Text="{Binding Texts.PaymentsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoPayments}" />
@@ -460,7 +461,7 @@
                                             <Label Text="{Binding Text}" />
                                             <Label Text="{Binding Detail}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDetail}" />
                                         </VerticalStackLayout>
-                                        <Button Grid.Column="1" Style="{StaticResource IconButton}" VerticalOptions="Start"
+                                        <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}" VerticalOptions="Start"
                                                 Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
                                                 ToolTipProperties.Text="{Binding RemoveText}"
                                                 SemanticProperties.Description="{Binding RemoveText}" />
@@ -468,7 +469,7 @@
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
-                        <Label Text="{Binding Texts.PaymentsHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        <Label Text="{Binding Texts.PaymentsHint}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding CanMarkPaid}" />
                     </VerticalStackLayout>
                 </Border>
 
