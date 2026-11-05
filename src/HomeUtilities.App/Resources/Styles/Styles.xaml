@@ -13,6 +13,12 @@
         <On Platform="WinUI" Value="20" />
     </OnPlatform>
 
+    <!-- The snackbar bar (UI_GUIDELINES §5.1, owner 2026-11-05): at least 56 dp high on Android so it is easy to hit with a finger. -->
+    <OnPlatform x:Key="SnackbarMinHeight" x:TypeArguments="x:Double">
+        <On Platform="Android" Value="56" />
+        <On Platform="WinUI" Value="48" />
+    </OnPlatform>
+
     <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
     </Style>

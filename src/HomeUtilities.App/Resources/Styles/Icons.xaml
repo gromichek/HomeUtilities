@@ -52,14 +52,13 @@
     <x:String x:Key="IconCollapse">&#xE5CE;</x:String>
 
     <!-- Choice dialog rows (docs/UI_GUIDELINES.md §3a): check_box / check_box_outline_blank / radio_button_checked / radio_button_unchecked;
-         Segoe: CheckboxComposite / Checkbox / RadioBtnOn / RadioBtnOff. -->
+         -->
     <x:String x:Key="IconCheckOn">&#xE834;</x:String>
     <x:String x:Key="IconCheckOff">&#xE835;</x:String>
     <x:String x:Key="IconRadioOn">&#xE837;</x:String>
     <x:String x:Key="IconRadioOff">&#xE836;</x:String>
 
-    <!-- Overview to-do rows (proposed for the UI guidelines table): readings = speed / Diagnostic, due bill = event / Calendar,
-         missing bill = note_add / Document, verification = build / Warning, settlement = balance / Calculator, chevron = chevron_right. -->
+    <!-- Overview to-do rows: readings = speed, due bill = event, missing bill = note_add, verification = build, settlement = balance. -->
     <x:String x:Key="IconTodoReadings">&#xE9E4;</x:String>
     <x:String x:Key="IconTodoDue">&#xE878;</x:String>
     <x:String x:Key="IconTodoMissing">&#xE89C;</x:String>
@@ -74,12 +73,12 @@
     <x:String x:Key="IconCheck">&#xE5CA;</x:String>
     <x:String x:Key="IconChevron">&#xE5CC;</x:String>
 
-    <!-- Settings list rows (T-028d): language / palette / event / backup / category / percent / description / upload_file / bug_report / info; Segoe: Globe / Color / Calendar / Upload / Tag / Calculator / Page / Import / ErrorBadge / Info. -->
+    <!-- Settings list rows (T-028d): language / palette / event / backup / category / percent / description / upload_file / bug_report / info (Material Icons on both platforms). -->
     <x:String x:Key="IconSettingsLanguage">&#xE894;</x:String>
     <x:String x:Key="IconSettingsTheme">&#xE40A;</x:String>
     <x:String x:Key="IconSettingsReminders">&#xE878;</x:String>
     <x:String x:Key="IconSettingsBackup">&#xE864;</x:String>
-    <!-- Sync (T-030): sync (Material, checked in the bundled font) / Sync (Segoe MDL2 E895). -->
+    <!-- Sync (T-030): sync (checked in the bundled font). -->
     <x:String x:Key="IconSettingsSync">&#xE627;</x:String>
     <x:String x:Key="IconSettingsCategories">&#xE574;</x:String>
     <x:String x:Key="IconSettingsVatRates">&#xEB58;</x:String>
