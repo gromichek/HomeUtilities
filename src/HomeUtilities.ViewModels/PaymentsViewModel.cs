@@ -102,6 +102,11 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
     protected override int TotalCount => _payments.Count;
 
+    protected override bool LoadingHintApplies => !IsLoaded;
+
+    /// <summary>"Loading…" shown in place of the list while the first load takes longer than 300 ms (R-52).</summary>
+    public string LoadingText => _localizer["Loading"];
+
     public override async Task ReloadAsync(CancellationToken ct = default)
     {
         var (payments, properties, contracts, bills) = await OffUiAsync(
@@ -173,13 +178,14 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     private Task ChoosePropertyFilterAsync() => RunSafeAsync(async () =>
     {
         var all = _localizer["PaymentsAllProperties"];
-        var picked = await _dialogs.ChooseAsync(_localizer["PaymentsPropertyFilter"], [all, .. _properties.Select(p => p.Name)]);
-        if (picked is null)
+        var currentIndex = _filter.PropertyId is { } currentId ? _properties.IndexWhere(p => p.Id == currentId) + 1 : 0;
+        var picked = await _dialogs.ChooseAsync(_localizer["PaymentsPropertyFilter"], [all, .. _properties.Select(p => p.Name)], currentIndex);
+        if (picked is not { } index)
         {
             return;
         }
 
-        _filter.PropertyId = picked == all ? null : _properties.FirstOrDefault(p => p.Name == picked)?.Id;
+        _filter.PropertyId = index == 0 ? null : _properties[index - 1].Id;
         if (_filter.PropertyId is { } property && _filter.ContractId is { } contract
             && _contracts.TryGetValue(contract, out var current) && current.PropertyId != property)
         {
@@ -195,13 +201,14 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
     {
         var all = _localizer["PaymentsAllContracts"];
         var options = ContractFilterOptions();
-        var picked = await _dialogs.ChooseAsync(_localizer["PaymentsContractFilter"], [all, .. options.Select(o => o.Name)]);
-        if (picked is null)
+        var current = _filter.ContractId is { } currentId ? options.FindIndex(o => o.Id == currentId) + 1 : 0;
+        var picked = await _dialogs.ChooseAsync(_localizer["PaymentsContractFilter"], [all, .. options.Select(o => o.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        _filter.ContractId = picked == all ? null : options.FirstOrDefault(o => o.Name == picked)?.Id;
+        _filter.ContractId = index == 0 ? null : options[index - 1].Id;
         _highlightContractId = null;
         RebuildItems();
     });

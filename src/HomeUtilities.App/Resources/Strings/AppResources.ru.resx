@@ -55,7 +55,7 @@
   <data name="Enum_PropertyParameterKind_CadastralValueBuilding" xml:space="preserve"><value>Кадастровая стоимость, здание</value></data>
   <data name="Enum_PropertyParameterKind_CadastralValueLand" xml:space="preserve"><value>Кадастровая стоимость, земля</value></data>
   <data name="Enum_PropertyParameterKind_Custom" xml:space="preserve"><value>Другой параметр</value></data>
-  <data name="PropertiesEmpty" xml:space="preserve"><value>Объектов пока нет. Добавьте первый.</value></data>
+  <data name="PropertiesEmpty" xml:space="preserve"><value>Объектов пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="PropertyAdd" xml:space="preserve"><value>Новый объект</value></data>
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
@@ -68,7 +68,7 @@
   <data name="PropertyNotes" xml:space="preserve"><value>Заметки</value></data>
   <data name="PropertyArchived" xml:space="preserve"><value>В архиве (скрыт из списка)</value></data>
   <data name="ParametersHeader" xml:space="preserve"><value>Параметры</value></data>
-  <data name="ParametersEmpty" xml:space="preserve"><value>Параметров пока нет.</value></data>
+  <data name="ParametersEmpty" xml:space="preserve"><value>Параметров пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="ParameterAdd" xml:space="preserve"><value>Добавить параметр</value></data>
   <data name="ParameterKind" xml:space="preserve"><value>Параметр</value></data>
   <data name="ParameterName" xml:space="preserve"><value>Название</value></data>
@@ -95,7 +95,7 @@
   <data name="ParameterHistory" xml:space="preserve"><value>История ({0})</value></data>
   <data name="SectionSuppliers" xml:space="preserve"><value>Поставщики</value></data>
   <data name="SectionCategories" xml:space="preserve"><value>Категории</value></data>
-  <data name="SuppliersEmpty" xml:space="preserve"><value>Поставщиков пока нет.</value></data>
+  <data name="SuppliersEmpty" xml:space="preserve"><value>Поставщиков пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="SupplierAdd" xml:space="preserve"><value>Новый поставщик</value></data>
   <data name="SuppliersSearch" xml:space="preserve"><value>Поиск по названию</value></data>
   <data name="SupplierLinksCount" xml:space="preserve"><value>Ссылок: {0}</value></data>
@@ -109,7 +109,7 @@
   <data name="SupplierNotes" xml:space="preserve"><value>Заметки</value></data>
   <data name="SupplierDelete" xml:space="preserve"><value>Удалить поставщика</value></data>
   <data name="LinksHeader" xml:space="preserve"><value>Ссылки</value></data>
-  <data name="LinksEmpty" xml:space="preserve"><value>Ссылок пока нет.</value></data>
+  <data name="LinksEmpty" xml:space="preserve"><value>Ссылок пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="LinkAdd" xml:space="preserve"><value>Добавить ссылку</value></data>
   <data name="LinkNew" xml:space="preserve"><value>Новая ссылка</value></data>
   <data name="LinkEdit" xml:space="preserve"><value>Изменить ссылку</value></data>
@@ -172,7 +172,7 @@
   <data name="Error_category_name_required" xml:space="preserve"><value>Введите название.</value></data>
   <data name="Error_category_name_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
   <data name="Error_category_color_invalid" xml:space="preserve"><value>Введите цвет в формате #RRGGBB, например #1E88E5.</value></data>
-  <data name="CategoriesEmpty" xml:space="preserve"><value>Категорий нет.</value></data>
+  <data name="CategoriesEmpty" xml:space="preserve"><value>Категорий пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="CategoryAdd" xml:space="preserve"><value>Новая категория</value></data>
   <data name="CategoriesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="CategoryBuiltInBadge" xml:space="preserve"><value>Встроенная</value></data>
@@ -187,7 +187,7 @@
   <data name="CategoryArchived" xml:space="preserve"><value>В архиве (скрыта в списках выбора)</value></data>
   <data name="CategoryDelete" xml:space="preserve"><value>Удалить категорию</value></data>
   <data name="ContractsHeader" xml:space="preserve"><value>Договоры</value></data>
-  <data name="ContractsEmpty" xml:space="preserve"><value>Договоров пока нет.</value></data>
+  <data name="ContractsEmpty" xml:space="preserve"><value>Договоров пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="ContractsSaveFirst" xml:space="preserve"><value>Сначала сохраните объект</value></data>
   <data name="ContractAdd" xml:space="preserve"><value>Добавить договор</value></data>
   <data name="ContractsShowEnded" xml:space="preserve"><value>Показывать завершённые и архивные</value></data>
@@ -232,7 +232,7 @@
   <data name="LinkFromSupplier" xml:space="preserve"><value>от поставщика</value></data>
   <data name="CustomFieldsHeader" xml:space="preserve"><value>Дополнительные поля</value></data>
   <data name="CustomFieldsHint" xml:space="preserve"><value>Эти поля появятся при вводе счёта.</value></data>
-  <data name="CustomFieldsEmpty" xml:space="preserve"><value>Дополнительных полей нет.</value></data>
+  <data name="CustomFieldsEmpty" xml:space="preserve"><value>Дополнительных полей пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="CustomFieldAdd" xml:space="preserve"><value>Добавить поле</value></data>
   <data name="CustomFieldNew" xml:space="preserve"><value>Новое поле</value></data>
   <data name="CustomFieldEdit" xml:space="preserve"><value>Изменить поле</value></data>
@@ -285,7 +285,7 @@
   <data name="Enum_EnergyDirection_Import" xml:space="preserve"><value>Потребление</value></data>
   <data name="Enum_EnergyDirection_Export" xml:space="preserve"><value>Отдача в сеть</value></data>
   <data name="MetersHeader" xml:space="preserve"><value>Счётчики</value></data>
-  <data name="MetersEmpty" xml:space="preserve"><value>Счётчиков пока нет.</value></data>
+  <data name="MetersEmpty" xml:space="preserve"><value>Счётчиков пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="MeterAdd" xml:space="preserve"><value>Добавить счётчик</value></data>
   <data name="MetersShowRemoved" xml:space="preserve"><value>Показать снятые</value></data>
   <data name="MeterRemoved" xml:space="preserve"><value>Снят {0:d}</value></data>
@@ -297,7 +297,7 @@
   <data name="MeterNextVerification" xml:space="preserve"><value>Следующая поверка: {0:d}</value></data>
   <data name="MeterNew" xml:space="preserve"><value>Новый счётчик</value></data>
   <data name="MeterDelete" xml:space="preserve"><value>Удалить счётчик</value></data>
-  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Счётчики с показаниями удалить нельзя — используйте «Заменить».</value></data>
+  <data name="MeterDeleteBlocked" xml:space="preserve"><value>Счётчики с показаниями удалить нельзя — используйте «Заменить счётчик…».</value></data>
   <data name="MeterGeneral" xml:space="preserve"><value>Основное</value></data>
   <data name="MeterResourceLabel" xml:space="preserve"><value>Ресурс *</value></data>
   <data name="MeterUnitLabel" xml:space="preserve"><value>Единица *</value></data>
@@ -325,7 +325,7 @@
   <data name="MeterContractsHint" xml:space="preserve"><value>Счётчик горячей воды обычно привязан и к договору на воду, и к договору на отопление.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>В этом объекте пока нет договоров.</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>История</value></data>
-  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Заменил счётчик {0} {1:d}</value></data>
+  <data name="MeterHistoryReplaced" xml:space="preserve"><value>Замена: снят счётчик № {0} · {1:d}</value></data>
   <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Заменён счётчиком {0} {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>Новый регистр</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Регистр</value></data>
@@ -599,7 +599,7 @@
   <data name="Error_tariff_quantity_parameter_not_allowed" xml:space="preserve"><value>Эта основа не использует параметр объекта.</value></data>
   <data name="Error_tariff_quantity_parameter_name_required" xml:space="preserve"><value>Введите название параметра.</value></data>
   <data name="SectionVatRates" xml:space="preserve"><value>Ставки НДС</value></data>
-  <data name="VatRatesEmpty" xml:space="preserve"><value>Ставок НДС нет.</value></data>
+  <data name="VatRatesEmpty" xml:space="preserve"><value>Ставок НДС пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="VatRateAdd" xml:space="preserve"><value>Новая ставка НДС</value></data>
   <data name="VatRatesBanner" xml:space="preserve"><value>Латвийские ставки по умолчанию — проверьте их по своим счетам.</value></data>
   <data name="VatPercentValue" xml:space="preserve"><value>{0} %</value></data>
@@ -627,9 +627,9 @@
   <data name="ChargesTotalsLabel" xml:space="preserve"><value>Ожидаемое начисление за месяц</value></data>
   <data name="ChargesIncomplete" xml:space="preserve"><value>Неполно — часть сумм не удалось рассчитать.</value></data>
   <data name="ChargesNoContracts" xml:space="preserve"><value>В этом месяце нет действующих договоров.</value></data>
-  <data name="ChargesTotals" xml:space="preserve"><value>Без НДС {0} · НДС {1} · Итого {2}</value></data>
+  <data name="ChargesTotals" xml:space="preserve"><value>Без НДС {0} · НДС {1} · Итого {2}</value></data>
   <data name="ContractShowCharges" xml:space="preserve"><value>Показать начисления</value></data>
-  <data name="ChargeStatus_Complete" xml:space="preserve"><value>Полностью</value></data>
+  <data name="ChargeStatus_Complete" xml:space="preserve"><value>Рассчитано</value></data>
   <data name="ChargeStatus_Incomplete" xml:space="preserve"><value>Неполно</value></data>
   <data name="ChargeStatus_FromBill" xml:space="preserve"><value>По счёту</value></data>
   <data name="ChargeStatus_NoTariff" xml:space="preserve"><value>Нет тарифа</value></data>
@@ -666,7 +666,7 @@
   <data name="ChargeConsumption_reading_outside_window" xml:space="preserve"><value>В окне подачи показаний показаний нет — использовано ближайшее.</value></data>
   <data name="ChargeConsumption_unusually_high" xml:space="preserve"><value>Необычно большой расход.</value></data>
   <data name="ChargeConsumption_zero" xml:space="preserve"><value>Нулевой расход.</value></data>
-  <data name="ChargeWarn_NoRate" xml:space="preserve"><value>На {0} нет действующей цены для «{1}» — добавьте цену в тарифе.</value></data>
+  <data name="ChargeWarn_NoRate" xml:space="preserve"><value>В тарифе нет цены для услуги «{1}» на {0}.</value></data>
   <data name="ChargeWarn_MissingParameter" xml:space="preserve"><value>У параметра «{0}» нет значения на {1:d} — добавьте его в объекте.</value></data>
   <data name="ChargeWarn_ReadingsMissing" xml:space="preserve"><value>Не хватает показаний: {0} — введите их в разделе «Показания».</value></data>
   <data name="ChargeWarn_NoMeters" xml:space="preserve"><value>Для «{0}» не привязан счётчик — привяжите счётчик в договоре.</value></data>
@@ -728,10 +728,10 @@
   <data name="BillPayment" xml:space="preserve"><value>Оплата</value></data>
   <data name="BillPaidAmountLabel" xml:space="preserve"><value>Оплачено</value></data>
   <data name="BillOpenAmountLabel" xml:space="preserve"><value>Осталось оплатить</value></data>
-  <data name="BillPaid" xml:space="preserve"><value>Оплачено</value></data>
+  <data name="BillPaid" xml:space="preserve"><value>Отметить оплаченным</value></data>
   <data name="BillPaymentsEmpty" xml:space="preserve"><value>Платежей пока нет.</value></data>
   <data name="BillRemovePayment" xml:space="preserve"><value>Отменить оплату</value></data>
-  <data name="BillPaymentsHint" xml:space="preserve"><value>Кнопка «Оплачено» записывает банковский перевод на оставшуюся сумму с сегодняшней датой. «Добавить платёж» — для другой даты или суммы и для платежа сразу за несколько счетов.</value></data>
+  <data name="BillPaymentsHint" xml:space="preserve"><value>«Отметить оплаченным» записывает банковский перевод на оставшуюся сумму с сегодняшней датой. «Добавить платёж» — для другой даты или суммы и для платежа сразу за несколько счетов.</value></data>
   <data name="BillNotesLabel" xml:space="preserve"><value>Комментарий</value></data>
   <data name="BillDelete" xml:space="preserve"><value>Удалить счёт</value></data>
   <data name="BillLineDescriptionLabel" xml:space="preserve"><value>Описание</value></data>
@@ -777,27 +777,27 @@
   <data name="BillStatusOverdue" xml:space="preserve"><value>Просроченные</value></data>
   <data name="BillStatusPaid" xml:space="preserve"><value>Оплаченные</value></data>
   <data name="BillBadgeUnpaid" xml:space="preserve"><value>Не оплачен</value></data>
-  <data name="BillBadgePartial" xml:space="preserve"><value>Оплачен частично · осталось {0}</value></data>
+  <data name="BillBadgePartial" xml:space="preserve"><value>Оплачен частично · осталось {0}</value></data>
   <data name="BillBadgeOverdue" xml:space="preserve"><value>Просрочен</value></data>
   <data name="BillBadgePaid" xml:space="preserve"><value>Оплачен ✓</value></data>
   <data name="BillBadgePrepaid" xml:space="preserve"><value>Оплачен вперёд ✓</value></data>
-  <data name="BillMarkPaid" xml:space="preserve"><value>Оплачено</value></data>
+  <data name="BillMarkPaid" xml:space="preserve"><value>Отметить оплаченным</value></data>
   <data name="BillMarkPaidTooltip" xml:space="preserve"><value>Отметить счёт оплаченным</value></data>
   <data name="BillMarkedPaid" xml:space="preserve"><value>Счёт отмечен оплаченным</value></data>
   <data name="BillUndo" xml:space="preserve"><value>Отменить</value></data>
   <data name="BillSaveFirst" xml:space="preserve"><value>Сначала сохраните счёт, затем отметьте его оплаченным.</value></data>
-  <data name="BillsEmpty" xml:space="preserve"><value>Счетов пока нет. Добавьте первый кнопкой ниже.</value></data>
+  <data name="BillsEmpty" xml:space="preserve"><value>Счетов пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="BillsNothingFound" xml:space="preserve"><value>По выбранным фильтрам счетов нет.</value></data>
   <data name="BillAdd" xml:space="preserve"><value>Новый счёт</value></data>
-  <data name="BillTotals" xml:space="preserve"><value>Выставлено {0} · Оплачено {1} · Осталось {2}</value></data>
+  <data name="BillTotals" xml:space="preserve"><value>Выставлено {0} · Оплачено {1} · Осталось {2}</value></data>
   <data name="BillPaymentRow" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
-  <data name="BillPaymentQuick" xml:space="preserve"><value>кнопка «Оплачено»</value></data>
+  <data name="BillPaymentQuick" xml:space="preserve"><value>быстрая оплата</value></data>
   <data name="BillPaymentOfBill" xml:space="preserve"><value>На этот счёт приходится {0} из {1}</value></data>
   <data name="BillRemovePaymentTitle" xml:space="preserve"><value>Отменить оплату {0} от {1}?</value></data>
   <data name="BillRemovePaymentRest" xml:space="preserve"><value>Остаток останется на договоре как предоплата.</value></data>
   <data name="BillRemovePaymentHidden" xml:space="preserve"><value>Платёж будет скрыт, история сохранится.</value></data>
   <data name="BillPaymentRemoved" xml:space="preserve"><value>Оплата отменена</value></data>
-  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Платежи по этому счёту останутся на договоре как предоплата; платёж, сделанный кнопкой «Оплачено» только за этот счёт, будет удалён вместе с ним.</value></data>
+  <data name="BillDeleteWithPayments" xml:space="preserve"><value>Платежи по этому счёту останутся на договоре как предоплата; платёж, сделанный кнопкой «Отметить оплаченным» только за этот счёт, будет удалён вместе с ним.</value></data>
   <data name="BillAttachmentPending" xml:space="preserve"><value>{0} (сохранится вместе со счётом)</value></data>
   <data name="BillAttachmentMissing" xml:space="preserve"><value>Файл этого вложения не найден.</value></data>
   <data name="BillAttachmentChoose" xml:space="preserve"><value>Добавить документ</value></data>
@@ -812,7 +812,7 @@
   <data name="BillBillsCardAll" xml:space="preserve"><value>Все счета</value></data>
   <data name="BillBillsCardAdd" xml:space="preserve"><value>Новый счёт по этому договору</value></data>
   <data name="ChargesBillLine" xml:space="preserve"><value>Счёт: {0}</value></data>
-  <data name="ChargesEnterBill" xml:space="preserve"><value>Ввести счёт</value></data>
+  <data name="ChargesEnterBill" xml:space="preserve"><value>Новый счёт</value></data>
   <data name="Error_amount_inconsistent" xml:space="preserve"><value>Сумма без НДС, НДС % и итого не сходятся. Заполните только два поля из трёх.</value></data>
   <data name="Error_amount_gross_required" xml:space="preserve"><value>Укажите итог либо сумму без НДС вместе с НДС %.</value></data>
   <data name="Error_amount_vat_percent_out_of_range" xml:space="preserve"><value>НДС % должен быть от 0 до 100.</value></data>
@@ -830,7 +830,7 @@
   <data name="Error_bill_title_too_long" xml:space="preserve"><value>Название длиннее {0} символов.</value></data>
   <data name="Error_bill_number_too_long" xml:space="preserve"><value>Номер длиннее {0} символов.</value></data>
   <data name="Error_bill_line_description_required" xml:space="preserve"><value>Введите описание.</value></data>
-  <data name="BillBadgeOverdueOpen" xml:space="preserve"><value>Просрочен · осталось {0}</value></data>
+  <data name="BillBadgeOverdueOpen" xml:space="preserve"><value>Просрочен · осталось {0}</value></data>
   <data name="Enum_BillKind_Regular" xml:space="preserve"><value>Обычный счёт</value></data>
   <data name="Enum_BillKind_Equalized" xml:space="preserve"><value>Платёж по плану</value></data>
   <data name="Enum_BillKind_Settlement" xml:space="preserve"><value>Перерасчёт (годовой)</value></data>
@@ -843,17 +843,17 @@
   <data name="Enum_PaymentMethod_DirectDebit" xml:space="preserve"><value>Прямое списание</value></data>
   <data name="Enum_PaymentMethod_Other" xml:space="preserve"><value>Другое</value></data>
   <data name="PaymentAdd" xml:space="preserve"><value>Новый платёж</value></data>
-  <data name="PaymentsEmpty" xml:space="preserve"><value>Платежей пока нет. Добавьте первый кнопкой ниже.</value></data>
+  <data name="PaymentsEmpty" xml:space="preserve"><value>Платежей пока нет. Нажмите ＋, чтобы добавить.</value></data>
   <data name="PaymentsNothingFound" xml:space="preserve"><value>По выбранным фильтрам платежей нет.</value></data>
   <data name="PaymentsPropertyFilter" xml:space="preserve"><value>Объект</value></data>
   <data name="PaymentsAllProperties" xml:space="preserve"><value>Все объекты</value></data>
   <data name="PaymentsContractFilter" xml:space="preserve"><value>Договор</value></data>
   <data name="PaymentsAllContracts" xml:space="preserve"><value>Все договоры</value></data>
-  <data name="PaymentsTotals" xml:space="preserve"><value>Оплачено {0} · из них не распределено (предоплата) {1}</value></data>
+  <data name="PaymentsTotals" xml:space="preserve"><value>Оплачено {0} · из них не распределено (предоплата) {1}</value></data>
   <data name="PaymentRefundAmount" xml:space="preserve"><value>−{0} возврат</value></data>
   <data name="PaymentSeveralContracts" xml:space="preserve"><value>Несколько договоров</value></data>
   <data name="PaymentPaysMore" xml:space="preserve"><value>{0} +{1}</value></data>
-  <data name="PaymentPrepaymentBadge" xml:space="preserve"><value>Предоплата {0}</value></data>
+  <data name="PaymentPrepaymentBadge" xml:space="preserve"><value>Предоплата {0}</value></data>
   <data name="PaymentQuickMarker" xml:space="preserve"><value>быстрый</value></data>
   <data name="PaymentNewTitle" xml:space="preserve"><value>Новый платёж</value></data>
   <data name="PaymentEditTitle" xml:space="preserve"><value>Платёж {0} · {1}</value></data>
@@ -871,7 +871,7 @@
   <data name="PaymentReferenceLabel" xml:space="preserve"><value>Назначение платежа</value></data>
   <data name="PaymentFillReference" xml:space="preserve"><value>Заполнить по договору</value></data>
   <data name="PaymentNotesLabel" xml:space="preserve"><value>Комментарий</value></data>
-  <data name="PaymentQuickNote" xml:space="preserve"><value>Создан кнопкой «Оплачено». Если сделать его частичным или добавить другие счета, он станет обычным платежом.</value></data>
+  <data name="PaymentQuickNote" xml:space="preserve"><value>Создан кнопкой «Отметить оплаченным». Если сделать его частичным или добавить другие счета, он станет обычным платежом.</value></data>
   <data name="PaymentAllocations" xml:space="preserve"><value>Оплаченные счета</value></data>
   <data name="PaymentAllocationAdd" xml:space="preserve"><value>Добавить счёт</value></data>
   <data name="PaymentAutoAllocate" xml:space="preserve"><value>Распределить автоматически</value></data>
@@ -901,10 +901,10 @@
   <data name="ContractBalanceHeader" xml:space="preserve"><value>Баланс</value></data>
   <data name="ContractBalanceBilled" xml:space="preserve"><value>Выставлено</value></data>
   <data name="ContractBalancePaid" xml:space="preserve"><value>Оплачено</value></data>
-  <data name="ContractBalanceDebt" xml:space="preserve"><value>Долг {0}</value></data>
-  <data name="ContractBalanceAdvance" xml:space="preserve"><value>Оплачено вперёд {0}</value></data>
+  <data name="ContractBalanceDebt" xml:space="preserve"><value>Долг {0}</value></data>
+  <data name="ContractBalanceAdvance" xml:space="preserve"><value>Оплачено вперёд {0}</value></data>
   <data name="ContractBalanceSettled" xml:space="preserve"><value>Расчёты закрыты</value></data>
-  <data name="ContractBalanceUnallocated" xml:space="preserve"><value>Не распределено по счетам: {0}</value></data>
+  <data name="ContractBalanceUnallocated" xml:space="preserve"><value>Не распределено по счетам: {0}</value></data>
   <data name="ContractBalanceUse" xml:space="preserve"><value>Распределить на неоплаченные счета</value></data>
   <data name="ContractBalanceNothingToUse" xml:space="preserve"><value>Распределять нечего: неоплаченных счетов нет.</value></data>
   <data name="ContractPaymentsHeader" xml:space="preserve"><value>Последние платежи</value></data>
@@ -971,14 +971,14 @@
   <data name="EqColDifference" xml:space="preserve"><value>Разн.</value></data>
   <data name="EqColRunning" xml:space="preserve"><value>Итого</value></data>
   <data name="EqEnterSettlementBill" xml:space="preserve"><value>Ввести счёт-перерасчёт</value></data>
-  <data name="EqPlanShort" xml:space="preserve"><value>План {0}</value></data>
+  <data name="EqPlanShort" xml:space="preserve"><value>План {0}</value></data>
   <data name="EqReadingsMissing" xml:space="preserve"><value>Нет показаний — открыть показания</value></data>
-  <data name="EqTotals" xml:space="preserve"><value>Выставлено {0} · фактически по показаниям {1}</value></data>
+  <data name="EqTotals" xml:space="preserve"><value>Выставлено {0} · фактически по показаниям {1}</value></data>
   <data name="EqWordsSurcharge" xml:space="preserve"><value>Вероятно, придётся доплатить около {0}.</value></data>
   <data name="EqWordsRefund" xml:space="preserve"><value>Вероятно, вам вернут около {0}.</value></data>
   <data name="EqWordsZero" xml:space="preserve"><value>Выставленное и фактическое совпадают: перерасчёта не ожидается.</value></data>
   <data name="EqIncomplete" xml:space="preserve"><value>Месяцы без показаний или цен не учтены: {0}. Введите показания, чтобы картина была полной.</value></data>
-  <data name="ChargesEqualizedLine" xml:space="preserve"><value>План {0} · факт {1} · с прошлого перерасчёта {2}</value></data>
+  <data name="ChargesEqualizedLine" xml:space="preserve"><value>План {0} · факт {1} · с прошлого перерасчёта {2}</value></data>
   <data name="TaxHeader" xml:space="preserve"><value>Налог по годам</value></data>
   <data name="TaxHint" xml:space="preserve"><value>Самоуправление начисляет налог раз в год, а вы платите его частями. Введите сумму за год: приложение создаст по одному счёту на каждый взнос.</value></data>
   <data name="TaxEmpty" xml:space="preserve"><value>Налог ещё не введён. Нажмите ＋, чтобы ввести налог за год.</value></data>
@@ -1021,11 +1021,11 @@
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>Счетов и платежей пока нет.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>Этот год</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>Счетов за этот год пока нет.</value></data>
-  <data name="OverviewOpenBills" xml:space="preserve"><value>Неоплаченные счета {0}</value></data>
-  <data name="OverviewOverdueBills" xml:space="preserve"><value>Просрочено {0}</value></data>
-  <data name="OverviewPrepayments" xml:space="preserve"><value>Предоплата {0}</value></data>
-  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: доплата {1}</value></data>
-  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: возврат {1}</value></data>
+  <data name="OverviewOpenBills" xml:space="preserve"><value>Неоплаченные счета {0}</value></data>
+  <data name="OverviewOverdueBills" xml:space="preserve"><value>Просрочено {0}</value></data>
+  <data name="OverviewPrepayments" xml:space="preserve"><value>Предоплата {0}</value></data>
+  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: доплата {1}</value></data>
+  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: возврат {1}</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3}</value></data>
   <data name="TodoReadings" xml:space="preserve"><value>Передать показания: {0}</value></data>
@@ -1127,7 +1127,7 @@
   <data name="TodoDrafts" xml:space="preserve"><value>Черновики счетов к подтверждению: {0}</value></data>
   <data name="TodoDraftsDetail" xml:space="preserve"><value>Созданы по шаблонам</value></data>
   <data name="SectionBillTemplates" xml:space="preserve"><value>Шаблоны счетов</value></data>
-  <data name="BillTemplatesEmpty" xml:space="preserve"><value>Шаблонов пока нет. Шаблон описывает платёж, который приходит регулярно или повторяется, чтобы не вводить его каждый раз заново.</value></data>
+  <data name="BillTemplatesEmpty" xml:space="preserve"><value>Шаблонов пока нет. Нажмите ＋, чтобы добавить. Шаблон описывает платёж, который приходит регулярно или повторяется, чтобы не вводить его каждый раз заново.</value></data>
   <data name="BillTemplateAdd" xml:space="preserve"><value>Новый шаблон</value></data>
   <data name="BillTemplateInactiveBadge" xml:space="preserve"><value>Не активен — черновики не создаются</value></data>
   <data name="BillTemplateScheduleOnce" xml:space="preserve"><value>Вручную (Новый счёт › Из шаблона)</value></data>
@@ -1600,4 +1600,45 @@
   <data name="SyncBackupFirstHint" xml:space="preserve"><value>Сначала будет сделана резервная копия данных этого устройства.</value></data>
   <data name="SyncReplaceCloudHint" xml:space="preserve"><value>Внимание: другие устройства получат вопрос, заменить ли их данные данными этого устройства.</value></data>
   <data name="SyncMergeHint" xml:space="preserve"><value>Записи, которые уже синхронизировались раньше, объединяются по последней правке; записи, созданные отдельно на обоих устройствах, появятся дважды.</value></data>
+  <data name="MonthShort_1" xml:space="preserve"><value>янв</value></data>
+  <data name="MonthShort_2" xml:space="preserve"><value>фев</value></data>
+  <data name="MonthShort_3" xml:space="preserve"><value>мар</value></data>
+  <data name="MonthShort_4" xml:space="preserve"><value>апр</value></data>
+  <data name="MonthShort_5" xml:space="preserve"><value>май</value></data>
+  <data name="MonthShort_6" xml:space="preserve"><value>июн</value></data>
+  <data name="MonthShort_7" xml:space="preserve"><value>июл</value></data>
+  <data name="MonthShort_8" xml:space="preserve"><value>авг</value></data>
+  <data name="MonthShort_9" xml:space="preserve"><value>сен</value></data>
+  <data name="MonthShort_10" xml:space="preserve"><value>окт</value></data>
+  <data name="MonthShort_11" xml:space="preserve"><value>ноя</value></data>
+  <data name="MonthShort_12" xml:space="preserve"><value>дек</value></data>
+  <data name="ChargeWarn_NoReadings" xml:space="preserve"><value>Нет показаний за {0} — последнее от {1}.</value></data>
+  <data name="ChargeWarn_NoReadingsNone" xml:space="preserve"><value>Нет показаний за {0}.</value></data>
+  <data name="ChargeLineReason_NoPrice" xml:space="preserve"><value>нет цены</value></data>
+  <data name="ChargeLineReason_NoReadings" xml:space="preserve"><value>нет показаний</value></data>
+  <data name="ChargeLineReason_NoParameter" xml:space="preserve"><value>нет значения параметра</value></data>
+  <data name="ChargeLineReason_NoMeters" xml:space="preserve"><value>счётчик не привязан</value></data>
+  <data name="ChargeLineReason_UnknownVat" xml:space="preserve"><value>НДС неизвестен</value></data>
+  <data name="ChargeLineReason_Currency" xml:space="preserve"><value>другая валюта</value></data>
+  <data name="ChargeLineReason_Invalid" xml:space="preserve"><value>тариф не применим</value></data>
+  <data name="ChargeLineReason_NoQuantity" xml:space="preserve"><value>нет количества</value></data>
+  <data name="ChargeLineBreakdown" xml:space="preserve"><value>без НДС {0} + НДС {1} {2}</value></data>
+  <data name="ChargeLineBreakdownNet" xml:space="preserve"><value>без НДС {0}</value></data>
+  <data name="SyncDetail_StartedWithSnapshot" xml:space="preserve"><value>Это устройство начало синхронизацию.</value></data>
+  <data name="SyncDetail_ReplacedCloud" xml:space="preserve"><value>Это устройство заменило данные в облаке.</value></data>
+  <data name="SyncDetail_Resumed" xml:space="preserve"><value>Синхронизация возобновлена.</value></data>
+  <data name="SyncDetail_CloudReplaced" xml:space="preserve"><value>Данные в облаке заменены на другом устройстве.</value></data>
+  <data name="SyncDetail_ClockSkew" xml:space="preserve"><value>Часы этого устройства расходятся с серверными больше чем на пять минут.</value></data>
+  <data name="SyncDetail_AppliedSnapshot" xml:space="preserve"><value>Получена полная копия (записей: {0}).</value></data>
+  <data name="SyncDetail_AppliedChanges" xml:space="preserve"><value>Получены изменения (записей: {0}).</value></data>
+  <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Отправлены изменения (записей: {0}).</value></data>
+  <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Полная копия сохранена в облаке.</value></data>
+  <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Старые файлы изменений удалены из облака.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>Конфликт при объединении данных.</value></data>
+  <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Отправлен файл вложения.</value></data>
+  <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Получен файл вложения.</value></data>
+  <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>Полученный файл вложения повреждён, пробуем ещё раз.</value></data>
+  <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Старый файл вложения удалён из облака.</value></data>
+  <data name="SyncDisconnectButton" xml:space="preserve"><value>Отключить аккаунт Google…</value></data>
+  <data name="BillBadgeDueSoon" xml:space="preserve"><value>Не оплачен · срок {0}</value></data>
 </root>

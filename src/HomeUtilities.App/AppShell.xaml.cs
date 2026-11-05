@@ -37,6 +37,33 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.EqualizedSettlement, typeof(EqualizedSettlementPage));
         BindingContext = viewModel;
         Navigating += OnNavigating;
+        ApplyStatusBar();
+        if (Application.Current is { } app)
+        {
+            app.RequestedThemeChanged += (_, _) => ApplyStatusBar();
+        }
+    }
+
+    // The status bar takes the toolbar colour in the current theme (R-01); content colour is the opposite of the bar.
+    // Android only (Windows has no status bar API: CA1416).
+    private static void ApplyStatusBar()
+    {
+#if ANDROID
+        try
+        {
+            var dark = Application.Current?.RequestedTheme == AppTheme.Dark;
+            if (Application.Current?.Resources.TryGetValue(dark ? "PrimaryDark" : "PrimaryLight", out var value) == true && value is Color color)
+            {
+                CommunityToolkit.Maui.Core.Platform.StatusBar.SetColor(color);
+                CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(
+                    dark ? CommunityToolkit.Maui.Core.StatusBarStyle.DarkContent : CommunityToolkit.Maui.Core.StatusBarStyle.LightContent);
+            }
+        }
+        catch (Exception)
+        {
+            // Cosmetic only: a platform without a status bar API must not stop the app.
+        }
+#endif
     }
 
     // One central check for every way out of a page: menu item, toolbar / hardware Back, in-app "..". Pushing a page

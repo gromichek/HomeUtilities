@@ -98,7 +98,7 @@ public class OverviewViewModelTests : IDisposable
         return vm;
     }
 
-    private static string Money(string amount) => $"{amount} {Eur}";
+    private static string Money(string amount) => $"{amount}\u00A0{Eur}";
 
     /// <summary>The n-th argument of a fake-localized text ("Key a|b|c [en]") without the trailing language tag.</summary>
     private static string LastPart(string text, int index)
@@ -386,7 +386,7 @@ public class OverviewViewModelTests : IDisposable
         var row = Assert.Single(vm.TodoRows);
         Assert.Equal("TodoSettlement Cottage electricity [en]", row.Text);
         Assert.Equal("Sample flat · TodoSettlementRefund [en]", row.DetailText);
-        Assert.Equal($"-8.35 {Eur}", row.AmountText);
+        Assert.Equal($"-8.35\u00A0{Eur}", row.AmountText);
         Assert.True(row.IsInfo && row.IsSettlement);
 
         row.OpenCommand.Execute(null);
@@ -516,7 +516,7 @@ public class OverviewViewModelTests : IDisposable
 
         var block = Assert.Single(vm.YearBlocks);
         var line = Assert.Single(block.Lines);
-        Assert.Equal($"OverviewYearLine 2026|{Money("1,245.30")}|2025|{Money("1,180.10")}|+5.5 % [en]", line.Text);
+        Assert.Equal($"OverviewYearLine 2026|{Money("1,245.30")}|2025|{Money("1,180.10")}|+5.5\u00A0% [en]", line.Text);
 
         line.OpenCommand.Execute(null);
         await Task.Delay(50);

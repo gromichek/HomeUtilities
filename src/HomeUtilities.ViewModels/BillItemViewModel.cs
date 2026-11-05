@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.ViewModels.Common;
 using HomeUtilities.Core.Billing;
+using HomeUtilities.Core.Overview;
 
 namespace HomeUtilities.ViewModels;
 
@@ -26,7 +27,8 @@ public sealed partial class BillItemViewModel : ObservableObject, ISelectableLis
         bool isHighlighted,
         Action<Guid> select,
         Action<Guid> markPaid,
-        Action<Guid>? confirm = null)
+        Action<Guid>? confirm = null,
+        DateOnly? today = null)
     {
         Id = bill.Id;
         ContractId = bill.ContractId;
@@ -37,9 +39,18 @@ public sealed partial class BillItemViewModel : ObservableObject, ISelectableLis
         TotalText = BillText.Money(bill.Gross, currencySymbol);
         IsDraft = bill.IsDraft;
         Badge = IsDraft ? BillBadgeKind.Draft : BillBadge.KindOf(state);
+
+        // An unpaid bill that falls due within the next days is amber, with the date in the text (UI_GUIDELINES §8).
+        if (Badge == BillBadgeKind.Unpaid && today is { } now && bill.DueOn is { } due && due >= now && due <= now.AddDays(TodoBuilder.BillLookAheadDays))
+        {
+            Badge = BillBadgeKind.DueSoon;
+        }
+
         BadgeText = IsDraft
             ? (bill.Gross > 0 ? localizer["BillBadgeDraft"] : localizer["BillBadgeDraftAmount"])
-            : BillBadge.TextOf(localizer, state, currencySymbol);
+            : Badge == BillBadgeKind.DueSoon
+                ? localizer.Get("BillBadgeDueSoon", BillText.Date(bill.DueOn!.Value))
+                : BillBadge.TextOf(localizer, state, currencySymbol);
         IsHighlighted = isHighlighted;
         CanMarkPaid = !IsDraft && state.Open != 0 && Math.Sign(state.Open) == Math.Sign(bill.Gross);
         MarkPaidText = localizer["BillMarkPaid"];
@@ -81,6 +92,9 @@ public sealed partial class BillItemViewModel : ObservableObject, ISelectableLis
 
     public BillBadgeKind Badge { get; }
 
+    /// <summary>Unpaid and due within the next days: amber, with a warning icon.</summary>
+    public bool IsBadgeDueSoon => Badge == BillBadgeKind.DueSoon;
+
     public string BadgeText { get; }
 
     /// <summary>A draft from a template: shown muted, with a Confirm button instead of Paid.</summary>
@@ -97,6 +111,9 @@ public sealed partial class BillItemViewModel : ObservableObject, ISelectableLis
     public bool IsBadgePartial => Badge == BillBadgeKind.PartiallyPaid;
 
     public bool IsBadgeOverdue => Badge == BillBadgeKind.Overdue;
+
+    /// <summary>Overdue and partially paid bills carry a warning icon next to the status text (status is never colour alone).</summary>
+    public bool ShowBadgeIcon => IsBadgePartial || IsBadgeOverdue || IsBadgeDueSoon;
 
     /// <summary>"+2,15 € (+3,4 %)", empty when the bill has no calculation to compare with.</summary>
     public string DifferenceText { get; } = string.Empty;

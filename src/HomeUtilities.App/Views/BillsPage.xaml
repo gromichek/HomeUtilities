@@ -10,7 +10,7 @@
                 Title="{Binding Title}">
 
     <views:PageBase.ToolbarItems>
-        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpToolbarSource}" Command="{Binding OpenHelpCommand}" />
     </views:PageBase.ToolbarItems>
 
     <views:PageBase.Resources>
@@ -54,13 +54,13 @@
                             <!-- The period scope (All years / Year / Month) is a drop-down like the other filters (T-028f). -->
                             <views:ReportFilterField Caption="{Binding Period.PeriodLabel}" Value="{Binding Period.ScopeText}" Command="{Binding Period.ChooseScopeCommand}" />
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
-                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24"
+                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
                                 Command="{Binding Period.PreviousCommand}"
                                 ToolTipProperties.Text="{Binding Period.PreviousText}"
                                 SemanticProperties.Description="{Binding Period.PreviousText}" />
                         <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold" LineBreakMode="NoWrap" MaxLines="1"
                                HorizontalOptions="Center" VerticalOptions="Center" />
-                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24"
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24"
                                 Command="{Binding Period.NextCommand}"
                                 ToolTipProperties.Text="{Binding Period.NextText}"
                                 SemanticProperties.Description="{Binding Period.NextText}" />
@@ -78,13 +78,17 @@
                            HorizontalTextAlignment="Center" IsVisible="{Binding ShowNothingFound}" />
                 </VerticalStackLayout>
             </CollectionView.Header>
+            <!-- Always 88 dp of space at the end, so the last card can be scrolled clear of the floating button (R-19). -->
             <CollectionView.Footer>
-                <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
-                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,4,0,64" />
+                <VerticalStackLayout>
+                    <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,4,0,0" />
+                    <BoxView HeightRequest="88" Color="Transparent" />
+                </VerticalStackLayout>
             </CollectionView.Footer>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:BillItemViewModel">
-                    <Border Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
+                    <Border Style="{StaticResource ListCard}" Stroke="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" StrokeThickness="1" Margin="0,4" StrokeShape="RoundRectangle 8">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" x:DataType="vm:BillItemViewModel" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
@@ -110,14 +114,26 @@
                             <Label Grid.Column="2" Grid.Row="0" Text="{Binding TotalText}" FontAttributes="Bold" HorizontalOptions="End" HorizontalTextAlignment="End" />
                             <Label Grid.Column="2" Grid.Row="1" Text="{Binding PeriodText}" Style="{StaticResource MutedLabel}" FontSize="13" HorizontalOptions="End" HorizontalTextAlignment="End" />
 
-                            <!-- Status badge: grey unpaid, yellow partially paid, red overdue, green paid. -->
-                            <Label Grid.Column="1" Grid.Row="2" Text="{Binding BadgeText}" FontAttributes="Bold" FontSize="13"
-                                   Style="{StaticResource MutedLabel}" Margin="0,2,0,0">
+                            <!-- Status (UI_GUIDELINES §8): unpaid = normal text, partially paid = amber, overdue = red, paid = green; always text, and a warning icon for the two that need attention. -->
+                            <Label Grid.Column="0" Grid.Row="2" Text="{StaticResource IconWarning}" FontFamily="{StaticResource IconFontFamily}" FontSize="16"
+                                   VerticalOptions="Center" HorizontalOptions="Center" Margin="0,2,0,0" IsVisible="{Binding ShowBadgeIcon}"
+                                   TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
+                                   AutomationProperties.IsInAccessibleTree="False">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgeOverdue}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Grid.Column="1" Grid.Row="2" Text="{Binding BadgeText}" Style="{StaticResource BadgeUnpaidLabel}" Margin="0,2,0,0">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgePaid}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
                                     </DataTrigger>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgePartial}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgeDueSoon}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
                                     </DataTrigger>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgeOverdue}" Value="True">
@@ -157,6 +173,10 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <!-- Loading (R-52): text only, shown after 300 ms of the first load. -->
+        <Label Grid.Row="1" Text="{Binding LoadingText}" Style="{StaticResource MutedLabel}" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,24,0,0"
+               IsVisible="{Binding ShowLoading}" />
 
         <VerticalStackLayout Grid.Row="1" Spacing="16" VerticalOptions="Center" HorizontalOptions="Center"
                              IsVisible="{Binding IsEmpty}">

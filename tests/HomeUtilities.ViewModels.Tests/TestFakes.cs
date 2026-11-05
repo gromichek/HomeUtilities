@@ -33,7 +33,12 @@ internal sealed class FakeLocalizer(FakeLanguageService language) : ILocalizer
     /// <summary>Keys for which <see cref="TryGet"/> reports a missing resource.</summary>
     public HashSet<string> MissingKeys { get; } = [];
 
-    public string this[string key] => $"{key} [{language.CurrentLanguage}]";
+    public string this[string key] =>
+        key.StartsWith("MonthShort_", StringComparison.Ordinal) && int.TryParse(key["MonthShort_".Length..], out var month) && month is >= 1 and <= 12
+            ? EnglishMonths[month - 1] // the real names are tested against the resource files (ResourceTextTests)
+            : $"{key} [{language.CurrentLanguage}]";
+
+    private static readonly string[] EnglishMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     public bool TryGet(string key, out string value)
     {
@@ -115,8 +120,27 @@ internal sealed class FakeDialogService : IDialogService
         return Task.FromResult(ConfirmAnswers.Count > 0 ? ConfirmAnswers.Dequeue() : ConfirmResult);
     }
 
-    public Task<string?> ChooseAsync(string title, IReadOnlyList<string> options) =>
-        Task.FromResult(ChooseScript?.Invoke(options));
+    /// <summary>Like <see cref="ChooseScript"/> but answers with the index directly (for records with equal names).</summary>
+    public Func<IReadOnlyList<string>, int?>? ChooseIndexScript { get; set; }
+
+    /// <summary>The options and the marked index of every <see cref="ChooseAsync"/> call.</summary>
+    public List<(IReadOnlyList<string> Options, int? Selected)> Choices { get; } = [];
+
+    public Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null)
+    {
+        Choices.Add((options, selectedIndex));
+        if (ChooseIndexScript is not null)
+        {
+            return Task.FromResult(ChooseIndexScript(options));
+        }
+
+        var picked = ChooseScript?.Invoke(options);
+        var index = picked is null ? -1 : options.ToList().IndexOf(picked);
+        return Task.FromResult(index < 0 ? (int?)null : index);
+    }
+
+    public Task<string?> ChooseCommandAsync(string title, IReadOnlyList<string> commands) =>
+        Task.FromResult(ChooseScript?.Invoke(commands));
 
     public Task<UnsavedChangesChoice> AskUnsavedChangesAsync()
     {

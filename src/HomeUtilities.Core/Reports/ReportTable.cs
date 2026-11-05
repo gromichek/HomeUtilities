@@ -81,6 +81,14 @@ public sealed record ReportTable(
 {
     /// <summary>True if no column has any data.</summary>
     public bool IsEmpty => Columns.Count == 0;
+
+    /// <summary>
+    /// True if at least one number of the table (a cell, a row total or a total) is marked "≈". The footnote that explains the
+    /// mark is shown only then (R-41).
+    /// </summary>
+    public bool HasApproximateCells =>
+        Rows.Any(r => r.Cells.Any(c => c.IsApproximate) || r.Total is { IsApproximate: true })
+        || Totals is { } totals && (totals.Cells.Any(c => c.IsApproximate) || totals.Total is { IsApproximate: true });
 }
 
 /// <summary>Decimals of the numbers of a report, shared by the screen and the export.</summary>

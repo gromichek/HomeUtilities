@@ -601,7 +601,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
         {
             if (info.Contract.GetReadingWindow(candidate) is { } open && open.From <= today && today <= open.To)
             {
-                return new(info.Contract.Id, ReadingWindowState.Open, _localizer.Get("ReadingsWindowOpen", title, FormatRange(open.From, open.To)), submitText, command);
+                return new(info.Contract.Id, ReadingWindowState.Open, _localizer.Get("ReadingsWindowOpen", title, FormatRange(_localizer, open.From, open.To)), submitText, command);
             }
         }
 
@@ -610,8 +610,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
         {
             var days = current.From.DayNumber - today.DayNumber;
             var text = days == 1
-                ? _localizer.Get("ReadingsWindowOpensTomorrow", title, FormatRange(current.From, current.To))
-                : _localizer.Get("ReadingsWindowOpens", title, FormatRange(current.From, current.To), days);
+                ? _localizer.Get("ReadingsWindowOpensTomorrow", title, FormatRange(_localizer, current.From, current.To))
+                : _localizer.Get("ReadingsWindowOpens", title, FormatRange(_localizer, current.From, current.To), days);
             return new(info.Contract.Id, ReadingWindowState.Upcoming, text, submitText, command);
         }
 
@@ -624,13 +624,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
             command);
     }
 
-    internal static string FormatRange(DateOnly from, DateOnly to)
-    {
-        var culture = CultureInfo.CurrentCulture;
-        return from.Year == to.Year && from.Month == to.Month
-            ? $"{from.Day}–{to.ToString("d MMM", culture)}"
-            : $"{from.ToString("d MMM", culture)}–{to.ToString("d MMM", culture)}";
-    }
+    internal static string FormatRange(ILocalizer localizer, DateOnly from, DateOnly to) => MonthFormat.Range(localizer, from, to);
 
     /// <summary>One button per distinct page among the active contracts of the meter; contracts with the same page share a button.</summary>
     private IReadOnlyList<SubmitLinkViewModel> SubmitLinksOf(Meter meter)

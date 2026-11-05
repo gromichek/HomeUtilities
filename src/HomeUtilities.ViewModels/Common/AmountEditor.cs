@@ -29,7 +29,11 @@ public sealed partial class AmountEditor : ObservableObject
 
     /// <summary>The derived VAT amount; read-only in the UI.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VatDisplayText))]
     private string _vatText = string.Empty;
+
+    /// <summary>The VAT as shown: "—" while it is not calculated (never an empty line that looks broken, R-28).</summary>
+    public string VatDisplayText => VatText.Length > 0 ? VatText : "—";
 
     /// <summary>Hint shown in the empty Total field (the calculated total), never a value.</summary>
     [ObservableProperty]

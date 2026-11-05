@@ -612,7 +612,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         _hasData = !table.IsEmpty;
         Charts = built.Charts;
         ShowEmpty = table.IsEmpty;
-        ShowLegend = !table.IsEmpty;
+        ShowLegend = !table.IsEmpty && table.HasApproximateCells;
         var (from, to) = (filter.From, filter.To);
         FromText = BillText.Period(from);
         ToText = BillText.Period(to);

@@ -9,7 +9,7 @@
                 Title="{Binding Title}">
 
     <views:PageBase.ToolbarItems>
-        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpToolbarSource}" Command="{Binding OpenHelpCommand}" />
     </views:PageBase.ToolbarItems>
 
     <views:PageBase.Resources>
@@ -41,6 +41,9 @@
                         </Border>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
+
+                <!-- Loading (R-52): text only, shown after 300 ms of the first load. -->
+                <Label Text="{Binding LoadingText}" Style="{StaticResource MutedLabel}" HorizontalOptions="Center" IsVisible="{Binding ShowLoading}" />
 
                 <!-- Phone: one column. -->
                 <VerticalStackLayout Spacing="12" IsVisible="{Binding IsCompact}">

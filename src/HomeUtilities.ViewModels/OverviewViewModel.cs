@@ -190,6 +190,11 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     /// <summary>The remembered property filter; null = all properties.</summary>
     public Guid? PropertyFilterId => _propertyFilter;
 
+    protected override bool LoadingHintApplies => !IsLoaded;
+
+    /// <summary>"Loading…" shown in place of the content while the first load takes longer than 300 ms (R-52).</summary>
+    public string LoadingText => _localizer["Loading"];
+
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
         await InitializeDatabaseAsync();
@@ -266,13 +271,15 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     private Task ChoosePropertyFilterAsync() => RunSafeAsync(async () =>
     {
         var all = _localizer["BillAllProperties"];
-        var picked = await _dialogs.ChooseAsync(_localizer["OverviewPropertyFilter"], [all, .. _data.Properties.Select(p => p.Name)]);
-        if (picked is null)
+        var properties = _data.Properties;
+        var current = _propertyFilter is { } currentId ? properties.IndexWhere(p => p.Id == currentId) + 1 : 0;
+        var picked = await _dialogs.ChooseAsync(_localizer["OverviewPropertyFilter"], [all, .. properties.Select(p => p.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        SetFilter(picked == all ? null : _data.Properties.FirstOrDefault(p => p.Name == picked)?.Id);
+        SetFilter(index == 0 ? null : properties[index - 1].Id);
         Rebuild();
     });
 
@@ -406,7 +413,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
     private string ReadingsDetail(TodoItem item, DateOnly today)
     {
-        var range = ReadingsViewModel.FormatRange(item.Date, item.EndDate ?? item.Date);
+        var range = ReadingsViewModel.FormatRange(_localizer, item.Date, item.EndDate ?? item.Date);
         switch (item.Severity)
         {
             case TodoSeverity.Today:
@@ -527,7 +534,8 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
                 }
             }
 
-            foreach (var settlement in settlements.Where(s => s.PropertyId == property.Id))
+            // A recalculation of less than one cent says nothing: the line is not shown (R-18, UI_GUIDELINES §9).
+            foreach (var settlement in settlements.Where(s => s.PropertyId == property.Id && Math.Abs(s.Expected) >= 0.01m))
             {
                 var contractId = settlement.ContractId;
                 lines.Add(new(

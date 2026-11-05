@@ -25,10 +25,21 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
     public Task<bool> ConfirmAsync(string title, string message, string accept, string cancel) =>
         Page.DisplayAlertAsync(title, message, accept, cancel);
 
-    public async Task<string?> ChooseAsync(string title, IReadOnlyList<string> options)
+    public async Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null)
+    {
+        // The row value is the index, so two options with the same text stay distinguishable.
+        var dialog = new SingleChoiceDialogViewModel(
+            localizer,
+            title,
+            options.Select((text, index) => new SingleChoiceOption(index, text)),
+            selectedIndex);
+        return await ShowEditorAsync(dialog) && dialog.SelectedValue is int picked ? picked : null;
+    }
+
+    public async Task<string?> ChooseCommandAsync(string title, IReadOnlyList<string> commands)
     {
         var cancel = localizer["Cancel"];
-        var result = await Page.DisplayActionSheetAsync(title, cancel, null, [.. options]);
+        var result = await Page.DisplayActionSheetAsync(title, cancel, null, [.. commands]);
         return result is null || result == cancel ? null : result;
     }
 

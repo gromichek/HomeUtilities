@@ -469,8 +469,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     {
         get
         {
-            var text = Period.FirstDay.ToString("MMMM yyyy", CultureInfo.CurrentCulture);
-            return text.Length == 0 ? text : char.ToUpper(text[0], CultureInfo.CurrentCulture) + text[1..];
+            return MonthFormat.Long(Period);
         }
     }
 

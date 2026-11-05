@@ -2,6 +2,7 @@ using System.Globalization;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Reports;
+using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
@@ -52,18 +53,14 @@ public sealed class ReportLabels(ILocalizer localizer, CultureInfo? culture = nu
     /// <summary>The label of a row on a chart axis: "Jan 26" for a month, "2026" for a year, "Jan" for a month of the year.</summary>
     public string ChartRow(ReportRow row) => row.Kind switch
     {
-        ReportRowKind.Month => $"{ShortMonthName(row.Month)} {(row.Year % 100).ToString("00", CultureInfo.InvariantCulture)}",
+        ReportRowKind.Month => MonthFormat.ShortWithYear(localizer, row.Year, row.Month),
         ReportRowKind.Year => row.Year.ToString(CultureInfo.InvariantCulture),
         ReportRowKind.MonthOfYear => ShortMonthName(row.Month),
         _ => Total,
     };
 
-    /// <summary>The short month name ("Jan").</summary>
-    public string ShortMonthName(int month)
-    {
-        var name = new DateOnly(2001, month, 1).ToString("MMM", Culture).TrimEnd('.');
-        return name.Length == 0 ? name : char.ToUpper(name[0], Culture) + name[1..];
-    }
+    /// <summary>The app's own 3-letter month name ("Jan" / "янв"); the same length for every month (R-11).</summary>
+    public string ShortMonthName(int month) => MonthFormat.ShortName(localizer, month);
 
     /// <summary>The name of a chart series: the category, service, contract or property; <paramref name="withProperty"/> puts the property in front.</summary>
     public string SeriesName(ReportColumn column, bool withProperty)

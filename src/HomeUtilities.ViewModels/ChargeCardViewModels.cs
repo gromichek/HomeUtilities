@@ -123,6 +123,19 @@ public sealed partial class ChargeLineViewModel : ObservableObject
 
     public bool HasAmounts => !IsFromBill && !IsIncomplete;
 
+    /// <summary>"excl. VAT 10,00 € + VAT 21 % 2,10 €" — the amounts behind the line total, once; empty when not calculated.</summary>
+    public string BreakdownText { get; init; } = string.Empty;
+
+    public bool HasBreakdown => BreakdownText.Length > 0;
+
+    /// <summary>Why the line has no amount ("no price", "no readings"…); empty when it has one.</summary>
+    public string ReasonText { get; init; } = string.Empty;
+
+    public bool HasReason => ReasonText.Length > 0;
+
+    /// <summary>The line total, or "—" when the line could not be calculated; hidden for "amount from the bill" lines.</summary>
+    public bool ShowTotal => !IsFromBill;
+
     public bool HasQuantity => QuantityText.Length > 0;
 
     public bool HasUnitPrice => UnitPriceText.Length > 0;
@@ -189,6 +202,9 @@ public sealed partial class ChargeCardViewModel : ObservableObject
     /// <summary>Warning icon in the header.</summary>
     public bool ShowWarningIcon => Status is ChargeCardStatus.Incomplete or ChargeCardStatus.Error;
 
+    /// <summary>Check mark in the header of a fully calculated card, in the same column as the warning icon.</summary>
+    public bool ShowCheckIcon => Status == ChargeCardStatus.Complete;
+
     public IReadOnlyList<ChargeLineViewModel> Lines { get; init; } = [];
 
     /// <summary>"VAT 12 % of 39,18 € = 4,70 €" per VAT percent when VAT is calculated on the total.</summary>
@@ -236,7 +252,7 @@ public sealed partial class ChargeCardViewModel : ObservableObject
     public string ErrorText { get; init; } = string.Empty;
 
     /// <summary>Totals row (Net · VAT · Total) at the end of the lines.</summary>
-    public bool ShowTotalsRow => HasLines && Status != ChargeCardStatus.Error;
+    public bool ShowTotalsRow => HasLines && Status == ChargeCardStatus.Complete;
 
     public string NetLabel { get; init; } = string.Empty;
 

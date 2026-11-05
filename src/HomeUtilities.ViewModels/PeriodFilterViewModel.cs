@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HomeUtilities.Core;
+using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
@@ -117,12 +118,13 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
             (YearText, PeriodScope.Year),
             (MonthText, PeriodScope.Month),
         };
-        var picked = await _dialogs.ChooseAsync(PeriodLabel, [.. options.Select(o => o.Name)]);
-        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { Name: not null } option)
+        var picked = await _dialogs.ChooseAsync(PeriodLabel, [.. options.Select(o => o.Name)], Array.FindIndex(options, o => o.Scope == Current.Scope));
+        if (picked is not { } index)
         {
             return;
         }
 
+        var option = options[index];
         if (option.Scope != Current.Scope)
         {
             Change(Current.WithScope(option.Scope, _clock.Today));

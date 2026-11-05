@@ -261,7 +261,7 @@ public static class ReportChartBuilder
         }
 
         var number = labels.Number(value, kind);
-        var text = kind == ReportValueKind.Percent || unit.Length == 0 ? number : $"{number} {unit}";
+        var text = kind == ReportValueKind.Percent || unit.Length == 0 ? number : $"{number}{BillText.NonBreakingSpace}{unit}";
         return $"{series.Name} · {period}: {(series.Approx[index] ? "≈ " : string.Empty)}{text}";
     }
 }

@@ -6,7 +6,13 @@
        x:Class="HomeUtilities.App.AppShell"
        x:DataType="vm:ShellViewModel"
        FlyoutBehavior="Flyout"
-       FlyoutWidth="{Binding FlyoutWidth}">
+       FlyoutWidth="{Binding FlyoutWidth}"
+       Shell.BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}"
+       Shell.ForegroundColor="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}"
+       Shell.TitleColor="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}">
+
+    <!-- R-01 / UI_GUIDELINES §8: the toolbar is explicitly accent-coloured in both themes; its icons (☰ ← ✓ ?) use the
+         colour ON the accent, so they are readable (6.9 : 1 in both themes). The status bar is set in code-behind. -->
 
     <Shell.Triggers>
         <DataTrigger TargetType="Shell" x:DataType="vm:ShellViewModel" Binding="{Binding IsFlyoutLocked}" Value="True">

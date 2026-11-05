@@ -20,7 +20,7 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenCommand}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
                                 <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
                                        Text="{StaticResource IconTodoDue}"
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}">
@@ -76,6 +76,10 @@
                                         SemanticProperties.Description="{Binding PayText}" />
                                 <Button Grid.Column="3" Text="{Binding EnterText}" Style="{StaticResource SecondaryButton}"
                                         Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center" />
+
+                                <!-- The row opens another page (R-16). -->
+                                <Label Grid.Column="4" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
+                                       VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

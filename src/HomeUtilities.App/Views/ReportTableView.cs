@@ -236,7 +236,7 @@ public sealed class ReportTableView : ContentView
         {
             var cell = MakeCell(
                 group.Text,
-                new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Heading, Separator: position > 0, Stripe: group.Index >= 0, ColorIndex: group.ColorIndex, ToolTip: group.Text));
+                new CellLook(TextAlignment.Center, Bold: true, Tint: CellTint.Heading, Separator: position > 0, Stripe: group.Index >= 0, ColorIndex: group.ColorIndex, MaxLines: 2, ToolTip: group.Text));
             body.Add(cell, position, 0);
             Grid.SetColumnSpan(cell, group.Span);
             position += group.Span;

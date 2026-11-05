@@ -110,7 +110,7 @@ public class DraftBillsTests : IDisposable
         var vm = await LoadBillsAsync();
 
         Assert.Equal(2, vm.Items.Count);
-        Assert.Equal("BillTotals 20.00 Currency_Symbol_EUR [en]|0.00 Currency_Symbol_EUR [en]|20.00 Currency_Symbol_EUR [en] [en]".Replace(" [en]|", "|"), vm.TotalsText.Replace(" [en]|", "|"));
+        Assert.Equal("BillTotals 20.00\u00A0Currency_Symbol_EUR [en]|0.00\u00A0Currency_Symbol_EUR [en]|20.00\u00A0Currency_Symbol_EUR [en] [en]".Replace(" [en]|", "|"), vm.TotalsText.Replace(" [en]|", "|"));
     }
 
     [Fact]

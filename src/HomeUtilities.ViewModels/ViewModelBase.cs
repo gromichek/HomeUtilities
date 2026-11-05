@@ -17,6 +17,20 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
     [ObservableProperty]
     private string _title = string.Empty;
 
+    /// <summary>
+    /// True while the first load of the screen takes longer than <see cref="LoadingHintDelay"/> (R-52, UI_GUIDELINES §10):
+    /// the page then shows the muted "Loading…" text in place of the content. Only for screens that override
+    /// <see cref="LoadingHintApplies"/>.
+    /// </summary>
+    [ObservableProperty]
+    private bool _showLoading;
+
+    /// <summary>A load faster than this shows no "Loading…" text at all.</summary>
+    public static TimeSpan LoadingHintDelay { get; } = TimeSpan.FromMilliseconds(300);
+
+    /// <summary>True while the screen has nothing to show yet (usually <c>!IsLoaded</c>); false = no loading hint.</summary>
+    protected virtual bool LoadingHintApplies => false;
+
     protected ViewModelBase()
     {
         WeakReferenceMessenger.Default.RegisterAll(this);
@@ -63,6 +77,23 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
         return next.Token;
     }
 
+    private async Task ShowLoadingHintAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(LoadingHintDelay, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!token.IsCancellationRequested && LoadingHintApplies)
+        {
+            ShowLoading = true;
+        }
+    }
+
     /// <summary>Cancels the load in progress, if any.</summary>
     protected void CancelLoad()
     {
@@ -82,6 +113,11 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
 
         var token = BeginLoad();
         var watch = PerformanceLog.Start();
+        if (LoadingHintApplies)
+        {
+            _ = ShowLoadingHintAsync(token);
+        }
+
         try
         {
             await load(token);
@@ -89,6 +125,10 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
         catch (OperationCanceledException)
         {
             return;
+        }
+        finally
+        {
+            ShowLoading = false;
         }
 
         if (!token.IsCancellationRequested)

@@ -8,8 +8,19 @@ public interface IDialogService
 
     Task<bool> ConfirmAsync(string title, string message, string accept, string cancel);
 
-    /// <summary>Returns the chosen option or null if the user cancelled.</summary>
-    Task<string?> ChooseAsync(string title, IReadOnlyList<string> options);
+    /// <summary>
+    /// Shows the app's own choice dialog (radio rows, the current value marked; UI_GUIDELINES §3a) and returns the
+    /// **index** of the chosen option, or null if the user cancelled. Callers map the index back to their record, never
+    /// the display text (two records may have the same name).
+    /// </summary>
+    /// <param name="selectedIndex">The option marked when the dialog opens (null = none).</param>
+    Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null);
+
+    /// <summary>
+    /// Picks a **command** (e.g. Camera / Gallery) with the system action sheet. Returns the chosen text or null if the
+    /// user cancelled. Never use it to pick a record or an option (use <see cref="ChooseAsync"/>).
+    /// </summary>
+    Task<string?> ChooseCommandAsync(string title, IReadOnlyList<string> commands);
 
     /// <summary>The standard "Save changes?" dialog with Save / Don't save / Cancel.</summary>
     Task<UnsavedChangesChoice> AskUnsavedChangesAsync();

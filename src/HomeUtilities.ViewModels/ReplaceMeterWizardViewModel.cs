@@ -123,6 +123,9 @@ public sealed partial class ReplaceMeterWizardViewModel : EditorDialogViewModel
 
     public bool HasNoContracts => ContractRows.Count == 0;
 
+    /// <summary>The hot-water hint is shown only when the meter being replaced is a hot-water meter (R-33).</summary>
+    public bool ShowContractsHint => _old.Resource == MeterResource.HotWater;
+
     /// <summary>Id of the new meter after a successful <see cref="ReplaceCommand"/>.</summary>
     public Guid? NewMeterId { get; private set; }
 

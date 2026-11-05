@@ -112,7 +112,7 @@
                                             <Label Text="{Binding Text}" />
                                             <Label Text="{Binding Note}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasNote}" />
                                         </VerticalStackLayout>
-                                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                        <Button Grid.Column="1" Style="{StaticResource DestructiveIconButton}"
                                                 Text="{StaticResource IconDelete}" Command="{Binding RemoveCommand}"
                                                 ToolTipProperties.Text="{Binding RemoveText}"
                                                 SemanticProperties.Description="{Binding RemoveText}" />

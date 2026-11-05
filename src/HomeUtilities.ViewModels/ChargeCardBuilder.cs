@@ -61,14 +61,27 @@ public sealed class ChargeCardBuilder
             : charge.IsComplete ? ChargeCardStatus.Complete
             : ChargeCardStatus.Incomplete;
 
-        var hasAmounts = status is ChargeCardStatus.Complete or ChargeCardStatus.Incomplete;
         var lines = new List<ChargeLineViewModel>();
         var detailShown = new HashSet<Guid>();
+        var noReadings = NoReadingComponents(charge);
+        var reasons = LineReasons(charge, noReadings);
         foreach (var line in charge.Lines)
         {
             var details = detailShown.Add(line.ComponentId) ? Details(line, registers) : [];
-            lines.Add(Line(line, input.Components.FirstOrDefault(c => c.Id == line.ComponentId), describer, symbol, details, charge.Period));
+            reasons.TryGetValue(line.ComponentId, out var reason);
+            lines.Add(Line(
+                line, input.Components.FirstOrDefault(c => c.Id == line.ComponentId), describer, symbol, details, charge.Period,
+                contract.VatCalculation, reason ?? string.Empty));
         }
+
+        // A total is shown only when it was really calculated: "—" when no line could be (never "0,00", R-35), "≈ 12,30"
+        // when only part of the lines could (UI_GUIDELINES §9).
+        var totalText = status switch
+        {
+            ChargeCardStatus.Complete => Money(charge.TotalGross, symbol),
+            ChargeCardStatus.Incomplete => lines.Any(l => l.HasAmounts) ? "≈ " + Money(charge.TotalGross, symbol) : NoValue,
+            _ => string.Empty,
+        };
 
         var card = new ChargeCardViewModel(
             contract.Id,
@@ -77,16 +90,16 @@ public sealed class ChargeCardBuilder
             color,
             status,
             _localizer["ChargeStatus_" + status],
-            hasAmounts ? Money(charge.TotalGross, symbol) : string.Empty,
+            totalText,
             Money(charge.TotalNet, symbol),
             Money(charge.TotalVat, symbol))
         {
             Lines = lines,
-            VatGroupTexts = hasAmounts && contract.VatCalculation == VatCalculation.OnTotal
+            VatGroupTexts = status is ChargeCardStatus.Complete or ChargeCardStatus.Incomplete && contract.VatCalculation == VatCalculation.OnTotal
                 ? [.. (charge.VatGroups ?? []).Select(g => _localizer.Get(
                     "ChargeVatGroup", TariffDescriber.FormatQuantity(g.VatPercent), Money(g.Net, symbol), Money(g.Vat, symbol)))]
                 : [],
-            Warnings = Warnings(input, charge, registers),
+            Warnings = Warnings(input, charge, registers, noReadings),
             NoTariffText = _localizer["ChargeNoTariff"],
             NoTariffLinkText = _localizer["ChargeOpenContract"],
             NoTariffCommand = new AsyncRelayCommand(() => _navigation.OpenContract(contract.PropertyId, contract.Id)),
@@ -97,10 +110,76 @@ public sealed class ChargeCardBuilder
         return card;
     }
 
-    private static string Money(decimal amount, string symbol) => $"{TariffDescriber.FormatMoney(amount)} {symbol}";
+    /// <summary>The text of a value that could not be calculated (UI_GUIDELINES §9).</summary>
+    private const string NoValue = "—";
+
+    private static string Money(decimal amount, string symbol) => BillText.Money(amount, symbol);
+
+    /// <summary>
+    /// The metered components of the charge that have no reading in the month at all: their consumption is incomplete and the last
+    /// reading is older than the month (or there is none). Their missing price is only a consequence — the cause to name is the
+    /// missing readings (R-37).
+    /// </summary>
+    private static Dictionary<Guid, DateOnly?> NoReadingComponents(CalculatedCharge charge)
+    {
+        var result = new Dictionary<Guid, DateOnly?>();
+        foreach (var group in charge.Lines.GroupBy(l => l.ComponentId))
+        {
+            var results = group.SelectMany(l => l.Consumption).ToList();
+            if (results.Count == 0 || results.All(r => r.IsComplete))
+            {
+                continue;
+            }
+
+            // The newest reading the calculation knows about: the end reading, else the start one (the month has none of its own).
+            var last = results.Select(r => r.EndReading?.Date ?? r.StartReading?.Date).Where(d => d is not null).Max();
+            if (last is null || last < charge.Period.FirstDay)
+            {
+                result[group.Key] = last;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>The short reason a line has no amount ("no price", "no readings"…), per component.</summary>
+    private Dictionary<Guid, string> LineReasons(CalculatedCharge charge, Dictionary<Guid, DateOnly?> noReadings)
+    {
+        var reasons = new Dictionary<Guid, string>();
+        foreach (var warning in charge.Warnings.Where(w => w.ComponentId is not null))
+        {
+            var id = warning.ComponentId!.Value;
+            var key = warning.Code switch
+            {
+                ChargeWarningCodes.NoRateForDate or ChargeWarningCodes.ConsumptionIncomplete when noReadings.ContainsKey(id) => "ChargeLineReason_NoReadings",
+                ChargeWarningCodes.NoRateForDate => "ChargeLineReason_NoPrice",
+                ChargeWarningCodes.ConsumptionIncomplete => "ChargeLineReason_NoReadings",
+                ChargeWarningCodes.MissingParameter => "ChargeLineReason_NoParameter",
+                ChargeWarningCodes.NoMeters => "ChargeLineReason_NoMeters",
+                ChargeWarningCodes.UnknownVat => "ChargeLineReason_UnknownVat",
+                ChargeWarningCodes.CurrencyMismatch => "ChargeLineReason_Currency",
+                ChargeWarningCodes.InvalidTariff => "ChargeLineReason_Invalid",
+                ChargeWarningCodes.QuantityFromBill => "ChargeLineReason_NoQuantity",
+                _ => null,
+            };
+            if (key is not null && !reasons.ContainsKey(id))
+            {
+                reasons[id] = _localizer[key];
+            }
+        }
+
+        return reasons;
+    }
 
     private ChargeLineViewModel Line(
-        ChargeLine line, TariffComponent? component, TariffDescriber describer, string symbol, IReadOnlyList<ChargeReadingDetailViewModel> details, YearMonth period)
+        ChargeLine line,
+        TariffComponent? component,
+        TariffDescriber describer,
+        string symbol,
+        IReadOnlyList<ChargeReadingDetailViewModel> details,
+        YearMonth period,
+        VatCalculation vatCalculation,
+        string reason)
     {
         var quantity = line.Quantity is { } q ? QuantityText(line.Basis, q, component, describer) : string.Empty;
         if (line.Basis == ChargeBasis.QuantityFromBill)
@@ -115,6 +194,18 @@ public sealed class ChargeCardBuilder
             ? _localizer.Get("ChargeUnitPrice", TariffDescriber.FormatPrice(price), symbol, _localizer[line.PriceIncludesVat ? "TariffVatIncluded" : "TariffVatExcluded"])
             : string.Empty;
         var hasAmounts = !line.IsFromBill && line.IsComplete;
+
+        // One breakdown per line (R-36): "excl. VAT 10,00 € + VAT 21 % 2,10 €"; with VAT on the total only the net amount
+        // (the VAT is given once, per percent, under the lines).
+        var breakdown = !hasAmounts
+            ? string.Empty
+            : vatCalculation == VatCalculation.OnTotal
+                ? _localizer.Get("ChargeLineBreakdownNet", Money(line.Net, symbol))
+                : _localizer.Get(
+                    "ChargeLineBreakdown",
+                    Money(line.Net, symbol),
+                    _localizer.Get("ChargePercent", TariffDescriber.FormatQuantity(line.VatPercent)),
+                    Money(line.Vat, symbol));
         return new ChargeLineViewModel(
             line.ComponentName,
             quantity,
@@ -122,11 +213,15 @@ public sealed class ChargeCardBuilder
             hasAmounts ? Money(line.Net, symbol) : string.Empty,
             hasAmounts ? _localizer.Get("ChargePercent", TariffDescriber.FormatQuantity(line.VatPercent)) : string.Empty,
             hasAmounts ? Money(line.Vat, symbol) : string.Empty,
-            hasAmounts ? Money(line.Gross, symbol) : string.Empty,
+            hasAmounts ? Money(line.Gross, symbol) : NoValue,
             line.IsFromBill,
             _localizer["ChargeFromBill"],
             !line.IsFromBill && !line.IsComplete,
-            details);
+            details)
+        {
+            BreakdownText = breakdown,
+            ReasonText = !line.IsFromBill && !line.IsComplete ? reason : string.Empty,
+        };
     }
 
     private string QuantityText(ChargeBasis basis, decimal quantity, TariffComponent? component, TariffDescriber describer)
@@ -230,11 +325,21 @@ public sealed class ChargeCardBuilder
         return null;
     }
 
-    private IReadOnlyList<ChargeWarningViewModel> Warnings(ChargeInput input, CalculatedCharge charge, Dictionary<Guid, (Meter Meter, MeterRegister Register)> registers)
+    private IReadOnlyList<ChargeWarningViewModel> Warnings(
+        ChargeInput input,
+        CalculatedCharge charge,
+        Dictionary<Guid, (Meter Meter, MeterRegister Register)> registers,
+        Dictionary<Guid, DateOnly?> noReadings)
     {
         var contract = input.Contract;
         var result = new List<ChargeWarningViewModel>();
         var seen = new HashSet<string>();
+
+        // One link per target: several findings of the same tariff show one "Open tariff", the readings one "Open readings".
+        var linked = new HashSet<string>();
+        (string Text, Func<Task>? Action) Link(string key, string textKey, Func<Task> open) =>
+            linked.Add(key) ? (_localizer[textKey], open) : (string.Empty, null);
+
         foreach (var warning in charge.Warnings)
         {
             var component = warning.ComponentId is { } id ? input.Components.FirstOrDefault(c => c.Id == id) : null;
@@ -248,43 +353,48 @@ public sealed class ChargeCardBuilder
             Func<Task>? action = null;
             switch (warning.Code)
             {
+                case ChargeWarningCodes.NoRateForDate when warning.ComponentId is { } missingId && noReadings.ContainsKey(missingId):
+                    // The price is looked up at the date of the last reading: with no reading in the month the missing price is
+                    // only a consequence, and "No readings for {month}" (below) names the real cause (R-37).
+                    continue;
                 case ChargeWarningCodes.NoRateForDate:
                     message = _localizer.Get("ChargeWarn_NoRate", DateText(arg0), name);
-                    actionText = _localizer["ChargeOpenTariff"];
-                    action = () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty);
+                    (actionText, action) = Link("tariff:" + component?.Id, "ChargeOpenTariff", () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty));
                     break;
                 case ChargeWarningCodes.MissingParameter:
                     message = _localizer.Get("ChargeWarn_MissingParameter", ParameterName(arg0), charge.Period.FirstDay);
-                    actionText = _localizer["ChargeOpenProperty"];
-                    action = () => _navigation.OpenProperty(input.Property.Id);
+                    (actionText, action) = Link("property", "ChargeOpenProperty", () => _navigation.OpenProperty(input.Property.Id));
+                    break;
+                case ChargeWarningCodes.ConsumptionIncomplete when warning.ComponentId is { } incompleteId && noReadings.TryGetValue(incompleteId, out var lastReading):
+                    // "No readings for October 2026 — the last one is from 15.03.2023", with a link to Readings.
+                    var month = charge.Period.FirstDay.ToString("MMMM yyyy", CultureInfo.CurrentCulture);
+                    message = lastReading is { } last
+                        ? _localizer.Get("ChargeWarn_NoReadings", month, last.ToString("d", CultureInfo.CurrentCulture))
+                        : _localizer.Get("ChargeWarn_NoReadingsNone", month);
+                    (actionText, action) = Link("readings", "ChargeOpenReadings", () => _navigation.OpenReadings(input.Property.Id));
                     break;
                 case ChargeWarningCodes.ConsumptionIncomplete:
                     message = _localizer.Get("ChargeWarn_ReadingsMissing", MissingMeters(charge, warning.ComponentId, input.PropertyMeters, registers, name));
-                    actionText = _localizer["ChargeOpenReadings"];
-                    action = () => _navigation.OpenReadings(input.Property.Id);
+                    (actionText, action) = Link("readings", "ChargeOpenReadings", () => _navigation.OpenReadings(input.Property.Id));
                     break;
                 case ChargeWarningCodes.NoMeters:
                     message = _localizer.Get("ChargeWarn_NoMeters", name);
-                    actionText = _localizer["ChargeOpenContract"];
-                    action = () => _navigation.OpenContract(contract.PropertyId, contract.Id);
+                    (actionText, action) = Link("contract", "ChargeOpenContract", () => _navigation.OpenContract(contract.PropertyId, contract.Id));
                     break;
                 case ChargeWarningCodes.UnknownVat:
                     message = _localizer.Get("ChargeWarn_UnknownVat", arg0, name);
-                    actionText = _localizer["ChargeOpenTariff"];
-                    action = () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty);
+                    (actionText, action) = Link("tariff:" + component?.Id, "ChargeOpenTariff", () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty));
                     break;
                 case ChargeWarningCodes.CurrencyMismatch:
                     message = _localizer.Get("ChargeWarn_CurrencyMismatch", name, arg0, arg1);
-                    actionText = _localizer["ChargeOpenTariff"];
-                    action = () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty);
+                    (actionText, action) = Link("tariff:" + component?.Id, "ChargeOpenTariff", () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty));
                     break;
                 case ChargeWarningCodes.TierUsageUnknown:
                     message = _localizer.Get("ChargeWarn_TierUsageUnknown", name);
                     break;
                 case ChargeWarningCodes.InvalidTariff:
                     message = _localizer.Get("ChargeWarn_InvalidTariff", name);
-                    actionText = _localizer["ChargeOpenTariff"];
-                    action = () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty);
+                    (actionText, action) = Link("tariff:" + component?.Id, "ChargeOpenTariff", () => _navigation.OpenComponent(contract.Id, component?.Id ?? Guid.Empty));
                     break;
                 case ChargeWarningCodes.QuantityFromBill:
                     message = _localizer.Get("ChargeWarn_QuantityFromBill", name);

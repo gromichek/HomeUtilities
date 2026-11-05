@@ -47,7 +47,7 @@ internal static class PhotoPicking
 
         var take = localizer["PhotoTake"];
         var gallery = localizer["PhotoGallery"];
-        var choice = await dialogs.ChooseAsync(localizer["PhotoTitle"], [take, gallery]);
+        var choice = await dialogs.ChooseCommandAsync(localizer["PhotoTitle"], [take, gallery]);
         if (choice is null)
         {
             return (null, string.Empty);

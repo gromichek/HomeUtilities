@@ -19,15 +19,22 @@
             <Label Text="{Binding RuleHint}" Style="{StaticResource MutedLabel}" />
 
             <Label Text="{Binding PeriodLabel}" Style="{StaticResource MutedLabel}" />
-            <DatePicker Date="{Binding Period}" Format="MMMM yyyy" />
+            <!-- App-language month text; the picker lies over it, invisible, and opens on tap (R-02). -->
+            <Grid>
+                <Label Text="{Binding PeriodText}" VerticalOptions="Center" InputTransparent="True" />
+                <DatePicker Date="{Binding Period}" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" />
+            </Grid>
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                <Label Grid.Column="0" Text="{Binding CoversLabel}" VerticalOptions="Center" />
-                <Switch Grid.Column="1" IsToggled="{Binding Covers}" />
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                <Switch IsToggled="{Binding Covers}" />
+                <Label Grid.Column="1" Text="{Binding CoversLabel}" VerticalOptions="Center" />
             </Grid>
             <VerticalStackLayout Spacing="2" IsVisible="{Binding Covers}">
                 <Label Text="{Binding UntilLabel}" Style="{StaticResource MutedLabel}" />
-                <DatePicker Date="{Binding Until}" Format="MMMM yyyy" />
+                <Grid>
+                    <Label Text="{Binding UntilText}" VerticalOptions="Center" InputTransparent="True" />
+                    <DatePicker Date="{Binding Until}" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" />
+                </Grid>
             </VerticalStackLayout>
             <Label Text="{Binding RangeError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding RangeError, Converter={StaticResource HasText}}" />

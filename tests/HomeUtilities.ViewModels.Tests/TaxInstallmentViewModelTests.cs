@@ -102,10 +102,10 @@ public class TaxInstallmentViewModelTests : IDisposable
         var dialog = new TaxYearEditorViewModel(_kit.Kit.Localizer, _kit.Kit.Clock, "€");
 
         dialog.AmountText = "101.00";
-        Assert.Equal("25.25 € · 25.25 € · 25.25 € · 25.25 €", dialog.PreviewText);
+        Assert.Equal("25.25\u00A0€ · 25.25\u00A0€ · 25.25\u00A0€ · 25.25\u00A0€", dialog.PreviewText);
 
         dialog.AmountText = "100.03";
-        Assert.Equal("25.03 € · 25.00 € · 25.00 € · 25.00 €", dialog.PreviewText);
+        Assert.Equal("25.03\u00A0€ · 25.00\u00A0€ · 25.00\u00A0€ · 25.00\u00A0€", dialog.PreviewText);
 
         dialog.AmountText = "abc";
         Assert.Equal(string.Empty, dialog.PreviewText);
@@ -195,8 +195,8 @@ public class TaxInstallmentViewModelTests : IDisposable
 
         var year = Assert.Single(vm.TaxYears);
         Assert.Equal(2027, year.Year);
-        Assert.Equal($"TaxYearHeader 2027|101.00 {Eur} [en]", year.HeaderText);
-        Assert.Equal($"TaxYearSummary 0.00 {Eur}|101.00 {Eur} [en]", year.SummaryText);
+        Assert.Equal($"TaxYearHeader 2027|101.00\u00A0{Eur} [en]", year.HeaderText);
+        Assert.Equal($"TaxYearSummary 0.00\u00A0{Eur}|101.00\u00A0{Eur} [en]", year.SummaryText);
         Assert.Equal(4, year.Installments.Count);
         Assert.Equal($"TaxInstallmentRow 2|4|15.05.2027 [en]", year.Installments[1].TitleText);
         Assert.True(year.CanPayYear);
@@ -316,7 +316,7 @@ public class TaxInstallmentViewModelTests : IDisposable
         await vm.OnAppearingAsync();
 
         var year = Assert.Single(vm.TaxYears);
-        Assert.Equal($"TaxYearSummary 25.00 {Eur}|75.00 {Eur} [en]", year.SummaryText);
+        Assert.Equal($"TaxYearSummary 25.00\u00A0{Eur}|75.00\u00A0{Eur} [en]", year.SummaryText);
         Assert.Equal(
             [BillBadgeKind.Paid, BillBadgeKind.Overdue, BillBadgeKind.Overdue, BillBadgeKind.Unpaid],
             year.Installments.Select(i => i.Badge));

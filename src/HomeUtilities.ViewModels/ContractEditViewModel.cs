@@ -783,14 +783,17 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private Task ChooseCategoryAsync() => RunSafeAsync(async () =>
     {
         var options = CategoryOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["ContractChooseCategory"], [.. options.Select(o => o.Name)]);
-        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { } option)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["ContractChooseCategory"],
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedCategory?.Id));
+        if (picked is not { } index)
         {
             return;
         }
 
         _categoryTouched = true;
-        SelectedCategory = option;
+        SelectedCategory = options[index];
     });
 
     /// <summary>Opens the supplier list with "＋ New supplier…" as the last entry.</summary>
@@ -799,19 +802,22 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     {
         var options = SupplierOptions();
         var newSupplier = _localizer["ContractNewSupplier"];
-        var picked = await Dialogs.ChooseAsync(_localizer["ContractChooseSupplier"], [.. options.Select(o => o.Name), newSupplier]);
-        if (picked is null)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["ContractChooseSupplier"],
+            [.. options.Select(o => o.Name), newSupplier],
+            options.IndexWhere(o => o.Id == SelectedSupplier?.Id));
+        if (picked is not { } index)
         {
             return;
         }
 
-        if (picked == newSupplier)
+        if (index >= options.Count)
         {
             await NewSupplierAsync();
         }
-        else if (options.FirstOrDefault(o => o.Name == picked) is { } option)
+        else
         {
-            SelectedSupplier = option;
+            SelectedSupplier = options[index];
         }
     });
 

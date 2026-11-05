@@ -125,10 +125,14 @@
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowPeriodFields}">
                             <Label Text="{Binding Texts.StartLabel}" Style="{StaticResource MutedLabel}" />
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                                <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24" Command="{Binding PreviousStartCommand}" />
-                                <DatePicker x:Name="StartPicker" Grid.Column="1" Format="MMMM yyyy" HorizontalOptions="Center"
-                                            Date="{Binding StartDate, Converter={StaticResource DateOnly}}" />
-                                <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24" Command="{Binding NextStartCommand}" />
+                                <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24" Command="{Binding PreviousStartCommand}" />
+                                <Grid Grid.Column="1" HorizontalOptions="Center">
+                                    <Label Text="{Binding StartMonthText}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalOptions="Center"
+                                           Padding="12,0" InputTransparent="True" />
+                                    <DatePicker x:Name="StartPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}"
+                                                Date="{Binding StartDate, Converter={StaticResource DateOnly}}" />
+                                </Grid>
+                                <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24" Command="{Binding NextStartCommand}" />
                             </Grid>
                             <Label Text="{Binding StartError}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding StartError, Converter={StaticResource HasText}}" />
@@ -140,10 +144,14 @@
                             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEnd}">
                                 <Label Text="{Binding Texts.EndLabel}" Style="{StaticResource MutedLabel}" />
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                                    <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="‹" FontSize="24" Command="{Binding PreviousEndCommand}" />
-                                    <DatePicker x:Name="EndPicker" Grid.Column="1" Format="MMMM yyyy" HorizontalOptions="Center"
-                                                Date="{Binding EndDate, Converter={StaticResource DateOnly}}" />
-                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="24" Command="{Binding NextEndCommand}" />
+                                    <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24" Command="{Binding PreviousEndCommand}" />
+                                    <Grid Grid.Column="1" HorizontalOptions="Center">
+                                        <Label Text="{Binding EndMonthText}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalOptions="Center"
+                                               Padding="12,0" InputTransparent="True" />
+                                        <DatePicker x:Name="EndPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}"
+                                                    Date="{Binding EndDate, Converter={StaticResource DateOnly}}" />
+                                    </Grid>
+                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24" Command="{Binding NextEndCommand}" />
                                 </Grid>
                                 <Label Text="{Binding EndError}" Style="{StaticResource ErrorLabel}"
                                        IsVisible="{Binding EndError, Converter={StaticResource HasText}}" />
@@ -196,7 +204,7 @@
                                IsVisible="{Binding VatPercentError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding Texts.VatLabel}" Style="{StaticResource MutedLabel}" />
-                        <Label Text="{Binding Amounts.VatText}" />
+                        <Label Text="{Binding Amounts.VatDisplayText}" />
 
                         <Label Text="{Binding Texts.GrossLabel}" Style="{StaticResource MutedLabel}" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
