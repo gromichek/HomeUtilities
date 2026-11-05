@@ -361,13 +361,14 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     {
         var same = _localizer["TariffCategorySameAsContract"];
         var options = CategoryOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["TariffChooseCategory"], [same, .. options.Select(o => o.Name)]);
-        if (picked is null)
+        var current = SelectedCategory is null ? 0 : options.IndexWhere(o => o.Id == SelectedCategory.Id) + 1;
+        var picked = await Dialogs.ChooseAsync(_localizer["TariffChooseCategory"], [same, .. options.Select(o => o.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        SelectedCategory = picked == same ? null : options.FirstOrDefault(o => o.Name == picked) ?? SelectedCategory;
+        SelectedCategory = index == 0 ? null : options[index - 1];
     });
 
     [RelayCommand]

@@ -266,13 +266,15 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     private Task ChoosePropertyFilterAsync() => RunSafeAsync(async () =>
     {
         var all = _localizer["BillAllProperties"];
-        var picked = await _dialogs.ChooseAsync(_localizer["OverviewPropertyFilter"], [all, .. _data.Properties.Select(p => p.Name)]);
-        if (picked is null)
+        var properties = _data.Properties;
+        var current = _propertyFilter is { } currentId ? properties.IndexWhere(p => p.Id == currentId) + 1 : 0;
+        var picked = await _dialogs.ChooseAsync(_localizer["OverviewPropertyFilter"], [all, .. properties.Select(p => p.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        SetFilter(picked == all ? null : _data.Properties.FirstOrDefault(p => p.Name == picked)?.Id);
+        SetFilter(index == 0 ? null : properties[index - 1].Id);
         Rebuild();
     });
 

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core;
+using HomeUtilities.ViewModels.Common;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Backup;
 
@@ -542,7 +543,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     [RelayCommand]
     private Task ChooseIntervalAsync() => RunSafeAsync(async () =>
     {
-        var days = await ChooseNumberAsync("SettingsBackupAutoInterval", AutoBackupSettings.IntervalChoices, IntervalName);
+        var days = await ChooseNumberAsync("SettingsBackupAutoInterval", AutoBackupSettings.IntervalChoices, IntervalName, _auto.Settings.IntervalDays);
         if (days is { } chosen)
         {
             _auto.Save(_auto.Settings with { IntervalDays = chosen });
@@ -554,7 +555,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
     [RelayCommand]
     private Task ChooseKeepAsync() => RunSafeAsync(async () =>
     {
-        var count = await ChooseNumberAsync("SettingsBackupAutoKeep", AutoBackupSettings.KeepChoices, n => n.ToString(CultureInfo.CurrentCulture));
+        var count = await ChooseNumberAsync("SettingsBackupAutoKeep", AutoBackupSettings.KeepChoices, n => n.ToString(CultureInfo.CurrentCulture), _auto.Settings.KeepCopies);
         if (count is { } chosen)
         {
             _auto.Save(_auto.Settings with { KeepCopies = chosen });
@@ -570,12 +571,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         }
     }
 
-    private async Task<int?> ChooseNumberAsync(string titleKey, IReadOnlyList<int> choices, Func<int, string> name)
+    private async Task<int?> ChooseNumberAsync(string titleKey, IReadOnlyList<int> choices, Func<int, string> name, int? current = null)
     {
         var names = choices.Select(name).ToList();
-        var picked = await _dialogs.ChooseAsync(_localizer[titleKey], names);
-        var index = picked is null ? -1 : names.IndexOf(picked);
-        return index < 0 ? null : choices[index];
+        var picked = await _dialogs.ChooseAsync(_localizer[titleKey], names, current is { } value ? choices.IndexWhere(c => c == value) : null);
+        return picked is { } index ? choices[index] : null;
     }
 
     private string IntervalName(int days) => _localizer[$"BackupInterval_{days}"];
@@ -590,12 +590,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         var withAttachments = _localizer["DataExportWithAttachments"];
         var jsonOnly = _localizer["DataExportJsonOnly"];
         var choice = await _dialogs.ChooseAsync(_localizer["DataExportChoiceTitle"], [withAttachments, jsonOnly]);
-        if (choice is null)
+        if (choice is not { } choiceIndex)
         {
             return;
         }
 
-        var zipped = choice == withAttachments;
+        var zipped = choiceIndex == 0;
         var result = await _backupFiles.SaveAsync(
             _exchange.SuggestFileName(zipped),
             zipped ? "application/zip" : "application/json",

@@ -1282,6 +1282,39 @@ public class BillEditViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ChooseContract_TwoContractsWithTheSameTitle_TheChosenOneIsTaken()
+    {
+        // The picked row is identified by its index, not by its text (R-06): both contracts are called "Gas".
+        var first = _kit.AddWaterContract("Gas", tariff: false);
+        var second = _kit.AddWaterContract("Gas", tariff: false);
+        var vm = await NewEditorAsync();
+
+        _kit.Kit.Dialogs.ChooseIndexScript = options => options.ToList().LastIndexOf("Gas");
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+
+        Assert.NotEqual(first.Id, second.Id);
+        Assert.Equal(second.Id, vm.SelectedContract?.Id);
+        var shown = Assert.Single(_kit.Kit.Dialogs.Choices);
+        Assert.Equal(["Gas", "Gas"], shown.Options);
+    }
+
+    [Fact]
+    public async Task ChooseContract_MarksTheCurrentContractWhenTheDialogOpens()
+    {
+        _ = _kit.AddWaterContract("Gas", tariff: false);
+        var second = _kit.AddWaterContract("Gas", tariff: false);
+        var vm = await NewEditorAsync();
+        _kit.Kit.Dialogs.ChooseIndexScript = _ => 1;
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+        Assert.Equal(second.Id, vm.SelectedContract?.Id);
+
+        _kit.Kit.Dialogs.ChooseIndexScript = _ => null;
+        await vm.ChooseContractCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, _kit.Kit.Dialogs.Choices.Last().Selected);
+    }
+
+    [Fact]
     public async Task Dates_OneOffExpense_AreSaved()
     {
         var vm = await NewEditorAsync();

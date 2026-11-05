@@ -472,8 +472,11 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
         }
 
         var options = _properties.Select(PropertyOption).ToList();
-        var picked = await Dialogs.ChooseAsync(_localizer["PaymentChooseProperty"], [.. options.Select(o => o.Name)]);
-        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { } option || option.Id == SelectedProperty?.Id)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["PaymentChooseProperty"],
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedProperty?.Id));
+        if (picked is not { } index || options[index] is not { } option || option.Id == SelectedProperty?.Id)
         {
             return;
         }
@@ -501,13 +504,14 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 
         var none = _localizer["PaymentNoContract"];
         var contracts = _contracts.Where(c => c.PropertyId == property.Id).OrderBy(c => c.Title, StringComparer.CurrentCultureIgnoreCase).ToList();
-        var picked = await Dialogs.ChooseAsync(_localizer["PaymentChooseContract"], [none, .. contracts.Select(c => c.Title)]);
-        if (picked is null)
+        var current = SelectedContract is { } selected ? contracts.IndexWhere(c => c.Id == selected.Id) + 1 : 0;
+        var picked = await Dialogs.ChooseAsync(_localizer["PaymentChooseContract"], [none, .. contracts.Select(c => c.Title)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        var contract = picked == none ? null : contracts.FirstOrDefault(c => c.Title == picked);
+        var contract = index == 0 ? null : contracts[index - 1];
         if (contract?.Id == SelectedContract?.Id)
         {
             return;
@@ -601,7 +605,7 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 
         var labels = LabelsOf(candidates);
         var picked = await Dialogs.ChooseAsync(_localizer["PaymentChooseBill"], labels);
-        if (picked is null || labels.ToList().IndexOf(picked) is not (>= 0 and var index))
+        if (picked is not { } index)
         {
             return;
         }

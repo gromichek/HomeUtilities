@@ -620,8 +620,11 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     private Task ChoosePropertyAsync() => RunSafeAsync(async () =>
     {
         var options = PropertyOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseProperty"], [.. options.Select(o => o.Name)]);
-        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { } option || option.Id == SelectedProperty?.Id)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["BillChooseProperty"],
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedProperty?.Id));
+        if (picked is not { } index || options[index] is not { } option || option.Id == SelectedProperty?.Id)
         {
             return;
         }
@@ -640,13 +643,14 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
         }
 
         var none = _localizer["BillContractNone"];
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseContract"], [none, .. _contracts.Select(c => c.Title)]);
-        if (picked is null)
+        var current = SelectedContract is { } selected ? _contracts.IndexWhere(c => c.Id == selected.Id) + 1 : 0;
+        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseContract"], [none, .. _contracts.Select(c => c.Title)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        if (picked == none)
+        if (index == 0)
         {
             _contract = null;
             SelectedContract = null;
@@ -654,20 +658,20 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
             return;
         }
 
-        if (_contracts.FirstOrDefault(c => c.Title == picked) is { } contract)
-        {
-            ApplyContract(contract);
-        }
+        ApplyContract(_contracts[index - 1]);
     });
 
     [RelayCommand]
     private Task ChooseCategoryAsync() => RunSafeAsync(async () =>
     {
         var options = CategoryOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseCategory"], [.. options.Select(o => o.Name)]);
-        if (picked is not null && options.FirstOrDefault(o => o.Name == picked) is { } option)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["BillChooseCategory"],
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedCategory?.Id));
+        if (picked is { } index)
         {
-            SelectedCategory = option;
+            SelectedCategory = options[index];
         }
     });
 
@@ -676,13 +680,14 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     {
         var none = _localizer["BillNoSupplier"];
         var options = SupplierOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseSupplier"], [none, .. options.Select(o => o.Name)]);
-        if (picked is null)
+        var current = SelectedSupplier is null ? 0 : options.IndexWhere(o => o.Id == SelectedSupplier.Id) + 1;
+        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseSupplier"], [none, .. options.Select(o => o.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        SelectedSupplier = picked == none ? null : options.FirstOrDefault(o => o.Name == picked);
+        SelectedSupplier = index == 0 ? null : options[index - 1];
     });
 
     [RelayCommand]

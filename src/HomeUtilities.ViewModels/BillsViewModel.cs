@@ -265,13 +265,14 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private Task ChoosePropertyFilterAsync() => RunSafeAsync(async () =>
     {
         var all = _localizer["BillAllProperties"];
-        var picked = await _dialogs.ChooseAsync(_localizer["BillsPropertyFilter"], [all, .. _properties.Select(p => p.Name)]);
-        if (picked is null)
+        var current = _filter.PropertyId is { } currentId ? _properties.IndexWhere(p => p.Id == currentId) + 1 : 0;
+        var picked = await _dialogs.ChooseAsync(_localizer["BillsPropertyFilter"], [all, .. _properties.Select(p => p.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        _filter.PropertyId = picked == all ? null : _properties.FirstOrDefault(p => p.Name == picked)?.Id;
+        _filter.PropertyId = index == 0 ? null : _properties[index - 1].Id;
         _highlightContractId = null;
         RebuildItems();
     });
@@ -280,13 +281,16 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     private Task ChooseStatusFilterAsync() => RunSafeAsync(async () =>
     {
         var options = Enum.GetValues<BillStatusFilter>().Select(s => (Filter: s, Name: StatusName(s))).ToList();
-        var picked = await _dialogs.ChooseAsync(_localizer["BillsStatusFilter"], [.. options.Select(o => o.Name)]);
-        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { Name: not null } option)
+        var picked = await _dialogs.ChooseAsync(
+            _localizer["BillsStatusFilter"],
+            [.. options.Select(o => o.Name)],
+            options.FindIndex(o => o.Filter == _filter.Status));
+        if (picked is not { } index)
         {
             return;
         }
 
-        _filter.Status = option.Filter;
+        _filter.Status = options[index].Filter;
         RebuildItems();
     });
 
@@ -300,13 +304,14 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
             .ThenBy(c => CategoryNames.DisplayName(c, _localizer), StringComparer.CurrentCultureIgnoreCase)
             .Select(c => (c.Id, Name: CategoryNames.DisplayName(c, _localizer)))
             .ToList();
-        var picked = await _dialogs.ChooseAsync(_localizer["BillsCategoryFilter"], [all, .. options.Select(o => o.Name)]);
-        if (picked is null)
+        var current = _filter.CategoryId is { } currentId ? options.FindIndex(o => o.Id == currentId) + 1 : 0;
+        var picked = await _dialogs.ChooseAsync(_localizer["BillsCategoryFilter"], [all, .. options.Select(o => o.Name)], current);
+        if (picked is not { } index)
         {
             return;
         }
 
-        _filter.CategoryId = picked == all ? null : options.FirstOrDefault(o => o.Name == picked) is { Name: not null } option ? option.Id : _filter.CategoryId;
+        _filter.CategoryId = index == 0 ? null : options[index - 1].Id;
         RebuildItems();
     });
 

@@ -238,8 +238,11 @@ public sealed partial class BillEditViewModel
         }
 
         var options = PropertyOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseProperty"], [.. options.Select(o => o.Name)]);
-        if (picked is null || options.FirstOrDefault(o => o.Name == picked) is not { } option || option.Id == SelectedProperty?.Id)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["BillChooseProperty"],
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedProperty?.Id));
+        if (picked is not { } pickedIndex || options[pickedIndex] is not { } option || option.Id == SelectedProperty?.Id)
         {
             return;
         }
@@ -263,13 +266,16 @@ public sealed partial class BillEditViewModel
             return;
         }
 
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseContract"], [.. _contracts.Select(c => c.Title)]);
-        if (picked is null || _contracts.FirstOrDefault(c => c.Title == picked) is not { } contract)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["BillChooseContract"],
+            [.. _contracts.Select(c => c.Title)],
+            _contracts.IndexWhere(c => c.Id == SelectedContract?.Id));
+        if (picked is not { } pickedIndex)
         {
             return;
         }
 
-        ApplyContract(contract);
+        ApplyContract(_contracts[pickedIndex]);
         PendingRefresh = RefreshCalculationAsync();
         await PendingRefresh;
     });
@@ -278,10 +284,13 @@ public sealed partial class BillEditViewModel
     private Task ChooseCategoryAsync() => RunSafeAsync(async () =>
     {
         var options = CategoryOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseCategory"], [.. options.Select(o => o.Name)]);
-        if (picked is not null && options.FirstOrDefault(o => o.Name == picked) is { } option)
+        var picked = await Dialogs.ChooseAsync(
+            _localizer["BillChooseCategory"],
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedCategory?.Id));
+        if (picked is { } pickedIndex)
         {
-            SelectedCategory = option;
+            SelectedCategory = options[pickedIndex];
         }
     });
 
@@ -290,13 +299,14 @@ public sealed partial class BillEditViewModel
     {
         var none = _localizer["BillNoSupplier"];
         var options = SupplierOptions();
-        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseSupplier"], [none, .. options.Select(o => o.Name)]);
-        if (picked is null)
+        var current = SelectedSupplier is null ? 0 : options.IndexWhere(o => o.Id == SelectedSupplier.Id) + 1;
+        var picked = await Dialogs.ChooseAsync(_localizer["BillChooseSupplier"], [none, .. options.Select(o => o.Name)], current);
+        if (picked is not { } pickedIndex)
         {
             return;
         }
 
-        SelectedSupplier = picked == none ? null : options.FirstOrDefault(o => o.Name == picked);
+        SelectedSupplier = pickedIndex == 0 ? null : options[pickedIndex - 1];
     });
 
     [RelayCommand]
@@ -632,7 +642,7 @@ public sealed partial class BillEditViewModel
             return;
         }
 
-        var index = line is null ? -1 : _lines.FindIndex(l => l.Id == line.Id);
+        var index = line is null ? -1 : _lines.IndexWhere(l => l.Id == line.Id);
         if (index >= 0)
         {
             _lines[index] = result;
@@ -772,7 +782,7 @@ public sealed partial class BillEditViewModel
         var image = _localizer["BillAttachmentImage"];
         var pdf = _localizer["BillAttachmentPdf"];
         var options = _media.IsCaptureSupported ? new List<string> { take, image, pdf } : [image, pdf];
-        var choice = await Dialogs.ChooseAsync(_localizer["BillAttachmentChoose"], options);
+        var choice = await Dialogs.ChooseCommandAsync(_localizer["BillAttachmentChoose"], options);
         if (choice is null)
         {
             return;
@@ -1052,7 +1062,7 @@ public sealed partial class BillEditViewModel
             : t.Name;
         var labels = templates.Select(Label).ToList();
         var picked = await Dialogs.ChooseAsync(_localizer["BillChooseTemplate"], labels);
-        if (picked is null || labels.IndexOf(picked) is var index && index < 0)
+        if (picked is not { } index)
         {
             return;
         }
