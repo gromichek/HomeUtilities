@@ -21,8 +21,10 @@ public sealed class ReportTableView : ContentView
     private const double CharWidth = 9;
     private const double CellPadding = 20;
     private const double RowHeight = 36;
-    private const double GroupHeight = 30;
-    private const double HeaderHeight = 64;
+    // Fixed heights (the frozen first column is a separate grid and must line up): room for 2 bold lines in the group row
+    // and 3 in the column header row (MaxLines of their cells), plus the colour stripe.
+    private const double GroupHeight = 50;
+    private const double HeaderHeight = 72;
     private const double SeparatorWidth = 2;
     private const double StripeHeight = 4;
     private const int HeaderRows = 2;

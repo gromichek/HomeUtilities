@@ -113,9 +113,13 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
 
         var token = BeginLoad();
         var watch = PerformanceLog.Start();
+
+        // The hint has its own token, cancelled when this load ends in any way: a load that fails before the hint delay
+        // must not leave "Loading…" on the page (T-036a check C-03).
+        using var hint = CancellationTokenSource.CreateLinkedTokenSource(token);
         if (LoadingHintApplies)
         {
-            _ = ShowLoadingHintAsync(token);
+            _ = ShowLoadingHintAsync(hint.Token);
         }
 
         try
@@ -128,6 +132,7 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
         }
         finally
         {
+            hint.Cancel();
             ShowLoading = false;
         }
 
