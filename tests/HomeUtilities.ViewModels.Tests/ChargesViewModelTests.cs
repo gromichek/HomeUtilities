@@ -890,4 +890,127 @@ public class ChargesViewModelTests : IDisposable
 
         Assert.Equal(new YearMonth(2026, 9), vm.Month);
     }
+
+    // ---- Card texts (R-35…R-38) -----------------------------------------------------------------------------------
+
+    private const string Eur = "Currency_Symbol_EUR [en]";
+
+    [Fact]
+    public async Task CompleteCard_ShowsOneLinePerService_WithTheBreakdownOnceAndLabelledTotals()
+    {
+        // Monthly fee: net 10.00 + VAT 21 % 2.10 = 12.10
+        var contract = AddContract("Water");
+        contract.VatCalculation = VatCalculation.PerLine;
+        AddComponent(contract, "Monthly fee", ChargeBasis.FixedMonthly, 10m);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal(ChargeCardStatus.Complete, card.Status);
+        Assert.Equal($"12.10\u00A0{Eur}", card.TotalText);
+        var line = Assert.Single(card.Lines);
+        Assert.Equal($"12.10\u00A0{Eur}", line.TotalText);
+        Assert.Equal($"ChargeLineBreakdown 10.00\u00A0{Eur}|ChargePercent 21 [en]|2.10\u00A0{Eur} [en]", line.BreakdownText);
+        Assert.True(line.HasBreakdown);
+        Assert.True(card.ShowTotalsRow);
+        Assert.Equal("ChargeNet [en]", card.NetLabel);
+        Assert.Equal("ChargeVat [en]", card.VatLabel);
+        Assert.Equal("ChargeTotal [en]", card.TotalLabel);
+        Assert.Equal($"10.00\u00A0{Eur}", card.NetText);
+        Assert.Equal($"2.10\u00A0{Eur}", card.VatText);
+        Assert.True(card.ShowCheckIcon);
+        Assert.False(card.ShowWarningIcon);
+    }
+
+    [Fact]
+    public async Task VatOnTheTotal_ShowsTheNetAmountOnTheLine_AndTheVatOncePerPercent()
+    {
+        var contract = AddContract("Water");
+        AddComponent(contract, "Monthly fee", ChargeBasis.FixedMonthly, 10m);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal($"ChargeLineBreakdownNet 10.00\u00A0{Eur} [en]", Assert.Single(card.Lines).BreakdownText);
+        Assert.Single(card.VatGroupTexts);
+    }
+
+    [Fact]
+    public async Task ContractThatCouldNotBeCalculated_ShowsADash_NeverZero()
+    {
+        // A meter without any reading: nothing can be calculated, the total is "—" (not 0.00).
+        var contract = AddContract("Water");
+        AddMeter(contract, "Kitchen cold");
+        AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 1.41m);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal(ChargeCardStatus.Incomplete, card.Status);
+        Assert.Equal("—", card.TotalText);
+        Assert.True(card.HasTotal);
+        Assert.False(card.ShowTotalsRow);
+        var line = Assert.Single(card.Lines);
+        Assert.Equal("—", line.TotalText);
+        Assert.False(line.HasBreakdown);
+        Assert.Equal("ChargeLineReason_NoReadings [en]", line.ReasonText);
+        Assert.True(card.ShowWarningIcon);
+        Assert.False(card.ShowCheckIcon);
+    }
+
+    [Fact]
+    public async Task PartlyCalculatedContract_ShowsTheSumOfTheCalculatedPartWithApproximately()
+    {
+        // Monthly fee 10.00 + VAT 2.10 = 12.10 is known; the metered line is not: "≈ 12.10", the other line "—".
+        var contract = AddContract("Water");
+        AddComponent(contract, "Monthly fee", ChargeBasis.FixedMonthly, 10m, order: 0);
+        AddMeter(contract, "Kitchen cold");
+        AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 1.41m, order: 1);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.Equal(ChargeCardStatus.Incomplete, card.Status);
+        Assert.Equal($"≈ 12.10\u00A0{Eur}", card.TotalText);
+        Assert.Equal([$"12.10\u00A0{Eur}", "—"], card.Lines.Select(l => l.TotalText));
+    }
+
+    [Fact]
+    public async Task MissingPriceBecauseOfMissingReadings_NamesTheReadings_WithMonthAndLastDate_AndOneLink()
+    {
+        // The price is looked up on the date of the last reading (15.03.2023), where the tariff has no price yet. The cause to
+        // name is "no readings for October 2026 — the last one is from 03/15/2023", with one link to Readings.
+        var contract = AddContract("Water");
+        var meter = AddMeter(contract, "Kitchen cold", installed: new DateOnly(2023, 3, 15));
+        Read(meter, new DateOnly(2023, 3, 15), 10m, ReadingKind.Initial);
+        var component = AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 1.41m);
+        component.Rates[0].ValidFrom = new DateOnly(2024, 1, 1);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        var warning = Assert.Single(card.Warnings);
+        Assert.Equal(
+            $"ChargeWarn_NoReadings October 2026|{new DateOnly(2023, 3, 15).ToString("d", CultureInfo.CurrentCulture)} [en]",
+            warning.Message);
+        Assert.Equal("ChargeOpenReadings [en]", warning.ActionText);
+        Assert.Equal("ChargeLineReason_NoReadings [en]", Assert.Single(card.Lines).ReasonText);
+    }
+
+    [Fact]
+    public async Task SeveralFindingsOfOneTariff_ShowOneOpenTariffLink()
+    {
+        // No price on the date and an unknown VAT code on the same component: two messages, one link to the tariff.
+        var contract = AddContract("Water");
+        var component = AddComponent(contract, "Monthly fee", ChargeBasis.FixedMonthly, 10m, vat: "NO-SUCH-CODE");
+        component.Rates[0].ValidFrom = new DateOnly(2027, 1, 1);
+        AddComponent(contract, "Other fee", ChargeBasis.FixedMonthly, 5m, vat: "NO-SUCH-CODE", order: 1);
+
+        var vm = await LoadAsync();
+
+        var card = Assert.Single(vm.Cards);
+        Assert.True(card.Warnings.Count >= 2);
+        Assert.Equal(card.Warnings.Count(w => w.HasAction), card.Warnings.Where(w => w.HasAction).Select(w => w.Message).Distinct().Count());
+        Assert.Equal(2, card.Warnings.Count(w => w.HasAction && w.ActionText == "ChargeOpenTariff [en]"));
+    }
 }
