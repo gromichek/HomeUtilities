@@ -100,6 +100,7 @@ Prompt for a new lead session:
 | 2026-11-04 | Google OAuth app goes **In production**: branch `gh-pages` (only `index.html`, `privacy.html`, `.nojekyll`, **no personal data** — owner) serves `https://gromichek.github.io/HomeUtilities/` and `/privacy.html`; Branding: home page + privacy link + authorized domain `gromichek.github.io`, no logo (a logo triggers verification). Pages enabling via API is blocked by the proxy — the owner enables it in the repo settings. |
 | 2026-11-02 | **Licence exception:** Google Play services on Android (MIT bindings `Xamarin.GooglePlayServices.*`) only for Google sign-in (T-030). README and CLAUDE.md updated. |
 | 2026-11-02 | Sync storage replaceable (`ISyncStorage`); Google Drive first; one provider per user; OneDrive/Dropbox/WebDAV later if needed (T-032a). |
+| 2026-11-05 | iOS dropped (no Mac); Windows + Android only. Second cloud provider postponed (OneDrive declined: needs an Azure tenant; Dropbox possible later). Contract templates (T-025b) dropped. |
 | 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |
 
 ## 4. The owner's data (private — never in the repo)
@@ -121,14 +122,15 @@ Prompt for a new lead session:
 - Google OAuth app is **In production** (branding pages on `gh-pages`). The owner keeps a personal step-by-step Google
   Cloud registration guide (a Claude doc, Russian) — not in the repo.
 - Next: T-034 release identity (permanent key + its SHA-1 as a new Android client, real icon, house notification icon);
-  T-032a other providers (optional); T-033 iOS.
+  installers (Windows) / release APK — under discussion (2026-11-05).
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
-   owner's choice: T-032a other providers (optional), T-033 iOS, T-025b. T-032b and the snackbar fix (#220) passed the owner's tests.
-3. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
-5. **T-033** iOS. **T-025b** contract templates (optional, low priority).
+   owner's choice: release builds / Windows installer (discussing 2026-11-05). iOS (T-033) and contract templates
+   (T-025b) dropped; second cloud (T-032a) postponed. T-032b and the snackbar fix (#220) passed the owner's tests.
+3. **T-032a** postponed (Dropbox possible later; OneDrive declined — needs an Azure tenant).
+5. ~~T-033 iOS~~, ~~T-025b~~ dropped (owner, 2026-11-05).
 6. Collected owner findings go into one batch task when the owner asks (PROGRESS "Collected …").
 
 ## 7. Pitfalls learned (details in UI_GUIDELINES §6a and PROGRESS)
