@@ -57,8 +57,8 @@ The app needs neither .NET nor the Windows App SDK on the PC (everything is incl
 ## Where the data lives
 
 The app keeps its data (database, backups, attachments, secrets, logs) in the platform's app data folder
-(`FileSystem.AppDataDirectory`). On Windows (unpackaged) this is a folder under `%LocalAppData%` such as
-`%LocalAppData%\<publisher>\HomeUtilities\Data`; *Settings → About* shows the exact path of the database file. It is **not** the
+(`FileSystem.AppDataDirectory`). On Windows (unpackaged) this is
+`%LocalAppData%\HomeUtilities.App\HomeUtilities.App\Data` (confirmed on the owner's PC, 2026-11-05); *Settings → About* shows the exact path of the database file. It is **not** the
 install folder (`%LocalAppData%\Programs\HomeUtilities`), and neither the update nor the uninstaller touches it. To remove
 the data too, delete that folder by hand (make a backup first). On Android the data is inside the app and is removed when the
 app is uninstalled.

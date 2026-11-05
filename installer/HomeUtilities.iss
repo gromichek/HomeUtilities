@@ -50,7 +50,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [InstallDelete]
 ; A newer version replaces the program files completely, so removed DLLs do not linger.
-; Only {app} (the install folder) is touched. The user data lives in %LocalAppData%\<publisher>\HomeUtilities\Data, never here.
+; Only {app} (the install folder) is touched. The user data lives in %LocalAppData%\HomeUtilities.App\HomeUtilities.App\Data, never here.
 Type: filesandordirs; Name: "{app}\*"
 
 [Files]
