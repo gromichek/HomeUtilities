@@ -1624,4 +1624,20 @@
   <data name="ChargeLineReason_NoQuantity" xml:space="preserve"><value>quantity missing</value></data>
   <data name="ChargeLineBreakdown" xml:space="preserve"><value>excl. VAT {0} + VAT {1} {2}</value></data>
   <data name="ChargeLineBreakdownNet" xml:space="preserve"><value>excl. VAT {0}</value></data>
+  <data name="SyncDetail_StartedWithSnapshot" xml:space="preserve"><value>This device started the sync.</value></data>
+  <data name="SyncDetail_ReplacedCloud" xml:space="preserve"><value>This device replaced the data in the cloud.</value></data>
+  <data name="SyncDetail_Resumed" xml:space="preserve"><value>Sync resumed.</value></data>
+  <data name="SyncDetail_CloudReplaced" xml:space="preserve"><value>The data in the cloud was replaced on another device.</value></data>
+  <data name="SyncDetail_ClockSkew" xml:space="preserve"><value>The clock of this device is more than five minutes off.</value></data>
+  <data name="SyncDetail_AppliedSnapshot" xml:space="preserve"><value>Received a full copy (records: {0}).</value></data>
+  <data name="SyncDetail_AppliedChanges" xml:space="preserve"><value>Received changes (records: {0}).</value></data>
+  <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Sent changes (records: {0}).</value></data>
+  <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Saved a full copy to the cloud.</value></data>
+  <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Removed old change files from the cloud.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>A conflict was met while merging.</value></data>
+  <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Sent an attachment file.</value></data>
+  <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Received an attachment file.</value></data>
+  <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>A received attachment file is damaged; trying again.</value></data>
+  <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Removed an old attachment file from the cloud.</value></data>
+  <data name="SyncDisconnectButton" xml:space="preserve"><value>Disconnect Google account…</value></data>
 </root>

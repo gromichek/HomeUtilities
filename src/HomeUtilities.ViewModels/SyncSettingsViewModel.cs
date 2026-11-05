@@ -261,9 +261,24 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasDetails => DetailsText.Length > 0;
 
+    /// <summary>The details list is collapsed until the owner opens it (R-43).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDetailsList))]
+    private bool _detailsExpanded;
+
+    /// <summary>The lines are shown only while the section is expanded.</summary>
+    public bool ShowDetailsList => HasDetails && DetailsExpanded;
+
+    [RelayCommand]
+    private void ToggleDetails() => DetailsExpanded = !DetailsExpanded;
+
     public bool CanSyncNow => ShowDataSync && SyncOn && !IsBusy && !IsConnecting;
 
-    partial void OnDetailsTextChanged(string value) => OnPropertyChanged(nameof(HasDetails));
+    partial void OnDetailsTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasDetails));
+        OnPropertyChanged(nameof(ShowDetailsList));
+    }
 
     partial void OnSyncOnChanged(bool value)
     {
@@ -547,7 +562,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
         ConnectText = _localizer["SyncConnect"];
         CancelSignInText = _localizer["SyncCancelSignIn"];
         CheckText = _localizer["SyncCheck"];
-        DisconnectText = _localizer["SyncDisconnect"];
+        DisconnectText = _localizer["SyncDisconnectButton"];
 
         var state = State;
         StatusText = IsConnecting
@@ -642,7 +657,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
         }
 
         LastSyncText = status.LastSyncAt is null ? _localizer["SyncNever"] : _localizer.Get("SyncLastSync", Local(status.LastSyncAt));
-        DetailsText = string.Join(Environment.NewLine, _engine.Details.Take(12).Select(d => $"{d.At.ToLocalTime():HH:mm} {d.Text}"));
+        DetailsText = SyncDetailText.Lines(_localizer, _engine.Details.Take(12));
     }
 
     private static string Local(DateTimeOffset? at) => at is { } value ? value.ToLocalTime().ToString("g", System.Globalization.CultureInfo.CurrentCulture) : string.Empty;

@@ -77,7 +77,7 @@ public sealed partial class SyncEngine
                 {
                     await using var stream = new FileStream(local, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
                     await _storage.UploadAsync(cloud, stream, ct);
-                    AddDetail($"Uploaded {cloud}.");
+                    AddDetail(SyncDetailKind.AttachmentUploaded);
                 }
             }
             else if (automatic && inCloud.Contains(cloud))
@@ -147,14 +147,15 @@ public sealed partial class SyncEngine
                 if (row.Sha256.Length == 0 || string.Equals(hash, row.Sha256, StringComparison.OrdinalIgnoreCase))
                 {
                     File.Move(part, local, overwrite: true);
-                    AddDetail($"Downloaded {CloudPath(row)}.");
+                    AddDetail(SyncDetailKind.AttachmentDownloaded);
                     _notifier?.Notify();
                     return true;
                 }
 
                 TryDelete(part);
+                // The file name stays out of the Details list; the error log has it.
                 var message = $"Checksum of {CloudPath(row)} does not match (attempt {attempt}).";
-                AddDetail(message);
+                AddDetail(SyncDetailKind.AttachmentChecksum);
                 _log?.Invoke("Sync", new InvalidDataException(message));
             }
 
@@ -221,7 +222,7 @@ public sealed partial class SyncEngine
             {
                 await _storage.DeleteAsync(CloudPath(row), ct);
                 await _state.RemoveAsync(SyncStateStore.DeletedAttachmentPrefix + key, ct);
-                AddDetail($"Deleted {CloudPath(row)} (attachment deleted more than {_options.Retention.TotalDays:0} days ago).");
+                AddDetail(SyncDetailKind.AttachmentDeleted);
             }
         }
     }

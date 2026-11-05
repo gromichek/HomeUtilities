@@ -232,8 +232,22 @@
                                 <Button Text="{Binding CloudFilesButtonText}" Command="{Binding LoadCloudFilesCommand}"
                                         Style="{StaticResource SecondaryButton}" />
                                 <Label Text="{Binding CloudFilesText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasCloudFiles}" />
-                                <Label Text="{Binding DetailsHeader}" Style="{StaticResource SectionHeader}" IsVisible="{Binding HasDetails}" />
-                                <Label Text="{Binding DetailsText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasDetails}" />
+                                <!-- Details: localized short lines, collapsed until the owner opens them (R-43). -->
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding HasDetails}">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleDetailsCommand}" />
+                                    </Grid.GestureRecognizers>
+                                    <Label Grid.Column="0" Text="{Binding DetailsHeader}" Style="{StaticResource SectionHeader}" />
+                                    <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}" FontSize="20"
+                                           VerticalOptions="Center" Style="{StaticResource MutedLabel}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:SyncSettingsViewModel" Binding="{Binding DetailsExpanded}" Value="True">
+                                                <Setter Property="Text" Value="{StaticResource IconCollapse}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Grid>
+                                <Label Text="{Binding DetailsText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowDetailsList}" />
                             </VerticalStackLayout>
                             <Button Text="{Binding CheckText}" Command="{Binding CheckConnectionCommand}"
                                     IsVisible="{Binding IsSignedIn}" Style="{StaticResource SecondaryButton}" />

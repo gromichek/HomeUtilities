@@ -180,7 +180,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
                     await _state.ClearOutboxAsync(ct);
                     await WriteSnapshotAsync(ct);
                     await _state.SetLongAsync(SyncStateStore.BootstrappedKey, 1, ct);
-                    AddDetail("This device started the sync with a snapshot.");
+                    AddDetail(SyncDetailKind.StartedWithSnapshot);
                     break;
 
                 case FirstJoinChoice.ReplaceCloud:
@@ -193,7 +193,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
                         await _storage.DeleteAsync(file.Path, ct);
                     }
 
-                    AddDetail($"This device replaced the data in the cloud (generation {cloudGeneration}).");
+                    AddDetail(SyncDetailKind.ReplacedCloud);
                     break;
 
                 case FirstJoinChoice.Replace:
@@ -235,7 +235,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
             await _state.SetAsync(SyncStateStore.EnabledKey, "1", ct);
             IsEnabled = true;
             SetStatus(new SyncStatus(SyncStateKind.Synced, await LastSyncAsync(ct)));
-            AddDetail("Sync resumed.");
+            AddDetail(SyncDetailKind.Resumed);
         }
         finally
         {
@@ -303,7 +303,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
             if (SyncFormat.MaxGeneration(files) > _generation)
             {
                 // Another device replaced the data in the cloud: uploading or applying anything would mix two generations.
-                AddDetail("The data in the cloud was replaced on another device.");
+                AddDetail(SyncDetailKind.CloudReplaced);
                 SetStatus(previous with { Kind = SyncStateKind.CloudReplaced, LastAttemptAt = attempt, Trigger = trigger });
                 return true;
             }
@@ -320,7 +320,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
             var skew = ClockSkewed(attempt);
             if (skew)
             {
-                AddDetail("The clock of this device differs from the server's by more than five minutes.");
+                AddDetail(SyncDetailKind.ClockSkew);
             }
 
             SetStatus(new SyncStatus(SyncStateKind.Synced, attempt, attempt, null, conflicts.Count, skew, trigger, applied.RowsApplied, rowsSent));
@@ -441,7 +441,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
             }
 
             filesApplied++;
-            AddDetail($"Applied snapshot {snapshot.Path} ({snapshot.RowCount} rows).");
+            AddDetail(SyncDetailKind.AppliedSnapshot, snapshot.RowCount);
         }
 
         else if (replace)
@@ -491,7 +491,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
                     filesApplied++;
                     conflicts.AddRange(result.Conflicts);
                     progress = true;
-                    AddDetail($"Applied {doc.Path} ({doc.RowCount} rows).");
+                    AddDetail(SyncDetailKind.AppliedChanges, doc.RowCount);
                 }
 
                 if (queue.Count == 0)
@@ -511,7 +511,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
 
         foreach (var text in conflicts)
         {
-            AddDetail("Conflict: " + text);
+            AddDetail(SyncDetailKind.Conflict);
         }
 
         return new Applied(filesApplied, rowsApplied, conflicts);
@@ -635,7 +635,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
             await RecordDeletedAttachmentsAsync(chunk, ct);
             uploaded++;
             rows += chunk.Length;
-            AddDetail($"Uploaded {SyncFormat.ChangePathFor(_deviceId, sequence)} ({chunk.Length} rows).");
+            AddDetail(SyncDetailKind.UploadedChanges, chunk.Length);
         }
 
         return (uploaded, rows);
@@ -723,7 +723,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
         await _state.SetLongAsync(SyncStateStore.LastSnapshotSequenceKey, own, ct);
         var history = await _state.GetAsync(SyncStateStore.OwnSnapshotsKey, ct) ?? string.Empty;
         await _state.SetAsync(SyncStateStore.OwnSnapshotsKey, history + $"{now.UtcTicks}:{own};", ct);
-        AddDetail($"Wrote snapshot {path}.");
+        AddDetail(SyncDetailKind.WroteSnapshot);
     }
 
     private async Task WriteSnapshotIfDueAsync(CancellationToken ct)
@@ -753,7 +753,7 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
                 if (SyncFormat.ParseChange(file.Path) is { } change && change.Device == _deviceId && change.Sequence <= covered.Sequence)
                 {
                     await _storage.DeleteAsync(file.Path, ct);
-                    AddDetail($"Deleted {file.Path} (covered by a snapshot).");
+                    AddDetail(SyncDetailKind.DeletedCovered);
                 }
             }
         }
@@ -781,11 +781,11 @@ public sealed partial class SyncEngine : ISyncEngine, IAttachmentFileSync
     private bool ClockSkewed(DateTimeOffset now) =>
         _storage is IServerClock { ServerTime: { } server, ObservedAt: { } observed } && (observed - server).Duration() > MaxSkew;
 
-    private void AddDetail(string text)
+    private void AddDetail(SyncDetailKind kind, int count = 0)
     {
         lock (_details)
         {
-            _details.Insert(0, new SyncDetail(_clock.UtcNow, text));
+            _details.Insert(0, new SyncDetail(_clock.UtcNow, kind, count));
             if (_details.Count > MaxDetails)
             {
                 _details.RemoveRange(MaxDetails, _details.Count - MaxDetails);

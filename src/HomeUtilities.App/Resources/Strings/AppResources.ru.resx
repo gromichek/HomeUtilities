@@ -1624,4 +1624,20 @@
   <data name="ChargeLineReason_NoQuantity" xml:space="preserve"><value>нет количества</value></data>
   <data name="ChargeLineBreakdown" xml:space="preserve"><value>без НДС {0} + НДС {1} {2}</value></data>
   <data name="ChargeLineBreakdownNet" xml:space="preserve"><value>без НДС {0}</value></data>
+  <data name="SyncDetail_StartedWithSnapshot" xml:space="preserve"><value>Это устройство начало синхронизацию.</value></data>
+  <data name="SyncDetail_ReplacedCloud" xml:space="preserve"><value>Это устройство заменило данные в облаке.</value></data>
+  <data name="SyncDetail_Resumed" xml:space="preserve"><value>Синхронизация возобновлена.</value></data>
+  <data name="SyncDetail_CloudReplaced" xml:space="preserve"><value>Данные в облаке заменены на другом устройстве.</value></data>
+  <data name="SyncDetail_ClockSkew" xml:space="preserve"><value>Часы этого устройства расходятся с серверными больше чем на пять минут.</value></data>
+  <data name="SyncDetail_AppliedSnapshot" xml:space="preserve"><value>Получена полная копия (записей: {0}).</value></data>
+  <data name="SyncDetail_AppliedChanges" xml:space="preserve"><value>Получены изменения (записей: {0}).</value></data>
+  <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Отправлены изменения (записей: {0}).</value></data>
+  <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Полная копия сохранена в облаке.</value></data>
+  <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Старые файлы изменений удалены из облака.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>Конфликт при объединении данных.</value></data>
+  <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Отправлен файл вложения.</value></data>
+  <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Получен файл вложения.</value></data>
+  <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>Полученный файл вложения повреждён, пробуем ещё раз.</value></data>
+  <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Старый файл вложения удалён из облака.</value></data>
+  <data name="SyncDisconnectButton" xml:space="preserve"><value>Отключить аккаунт Google…</value></data>
 </root>

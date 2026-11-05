@@ -181,10 +181,60 @@ public interface IAttachmentFileSync
     Task<bool> EnsureDownloadedAsync(Guid attachmentId, CancellationToken ct = default);
 }
 
-/// <summary>One line of the Details list.</summary>
+/// <summary>What a line of the Details list says. The UI shows each kind with its own localized short wording (R-43).</summary>
+public enum SyncDetailKind
+{
+    /// <summary>This device started the sync with a snapshot.</summary>
+    StartedWithSnapshot,
+
+    /// <summary>This device replaced the data in the cloud.</summary>
+    ReplacedCloud,
+
+    /// <summary>Sync was resumed.</summary>
+    Resumed,
+
+    /// <summary>The data in the cloud was replaced on another device.</summary>
+    CloudReplaced,
+
+    /// <summary>The clock of the device differs from the server's.</summary>
+    ClockSkew,
+
+    /// <summary>A snapshot of another device was applied (<see cref="SyncDetail.Count"/> records).</summary>
+    AppliedSnapshot,
+
+    /// <summary>Changes of another device were applied (<see cref="SyncDetail.Count"/> records).</summary>
+    AppliedChanges,
+
+    /// <summary>Changes of this device were uploaded (<see cref="SyncDetail.Count"/> records).</summary>
+    UploadedChanges,
+
+    /// <summary>A snapshot was written to the cloud.</summary>
+    WroteSnapshot,
+
+    /// <summary>Old change files covered by a snapshot were removed from the cloud.</summary>
+    DeletedCovered,
+
+    /// <summary>A conflict was met while merging.</summary>
+    Conflict,
+
+    /// <summary>The file of an attachment was uploaded.</summary>
+    AttachmentUploaded,
+
+    /// <summary>The file of an attachment was downloaded.</summary>
+    AttachmentDownloaded,
+
+    /// <summary>A downloaded attachment file was damaged (checksum); another attempt follows.</summary>
+    AttachmentChecksum,
+
+    /// <summary>An old deleted attachment was removed from the cloud.</summary>
+    AttachmentDeleted,
+}
+
+/// <summary>One line of the Details list: the kind and a number, no file names or ids (those go to the error log only).</summary>
 /// <param name="At">When it happened (UTC).</param>
-/// <param name="Text">English text for the log; the UI shows the kind with its own wording.</param>
-public sealed record SyncDetail(DateTimeOffset At, string Text);
+/// <param name="Kind">What happened; the UI maps it to a localized short text.</param>
+/// <param name="Count">Number of records for the kinds that have one; else 0.</param>
+public sealed record SyncDetail(DateTimeOffset At, SyncDetailKind Kind, int Count = 0);
 
 /// <summary>
 /// The synchronization of the local database with the other devices through <see cref="ISyncStorage"/> (ARCHITECTURE §8).
