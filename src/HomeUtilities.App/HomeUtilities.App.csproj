@@ -28,6 +28,13 @@
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
 
+  <!-- Windows release publish (T-035): scripts/publish-release.ps1 passes -p:RuntimeIdentifierOverride=win-x64 instead of -r,
+       which would make the restore ask for a win-x64 runtime of the Android target (NU1102). Workaround from the MAUI docs
+       "Publish an unpackaged .NET MAUI app for Windows with the CLI" (WindowsAppSDK issue 3337). -->
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(RuntimeIdentifierOverride)' != ''">
+    <RuntimeIdentifier>$(RuntimeIdentifierOverride)</RuntimeIdentifier>
+  </PropertyGroup>
+
   <!-- Permanent Android signing key (T-030 follow-up, T-034): optional git-ignored signing.props, see docs/SIGNING.md.
        Without it the per-PC debug key is used (CI). -->
   <Import Project="signing.props" Condition="Exists('signing.props') And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />

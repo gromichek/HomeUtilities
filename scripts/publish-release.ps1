@@ -124,7 +124,9 @@ if ($doAndroid) {
 if ($doWindows) {
     $winOut = Join-Path $workDir 'windows'
     Invoke-Step 'Windows publish' (Join-Path $workDir 'windows.log') (@(
-            'publish', $appProject, '-f', 'net10.0-windows10.0.19041.0', '-c', 'Release', '-r', 'win-x64', '--self-contained',
+            # RuntimeIdentifierOverride, not -r: with -r the restore applies win-x64 to the Android target as well and asks for a
+            # Mono runtime pack that does not exist (NU1102). See the MAUI docs "Publish an unpackaged app with the CLI".
+            'publish', $appProject, '-f', 'net10.0-windows10.0.19041.0', '-c', 'Release', '-p:RuntimeIdentifierOverride=win-x64', '-p:SelfContained=true',
             '-p:WindowsPackageType=None', '-p:WindowsAppSDKSelfContained=true', '-p:PublishReadyToRun=false', '-o', $winOut) + $versionArgs)
     if (-not (Test-Path (Join-Path $winOut 'HomeUtilities.App.exe'))) {
         Stop-Release "HomeUtilities.App.exe is missing in $winOut. See $(Join-Path $workDir 'windows.log')."
