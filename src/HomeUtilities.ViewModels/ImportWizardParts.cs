@@ -214,12 +214,14 @@ public sealed partial class ImportRowOverrideEditorViewModel : EditorDialogViewM
     private readonly ILocalizer _localizer;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PeriodText))]
     private DateTime _period;
 
     [ObservableProperty]
     private bool _covers;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UntilText))]
     private DateTime _until;
 
     [ObservableProperty]
@@ -227,6 +229,12 @@ public sealed partial class ImportRowOverrideEditorViewModel : EditorDialogViewM
 
     [ObservableProperty]
     private string _rangeError;
+
+    /// <summary>The period as "September 2026" in the app language (the date picker only opens on tap, R-02).</summary>
+    public string PeriodText => MonthFormat.Long(DateOnly.FromDateTime(Period));
+
+    /// <summary>The "until" month as text.</summary>
+    public string UntilText => MonthFormat.Long(DateOnly.FromDateTime(Until));
 
     public string PeriodLabel { get; }
 

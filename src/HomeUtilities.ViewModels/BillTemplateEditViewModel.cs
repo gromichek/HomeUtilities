@@ -103,7 +103,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     private string _everyMonthsText = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(StartDate))]
+    [NotifyPropertyChangedFor(nameof(StartDate), nameof(StartMonthText))]
     private YearMonth _startMonth;
 
     [ObservableProperty]
@@ -111,7 +111,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     private bool _hasEnd;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EndDate))]
+    [NotifyPropertyChangedFor(nameof(EndDate), nameof(EndMonthText))]
     private YearMonth _endMonth;
 
     [ObservableProperty]
@@ -246,6 +246,12 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
             }
         }
     }
+
+    /// <summary>"September 2026" in the app language; the date picker only opens on tap (R-02).</summary>
+    public string StartMonthText => MonthFormat.Long(StartMonth);
+
+    /// <summary>The last period as text.</summary>
+    public string EndMonthText => MonthFormat.Long(EndMonth);
 
     /// <summary>The first period as a date for the platform date picker (only month and year count).</summary>
     public DateOnly StartDate

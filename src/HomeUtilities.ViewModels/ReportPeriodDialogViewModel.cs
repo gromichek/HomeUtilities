@@ -20,9 +20,11 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     private ReportPreset _preset;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FromText))]
     private DateOnly _fromDate;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ToText))]
     private DateOnly _toDate;
 
     [ObservableProperty]
@@ -91,6 +93,12 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
         var earliest = earliestData ?? current.AddMonths(-120);
         return (earliest < latest ? earliest : latest, latest);
     }
+
+    /// <summary>"September 2026" in the app language; the platform date picker would show the Windows language (R-02).</summary>
+    public string FromText => MonthFormat.Long(FromDate);
+
+    /// <summary>The last month of the custom range as text.</summary>
+    public string ToText => MonthFormat.Long(ToDate);
 
     /// <summary>True while "Custom…" is chosen (the month pickers are shown).</summary>
     public bool IsCustom => Preset == ReportPreset.Custom;
