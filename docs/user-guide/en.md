@@ -1269,9 +1269,21 @@ help to find slow screens — send them together with the log. **Clear** empties
 
 ### Installing a new version
 
-Normally a new build installs **over** the old one and your data stays. The one exception is the switch to the permanent
-signing key (a build made on a PC with a different key cannot update the installed app): then install once like this,
-and from then on every PC that uses the same key updates the app in place.
+New versions are copied to the devices by hand; the app does not update itself. A new version installs **over** the old
+one and your data stays.
+
+**Windows.** Run `HomeUtilities-Setup-<version>.exe`. If Windows says "Windows protected your PC", click *More info* and
+then *Run anyway* (the installer is not code-signed). No administrator rights are needed. The running app is closed, the
+program files are replaced and your data is not touched; the same applies when you later uninstall the app in
+*Settings → Apps*. The installer also works for a first installation.
+
+**Android.** Copy `HomeUtilities-<version>.apk` to the phone and open it in a file manager. Allow *Install unknown apps* for that
+file manager if Android asks, and choose *Install anyway* if Play Protect warns. The app is updated in place with its data.
+Check *Settings → About*: it must show the same version as on the PC.
+
+The one exception is a build signed with a different key (for example one made on another PC without the permanent key):
+Android cannot update the installed app with it. Then install once like this, and from then on every build with the same key
+updates the app in place.
 
 1. On the phone and on the PC press *Sync now* (*Settings → Sync*) so that the cloud holds everything.
 2. On the phone uninstall the app (this deletes its data and its own backup folder).
@@ -1279,11 +1291,13 @@ and from then on every PC that uses the same key updates the app in place.
 4. *Settings → Sync → Connect Google account*, then choose *Replace this device's data with the data from the cloud (recommended)*.
 
 Without sync: before uninstalling, use *Settings → Backup → Save backup…* and keep the file outside the app (Downloads,
-Drive); after installing use *Restore from backup…*. The setup of the key itself is described in `docs/SIGNING.md`.
+Drive); after installing use *Restore from backup…*. How the release files are made and how the key is set up is described in
+`docs/RELEASE.md` and `docs/SIGNING.md`.
 
 ### About
 
-**Settings → About** shows the version of the app, the path of the database file and the current layout (phone / tablet /
+**Settings → About** shows the version of the app, written as `2026.11.5 (build 446000)` — the date of the build and a
+running build number (the same on the phone and on the PC, so you can see at a glance which build is installed), the path of the database file and the current layout (phone / tablet /
 desktop). In test builds it also holds *Fill with sample data* and *Delete all data*.
 
 ## 17. Coming soon

@@ -15,6 +15,9 @@ Built with .NET MAUI.
 Optional files next to the App project (both git-ignored, templates are committed): `secrets.json` (Google OAuth client
 values for Sync) and `signing.props` (permanent Android signing key, see [docs/SIGNING.md](docs/SIGNING.md)).
 
+Release files (signed APK + Windows installer) are made on the owner's PC by `scripts\publish-release.ps1`, see
+[docs/RELEASE.md](docs/RELEASE.md).
+
 ## Tests
 
 ```
