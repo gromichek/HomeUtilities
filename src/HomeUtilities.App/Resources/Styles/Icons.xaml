@@ -70,6 +70,8 @@
     <x:String x:Key="IconPrevious">&#xE5CB;</x:String>
     <x:String x:Key="IconNext">&#xE5CC;</x:String>
     <x:String x:Key="IconWarning">&#xF083;</x:String>
+    <!-- A check mark inside a status ("✓ Calculated"): the same glyph as IconSave, but a state, not an action. -->
+    <x:String x:Key="IconCheck">&#xE5CA;</x:String>
     <x:String x:Key="IconChevron">&#xE5CC;</x:String>
 
     <!-- Settings list rows (T-028d): language / palette / event / backup / category / percent / description / upload_file / bug_report / info; Segoe: Globe / Color / Calendar / Upload / Tag / Calculator / Page / Import / ErrorBadge / Info. -->

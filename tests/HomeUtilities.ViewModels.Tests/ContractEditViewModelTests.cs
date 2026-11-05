@@ -949,7 +949,7 @@ public class ContractEditViewModelTests
 
         Assert.True(vm.ShowBillsCard);
         Assert.Equal(["07.2026", "06.2026", "05.2026", "04.2026", "03.2026", "02.2026"], vm.BillRows.Select(r => r.PeriodText));
-        Assert.Equal("70.00 Currency_Symbol_EUR [en]", vm.BillRows[0].TotalText);
+        Assert.Equal("70.00\u00A0Currency_Symbol_EUR [en]", vm.BillRows[0].TotalText);
         Assert.Equal(BillBadgeKind.Paid, vm.BillRows[0].Badge);
         // Today is 23 Oct 2026: the bill of June was due on 28 July, so it is overdue
         Assert.Equal(BillBadgeKind.Overdue, vm.BillRows[1].Badge);
@@ -1064,9 +1064,9 @@ public class ContractEditViewModelTests
 
         // billed 3 x 46.02 = 138.06; paid 120.00; debt 138.06 - 120.00 = 18.06
         Assert.True(vm.ShowBalanceCard);
-        Assert.Equal("138.06 Currency_Symbol_EUR [en]", vm.BalanceBilledText);
-        Assert.Equal("120.00 Currency_Symbol_EUR [en]", vm.BalancePaidText);
-        Assert.Equal("ContractBalanceDebt 18.06 Currency_Symbol_EUR [en] [en]", vm.BalanceResultText);
+        Assert.Equal("138.06\u00A0Currency_Symbol_EUR [en]", vm.BalanceBilledText);
+        Assert.Equal("120.00\u00A0Currency_Symbol_EUR [en]", vm.BalancePaidText);
+        Assert.Equal("ContractBalanceDebt 18.06\u00A0Currency_Symbol_EUR [en] [en]", vm.BalanceResultText);
         Assert.Equal(BalanceKind.Debt, vm.BalanceKind);
         Assert.True(vm.IsBalanceDebt);
         Assert.False(vm.IsBalanceAdvance);
@@ -1082,7 +1082,7 @@ public class ContractEditViewModelTests
         await vm.LoadAsync(contract.PropertyId, contract.Id);
 
         // 150.00 - 138.06 = 11.94
-        Assert.Equal("ContractBalanceAdvance 11.94 Currency_Symbol_EUR [en] [en]", vm.BalanceResultText);
+        Assert.Equal("ContractBalanceAdvance 11.94\u00A0Currency_Symbol_EUR [en] [en]", vm.BalanceResultText);
         Assert.Equal(BalanceKind.PaidInAdvance, vm.BalanceKind);
         Assert.True(vm.IsBalanceAdvance);
     }
@@ -1108,13 +1108,13 @@ public class ContractEditViewModelTests
         var vm = _kit.CreateContractEditor();
         await vm.LoadAsync(contract.PropertyId, contract.Id);
         Assert.True(vm.HasUnallocated);
-        Assert.Equal("ContractBalanceUnallocated 150.00 Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
+        Assert.Equal("ContractBalanceUnallocated 150.00\u00A0Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
 
         await vm.UseForOpenBillsCommand.ExecuteAsync(null);
 
         // 150.00 -> 3 x 46.02 = 138.06 allocated, 11.94 stay unallocated
         Assert.True(vm.HasUnallocated);
-        Assert.Equal("ContractBalanceUnallocated 11.94 Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
+        Assert.Equal("ContractBalanceUnallocated 11.94\u00A0Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
         Assert.Equal(138.06m, _kit.Payments.Stored.Single().Allocations.Where(a => !a.IsDeleted).Sum(a => a.Amount));
         Assert.Contains(_kit.Toast.Calls, c => c.Message == "PrepaymentUsed [en]" && c.Action == "BillUndo [en]");
     }
@@ -1131,7 +1131,7 @@ public class ContractEditViewModelTests
         await vm.UseForOpenBillsCommand.ExecuteAsync(null);
 
         Assert.DoesNotContain(_kit.Payments.Stored.Single().Allocations, a => !a.IsDeleted);
-        Assert.Equal("ContractBalanceUnallocated 100.00 Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
+        Assert.Equal("ContractBalanceUnallocated 100.00\u00A0Currency_Symbol_EUR [en] [en]", vm.UnallocatedText);
     }
 
     [Fact]
@@ -1175,7 +1175,7 @@ public class ContractEditViewModelTests
         Assert.Equal(6, vm.PaymentRows.Count);
         Assert.StartsWith("BillPaymentRow 20.10.2026|7.00", vm.PaymentRows[0].Text, StringComparison.Ordinal);
         Assert.True(vm.PaymentRows[0].HasPrepayment);
-        Assert.Equal("PaymentPrepaymentBadge 7.00 Currency_Symbol_EUR [en] [en]", vm.PaymentRows[0].PrepaymentText);
+        Assert.Equal("PaymentPrepaymentBadge 7.00\u00A0Currency_Symbol_EUR [en] [en]", vm.PaymentRows[0].PrepaymentText);
 
         vm.PaymentRows[0].OpenCommand.Execute(null);
         await vm.OpenAllPaymentsCommand.ExecuteAsync(null);

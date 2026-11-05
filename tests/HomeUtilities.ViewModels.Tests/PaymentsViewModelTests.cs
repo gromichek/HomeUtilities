@@ -63,7 +63,7 @@ public class PaymentsViewModelTests : IDisposable
 
     public void Dispose() => CultureInfo.CurrentCulture = _culture;
 
-    private static string Money(string amount) => $"{amount} {Eur}";
+    private static string Money(string amount) => $"{amount}\u00A0{Eur}";
 
     private Payment Pay(decimal amount, DateOnly paidOn, Guid? contractId, params (Bill Bill, decimal Amount)[] allocations)
     {

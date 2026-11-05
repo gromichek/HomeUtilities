@@ -33,7 +33,12 @@ internal sealed class FakeLocalizer(FakeLanguageService language) : ILocalizer
     /// <summary>Keys for which <see cref="TryGet"/> reports a missing resource.</summary>
     public HashSet<string> MissingKeys { get; } = [];
 
-    public string this[string key] => $"{key} [{language.CurrentLanguage}]";
+    public string this[string key] =>
+        key.StartsWith("MonthShort_", StringComparison.Ordinal) && int.TryParse(key["MonthShort_".Length..], out var month) && month is >= 1 and <= 12
+            ? EnglishMonths[month - 1] // the real names are tested against the resource files (ResourceTextTests)
+            : $"{key} [{language.CurrentLanguage}]";
+
+    private static readonly string[] EnglishMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     public bool TryGet(string key, out string value)
     {

@@ -20,6 +20,9 @@
     <ScrollView x:Name="Scroller">
         <VerticalStackLayout Padding="12" Spacing="12">
 
+            <!-- Loading (R-52): text only, shown after 300 ms of the first calculation. -->
+            <Label Text="{Binding LoadingText}" Style="{StaticResource MutedLabel}" HorizontalOptions="Center" IsVisible="{Binding ShowLoading}" />
+
             <Label Text="{Binding NoPropertiesText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"
                    IsVisible="{Binding ShowNoProperties}" />
 
@@ -40,8 +43,14 @@
                                 ToolTipProperties.Text="{Binding PreviousMonthText}"
                                 SemanticProperties.Description="{Binding PreviousMonthText}" />
                         <!-- Tap to pick a month and year; only the month and year of the chosen date count. -->
-                        <DatePicker x:Name="MonthPicker" Grid.Column="1" Format="MMMM yyyy" HorizontalOptions="Center"
-                                    Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
+                        <!-- The month text comes from the view model (app language); the date picker lies over it, invisible, and opens on tap (R-02:
+                             the platform date picker shows the Windows language, not the app language). -->
+                        <Grid Grid.Column="1" HorizontalOptions="Center">
+                            <Label Text="{Binding MonthText}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalOptions="Center"
+                                   Padding="12,0" InputTransparent="True" />
+                            <DatePicker x:Name="MonthPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}"
+                                        Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
+                        </Grid>
                         <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24"
                                 Command="{Binding NextMonthCommand}"
                                 ToolTipProperties.Text="{Binding NextMonthText}"
@@ -72,14 +81,20 @@
                                         <TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" />
                                     </Grid.GestureRecognizers>
                                     <Border Grid.Column="0" WidthRequest="16" HeightRequest="16" StrokeShape="RoundRectangle 8"
-                                            StrokeThickness="0" VerticalOptions="Center"
+                                            StrokeThickness="0" VerticalOptions="Start" Margin="0,3,0,0"
                                             BackgroundColor="{Binding Color, Converter={StaticResource HexColor}}" />
                                     <VerticalStackLayout Grid.Column="1" Spacing="2">
                                         <Label Text="{Binding Title}" FontAttributes="Bold" />
                                         <Label Text="{Binding SupplierName}" Style="{StaticResource MutedLabel}" />
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
-                                            <Label Grid.Column="0" Text="⚠" Style="{StaticResource WarningLabel}" IsVisible="{Binding ShowWarningIcon}" />
-                                            <Label Grid.Column="1" Text="{Binding StatusText}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                                        <!-- Status: icon + text in the same column for every state (✓ calculated, ⚠ incomplete / error). -->
+                                        <Grid ColumnDefinitions="20,*" ColumnSpacing="4">
+                                            <Label Grid.Column="0" Text="{StaticResource IconWarning}" FontFamily="{StaticResource IconFontFamily}" FontSize="16"
+                                                   VerticalOptions="Center" TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"
+                                                   IsVisible="{Binding ShowWarningIcon}" AutomationProperties.IsInAccessibleTree="False" />
+                                            <Label Grid.Column="0" Text="{StaticResource IconCheck}" FontFamily="{StaticResource IconFontFamily}" FontSize="16"
+                                                   VerticalOptions="Center" TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"
+                                                   IsVisible="{Binding ShowCheckIcon}" AutomationProperties.IsInAccessibleTree="False" />
+                                            <Label Grid.Column="1" Text="{Binding StatusText}" Style="{StaticResource MutedLabel}" FontSize="13" VerticalOptions="Center" />
                                         </Grid>
                                     </VerticalStackLayout>
                                     <Label Grid.Column="2" Text="{Binding TotalText}" FontAttributes="Bold" VerticalOptions="Center"
@@ -128,18 +143,15 @@
                                                             <TapGestureRecognizer Command="{Binding ToggleDetailCommand}" />
                                                         </Grid.GestureRecognizers>
                                                         <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" />
-                                                        <Label Grid.Column="1" Text="{Binding TotalText}" FontAttributes="Bold" IsVisible="{Binding HasAmounts}" />
+                                                        <Label Grid.Column="1" Text="{Binding TotalText}" FontAttributes="Bold" HorizontalTextAlignment="End" IsVisible="{Binding ShowTotal}" />
                                                     </Grid>
+                                                    <Label Text="{Binding ReasonText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasReason}" />
                                                     <Label Text="{Binding FromBillText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsFromBill}" />
                                                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding HasQuantity}">
                                                         <Label Grid.Column="0" Text="{Binding QuantityText}" />
                                                         <Label Grid.Column="1" Text="{Binding UnitPriceText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasUnitPrice}" />
                                                     </Grid>
-                                                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8" IsVisible="{Binding HasAmounts}">
-                                                        <Label Grid.Column="0" Text="{Binding NetText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                                        <Label Grid.Column="1" Text="{Binding VatPercentText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                                        <Label Grid.Column="2" Text="{Binding VatText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                                    </Grid>
+                                                    <Label Text="{Binding BreakdownText}" Style="{StaticResource MutedLabel}" FontSize="13" IsVisible="{Binding HasBreakdown}" />
 
                                                     <!-- The readings behind the quantity. -->
                                                     <VerticalStackLayout Spacing="6" Padding="12,4,0,4" IsVisible="{Binding IsDetailOpen}"
@@ -172,10 +184,19 @@
                                     </VerticalStackLayout>
 
                                     <!-- Totals of the contract. -->
-                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="12" IsVisible="{Binding ShowTotalsRow}">
-                                        <Label Grid.Column="1" Text="{Binding NetText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                        <Label Grid.Column="2" Text="{Binding VatText}" Style="{StaticResource MutedLabel}" FontSize="13" />
-                                        <Label Grid.Column="3" Text="{Binding TotalText}" FontAttributes="Bold" />
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" IsVisible="{Binding ShowTotalsRow}">
+                                        <VerticalStackLayout Grid.Column="0">
+                                            <Label Text="{Binding NetLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <Label Text="{Binding NetText}" />
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="1">
+                                            <Label Text="{Binding VatLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <Label Text="{Binding VatText}" />
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="2">
+                                            <Label Text="{Binding TotalLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                            <Label Text="{Binding TotalText}" FontAttributes="Bold" />
+                                        </VerticalStackLayout>
                                     </Grid>
 
                                     <!-- VAT on the total, per VAT percent. -->

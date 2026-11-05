@@ -627,9 +627,9 @@
   <data name="ChargesTotalsLabel" xml:space="preserve"><value>Expected charge of the month</value></data>
   <data name="ChargesIncomplete" xml:space="preserve"><value>Incomplete — some amounts could not be calculated.</value></data>
   <data name="ChargesNoContracts" xml:space="preserve"><value>No contracts are active in this month.</value></data>
-  <data name="ChargesTotals" xml:space="preserve"><value>Net {0} · VAT {1} · Total {2}</value></data>
+  <data name="ChargesTotals" xml:space="preserve"><value>Net {0} · VAT {1} · Total {2}</value></data>
   <data name="ContractShowCharges" xml:space="preserve"><value>Show charges</value></data>
-  <data name="ChargeStatus_Complete" xml:space="preserve"><value>Complete</value></data>
+  <data name="ChargeStatus_Complete" xml:space="preserve"><value>Calculated</value></data>
   <data name="ChargeStatus_Incomplete" xml:space="preserve"><value>Incomplete</value></data>
   <data name="ChargeStatus_FromBill" xml:space="preserve"><value>From the bill</value></data>
   <data name="ChargeStatus_NoTariff" xml:space="preserve"><value>No tariff</value></data>
@@ -666,7 +666,7 @@
   <data name="ChargeConsumption_reading_outside_window" xml:space="preserve"><value>No reading inside the reading window — the nearest one was used.</value></data>
   <data name="ChargeConsumption_unusually_high" xml:space="preserve"><value>Unusually high consumption.</value></data>
   <data name="ChargeConsumption_zero" xml:space="preserve"><value>Zero consumption.</value></data>
-  <data name="ChargeWarn_NoRate" xml:space="preserve"><value>No price valid on {0} for «{1}» — add a price in the tariff.</value></data>
+  <data name="ChargeWarn_NoRate" xml:space="preserve"><value>The tariff has no price for the service «{1}» on {0}.</value></data>
   <data name="ChargeWarn_MissingParameter" xml:space="preserve"><value>«{0}» has no value on {1:d} — add it in the property.</value></data>
   <data name="ChargeWarn_ReadingsMissing" xml:space="preserve"><value>Readings missing for {0} — enter them in Readings.</value></data>
   <data name="ChargeWarn_NoMeters" xml:space="preserve"><value>No meter is linked for «{0}» — link a meter in the contract.</value></data>
@@ -777,11 +777,11 @@
   <data name="BillStatusOverdue" xml:space="preserve"><value>Overdue</value></data>
   <data name="BillStatusPaid" xml:space="preserve"><value>Paid</value></data>
   <data name="BillBadgeUnpaid" xml:space="preserve"><value>Unpaid</value></data>
-  <data name="BillBadgePartial" xml:space="preserve"><value>Partially paid · open {0}</value></data>
+  <data name="BillBadgePartial" xml:space="preserve"><value>Partially paid · open {0}</value></data>
   <data name="BillBadgeOverdue" xml:space="preserve"><value>Overdue</value></data>
   <data name="BillBadgePaid" xml:space="preserve"><value>Paid ✓</value></data>
   <data name="BillBadgePrepaid" xml:space="preserve"><value>Prepaid ✓</value></data>
-  <data name="BillMarkPaid" xml:space="preserve"><value>Paid</value></data>
+  <data name="BillMarkPaid" xml:space="preserve"><value>Mark as paid</value></data>
   <data name="BillMarkPaidTooltip" xml:space="preserve"><value>Mark this bill as paid</value></data>
   <data name="BillMarkedPaid" xml:space="preserve"><value>Bill marked as paid</value></data>
   <data name="BillUndo" xml:space="preserve"><value>Undo</value></data>
@@ -789,7 +789,7 @@
   <data name="BillsEmpty" xml:space="preserve"><value>There are no bills yet. Add the first one with the button below.</value></data>
   <data name="BillsNothingFound" xml:space="preserve"><value>No bills match the filters.</value></data>
   <data name="BillAdd" xml:space="preserve"><value>New bill</value></data>
-  <data name="BillTotals" xml:space="preserve"><value>Billed {0} · Paid {1} · Open {2}</value></data>
+  <data name="BillTotals" xml:space="preserve"><value>Billed {0} · Paid {1} · Open {2}</value></data>
   <data name="BillPaymentRow" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
   <data name="BillPaymentQuick" xml:space="preserve"><value>Paid button</value></data>
   <data name="BillPaymentOfBill" xml:space="preserve"><value>{0} of {1} goes to this bill</value></data>
@@ -812,7 +812,7 @@
   <data name="BillBillsCardAll" xml:space="preserve"><value>All bills</value></data>
   <data name="BillBillsCardAdd" xml:space="preserve"><value>New bill for this contract</value></data>
   <data name="ChargesBillLine" xml:space="preserve"><value>Bill: {0}</value></data>
-  <data name="ChargesEnterBill" xml:space="preserve"><value>Enter bill</value></data>
+  <data name="ChargesEnterBill" xml:space="preserve"><value>New bill</value></data>
   <data name="Error_amount_inconsistent" xml:space="preserve"><value>Amount excl. VAT, VAT % and Total do not match. Fill in only two of them.</value></data>
   <data name="Error_amount_gross_required" xml:space="preserve"><value>Enter the Total, or the amount excl. VAT together with the VAT %.</value></data>
   <data name="Error_amount_vat_percent_out_of_range" xml:space="preserve"><value>VAT % must be between 0 and 100.</value></data>
@@ -830,7 +830,7 @@
   <data name="Error_bill_title_too_long" xml:space="preserve"><value>The title is longer than {0} characters.</value></data>
   <data name="Error_bill_number_too_long" xml:space="preserve"><value>The number is longer than {0} characters.</value></data>
   <data name="Error_bill_line_description_required" xml:space="preserve"><value>Enter a description.</value></data>
-  <data name="BillBadgeOverdueOpen" xml:space="preserve"><value>Overdue · open {0}</value></data>
+  <data name="BillBadgeOverdueOpen" xml:space="preserve"><value>Overdue · open {0}</value></data>
   <data name="Enum_BillKind_Regular" xml:space="preserve"><value>Regular bill</value></data>
   <data name="Enum_BillKind_Equalized" xml:space="preserve"><value>Equalized payment</value></data>
   <data name="Enum_BillKind_Settlement" xml:space="preserve"><value>Settlement (annual reconciliation)</value></data>
@@ -849,11 +849,11 @@
   <data name="PaymentsAllProperties" xml:space="preserve"><value>All properties</value></data>
   <data name="PaymentsContractFilter" xml:space="preserve"><value>Contract</value></data>
   <data name="PaymentsAllContracts" xml:space="preserve"><value>All contracts</value></data>
-  <data name="PaymentsTotals" xml:space="preserve"><value>Paid {0} · of it unallocated (prepayment) {1}</value></data>
+  <data name="PaymentsTotals" xml:space="preserve"><value>Paid {0} · of it unallocated (prepayment) {1}</value></data>
   <data name="PaymentRefundAmount" xml:space="preserve"><value>−{0} refund</value></data>
   <data name="PaymentSeveralContracts" xml:space="preserve"><value>Several contracts</value></data>
   <data name="PaymentPaysMore" xml:space="preserve"><value>{0} +{1}</value></data>
-  <data name="PaymentPrepaymentBadge" xml:space="preserve"><value>Prepayment {0}</value></data>
+  <data name="PaymentPrepaymentBadge" xml:space="preserve"><value>Prepayment {0}</value></data>
   <data name="PaymentQuickMarker" xml:space="preserve"><value>quick</value></data>
   <data name="PaymentNewTitle" xml:space="preserve"><value>New payment</value></data>
   <data name="PaymentEditTitle" xml:space="preserve"><value>Payment {0} · {1}</value></data>
@@ -901,10 +901,10 @@
   <data name="ContractBalanceHeader" xml:space="preserve"><value>Balance</value></data>
   <data name="ContractBalanceBilled" xml:space="preserve"><value>Billed</value></data>
   <data name="ContractBalancePaid" xml:space="preserve"><value>Paid</value></data>
-  <data name="ContractBalanceDebt" xml:space="preserve"><value>Debt {0}</value></data>
-  <data name="ContractBalanceAdvance" xml:space="preserve"><value>Paid in advance {0}</value></data>
+  <data name="ContractBalanceDebt" xml:space="preserve"><value>Debt {0}</value></data>
+  <data name="ContractBalanceAdvance" xml:space="preserve"><value>Paid in advance {0}</value></data>
   <data name="ContractBalanceSettled" xml:space="preserve"><value>Settled</value></data>
-  <data name="ContractBalanceUnallocated" xml:space="preserve"><value>Unallocated payments: {0}</value></data>
+  <data name="ContractBalanceUnallocated" xml:space="preserve"><value>Unallocated payments: {0}</value></data>
   <data name="ContractBalanceUse" xml:space="preserve"><value>Use for open bills</value></data>
   <data name="ContractBalanceNothingToUse" xml:space="preserve"><value>Nothing to allocate: there are no open bills.</value></data>
   <data name="ContractPaymentsHeader" xml:space="preserve"><value>Latest payments</value></data>
@@ -971,14 +971,14 @@
   <data name="EqColDifference" xml:space="preserve"><value>Differ.</value></data>
   <data name="EqColRunning" xml:space="preserve"><value>Total</value></data>
   <data name="EqEnterSettlementBill" xml:space="preserve"><value>Enter settlement bill</value></data>
-  <data name="EqPlanShort" xml:space="preserve"><value>Plan {0}</value></data>
+  <data name="EqPlanShort" xml:space="preserve"><value>Plan {0}</value></data>
   <data name="EqReadingsMissing" xml:space="preserve"><value>Readings missing — open readings</value></data>
-  <data name="EqTotals" xml:space="preserve"><value>Billed {0} · actual by readings {1}</value></data>
+  <data name="EqTotals" xml:space="preserve"><value>Billed {0} · actual by readings {1}</value></data>
   <data name="EqWordsSurcharge" xml:space="preserve"><value>You will probably pay about {0} extra.</value></data>
   <data name="EqWordsRefund" xml:space="preserve"><value>You will probably get about {0} back.</value></data>
   <data name="EqWordsZero" xml:space="preserve"><value>Billed and actual are equal: no settlement is expected.</value></data>
   <data name="EqIncomplete" xml:space="preserve"><value>{0} months without readings or prices are not counted. Enter the readings to complete the picture.</value></data>
-  <data name="ChargesEqualizedLine" xml:space="preserve"><value>Plan {0} · actual {1} · since last settlement {2}</value></data>
+  <data name="ChargesEqualizedLine" xml:space="preserve"><value>Plan {0} · actual {1} · since last settlement {2}</value></data>
   <data name="TaxHeader" xml:space="preserve"><value>Tax by year</value></data>
   <data name="TaxHint" xml:space="preserve"><value>The municipality assesses the tax once a year and you pay it in installments. Enter the yearly amount: the app creates one bill per installment.</value></data>
   <data name="TaxEmpty" xml:space="preserve"><value>No tax entered yet. Use ＋ to enter the yearly tax.</value></data>
@@ -1021,11 +1021,11 @@
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>No bills or payments yet.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>This year</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>No bills this year yet.</value></data>
-  <data name="OverviewOpenBills" xml:space="preserve"><value>Open bills {0}</value></data>
-  <data name="OverviewOverdueBills" xml:space="preserve"><value>Overdue {0}</value></data>
-  <data name="OverviewPrepayments" xml:space="preserve"><value>Prepayments {0}</value></data>
-  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Expected settlement, {0}: surcharge {1}</value></data>
-  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Expected settlement, {0}: refund {1}</value></data>
+  <data name="OverviewOpenBills" xml:space="preserve"><value>Open bills {0}</value></data>
+  <data name="OverviewOverdueBills" xml:space="preserve"><value>Overdue {0}</value></data>
+  <data name="OverviewPrepayments" xml:space="preserve"><value>Prepayments {0}</value></data>
+  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Expected settlement, {0}: surcharge {1}</value></data>
+  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Expected settlement, {0}: refund {1}</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} same period: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} same period: {3}</value></data>
   <data name="TodoReadings" xml:space="preserve"><value>Submit readings: {0}</value></data>
@@ -1600,4 +1600,28 @@
   <data name="SyncBackupFirstHint" xml:space="preserve"><value>A backup copy of this device's data is made first.</value></data>
   <data name="SyncReplaceCloudHint" xml:space="preserve"><value>Warning: the other devices will be asked to replace their data with the data of this device.</value></data>
   <data name="SyncMergeHint" xml:space="preserve"><value>Records that were synced before are merged by their latest edit; records created separately on both devices will appear twice.</value></data>
+  <data name="MonthShort_1" xml:space="preserve"><value>Jan</value></data>
+  <data name="MonthShort_2" xml:space="preserve"><value>Feb</value></data>
+  <data name="MonthShort_3" xml:space="preserve"><value>Mar</value></data>
+  <data name="MonthShort_4" xml:space="preserve"><value>Apr</value></data>
+  <data name="MonthShort_5" xml:space="preserve"><value>May</value></data>
+  <data name="MonthShort_6" xml:space="preserve"><value>Jun</value></data>
+  <data name="MonthShort_7" xml:space="preserve"><value>Jul</value></data>
+  <data name="MonthShort_8" xml:space="preserve"><value>Aug</value></data>
+  <data name="MonthShort_9" xml:space="preserve"><value>Sep</value></data>
+  <data name="MonthShort_10" xml:space="preserve"><value>Oct</value></data>
+  <data name="MonthShort_11" xml:space="preserve"><value>Nov</value></data>
+  <data name="MonthShort_12" xml:space="preserve"><value>Dec</value></data>
+  <data name="ChargeWarn_NoReadings" xml:space="preserve"><value>No readings for {0} — the last one is from {1}.</value></data>
+  <data name="ChargeWarn_NoReadingsNone" xml:space="preserve"><value>No readings for {0} yet.</value></data>
+  <data name="ChargeLineReason_NoPrice" xml:space="preserve"><value>no price</value></data>
+  <data name="ChargeLineReason_NoReadings" xml:space="preserve"><value>no readings</value></data>
+  <data name="ChargeLineReason_NoParameter" xml:space="preserve"><value>no parameter value</value></data>
+  <data name="ChargeLineReason_NoMeters" xml:space="preserve"><value>no meter linked</value></data>
+  <data name="ChargeLineReason_UnknownVat" xml:space="preserve"><value>VAT unknown</value></data>
+  <data name="ChargeLineReason_Currency" xml:space="preserve"><value>currency differs</value></data>
+  <data name="ChargeLineReason_Invalid" xml:space="preserve"><value>tariff cannot be applied</value></data>
+  <data name="ChargeLineReason_NoQuantity" xml:space="preserve"><value>quantity missing</value></data>
+  <data name="ChargeLineBreakdown" xml:space="preserve"><value>excl. VAT {0} + VAT {1} {2}</value></data>
+  <data name="ChargeLineBreakdownNet" xml:space="preserve"><value>excl. VAT {0}</value></data>
 </root>

@@ -171,8 +171,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     {
         get
         {
-            var text = Month.FirstDay.ToString("MMMM yyyy", CultureInfo.CurrentCulture);
-            return text.Length == 0 ? text : char.ToUpper(text[0], CultureInfo.CurrentCulture) + text[1..];
+            return MonthFormat.Long(Month);
         }
     }
 
@@ -605,9 +604,9 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             var symbol = _localizer["Currency_Symbol_" + group.Key];
             lines.Add(_localizer.Get(
                 "ChargesTotals",
-                $"{TariffDescriber.FormatMoney(group.Sum(c => c.Charge!.TotalNet))} {symbol}",
-                $"{TariffDescriber.FormatMoney(group.Sum(c => c.Charge!.TotalVat))} {symbol}",
-                $"{TariffDescriber.FormatMoney(group.Sum(c => c.Charge!.TotalGross))} {symbol}"));
+                BillText.Money(group.Sum(c => c.Charge!.TotalNet), symbol),
+                BillText.Money(group.Sum(c => c.Charge!.TotalVat), symbol),
+                BillText.Money(group.Sum(c => c.Charge!.TotalGross), symbol)));
         }
 
         TotalsText = string.Join("\n", lines);

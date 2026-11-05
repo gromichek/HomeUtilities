@@ -413,7 +413,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
     private string ReadingsDetail(TodoItem item, DateOnly today)
     {
-        var range = ReadingsViewModel.FormatRange(item.Date, item.EndDate ?? item.Date);
+        var range = ReadingsViewModel.FormatRange(_localizer, item.Date, item.EndDate ?? item.Date);
         switch (item.Severity)
         {
             case TodoSeverity.Today:
@@ -534,7 +534,8 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
                 }
             }
 
-            foreach (var settlement in settlements.Where(s => s.PropertyId == property.Id))
+            // A recalculation of less than one cent says nothing: the line is not shown (R-18, UI_GUIDELINES §9).
+            foreach (var settlement in settlements.Where(s => s.PropertyId == property.Id && Math.Abs(s.Expected) >= 0.01m))
             {
                 var contractId = settlement.ContractId;
                 lines.Add(new(

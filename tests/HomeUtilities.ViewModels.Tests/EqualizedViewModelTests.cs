@@ -9,7 +9,7 @@ namespace HomeUtilities.ViewModels.Tests;
 
 /// <summary>
 /// Equalized plans over the real <c>ChargeCalculator</c>. The water contract of <see cref="BillTestKit"/> is used as the
-/// "electricity" contract: October 2026 costs 12.150 m³ × 3.0675 = 37.27 net; VAT 21 % = 7.83; total 45.10. Today is 27 Oct
+/// "electricity" contract: October 2026 costs 12.150 m³ × 3.0675 = 37.27 net; VAT 21\u00A0% = 7.83; total 45.10. Today is 27 Oct
 /// 2026, so the current month is October. FakeLocalizer renders texts as "key [en]".
 /// </summary>
 public class EqualizedViewModelTests : IDisposable
@@ -104,7 +104,7 @@ public class EqualizedViewModelTests : IDisposable
         Assert.True(vm.ShowEqualizedCard);
         Assert.False(vm.ShowTaxCard);
         Assert.Equal(
-            ["EqPlanRow 01.10.2026|45.00 Currency_Symbol_EUR [en] [en]", "EqPlanRowTo 01.06.2026|30.09.2026|40.00 Currency_Symbol_EUR [en] [en]"],
+            ["EqPlanRow 01.10.2026|45.00\u00A0Currency_Symbol_EUR [en] [en]", "EqPlanRowTo 01.06.2026|30.09.2026|40.00\u00A0Currency_Symbol_EUR [en] [en]"],
             vm.PlanRows.Select(r => r.DisplayText));
         Assert.False(vm.HasNoPlans);
 
@@ -123,7 +123,7 @@ public class EqualizedViewModelTests : IDisposable
         var vm = await OpenContractAsync(contract);
 
         Assert.True(vm.ShowSettlementSummary);
-        Assert.StartsWith("EqSummarySurcharge 5.10 Currency_Symbol_EUR [en]|09.2026|10.2026 [en]", vm.PlanSummaryText);
+        Assert.StartsWith("EqSummarySurcharge 5.10\u00A0Currency_Symbol_EUR [en]|09.2026|10.2026 [en]", vm.PlanSummaryText);
         Assert.EndsWith("EqSummaryIncomplete 1 [en]", vm.PlanSummaryText);
         Assert.True(vm.ShowSettlementCommand.CanExecute(null));
     }
@@ -137,7 +137,7 @@ public class EqualizedViewModelTests : IDisposable
 
         var vm = await OpenContractAsync(contract);
 
-        Assert.StartsWith("EqSummaryRefund 4.90 Currency_Symbol_EUR [en]|10.2026|10.2026 [en]", vm.PlanSummaryText);
+        Assert.StartsWith("EqSummaryRefund 4.90\u00A0Currency_Symbol_EUR [en]|10.2026|10.2026 [en]", vm.PlanSummaryText);
     }
 
     [Fact]
@@ -311,11 +311,11 @@ public class EqualizedViewModelTests : IDisposable
         Assert.Equal("EqReadingsMissing [en]", vm.Rows[0].MissingText);
         Assert.Equal("–", vm.Rows[0].DifferenceText);
         Assert.True(vm.Rows[1].IsComplete);
-        Assert.Equal("40.00 Currency_Symbol_EUR [en]", vm.Rows[1].BilledText);
-        Assert.Equal("45.10 Currency_Symbol_EUR [en]", vm.Rows[1].ActualText);
-        Assert.Equal("+5.10 Currency_Symbol_EUR [en]", vm.Rows[1].DifferenceText);
+        Assert.Equal("40.00\u00A0Currency_Symbol_EUR [en]", vm.Rows[1].BilledText);
+        Assert.Equal("45.10\u00A0Currency_Symbol_EUR [en]", vm.Rows[1].ActualText);
+        Assert.Equal("+5.10\u00A0Currency_Symbol_EUR [en]", vm.Rows[1].DifferenceText);
         Assert.True(vm.Rows[1].IsSurcharge);
-        Assert.Equal("EqWordsSurcharge 5.10 Currency_Symbol_EUR [en] [en]", vm.ResultText);
+        Assert.Equal("EqWordsSurcharge 5.10\u00A0Currency_Symbol_EUR [en] [en]", vm.ResultText);
         Assert.True(vm.IsSurcharge);
         Assert.False(vm.IsRefund);
         Assert.Equal("EqIncomplete 1 [en]", vm.IncompleteText);
@@ -332,7 +332,7 @@ public class EqualizedViewModelTests : IDisposable
 
         var vm = await OpenSettlementAsync(contract);
 
-        Assert.Equal("EqWordsRefund 4.90 Currency_Symbol_EUR [en] [en]", vm.ResultText);
+        Assert.Equal("EqWordsRefund 4.90\u00A0Currency_Symbol_EUR [en] [en]", vm.ResultText);
         Assert.True(vm.IsRefund);
         Assert.True(vm.Rows[0].IsRefund);
         Assert.Equal(string.Empty, vm.IncompleteText);
@@ -443,7 +443,7 @@ public class EqualizedViewModelTests : IDisposable
 
         var vm = await NewBillAsync(contract);
 
-        // 40.00 incl. VAT 21 %: net 33.06, VAT 6.94
+        // 40.00 incl. VAT 21\u00A0%: net 33.06, VAT 6.94
         Assert.Equal(("33.06", "21", "6.94"), (vm.Amounts.NetText, vm.Amounts.VatPercentText, vm.Amounts.VatText));
     }
 
@@ -458,10 +458,10 @@ public class EqualizedViewModelTests : IDisposable
         Assert.True(vm.PlanMode);
         Assert.True(vm.ShowComparison);
         Assert.Equal("BillPlanLabel [en]", vm.BasisLabel);
-        Assert.Equal("40.00 Currency_Symbol_EUR [en]", vm.CalculatedText);
-        Assert.Equal("BillActualByReadings 45.10 Currency_Symbol_EUR [en] [en]", vm.ActualInfoText);
+        Assert.Equal("40.00\u00A0Currency_Symbol_EUR [en]", vm.CalculatedText);
+        Assert.Equal("BillActualByReadings 45.10\u00A0Currency_Symbol_EUR [en] [en]", vm.ActualInfoText);
         Assert.True(vm.ShowActualInfo);
-        Assert.Equal("0.00 Currency_Symbol_EUR [en] (0.0 %)", vm.DifferenceText);
+        Assert.Equal("0.00\u00A0Currency_Symbol_EUR [en] (0.0\u00A0%)", vm.DifferenceText);
 
         vm.Amounts.GrossText = "46.00";
         Assert.StartsWith("+6.00", vm.DifferenceText);
@@ -477,7 +477,7 @@ public class EqualizedViewModelTests : IDisposable
         Assert.False(vm.PlanMode);
         Assert.Equal(string.Empty, vm.Amounts.GrossText);
         Assert.Equal("BillCalculatedLabel [en]", vm.BasisLabel);
-        Assert.Equal("45.10 Currency_Symbol_EUR [en]", vm.CalculatedText);
+        Assert.Equal("45.10\u00A0Currency_Symbol_EUR [en]", vm.CalculatedText);
         Assert.Equal(string.Empty, vm.ActualInfoText);
     }
 
@@ -581,7 +581,7 @@ public class EqualizedViewModelTests : IDisposable
         var card = Assert.Single(vm.Cards);
         Assert.True(card.HasEqualizedText);
         Assert.Equal(
-            "ChargesEqualizedLine 40.00 Currency_Symbol_EUR [en]|45.10 Currency_Symbol_EUR [en]|+5.10 Currency_Symbol_EUR [en] [en]",
+            "ChargesEqualizedLine 40.00\u00A0Currency_Symbol_EUR [en]|45.10\u00A0Currency_Symbol_EUR [en]|+5.10\u00A0Currency_Symbol_EUR [en] [en]",
             card.EqualizedText);
     }
 

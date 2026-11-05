@@ -9,7 +9,7 @@ namespace HomeUtilities.ViewModels.Tests;
 
 /// <summary>
 /// The bill editor over the real <c>ChargeCalculator</c>. The water contract of <see cref="BillTestKit"/> is calculated as
-/// 12.150 m³ × 3.0675 = 37.27 net; VAT 21 % = 7.83; total 45.10. FakeLocalizer renders texts as "key [en]".
+/// 12.150 m³ × 3.0675 = 37.27 net; VAT 21\u00A0% = 7.83; total 45.10. FakeLocalizer renders texts as "key [en]".
 /// </summary>
 public class BillEditViewModelTests : IDisposable
 {
@@ -225,9 +225,9 @@ public class BillEditViewModelTests : IDisposable
 
         vm.QuantityRows[0].Text = "0,210";
 
-        Assert.Equal($"62.88 {Eur}", vm.CalculatedText);
+        Assert.Equal($"62.88\u00A0{Eur}", vm.CalculatedText);
         Assert.Equal(string.Empty, vm.ComparisonNote);
-        Assert.Equal($"0.00 {Eur} (0.0 %)", vm.DifferenceText);
+        Assert.Equal($"0.00\u00A0{Eur} (0.0\u00A0%)", vm.DifferenceText);
         Assert.True(vm.IsDirty);
     }
 
@@ -251,7 +251,7 @@ public class BillEditViewModelTests : IDisposable
         _kit.Bills.All.Add(saved);
         var reopened = await OpenAsync(saved.Id);
         Assert.Equal("0.21", reopened.QuantityRows[0].Text);
-        Assert.Equal($"62.88 {Eur}", reopened.CalculatedText);
+        Assert.Equal($"62.88\u00A0{Eur}", reopened.CalculatedText);
     }
 
     [Fact]
@@ -302,9 +302,9 @@ public class BillEditViewModelTests : IDisposable
         vm.QuantityRows[0].Text = "0,210";
         vm.QuantityRows[0].AmountText = "14,71";
 
-        Assert.Equal($"62.90 {Eur}", vm.CalculatedText);
+        Assert.Equal($"62.90\u00A0{Eur}", vm.CalculatedText);
         Assert.False(vm.QuantityRows[0].HasWarning);
-        Assert.Equal($"0.00 {Eur} (0.0 %)", vm.DifferenceText);
+        Assert.Equal($"0.00\u00A0{Eur} (0.0\u00A0%)", vm.DifferenceText);
 
         await vm.SaveCommand.ExecuteAsync(null);
 
@@ -316,7 +316,7 @@ public class BillEditViewModelTests : IDisposable
         var reopened = await OpenAsync(saved.Id);
         Assert.Equal("0.21", reopened.QuantityRows[0].Text);
         Assert.Equal("14.71", reopened.QuantityRows[0].AmountText);
-        Assert.Equal($"62.90 {Eur}", reopened.CalculatedText);
+        Assert.Equal($"62.90\u00A0{Eur}", reopened.CalculatedText);
     }
 
     [Fact]
@@ -354,7 +354,7 @@ public class BillEditViewModelTests : IDisposable
         _kit.Bills.All.Add(saved);
         var reopened = await OpenAsync(saved.Id);
         Assert.Equal(string.Empty, reopened.QuantityRows[0].AmountText);
-        Assert.Equal($"62.88 {Eur}", reopened.CalculatedText);
+        Assert.Equal($"62.88\u00A0{Eur}", reopened.CalculatedText);
     }
 
     [Fact]
@@ -401,7 +401,7 @@ public class BillEditViewModelTests : IDisposable
         vm.Amounts.NetText = "10,00";
         await vm.SaveCommand.ExecuteAsync(null);
 
-        // 10.00 + 21 % = 2.10 VAT; total 12.10
+        // 10.00 + 21\u00A0% = 2.10 VAT; total 12.10
         var saved = Assert.Single(_kit.Bills.Saved);
         Assert.Equal((10.00m, 21m, 2.10m, 12.10m), (saved.Net, saved.VatPercent, saved.Vat, saved.Gross));
     }
@@ -516,17 +516,17 @@ public class BillEditViewModelTests : IDisposable
 
         vm.Amounts.GrossText = "46,02";
 
-        // calculated 45.10; bill 46.02 -> +0.92 (+2.0 %)
-        Assert.Equal($"45.10 {Eur}", vm.CalculatedText);
-        Assert.Equal($"+0.92 {Eur} (+2.0 %)", vm.DifferenceText);
+        // calculated 45.10; bill 46.02 -> +0.92 (+2.0\u00A0%)
+        Assert.Equal($"45.10\u00A0{Eur}", vm.CalculatedText);
+        Assert.Equal($"+0.92\u00A0{Eur} (+2.0\u00A0%)", vm.DifferenceText);
         Assert.False(vm.DifferenceHigher);
         Assert.False(vm.DifferenceLower);
     }
 
     [Theory]
-    [InlineData("50,00", true, false)] // +4.90 = +10.9 %
-    [InlineData("47,00", false, false)] // +1.90 = +4.2 %
-    [InlineData("40,00", false, true)] // -5.10 = -11.3 %
+    [InlineData("50,00", true, false)] // +4.90 = +10.9\u00A0%
+    [InlineData("47,00", false, false)] // +1.90 = +4.2\u00A0%
+    [InlineData("40,00", false, true)] // -5.10 = -11.3\u00A0%
     public async Task Comparison_ColoursAboveFivePercentRed_AndBelowMinusFiveGreen(string gross, bool higher, bool lower)
     {
         var contract = _kit.AddWaterContract();
@@ -602,15 +602,15 @@ public class BillEditViewModelTests : IDisposable
 
         var vm = await OpenAsync(bill.Id);
 
-        Assert.Equal($"BillSnapshotChanged 45.10 {Eur}|45.58 {Eur} [en]", vm.SnapshotChangedText);
-        Assert.Equal($"45.10 {Eur}", vm.CalculatedText);
-        Assert.Equal($"+0.92 {Eur} (+2.0 %)", vm.DifferenceText);
+        Assert.Equal($"BillSnapshotChanged 45.10\u00A0{Eur}|45.58\u00A0{Eur} [en]", vm.SnapshotChangedText);
+        Assert.Equal($"45.10\u00A0{Eur}", vm.CalculatedText);
+        Assert.Equal($"+0.92\u00A0{Eur} (+2.0\u00A0%)", vm.DifferenceText);
 
         vm.UpdateSnapshotCommand.Execute(null);
 
         Assert.True(vm.IsDirty);
         Assert.False(vm.ShowSnapshotChanged);
-        Assert.Equal($"45.58 {Eur}", vm.CalculatedText);
+        Assert.Equal($"45.58\u00A0{Eur}", vm.CalculatedText);
         await vm.SaveCommand.ExecuteAsync(null);
         Assert.Equal(45.58m, _kit.Bills.Saved.Last().CalculatedSnapshot!.TotalGross);
     }
@@ -666,7 +666,7 @@ public class BillEditViewModelTests : IDisposable
 
         Assert.Single(vm.LineRows);
         Assert.True(vm.LinesExpanded);
-        Assert.Equal($"BillLinesMismatch 30.00 {Eur}|46.02 {Eur} [en]", vm.LinesWarning);
+        Assert.Equal($"BillLinesMismatch 30.00\u00A0{Eur}|46.02\u00A0{Eur} [en]", vm.LinesWarning);
         Assert.True(vm.IsDirty);
 
         await vm.SaveCommand.ExecuteAsync(null);
@@ -888,10 +888,10 @@ public class BillEditViewModelTests : IDisposable
 
         var vm = await OpenAsync(bill.Id);
 
-        Assert.Equal($"BillBadgePartial 26.02 {Eur} [en]", vm.StatusText);
+        Assert.Equal($"BillBadgePartial 26.02\u00A0{Eur} [en]", vm.StatusText);
         Assert.Equal(BillBadgeKind.PartiallyPaid, vm.StatusKind);
-        Assert.Equal($"20.00 {Eur}", vm.PaidAmountText);
-        Assert.Equal($"26.02 {Eur}", vm.OpenAmountText);
+        Assert.Equal($"20.00\u00A0{Eur}", vm.PaidAmountText);
+        Assert.Equal($"26.02\u00A0{Eur}", vm.OpenAmountText);
         Assert.True(vm.CanMarkPaid);
         Assert.Single(vm.PaymentRows);
     }
@@ -950,7 +950,7 @@ public class BillEditViewModelTests : IDisposable
         await Task.Delay(50);
 
         var (title, message) = Assert.Single(_kit.Kit.Dialogs.Confirmations);
-        Assert.Equal($"BillRemovePaymentTitle 46.02 {Eur}|27.10.2026 [en]", title);
+        Assert.Equal($"BillRemovePaymentTitle 46.02\u00A0{Eur}|27.10.2026 [en]", title);
         Assert.Equal("BillRemovePaymentHidden [en]", message);
         Assert.Empty(_kit.Payments.Stored);
         Assert.Equal(BillBadgeKind.Unpaid, vm.StatusKind);
@@ -1053,7 +1053,7 @@ public class BillEditViewModelTests : IDisposable
 
         // 70.00 - 57.70 = 12.30 prepayment
         Assert.True(vm.CanUsePrepayment);
-        Assert.Equal($"BillUsePrepayment 12.30 {Eur} [en]", vm.UsePrepaymentText);
+        Assert.Equal($"BillUsePrepayment 12.30\u00A0{Eur} [en]", vm.UsePrepaymentText);
         Assert.False((await OpenAsync(october.Id)).CanUsePrepayment);
     }
 
@@ -1071,8 +1071,8 @@ public class BillEditViewModelTests : IDisposable
 
         // 46.02 - 12.30 = 33.72 still open
         Assert.Equal(BillBadgeKind.PartiallyPaid, vm.StatusKind);
-        Assert.Equal($"12.30 {Eur}", vm.PaidAmountText);
-        Assert.Equal($"33.72 {Eur}", vm.OpenAmountText);
+        Assert.Equal($"12.30\u00A0{Eur}", vm.PaidAmountText);
+        Assert.Equal($"33.72\u00A0{Eur}", vm.OpenAmountText);
         Assert.False(vm.CanUsePrepayment);
         var call = Assert.Single(_kit.Kit.Toast.Calls);
         Assert.Equal(("PrepaymentUsed [en]", "BillUndo [en]"), (call.Message, call.Action));
@@ -1091,7 +1091,7 @@ public class BillEditViewModelTests : IDisposable
 
         Assert.Equal(BillBadgeKind.Unpaid, vm.StatusKind);
         Assert.True(vm.CanUsePrepayment);
-        Assert.Equal($"BillUsePrepayment 12.30 {Eur} [en]", vm.UsePrepaymentText);
+        Assert.Equal($"BillUsePrepayment 12.30\u00A0{Eur} [en]", vm.UsePrepaymentText);
     }
 
     [Fact]

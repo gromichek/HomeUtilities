@@ -82,7 +82,7 @@ public class ReportChartBuilderTests : IDisposable
 
         var series = Assert.Single(Assert.Single(Charts(table)).Series);
 
-        Assert.Equal($"Water · Jan 26: 1,234.50 {Eur}", series.Points[0].Tooltip);
+        Assert.Equal($"Water · Jan 26: 1,234.50\u00A0{Eur}", series.Points[0].Tooltip);
         Assert.Equal("Water · Feb 26", series.Points[1].Tooltip);
     }
 
@@ -219,7 +219,7 @@ public class ReportChartBuilderTests : IDisposable
         Assert.Equal([5m, 6m, null], chart.Series[0].Points.Select(p => p.Value));
         Assert.True(chart.HasApproximate);
         Assert.Equal("ReportChartApproximate [en]", chart.ApproximateNote);
-        Assert.Equal("Enum_MeterResource_ColdWater [en], Enum_MeterUnit_M3 [en] · Feb 26: ≈ 6.000 Enum_MeterUnit_M3 [en]", chart.Series[0].Points[1].Tooltip);
+        Assert.Equal("Enum_MeterResource_ColdWater [en], Enum_MeterUnit_M3 [en] · Feb 26: ≈ 6.000\u00A0Enum_MeterUnit_M3 [en]", chart.Series[0].Points[1].Tooltip);
     }
 
     [Fact]

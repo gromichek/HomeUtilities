@@ -28,7 +28,7 @@ public class PaymentEditViewModelTests : IDisposable
 
     public void Dispose() => CultureInfo.CurrentCulture = _culture;
 
-    private static string Money(string amount) => $"{amount} {Eur}";
+    private static string Money(string amount) => $"{amount}\u00A0{Eur}";
 
     private Bill WaterBill(decimal gross, int month, string? number = null)
     {

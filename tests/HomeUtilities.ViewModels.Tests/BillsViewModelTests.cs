@@ -54,11 +54,11 @@ public class BillsViewModelTests : IDisposable
             [BillBadgeKind.Prepaid, BillBadgeKind.Unpaid, BillBadgeKind.Overdue, BillBadgeKind.Paid],
             vm.Items.Select(i => i.Badge));
         Assert.Equal(
-            ["BillBadgePrepaid [en]", "BillBadgeUnpaid [en]", $"BillBadgeOverdueOpen 30.00 {Eur} [en]", "BillBadgePaid [en]"],
+            ["BillBadgePrepaid [en]", "BillBadgeUnpaid [en]", $"BillBadgeOverdueOpen 30.00\u00A0{Eur} [en]", "BillBadgePaid [en]"],
             vm.Items.Select(i => i.BadgeText));
         Assert.Equal(["11.2026", "10.2026", "09.2026", "08.2026"], vm.Items.Select(i => i.PeriodText));
         Assert.Equal(["Internet", "Water", "Water", "Water"], vm.Items.Select(i => i.Title));
-        Assert.Equal($"60.00 {Eur}", vm.Items[1].TotalText);
+        Assert.Equal($"60.00\u00A0{Eur}", vm.Items[1].TotalText);
         Assert.Equal("Water utility Ltd", vm.Items[1].SupplierName);
     }
 
@@ -73,7 +73,7 @@ public class BillsViewModelTests : IDisposable
 
         var item = Assert.Single(vm.Items);
         Assert.Equal(BillBadgeKind.PartiallyPaid, item.Badge);
-        Assert.Equal($"BillBadgePartial 35.00 {Eur} [en]", item.BadgeText);
+        Assert.Equal($"BillBadgePartial 35.00\u00A0{Eur} [en]", item.BadgeText);
         Assert.True(item.CanMarkPaid);
         Assert.True(item.IsBadgePartial);
     }
@@ -86,7 +86,7 @@ public class BillsViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         // billed 40 + 50 + 60 + 22 = 172; paid 40 + 20 + 0 + 22 = 82; open 90
-        Assert.Equal($"BillTotals 172.00 {Eur}|82.00 {Eur}|90.00 {Eur} [en]", vm.TotalsText);
+        Assert.Equal($"BillTotals 172.00\u00A0{Eur}|82.00\u00A0{Eur}|90.00\u00A0{Eur} [en]", vm.TotalsText);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class BillsViewModelTests : IDisposable
         _kit.Kit.Dialogs.ChooseScript = o => o.First(x => x.Contains("BillStatusOpen", StringComparison.Ordinal));
         await vm.ChooseStatusFilterCommand.ExecuteAsync(null);
         Assert.Equal([oct.Id, sep.Id], vm.Items.Select(i => i.Id));
-        Assert.Equal($"BillTotals 110.00 {Eur}|20.00 {Eur}|90.00 {Eur} [en]", vm.TotalsText);
+        Assert.Equal($"BillTotals 110.00\u00A0{Eur}|20.00\u00A0{Eur}|90.00\u00A0{Eur} [en]", vm.TotalsText);
 
         _kit.Kit.Dialogs.ChooseScript = o => o.First(x => x.Contains("BillStatusOverdue", StringComparison.Ordinal));
         await vm.ChooseStatusFilterCommand.ExecuteAsync(null);
@@ -149,12 +149,12 @@ public class BillsViewModelTests : IDisposable
         vm.Period.ShowMonthCommand.Execute(null);
         Assert.Equal("October 2026", vm.Period.Label);
         Assert.Equal([oct.Id], vm.Items.Select(i => i.Id));
-        Assert.Equal($"BillTotals 60.00 {Eur}|0.00 {Eur}|60.00 {Eur} [en]", vm.TotalsText);
+        Assert.Equal($"BillTotals 60.00\u00A0{Eur}|0.00\u00A0{Eur}|60.00\u00A0{Eur} [en]", vm.TotalsText);
 
         vm.Period.PreviousCommand.Execute(null);
         Assert.Equal("September 2026", vm.Period.Label);
         Assert.Equal([sep.Id], vm.Items.Select(i => i.Id));
-        Assert.Equal($"BillTotals 50.00 {Eur}|20.00 {Eur}|30.00 {Eur} [en]", vm.TotalsText);
+        Assert.Equal($"BillTotals 50.00\u00A0{Eur}|20.00\u00A0{Eur}|30.00\u00A0{Eur} [en]", vm.TotalsText);
 
         vm.Period.PreviousCommand.Execute(null);
         vm.Period.PreviousCommand.Execute(null);
@@ -252,11 +252,11 @@ public class BillsViewModelTests : IDisposable
     }
 
     [Theory]
-    [InlineData(47.30, false, false)] // +2.20 against 45.10 = +4.9 %: muted
-    [InlineData(47.35, false, false)] // +2.25 = +4.99 % -> 5.0: not above +5, muted
-    [InlineData(47.40, true, false)] // +2.30 = +5.1 %: red
-    [InlineData(42.90, false, false)] // -2.20 = -4.9 %: muted
-    [InlineData(42.80, false, true)] // -2.30 = -5.1 %: green
+    [InlineData(47.30, false, false)] // +2.20 against 45.10 = +4.9\u00A0%: muted
+    [InlineData(47.35, false, false)] // +2.25 = +4.99\u00A0% -> 5.0: not above +5, muted
+    [InlineData(47.40, true, false)] // +2.30 = +5.1\u00A0%: red
+    [InlineData(42.90, false, false)] // -2.20 = -4.9\u00A0%: muted
+    [InlineData(42.80, false, true)] // -2.30 = -5.1\u00A0%: green
     public async Task Difference_IsRedAboveFivePercent_GreenBelowMinusFive_AndMutedOtherwise(double gross, bool higher, bool lower)
     {
         var water = _kit.AddWaterContract(tariff: false);
@@ -277,7 +277,7 @@ public class BillsViewModelTests : IDisposable
 
         var vm = await LoadAsync();
 
-        Assert.Equal($"+0.92 {Eur} (+2.0 %)", Assert.Single(vm.Items).DifferenceText);
+        Assert.Equal($"+0.92\u00A0{Eur} (+2.0\u00A0%)", Assert.Single(vm.Items).DifferenceText);
     }
 
     [Fact]
@@ -595,7 +595,7 @@ public class BillsViewModelTests : IDisposable
         editor.Amounts.GrossText = "50";
         await editor.SaveCommand.ExecuteAsync(null);
 
-        Assert.Equal($"50.00 {Eur}", vm.Items[0].TotalText);
+        Assert.Equal($"50.00\u00A0{Eur}", vm.Items[0].TotalText);
         Assert.True(vm.Items[0].IsSelected);
     }
 

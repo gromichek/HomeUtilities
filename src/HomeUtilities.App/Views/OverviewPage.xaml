@@ -42,6 +42,9 @@
                     </VerticalStackLayout>
                 </VerticalStackLayout>
 
+                <!-- Loading (R-52): text only, shown after 300 ms of the first load. -->
+                <Label Text="{Binding LoadingText}" Style="{StaticResource MutedLabel}" HorizontalOptions="Center" IsVisible="{Binding ShowLoading}" />
+
                 <!-- Phone: one column. -->
                 <VerticalStackLayout Spacing="12" IsVisible="{Binding IsCompact}">
                     <views:OverviewTodoCard />
