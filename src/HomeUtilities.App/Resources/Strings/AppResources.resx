@@ -7,7 +7,6 @@
   <data name="AppTitle" xml:space="preserve"><value>Home utilities</value></data>
   <data name="TodayIs" xml:space="preserve"><value>Today is {0:d}</value></data>
   <data name="DatabaseError" xml:space="preserve"><value>Database error: {0}</value></data>
-  <data name="ComingSoon" xml:space="preserve"><value>Coming soon</value></data>
   <data name="SectionOverview" xml:space="preserve"><value>Overview</value></data>
   <data name="SectionProperties" xml:space="preserve"><value>Properties</value></data>
   <data name="SectionReadings" xml:space="preserve"><value>Readings</value></data>
@@ -206,7 +205,6 @@
   <data name="ContractChooseCategory" xml:space="preserve"><value>Category</value></data>
   <data name="ContractChooseSupplier" xml:space="preserve"><value>Supplier</value></data>
   <data name="ContractNewSupplier" xml:space="preserve"><value>＋ New supplier…</value></data>
-  <data name="ContractSelectPlaceholder" xml:space="preserve"><value>Select…</value></data>
   <data name="ContractAccount" xml:space="preserve"><value>Account</value></data>
   <data name="ContractCustomerNumber" xml:space="preserve"><value>Customer number</value></data>
   <data name="ContractContractNumber" xml:space="preserve"><value>Contract number</value></data>
@@ -815,7 +813,6 @@
   <data name="BillBillsCardAdd" xml:space="preserve"><value>New bill for this contract</value></data>
   <data name="ChargesBillLine" xml:space="preserve"><value>Bill: {0}</value></data>
   <data name="ChargesEnterBill" xml:space="preserve"><value>Enter bill</value></data>
-  <data name="ChargesBillOpen" xml:space="preserve"><value>Open the bill</value></data>
   <data name="Error_amount_inconsistent" xml:space="preserve"><value>Amount excl. VAT, VAT % and Total do not match. Fill in only two of them.</value></data>
   <data name="Error_amount_gross_required" xml:space="preserve"><value>Enter the Total, or the amount excl. VAT together with the VAT %.</value></data>
   <data name="Error_amount_vat_percent_out_of_range" xml:space="preserve"><value>VAT % must be between 0 and 100.</value></data>
@@ -1114,7 +1111,6 @@
   <data name="ReportFiltersTitle" xml:space="preserve"><value>Filters</value></data>
   <data name="ReportFiltersExpand" xml:space="preserve"><value>Show filters</value></data>
   <data name="ReportFiltersCollapse" xml:space="preserve"><value>Hide filters</value></data>
-  <data name="ReportExportMenu" xml:space="preserve"><value>Export</value></data>
   <data name="BillBadgeDraft" xml:space="preserve"><value>Draft</value></data>
   <data name="BillBadgeDraftAmount" xml:space="preserve"><value>Draft · enter the amount</value></data>
   <data name="BillStatusDrafts" xml:space="preserve"><value>Drafts</value></data>
@@ -1443,7 +1439,6 @@
   <data name="MeterLinkValidTo" xml:space="preserve"><value>Valid to</value></data>
   <data name="MeterLinkBeforeContract" xml:space="preserve"><value>The link starts before the contract ({0}); charges and reports only count the months from the contract’s start.</value></data>
   <data name="MeterLinkSaved" xml:space="preserve"><value>Link dates saved</value></data>
-  <data name="MeterLinkEditTip" xml:space="preserve"><value>Edit dates</value></data>
   <data name="ImportsLinkRepairHeader" xml:space="preserve"><value>Meter links</value></data>
   <data name="ImportsLinkRepairHint" xml:space="preserve"><value>A link that starts after the meter was installed hides the earlier readings from charges and reports.</value></data>
   <data name="ImportsLinkRepairNone" xml:space="preserve"><value>All meter links start at the installation of their meters.</value></data>
