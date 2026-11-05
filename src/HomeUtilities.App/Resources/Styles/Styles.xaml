@@ -131,10 +131,10 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         <Setter Property="BorderWidth" Value="0" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="WidthRequest" Value="40" />
-        <Setter Property="HeightRequest" Value="40" />
-        <Setter Property="MinimumWidthRequest" Value="40" />
+        <Setter Property="CornerRadius" Value="{StaticResource TouchRadius}" />
+        <Setter Property="WidthRequest" Value="{StaticResource TouchSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource TouchSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource TouchSize}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
