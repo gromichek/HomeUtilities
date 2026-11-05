@@ -36,7 +36,8 @@ public class LoadingHintTests
         Assert.False(vm.ShowLoading);
     }
 
-    private sealed class HintViewModel : ViewModelBase
+    // Internal, not private: the MVVM Toolkit messenger generator (IRecipient on ViewModelBase) references it from generated code.
+    internal sealed class HintViewModel : ViewModelBase
     {
         protected override bool LoadingHintApplies => true;
 
