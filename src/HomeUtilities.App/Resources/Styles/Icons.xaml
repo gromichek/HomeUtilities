@@ -104,17 +104,36 @@
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
 
-    <!-- Toolbar items: the toolbar colour comes from ToolbarLight/ToolbarDark (AppShell), so its icons use the
-         OnToolbar colour, never the accent (R-01: 1.6 : 1 before; C-17 dark bar). -->
-    <FontImageSource x:Key="IconHelpToolbarSource"
+    <!-- Toolbar items. Android: the toolbar colour comes from ToolbarLight/ToolbarDark (AppShell), so its icons use the
+         OnToolbar colour, never the accent (R-01: 1.6 : 1 before; C-17 dark bar). Windows keeps the default (light /
+         dark) toolbar, so its icons use the accent colour. -->
+    <FontImageSource x:Key="IconHelpOnToolbarSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource ImageGlyphHelp}"
                      Size="24"
                      Color="{AppThemeBinding Light={StaticResource OnToolbarLight}, Dark={StaticResource OnToolbarDark}}" />
-    <FontImageSource x:Key="IconSaveToolbarSource"
+    <FontImageSource x:Key="IconSaveOnToolbarSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource ImageGlyphSave}"
                      Size="24"
                      Color="{AppThemeBinding Light={StaticResource OnToolbarLight}, Dark={StaticResource OnToolbarDark}}" />
+    <FontImageSource x:Key="IconHelpAccentToolbarSource"
+                     FontFamily="{StaticResource IconImageFontFamily}"
+                     Glyph="{StaticResource ImageGlyphHelp}"
+                     Size="24"
+                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+    <FontImageSource x:Key="IconSaveAccentToolbarSource"
+                     FontFamily="{StaticResource IconImageFontFamily}"
+                     Glyph="{StaticResource ImageGlyphSave}"
+                     Size="24"
+                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+    <OnPlatform x:Key="IconHelpToolbarSource" x:TypeArguments="ImageSource">
+        <On Platform="Android" Value="{StaticResource IconHelpOnToolbarSource}" />
+        <On Platform="WinUI" Value="{StaticResource IconHelpAccentToolbarSource}" />
+    </OnPlatform>
+    <OnPlatform x:Key="IconSaveToolbarSource" x:TypeArguments="ImageSource">
+        <On Platform="Android" Value="{StaticResource IconSaveOnToolbarSource}" />
+        <On Platform="WinUI" Value="{StaticResource IconSaveAccentToolbarSource}" />
+    </OnPlatform>
 
 </ResourceDictionary>

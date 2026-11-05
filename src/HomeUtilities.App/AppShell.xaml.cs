@@ -37,11 +37,34 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.EqualizedSettlement, typeof(EqualizedSettlementPage));
         BindingContext = viewModel;
         Navigating += OnNavigating;
+        ApplyToolbarColors();
         ApplyStatusBar();
         if (Application.Current is { } app)
         {
             app.RequestedThemeChanged += (_, _) => ApplyStatusBar();
         }
+    }
+
+    // Toolbar colours (R-01, C-17), Android only. On Windows Shell.ForegroundColor is also the colour of the Back and ☰
+    // buttons, which stand outside the toolbar on the light window background (MAUI MauiToolbar.UpdateIconColor): white on
+    // white in the light theme. Windows keeps its default toolbar.
+    private void ApplyToolbarColors()
+    {
+#if ANDROID
+        var resources = Application.Current?.Resources;
+        if (resources is null
+            || !resources.TryGetValue("ToolbarLight", out var barLight) || barLight is not Color toolbarLight
+            || !resources.TryGetValue("ToolbarDark", out var barDark) || barDark is not Color toolbarDark
+            || !resources.TryGetValue("OnToolbarLight", out var onLight) || onLight is not Color onToolbarLight
+            || !resources.TryGetValue("OnToolbarDark", out var onDark) || onDark is not Color onToolbarDark)
+        {
+            return;
+        }
+
+        this.SetAppThemeColor(Shell.BackgroundColorProperty, toolbarLight, toolbarDark);
+        this.SetAppThemeColor(Shell.ForegroundColorProperty, onToolbarLight, onToolbarDark);
+        this.SetAppThemeColor(Shell.TitleColorProperty, onToolbarLight, onToolbarDark);
+#endif
     }
 
     // The status bar takes the toolbar colour in the current theme (R-01); content colour is the opposite of the bar.
