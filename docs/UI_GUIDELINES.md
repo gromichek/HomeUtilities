@@ -266,6 +266,9 @@ Use these wordings everywhere (resx keys in brackets).
   text and open the picker on tap.
 - **[NEW] .NET's Russian abbreviated month names have different lengths** ("янв.", "февр.", "март", "июнь", "сент.").
   Use the app's own short month names (§9).
+- **Windows: `Shell.ForegroundColor` also colours the NavigationView Back and ☰ buttons** (`MauiToolbar.UpdateIconColor`),
+  which stand outside the toolbar on the window background — a light foreground made them invisible in the light theme
+  (#244). Do not set Shell toolbar colours on Windows.
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.
@@ -297,8 +300,9 @@ Use these wordings everywhere (resx keys in brackets).
 
 ## 8. Colours and contrast [NEW]
 - Colours only from `Colors.xaml` via styles / `AppThemeBinding`; no hard-coded colours.
-- **Toolbar / status bar:** accent blue (`ToolbarLight`) in the light theme, a **dark bar** (`ToolbarDark` #25282D) in the
-  dark theme — the light-blue bar was too bright at night (owner 2026-11-05, C-17); icons in `OnToolbar*`. The colours are set explicitly in `AppShell` (`Shell.BackgroundColor`, `Shell.ForegroundColor`,
+- **Toolbar / status bar — Android:** accent blue (`ToolbarLight`) in the light theme, a **dark bar** (`ToolbarDark` #25282D) in the
+  dark theme — the light-blue bar was too bright at night (owner 2026-11-05, C-17); icons in `OnToolbar*`. The colours are set in `AppShell.xaml.cs` **on Android only** (#244). **Windows keeps its default toolbar**; toolbar icons
+  there use the accent colour (`OnPlatform` toolbar sources). The colours were set in `AppShell` (`Shell.BackgroundColor`, `Shell.ForegroundColor`,
   `Shell.TitleColor`) for both themes, and every toolbar icon uses the toolbar foreground colour (`OnPrimary` style
   sources, e.g. `IconSaveToolbarSource`) — never the accent colour, which is nearly invisible on the dark toolbar
   (1.6 : 1).
