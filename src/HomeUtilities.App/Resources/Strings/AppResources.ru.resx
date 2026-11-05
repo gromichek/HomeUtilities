@@ -1640,4 +1640,5 @@
   <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>Полученный файл вложения повреждён, пробуем ещё раз.</value></data>
   <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Старый файл вложения удалён из облака.</value></data>
   <data name="SyncDisconnectButton" xml:space="preserve"><value>Отключить аккаунт Google…</value></data>
+  <data name="BillBadgeDueSoon" xml:space="preserve"><value>Не оплачен · срок {0}</value></data>
 </root>

@@ -407,6 +407,7 @@ the list shows only the bills of that category, that property and that month.
 | Badge | Meaning |
 |---|---|
 | *Unpaid* (normal text) | Nothing paid yet — this is the state that needs action, so it is not dimmed. |
+| *⚠ Unpaid · due 30.10.2026* (amber) | Nothing paid and the due date is within the next 7 days (or today). |
 | *⚠ Partially paid · open 26,02 €* (amber) | Part of the total is paid. |
 | *⚠ Overdue* (red) | Something is open and the due date has passed. |
 | *Paid ✓* (green) | Everything is paid. |

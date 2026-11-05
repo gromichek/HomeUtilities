@@ -133,6 +133,9 @@
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgePartial}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
                                     </DataTrigger>
+                                    <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgeDueSoon}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                    </DataTrigger>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillItemViewModel" Binding="{Binding IsBadgeOverdue}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
                                     </DataTrigger>

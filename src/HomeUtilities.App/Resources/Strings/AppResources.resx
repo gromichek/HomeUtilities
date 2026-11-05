@@ -1640,4 +1640,5 @@
   <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>A received attachment file is damaged; trying again.</value></data>
   <data name="SyncDetail_AttachmentDeleted" xml:space="preserve"><value>Removed an old attachment file from the cloud.</value></data>
   <data name="SyncDisconnectButton" xml:space="preserve"><value>Disconnect Google account…</value></data>
+  <data name="BillBadgeDueSoon" xml:space="preserve"><value>Unpaid · due {0}</value></data>
 </root>

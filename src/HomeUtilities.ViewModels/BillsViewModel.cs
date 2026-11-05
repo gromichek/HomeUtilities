@@ -425,7 +425,8 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
                     _highlightContractId is { } highlighted && r.Bill.ContractId == highlighted,
                     id => SelectCommand.Execute(id),
                     id => _ = MarkPaidAsync(id),
-                    id => _ = ConfirmDraftAsync(id))),
+                    id => _ = ConfirmDraftAsync(id),
+                    _clock.Today)),
         ]);
 
         PropertyFilterName = _filter.PropertyId is { } id

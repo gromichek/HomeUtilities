@@ -22,6 +22,12 @@ public enum BillBadgeKind
 
     /// <summary>Created from a template and not confirmed yet (muted); counts nowhere until confirmed.</summary>
     Draft,
+
+    /// <summary>
+    /// Nothing paid and the due date is within the next few days (amber). Only the bills list uses it — it needs today's date,
+    /// which <see cref="BillBadge.KindOf"/> does not have.
+    /// </summary>
+    DueSoon,
 }
 
 /// <summary>Maps a <see cref="BillState"/> to the badge and its text.</summary>

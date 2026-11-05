@@ -78,6 +78,42 @@ public class BillsViewModelTests : IDisposable
         Assert.True(item.IsBadgePartial);
     }
 
+    [Theory]
+    [InlineData(27, BillBadgeKind.DueSoon)]   // due today
+    [InlineData(30, BillBadgeKind.DueSoon)]   // in 3 days
+    [InlineData(3, BillBadgeKind.Overdue)]    // 3.10 is past: overdue, not "due soon"
+    public async Task UnpaidBill_DueWithinAWeek_IsDueSoon_AmberWithTheDate(int dueDay, BillBadgeKind expected)
+    {
+        // Today is 27.10.2026; "soon" = within the next 7 days (the same window as the Overview to-do).
+        var water = _kit.AddWaterContract(tariff: false);
+        _kit.AddBill(water, new YearMonth(2026, 9), 60m, due: new DateOnly(2026, 10, dueDay));
+
+        var vm = await LoadAsync();
+
+        var item = Assert.Single(vm.Items);
+        Assert.Equal(expected, item.Badge);
+        Assert.Equal(expected == BillBadgeKind.DueSoon, item.IsBadgeDueSoon);
+        Assert.Equal(expected == BillBadgeKind.DueSoon, item.ShowBadgeIcon && !item.IsBadgeOverdue);
+        if (expected == BillBadgeKind.DueSoon)
+        {
+            Assert.Equal($"BillBadgeDueSoon {dueDay:00}.10.2026 [en]", item.BadgeText);
+        }
+    }
+
+    [Fact]
+    public async Task UnpaidBill_DueLaterThanAWeek_IsPlainUnpaid_AndTheStatusShowsAnIconOnlyForTheOnesThatNeedAttention()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        _kit.AddBill(water, new YearMonth(2026, 10), 60m, due: new DateOnly(2026, 11, 4));
+
+        var vm = await LoadAsync();
+
+        var item = Assert.Single(vm.Items);
+        Assert.Equal(BillBadgeKind.Unpaid, item.Badge);
+        Assert.False(item.ShowBadgeIcon);
+        Assert.False(item.IsBadgeDueSoon);
+    }
+
     [Fact]
     public async Task Totals_AreBilledPaidAndOpenOfTheFilteredList()
     {
