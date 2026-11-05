@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-035 | Release builds: version number, signed APK, Windows installer (Inno Setup), release script | Ready | | owner 2026-11-05: Inno Setup, no auto-update, manual copy |
 
 ## Done
 

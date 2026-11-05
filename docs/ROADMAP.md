@@ -79,5 +79,9 @@ is written; the list below is the plan and will change.
   2026-11-02). Owner keeps the keystore and passwords outside the repo; migration from the debug key needs one reinstall
   (backup → uninstall → install → restore).
 
+- T-035 Release builds made locally by `scripts/publish-release.ps1`: date-based version (display `yyyy.M.d`, build =
+  minutes since 2026-01-01), signed release APK, self-contained Windows build + Inno Setup installer (per user, no admin,
+  data kept); no auto-update, files copied by hand (owner, 2026-11-05).
+
 ## Phase 10 — iOS (dropped)
 - ~~T-033 iOS~~ — dropped (owner, 2026-11-05: no Mac to develop on). Windows + Android only.
