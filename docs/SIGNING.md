@@ -7,7 +7,8 @@ A **permanent key** that you keep and copy to every PC fixes both. The key never
 ## 1. Create the key (once)
 
 Use the JDK that Visual Studio installs. Pick a folder **outside the repository** (for example a `Keys` folder in your
-user folder) and a password; keep the password in a one-line text file in the same folder (`homeutilities.pass`).
+user folder) and a password; keep the password in a text file in the same folder (`homeutilities.pass`) — see below for its
+exact content.
 
 cmd:
 
@@ -34,6 +35,18 @@ with a new key and a new Google client is needed.
 1. Copy `src/HomeUtilities.App/signing.template.props` to `src/HomeUtilities.App/signing.props` (git-ignored).
 2. Fill in the absolute path of the keystore, the alias (`homeutilities`) and the passwords. Passwords are given as
    `file:<path to the password file>` or `env:<NAME OF AN ENVIRONMENT VARIABLE>`; never type the password into the file.
+   Paths can use `$(USERPROFILE)`, e.g. `$(USERPROFILE)\Keys\homeutilities.keystore` (MSBuild does not understand
+   `%USERPROFILE%`).
+
+**The password file must contain the password on two lines.** `apksigner` reads the keystore password and the key
+password one after the other from the same file (first line, second line); a file with one line fails with
+`Failed to read Key "homeutilities" password … end of file reached` and the build stops with `"java.exe" exited with
+code 2`. Write it like this in PowerShell (UTF-8 without BOM — `echo … > file` in Windows PowerShell 5.1 writes UTF-16,
+which does not work):
+
+```powershell
+[IO.File]::WriteAllText("$env:USERPROFILE\Keys\homeutilities.pass", "YOUR_PASSWORD`nYOUR_PASSWORD`n")
+```
 3. Build as usual. `signing.props` is used for **every** Android build (Debug and Release). Without the file nothing changes
    (the debug key is used, as in CI).
 

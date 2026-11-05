@@ -53,13 +53,15 @@ function Invoke-Step([string]$Name, [string]$LogFile, [string[]]$Arguments) {
     $oldPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'   # Windows PowerShell 5.1 turns native stderr text into errors otherwise
     try {
-        & dotnet @Arguments *> $LogFile
+        # Normal verbosity: the messages of tools such as apksigner (the real cause of "java.exe exited with code 2") are kept.
+        & dotnet @Arguments -v n *> $LogFile
         $code = $LASTEXITCODE
     } finally {
         $ErrorActionPreference = $oldPreference
     }
     if ($code -ne 0) {
-        Write-Host (Get-Content $LogFile -Tail 25 | Out-String)
+        $causes = Select-String -Path $LogFile -Pattern 'Exception|error ' -SimpleMatch:$false | Select-Object -Last 12
+        if ($causes) { Write-Host ($causes | ForEach-Object { $_.Line.Trim() } | Out-String) } else { Write-Host (Get-Content $LogFile -Tail 25 | Out-String) }
         Stop-Release "Step '$Name' failed (exit code $code). Full output: $LogFile"
     }
 }
