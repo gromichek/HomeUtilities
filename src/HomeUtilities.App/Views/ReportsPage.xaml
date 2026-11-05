@@ -11,7 +11,7 @@
     <views:PageBase.ToolbarItems>
         <ToolbarItem Text="{Binding ExportExcelText}" Order="Secondary" Command="{Binding ExportExcelCommand}" />
         <ToolbarItem Text="{Binding ExportCsvText}" Order="Secondary" Command="{Binding ExportCsvCommand}" />
-        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpSource}" Command="{Binding OpenHelpCommand}" />
+        <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpToolbarSource}" Command="{Binding OpenHelpCommand}" />
     </views:PageBase.ToolbarItems>
 
     <ScrollView>

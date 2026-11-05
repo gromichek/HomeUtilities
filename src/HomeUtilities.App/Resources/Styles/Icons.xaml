@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-    One resource per icon of docs/UI_GUIDELINES.md §1. Android: Material Icons Outlined (bundled static font, ~330 KB, same code points as Material Symbols);
-    Windows: Segoe Fluent Icons (Windows 11) with Segoe MDL2 Assets as the Windows 10 fallback (system fonts).
+    One resource per icon of docs/UI_GUIDELINES.md §1: Google Material Icons Outlined (bundled static font, ~330 KB) on
+    BOTH platforms — no Segoe glyphs (R-17), so the same action looks the same everywhere.
     Pages use only these keys, never raw glyph codes.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <OnPlatform x:Key="IconFontFamily" x:TypeArguments="x:String">
-        <On Platform="Android" Value="MaterialIcons" />
-        <On Platform="WinUI" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
-    </OnPlatform>
+    <x:String x:Key="IconFontFamily">MaterialIcons</x:String>
 
     <!-- Font of every FontImageSource (toolbar icons, menu icons): the font FILE bundled with the app, on all platforms.
          In an unpackaged Windows app MAUI's FontImageSourceService turns the font of an image into a file URI
@@ -37,161 +34,57 @@
     <x:String x:Key="MenuGlyphHelp">&#xE8FD;</x:String>
     <x:String x:Key="MenuGlyphSettings">&#xE8B8;</x:String>
 
-    <OnPlatform x:Key="IconAdd" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE145;" />
-        <On Platform="WinUI" Value="&#xE710;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconEdit" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE3C9;" />
-        <On Platform="WinUI" Value="&#xE70F;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconDelete" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE872;" />
-        <On Platform="WinUI" Value="&#xE74D;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSave" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE5CA;" />
-        <On Platform="WinUI" Value="&#xE73E;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconClose" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE5CD;" />
-        <On Platform="WinUI" Value="&#xE711;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconMore" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE5D4;" />
-        <On Platform="WinUI" Value="&#xE712;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconOpenLink" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE89E;" />
-        <On Platform="WinUI" Value="&#xE8A7;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconCopy" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE14D;" />
-        <On Platform="WinUI" Value="&#xE8C8;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconArchive" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE149;" />
-        <On Platform="WinUI" Value="&#xE7B8;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconHistory" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE889;" />
-        <On Platform="WinUI" Value="&#xE81C;" />
-    </OnPlatform>
-    <!-- Paid: the "mark as paid" quick action (Material task_alt / Segoe CheckMark). Proposed for the UI guidelines table. -->
-    <OnPlatform x:Key="IconPaid" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE2E6;" />
-        <On Platform="WinUI" Value="&#xE73E;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconPhoto" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE412;" />
-        <On Platform="WinUI" Value="&#xE722;" />
-    </OnPlatform>
-    <!-- Not in the guidelines table yet: expand / collapse chevrons (expand_more / expand_less, ChevronDown / ChevronUp). -->
-    <OnPlatform x:Key="IconHelp" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE8FD;" />
-        <On Platform="WinUI" Value="&#xE897;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconExpand" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE5CF;" />
-        <On Platform="WinUI" Value="&#xE70D;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconCollapse" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE5CE;" />
-        <On Platform="WinUI" Value="&#xE70E;" />
-    </OnPlatform>
+    <x:String x:Key="IconAdd">&#xE145;</x:String>
+    <x:String x:Key="IconEdit">&#xE3C9;</x:String>
+    <x:String x:Key="IconDelete">&#xE872;</x:String>
+    <x:String x:Key="IconSave">&#xE5CA;</x:String>
+    <x:String x:Key="IconClose">&#xE5CD;</x:String>
+    <x:String x:Key="IconMore">&#xE5D4;</x:String>
+    <x:String x:Key="IconOpenLink">&#xE89E;</x:String>
+    <x:String x:Key="IconCopy">&#xE14D;</x:String>
+    <x:String x:Key="IconArchive">&#xE149;</x:String>
+    <x:String x:Key="IconHistory">&#xE889;</x:String>
+    <!-- Paid: the "mark as paid" quick action (task_alt, a circled check) — differs from IconSave (check). -->
+    <x:String x:Key="IconPaid">&#xE2E6;</x:String>
+    <x:String x:Key="IconPhoto">&#xE412;</x:String>
+    <x:String x:Key="IconHelp">&#xE8FD;</x:String>
+    <x:String x:Key="IconExpand">&#xE5CF;</x:String>
+    <x:String x:Key="IconCollapse">&#xE5CE;</x:String>
 
     <!-- Choice dialog rows (docs/UI_GUIDELINES.md §3a): check_box / check_box_outline_blank / radio_button_checked / radio_button_unchecked;
          Segoe: CheckboxComposite / Checkbox / RadioBtnOn / RadioBtnOff. -->
-    <OnPlatform x:Key="IconCheckOn" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE834;" />
-        <On Platform="WinUI" Value="&#xE73A;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconCheckOff" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE835;" />
-        <On Platform="WinUI" Value="&#xE739;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconRadioOn" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE837;" />
-        <On Platform="WinUI" Value="&#xECCB;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconRadioOff" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE836;" />
-        <On Platform="WinUI" Value="&#xECCA;" />
-    </OnPlatform>
+    <x:String x:Key="IconCheckOn">&#xE834;</x:String>
+    <x:String x:Key="IconCheckOff">&#xE835;</x:String>
+    <x:String x:Key="IconRadioOn">&#xE837;</x:String>
+    <x:String x:Key="IconRadioOff">&#xE836;</x:String>
 
     <!-- Overview to-do rows (proposed for the UI guidelines table): readings = speed / Diagnostic, due bill = event / Calendar,
          missing bill = note_add / Document, verification = build / Warning, settlement = balance / Calculator, chevron = chevron_right. -->
-    <OnPlatform x:Key="IconTodoReadings" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE9E4;" />
-        <On Platform="WinUI" Value="&#xE9D9;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconTodoDue" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE878;" />
-        <On Platform="WinUI" Value="&#xE787;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconTodoMissing" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE89C;" />
-        <On Platform="WinUI" Value="&#xE8A5;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconTodoVerification" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE869;" />
-        <On Platform="WinUI" Value="&#xE7BA;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconTodoSettlement" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xEAF6;" />
-        <On Platform="WinUI" Value="&#xE8EF;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconChevron" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE5CC;" />
-        <On Platform="WinUI" Value="&#xE76C;" />
-    </OnPlatform>
+    <x:String x:Key="IconTodoReadings">&#xE9E4;</x:String>
+    <x:String x:Key="IconTodoDue">&#xE878;</x:String>
+    <x:String x:Key="IconTodoMissing">&#xE89C;</x:String>
+    <x:String x:Key="IconTodoVerification">&#xE869;</x:String>
+    <x:String x:Key="IconTodoSettlement">&#xEAF6;</x:String>
+    <!-- Back arrow (arrow_back), previous / next period (chevron_left / chevron_right) and the warning mark (warning_amber). -->
+    <x:String x:Key="IconBack">&#xE5C4;</x:String>
+    <x:String x:Key="IconPrevious">&#xE5CB;</x:String>
+    <x:String x:Key="IconNext">&#xE5CC;</x:String>
+    <x:String x:Key="IconWarning">&#xF083;</x:String>
+    <x:String x:Key="IconChevron">&#xE5CC;</x:String>
 
     <!-- Settings list rows (T-028d): language / palette / event / backup / category / percent / description / upload_file / bug_report / info; Segoe: Globe / Color / Calendar / Upload / Tag / Calculator / Page / Import / ErrorBadge / Info. -->
-    <OnPlatform x:Key="IconSettingsLanguage" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE894;" />
-        <On Platform="WinUI" Value="&#xE774;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsTheme" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE40A;" />
-        <On Platform="WinUI" Value="&#xE790;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsReminders" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE878;" />
-        <On Platform="WinUI" Value="&#xE787;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsBackup" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE864;" />
-        <On Platform="WinUI" Value="&#xE898;" />
-    </OnPlatform>
+    <x:String x:Key="IconSettingsLanguage">&#xE894;</x:String>
+    <x:String x:Key="IconSettingsTheme">&#xE40A;</x:String>
+    <x:String x:Key="IconSettingsReminders">&#xE878;</x:String>
+    <x:String x:Key="IconSettingsBackup">&#xE864;</x:String>
     <!-- Sync (T-030): sync (Material, checked in the bundled font) / Sync (Segoe MDL2 E895). -->
-    <OnPlatform x:Key="IconSettingsSync" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE627;" />
-        <On Platform="WinUI" Value="&#xE895;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsCategories" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE574;" />
-        <On Platform="WinUI" Value="&#xE8EC;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsVatRates" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xEB58;" />
-        <On Platform="WinUI" Value="&#xE8EF;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsBillTemplates" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE873;" />
-        <On Platform="WinUI" Value="&#xE7C3;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsImports" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE9FC;" />
-        <On Platform="WinUI" Value="&#xE8B5;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsErrorLog" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE868;" />
-        <On Platform="WinUI" Value="&#xE783;" />
-    </OnPlatform>
-    <OnPlatform x:Key="IconSettingsAbout" x:TypeArguments="x:String">
-        <On Platform="Android" Value="&#xE88E;" />
-        <On Platform="WinUI" Value="&#xE946;" />
-    </OnPlatform>
+    <x:String x:Key="IconSettingsSync">&#xE627;</x:String>
+    <x:String x:Key="IconSettingsCategories">&#xE574;</x:String>
+    <x:String x:Key="IconSettingsVatRates">&#xEB58;</x:String>
+    <x:String x:Key="IconSettingsBillTemplates">&#xE873;</x:String>
+    <x:String x:Key="IconSettingsImports">&#xE9FC;</x:String>
+    <x:String x:Key="IconSettingsErrorLog">&#xE868;</x:String>
+    <x:String x:Key="IconSettingsAbout">&#xE88E;</x:String>
 
     <!-- Image sources for toolbar items and buttons with an icon next to the text. -->
     <FontImageSource x:Key="IconAddSource"
@@ -209,15 +102,18 @@
                      Glyph="{StaticResource ImageGlyphPaid}"
                      Size="20"
                      Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-    <FontImageSource x:Key="IconHelpSource"
+
+    <!-- Toolbar items: the toolbar is drawn in the accent colour (AppShell), so its icons use the colour ON the accent
+         (OnPrimary), never the accent itself (R-01: 1.6 : 1 before). -->
+    <FontImageSource x:Key="IconHelpToolbarSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource ImageGlyphHelp}"
                      Size="24"
-                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-    <FontImageSource x:Key="IconSaveSource"
+                     Color="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+    <FontImageSource x:Key="IconSaveToolbarSource"
                      FontFamily="{StaticResource IconImageFontFamily}"
                      Glyph="{StaticResource ImageGlyphSave}"
                      Size="24"
-                     Color="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                     Color="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
 
 </ResourceDictionary>

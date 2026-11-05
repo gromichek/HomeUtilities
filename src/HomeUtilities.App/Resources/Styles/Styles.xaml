@@ -2,6 +2,17 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
+    <!-- Touch targets (UI_GUIDELINES §2): 48 dp on Android, 40 on Windows. The glyph / text size does not change, only
+         the hit area grows. -->
+    <OnPlatform x:Key="TouchSize" x:TypeArguments="x:Double">
+        <On Platform="Android" Value="48" />
+        <On Platform="WinUI" Value="40" />
+    </OnPlatform>
+    <OnPlatform x:Key="TouchRadius" x:TypeArguments="x:Int32">
+        <On Platform="Android" Value="24" />
+        <On Platform="WinUI" Value="20" />
+    </OnPlatform>
+
     <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
     </Style>
@@ -31,6 +42,20 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
     </Style>
 
+    <!-- Bill status (UI_GUIDELINES §8): unpaid = normal text (it needs action), due soon = amber, overdue = red, paid = muted/green.
+         The status is always text (+ icon), never colour alone. -->
+    <Style x:Key="BadgeUnpaidLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+    </Style>
+
+    <Style x:Key="BadgePaidLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+    </Style>
+
     <!-- Readings: amber warning text under an entry row, green text of an open reading window. -->
     <Style x:Key="WarningLabel" TargetType="Label">
         <Setter Property="FontSize" Value="13" />
@@ -51,7 +76,7 @@
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="16,8" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
     <Style x:Key="SecondaryButton" TargetType="Button">
@@ -61,7 +86,7 @@
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="16,8" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
     <Style x:Key="PrimaryButton" TargetType="Button">
@@ -70,7 +95,7 @@
         <Setter Property="BorderWidth" Value="0" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="16,8" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
     <Style x:Key="DestructiveButton" TargetType="Button">
@@ -80,19 +105,19 @@
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="16,8" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
-    <!-- Plain text button (no outline), e.g. expanding a history. -->
+    <!-- Plain text button (no outline), e.g. expanding a history. No horizontal padding: its text lines up with the labels above it (R-07). -->
     <Style x:Key="TextButton" TargetType="Button">
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
         <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
+        <Setter Property="Padding" Value="0,4" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
-    <!-- Icon-only button: 40x40 hit area, transparent, accent tint. Always give it a tooltip and a semantic description. -->
+    <!-- Icon-only button: 48x48 hit area on Android (40 on Windows), transparent, accent tint. Always give it a tooltip and a semantic description. -->
     <Style x:Key="IconButton" TargetType="Button">
         <Setter Property="FontFamily" Value="{DynamicResource IconFontFamily}" />
         <Setter Property="FontSize" Value="20" />
@@ -104,7 +129,7 @@
         <Setter Property="WidthRequest" Value="40" />
         <Setter Property="HeightRequest" Value="40" />
         <Setter Property="MinimumWidthRequest" Value="40" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource TouchSize}" />
     </Style>
 
     <Style x:Key="DestructiveIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
@@ -133,6 +158,11 @@
         <Setter Property="Padding" Value="16" />
     </Style>
 
+    <!-- A card of a list (Bills, Payments, Properties, Suppliers…): the card background and outline, never the bare page (R-20). -->
+    <Style x:Key="ListCard" TargetType="Border" BasedOn="{StaticResource SectionCard}">
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
     <Style x:Key="SectionHeader" TargetType="Label">
         <Setter Property="FontSize" Value="18" />
         <Setter Property="FontAttributes" Value="Bold" />
@@ -143,6 +173,11 @@
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+    </Style>
+
+    <!-- Switches (UI_GUIDELINES §6): the "on" colour is the app accent, not the system blue. -->
+    <Style TargetType="Switch">
+        <Setter Property="OnColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
     </Style>
 
     <Style TargetType="Picker">

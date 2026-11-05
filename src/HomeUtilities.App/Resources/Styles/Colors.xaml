@@ -29,9 +29,15 @@
     <Color x:Key="SnackbarTextDark">#1B1D21</Color>
 
     <Color x:Key="CardLight">#FFFFFF</Color>
-    <Color x:Key="CardDark">#25282D</Color>
-    <Color x:Key="OutlineLight">#D0D5DD</Color>
-    <Color x:Key="OutlineDark">#3A3F47</Color>
+    <Color x:Key="CardDark">#2B2F35</Color>
+    <!-- Card outlines (R-51, UI review 2026-11-05): a card is also set apart by its fill, so the outline may be soft
+         (1.85 : 1 light, 1.66 : 1 dark against the card). -->
+    <Color x:Key="OutlineLight">#B8BFCA</Color>
+    <Color x:Key="OutlineDark">#4A505A</Color>
+    <!-- Outline of an input field / choice field, where the outline is the only boundary: at least 3 : 1 against
+         the card (UI_GUIDELINES §8) — 3.18 : 1 light, 3.53 : 1 dark. -->
+    <Color x:Key="FieldOutlineLight">#8A919C</Color>
+    <Color x:Key="FieldOutlineDark">#7C8390</Color>
 
     <!-- Report table: one soft tint (header cells) and one stronger stripe colour per property slot; the slot is the
          property's position in the alphabetical list of all properties (ReportPropertyColors). Text stays the normal theme text colour. -->

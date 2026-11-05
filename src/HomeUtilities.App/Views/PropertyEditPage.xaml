@@ -9,7 +9,7 @@
 
     <!-- Phone: system Back (handled in EditorPageBase) + Save. No separate Cancel: Back cancels. -->
     <views:EditorPageBase.ToolbarItems>
-        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveSource}" Command="{Binding SaveCommand}" />
+        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveToolbarSource}" Command="{Binding SaveCommand}" />
     </views:EditorPageBase.ToolbarItems>
 
     <views:PropertyEditView />

@@ -8,7 +8,7 @@
                       Title="{Binding Title}">
 
     <views:EditorPageBase.ToolbarItems>
-        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveSource}" Command="{Binding SaveCommand}" />
+        <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveToolbarSource}" Command="{Binding SaveCommand}" />
     </views:EditorPageBase.ToolbarItems>
 
     <views:CategoryEditView />
