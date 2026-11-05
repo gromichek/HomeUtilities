@@ -1,6 +1,6 @@
 # CLAUDE.md — rules for coding sessions
 
-You are a coding session working on **HomeUtilities**, a .NET MAUI app (Windows + Android, iOS later)
+You are a coding session working on **HomeUtilities**, a .NET MAUI app (Windows + Android)
 for tracking utility meters, bills, payments and property taxes across several properties.
 
 The project is run by a project lead (a separate Claude session) who writes tasks and reviews PRs,

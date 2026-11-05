@@ -1,6 +1,6 @@
 # HomeUtilities
 
-Utility meters, bills and payments tracker for multiple properties (Windows and Android; iOS later).
+Utility meters, bills and payments tracker for multiple properties (Windows and Android).
 Built with .NET MAUI.
 
 **Status: early development.**

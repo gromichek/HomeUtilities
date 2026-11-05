@@ -184,7 +184,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<SyncScheduler>();
         builder.Services.AddTransient<SyncSettingsViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
-        builder.Services.AddTransient<PlaceholderViewModel>();
         builder.Services.AddTransient<HelpViewModel>();
         builder.Services.AddTransient<PropertiesViewModel>();
         builder.Services.AddTransient<PropertyEditViewModel>();
@@ -228,7 +227,6 @@ public static class MauiProgram
         builder.Services.AddTransient<OverviewPage>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<SettingsSectionPage>();
-        builder.Services.AddTransient<PlaceholderPage>();
         builder.Services.AddTransient<HelpPage>();
         builder.Services.AddTransient<PropertiesPage>();
         builder.Services.AddTransient<PropertyEditPage>();

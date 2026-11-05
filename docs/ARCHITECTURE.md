@@ -6,7 +6,7 @@ Status: **agreed baseline** (2026-10-19). Changes go through the project lead.
 
 - Track several properties (house, cottage, apartment), their meters, readings, supplier contracts,
   tariffs, calculated charges, supplier bills, payments, balances and property taxes.
-- Platforms: **Windows and Android are mandatory**, iOS later (code must stay iOS-compatible).
+- Platforms: **Windows and Android**. iOS was dropped (owner, 2026-11-05: no Mac to develop on).
 - Data is entered on more than one device (phone at the meter, PC for analysis), so **sync is a core
   concern from day one**, even though the sync engine itself is built late.
 - UI languages: English (base) and Russian; adding a language must require only a new resource file.
@@ -18,13 +18,13 @@ Status: **agreed baseline** (2026-10-19). Changes go through the project lead.
 | Concern | Choice | Notes |
 |---|---|---|
 | Runtime | .NET 10 (LTS) | |
-| UI | .NET MAUI | `net10.0-android`, `net10.0-windows10.0.19041.0`; `net10.0-ios` added later |
+| UI | .NET MAUI | `net10.0-android`, `net10.0-windows10.0.19041.0` |
 | MVVM | CommunityToolkit.Mvvm | source generators |
 | UI helpers | CommunityToolkit.Maui | |
 | Storage | SQLite via EF Core 10 (`Microsoft.EntityFrameworkCore.Sqlite`) | migrations in `HomeUtilities.Data` |
 | Charts | LiveChartsCore (SkiaSharp, MAUI) | bar charts, multi-property series |
 | Excel import/export | ClosedXML | |
-| Notifications | behind `INotificationService` | Android/iOS: Plugin.LocalNotification; Windows: Windows App SDK app notifications |
+| Notifications | behind `INotificationService` | Android: own `ReminderAlarms` (AlarmManager) + Plugin.LocalNotification for permission/test; Windows: Windows App SDK app notifications |
 | Google Drive | Google.Apis.Drive.v3 | scope `drive.appdata` (hidden app folder only) |
 | Tests | xUnit, plain `Assert` | no FluentAssertions (license) |
 | CI | GitHub Actions | Linux: core + tests + Android build; Windows: Windows build |
@@ -164,7 +164,6 @@ from Core; `App` wires implementations via dependency injection (`MauiProgram.cs
 `.github/workflows/ci.yml`, on every PR and push to `main`:
 - **linux** job: restore, build `HomeUtilities.Tests.slnf`, run tests; build the App for Android.
 - **windows** job: build the App for Windows.
-- Later: **macos** job for iOS build (free for public repositories).
 
 `main` is protected: merging requires green CI.
 
