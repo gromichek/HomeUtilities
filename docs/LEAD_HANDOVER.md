@@ -125,7 +125,8 @@ Prompt for a new lead session:
 - Phone Android 16, tablet Android 13.
 
 ## 6. Next steps (ROADMAP)
-1. **T-034** merged (#222); owner creates the key + new Android OAuth client per `docs/SIGNING.md`, reinstalls once, tests. T-032b and the snackbar fix (#220) passed the owner's tests.
+1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
+   owner's choice: T-032a other providers (optional), T-033 iOS, T-025b. T-032b and the snackbar fix (#220) passed the owner's tests.
 3. **T-032a** (optional) OneDrive/Dropbox/WebDAV adapters.
 5. **T-033** iOS. **T-025b** contract templates (optional, low priority).
 6. Collected owner findings go into one batch task when the owner asks (PROGRESS "Collected …").
