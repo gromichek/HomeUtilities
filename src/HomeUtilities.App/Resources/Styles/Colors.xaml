@@ -21,6 +21,12 @@
     <Color x:Key="SuccessDark">#81C784</Color>
     <Color x:Key="OnPrimaryLight">#FFFFFF</Color>
     <Color x:Key="OnPrimaryDark">#10243A</Color>
+    <!-- Toolbar / status bar (C-17, owner 2026-11-05): accent blue in the light theme, a dark bar in the dark theme (the light
+         blue bar was too bright at night); the accent stays for buttons and selection. -->
+    <Color x:Key="ToolbarLight">#2F5D8A</Color>
+    <Color x:Key="ToolbarDark">#25282D</Color>
+    <Color x:Key="OnToolbarLight">#FFFFFF</Color>
+    <Color x:Key="OnToolbarDark">#ECEEF1</Color>
 
     <!-- Snackbar: inverse surface (dark bar in the light theme, light bar in the dark theme). -->
     <Color x:Key="SnackbarBackgroundLight">#2E3238</Color>
