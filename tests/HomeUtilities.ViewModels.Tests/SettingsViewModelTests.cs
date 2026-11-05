@@ -277,6 +277,17 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public void VersionText_WithBuildNumber_UsesTheBuildKey()
+    {
+        // 2026.11.5 + build 446000 -> "SettingsVersionBuild 2026.11.5 446000 [en]" through the fake localizer.
+        var language = new FakeLanguageService();
+        var vm = new SettingsViewModel(new FakeLocalizer(language), language, new FakeThemeService(), new FakeLayoutModeService(), new FakeAppInfo(false, "446000"), new FakeAppPaths(), new FakeNavigationService(), ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language));
+
+        Assert.Equal("SettingsVersionBuild 1.2.3|446000 [en]", vm.VersionText);
+        Assert.Equal("SettingsVersionBuild 1.2.3|446000 [en]", Row(vm, SettingsSection.About).Value);
+    }
+
+    [Fact]
     public void LayoutText_FollowsLayoutModeChanges()
     {
         var vm = Create(out _, out _, out var layout);
@@ -770,9 +781,11 @@ public class SettingsViewModelTests
         return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language));
     }
 
-    private sealed class FakeAppInfo(bool isDebug) : IAppInfo
+    private sealed class FakeAppInfo(bool isDebug, string? build = null) : IAppInfo
     {
         public string Version => "1.2.3";
+
+        public string? BuildNumber => build;
 
         public bool IsDebugBuild => isDebug;
     }

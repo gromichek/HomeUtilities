@@ -20,6 +20,7 @@
   <data name="SettingsLanguage" xml:space="preserve"><value>Language</value></data>
   <data name="SettingsTheme" xml:space="preserve"><value>Theme</value></data>
   <data name="SettingsVersion" xml:space="preserve"><value>Version: {0}</value></data>
+  <data name="SettingsVersionBuild" xml:space="preserve"><value>Version: {0} (build {1})</value></data>
   <data name="SettingsDatabaseFile" xml:space="preserve"><value>Database file: {0}</value></data>
   <data name="SettingsLayout" xml:space="preserve"><value>Layout: {0}</value></data>
   <data name="LanguageName_en" xml:space="preserve"><value>English</value></data>
