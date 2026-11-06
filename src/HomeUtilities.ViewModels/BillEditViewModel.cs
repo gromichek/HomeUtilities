@@ -294,9 +294,11 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         INavigationService navigation,
         ISnackbarService snackbar,
         IErrorLog errorLog,
-        IAttachmentFileSync? fileSync = null)
+        IAttachmentFileSync? fileSync = null,
+        DeleteUndoSupport? undo = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        UndoSupport = undo;
         _fileSync = fileSync;
         _bills = bills;
         _paymentStore = paymentStore;

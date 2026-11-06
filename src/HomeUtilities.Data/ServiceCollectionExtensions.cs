@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
             .UseSqlite(connectionString)
             .AddInterceptors(new SyncEntityInterceptor(provider.GetRequiredService<IClock>(), provider.GetRequiredService<IDataChangeNotifier>())));
 
+        services.AddSingleton<IDeleteUndoService, DeleteUndoService>();
         services.AddSingleton<IPropertyStore, PropertyStore>();
         services.AddSingleton<ICategoryStore, CategoryStore>();
         services.AddSingleton<ISupplierStore, SupplierStore>();

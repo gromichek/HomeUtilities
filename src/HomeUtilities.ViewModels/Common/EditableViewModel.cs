@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Common;
 
 namespace HomeUtilities.ViewModels.Common;
@@ -58,6 +59,15 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
 
     protected IDialogService Dialogs => _dialogs;
 
+    /// <summary>
+    /// Set by editors whose delete can be undone exactly (UI_GUIDELINES §5.1): they delete without a confirmation and show
+    /// "deleted · Undo". Editors of records with dependants leave it null and keep the confirmation dialog.
+    /// </summary>
+    protected DeleteUndoSupport? UndoSupport { get; set; }
+
+    /// <summary>Completes when the Undo snackbar of the last delete is gone (tests await it).</summary>
+    public Task UndoOffer { get; private set; } = Task.CompletedTask;
+
     /// <summary>While true, property changes do not mark the editor dirty (loading, text refresh).</summary>
     protected bool SuppressDirty { get; set; }
 
@@ -87,6 +97,12 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
 
     /// <summary>Message of the delete confirmation; the default is the standard "It will be hidden; history is kept."</summary>
     protected virtual string DeleteMessage() => _editableLocalizer["Dialog_Delete_Message"];
+
+    /// <summary>
+    /// Message of the delete confirmation, which may look up the dependent records ("Contracts: 2, meters: 3 will be deleted
+    /// with it"). Only used when the editor has no Undo. The default is <see cref="DeleteMessage"/>.
+    /// </summary>
+    protected virtual Task<string> DeleteMessageAsync() => Task.FromResult(DeleteMessage());
 
     /// <summary>
     /// Called after the session ended: Cancelled / Deleted leave the editor; Saved does not (the editor stays open,
@@ -219,21 +235,30 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
             return;
         }
 
-        var confirmed = await _dialogs.ConfirmAsync(
-            _editableLocalizer.Get("Dialog_Delete_Title", DeleteName()),
-            DeleteMessage(),
-            _editableLocalizer["Delete"],
-            _editableLocalizer["Cancel"]);
-        if (!confirmed)
+        var name = DeleteName();
+        var undo = UndoSupport;
+        if (undo is null)
         {
-            return;
+            // A record with dependants cannot be brought back exactly: ask first (UI_GUIDELINES §5.1).
+            var confirmed = await _dialogs.ConfirmAsync(
+                _editableLocalizer.Get("Dialog_Delete_Title", name),
+                await DeleteMessageAsync(),
+                _editableLocalizer["Delete"],
+                _editableLocalizer["Cancel"]);
+            if (!confirmed)
+            {
+                return;
+            }
         }
 
+        IReadOnlyList<DeletedRow> deleted = [];
         IsBusy = true;
         try
         {
+            using var recording = undo?.Begin();
             await DeleteCoreAsync();
             IsDirty = false;
+            deleted = recording?.Rows ?? [];
         }
         finally
         {
@@ -241,5 +266,11 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
         }
 
         await OnFinishedAsync(EditOutcome.Deleted);
+
+        if (undo is not null && deleted.Count > 0)
+        {
+            // Not awaited: the snackbar stays for a few seconds while the user carries on.
+            UndoOffer = RunSafeAsync(() => undo.OfferUndoAsync(name, deleted));
+        }
     });
 }

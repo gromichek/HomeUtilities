@@ -10,7 +10,7 @@ namespace HomeUtilities.ViewModels.Common;
 /// back (the remembered id lives in <see cref="ISectionSelectionMemory"/>, because the page and this view model may be
 /// recreated when the user leaves the section and comes back).
 /// </summary>
-public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IRecipient<LayoutModeChangedMessage>
+public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IRecipient<LayoutModeChangedMessage>, IRecipient<RecordsRestoredMessage>
     where TEditor : PaneEditorViewModel
 {
     private readonly INavigationService _navigation;
@@ -111,6 +111,15 @@ public abstract partial class MasterDetailViewModel<TEditor> : ViewModelBase, IR
 
     [RelayCommand]
     private Task SelectAsync(Guid id) => RunSafeAsync(() => OpenEditorAsync(id));
+
+    // Undo of a delete brought records back while this list is on screen: show them.
+    void IRecipient<RecordsRestoredMessage>.Receive(RecordsRestoredMessage message)
+    {
+        if (IsLoaded)
+        {
+            _ = RunSafeAsync(() => RunLoadAsync(ReloadAsync, () => TotalCount));
+        }
+    }
 
     void IRecipient<LayoutModeChangedMessage>.Receive(LayoutModeChangedMessage message) =>
         IsWide = _layoutModeService.Current != LayoutMode.Compact;

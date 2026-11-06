@@ -86,6 +86,9 @@
   <data name="Dialog_Delete_Message" xml:space="preserve"><value>It will be hidden; history is kept.</value></data>
   <data name="Dialog_DeleteRow_Title" xml:space="preserve"><value>Delete this entry?</value></data>
   <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
+  <data name="DeletedUndoMessage" xml:space="preserve"><value>«{0}» deleted</value></data>
+  <data name="Undo" xml:space="preserve"><value>Undo</value></data>
+  <data name="Dialog_Delete_Dependants" xml:space="preserve"><value>{0} will be deleted with it.</value></data>
   <data name="Dialog_Error_Title" xml:space="preserve"><value>Error</value></data>
   <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
   <data name="PropertyGeneral" xml:space="preserve"><value>General</value></data>

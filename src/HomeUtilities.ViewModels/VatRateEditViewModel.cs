@@ -55,9 +55,11 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        ISnackbarService snackbar)
+        ISnackbarService snackbar,
+        DeleteUndoSupport? undo = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        UndoSupport = undo;
         _store = store;
         _tariffStore = tariffStore;
         _clock = clock;

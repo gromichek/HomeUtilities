@@ -72,9 +72,11 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        ISnackbarService snackbar)
+        ISnackbarService snackbar,
+        DeleteUndoSupport? undo = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        UndoSupport = undo;
         _store = store;
         _localizer = localizer;
         RefreshTexts();

@@ -239,6 +239,8 @@ internal sealed class BillTestKit
 
     public PaymentEditViewModel CreatePaymentEditor() => Kit.CreatePaymentEditor();
 
+    public PaymentEditViewModel CreatePaymentEditor(DeleteUndoSupport? undo) => Kit.CreatePaymentEditor(undo);
+
     public PaymentsViewModel CreatePayments(ISectionSelectionMemory? memory = null) =>
         new(Payments, Bills, Kit.Contracts, Kit.Properties, Kit.Dialogs, Kit.Clock, Kit.Localizer, Kit.Navigation, Kit.Layout,
             memory ?? new SectionSelectionMemory(), PaymentFilter, CreatePaymentEditor);
