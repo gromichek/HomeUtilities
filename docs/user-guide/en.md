@@ -65,8 +65,12 @@ bottom right. *Settings → About* shows the current layout (phone / tablet / de
   A bill, a payment, a bill template, a tariff component, a VAT rate or your own category is deleted **at once, without a
   question**; a bar appears at the bottom for about six seconds: **«Gas 09.2026» deleted · Undo**. **Undo** brings back exactly
   what the delete changed — the record with its lines, and for a bill also the payments and shares of payments it released.
-  A record that others depend on — a **property, a contract, a supplier, a meter** — still asks **Delete «…»?** first, because
-  its records cannot be brought back that simply.
+  A record that others depend on — a **property, a contract, a supplier, a meter** — asks **Delete «…»?** first and **lists
+  what goes with it**, for example: *Contract «Gas» will be deleted together with: 12 bills, 3 payments, 1 tariff. You can undo
+  this right after the deletion.* For a property, a contract and a supplier the bar **«…» deleted · Undo** follows the
+  deletion and brings everything back. A **meter** cannot be brought back that way (its links to contracts end on deletion), so
+  the question says that it can be undone only by restoring a backup. If a property, contract or supplier has nothing
+  that depends on it, it is deleted at once, like a bill.
 - **Choosing from a list.** Every choice (supplier, contract, category, property, period, template, kind, unit…) is a **field
   with a frame and an arrow** showing the current value; a tap opens the same dialog: the options as rows with a round mark,
   the **current value already marked**. **Tap a row and the choice is made** — there is no OK to press. **OK** appears only when
@@ -88,7 +92,9 @@ bottom right. *Settings → About* shows the current layout (phone / tablet / de
   (*Jan … Dec* / *янв … дек*), in the report charts too.
 - **Colours.** The bar at the top and the icons on it (✓, ?, ☰, ←) are readable in the light and the dark theme; on Android the
   navigation bar at the bottom (◁ ○ ▢) has the colour of the page, with buttons that stand out from it. The dot of a
-  category is never the pure green or red of a status; categories you created earlier keep their colours.
+  category is never the pure green or red of a status; categories you created earlier keep their colours (new categories
+  get darker default colours, which stay visible on a white card). The outlines of cards and fields are drawn strongly enough to
+  see where one card ends in both themes. A number and its unit (*1,267 m³*, *54,7 m²*) never break apart.
 - Fields marked * are required. A wrong value shows a red message under the field; the app does not save until
   it is fixed.
 - Numbers accept both `,` and `.` as the decimal separator.
@@ -142,7 +148,8 @@ the Bills screen (filtered to open or overdue bills), the Payments screen, or th
 
 For each property the gross total of the bills of this year, counted by the bill's month from January up to the current month,
 next to the same months of last year: *2026: 1,245.30 € · 2025 same period: 1,180.10 € (+5.5 %)*. A bill for a later month
-(for example internet paid in advance) is counted when its month comes. Tap to open the Bills screen for that year.
+(for example internet paid in advance) is counted when its month comes. If there is no bill at all in the same months of last
+year, the line shows only this year (*2026: 1 245,30 €*) instead of an invented *0,00 €*. Tap to open the Bills screen for that year.
 Charts on this screen come later.
 
 ## 3. Properties
@@ -191,8 +198,11 @@ Open a property → card **Contracts** → **Add contract**.
   the result, including the payment purpose filled with this contract's numbers.
 - **Tariff:** the priced components of this contract (see [Tariffs](#9-tariffs)). Available after the contract is
   saved. Tap a row to edit it; the arrows change the order.
-- **Custom fields:** extra fields (text, number, amount, date) that will appear when you enter a bill or a bill line
-  for this contract.
+- **Custom fields:** extra fields (text, number, amount, date) for the bills of this contract. The field editor asks **Applies
+  to**: a field that applies to the **Bill** appears in the card **Custom fields** of every bill of the contract; a field that
+  applies to the **Bill line** appears inside every line of the bill (card *Lines*). A short hint under *Applies to* says
+  which of the two you have chosen. The same works in a [bill template](#bill-templates-and-drafts): its custom fields are
+  copied into the bills made from it.
 - **Bills:** the last six bills of the contract with the month, the total and the status (*Unpaid*, *Paid ✓*…). Tap a
   row to open the bill, **All bills** opens the Bills screen for this property with the contract highlighted, ＋ enters a
   new bill for this contract. Available after the contract is saved. See [Bills](#11-bills).
@@ -208,14 +218,18 @@ Open a property → card **Contracts** → **Add contract**.
 
 Open a property → card **Meters** → **Add meter**.
 - **General:** resource (cold/hot water, electricity, gas, heat, other), unit (m³, kWh, MWh, Gcal), serial number,
-  location, notes, **photo** (camera on Android, image file on Windows).
+  location, notes, **photo** (camera on Android, image file on Windows). The **title** of the meter in the editor, in the
+  reading history and in the reading dialog is *location · serial number* (*Bathroom · CW-1*), so that two meters in one room can
+  be told apart; without a serial number a meter with several registers shows *location · Day / Night*.
 - **Dial digits:** how many digits the dial has. Needed to recognise a roll-over (99999 → 00000).
 - **Registers:** *Total* for ordinary meters; *Day* and *Night* (or the "Dual tariff" switch) for two-rate
   electricity meters; *Export* counts energy fed into the grid (solar panels).
 - **Installation and verification:** installed on, last verified, verification interval (water meters usually 72
   months) → the app shows "Next verification" and warns when it is overdue.
-- **Contracts:** switch on every contract that uses this meter. A hot water meter is usually linked to both the
-  water and the heating contract (this hint is shown for hot water meters only). Each linked contract shows the dates of the link (*from 01.05.2004*, and *to …* if it
+- **Contracts:** the card lists **only the contracts this meter is linked to**; **Link to a contract…** (a choice of the other
+  contracts of the property) adds one, the **×** at the end of a row removes the link when you save. A hot water meter is usually
+  linked to both the water and the heating contract (this hint is shown for hot water meters only). A second line with the service
+  appears only when it says something other than the title. Each linked contract shows the dates of the link (*from 01.05.2004*, and *to …* if it
   ended). **The link decides which readings belong to the contract:** charges and reports (consumption by contract, unit
   cost, calculated vs billed) count a meter's readings only inside the link. A new link therefore starts on the later of the
   meter's *installed on* date and the contract's *Valid from* — not today — so the whole history of an old meter is counted.
@@ -223,9 +237,9 @@ Open a property → card **Meters** → **Add meter**.
   date. The app refuses a start before the meter was installed, an end before the start, and dates that overlap another link
   of the same meter and contract; a start before the contract's own start is allowed (with a warning), but charges only count
   the months from the contract's start. The dates are saved when you press *Save* in the dialog; the meter page stays open.
-  Switching a contract off ends the link yesterday; switching it on again starts a new link the day after the old one ended.
-- **Readings:** the latest readings and "All readings". A *Submit readings* link of the contract or supplier is
-  shown on the meter card.
+  Removing a link ends it yesterday; linking the contract again starts a new link the day after the old one ended.
+- **Readings:** the latest readings and "All readings". **＋** in the card header opens the [Readings](#7-readings) screen of the
+  property for today, where you type the new value of this meter.
 - **Replace meter…** — use this when a meter is physically replaced (verification, defect). A wizard asks for the
   date, the final reading of the old meter, the new meter with its initial reading, and the contracts the new meter
   belongs to. The old meter is kept as removed ("Show removed"), so consumption across the change is correct.
@@ -241,8 +255,12 @@ Menu **Readings**: the fastest way to enter monthly values.
    *The date is before the last reading*. A value lower than the last one on a meter without dial digits is an
    error.
 4. The header shows each contract's reading window ("submit 25–28 — open now").
-5. **Submit online** opens the supplier's *Submit readings* link. When you come back, the app asks **Readings
-   submitted?** — *Mark submitted* stores the date, so you can see which readings were sent.
+5. **Submit online** opens the supplier's *Submit readings* link. It is in the contract's banner; the meter cards repeat it
+   only for pages that no banner offers (a contract without a reading window, or only a customer portal). When you come
+   back, the app asks **Readings submitted?** — *Mark submitted* stores the date, so you can see which readings were sent.
+6. **Keyboard.** The Enter key of the number keyboard says *Next* and moves to the next value field (the last field says
+   *Done*). The small **note icon** at the right of a value field opens a note for that register; it is highlighted while the
+   register has a note. The **history icon** in the card header (or a tap on the title) opens the history of the meter.
 
 Tap a meter to see its reading history; tap a reading to edit it (date, value, kind, note, submitted). Initial and
 final readings belong to a meter replacement and cannot be deleted. A long history (twenty years of monthly readings) opens
@@ -405,7 +423,9 @@ what the app expects, the bill is what the supplier asked for, the *payment* is 
 category, shown with its colour dot) and **Status** (*All*, *Open*, *Overdue*, *Paid*, *Drafts*); the filters are remembered until you close the app.
 The filters are the **header of the list**: they scroll away with the cards, so the cards get the whole screen. On a phone
 the filter block is collapsed to **one summary line** (for example *All properties · 2026 · All categories · All · Billed 78,13 € · Paid 78,13 €*);
-tap it, or the arrow at its right, to open the fields (**Show filters** / **Hide filters**). On a tablet and on a wide window the
+the first line of it holds **‹ October 2026 ›** (with *Year* or *Month* as the period): one tap on ‹ shows the previous month without
+opening the filters; the second line has the rest (property, category, status, totals). Tap the line, or the arrow at its right, to open
+the fields (**Show filters** / **Hide filters**); after you pick a value in an open filter on a phone, the block **folds again**. On a tablet and on a wide window the
 fields are open and sit in two or three columns. Your choice (open or collapsed) is remembered until you close the app. **Period** is a
 drop-down like the other filters with three choices: *All years*, *Year* and *Month*; with *Year* or *Month* the ‹ › buttons step to the previous or next year or month
 (a bill belongs to the month of its billing period), and the totals below follow the chosen period. Below them the totals of the
@@ -451,7 +471,12 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
 2. **Amounts** — *Amount excl. VAT*, *VAT %*, *VAT* and *Total*. **Fill in any two** of the amount excl. VAT, the VAT % and
    the total; the app calculates the rest (the two you changed last count). The *Total* alone is enough. The VAT % starts
    with the one of the contract's tariff.
-3. **Quantities from the bill** (only for contracts whose tariff has *Quantity from the bill* components, for example
+3. **Payment** (a saved bill) — right after the amounts, because it is what you do most often after entering a bill: the status, how much
+   is paid and open, and the payments of this bill. **Mark as paid** records the open amount at once (it is also in the ⋮ menu at the
+   top, and dimmed there when nothing is open); **Add payment** opens the [payment editor](#12-payments) for this bill (tap a payment
+   to open it); **Use prepayment** appears when the contract has money that pays no bill yet. The status is *Unpaid*, *⚠ Unpaid · due
+   30.10.2026* (due within 7 days — the same amber state as in the list), *⚠ Partially paid*, *⚠ Overdue* or *Paid ✓*.
+4. **Quantities from the bill** (only for contracts whose tariff has *Quantity from the bill* components, for example
    heat in MWh) — one field per component with its unit. Type what the supplier printed on the bill. The calculation
    below uses the numbers at once; they are saved with the bill and with its snapshot, and the *Charges* screen uses
    them for that month ("from bill 10.2026"). Without them the calculation is incomplete.
@@ -462,7 +487,7 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
    price already includes VAT, type the line's total including VAT. If the amount is further from quantity × price
    than the rounding of the quantity can explain, the card shows *The amount on the bill does not match quantity ×
    price — the price may have changed.* — then check the price in the tariff. An amount needs its quantity.
-4. **Comparison with the calculation** (contracts with a tariff) — the calculated total for the month and the
+5. **Comparison with the calculation** (contracts with a tariff) — the calculated total for the month and the
    **difference** to your bill. *Quantity on the bill* is what the supplier billed in m³; next to the metered quantity it
    shows **Water losses / difference**, e.g. billed 12,500 m³, metered 12,150 m³ → 0,350 m³. **Show charges** opens the
    charges of that month. When you save, the calculation of that moment is kept with the bill (a *snapshot*), so later
@@ -473,15 +498,13 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
    calculation, and shows the calculation as information: *Actual by readings: 35,20 €*. A new bill of such a contract
    starts as kind *Equalized payment* with the *Total* already filled in with the plan amount of its month (change it if
    the supplier billed something else). See [Equalized payments](#13-equalized-payments).
-5. **Lines** (folded by default) — optional detail rows of the bill: description, quantity, unit, unit price, the
+6. **Lines** (folded by default) — optional detail rows of the bill: description, quantity, unit, unit price, the
    amounts (any two, as above), a category of their own and a note. If the lines do not add up to the total you see a
    warning, not an error — suppliers round differently.
-6. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*).
-7. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
+7. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*); fields that apply to the
+   *Bill line* are inside each line instead.
+8. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
-8. **Payment** — the status, how much is paid and open, and the payments of this bill. **Mark as paid** records the open amount
-   at once; **Add payment** opens the [payment editor](#12-payments) for this bill (tap a payment to open it);
-   **Use prepayment** appears when the contract has money that pays no bill yet.
 9. **Comment.**
 
 **Save as template** (at the end of the form, for a saved bill) opens the template editor with this bill's content, so a
@@ -530,7 +553,8 @@ template can also point to a contract (internet with the FiberNet contract) so t
 - **Default amount** — any two of *Amount excl. VAT*, *VAT %* and *Total*, as in a bill. It may stay **empty** when the amount is
   different every time (the chimney sweep): the draft then says *Draft · enter the amount*.
 - **Lines** and **Custom fields** — as in a bill. The lines are copied into each bill; the custom fields appear in each bill with an
-  empty value.
+  empty value. A custom field that *Applies to* the **Bill** appears in the card *Custom fields* of the bill; one that applies to
+  the **Bill line** appears inside every line of the bill.
 - **Comment.**
 
 **How drafts appear.** Every time you open **Overview** or **Bills** the app creates the drafts that are due and not made yet:
@@ -570,7 +594,8 @@ says what left your account, and the **allocation** says which bill the money se
 
 **The list.** At the top: filters **Property** (all or one), **Period** and **Contract**; they are
 remembered until you close the app. Like on Bills, they are the header of the list (they scroll away with the cards) and are
-collapsed to one summary line on a phone (tap it to open them). **Period** is a drop-down with three choices: *All years*, *Year* and *Month* (by the date of the
+collapsed to one summary line on a phone (tap it to open them; the line has the same **‹ month ›** buttons as on Bills, and the block
+folds again after you pick a value). **Period** is a drop-down with three choices: *All years*, *Year* and *Month* (by the date of the
 payment); with *Year* or *Month* the ‹ › buttons step to the previous or next year or month, and the totals below follow
 the chosen period. Below them the totals of the list: *Paid · of it unallocated (prepayment)*. Like the bills, a list longer than 100 rows shows the first 100 and **Show more (N left)** adds the next 100. Each row
 shows the date, the amount, the contract (or the property, or *Several contracts*), the method and the bills it pays, for
@@ -1067,14 +1092,17 @@ the Drive app or on the Drive website, and **only HomeUtilities can see it** —
 Google asks for exactly one permission: *See, create and delete its own configuration data in your Google Drive*. Nothing is sent
 anywhere else, and the app never stores your Google password: the sign-in happens in Google's own page.
 
-**Settings → Sync** shows the state (*Not connected* / *Connected* / *Connection lost*) and, when connected, the e-mail of the account.
+**Settings → Sync** shows the state first (*Not connected* / *Connected* / *Connection lost*) and, when connected, the e-mail of the account, the
+sync switch, the line *Synced 05.11.2026 15:10* (or the state of the last run) and the buttons. The long explanation of how sync works and
+where the data are stored sits in a folded block **How it works** at the end of the page — tap it to read it. The line *Last sync: …* is
+shown only when the status line does not already say the time (for example *Waiting for the network*).
 
 - **Connect Google account** — on Windows your browser opens with Google's sign-in page; choose the account and allow the access, then
   go back to the app (the browser tab can be closed). On Android Google's own account window opens over the app. While the app waits,
   **Cancel sign-in** stops it; after 5 minutes without an answer it stops by itself.
 - **Check connection** — writes a small test file into the hidden folder, lists the folder, reads the file back and deletes it. The
   result is *OK (write, list, read, delete)*, or the step that failed and the reason (for example *No connection to Google…*).
-- **Disconnect** — asks for confirmation, removes the sign-in from this device and withdraws the access of HomeUtilities at Google. If
+- **Disconnect Google account…** — asks *Disconnect the Google account?*, removes the sign-in from this device and withdraws the access of HomeUtilities at Google. If
   Google cannot be reached (no internet), the sign-in is still removed here and the app says so; you can then remove the access in your
   Google account under *Security → Third-party access*. Your data in the app are not changed.
 
@@ -1127,7 +1155,9 @@ devices set automatically — the status line warns if the clock is more than 5 
 
 Some records are special: the built-in categories and the VAT rates have unique names. If two devices created the same one, the app
 keeps one as it is and gives the other a different code (VAT rate) or turns it into an ordinary category; such cases are counted in the
-status line as *conflicts* and listed in **Details**.
+status line as *conflicts* and listed in **Details**. The line in **Details** says what happened: *The same category or VAT rate was
+created on two devices; one of them was kept. Check the Categories and VAT rates lists.* Lines of earlier days start with the date
+(*05.11.2026 14:52 …*), lines of today only with the time.
 
 #### The status line
 
