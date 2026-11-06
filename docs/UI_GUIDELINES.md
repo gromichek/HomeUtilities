@@ -65,7 +65,6 @@ The history of why a rule exists is in the appendix at the end.
 | `IconCheckOn` / `IconCheckOff` / `IconRadioOn` / `IconRadioOff` | marks in choice dialogs (§3a) | `check_box` / `check_box_outline_blank` / `radio_button_checked` / `radio_button_unchecked` |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` |
 | `IconWarning` [NEW] | warning next to a status text | `warning_amber` |
-| `IconCalendar` [NEW] | the calendar icon of a date or month field (`DateField`, C-09) | `event` |
 
 Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an accessibility name
 (`SemanticProperties.Description`) — localized.
@@ -138,8 +137,6 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   (`MinColumnWidth` = the width each needs). Never stack buttons with `HorizontalOptions="Start"`.
   **[NEW]** Two buttons side by side on compact width only if *both* full texts fit at 360 dp in Russian; otherwise
   stack them. A button text is never shortened by truncation.
-- **Date and month fields** are the bordered box of §6 with a calendar icon (`DateField`): the text is the app's own
-  `dd.MM.yyyy` (`DateFormat`, §9) or the month in the app language, the platform picker opens on tap. Never a bare `DatePicker`.
 - **Child rows:** tap the row → edit (dialog); red `IconDelete` at the end of the row. No separate "Edit"/"Remove"
   text buttons.
 
@@ -152,11 +149,7 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
     keyboard. Back = Cancel.
   - **Tablet / desktop:** popup of fixed width (~420 for choices, ~560 for editors), content scrolls inside, max height
     ~70 % (wizards 90 %) of the window, buttons bottom-right.
-  - Implemented once in `EditorDialogPage` + `DialogFrame` / the popup host, not per dialog. **[CHANGED] (T-036b)** On the phone the
-    top bar has **←** (Cancel), the title and **✓** (the dialog's `PrimaryCommand`; absent when the dialog answers at once, e.g.
-    a choice dialog); the dialog view's own title and Cancel / Save row are hidden there. The zone behind the status bar has the toolbar
-    colour, the zone behind the navigation bar the page colour; on Android the navigation bar (◁ ○ ▢) follows the page colour in both
-    themes (`SystemBars`).
+  - Implemented once in `EditorDialogPage` / the popup host, not per dialog.
 - **[NEW] Context in the title:** a dialog about a part of a record names the record: "Показание · Холодная вода,
   ванная", not only "Изменить показание".
 
@@ -229,12 +222,6 @@ Use these wordings everywhere (resx keys in brackets).
   it stays at the bottom above the FAB. **Undo restores exactly** what the delete changed (the record and every row the
   delete touched, e.g. released payment allocations); where that cannot be guaranteed, the confirmation dialog with the
   list of dependent records is used instead.
-  **[CHANGED] (T-036b)** Undo is exact because `IDeleteUndoService` records the rows the delete soft-deleted (the interceptor notes every
-  row that turns into a soft delete inside the recording) and Undo un-deletes exactly those, with a newer `UpdatedAt` so that the
-  sync carries it. An editor opts in by getting a `DeleteUndoSupport` (bill, payment, bill template, tariff component, VAT rate,
-  category; reading rows of the history); the editors of **property, contract, supplier and meter** (records with dependants; a meter
-  delete also closes its links) keep the confirmation dialog. In-form removals of unsaved rows (parameters, links, lines) are not deletes
-  of stored data and still confirm.
 - "Cancel" in a dialog always means "close the dialog and do nothing". Words like "Discard", "Continue", "Отбросить",
   "Продолжить" are not used.
 
@@ -300,10 +287,8 @@ Use these wordings everywhere (resx keys in brackets).
 - Selectable list items: give the `Border` an explicit base `Stroke` and `StrokeThickness="1"`.
 - Decimal input: every number field parses through `DecimalInput`; values are stored as `decimal`, never as text.
 - **Do not use `FlexLayout`** on Android: it clips the first item of each wrapped row. Use a `Grid`.
-- **[NEW] Replacing `CollectionView.ItemsLayout` after the first layout is ignored on Windows** (Properties stayed in one column in a
-  maximised window, R-21): `ListColumns` gives the view one `GridItemsLayout` and only changes its `Span`.
-- **[NEW] A modal dialog opened from a field of another modal dialog** also makes the first page disappear: a dialog page counts as
-  closed when the dialog service pops it (`EditorDialogPage.MarkClosed`), never when it disappears.
+- **[NEW] Replacing `CollectionView.ItemsLayout` after the first layout** may be ignored on Windows — check that
+  `ListColumns` really switches to 2–3 columns there (R-21).
 - Do not use CommunityToolkit `Toast`/`Snackbar` — use `ISnackbarService`.
 
 ## 6b. Robustness
@@ -353,8 +338,6 @@ Use these wordings everywhere (resx keys in brackets).
 - **No value:** `—` (em dash) in muted colour. **Not calculated:** `—` plus the reason; never `0,00`.
   **Approximate:** `≈ 12,30`. Zero is shown only when the value really is zero.
 - A line that would only say "0,00 €" (e.g. "expected recalculation: 0,00 €") is not shown.
-- **Full dates** are `dd.MM.yyyy` in every language (`DateFormat.Full`, "15.03.2023"); never `ToString("d")` (it is "3/15/2023" in the English UI
-  and follows the Windows region in a date picker).
 - Quantities with their unit (`1,267 м³`); percentages with a space (`21 %`).
 
 ## 10. Screen states [NEW]
@@ -391,7 +374,5 @@ No other sizes in pages; styles carry the sizes.
 - #220: the snackbar host had a constant `IsVisible="False"` from T-019 to #220.
 - 2026-11-02: changing `ItemsLayout` during an items update threw on WinUI (owner's error log) → `ListColumns` posts
   the change.
-- 2026-11-06 (T-036b): ChoiceField replaces every native Picker; choice rows answer with one tap; phone dialogs get a top bar;
-  delete with Undo restores exactly the recorded rows; Windows menu icons are text, toolbar icons back to the state before #250.
 - 2026-11-05: UI review → revision 1 (this text), agreed with the owner: date lists in one column, compact-by-height on
   Android only, Delete only at the end of the form, single delete with Undo instead of a confirmation (bigger snackbar).
