@@ -39,9 +39,6 @@ public partial class AppShell : Shell
         Navigating += OnNavigating;
         ApplyToolbarColors();
         ApplyStatusBar();
-#if WINDOWS
-        Loaded += (_, _) => HookChromeIconScale();
-#endif
         if (Application.Current is { } app)
         {
             app.RequestedThemeChanged += (_, _) => ApplyStatusBar();
@@ -80,81 +77,6 @@ public partial class AppShell : Shell
         this.SetAppThemeColor(Shell.TitleColorProperty, onToolbarLight, onToolbarDark);
 #endif
     }
-
-#if WINDOWS
-    // Sharp menu and toolbar icons on Windows. MAUI renders a FontImageSource on Windows as a bitmap at 96 dpi whatever the
-    // display scale (dotnet/maui#1000), and both the flyout (an Image of 16 × 16, MAUI BaseShellItem default template) and
-    // the toolbar (an ImageIcon in the AppBarButton icon slot) squeeze it into a 16 × 16 DIP box: a 20 / 24 px glyph is
-    // resampled and looks blurred, and on a 125 %+ display it is stretched as well. So these icons are rendered at
-    // exactly 16 DIP × display scale physical pixels (100 % → 16, 150 % → 24, 200 % → 32) and re-rendered when the window
-    // moves to a display with another scale. Android is not affected (the glyph is drawn at the device density).
-    private const double ChromeIconBoxSize = 16;
-    private static readonly string[] ToolbarIconKeys = ["IconHelpAccentToolbarSource", "IconSaveAccentToolbarSource"];
-    private Microsoft.UI.Xaml.XamlRoot? _chromeIconRoot;
-    private double _chromeIconPixels;
-
-    private void HookChromeIconScale()
-    {
-        if (Handler?.PlatformView is not Microsoft.UI.Xaml.FrameworkElement { XamlRoot: { } root }
-            || ReferenceEquals(root, _chromeIconRoot))
-        {
-            return;
-        }
-
-        _chromeIconRoot = root;
-        // Changed also fires on every resize; ApplyChromeIconScale returns at once when the pixel size stays the same.
-        root.Changed += (sender, _) => ApplyChromeIconScale(sender.RasterizationScale);
-        ApplyChromeIconScale(root.RasterizationScale);
-    }
-
-    private void ApplyChromeIconScale(double scale)
-    {
-        var pixels = Math.Round(ChromeIconBoxSize * (scale > 0 ? scale : 1));
-        if (pixels == _chromeIconPixels)
-        {
-            return;
-        }
-
-        _chromeIconPixels = pixels;
-
-        // Flyout: the Image listens to changes of its source, so a new size re-renders the icon in place (the colour keeps
-        // its AppThemeBinding).
-        foreach (var item in Items)
-        {
-            if (item.Icon is FontImageSource icon)
-            {
-                icon.Size = pixels;
-            }
-        }
-
-        // Toolbar: the shared sources are used by every page created from now on.
-        if (Application.Current?.Resources is { } resources)
-        {
-            foreach (var key in ToolbarIconKeys)
-            {
-                if (resources.TryGetValue(key, out var value) && value is FontImageSource source)
-                {
-                    source.Size = pixels;
-                }
-            }
-        }
-
-        // The Windows toolbar renders an icon only when ToolbarItem.IconImageSource changes, so the visible page re-sets
-        // its icons. Pages further back in the stack keep the old rendering until they are opened again (only after a move
-        // to a display with another scale; the icon stays in its box, it is just less sharp).
-        if (CurrentPage is { } page)
-        {
-            foreach (var toolbarItem in page.ToolbarItems)
-            {
-                if (toolbarItem.IconImageSource is FontImageSource current)
-                {
-                    toolbarItem.IconImageSource = null;
-                    toolbarItem.IconImageSource = current;
-                }
-            }
-        }
-    }
-#endif
 
     // The status bar takes the toolbar colour in the current theme (R-01); content colour is the opposite of the bar.
     // Android only (Windows has no status bar API: CA1416).

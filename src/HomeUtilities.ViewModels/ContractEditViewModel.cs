@@ -801,11 +801,11 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private Task ChooseSupplierAsync() => RunSafeAsync(async () =>
     {
         var options = SupplierOptions();
-        var newSupplier = _localizer["ContractNewSupplier"];
         var picked = await Dialogs.ChooseAsync(
             _localizer["ContractChooseSupplier"],
-            [.. options.Select(o => o.Name), newSupplier],
-            options.IndexWhere(o => o.Id == SelectedSupplier?.Id));
+            [.. options.Select(o => o.Name)],
+            options.IndexWhere(o => o.Id == SelectedSupplier?.Id),
+            _localizer["ContractNewSupplier"]);
         if (picked is not { } index)
         {
             return;

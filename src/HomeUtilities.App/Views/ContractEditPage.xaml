@@ -38,8 +38,8 @@
                            IsVisible="{Binding ContractTitleError, Converter={StaticResource HasText}}" />
 
                     <Label Text="{Binding ServiceLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Services}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Services}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedServiceIndex, Mode=TwoWay}" />
 
                     <!-- Category and supplier are chosen from a list; the row shows the current value (with the colour dot). -->
@@ -78,8 +78,8 @@
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowCurrencyPicker}">
                         <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Currencies}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Currencies}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedCurrencyIndex, Mode=TwoWay}" />
                     </VerticalStackLayout>
 
@@ -127,13 +127,13 @@
                     <Label Text="{Binding BillingHeader}" Style="{StaticResource SectionHeader}" />
 
                     <Label Text="{Binding BillingModeLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding BillingModes}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding BillingModes}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedBillingModeIndex, Mode=TwoWay}" />
 
                     <Label Text="{Binding BillingTimingLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding BillingTimings}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding BillingTimings}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedBillingTimingIndex, Mode=TwoWay}" />
                     <Label Text="{Binding BillingTimingHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 

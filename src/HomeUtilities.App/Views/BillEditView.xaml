@@ -44,8 +44,8 @@
                         <!-- First choice of a new bill: for a contract, or a one-off expense. -->
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowTypePicker}">
                             <Label Text="{Binding Texts.TypeLabel}" Style="{StaticResource MutedLabel}" />
-                            <Picker ItemsSource="{Binding TypeChoices}"
-                                    ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                            <views:ChoiceField ItemsSource="{Binding TypeChoices}"
+                                    DisplayMember="Name"
                                     SelectedIndex="{Binding SelectedTypeIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
 
@@ -106,8 +106,8 @@
 
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding IsKindEditable}">
                             <Label Text="{Binding Texts.KindLabel}" Style="{StaticResource MutedLabel}" />
-                            <Picker ItemsSource="{Binding Kinds}"
-                                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            <views:ChoiceField ItemsSource="{Binding Kinds}"
+                                    DisplayMember="DisplayName"
                                     SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
 

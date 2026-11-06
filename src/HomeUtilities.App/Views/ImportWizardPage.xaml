@@ -27,27 +27,27 @@
                             Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
                     <Label Text="{Binding FileText}" />
                     <Label Text="{Binding SheetsLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                    <Picker ItemsSource="{Binding Sheets}"
-                            ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportSheetOption}"
+                    <views:ChoiceField ItemsSource="{Binding Sheets}"
+                            DisplayMember="Text"
                             SelectedItem="{Binding SelectedSheet}" />
                 </VerticalStackLayout>
 
                 <!-- 2. Profile and target contract -->
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsTargetStep}">
                     <Label Text="{Binding ProfileLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                    <Picker ItemsSource="{Binding ProfileChoices}"
-                            ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportProfileOption}"
+                    <views:ChoiceField ItemsSource="{Binding ProfileChoices}"
+                            DisplayMember="Text"
                             SelectedItem="{Binding SelectedProfile}" />
                     <Label Text="{Binding ProfileNameLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
                     <Entry Text="{Binding ProfileName}" MaxLength="{x:Static core:InputLimits.Name}" />
 
                     <Label Text="{Binding PropertyLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                    <Picker ItemsSource="{Binding PropertyChoices}"
-                            ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                    <views:ChoiceField ItemsSource="{Binding PropertyChoices}"
+                            DisplayMember="Name"
                             SelectedItem="{Binding SelectedProperty}" />
                     <Label Text="{Binding ContractLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                    <Picker ItemsSource="{Binding ContractChoices}"
-                            ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                    <views:ChoiceField ItemsSource="{Binding ContractChoices}"
+                            DisplayMember="Name"
                             SelectedItem="{Binding SelectedContract}" />
                     <Label Text="{Binding TargetHintText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasTargetHint}" />
                     <Button Text="{Binding ShowContractText}" Command="{Binding ShowContractCommand}"
@@ -125,8 +125,8 @@
                         <VerticalStackLayout Spacing="8">
                             <Label Text="{Binding PeriodRuleLabel}" Style="{StaticResource SectionHeader}" />
                             <Label Text="{Binding PeriodRuleHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                            <Picker ItemsSource="{Binding PeriodRules}"
-                                    ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportPeriodRuleChoice}"
+                            <views:ChoiceField ItemsSource="{Binding PeriodRules}" DialogTitle="{Binding PeriodRuleLabel}"
+                                    DisplayMember="Text"
                                     SelectedItem="{Binding SelectedPeriodRule}" />
                             <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDayLimit}">
                                 <Label Text="{Binding DayLimitLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
@@ -140,8 +140,8 @@
                                         <VerticalStackLayout Spacing="2">
                                             <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
                                             <DatePicker Date="{Binding FromDate}" />
-                                            <Picker ItemsSource="{Binding Rules}"
-                                                    ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportPeriodRuleChoice}"
+                                            <views:ChoiceField ItemsSource="{Binding Rules}"
+                                                    DisplayMember="Text"
                                                     SelectedItem="{Binding SelectedRule}" />
                                             <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDayLimit}">
                                                 <Label Text="{Binding DayLimitLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
@@ -192,8 +192,8 @@
                             </VerticalStackLayout>
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                                <Picker ItemsSource="{Binding CurrencyRules}"
-                                        ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportCurrencyChoice}"
+                                <views:ChoiceField ItemsSource="{Binding CurrencyRules}"
+                                        DisplayMember="Text"
                                         SelectedItem="{Binding SelectedCurrencyRule}" />
                             </VerticalStackLayout>
                         </VerticalStackLayout>
@@ -244,8 +244,8 @@
             </VerticalStackLayout>
             <HorizontalStackLayout Grid.Row="2" Spacing="8">
                 <Label Text="{Binding FilterLabel}" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
-                <Picker ItemsSource="{Binding Filters}"
-                        ItemDisplayBinding="{Binding Text, x:DataType=vm:ImportFilterChoice}"
+                <views:ChoiceField ItemsSource="{Binding Filters}"
+                        DisplayMember="Text"
                         SelectedItem="{Binding SelectedFilter}" WidthRequest="200" />
             </HorizontalStackLayout>
             <CollectionView Grid.Row="3" ItemsSource="{Binding PlanRows}">

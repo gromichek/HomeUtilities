@@ -18,16 +18,16 @@ public sealed class EditorDialogPage : ContentPage
     /// <summary>Completes when the page has been removed.</summary>
     public Task Closed => _closed.Task;
 
+    /// <summary>
+    /// Called by the dialog service after it popped the page. Not tied to <c>OnDisappearing</c>: a choice dialog opened from a
+    /// field of this dialog is pushed on top of it, which also makes this page disappear — it is not closed then.
+    /// </summary>
+    public void MarkClosed() => _closed.TrySetResult();
+
     // Hardware / gesture Back behaves like the dialog's Cancel button.
     protected override bool OnBackButtonPressed()
     {
         _editor.CancelCommand.Execute(null);
         return true;
-    }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _closed.TrySetResult();
     }
 }

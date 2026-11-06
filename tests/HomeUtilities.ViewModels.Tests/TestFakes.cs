@@ -126,8 +126,18 @@ internal sealed class FakeDialogService : IDialogService
     /// <summary>The options and the marked index of every <see cref="ChooseAsync"/> call.</summary>
     public List<(IReadOnlyList<string> Options, int? Selected)> Choices { get; } = [];
 
-    public Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null)
+    /// <summary>The "create new" action texts passed to <see cref="ChooseAsync"/>, in order (null = none).</summary>
+    public List<string?> ChoiceActions { get; } = [];
+
+    public Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null, string? actionText = null)
     {
+        // The action row is the last option for the scripts (its index is options.Count, like in the app).
+        ChoiceActions.Add(actionText);
+        if (actionText is not null)
+        {
+            options = [.. options, actionText];
+        }
+
         Choices.Add((options, selectedIndex));
         if (ChooseIndexScript is not null)
         {

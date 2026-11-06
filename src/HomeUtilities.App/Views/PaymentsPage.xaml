@@ -47,10 +47,10 @@
                             </Grid>
 
                             <views:AdaptiveFieldGrid Columns="{Binding FilterPanel.Columns}" IsVisible="{Binding FilterPanel.IsExpanded}">
-                        <views:ReportFilterField Caption="{Binding Texts.PropertyFilterLabel}" Value="{Binding PropertyFilterName}" Command="{Binding ChoosePropertyFilterCommand}" />
+                        <views:ChoiceField Caption="{Binding Texts.PropertyFilterLabel}" Value="{Binding PropertyFilterName}" Command="{Binding ChoosePropertyFilterCommand}" />
                         <VerticalStackLayout Spacing="8">
                             <!-- The period scope (All years / Year / Month) is a drop-down like the other filters (T-028f). -->
-                            <views:ReportFilterField Caption="{Binding Period.PeriodLabel}" Value="{Binding Period.ScopeText}" Command="{Binding Period.ChooseScopeCommand}" />
+                            <views:ChoiceField Caption="{Binding Period.PeriodLabel}" Value="{Binding Period.ScopeText}" Command="{Binding Period.ChooseScopeCommand}" />
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
                         <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
                                 Command="{Binding Period.PreviousCommand}"
@@ -64,7 +64,7 @@
                                 SemanticProperties.Description="{Binding Period.NextText}" />
                     </Grid>
                         </VerticalStackLayout>
-                        <views:ReportFilterField Caption="{Binding Texts.ContractFilterLabel}" Value="{Binding ContractFilterName}" Command="{Binding ChooseContractFilterCommand}" />
+                        <views:ChoiceField Caption="{Binding Texts.ContractFilterLabel}" Value="{Binding ContractFilterName}" Command="{Binding ChooseContractFilterCommand}" />
                             </views:AdaptiveFieldGrid>
 
                             <!-- Totals of the filtered list (part of the summary line when collapsed). -->

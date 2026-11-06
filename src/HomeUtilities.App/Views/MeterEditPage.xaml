@@ -31,13 +31,13 @@
                     <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
 
                     <Label Text="{Binding Texts.ResourceLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Resources}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Resources}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedResourceIndex, Mode=TwoWay}" />
 
                     <Label Text="{Binding Texts.UnitLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Units}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Units}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedUnitIndex, Mode=TwoWay}" />
                     <Label Text="{Binding UnitError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding UnitError, Converter={StaticResource HasText}}" />

@@ -111,8 +111,8 @@
                         <Label Text="{Binding Texts.ScheduleHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Label Text="{Binding Texts.KindLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Kinds}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Kinds}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}" />
 
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowEveryMonths}">
@@ -165,8 +165,8 @@
                         </VerticalStackLayout>
 
                         <Label Text="{Binding Texts.TimingLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Timings}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Timings}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedTimingIndex, Mode=TwoWay}" />
                         <Label Text="{Binding Texts.TimingHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 

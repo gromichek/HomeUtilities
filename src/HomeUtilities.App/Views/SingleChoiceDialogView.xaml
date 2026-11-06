@@ -21,7 +21,8 @@
 
         <HorizontalStackLayout Grid.Row="2" Spacing="8" HorizontalOptions="End" Margin="0,12,0,0">
             <Button Text="{Binding CancelText}" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButton}" />
-            <Button Text="{Binding OkText}" Command="{Binding ConfirmCommand}" Style="{StaticResource PrimaryButton}" />
+            <!-- OK only while a row with extra inputs is chosen; every other row answers at once (UI_GUIDELINES §3a). -->
+            <Button Text="{Binding OkText}" Command="{Binding ConfirmCommand}" Style="{StaticResource PrimaryButton}" IsVisible="{Binding ShowOk}" />
         </HorizontalStackLayout>
     </Grid>
 </ContentView>

@@ -31,8 +31,8 @@
                 <VerticalStackLayout Spacing="8">
                     <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMultipleProperties}">
                         <Label Text="{Binding PropertyLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Properties}"
-                                ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                        <views:ChoiceField ItemsSource="{Binding Properties}"
+                                DisplayMember="Name"
                                 SelectedIndex="{Binding SelectedPropertyIndex, Mode=TwoWay}" />
                     </VerticalStackLayout>
 

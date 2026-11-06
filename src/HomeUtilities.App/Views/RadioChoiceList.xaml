@@ -9,25 +9,39 @@
     <VerticalStackLayout x:Name="Rows" Spacing="2">
         <BindableLayout.ItemTemplate>
             <DataTemplate x:DataType="vm:ReportOptionViewModel">
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinimumHeightRequest="48" Padding="4,6">
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ChooseCommand}" />
-                    </Grid.GestureRecognizers>
-                    <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
-                           Text="{StaticResource IconRadioOff}"
-                           TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                <Setter Property="Text" Value="{StaticResource IconRadioOn}" />
-                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                        <Label Text="{Binding Text}" />
-                        <Label Text="{Binding Description}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasDescription}" />
-                    </VerticalStackLayout>
-                </Grid>
+                <VerticalStackLayout>
+                    <!-- An action row ("＋ New supplier…") is the last row, set apart by a line, with the add icon instead of a radio mark. -->
+                    <BoxView HeightRequest="1" Margin="0,8,0,4" IsVisible="{Binding IsAction}"
+                             Color="{AppThemeBinding Light={StaticResource OutlineLight}, Dark={StaticResource OutlineDark}}" />
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinimumHeightRequest="48" Padding="4,6">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChooseCommand}" />
+                        </Grid.GestureRecognizers>
+                        <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
+                               Text="{StaticResource IconRadioOff}" IsVisible="{Binding IsRadio}"
+                               TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Text" Value="{StaticResource IconRadioOn}" />
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                        <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
+                               Text="{StaticResource IconAdd}" IsVisible="{Binding IsAction}"
+                               TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="{Binding Text}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsAction}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                            <Label Text="{Binding Description}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding HasDescription}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
             </DataTemplate>
         </BindableLayout.ItemTemplate>
     </VerticalStackLayout>

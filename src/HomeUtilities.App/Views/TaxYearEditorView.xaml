@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
              xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
@@ -30,8 +31,8 @@
                    IsVisible="{Binding AmountError, Converter={StaticResource HasText}}" />
 
             <Label Text="{Binding CountLabel}" Style="{StaticResource MutedLabel}" />
-            <Picker ItemsSource="{Binding Counts}"
-                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+            <views:ChoiceField ItemsSource="{Binding Counts}"
+                    DisplayMember="DisplayName"
                     SelectedIndex="{Binding SelectedCountIndex, Mode=TwoWay}" />
             <Label Text="{Binding CountError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding CountError, Converter={StaticResource HasText}}" />

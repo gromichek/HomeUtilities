@@ -74,8 +74,8 @@
                                IsVisible="{Binding AmountError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding Texts.MethodLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Methods}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Methods}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedMethodIndex, Mode=TwoWay}" />
 
                         <Label Text="{Binding Texts.ReferenceLabel}" Style="{StaticResource MutedLabel}" />
