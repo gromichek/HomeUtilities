@@ -20,6 +20,7 @@ The history of why a rule exists is in the appendix at the end.
 | 3 | (owner 2026-11-05) Compact-by-height only on Android | A short wide Windows window became a "phone". |
 | 3 | Period switcher ‹ › visible in the collapsed filter summary | Most common filter action without expanding (R-50). |
 | 3a | One choice field control; native `Picker` and action sheets not used for picking records; dialogs return Ids | Two field looks on one screen, no current-value mark, records matched by display text (R-03, R-04, R-06). |
+| 3a | (owner 2026-11-05) A choice row without extra inputs selects **and closes at once**; OK only for rows with extra inputs | Two taps per choice (tap the row, tap OK) were slower than the old action sheet (C-06). |
 | 3a | Segmented control allowed for 2–3 short options | The ban led to two plain buttons with the primary style as "selected" (R-40). |
 | 5 | Undo snackbar instead of a confirmation for a single delete; clearer confirmation text; standard texts for empty, loading, saved | "Will be hidden" is unclear; Undo infrastructure exists. |
 | 6 | One field look (bordered), read-only value pattern, unit suffix, `ReturnType=Next`, switch placement | Several patterns side by side (R-07, R-08, R-24). |
@@ -64,6 +65,7 @@ The history of why a rule exists is in the appendix at the end.
 | `IconCheckOn` / `IconCheckOff` / `IconRadioOn` / `IconRadioOff` | marks in choice dialogs (§3a) | `check_box` / `check_box_outline_blank` / `radio_button_checked` / `radio_button_unchecked` |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` |
 | `IconWarning` [NEW] | warning next to a status text | `warning_amber` |
+| `IconCalendar` [NEW] | the calendar icon of a date or month field (`DateField`, C-09) | `event` |
 
 Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an accessibility name
 (`SemanticProperties.Description`) — localized.
@@ -136,6 +138,8 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   (`MinColumnWidth` = the width each needs). Never stack buttons with `HorizontalOptions="Start"`.
   **[NEW]** Two buttons side by side on compact width only if *both* full texts fit at 360 dp in Russian; otherwise
   stack them. A button text is never shortened by truncation.
+- **Date and month fields** are the bordered box of §6 with a calendar icon (`DateField`): the text is the app's own
+  `dd.MM.yyyy` (`DateFormat`, §9) or the month in the app language, the platform picker opens on tap. Never a bare `DatePicker`.
 - **Child rows:** tap the row → edit (dialog); red `IconDelete` at the end of the row. No separate "Edit"/"Remove"
   text buttons.
 
@@ -148,7 +152,11 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
     keyboard. Back = Cancel.
   - **Tablet / desktop:** popup of fixed width (~420 for choices, ~560 for editors), content scrolls inside, max height
     ~70 % (wizards 90 %) of the window, buttons bottom-right.
-  - Implemented once in `EditorDialogPage` / the popup host, not per dialog.
+  - Implemented once in `EditorDialogPage` + `DialogFrame` / the popup host, not per dialog. **[CHANGED] (T-036b)** On the phone the
+    top bar has **←** (Cancel), the title and **✓** (the dialog's `PrimaryCommand`; absent when the dialog answers at once, e.g.
+    a choice dialog); the dialog view's own title and Cancel / Save row are hidden there. The zone behind the status bar has the toolbar
+    colour, the zone behind the navigation bar the page colour; on Android the navigation bar (◁ ○ ▢) follows the page colour in both
+    themes (`SystemBars`).
 - **[NEW] Context in the title:** a dialog about a part of a record names the record: "Показание · Холодная вода,
   ванная", not only "Изменить показание".
 
@@ -162,21 +170,25 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 
 ## 3a. Choices [CHANGED]
 - **[CHANGED] One choice field control** for every "pick one of a list" field in the app: caption above, current value
-  in a bordered box with `IconExpand`, a tap opens the choice dialog (today's `ReportFilterField`; rename it to
-  `ChoiceField`). The value wraps to at most 2 lines; it is never cut to one line.
+  in a bordered box with `IconExpand`, a tap opens the choice dialog (`ChoiceField`; bind `ItemsSource` + `DisplayMember` +
+  `SelectedIndex` / `SelectedItem` like a Picker, or `Value` + `Command` when the view model runs the dialog). The value wraps to
+  at most 2 lines; it is never cut to one line.
 - **[CHANGED] The native `Picker` is not used** (on Android it shows no current-value mark and looks like a text field).
   **`DisplayActionSheet` is used only to pick a *command*** (e.g. "Camera / Gallery"), never to pick a record or an
   option.
 - **[NEW] Choice dialogs return the Id** (or index) of the chosen item, never its display text — two records may have
   the same name (two contracts "Газ" after a change of supplier).
-- One look for every choice dialog: title top-left, content **directly under the title**, **Cancel** + **OK** at the
-  bottom (frame per §3.4). Rows are list rows: whole row tappable, height ≥ 48, the radio / check mark **directly
+- One look for every choice dialog: title top-left, content **directly under the title**, **Cancel** at the
+  bottom (frame per §3.4). **[CHANGED] (owner 2026-11-05)** In a single-choice dialog **a row without extra inputs selects and
+  closes the dialog at once** — there is no OK; **OK is shown only while a row with extra inputs is chosen** (e.g. "Custom…" with
+  its from / to months) and in multi-choice dialogs. Cancel / Back stay. Rows are list rows: whole row tappable, height ≥ 48, the radio / check mark **directly
   before** the text, optional colour dot between mark and text, text left-aligned. **The current value is marked when
   the dialog opens.**
-- Single choice: radio rows. Extra inputs of an option (e.g. "Custom…" → from/to month) appear under that row.
+- Single choice: radio rows. Extra inputs of an option (e.g. "Custom…" → from/to month) appear under that row; choosing such a row
+  does not close the dialog, OK does.
 - Multi choice: **All / None** as text buttons under the title, then the check rows.
 - An entry that creates a new record ("＋ Новый поставщик…") is the **last row**, visually separated, with `IconAdd`
-  instead of a radio mark.
+  instead of a radio mark; it acts at once (`IDialogService.ChooseAsync(..., actionText)`; the answer is `options.Count`).
 - **[NEW] Segmented control** for 2–3 short mutually exclusive options that switch a *view* (Table / Chart): one
   bordered group of equal columns, the selected segment tinted (`Highlight`) with a check icon — not the filled primary
   style. Labels ≤ 12 characters; otherwise use a choice field.
@@ -217,6 +229,12 @@ Use these wordings everywhere (resx keys in brackets).
   it stays at the bottom above the FAB. **Undo restores exactly** what the delete changed (the record and every row the
   delete touched, e.g. released payment allocations); where that cannot be guaranteed, the confirmation dialog with the
   list of dependent records is used instead.
+  **[CHANGED] (T-036b)** Undo is exact because `IDeleteUndoService` records the rows the delete soft-deleted (the interceptor notes every
+  row that turns into a soft delete inside the recording) and Undo un-deletes exactly those, with a newer `UpdatedAt` so that the
+  sync carries it. An editor opts in by getting a `DeleteUndoSupport` (bill, payment, bill template, tariff component, VAT rate,
+  category; reading rows of the history); the editors of **property, contract, supplier and meter** (records with dependants; a meter
+  delete also closes its links) keep the confirmation dialog. In-form removals of unsaved rows (parameters, links, lines) are not deletes
+  of stored data and still confirm.
 - "Cancel" in a dialog always means "close the dialog and do nothing". Words like "Discard", "Continue", "Отбросить",
   "Продолжить" are not used.
 
@@ -272,8 +290,9 @@ Use these wordings everywhere (resx keys in brackets).
   `TextDark`): unset, WinUI took the hover colours of Back from the system theme and Back vanished in the dark app theme (#246).
   Never a toolbar background colour on Windows.
 - **Windows renders `FontImageSource` at 96 dpi and the flyout / toolbar icon box is 16 DIP**; Material glyphs (24 grid) are
-  soft at 16 px whatever is done (#250 tried runtime sizing — no visible gain, to be removed). Menu icons therefore become
-  text (`Label` in the Material font, owner 2026-11-06); toolbar icons stay images.
+  soft at 16 px whatever is done (#250 tried runtime sizing — no visible gain, **removed in T-036b**). Menu icons are therefore
+  text: the flyout items use `Shell.ItemTemplate` with a `MenuIconLabel` (a `Label` in the Material font that takes its glyph from
+  `FlyoutItem.Icon`, same code points); toolbar icons stay images, as they were before #250 (owner 2026-11-06).
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.
@@ -281,8 +300,10 @@ Use these wordings everywhere (resx keys in brackets).
 - Selectable list items: give the `Border` an explicit base `Stroke` and `StrokeThickness="1"`.
 - Decimal input: every number field parses through `DecimalInput`; values are stored as `decimal`, never as text.
 - **Do not use `FlexLayout`** on Android: it clips the first item of each wrapped row. Use a `Grid`.
-- **[NEW] Replacing `CollectionView.ItemsLayout` after the first layout** may be ignored on Windows — check that
-  `ListColumns` really switches to 2–3 columns there (R-21).
+- **[NEW] Replacing `CollectionView.ItemsLayout` after the first layout is ignored on Windows** (Properties stayed in one column in a
+  maximised window, R-21): `ListColumns` gives the view one `GridItemsLayout` and only changes its `Span`.
+- **[NEW] A modal dialog opened from a field of another modal dialog** also makes the first page disappear: a dialog page counts as
+  closed when the dialog service pops it (`EditorDialogPage.MarkClosed`), never when it disappears.
 - Do not use CommunityToolkit `Toast`/`Snackbar` — use `ISnackbarService`.
 
 ## 6b. Robustness
@@ -332,6 +353,8 @@ Use these wordings everywhere (resx keys in brackets).
 - **No value:** `—` (em dash) in muted colour. **Not calculated:** `—` plus the reason; never `0,00`.
   **Approximate:** `≈ 12,30`. Zero is shown only when the value really is zero.
 - A line that would only say "0,00 €" (e.g. "expected recalculation: 0,00 €") is not shown.
+- **Full dates** are `dd.MM.yyyy` in every language (`DateFormat.Full`, "15.03.2023"); never `ToString("d")` (it is "3/15/2023" in the English UI
+  and follows the Windows region in a date picker).
 - Quantities with their unit (`1,267 м³`); percentages with a space (`21 %`).
 
 ## 10. Screen states [NEW]
@@ -368,5 +391,7 @@ No other sizes in pages; styles carry the sizes.
 - #220: the snackbar host had a constant `IsVisible="False"` from T-019 to #220.
 - 2026-11-02: changing `ItemsLayout` during an items update threw on WinUI (owner's error log) → `ListColumns` posts
   the change.
+- 2026-11-06 (T-036b): ChoiceField replaces every native Picker; choice rows answer with one tap; phone dialogs get a top bar;
+  delete with Undo restores exactly the recorded rows; Windows menu icons are text, toolbar icons back to the state before #250.
 - 2026-11-05: UI review → revision 1 (this text), agreed with the owner: date lists in one column, compact-by-height on
   Android only, Delete only at the end of the form, single delete with Undo instead of a confirmation (bigger snackbar).
