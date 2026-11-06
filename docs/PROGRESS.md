@@ -260,7 +260,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | Date | Build / PR | What was tested | Result |
 |---|---|---|---|
 | 2026-10-19 | #1 | Start on Windows and Android emulator | OK (VS framework selection needed, fixed by #4) |
-| | #21 | Database created + seeded on Windows / Android, no duplicates after restart | pending |
+| | #21 | Database created + seeded on Windows / Android, no duplicates after restart | **OK** (owner 2026-11-06: in use, no problems) |
 | 2026-10-20 | #24 | Start on Windows / Android | **Crash**: `StaticResource not found for key PrimaryLight` (AppShell built before App resources) — fixed in hotfix PR |
 | 2026-10-20 | #27 | Restart with Russian selected | **Bug**: menu in English, Settings in Russian (LanguageService created lazily after Shell) — fixed in hotfix PR |
 | 2026-10-20 | #28 + #29 | Shell, settings, Properties on Windows + Android | Works. **Usability**: identical buttons, unclear grouping, non-standard dialog texts; **Android bugs**: Kind picker empty, Back did not leave the editor (after archive toggle), stray "≡" button → T-012a |
@@ -295,10 +295,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-11-02 | #181 + #184 | T-028h, T-029 | Help tables OK; automatic copies, copy before import, JSON export (~100 000 lines) and import on the emulator OK. Windows theme still broken (C5); Imports buttons (C6); sections still feel reloaded every time (C7). |
 | 2026-11-02 | #174 + #175 + #177 (phone, Windows) | T-028g fixes, menu switching, scrolling, Windows buttons/theme | Phone: much faster, slight lag on fast menu switching, no hang; Imports help OK; payment row OK; help zoom works but tables are squeezed to the page width without sideways scrolling; Imports profile buttons have different widths in portrait. Windows: dark theme first switch **still broken** after #174 and #177. Tablet pending. |
 | 2026-11-02 | #165 | T-028d Settings sections (phone, tablet, Windows) | OK except: Imports has no help; Windows first switch to Dark draws wrongly; Imports profile buttons cut; bill payment row squeezed by "Cancel payment" → T-028g. Paid-bill reminder: not reproduced (several tries). Fast menu switching slows down, ANR + one hang on the tablet → T-028b. Owner wishes pinch-zoom in Help → T-028g. |
-| | #149 | Reminder time 22:30 kept; list without red marks after a bill change | pending |
+| | #149 | Reminder time 22:30 kept; list without red marks after a bill change | **OK** (owner 2026-11-06: in use, no problems) |
 | 2026-10-29 | #125 | T-027 import of the owner's sheets | Import successful. Request: total water consumption per month → #130. Owner: no validity dates for tariff components needed (old data is for information). |
 | 2026-10-29 | #130 | Reports with real data | Gas missing in Unit cost / Calculated vs billed (no tariff, equalized months excluded, contract start, link start today) → #133, #134; 20 years froze the UI → #133 |
-| | #124 | T-028 reminders | pending |
+| | #124 | T-028 reminders | **OK** (owner 2026-11-06: in use, no problems) |
 | 2026-10-29 | #116 + #117 | T-026 import wizard; report colours + calendar | Colours/calendar OK; Shift+wheel does not scroll the table. Import: dates are reading dates (not periods), one column per meter position with 6 replacements → T-027 |
 | 2026-10-29 | #114 | T-023b reports polish | OK (requests: coloured property headers, calendar for custom period → #117) |
 | | #111 | T-025 templates and drafts | pending |
@@ -306,8 +306,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-28 | #105 | T-023 reports | 6 steps OK. **Usability**: filter buttons do not fit (Windows), want drop-downs with check boxes; multi-property columns hard to assign; Android spinner keeps turning on first open → T-023a |
 | 2026-10-28 | #102 | T-022 overview | OK. Somewhere a text does not wrap (emulator) — to collect on a real phone/tablet in the polish pass |
 | 2026-10-27 | #95 + #97 + #99 | T-021 equalized + tax; line amount from the bill (owner's heating bill matches to the cent) | OK. Android icons shown as boxes — stale local build; fixed by a fresh clone (no code issue) |
-| | #93 | T-020a: heating preset with quantities from the bill (owner's real bill), VAT on total | pending |
-| | #91 | Month filter on Bills and Payments | pending |
+| | #93 | T-020a: heating preset with quantities from the bill (owner's real bill), VAT on total | **OK** (owner 2026-11-06: in use, no problems) |
+| | #91 | Month filter on Bills and Payments | **OK** (owner 2026-11-06: in use, no problems) |
 | 2026-10-26 | #89 | T-020 payments | OK |
 | 2026-10-26 | #86 | T-019 bills, Paid + Undo, snackbar | OK. Request: month filter (plus whole year / all years) → Sonnet helper for Bills and Payments |
 | 2026-10-25 | #81 + #82 | T-018 charges screen; VAT from rounded net | OK |
@@ -316,4 +316,4 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | 2026-10-24 | #69 + #70 | Selection kept on return; in-app help | OK |
 | 2026-10-24 | #66 | Restore on Windows and Android (save to Downloads, reinstall, restore incl. photos), bad file refused | OK |
 | 2026-10-24 | #60 | T-017a navigation guard: menu → section list, Save changes? on menu / Back / window ✕ | OK, except: Windows wide, after contract → Readings → Objects the property is **not selected** any more (spec: stays selected) → known issue |
-| | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | pending |
+| | #38 + #43 + #45 + #46 + #48 | **Readings entry**, Meters, replacement wizard; Contracts; robustness (bad input in all fields), stay after Save, swatches, error log | **OK** (owner 2026-11-06: in use, no problems) |
