@@ -1,5 +1,6 @@
 using System.Globalization;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
 using Microsoft.Data.Sqlite;
 
 namespace HomeUtilities.Data.Backup;
@@ -21,66 +22,41 @@ public sealed class DatabaseCleaner(BackupOptions options) : IDatabaseCleaner
         {
             if (!File.Exists(options.DatabasePath))
             {
-                return new CleanUpPreview(0, 0, 0);
+                return new CleanUpPreview([], 0, 0, []);
             }
 
+            // The very same purge as CleanAsync, rolled back: preview and result count the same rows by construction.
             using var connection = Open();
-            var records = 0;
-            foreach (var table in SoftDeleteTables(connection))
-            {
-                ct.ThrowIfCancellationRequested();
-                records += (int)Scalar(connection, $"SELECT COUNT(*) FROM {DataExchangeService.Quote(table)} WHERE {DeletedColumn} = 1");
-            }
-
-            var files = OrphanFiles(LiveAttachmentIds(connection));
-            return new CleanUpPreview(records, files.Count, files.Sum(f => f.Length));
+            var plan = Purge(connection, commit: false, ct);
+            return new CleanUpPreview(plan.Records, plan.Files.Count, plan.Files.Sum(f => f.Length), plan.Kept);
         }, ct);
 
     /// <inheritdoc />
     public async Task<CleanUpResult> CleanAsync(CancellationToken ct = default) =>
         await Task.Run(() => Clean(ct), ct);
 
+    private sealed record Purged(List<CleanUpRecordCount> Records, List<string> Kept, List<FileInfo> Files);
+
     private CleanUpResult Clean(CancellationToken ct)
     {
         if (!File.Exists(options.DatabasePath))
         {
-            return new CleanUpResult(0, 0, 0, 0, 0, []);
+            return new CleanUpResult([], 0, 0, 0, 0, []);
         }
 
-        var removed = 0;
-        var kept = new List<string>();
         long before;
-        HashSet<Guid> live;
+        Purged purged;
         using (var connection = Open())
         {
             Execute(connection, "PRAGMA wal_checkpoint(TRUNCATE)");
             before = new FileInfo(options.DatabasePath).Length;
-
-            // Foreign keys are enforced inside the transaction: a mistake in the order fails loudly instead of corrupting links.
-            Execute(connection, "PRAGMA foreign_keys = ON");
-            using var transaction = connection.BeginTransaction();
-            var tables = SoftDeleteTables(connection);
-            var references = ReadReferences(connection);
-            foreach (var table in DeleteOrder(tables, references))
-            {
-                ct.ThrowIfCancellationRequested();
-                removed += DeleteDeleted(connection, transaction, table, references);
-                var left = (int)Scalar(connection, $"SELECT COUNT(*) FROM {DataExchangeService.Quote(table)} WHERE {DeletedColumn} = 1", transaction);
-                if (left > 0)
-                {
-                    kept.Add($"{table}: {left} deleted record(s) kept because live records still refer to them");
-                }
-            }
-
-            RemoveOutboxOfMissingRows(connection, transaction, tables);
-            transaction.Commit();
-            live = LiveAttachmentIds(connection);
+            purged = Purge(connection, commit: true, ct);
         }
 
         // The database is final now; files go afterwards, so a failed transaction never loses a file.
         var filesRemoved = 0;
         long bytesRemoved = 0;
-        foreach (var file in OrphanFiles(live))
+        foreach (var file in purged.Files)
         {
             try
             {
@@ -95,7 +71,72 @@ public sealed class DatabaseCleaner(BackupOptions options) : IDatabaseCleaner
         }
 
         var (after, compactionError) = Compact();
-        return new CleanUpResult(removed, filesRemoved, bytesRemoved, before, after, kept, compactionError);
+        return new CleanUpResult(purged.Records, filesRemoved, bytesRemoved, before, after, purged.Kept, compactionError);
+    }
+
+    // The one purge for preview (rolled back) and clean-up (committed). Attachments of deleted or missing owners are marked
+    // deleted first (existing data from before T-037a), then every table is processed children first. Foreign keys are
+    // enforced inside the transaction: a mistake in the order fails loudly instead of corrupting links.
+    private Purged Purge(SqliteConnection connection, bool commit, CancellationToken ct)
+    {
+        var records = new List<CleanUpRecordCount>();
+        var kept = new List<string>();
+        Execute(connection, "PRAGMA foreign_keys = ON");
+        using var transaction = connection.BeginTransaction();
+        var tables = SoftDeleteTables(connection);
+        MarkAttachmentsOfDeletedOwners(connection, transaction, tables);
+        var references = ReadReferences(connection);
+        foreach (var table in DeleteOrder(tables, references))
+        {
+            ct.ThrowIfCancellationRequested();
+            var removed = DeleteDeleted(connection, transaction, table, references);
+            if (removed > 0)
+            {
+                records.Add(new CleanUpRecordCount(table, removed));
+            }
+
+            var left = (int)Scalar(connection, $"SELECT COUNT(*) FROM {DataExchangeService.Quote(table)} WHERE {DeletedColumn} = 1", transaction);
+            if (left > 0)
+            {
+                kept.Add($"{table}: {left} deleted record(s) kept because live records still refer to them");
+            }
+        }
+
+        RemoveOutboxOfMissingRows(connection, transaction, tables);
+        var files = OrphanFiles(LiveAttachmentIds(connection, transaction));
+        if (commit)
+        {
+            transaction.Commit();
+        }
+        else
+        {
+            transaction.Rollback();
+        }
+
+        return new Purged(records, kept, files);
+    }
+
+    // An attachment follows its owner: if the bill, reading or meter it belongs to is deleted or gone, the attachment is deleted
+    // too. New deletes do this themselves (T-037a); this catches rows deleted before and rows whose owner was purged earlier.
+    private static void MarkAttachmentsOfDeletedOwners(SqliteConnection connection, SqliteTransaction transaction, List<string> tables)
+    {
+        if (!tables.Contains("Attachments", StringComparer.Ordinal))
+        {
+            return;
+        }
+
+        var owners = new (AttachmentOwnerKind Kind, string Table)[]
+        {
+            (AttachmentOwnerKind.MeterReading, "MeterReadings"),
+            (AttachmentOwnerKind.Bill, "Bills"),
+            (AttachmentOwnerKind.Meter, "Meters"),
+        };
+        foreach (var (kind, table) in owners.Where(o => tables.Contains(o.Table, StringComparer.Ordinal)))
+        {
+            Execute(connection,
+                $"UPDATE Attachments SET {DeletedColumn} = 1 WHERE {DeletedColumn} = 0 AND OwnerKind = {(int)kind} " +
+                $"AND NOT EXISTS (SELECT 1 FROM {DataExchangeService.Quote(table)} o WHERE o.Id = Attachments.OwnerId AND o.{DeletedColumn} = 0)", transaction);
+        }
     }
 
     // VACUUM needs the connections of the app closed (like the backup service): pooled ones are closed here, then a fresh
@@ -283,15 +324,16 @@ public sealed class DatabaseCleaner(BackupOptions options) : IDatabaseCleaner
         }
     }
 
-    private static HashSet<Guid> LiveAttachmentIds(SqliteConnection connection)
+    private static HashSet<Guid> LiveAttachmentIds(SqliteConnection connection, SqliteTransaction transaction)
     {
         var ids = new HashSet<Guid>();
-        if (Scalar(connection, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Attachments'") == 0)
+        if (Scalar(connection, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Attachments'", transaction) == 0)
         {
             return ids;
         }
 
         using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         command.CommandText = $"SELECT Id FROM Attachments WHERE {DeletedColumn} = 0";
         using var reader = command.ExecuteReader();
         while (reader.Read())
@@ -319,9 +361,10 @@ public sealed class DatabaseCleaner(BackupOptions options) : IDatabaseCleaner
                 && !string.Equals(f.Extension, ".part", StringComparison.OrdinalIgnoreCase))];
     }
 
-    private static void Execute(SqliteConnection connection, string sql)
+    private static void Execute(SqliteConnection connection, string sql, SqliteTransaction? transaction = null)
     {
         using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         command.CommandText = sql;
         command.ExecuteNonQuery();
     }

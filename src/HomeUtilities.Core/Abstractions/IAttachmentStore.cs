@@ -30,4 +30,16 @@ public interface IAttachmentStore
 
     /// <summary>Soft-deletes the row. The file is kept (undo, sync); a cleanup job removes it later.</summary>
     Task DeleteAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Soft-deletes all live attachments of a record (the record itself is deleted by the caller). The stores of bills, meters and
+    /// readings do this in the same save as the owner's delete; use this for an owner deleted by other means.
+    /// </summary>
+    Task DeleteByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Restores the attachments that were deleted together with their owner: the soft-deleted ones last changed at
+    /// <paramref name="ownerDeletedAt"/> (the owner's <c>UpdatedAt</c> while deleted) or later. Call it when the owner is restored (Undo).
+    /// </summary>
+    Task RestoreByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, DateTimeOffset ownerDeletedAt, CancellationToken ct = default);
 }

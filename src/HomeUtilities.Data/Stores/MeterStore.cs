@@ -1,5 +1,6 @@
 using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,6 +79,7 @@ public sealed class MeterStore(IDbContextFactory<HomeUtilitiesDbContext> factory
         var existing = await Include(db.Set<Meter>()).AsSplitQuery().FirstOrDefaultAsync(m => m.Id == id, ct);
         if (existing is not null)
         {
+            await OnDeletingAsync(db, existing, ct);
             db.Remove(existing);
         }
 
@@ -151,8 +153,17 @@ public sealed class MeterStore(IDbContextFactory<HomeUtilitiesDbContext> factory
             return;
         }
 
+        await AttachmentCascade.DeleteForOwnersAsync(db, AttachmentOwnerKind.MeterReading, [reading.Id], ct);
         db.Remove(reading);
         await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>A deleted meter takes its readings along, so the photos of the meter and of all its readings go too.</summary>
+    protected override async Task OnDeletingAsync(HomeUtilitiesDbContext db, Meter existing, CancellationToken ct)
+    {
+        await AttachmentCascade.DeleteForOwnersAsync(db, AttachmentOwnerKind.Meter, [existing.Id], ct);
+        var readingIds = existing.Registers.SelectMany(r => r.Readings).Select(r => r.Id).ToList();
+        await AttachmentCascade.DeleteForOwnersAsync(db, AttachmentOwnerKind.MeterReading, readingIds, ct);
     }
 
     /// <inheritdoc />

@@ -116,6 +116,22 @@ public sealed class AttachmentStore(
         await db.SaveChangesAsync(ct);
     }
 
+    /// <inheritdoc />
+    public async Task DeleteByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, CancellationToken ct = default)
+    {
+        await using var db = await factory.CreateDbContextAsync(ct);
+        await AttachmentCascade.DeleteForOwnersAsync(db, kind, [ownerId], ct);
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task RestoreByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, DateTimeOffset ownerDeletedAt, CancellationToken ct = default)
+    {
+        await using var db = await factory.CreateDbContextAsync(ct);
+        await AttachmentCascade.RestoreForOwnerAsync(db, kind, ownerId, ownerDeletedAt, ct);
+        await db.SaveChangesAsync(ct);
+    }
+
     private string PathOf(Attachment attachment) =>
         Path.Combine(folder, attachment.Id.ToString() + AttachmentContentTypes.ExtensionFor(attachment.ContentType));
 
