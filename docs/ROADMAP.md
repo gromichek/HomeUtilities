@@ -93,6 +93,9 @@ is written; the list below is the plan and will change.
   `isNavigationBarContrastEnforced = false`); Android Entry underline is black in the dark theme (bordered field look);
   c (optional, owner 2026-11-06): the Windows calendar pop-up of DatePicker follows the Windows UI language
   (English) — try setting the native control's `Language` to the app culture in a Windows-only handler mapping;
+  c (guide, owner 2026-11-06): explain in the guide (templates and contracts) that custom fields with
+  "Относится к: Строка счёта" appear inside each bill line, "Счёт" in the bill's "Дополнительные поля" card — the owner
+  did not find them at first; consider a hint under "Относится к" in the field editor;
   c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
 
 - T-037 Database clean-up (owner, 2026-11-05): purge soft-deleted rows + orphan attachment files, VACUUM, backup first;
