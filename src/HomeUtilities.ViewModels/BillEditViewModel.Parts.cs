@@ -892,7 +892,7 @@ public sealed partial class BillEditViewModel
     }
 
     /// <summary>The "Paid" quick action: a payment for the open amount dated today, then "Bill marked as paid · Undo".</summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanMarkPaid))]
     private Task MarkPaidAsync() => RunSafeAsync(async () =>
     {
         if (IsNew)

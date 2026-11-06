@@ -264,6 +264,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private IReadOnlyList<BillPaymentRowViewModel> _paymentRows = [];
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(MarkPaidCommand))]
     private bool _canMarkPaid;
 
     [ObservableProperty]
