@@ -6,7 +6,7 @@ namespace HomeUtilities.App.Views;
 /// Lays the cards of a list out in columns on wide windows (T-028f): <c>ListColumns.MinItemWidth="360"</c> on a
 /// <see cref="CollectionView"/> gives as many columns of at least that width as fit, 1 to 3. The control keeps its
 /// virtualization (it is still a vertical <see cref="GridItemsLayout"/>). The view gets **one** grid layout for its whole life and
-/// only its <see cref="GridItemsLayout.Span"/> changes: WinUI ignored a replaced <see cref="CollectionView.ItemsLayout"/> after the first
+/// only its <see cref="GridItemsLayout.Span"/> changes: WinUI ignored a replaced <c>ItemsLayout</c> after the first
 /// layout, so Properties stayed in one column in a maximised window (R-21).
 /// <c>ListColumns.MaxContentWidth</c> on a layout centres its content and limits it to that width (lists ordered by date).
 /// </summary>
