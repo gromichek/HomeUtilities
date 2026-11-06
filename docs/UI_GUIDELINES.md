@@ -271,9 +271,9 @@ Use these wordings everywhere (resx keys in brackets).
   (#244). On Windows only `Shell.ForegroundColor` / `TitleColor` are set, to the theme's **text** colour (`TextLight` /
   `TextDark`): unset, WinUI took the hover colours of Back from the system theme and Back vanished in the dark app theme (#246).
   Never a toolbar background colour on Windows.
-- **Windows renders `FontImageSource` at 96 dpi and the flyout / toolbar icon box is 16 DIP:** menu and toolbar icons are
-  sized at runtime to 16 × display scale (`AppShell.ApplyChromeIconScale`, #250) — changing their XAML `Size` has no
-  visible effect on Windows. Icons inside page content are still stretched on 125 %+ displays (open, only if the owner sees it).
+- **Windows renders `FontImageSource` at 96 dpi and the flyout / toolbar icon box is 16 DIP**; Material glyphs (24 grid) are
+  soft at 16 px whatever is done (#250 tried runtime sizing — no visible gain, to be removed). Menu icons therefore become
+  text (`Label` in the Material font, owner 2026-11-06); toolbar icons stay images.
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.

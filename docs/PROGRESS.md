@@ -112,7 +112,11 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   "kept" line, so one counted row was neither removed nor reported. Preview and purge must count the same rows;
   reproduce with one bill (one line, one photo) deleted. Size 960 KB → 960 KB is expected for one small row (SQLite
   pages) — not a bug.
-- Windows icons blurred (owner, 2026-11-06) → fixed by #250 (menu/toolbar icons rendered at 16 DIP × display scale). / tech debt
+- **Windows icons** (owner, 2026-11-06): #250 did not help (100 % display: menu, ✓ and ? still soft — Material glyphs are
+  drawn on a 24 grid, at 16 px the strokes fall between pixels). Owner's decision: **toolbar ✓ / ? back to the state before
+  #250** (remove `ApplyChromeIconScale` / `HookChromeIconScale`, it looked better); **menu icons as text**: own
+  `Shell.ItemTemplate` (or `FlyoutItem` template) with a `Label` in the Material font (same glyph code points as now,
+  20–24 px, like the Settings section icons), selection highlight and both themes kept; Settings icons are already text. / tech debt
 
 ### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02)
 
