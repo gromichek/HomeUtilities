@@ -27,7 +27,8 @@ public sealed record ExpectedSettlement(Guid PropertyId, Guid ContractId, string
 /// <param name="Year">This year.</param>
 /// <param name="ThisYear">Gross of the bills with a period from January to the current month of this year.</param>
 /// <param name="LastYear">Gross of the bills with a period in the same months of the year before.</param>
-public sealed record YearComparison(Guid PropertyId, Currency Currency, int Year, decimal ThisYear, decimal LastYear)
+/// <param name="HasLastYear">Whether there is any bill in those months; without one "0,00" would be a false figure (UI_GUIDELINES §9).</param>
+public sealed record YearComparison(Guid PropertyId, Currency Currency, int Year, decimal ThisYear, decimal LastYear, bool HasLastYear = true)
 {
     /// <summary>This year against last year in percent, rounded to one decimal; null when last year is zero.</summary>
     public decimal? ChangePercent => LastYear == 0 ? null : Math.Round((ThisYear - LastYear) / LastYear * 100m, 1, MidpointRounding.AwayFromZero);
@@ -130,7 +131,8 @@ public static class OverviewMoney
                     group.Key,
                     today.Year,
                     group.Where(b => b.Period.Year == today.Year).Sum(b => b.Gross),
-                    group.Where(b => b.Period.Year == today.Year - 1).Sum(b => b.Gross)));
+                    group.Where(b => b.Period.Year == today.Year - 1).Sum(b => b.Gross),
+                    group.Any(b => b.Period.Year == today.Year - 1)));
             }
         }
 

@@ -938,6 +938,26 @@ public class BillEditViewModelTests : IDisposable
         Assert.Equal("BillSaveFirst [en]", Assert.Single(_kit.Kit.Dialogs.Alerts).Message);
     }
 
+    [Theory]
+    [InlineData(2026, 10, 27, BillBadgeKind.DueSoon)] // due today
+    [InlineData(2026, 11, 3, BillBadgeKind.DueSoon)] // today + 7 days = the last day of "soon"
+    [InlineData(2026, 11, 4, BillBadgeKind.Unpaid)] // 8 days: not yet
+    [InlineData(2026, 10, 26, BillBadgeKind.Overdue)] // yesterday
+    public async Task PaymentCard_ShowsDueSoonLikeTheBillsList(int year, int month, int day, BillBadgeKind expected)
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(contract, new YearMonth(2026, 10), 46.02m, due: new DateOnly(year, month, day));
+
+        var vm = await OpenAsync(bill.Id);
+
+        Assert.Equal(expected, vm.StatusKind);
+        Assert.Equal(expected == BillBadgeKind.DueSoon, vm.IsStatusDueSoon);
+        if (expected == BillBadgeKind.DueSoon)
+        {
+            Assert.Equal($"BillBadgeDueSoon {day:00}.{month:00}.{year} [en]", vm.StatusText);
+        }
+    }
+
     [Fact]
     public async Task RemovePayment_AsksWithAmountAndDate_ThenTheBillIsUnpaid()
     {

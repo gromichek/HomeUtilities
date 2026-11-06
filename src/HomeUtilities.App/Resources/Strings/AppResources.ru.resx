@@ -60,7 +60,7 @@
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
   <data name="PropertySummaryResidents" xml:space="preserve"><value>Жильцов: {0}</value></data>
-  <data name="PropertySummaryArea" xml:space="preserve"><value>Площадь: {0} м²</value></data>
+  <data name="PropertySummaryArea" xml:space="preserve"><value>Площадь: {0} м²</value></data>
   <data name="PropertyNew" xml:space="preserve"><value>Новый объект</value></data>
   <data name="PropertyName" xml:space="preserve"><value>Название</value></data>
   <data name="PropertyKindLabel" xml:space="preserve"><value>Тип</value></data>
@@ -86,6 +86,35 @@
   <data name="Dialog_Delete_Message" xml:space="preserve"><value>Запись будет скрыта, история сохранится.</value></data>
   <data name="Dialog_DeleteRow_Title" xml:space="preserve"><value>Удалить эту запись?</value></data>
   <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
+  <data name="Dependant_Contracts_One" xml:space="preserve"><value>{0} договор</value></data>
+  <data name="Dependant_Contracts_Few" xml:space="preserve"><value>{0} договора</value></data>
+  <data name="Dependant_Contracts_Many" xml:space="preserve"><value>{0} договоров</value></data>
+  <data name="Dependant_Meters_One" xml:space="preserve"><value>{0} счётчик</value></data>
+  <data name="Dependant_Meters_Few" xml:space="preserve"><value>{0} счётчика</value></data>
+  <data name="Dependant_Meters_Many" xml:space="preserve"><value>{0} счётчиков</value></data>
+  <data name="Dependant_Bills_One" xml:space="preserve"><value>{0} счёт</value></data>
+  <data name="Dependant_Bills_Few" xml:space="preserve"><value>{0} счёта</value></data>
+  <data name="Dependant_Bills_Many" xml:space="preserve"><value>{0} счетов</value></data>
+  <data name="Dependant_Payments_One" xml:space="preserve"><value>{0} платёж</value></data>
+  <data name="Dependant_Payments_Few" xml:space="preserve"><value>{0} платежа</value></data>
+  <data name="Dependant_Payments_Many" xml:space="preserve"><value>{0} платежей</value></data>
+  <data name="Dependant_Tariffs_One" xml:space="preserve"><value>{0} тариф</value></data>
+  <data name="Dependant_Tariffs_Few" xml:space="preserve"><value>{0} тарифа</value></data>
+  <data name="Dependant_Tariffs_Many" xml:space="preserve"><value>{0} тарифов</value></data>
+  <data name="Dependant_Readings_One" xml:space="preserve"><value>{0} показание</value></data>
+  <data name="Dependant_Readings_Few" xml:space="preserve"><value>{0} показания</value></data>
+  <data name="Dependant_Readings_Many" xml:space="preserve"><value>{0} показаний</value></data>
+  <data name="Dependant_Links_One" xml:space="preserve"><value>{0} связь с договором</value></data>
+  <data name="Dependant_Links_Few" xml:space="preserve"><value>{0} связи с договорами</value></data>
+  <data name="Dependant_Links_Many" xml:space="preserve"><value>{0} связей с договорами</value></data>
+  <data name="DeleteKind_Property" xml:space="preserve"><value>Объект</value></data>
+  <data name="DeleteKind_Contract" xml:space="preserve"><value>Договор</value></data>
+  <data name="DeleteKind_Supplier" xml:space="preserve"><value>Поставщик</value></data>
+  <data name="DeleteKind_Meter" xml:space="preserve"><value>Счётчик</value></data>
+  <data name="Dialog_DeleteDependants_Message" xml:space="preserve"><value>{0} «{1}» будет удалён вместе с: {2}.</value></data>
+  <data name="Dialog_DeleteSimple_Message" xml:space="preserve"><value>{0} «{1}» будет удалён.</value></data>
+  <data name="Dialog_DeleteUndoHint" xml:space="preserve"><value>Это можно отменить сразу после удаления.</value></data>
+  <data name="Dialog_DeleteNoUndoHint" xml:space="preserve"><value>Отменить это можно будет только восстановлением из резервной копии.</value></data>
   <data name="DeletedUndoMessage" xml:space="preserve"><value>«{0}» удалено</value></data>
   <data name="Undo" xml:space="preserve"><value>Отменить</value></data>
   <data name="Dialog_Error_Title" xml:space="preserve"><value>Ошибка</value></data>
@@ -241,6 +270,8 @@
   <data name="CustomFieldName" xml:space="preserve"><value>Название</value></data>
   <data name="CustomFieldKindLabel" xml:space="preserve"><value>Тип</value></data>
   <data name="CustomFieldTargetLabel" xml:space="preserve"><value>Относится к</value></data>
+  <data name="CustomFieldTargetHintBill" xml:space="preserve"><value>Поле счёта появляется в карточке «Дополнительные поля» счёта.</value></data>
+  <data name="CustomFieldTargetHintBillLine" xml:space="preserve"><value>Поле строки счёта появляется внутри каждой строки счёта.</value></data>
   <data name="CustomFieldRowDetail" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Enum_BillingMode_Actual" xml:space="preserve"><value>По потреблению</value></data>
   <data name="Enum_BillingMode_Equalized" xml:space="preserve"><value>Равномерные платежи</value></data>
@@ -326,9 +357,13 @@
   <data name="MeterContractsHeader" xml:space="preserve"><value>Договоры</value></data>
   <data name="MeterContractsHint" xml:space="preserve"><value>Счётчик горячей воды обычно привязан и к договору на воду, и к договору на отопление.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>В этом объекте пока нет договоров.</value></data>
+  <data name="MeterContractsNoneLinked" xml:space="preserve"><value>Пока не связан ни с одним договором.</value></data>
+  <data name="MeterLinkContract" xml:space="preserve"><value>Связать с договором…</value></data>
+  <data name="MeterUnlinkContract" xml:space="preserve"><value>Убрать связь</value></data>
+  <data name="MeterAddReading" xml:space="preserve"><value>Ввести показание</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>История</value></data>
   <data name="MeterHistoryReplaced" xml:space="preserve"><value>Замена: снят счётчик № {0} · {1:d}</value></data>
-  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Заменён счётчиком {0} {1:d}</value></data>
+  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Замена: установлен счётчик № {0} · {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>Новый регистр</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Регистр</value></data>
   <data name="RegisterExportHint" xml:space="preserve"><value>Считает энергию, отданную в сеть.</value></data>
@@ -387,6 +422,7 @@
   <data name="ReadingsNoLast" xml:space="preserve"><value>показаний ещё нет</value></data>
   <data name="ReadingsNoteShow" xml:space="preserve"><value>Добавить заметку</value></data>
   <data name="ReadingsNoteHide" xml:space="preserve"><value>Скрыть заметку</value></data>
+  <data name="ReadingsHistoryTooltip" xml:space="preserve"><value>История показаний</value></data>
   <data name="ReadingsWarnHigh" xml:space="preserve"><value>Необычно много (в среднем {0})</value></data>
   <data name="ReadingsWarnZero" xml:space="preserve"><value>Нулевой расход</value></data>
   <data name="ReadingsWarnRollover" xml:space="preserve"><value>Предположен переход через ноль ({0} → {1})</value></data>
@@ -536,8 +572,8 @@
   <data name="TariffExampleNoVat" xml:space="preserve"><value>Выберите ставку НДС, чтобы увидеть пример.</value></data>
   <data name="TariffExampleNoParameter" xml:space="preserve"><value>Укажите это значение в объекте, чтобы увидеть пример.</value></data>
   <data name="TariffExampleInvalid" xml:space="preserve"><value>Для этой цены пример недоступен.</value></data>
-  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
-  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + НДС {4} = {5} {6}</value></data>
+  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
+  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + НДС {4} = {5} {6}</value></data>
   <data name="TariffComponentNew" xml:space="preserve"><value>Новый компонент тарифа</value></data>
   <data name="TariffGeneral" xml:space="preserve"><value>Общее</value></data>
   <data name="TariffNameLabel" xml:space="preserve"><value>Название *</value></data>
@@ -654,7 +690,7 @@
   <data name="ChargeReadingStartMissing" xml:space="preserve"><value>Начало: нет показаний</value></data>
   <data name="ChargeReadingEnd" xml:space="preserve"><value>Конец: {0} на {1:d}</value></data>
   <data name="ChargeReadingEndMissing" xml:space="preserve"><value>Конец: нет показаний</value></data>
-  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Расход: {0} {1}</value></data>
+  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Расход: {0} {1}</value></data>
   <data name="ChargeSegmentOld" xml:space="preserve"><value>{0} (старый счётчик): {1} → итоговые {2} = {3}</value></data>
   <data name="ChargeSegmentNew" xml:space="preserve"><value>{0} (новый счётчик): начальные {1} → {2} = {3}</value></data>
   <data name="ChargeNoteRollover" xml:space="preserve"><value>Переход через ноль на счётчике «{0}»: {1} → {2}</value></data>
@@ -1030,6 +1066,7 @@
   <data name="OverviewSettlementRefund" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: возврат {1}</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3}</value></data>
+  <data name="OverviewYearLineNoPrevious" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="TodoReadings" xml:space="preserve"><value>Передать показания: {0}</value></data>
   <data name="TodoReadingsOpen" xml:space="preserve"><value>Окно {0} — открыто сейчас</value></data>
   <data name="TodoReadingsOpensTomorrow" xml:space="preserve"><value>Окно {0} — откроется завтра</value></data>
@@ -1539,6 +1576,8 @@
   <data name="SyncStep_Read" xml:space="preserve"><value>чтение</value></data>
   <data name="SyncStep_Delete" xml:space="preserve"><value>удаление</value></data>
   <data name="SyncDisconnect" xml:space="preserve"><value>Отключить</value></data>
+  <data name="SyncDisconnectTitle" xml:space="preserve"><value>Отключить аккаунт Google?</value></data>
+  <data name="SyncHowItWorks" xml:space="preserve"><value>Как это работает</value></data>
   <data name="SyncDisconnectConfirm" xml:space="preserve"><value>Удалить аккаунт Google с этого устройства и отозвать доступ HomeUtilities к вашему Google Диску? Данные в приложении останутся как есть.</value></data>
   <data name="SyncDisconnected" xml:space="preserve"><value>Отключено.</value></data>
   <data name="SyncDisconnectedRevokeFailed" xml:space="preserve"><value>На этом устройстве аккаунт отключён, но связаться с Google и отозвать доступ не удалось. Его можно убрать в аккаунте Google: Безопасность → Доступ третьих сторон.</value></data>
@@ -1636,7 +1675,7 @@
   <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Отправлены изменения (записей: {0}).</value></data>
   <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Полная копия сохранена в облаке.</value></data>
   <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Старые файлы изменений удалены из облака.</value></data>
-  <data name="SyncDetail_Conflict" xml:space="preserve"><value>Конфликт при объединении данных.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>Одна и та же категория или ставка НДС создана на двух устройствах; сохранена одна из них. Проверьте списки категорий и ставок НДС.</value></data>
   <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Отправлен файл вложения.</value></data>
   <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Получен файл вложения.</value></data>
   <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>Полученный файл вложения повреждён, пробуем ещё раз.</value></data>

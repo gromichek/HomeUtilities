@@ -24,6 +24,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
     private readonly ISupplierStore _store;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
+    private readonly IDeleteImpactService? _impact;
     private readonly ILauncherService _launcher;
     private readonly IClipboardService _clipboard;
     private readonly ISnackbarService _snackbar;
@@ -142,9 +143,13 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         INavigationService navigation,
         ILauncherService launcher,
         IClipboardService clipboard,
-        ISnackbarService snackbar)
+        ISnackbarService snackbar,
+        DeleteUndoSupport? undo = null,
+        IDeleteImpactService? impact = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        UndoSupport = undo;
+        _impact = impact;
         _store = store;
         _clock = clock;
         _localizer = localizer;
@@ -325,6 +330,27 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
     protected override Task DeleteCoreAsync() => _store.DeleteAsync(_supplier.Id);
 
     protected override string DeleteName() => _supplier.Name;
+
+    protected override async Task<string?> ConfirmationMessageAsync()
+    {
+        if (_impact is null)
+        {
+            return await base.ConfirmationMessageAsync();
+        }
+
+        // The list of what goes with the record (UI_GUIDELINES §5.1); without dependants a record with Undo is deleted at once.
+        var dependants = DependantsText.List(_localizer, await _impact.ForSupplierAsync(EntityId));
+        if (dependants.Length == 0 && UndoSupport is not null)
+        {
+            return null;
+        }
+
+        var kind = _localizer["DeleteKind_Supplier"];
+        var what = dependants.Length == 0
+            ? _localizer.Get("Dialog_DeleteSimple_Message", kind, DeleteName())
+            : _localizer.Get("Dialog_DeleteDependants_Message", kind, DeleteName(), dependants);
+        return $"{what} {_localizer["Dialog_DeleteUndoHint"]}";
+    }
 
     protected override void OnErrorsChanged()
     {

@@ -118,6 +118,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _texts = new BillsListTexts(localizer);
         FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
         Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, dialogs, RebuildItems);
+        Period.ScopeChosen = () => FilterPanel.CollapseAfterChoice();
         RefreshTexts();
     }
 
@@ -280,6 +281,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         _filter.PropertyId = index == 0 ? null : _properties[index - 1].Id;
         _highlightContractId = null;
         RebuildItems();
+        FilterPanel.CollapseAfterChoice();
     });
 
     [RelayCommand]
@@ -297,6 +299,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
         _filter.Status = options[index].Filter;
         RebuildItems();
+        FilterPanel.CollapseAfterChoice();
     });
 
     [RelayCommand]
@@ -318,6 +321,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
 
         _filter.CategoryId = index == 0 ? null : options[index - 1].Id;
         RebuildItems();
+        FilterPanel.CollapseAfterChoice();
     });
 
     private string StatusName(BillStatusFilter status) => _localizer["BillStatus" + status];
@@ -440,6 +444,7 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
         StatusFilterName = StatusName(_filter.Status);
         TotalsText = BuildTotals(rows);
         FilterPanel.SummaryText = string.Join(" · ", new[] { PropertyFilterName, Period.Label, CategoryFilterName, StatusFilterName, TotalsText }.Where(s => !string.IsNullOrEmpty(s)));
+        FilterPanel.SummaryDetailText = string.Join(" · ", new[] { PropertyFilterName, CategoryFilterName, StatusFilterName, TotalsText }.Where(s => !string.IsNullOrEmpty(s)));
         ShowNothingFound = IsLoaded && _bills.Count > 0 && Items.Count == 0;
         HasMoreItems = rows.Count > Items.Count;
         ShowMoreText = _localizer.Get("ListShowMore", rows.Count - Items.Count);

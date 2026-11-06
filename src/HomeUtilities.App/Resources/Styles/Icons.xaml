@@ -44,6 +44,7 @@
     <x:String x:Key="IconCopy">&#xE14D;</x:String>
     <x:String x:Key="IconArchive">&#xE149;</x:String>
     <x:String x:Key="IconHistory">&#xE889;</x:String>
+    <x:String x:Key="IconNote">&#xE26C;</x:String>
     <!-- Paid: the "mark as paid" quick action (task_alt, a circled check) — differs from IconSave (check). -->
     <x:String x:Key="IconPaid">&#xE2E6;</x:String>
     <x:String x:Key="IconPhoto">&#xE412;</x:String>

@@ -10,6 +10,8 @@
     <!-- Phone: system Back (handled in EditorPageBase) + Save. No separate Cancel: Back cancels. -->
     <views:EditorPageBase.ToolbarItems>
         <ToolbarItem Text="{Binding HelpText}" IconImageSource="{StaticResource IconHelpToolbarSource}" Command="{Binding OpenHelpCommand}" />
+        <!-- Not a delete, so the overflow menu may offer it (R-23); disabled unless something is open. -->
+        <ToolbarItem Text="{Binding Texts.PaidText}" Order="Secondary" Command="{Binding MarkPaidCommand}" />
         <ToolbarItem Text="{Binding SaveText}" IconImageSource="{StaticResource IconSaveToolbarSource}" Command="{Binding SaveCommand}" />
     </views:EditorPageBase.ToolbarItems>
 

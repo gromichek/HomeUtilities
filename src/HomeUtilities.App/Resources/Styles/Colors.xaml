@@ -36,10 +36,10 @@
 
     <Color x:Key="CardLight">#FFFFFF</Color>
     <Color x:Key="CardDark">#2B2F35</Color>
-    <!-- Card outlines (R-51, UI review 2026-11-05): a card is also set apart by its fill, so the outline may be soft
-         (1.85 : 1 light, 1.66 : 1 dark against the card). -->
-    <Color x:Key="OutlineLight">#B8BFCA</Color>
-    <Color x:Key="OutlineDark">#4A505A</Color>
+    <!-- Card outlines (R-51, C-08): at least 3 : 1 against the page and the card in both themes — 3.1 : 1 on the page
+         (#F6F7F9) and 3.3 : 1 on the card light; 3.2 : 1 on the card and 4.1 : 1 on the page dark. -->
+    <Color x:Key="OutlineLight">#868D98</Color>
+    <Color x:Key="OutlineDark">#767D88</Color>
     <!-- Outline of an input field / choice field, where the outline is the only boundary: at least 3 : 1 against
          the card (UI_GUIDELINES §8) — 3.18 : 1 light, 3.53 : 1 dark. -->
     <Color x:Key="FieldOutlineLight">#8A919C</Color>

@@ -464,6 +464,20 @@ internal sealed class FakeDeleteUndoService : IDeleteUndoService
     }
 }
 
+/// <summary>An <see cref="IDeleteImpactService"/> that reports the dependants a test sets up, for every record.</summary>
+internal sealed class FakeDeleteImpactService : IDeleteImpactService
+{
+    public List<Dependant> Dependants { get; } = [];
+
+    public Task<IReadOnlyList<Dependant>> ForPropertyAsync(Guid propertyId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Dependant>>([.. Dependants]);
+
+    public Task<IReadOnlyList<Dependant>> ForContractAsync(Guid contractId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Dependant>>([.. Dependants]);
+
+    public Task<IReadOnlyList<Dependant>> ForSupplierAsync(Guid supplierId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Dependant>>([.. Dependants]);
+
+    public Task<IReadOnlyList<Dependant>> ForMeterAsync(Guid meterId, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Dependant>>([.. Dependants]);
+}
+
 internal sealed class FakeSnackbarService : ISnackbarService
 {
     /// <summary>The messages shown, in order.</summary>
@@ -816,6 +830,18 @@ internal sealed class ContractTestKit
 
     public ContractEditViewModel CreateContractEditor() =>
         new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Plans, Settlement, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, TemplateLauncher, CreateSupplierEditor);
+
+    public ContractEditViewModel CreateContractEditor(DeleteUndoSupport? undo, IDeleteImpactService? impact) =>
+        new(Contracts, Suppliers, Categories, Properties, Tariffs, VatRates, Meters, Plans, Settlement, Bills, Payments, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, Prepayments, TemplateLauncher, CreateSupplierEditor, undo, impact);
+
+    public SupplierEditViewModel CreateSupplierEditor(DeleteUndoSupport? undo, IDeleteImpactService? impact) =>
+        new(Suppliers, Clock, Localizer, Dialogs, Navigation, Launcher, Clipboard, Toast, undo, impact);
+
+    public PropertyEditViewModel CreatePropertyEditor(DeleteUndoSupport? undo, IDeleteImpactService? impact) =>
+        new(Properties, Contracts, Meters, Suppliers, Categories, Clock, Localizer, Dialogs, Navigation, Toast, CreateContractEditor, CreateMeterEditor, undo, impact);
+
+    public MeterEditViewModel CreateMeterEditor(IDeleteImpactService? impact) =>
+        new(Meters, Contracts, Clock, Localizer, Dialogs, Navigation, Toast, CreateMeterEditor, impact);
 
     public TariffComponentEditViewModel CreateTariffEditor() =>
         new(Tariffs, Contracts, Meters, Properties, VatRates, Categories, Clock, Localizer, Dialogs, Navigation, Toast);

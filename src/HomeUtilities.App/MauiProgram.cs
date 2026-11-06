@@ -39,6 +39,7 @@ public static class MauiProgram
         FieldBorder.Register();
 #endif
 #if WINDOWS
+        HomeUtilities.App.WinUI.DatePickerLanguage.Register();
         builder.ConfigureLifecycleEvents(events => events.AddWindows(windows =>
             windows.OnWindowCreated(window => HomeUtilities.App.WinUI.WindowCloseGuard.Attach(window))));
 #endif

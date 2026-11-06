@@ -597,6 +597,45 @@ public class BillsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task FilterPanel_CollapsedLineCarriesThePeriodAndTheRestOfTheSummary_AndCollapsesAgainAfterAChoice()
+    {
+        AddTypicalBills();
+        var vm = await LoadAsync();
+
+        // The period is the ‹ month › part of the first line; the second line has the rest and not the period (R-50).
+        Assert.True(vm.Period.ShowStepper);
+        Assert.DoesNotContain(vm.Period.Label, vm.FilterPanel.SummaryDetailText);
+        Assert.Contains(vm.TotalsText, vm.FilterPanel.SummaryDetailText);
+        Assert.True(vm.FilterPanel.HasSummaryDetail);
+
+        // Expanded on the phone, a choice closes the panel again.
+        vm.FilterPanel.ToggleCommand.Execute(null);
+        Assert.True(vm.FilterPanel.IsExpanded);
+        _kit.Kit.Dialogs.ChooseIndexScript = options => options.Count - 1;
+        await vm.ChooseStatusFilterCommand.ExecuteAsync(null);
+        Assert.False(vm.FilterPanel.IsExpanded);
+
+        // The same for the period scope drop-down.
+        vm.FilterPanel.ToggleCommand.Execute(null);
+        await vm.Period.ChooseScopeCommand.ExecuteAsync(null);
+        Assert.False(vm.FilterPanel.IsExpanded);
+    }
+
+    [Fact]
+    public async Task FilterPanel_StepperInTheCollapsedLine_MovesToThePreviousMonth()
+    {
+        AddTypicalBills();
+        var vm = await LoadAsync();
+        vm.Period.Set(PeriodFilter.Default(new DateOnly(2026, 10, 27)).WithScope(PeriodScope.Month, new DateOnly(2026, 10, 27)));
+        var before = vm.Period.Label;
+
+        vm.Period.PreviousCommand.Execute(null);
+
+        Assert.NotEqual(before, vm.Period.Label);
+        Assert.False(vm.FilterPanel.IsExpanded);
+    }
+
+    [Fact]
     public async Task FilterPanel_FollowsTheLayoutUntilTheUserChooses()
     {
         AddTypicalBills();

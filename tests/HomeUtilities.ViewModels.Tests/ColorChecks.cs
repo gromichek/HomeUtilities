@@ -26,3 +26,24 @@ internal static class ColorChecks
         Assert.False(hue is >= 90 and <= 165, $"{hex} (hue {hue:0}°) looks like the status green");
     }
 }
+
+internal static class Contrast
+{
+    /// <summary>WCAG contrast ratio of two #RRGGBB colours.</summary>
+    public static double Ratio(string a, string b)
+    {
+        var (x, y) = (Luminance(a), Luminance(b));
+        return (Math.Max(x, y) + 0.05) / (Math.Min(x, y) + 0.05);
+    }
+
+    private static double Luminance(string hex)
+    {
+        double Channel(int start)
+        {
+            var c = int.Parse(hex.AsSpan(start, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture) / 255.0;
+            return c <= 0.03928 ? c / 12.92 : Math.Pow((c + 0.055) / 1.055, 2.4);
+        }
+
+        return (0.2126 * Channel(1)) + (0.7152 * Channel(3)) + (0.0722 * Channel(5));
+    }
+}

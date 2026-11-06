@@ -259,6 +259,21 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
 
     public bool IsNotBusy => !IsBusy;
 
+    /// <summary>The "Last sync: …" line; hidden while the run text is "Synced …" with the same time (R-42).</summary>
+    [ObservableProperty]
+    private bool _showLastSync = true;
+
+    /// <summary>Header of the collapsed explanation ("How it works").</summary>
+    [ObservableProperty]
+    private string _howItWorksText = string.Empty;
+
+    /// <summary>The long explanation is collapsed until the owner opens it (R-42).</summary>
+    [ObservableProperty]
+    private bool _howItWorksExpanded;
+
+    [RelayCommand]
+    private void ToggleHowItWorks() => HowItWorksExpanded = !HowItWorksExpanded;
+
     public bool HasDetails => DetailsText.Length > 0;
 
     /// <summary>The details list is collapsed until the owner opens it (R-43).</summary>
@@ -529,7 +544,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
     private Task DisconnectAsync() => RunSafeAsync(async () =>
     {
         if (!await _dialogs.ConfirmAsync(
-                _localizer["SyncDisconnect"], _localizer["SyncDisconnectConfirm"], _localizer["SyncDisconnect"], _localizer["Cancel"]))
+                _localizer["SyncDisconnectTitle"], _localizer["SyncDisconnectConfirm"], _localizer["SyncDisconnect"], _localizer["Cancel"]))
         {
             return;
         }
@@ -558,6 +573,7 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
     {
         Title = _localizer["SettingsSync"];
         HintText = _localizer["SyncHint"];
+        HowItWorksText = _localizer["SyncHowItWorks"];
         ProviderText = _localizer.Get("SyncProvider", _account.ProviderName);
         ConnectText = _localizer["SyncConnect"];
         CancelSignInText = _localizer["SyncCancelSignIn"];
@@ -657,7 +673,9 @@ public sealed partial class SyncSettingsViewModel : ViewModelBase, IDisposable
         }
 
         LastSyncText = status.LastSyncAt is null ? _localizer["SyncNever"] : _localizer.Get("SyncLastSync", Local(status.LastSyncAt));
-        DetailsText = SyncDetailText.Lines(_localizer, _engine.Details.Take(12));
+        // "Synced 05.11.2026 15:10" already says it; the separate last-sync line is for the other states only (R-42).
+        ShowLastSync = status.Kind != SyncStateKind.Synced;
+        DetailsText = SyncDetailText.Lines(_localizer, _engine.Details.Take(12), DateOnly.FromDateTime(DateTime.Now));
     }
 
     private static string Local(DateTimeOffset? at) => at is { } value ? value.ToLocalTime().ToString("g", System.Globalization.CultureInfo.CurrentCulture) : string.Empty;

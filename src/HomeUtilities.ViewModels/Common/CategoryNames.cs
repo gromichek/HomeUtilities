@@ -11,8 +11,8 @@ public static class CategoryNames
     /// </summary>
     public static IReadOnlyList<string> Palette { get; } =
     [
-        "#1E88E5", "#039BE5", "#8E24AA", "#FB8C00", "#5E35B1", "#FDD835",
-        "#00ACC1", "#6D4C41", "#3949AB", "#D81B60", "#546E7A", "#757575",
+        "#1E88E5", "#0288D1", "#8E24AA", "#C25E00", "#5E35B1", "#B8860B",
+        "#0097A7", "#6D4C41", "#3949AB", "#D81B60", "#546E7A", "#757575",
     ];
 
     /// <summary>The name set by the user; for a built-in category without one, the localized name of its service kind.</summary>

@@ -68,11 +68,20 @@ public sealed partial class MeterContractSwitchViewModel : CommunityToolkit.Mvvm
 
     public string Subtitle { get; }
 
+    /// <summary>False when the second line only repeats the title ("Gas" / "Gas"); it is then left out (R-32).</summary>
+    public bool HasSubtitle => Subtitle.Length > 0 && !string.Equals(Subtitle, Title, StringComparison.CurrentCultureIgnoreCase);
+
     /// <summary>Called after the user flipped the switch.</summary>
     public Action? Toggled { get; set; }
 
     /// <summary>Builds the "from … to …" text of the link; set by the editor.</summary>
     public Func<ContractMeter, string>? LinkTextBuilder { get; set; }
+
+    /// <summary>Removes the link (switches the row off); set by the editor.</summary>
+    public IRelayCommand? UnlinkCommand { get; set; }
+
+    /// <summary>Tooltip / accessibility name of the unlink button; set by the editor.</summary>
+    public string UnlinkText { get; set; } = string.Empty;
 
     /// <summary>Opens the dialog with the dates of the link; set by the editor.</summary>
     public IRelayCommand? EditLinkCommand { get; set; }

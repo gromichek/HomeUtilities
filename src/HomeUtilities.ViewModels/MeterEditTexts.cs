@@ -28,6 +28,10 @@ public sealed class MeterEditTexts
         ContractsHeader = localizer["MeterContractsHeader"];
         ContractsHint = localizer["MeterContractsHint"];
         ContractsEmpty = localizer["MeterContractsEmpty"];
+        NoneLinkedText = localizer["MeterContractsNoneLinked"];
+        LinkContractText = localizer["MeterLinkContract"];
+        UnlinkText = localizer["MeterUnlinkContract"];
+        AddReadingText = localizer["MeterAddReading"];
         LinkHint = localizer["MeterLinkHint"];
         HistoryHeader = localizer["MeterHistoryHeader"];
         ReadingsHeader = localizer["MeterReadingsHeader"];
@@ -82,6 +86,14 @@ public sealed class MeterEditTexts
     public string ContractsHint { get; }
 
     public string ContractsEmpty { get; }
+
+    public string NoneLinkedText { get; }
+
+    public string LinkContractText { get; }
+
+    public string UnlinkText { get; }
+
+    public string AddReadingText { get; }
 
     public string LinkHint { get; }
 

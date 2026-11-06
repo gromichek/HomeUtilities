@@ -284,7 +284,7 @@ public sealed class TariffDescriber
         var text = DecimalInput.Format(quantity, CultureInfo.CurrentCulture, 2);
         var kind = component.QuantityParameter ?? DefaultParameter(component.Basis);
         return kind is PropertyParameterKind.TotalArea or PropertyParameterKind.HeatedArea or PropertyParameterKind.LandArea
-            ? $"{text} {_localizer["Unit_Area"]}"
+            ? BillText.WithUnit(text, _localizer["Unit_Area"])
             : text;
     }
 }

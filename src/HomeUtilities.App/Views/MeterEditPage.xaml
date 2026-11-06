@@ -143,41 +143,57 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 4. Contracts that use the meter -->
+            <!-- 4. Contracts that use the meter: only the linked ones; "Link to a contract…" picks from the others (R-32). -->
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding Texts.ContractsHeader}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding Texts.ContractsHint}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding ShowContractsHint}" />
                     <Label Text="{Binding Texts.ContractsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoContracts}" />
+                    <Label Text="{Binding Texts.NoneLinkedText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowNoneLinked}" />
                     <Label Text="{Binding Texts.LinkHint}" Style="{StaticResource MutedLabel}" FontSize="12" IsVisible="{Binding ShowReadings}" />
 
-                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ContractSwitches}">
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding LinkedContracts}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:MeterContractSwitchViewModel">
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
                                         <VerticalStackLayout.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding EditLinkCommand}" />
                                         </VerticalStackLayout.GestureRecognizers>
                                         <Label Text="{Binding Title}" FontAttributes="Bold" />
-                                        <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" />
+                                        <Label Text="{Binding Subtitle}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasSubtitle}" />
                                         <Label Text="{Binding LinkText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowLinkDates}" />
                                     </VerticalStackLayout>
                                     <Label Grid.Column="1" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
                                            VerticalOptions="Center" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowLinkDates}"
                                            SemanticProperties.Description="{Binding LinkText}" />
-                                    <Switch Grid.Column="2" IsToggled="{Binding IsOn}" VerticalOptions="Center" />
+                                    <Button Grid.Column="2" Style="{StaticResource IconButton}" VerticalOptions="Center"
+                                            Text="{StaticResource IconClose}"
+                                            Command="{Binding UnlinkCommand}"
+                                            ToolTipProperties.Text="{Binding UnlinkText}"
+                                            SemanticProperties.Description="{Binding UnlinkText}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
+
+                    <Button Text="{Binding Texts.LinkContractText}" Command="{Binding LinkContractCommand}"
+                            ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill"
+                            IsVisible="{Binding CanLinkContract}" />
                 </VerticalStackLayout>
             </Border>
 
             <!-- 5a. Readings: the last five and a link to the full history. -->
             <Border Style="{StaticResource SectionCard}" IsVisible="{Binding ShowReadings}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding Texts.ReadingsHeader}" Style="{StaticResource SectionHeader}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{Binding Texts.ReadingsHeader}" Style="{StaticResource SectionHeader}" VerticalOptions="Center" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                Text="{StaticResource IconAdd}" Command="{Binding AddReadingCommand}"
+                                ToolTipProperties.Text="{Binding Texts.AddReadingText}"
+                                SemanticProperties.Description="{Binding Texts.AddReadingText}" />
+                    </Grid>
                     <Label Text="{Binding Texts.ReadingsEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoReadings}" />
                     <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding RecentReadings}" IsVisible="{Binding HasRecentReadings}">
                         <BindableLayout.ItemTemplate>

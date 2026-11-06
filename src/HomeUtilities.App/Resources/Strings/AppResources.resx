@@ -60,7 +60,7 @@
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>Archived</value></data>
   <data name="PropertySummaryResidents" xml:space="preserve"><value>Residents: {0}</value></data>
-  <data name="PropertySummaryArea" xml:space="preserve"><value>Area: {0} m²</value></data>
+  <data name="PropertySummaryArea" xml:space="preserve"><value>Area: {0} m²</value></data>
   <data name="PropertyNew" xml:space="preserve"><value>New property</value></data>
   <data name="PropertyName" xml:space="preserve"><value>Name</value></data>
   <data name="PropertyKindLabel" xml:space="preserve"><value>Kind</value></data>
@@ -86,6 +86,35 @@
   <data name="Dialog_Delete_Message" xml:space="preserve"><value>It will be hidden; history is kept.</value></data>
   <data name="Dialog_DeleteRow_Title" xml:space="preserve"><value>Delete this entry?</value></data>
   <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
+  <data name="Dependant_Contracts_One" xml:space="preserve"><value>{0} contract</value></data>
+  <data name="Dependant_Contracts_Many" xml:space="preserve"><value>{0} contracts</value></data>
+  <data name="Dependant_Contracts_Few" xml:space="preserve"><value>{0} contracts</value></data>
+  <data name="Dependant_Meters_One" xml:space="preserve"><value>{0} meter</value></data>
+  <data name="Dependant_Meters_Many" xml:space="preserve"><value>{0} meters</value></data>
+  <data name="Dependant_Meters_Few" xml:space="preserve"><value>{0} meters</value></data>
+  <data name="Dependant_Bills_One" xml:space="preserve"><value>{0} bill</value></data>
+  <data name="Dependant_Bills_Many" xml:space="preserve"><value>{0} bills</value></data>
+  <data name="Dependant_Bills_Few" xml:space="preserve"><value>{0} bills</value></data>
+  <data name="Dependant_Payments_One" xml:space="preserve"><value>{0} payment</value></data>
+  <data name="Dependant_Payments_Many" xml:space="preserve"><value>{0} payments</value></data>
+  <data name="Dependant_Payments_Few" xml:space="preserve"><value>{0} payments</value></data>
+  <data name="Dependant_Tariffs_One" xml:space="preserve"><value>{0} tariff</value></data>
+  <data name="Dependant_Tariffs_Many" xml:space="preserve"><value>{0} tariffs</value></data>
+  <data name="Dependant_Tariffs_Few" xml:space="preserve"><value>{0} tariffs</value></data>
+  <data name="Dependant_Readings_One" xml:space="preserve"><value>{0} reading</value></data>
+  <data name="Dependant_Readings_Many" xml:space="preserve"><value>{0} readings</value></data>
+  <data name="Dependant_Readings_Few" xml:space="preserve"><value>{0} readings</value></data>
+  <data name="Dependant_Links_One" xml:space="preserve"><value>{0} link to a contract</value></data>
+  <data name="Dependant_Links_Many" xml:space="preserve"><value>{0} links to contracts</value></data>
+  <data name="Dependant_Links_Few" xml:space="preserve"><value>{0} links to contracts</value></data>
+  <data name="DeleteKind_Property" xml:space="preserve"><value>Property</value></data>
+  <data name="DeleteKind_Contract" xml:space="preserve"><value>Contract</value></data>
+  <data name="DeleteKind_Supplier" xml:space="preserve"><value>Supplier</value></data>
+  <data name="DeleteKind_Meter" xml:space="preserve"><value>Meter</value></data>
+  <data name="Dialog_DeleteDependants_Message" xml:space="preserve"><value>{0} «{1}» will be deleted together with: {2}.</value></data>
+  <data name="Dialog_DeleteSimple_Message" xml:space="preserve"><value>{0} «{1}» will be deleted.</value></data>
+  <data name="Dialog_DeleteUndoHint" xml:space="preserve"><value>You can undo this right after the deletion.</value></data>
+  <data name="Dialog_DeleteNoUndoHint" xml:space="preserve"><value>This cannot be undone except by restoring a backup.</value></data>
   <data name="DeletedUndoMessage" xml:space="preserve"><value>«{0}» deleted</value></data>
   <data name="Undo" xml:space="preserve"><value>Undo</value></data>
   <data name="Dialog_Error_Title" xml:space="preserve"><value>Error</value></data>
@@ -241,6 +270,8 @@
   <data name="CustomFieldName" xml:space="preserve"><value>Name</value></data>
   <data name="CustomFieldKindLabel" xml:space="preserve"><value>Type</value></data>
   <data name="CustomFieldTargetLabel" xml:space="preserve"><value>Applies to</value></data>
+  <data name="CustomFieldTargetHintBill" xml:space="preserve"><value>A field of a bill appears in the card “Custom fields” of the bill.</value></data>
+  <data name="CustomFieldTargetHintBillLine" xml:space="preserve"><value>A field of a bill line appears inside every line of the bill.</value></data>
   <data name="CustomFieldRowDetail" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Enum_BillingMode_Actual" xml:space="preserve"><value>By consumption</value></data>
   <data name="Enum_BillingMode_Equalized" xml:space="preserve"><value>Equalized payments</value></data>
@@ -326,9 +357,13 @@
   <data name="MeterContractsHeader" xml:space="preserve"><value>Contracts</value></data>
   <data name="MeterContractsHint" xml:space="preserve"><value>A hot water meter is usually linked to both the water and the heating contract.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>No contracts in this property yet.</value></data>
+  <data name="MeterContractsNoneLinked" xml:space="preserve"><value>Not linked to any contract yet.</value></data>
+  <data name="MeterLinkContract" xml:space="preserve"><value>Link to a contract…</value></data>
+  <data name="MeterUnlinkContract" xml:space="preserve"><value>Remove the link</value></data>
+  <data name="MeterAddReading" xml:space="preserve"><value>Add reading</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>History</value></data>
   <data name="MeterHistoryReplaced" xml:space="preserve"><value>Replacement: removed meter no. {0} · {1:d}</value></data>
-  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replaced by {0} on {1:d}</value></data>
+  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replacement: installed meter no. {0} · {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>New register</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Register</value></data>
   <data name="RegisterExportHint" xml:space="preserve"><value>Counts energy fed into the grid.</value></data>
@@ -387,6 +422,7 @@
   <data name="ReadingsNoLast" xml:space="preserve"><value>no readings yet</value></data>
   <data name="ReadingsNoteShow" xml:space="preserve"><value>Add a note</value></data>
   <data name="ReadingsNoteHide" xml:space="preserve"><value>Hide note</value></data>
+  <data name="ReadingsHistoryTooltip" xml:space="preserve"><value>Reading history</value></data>
   <data name="ReadingsWarnHigh" xml:space="preserve"><value>Unusually high (avg {0})</value></data>
   <data name="ReadingsWarnZero" xml:space="preserve"><value>Zero consumption</value></data>
   <data name="ReadingsWarnRollover" xml:space="preserve"><value>Roll-over assumed ({0} → {1})</value></data>
@@ -536,8 +572,8 @@
   <data name="TariffExampleNoVat" xml:space="preserve"><value>Choose a VAT rate to see an example.</value></data>
   <data name="TariffExampleNoParameter" xml:space="preserve"><value>Enter this value in the property to see an example.</value></data>
   <data name="TariffExampleInvalid" xml:space="preserve"><value>No example for this price.</value></data>
-  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
-  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + VAT {4} = {5} {6}</value></data>
+  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
+  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + VAT {4} = {5} {6}</value></data>
   <data name="TariffComponentNew" xml:space="preserve"><value>New tariff component</value></data>
   <data name="TariffGeneral" xml:space="preserve"><value>General</value></data>
   <data name="TariffNameLabel" xml:space="preserve"><value>Name *</value></data>
@@ -654,7 +690,7 @@
   <data name="ChargeReadingStartMissing" xml:space="preserve"><value>Start: no reading</value></data>
   <data name="ChargeReadingEnd" xml:space="preserve"><value>End: {0} on {1:d}</value></data>
   <data name="ChargeReadingEndMissing" xml:space="preserve"><value>End: no reading</value></data>
-  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Consumption: {0} {1}</value></data>
+  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Consumption: {0} {1}</value></data>
   <data name="ChargeSegmentOld" xml:space="preserve"><value>{0} (old meter): {1} → final {2} = {3}</value></data>
   <data name="ChargeSegmentNew" xml:space="preserve"><value>{0} (new meter): initial {1} → {2} = {3}</value></data>
   <data name="ChargeNoteRollover" xml:space="preserve"><value>Roll-over on {0}: {1} → {2}</value></data>
@@ -1030,6 +1066,7 @@
   <data name="OverviewSettlementRefund" xml:space="preserve"><value>Expected settlement, {0}: refund {1}</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} same period: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} same period: {3}</value></data>
+  <data name="OverviewYearLineNoPrevious" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="TodoReadings" xml:space="preserve"><value>Submit readings: {0}</value></data>
   <data name="TodoReadingsOpen" xml:space="preserve"><value>Window {0} — open now</value></data>
   <data name="TodoReadingsOpensTomorrow" xml:space="preserve"><value>Window {0} — opens tomorrow</value></data>
@@ -1539,6 +1576,8 @@
   <data name="SyncStep_Read" xml:space="preserve"><value>read</value></data>
   <data name="SyncStep_Delete" xml:space="preserve"><value>delete</value></data>
   <data name="SyncDisconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="SyncDisconnectTitle" xml:space="preserve"><value>Disconnect the Google account?</value></data>
+  <data name="SyncHowItWorks" xml:space="preserve"><value>How it works</value></data>
   <data name="SyncDisconnectConfirm" xml:space="preserve"><value>Remove the Google account from this device and revoke the access of HomeUtilities to your Google Drive? The data in the app stay as they are.</value></data>
   <data name="SyncDisconnected" xml:space="preserve"><value>Disconnected.</value></data>
   <data name="SyncDisconnectedRevokeFailed" xml:space="preserve"><value>Disconnected on this device, but Google could not be reached to revoke the access. You can remove it in your Google account under Security → Third-party access.</value></data>
@@ -1636,7 +1675,7 @@
   <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Sent changes (records: {0}).</value></data>
   <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Saved a full copy to the cloud.</value></data>
   <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Removed old change files from the cloud.</value></data>
-  <data name="SyncDetail_Conflict" xml:space="preserve"><value>A conflict was met while merging.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>The same category or VAT rate was created on two devices; one of them was kept. Check the Categories and VAT rates lists.</value></data>
   <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Sent an attachment file.</value></data>
   <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Received an attachment file.</value></data>
   <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>A received attachment file is damaged; trying again.</value></data>

@@ -125,7 +125,10 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
         }
 
         Title = _localizer.Get("ReadingHistoryTitle", MeterNames.Title(_localizer, meter));
-        Subtitle = string.IsNullOrWhiteSpace(meter.SerialNumber) ? string.Empty : MeterNames.Serial(_localizer, meter);
+        // The title already carries the serial number when the meter has a location.
+        Subtitle = string.IsNullOrWhiteSpace(meter.SerialNumber) || !string.IsNullOrWhiteSpace(meter.Location)
+            ? string.Empty
+            : MeterNames.Serial(_localizer, meter);
         var chain = new MeterChain([meter]);
         var unit = EnumText.Get(_localizer, meter.Unit);
 

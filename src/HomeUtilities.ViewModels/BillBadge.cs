@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Overview;
 using HomeUtilities.Core.Billing;
 
 namespace HomeUtilities.ViewModels;
@@ -51,15 +52,32 @@ public static class BillBadge
         return state.Paid != 0 ? BillBadgeKind.PartiallyPaid : BillBadgeKind.Unpaid;
     }
 
+    /// <summary>
+    /// <see cref="KindOf(BillState)"/>, plus <see cref="BillBadgeKind.DueSoon"/> for an unpaid bill that falls due within the next
+    /// days (UI_GUIDELINES §8). One rule for the Bills list and the bill editor (C-12).
+    /// </summary>
+    public static BillBadgeKind KindOf(BillState state, DateOnly? dueOn, DateOnly? today)
+    {
+        var kind = KindOf(state);
+        return kind == BillBadgeKind.Unpaid && today is { } now && dueOn is { } due && due >= now && due <= now.AddDays(TodoBuilder.BillLookAheadDays)
+            ? BillBadgeKind.DueSoon
+            : kind;
+    }
+
     /// <summary>"Unpaid", "Partially paid · open 26,02 €", "Overdue", "Paid ✓", "Prepaid ✓".</summary>
-    public static string TextOf(ILocalizer localizer, BillState state, string currencySymbol)
+    public static string TextOf(ILocalizer localizer, BillState state, string currencySymbol) =>
+        TextOf(localizer, state, currencySymbol, KindOf(state), null);
+
+    /// <summary>The text of <paramref name="kind"/>; "Due 25.11.2026" for <see cref="BillBadgeKind.DueSoon"/>.</summary>
+    public static string TextOf(ILocalizer localizer, BillState state, string currencySymbol, BillBadgeKind kind, DateOnly? dueOn)
     {
         ArgumentNullException.ThrowIfNull(localizer);
         ArgumentNullException.ThrowIfNull(state);
 
         var open = BillText.Money(state.Open, currencySymbol);
-        return KindOf(state) switch
+        return kind switch
         {
+            BillBadgeKind.DueSoon when dueOn is { } due => localizer.Get("BillBadgeDueSoon", BillText.Date(due)),
             BillBadgeKind.Prepaid => localizer["BillBadgePrepaid"],
             BillBadgeKind.Paid => localizer["BillBadgePaid"],
             BillBadgeKind.Overdue => state.Paid != 0 ? localizer.Get("BillBadgeOverdueOpen", open) : localizer["BillBadgeOverdue"],

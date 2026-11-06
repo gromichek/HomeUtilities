@@ -250,7 +250,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private string _statusText = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStatusPaid), nameof(IsStatusPartial), nameof(IsStatusOverdue))]
+    [NotifyPropertyChangedFor(nameof(IsStatusPaid), nameof(IsStatusPartial), nameof(IsStatusOverdue), nameof(IsStatusDueSoon))]
     private BillBadgeKind _statusKind;
 
     [ObservableProperty]
@@ -264,6 +264,7 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private IReadOnlyList<BillPaymentRowViewModel> _paymentRows = [];
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(MarkPaidCommand))]
     private bool _canMarkPaid;
 
     [ObservableProperty]
@@ -425,6 +426,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     public bool IsStatusPaid => StatusKind is BillBadgeKind.Paid or BillBadgeKind.Prepaid;
 
     public bool IsStatusPartial => StatusKind == BillBadgeKind.PartiallyPaid;
+
+    public bool IsStatusDueSoon => StatusKind == BillBadgeKind.DueSoon;
 
     public bool IsStatusOverdue => StatusKind == BillBadgeKind.Overdue;
 

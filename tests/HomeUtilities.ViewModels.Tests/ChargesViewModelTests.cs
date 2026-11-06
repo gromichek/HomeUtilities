@@ -185,7 +185,7 @@ public class ChargesViewModelTests : IDisposable
         Assert.Equal(ChargeCardStatus.Complete, card.Status);
         var line = Assert.Single(card.Lines);
         Assert.Equal("Water supply", line.Name);
-        Assert.Equal("5.500 Enum_MeterUnit_M3 [en]", line.QuantityText);
+        Assert.Equal("5.500 Enum_MeterUnit_M3 [en]", line.QuantityText);
         Assert.Equal("ChargeUnitPrice 1.41|Currency_Symbol_EUR [en]|TariffVatExcluded [en] [en]", line.UnitPriceText);
         Assert.Equal("7.76\u00A0Currency_Symbol_EUR [en]", line.NetText);
         Assert.Equal("ChargePercent 21 [en]", line.VatPercentText);
@@ -206,7 +206,7 @@ public class ChargesViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         var line = Assert.Single(Assert.Single(vm.Cards).Lines);
-        Assert.Equal("1 Unit_Month [en]", line.QuantityText);
+        Assert.Equal("1 Unit_Month [en]", line.QuantityText);
         Assert.Contains("TariffVatIncluded", line.UnitPriceText);
         Assert.Equal("18.97\u00A0Currency_Symbol_EUR [en]", line.NetText);
         Assert.Equal("3.98\u00A0Currency_Symbol_EUR [en]", line.VatText);
@@ -226,10 +226,10 @@ public class ChargesViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         var lines = Assert.Single(vm.Cards).Lines;
-        Assert.Equal("52.30 Unit_Area [en]", lines[0].QuantityText);
+        Assert.Equal("52.30 Unit_Area [en]", lines[0].QuantityText);
         Assert.Equal("31.38\u00A0Currency_Symbol_EUR [en]", lines[0].NetText);
         Assert.Equal("6.59\u00A0Currency_Symbol_EUR [en]", lines[0].VatText);
-        Assert.Equal("2 ChargeUnitResident_Many [en]", lines[1].QuantityText);
+        Assert.Equal("2\u00A0ChargeUnitResident_Many [en]", lines[1].QuantityText);
         Assert.Equal("10.80\u00A0Currency_Symbol_EUR [en]", lines[1].NetText);
     }
 
@@ -297,7 +297,7 @@ public class ChargesViewModelTests : IDisposable
 
         var card = Assert.Single(vm.Cards);
         Assert.Equal(ChargeCardStatus.Complete, card.Status);
-        Assert.StartsWith("ChargeQuantityFromBillOf 0.210 Enum_MeterUnit_MWh [en]|10.2026", card.Lines[1].QuantityText);
+        Assert.StartsWith("ChargeQuantityFromBillOf 0.210 Enum_MeterUnit_MWh [en]|10.2026", card.Lines[1].QuantityText);
         Assert.Equal("14.70\u00A0Currency_Symbol_EUR [en]", card.Lines[1].NetText);
         Assert.Equal("43.88\u00A0Currency_Symbol_EUR [en]", card.TotalText);
         var group = Assert.Single(card.VatGroupTexts);
@@ -318,7 +318,7 @@ public class ChargesViewModelTests : IDisposable
 
         var card = Assert.Single(vm.Cards);
         Assert.Equal(ChargeCardStatus.Complete, card.Status);
-        Assert.StartsWith("ChargeQuantityAmountFromBillOf 0.210 Enum_MeterUnit_MWh [en]|10.2026", card.Lines[1].QuantityText);
+        Assert.StartsWith("ChargeQuantityAmountFromBillOf 0.210 Enum_MeterUnit_MWh [en]|10.2026", card.Lines[1].QuantityText);
         Assert.StartsWith("ChargeQuantityFromBillOf 0.150", card.Lines[2].QuantityText);
         Assert.Equal("14.71\u00A0Currency_Symbol_EUR [en]", card.Lines[1].NetText);
         Assert.Equal("43.89\u00A0Currency_Symbol_EUR [en]", card.TotalText);
@@ -367,9 +367,9 @@ public class ChargesViewModelTests : IDisposable
 
         var lines = Assert.Single(vm.Cards).Lines;
         Assert.Equal(2, lines.Count);
-        Assert.Equal("100.000 Enum_MeterUnit_KWh [en]", lines[0].QuantityText);
+        Assert.Equal("100.000 Enum_MeterUnit_KWh [en]", lines[0].QuantityText);
         Assert.Equal("10.65\u00A0Currency_Symbol_EUR [en]", lines[0].NetText);
-        Assert.Equal("50.000 Enum_MeterUnit_KWh [en]", lines[1].QuantityText);
+        Assert.Equal("50.000 Enum_MeterUnit_KWh [en]", lines[1].QuantityText);
         Assert.Equal("4.09\u00A0Currency_Symbol_EUR [en]", lines[1].NetText);
         Assert.Single(lines, l => l.HasDetails);
     }
@@ -414,7 +414,7 @@ public class ChargesViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         var line = Assert.Single(Assert.Single(vm.Cards).Lines);
-        Assert.Equal("7.500 Enum_MeterUnit_M3 [en]", line.QuantityText);
+        Assert.Equal("7.500 Enum_MeterUnit_M3 [en]", line.QuantityText);
         var lines = Assert.Single(line.Details).Lines;
         Assert.Contains(lines, l => l.StartsWith("ChargeSegmentOld Bathroom cold|120.000|125.500|5.500", StringComparison.Ordinal));
         Assert.Contains(lines, l => l.StartsWith("ChargeSegmentNew Bathroom cold|0.000|2.000|2.000", StringComparison.Ordinal));
@@ -433,7 +433,7 @@ public class ChargesViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         var line = Assert.Single(Assert.Single(vm.Cards).Lines);
-        Assert.Equal("20.000 Enum_MeterUnit_M3 [en]", line.QuantityText);
+        Assert.Equal("20.000 Enum_MeterUnit_M3 [en]", line.QuantityText);
         var note = Assert.Single(Assert.Single(line.Details).Notes);
         Assert.StartsWith("ChargeNoteRollover Kitchen cold|9,990.000|10.000", note, StringComparison.Ordinal);
     }
