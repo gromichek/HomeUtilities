@@ -24,6 +24,16 @@ public sealed partial class FilterPanelViewModel : ObservableObject, IRecipient<
     [ObservableProperty]
     private string _summaryText = string.Empty;
 
+    /// <summary>
+    /// The collapsed summary without the period ("all properties · 49,22 €"): the period is shown next to its ‹ › buttons in the
+    /// first line of the collapsed block (R-50), this is the second line.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSummaryDetail))]
+    private string _summaryDetailText = string.Empty;
+
+    public bool HasSummaryDetail => SummaryDetailText.Length > 0;
+
     public FilterPanelViewModel(ILayoutModeService layout, ILocalizer localizer, Func<bool?> getRemembered, Action<bool?> remember)
     {
         _layout = layout;
@@ -57,6 +67,18 @@ public sealed partial class FilterPanelViewModel : ObservableObject, IRecipient<
 
     [RelayCommand]
     private void Toggle() => IsExpanded = !IsExpanded;
+
+    /// <summary>
+    /// Collapses the panel again after the user picked a filter value, when it was open only for that (R-50); an expanded panel the
+    /// user opened by hand on a wide layout stays as it is.
+    /// </summary>
+    public void CollapseAfterChoice()
+    {
+        if (_layout.Current == LayoutMode.Compact)
+        {
+            IsExpanded = false;
+        }
+    }
 
     partial void OnIsExpandedChanged(bool value)
     {

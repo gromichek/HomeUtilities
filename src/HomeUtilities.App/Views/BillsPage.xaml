@@ -35,12 +35,31 @@
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                 <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.Title}" Style="{StaticResource SectionHeader}"
                                        IsVisible="{Binding FilterPanel.IsExpanded}" />
-                                <Label Grid.Column="0" VerticalOptions="Center" Text="{Binding FilterPanel.SummaryText}" LineBreakMode="TailTruncation" MaxLines="3"
-                                       IsVisible="{Binding FilterPanel.ShowSummary}">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding FilterPanel.ToggleCommand}" />
-                                    </Label.GestureRecognizers>
-                                </Label>
+                                <!-- Collapsed: ‹ month › on the first line (one tap to the previous month, R-50), the rest of the summary under it. -->
+                                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center" IsVisible="{Binding FilterPanel.ShowSummary}">
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto,*" ColumnSpacing="4">
+                                        <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
+                                                Command="{Binding Period.PreviousCommand}" IsVisible="{Binding Period.ShowStepper}"
+                                                ToolTipProperties.Text="{Binding Period.PreviousText}"
+                                                SemanticProperties.Description="{Binding Period.PreviousText}" />
+                                        <Label Grid.Column="1" Text="{Binding Period.Label}" FontAttributes="Bold" LineBreakMode="NoWrap" MaxLines="1"
+                                               VerticalOptions="Center">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding FilterPanel.ToggleCommand}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24"
+                                                Command="{Binding Period.NextCommand}" IsVisible="{Binding Period.ShowStepper}"
+                                                ToolTipProperties.Text="{Binding Period.NextText}"
+                                                SemanticProperties.Description="{Binding Period.NextText}" />
+                                    </Grid>
+                                    <Label Text="{Binding FilterPanel.SummaryDetailText}" LineBreakMode="WordWrap" MaxLines="3"
+                                           IsVisible="{Binding FilterPanel.HasSummaryDetail}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding FilterPanel.ToggleCommand}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </VerticalStackLayout>
                                 <Button Grid.Column="1" Style="{StaticResource IconButton}" Text="{StaticResource IconCollapse}"
                                         Command="{Binding FilterPanel.ToggleCommand}" IsVisible="{Binding FilterPanel.IsExpanded}"
                                         ToolTipProperties.Text="{Binding FilterPanel.ToggleText}"

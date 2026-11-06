@@ -87,6 +87,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         _texts = new PaymentsListTexts(localizer);
         Period = new PeriodFilterViewModel(() => _filter.Period, p => _filter.Period = p, clock, localizer, dialogs, RebuildItems);
         FilterPanel = new FilterPanelViewModel(layoutModeService, localizer, () => _filter.FiltersExpanded, v => _filter.FiltersExpanded = v);
+        Period.ScopeChosen = () => FilterPanel.CollapseAfterChoice();
         RefreshTexts();
     }
 
@@ -194,6 +195,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
 
         _highlightContractId = null;
         RebuildItems();
+        FilterPanel.CollapseAfterChoice();
     });
 
     [RelayCommand]
@@ -211,6 +213,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         _filter.ContractId = index == 0 ? null : options[index - 1].Id;
         _highlightContractId = null;
         RebuildItems();
+        FilterPanel.CollapseAfterChoice();
     });
 
     /// <summary>The contracts of the chosen property; with all properties, every contract (named with its property when there are several).</summary>
@@ -271,6 +274,7 @@ public sealed partial class PaymentsViewModel : MasterDetailViewModel<PaymentEdi
         Period.Refresh();
         TotalsText = BuildTotals(rows);
         FilterPanel.SummaryText = string.Join(" · ", new[] { PropertyFilterName, Period.Label, ContractFilterName, TotalsText }.Where(s => !string.IsNullOrEmpty(s)));
+        FilterPanel.SummaryDetailText = string.Join(" · ", new[] { PropertyFilterName, ContractFilterName, TotalsText }.Where(s => !string.IsNullOrEmpty(s)));
         ShowNothingFound = IsLoaded && _payments.Count > 0 && Items.Count == 0;
         HasMoreItems = rows.Count > Items.Count;
         ShowMoreText = _localizer.Get("ListShowMore", rows.Count - Items.Count);

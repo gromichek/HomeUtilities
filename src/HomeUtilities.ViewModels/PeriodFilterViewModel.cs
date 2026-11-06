@@ -46,6 +46,9 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
         _culture = culture;
     }
 
+    /// <summary>Called after the user picked another scope in the drop-down (the filter panel collapses again, R-50).</summary>
+    public Action? ScopeChosen { get; set; }
+
     /// <summary>The filter in force.</summary>
     public PeriodFilter Current => _read() ?? PeriodFilter.Default(_clock.Today);
 
@@ -129,6 +132,8 @@ public sealed partial class PeriodFilterViewModel : ObservableObject
         {
             Change(Current.WithScope(option.Scope, _clock.Today));
         }
+
+        ScopeChosen?.Invoke();
     }
 
     [RelayCommand]
