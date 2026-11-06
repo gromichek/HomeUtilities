@@ -83,7 +83,7 @@
                     <!-- One date for all readings. -->
                     <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMeters}">
                         <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" />
-                        <DatePicker Date="{Binding ReadingDate, Converter={StaticResource DateOnly}}" />
+                        <views:DateField Date="{Binding ReadingDate, Converter={StaticResource DateOnly}}" />
                     </VerticalStackLayout>
 
                     <Label Text="{Binding NoMetersText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"

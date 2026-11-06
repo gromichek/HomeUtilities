@@ -194,7 +194,7 @@ public sealed partial class ImportRowOverrideEditorViewModel : EditorDialogViewM
 
         _rowDate = row.RowDate ?? throw new ArgumentException("The row has no date.", nameof(row));
         _ruleBasedPeriod = row.RuleBasedPeriod ?? YearMonth.From(_rowDate);
-        Title = localizer.Get("ImportRowOverrideTitle", row.RowNumber, _rowDate.ToString("d", CultureInfo.CurrentCulture));
+        Title = localizer.Get("ImportRowOverrideTitle", row.RowNumber, DateFormat.Full(_rowDate));
         PeriodLabel = localizer["ImportOverridePeriod"];
         CoversLabel = localizer["ImportOverrideCovers"];
         UntilLabel = localizer["ImportOverrideUntil"];

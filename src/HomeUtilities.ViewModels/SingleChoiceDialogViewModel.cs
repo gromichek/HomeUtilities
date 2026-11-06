@@ -66,6 +66,12 @@ public sealed partial class SingleChoiceDialogViewModel : EditorDialogViewModel,
     /// <summary>Text of the confirm button.</summary>
     public string OkText { get; }
 
+    /// <inheritdoc />
+    public override System.Windows.Input.ICommand PrimaryCommand => ConfirmCommand;
+
+    /// <inheritdoc />
+    public override bool ShowPrimary => ShowOk;
+
     /// <summary>True when OK is shown: only if a row has extra inputs; every other choice closes the dialog at once.</summary>
     public bool ShowOk => Items.Any(i => i.HasExtraInputs);
 

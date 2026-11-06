@@ -11,8 +11,18 @@ public sealed class EditorDialogPage : ContentPage
     public EditorDialogPage(View content, EditorDialogViewModel editor)
     {
         _editor = editor;
-        Content = content;
         BindingContext = editor;
+
+        // Top bar with ← and ✓ above the dialog's own content (UI_GUIDELINES §3.4); Back is the dialog's Cancel.
+        Content = new DialogFrame(content, editor);
+
+        // The zone behind the status bar has the toolbar colour, the one behind the navigation bar the page colour (C-04).
+        if (Application.Current?.Resources is { } resources
+            && resources.TryGetValue("DialogBackdropLight", out var light) && light is Brush lightBrush
+            && resources.TryGetValue("DialogBackdropDark", out var dark) && dark is Brush darkBrush)
+        {
+            this.SetAppTheme(BackgroundProperty, lightBrush, darkBrush);
+        }
     }
 
     /// <summary>Completes when the page has been removed.</summary>

@@ -19,6 +19,21 @@
         <On Platform="WinUI" Value="48" />
     </OnPlatform>
 
+    <!-- Backdrop of a phone dialog page (C-04): the upper half is the toolbar colour — the status bar zone and the dialog's top bar —
+         and the lower half the page colour — the navigation bar zone — whatever the system bars' sizes are. -->
+    <LinearGradientBrush x:Key="DialogBackdropLight" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="{StaticResource ToolbarLight}" Offset="0.0" />
+        <GradientStop Color="{StaticResource ToolbarLight}" Offset="0.5" />
+        <GradientStop Color="{StaticResource SurfaceLight}" Offset="0.5" />
+        <GradientStop Color="{StaticResource SurfaceLight}" Offset="1.0" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DialogBackdropDark" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="{StaticResource ToolbarDark}" Offset="0.0" />
+        <GradientStop Color="{StaticResource ToolbarDark}" Offset="0.5" />
+        <GradientStop Color="{StaticResource SurfaceDark}" Offset="0.5" />
+        <GradientStop Color="{StaticResource SurfaceDark}" Offset="1.0" />
+    </LinearGradientBrush>
+
     <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
     </Style>

@@ -261,7 +261,7 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
             return;
         }
 
-        var name = $"{reading.Date.ToString("d", CultureInfo.CurrentCulture)}: {DecimalInput.Format(reading.Value, CultureInfo.CurrentCulture, 3)}";
+        var name = $"{DateFormat.Full(reading.Date)}: {DecimalInput.Format(reading.Value, CultureInfo.CurrentCulture, 3)}";
         if (_undo is null)
         {
             var confirmed = await _dialogs.ConfirmAsync(
@@ -369,12 +369,12 @@ public sealed class ReadingHistoryRowViewModel
     {
         Id = reading.Id;
         Kind = reading.Kind;
-        DateText = reading.Date.ToString("d", CultureInfo.CurrentCulture);
+        DateText = DateFormat.Full(reading.Date);
         ValueText = DecimalInput.Format(reading.Value, CultureInfo.CurrentCulture, 3);
         ConsumptionText = consumptionText;
         KindText = reading.Kind == ReadingKind.Regular ? string.Empty : EnumText.Get(localizer, reading.Kind);
         SubmittedText = reading.SubmittedOn is { } submitted
-            ? localizer.Get("ReadingSubmittedOn", submitted.ToString("d", CultureInfo.CurrentCulture))
+            ? localizer.Get("ReadingSubmittedOn", DateFormat.Full(submitted))
             : string.Empty;
         Note = reading.Note ?? string.Empty;
         CanDelete = reading.Kind is not (ReadingKind.Initial or ReadingKind.Final);

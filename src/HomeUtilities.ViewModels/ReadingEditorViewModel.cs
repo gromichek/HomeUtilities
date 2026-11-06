@@ -74,7 +74,8 @@ public sealed partial class ReadingEditorViewModel : EditorDialogViewModel
         _register = register;
         _original = original;
 
-        Title = localizer["ReadingEditTitle"];
+        // The dialog names the meter it is about (R-30): "Edit reading · Cold water, bathroom".
+        Title = $"{localizer["ReadingEditTitle"]} · {MeterNames.Title(localizer, meter)}";
         _date = original.Date;
         _valueText = DecimalInput.Format(original.Value, CultureInfo.CurrentCulture, 3);
         _hasSubmitted = original.SubmittedOn is not null;

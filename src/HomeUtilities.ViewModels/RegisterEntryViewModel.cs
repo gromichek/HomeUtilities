@@ -65,7 +65,7 @@ public sealed partial class RegisterEntryViewModel : ObservableObject
         Label = RegisterLabel.For(localizer, meter, register);
         _last = ChainReadings().OrderBy(r => r.Date).LastOrDefault();
         LastText = _last is { } last
-            ? localizer.Get("ReadingsLast", Format(last.Value), last.Date.ToString("d", CultureInfo.CurrentCulture))
+            ? localizer.Get("ReadingsLast", Format(last.Value), DateFormat.Full(last.Date))
             : localizer["ReadingsNoLast"];
         UnitText = EnumText.Get(localizer, meter.Unit);
         ToggleNoteCommand = new RelayCommand(() => ShowNote = !ShowNote);
@@ -188,7 +188,7 @@ public sealed partial class RegisterEntryViewModel : ObservableObject
         var last = _last;
         if (last is not null && reading.Date < last.Date)
         {
-            warnings.Add(_localizer.Get("ReadingsWarnDateBefore", last.Date.ToString("d", CultureInfo.CurrentCulture)));
+            warnings.Add(_localizer.Get("ReadingsWarnDateBefore", DateFormat.Full(last.Date)));
         }
 
         // The previous reading is the latest one before the new date, in any meter of the chain.

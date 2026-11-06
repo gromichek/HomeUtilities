@@ -43,7 +43,7 @@
                     <DataTemplate x:DataType="vm:TaxDueDateRowViewModel">
                         <VerticalStackLayout Spacing="2">
                             <Label Text="{Binding Label}" FontSize="12" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding Date, Converter={StaticResource DateOnly}}" />
                             <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
                         </VerticalStackLayout>

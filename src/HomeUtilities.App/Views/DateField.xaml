@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HomeUtilities.App.Views.DateField">
+
+    <!-- A date or month field: the bordered box of every field (UI_GUIDELINES §6) with the date in the app's own format and a calendar
+         icon, so it reads as tappable (C-09). The platform date picker lies over the box, invisible, and opens on tap: its own
+         text follows the Windows language / region format (R-02, C-10), the text in the box does not. -->
+    <Grid>
+        <Border x:Name="Box" InputTransparent="True" StrokeThickness="1" Padding="12,0" StrokeShape="RoundRectangle 8"
+                MinimumHeightRequest="{StaticResource TouchSize}"
+                Stroke="{AppThemeBinding Light={StaticResource FieldOutlineLight}, Dark={StaticResource FieldOutlineDark}}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Label x:Name="TextLabel" Grid.Column="0" VerticalOptions="Center" Margin="0,10" LineBreakMode="NoWrap" />
+                <Label Grid.Column="1" Text="{StaticResource IconCalendar}" FontFamily="{DynamicResource IconFontFamily}" FontSize="20" VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+            </Grid>
+        </Border>
+        <DatePicker x:Name="Picker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" DateSelected="OnPickerDateSelected" />
+    </Grid>
+</ContentView>

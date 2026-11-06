@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:conv="clr-namespace:HomeUtilities.App.Converters"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
@@ -19,7 +20,7 @@
             <Label Text="{Binding ContextText}" Style="{StaticResource MutedLabel}" />
 
             <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
-            <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
+            <views:DateField Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
             <Label Text="{Binding ValidFromError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding ValidFromError, Converter={StaticResource HasText}}" />
             <Label Text="{Binding WarningText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasWarning}" />
@@ -30,7 +31,7 @@
             </Grid>
             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasValidTo}">
                 <Label Text="{Binding ValidToLabel}" Style="{StaticResource MutedLabel}" />
-                <DatePicker Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />
+                <views:DateField Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />
                 <Label Text="{Binding ValidToError}" Style="{StaticResource ErrorLabel}"
                        IsVisible="{Binding ValidToError, Converter={StaticResource HasText}}" />
             </VerticalStackLayout>

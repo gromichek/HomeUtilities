@@ -79,7 +79,7 @@
                                     <Switch IsToggled="{Binding HasDate}" />
                                     <Label Grid.Column="1" Text="{Binding DateSetText}" VerticalOptions="Center" />
                                 </Grid>
-                                <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
+                                <views:DateField Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
                             </VerticalStackLayout>
                             <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
                         </VerticalStackLayout>

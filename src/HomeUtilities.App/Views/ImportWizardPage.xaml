@@ -139,7 +139,7 @@
                                     <DataTemplate x:DataType="vm:ImportRuleChangeRowViewModel">
                                         <VerticalStackLayout Spacing="2">
                                             <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                                            <DatePicker Date="{Binding FromDate}" />
+                                            <views:DateField Date="{Binding FromDate}" />
                                             <views:ChoiceField ItemsSource="{Binding Rules}"
                                                     DisplayMember="Text"
                                                     SelectedItem="{Binding SelectedRule}" />
@@ -263,7 +263,7 @@
                                             <Label Text="{Binding TitleText}" FontAttributes="Bold" />
                                             <Label Text="{Binding EstimatedText}" Style="{StaticResource WarningLabel}" FontSize="12" IsVisible="{Binding HasEstimate}" />
                                             <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
-                                            <DatePicker Date="{Binding Date}" />
+                                            <views:DateField Date="{Binding Date}" />
                                             <Label Text="{Binding FinalLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
                                             <Entry Text="{Binding FinalText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
                                             <Label Text="{Binding InitialLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />

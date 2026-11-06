@@ -38,7 +38,7 @@
                    IsVisible="{Binding ValueError, Converter={StaticResource HasText}}" />
 
             <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
-            <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
+            <views:DateField Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
             <Label Text="{Binding ValidFromError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding ValidFromError, Converter={StaticResource HasText}}" />
 

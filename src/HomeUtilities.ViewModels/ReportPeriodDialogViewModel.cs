@@ -103,6 +103,12 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     /// <summary>True while "Custom…" is chosen (the month pickers are shown).</summary>
     public bool IsCustom => Preset == ReportPreset.Custom;
 
+    /// <inheritdoc />
+    public override System.Windows.Input.ICommand PrimaryCommand => ConfirmCommand;
+
+    /// <inheritdoc />
+    public override bool ShowPrimary => ShowOk;
+
     /// <summary>OK is shown only while "Custom…" (the one row with extra inputs) is chosen; every preset closes the dialog at once.</summary>
     public bool ShowOk => IsCustom;
 
@@ -135,6 +141,7 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     {
         OnPropertyChanged(nameof(IsCustom));
         OnPropertyChanged(nameof(ShowOk));
+        OnPropertyChanged(nameof(ShowPrimary));
         Error = string.Empty;
         BuildPresets();
     }

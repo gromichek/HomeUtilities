@@ -369,7 +369,7 @@ public sealed class ChargeCardBuilder
                     // "No readings for October 2026 — the last one is from 15.03.2023", with a link to Readings.
                     var month = charge.Period.FirstDay.ToString("MMMM yyyy", CultureInfo.CurrentCulture);
                     message = lastReading is { } last
-                        ? _localizer.Get("ChargeWarn_NoReadings", month, last.ToString("d", CultureInfo.CurrentCulture))
+                        ? _localizer.Get("ChargeWarn_NoReadings", month, DateFormat.Full(last))
                         : _localizer.Get("ChargeWarn_NoReadingsNone", month);
                     (actionText, action) = Link("readings", "ChargeOpenReadings", () => _navigation.OpenReadings(input.Property.Id));
                     break;
@@ -422,7 +422,7 @@ public sealed class ChargeCardBuilder
 
     private string DateText(string iso) =>
         DateOnly.TryParseExact(iso, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
-            ? date.ToString("d", CultureInfo.CurrentCulture)
+            ? DateFormat.Full(date)
             : iso;
 
     private string ParameterName(string name) =>

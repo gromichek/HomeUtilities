@@ -26,15 +26,9 @@
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustom}" Padding="4,0">
                     <Label Text="{Binding FromLabel}" Style="{StaticResource MutedLabel}" />
                     <!-- App-language month text; the picker lies over it, invisible, and opens on tap (R-02). -->
-                    <Grid>
-                        <Label Text="{Binding FromText}" VerticalOptions="Center" InputTransparent="True" />
-                        <DatePicker x:Name="FromPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" Date="{Binding FromDate, Converter={StaticResource DateOnly}}" />
-                    </Grid>
+                    <views:DateField x:Name="FromPicker" Text="{Binding FromText}" Date="{Binding FromDate, Converter={StaticResource DateOnly}}" />
                     <Label Text="{Binding ToLabel}" Style="{StaticResource MutedLabel}" />
-                    <Grid>
-                        <Label Text="{Binding ToText}" VerticalOptions="Center" InputTransparent="True" />
-                        <DatePicker x:Name="ToPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" Date="{Binding ToDate, Converter={StaticResource DateOnly}}" />
-                    </Grid>
+                    <views:DateField x:Name="ToPicker" Text="{Binding ToText}" Date="{Binding ToDate, Converter={StaticResource DateOnly}}" />
                     <Label Text="{Binding Error}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding Error, Converter={StaticResource HasText}}" />
                 </VerticalStackLayout>

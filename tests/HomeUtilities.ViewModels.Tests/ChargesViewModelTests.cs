@@ -452,7 +452,7 @@ public class ChargesViewModelTests : IDisposable
         Assert.True(card.ShowWarningIcon);
         Assert.True(vm.IsIncomplete);
         var warning = Assert.Single(card.Warnings);
-        Assert.StartsWith($"ChargeWarn_NoRate {new DateOnly(2026, 10, 1)}|Sewerage", warning.Message, StringComparison.Ordinal);
+        Assert.StartsWith($"ChargeWarn_NoRate {DateFormat.Full(new DateOnly(2026, 10, 1))}|Sewerage", warning.Message, StringComparison.Ordinal);
         Assert.Equal("ChargeOpenTariff [en]", warning.ActionText);
 
         await warning.ActionCommand!.ExecuteAsync(null);
@@ -495,7 +495,7 @@ public class ChargesViewModelTests : IDisposable
         var warning = Assert.Single(card.Warnings);
         // The last reading is from September, the month is October: the cause named is "no readings for the month" (R-37).
         Assert.Equal(
-            $"ChargeWarn_NoReadings {Today.ToString("MMMM yyyy", CultureInfo.CurrentCulture)}|{new DateOnly(2026, 9, 26).ToString("d", CultureInfo.CurrentCulture)} [en]",
+            $"ChargeWarn_NoReadings {Today.ToString("MMMM yyyy", CultureInfo.CurrentCulture)}|{DateFormat.Full(new DateOnly(2026, 9, 26))} [en]",
             warning.Message);
         await warning.ActionCommand!.ExecuteAsync(null);
         var (route, parameters) = _kit.Navigation.Visited[^1];
@@ -979,7 +979,7 @@ public class ChargesViewModelTests : IDisposable
     public async Task MissingPriceBecauseOfMissingReadings_NamesTheReadings_WithMonthAndLastDate_AndOneLink()
     {
         // The price is looked up on the date of the last reading (15.03.2023), where the tariff has no price yet. The cause to
-        // name is "no readings for October 2026 — the last one is from 03/15/2023", with one link to Readings.
+        // name is "no readings for October 2026 — the last one is from 15.03.2023", with one link to Readings.
         var contract = AddContract("Water");
         var meter = AddMeter(contract, "Kitchen cold", installed: new DateOnly(2023, 3, 15));
         Read(meter, new DateOnly(2023, 3, 15), 10m, ReadingKind.Initial);
@@ -991,7 +991,7 @@ public class ChargesViewModelTests : IDisposable
         var card = Assert.Single(vm.Cards);
         var warning = Assert.Single(card.Warnings);
         Assert.Equal(
-            $"ChargeWarn_NoReadings October 2026|{new DateOnly(2023, 3, 15).ToString("d", CultureInfo.CurrentCulture)} [en]",
+            $"ChargeWarn_NoReadings October 2026|{DateFormat.Full(new DateOnly(2023, 3, 15))} [en]",
             warning.Message);
         Assert.Equal("ChargeOpenReadings [en]", warning.ActionText);
         Assert.Equal("ChargeLineReason_NoReadings [en]", Assert.Single(card.Lines).ReasonText);

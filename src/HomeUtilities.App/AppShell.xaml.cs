@@ -92,6 +92,9 @@ public partial class AppShell : Shell
                 CommunityToolkit.Maui.Core.Platform.StatusBar.SetStyle(
                     CommunityToolkit.Maui.Core.StatusBarStyle.LightContent);
             }
+
+            // The navigation bar follows the page colour of the theme (owner 2026-11-05).
+            SystemBars.Apply();
         }
         catch (Exception)
         {

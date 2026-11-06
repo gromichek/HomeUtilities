@@ -85,18 +85,14 @@
 
                         <!-- The month the bill belongs to, with ‹ ›; tap the month to pick another. -->
                         <Label Text="{Binding Texts.PeriodLabel}" Style="{StaticResource MutedLabel}" />
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="4" HorizontalOptions="Center">
                             <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
                                     Command="{Binding PreviousPeriodCommand}"
                                     ToolTipProperties.Text="{Binding Texts.PreviousPeriodText}"
                                     SemanticProperties.Description="{Binding Texts.PreviousPeriodText}" />
-                            <!-- App-language month text; the picker lies over it, invisible, and opens on tap (R-02). -->
-                            <Grid Grid.Column="1" HorizontalOptions="Center">
-                                <Label Text="{Binding PeriodText}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalOptions="Center"
-                                       Padding="12,0" InputTransparent="True" />
-                                <DatePicker x:Name="PeriodPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}"
-                                            Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
-                            </Grid>
+                            <!-- Tap the month to pick another; the box shows the month in the app language and a calendar icon (R-02, C-09). -->
+                            <views:DateField x:Name="PeriodPicker" Grid.Column="1" MinimumWidthRequest="180" Text="{Binding PeriodText}"
+                                             Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
                             <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24"
                                     Command="{Binding NextPeriodCommand}"
                                     ToolTipProperties.Text="{Binding Texts.NextPeriodText}"
@@ -130,7 +126,7 @@
                         </Grid>
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasIssuedOn}">
                             <Label Text="{Binding Texts.IssuedOnLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding IssuedOn, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding IssuedOn, Converter={StaticResource DateOnly}}" />
                         </VerticalStackLayout>
 
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
@@ -139,7 +135,7 @@
                         </Grid>
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasDueOn}">
                             <Label Text="{Binding Texts.DueOnLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding DueOn, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding DueOn, Converter={StaticResource DateOnly}}" />
                         </VerticalStackLayout>
                         <Label Text="{Binding DueOnError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding DueOnError, Converter={StaticResource HasText}}" />
@@ -150,11 +146,11 @@
                         </Grid>
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasServicePeriod}">
                             <Label Text="{Binding Texts.ServiceFromLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding ServiceFrom, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding ServiceFrom, Converter={StaticResource DateOnly}}" />
                             <Label Text="{Binding ServiceFromError}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding ServiceFromError, Converter={StaticResource HasText}}" />
                             <Label Text="{Binding Texts.ServiceToLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding ServiceTo, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding ServiceTo, Converter={StaticResource DateOnly}}" />
                             <Label Text="{Binding ServiceToError}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding ServiceToError, Converter={StaticResource HasText}}" />
                         </VerticalStackLayout>
@@ -363,7 +359,7 @@
                                                 <Switch IsToggled="{Binding HasDate}" />
                                                 <Label Grid.Column="1" Text="{Binding DateSetText}" VerticalOptions="Center" />
                                             </Grid>
-                                            <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
+                                            <views:DateField Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
                                         </VerticalStackLayout>
                                         <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
                                     </VerticalStackLayout>

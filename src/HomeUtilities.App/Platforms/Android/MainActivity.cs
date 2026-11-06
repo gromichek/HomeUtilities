@@ -22,6 +22,9 @@ public class MainActivity : MauiAppCompatActivity
         // dispatcher is delivered on every Android version; the callback runs the same path as the toolbar arrow.
         OnBackPressedDispatcher.AddCallback(this, new ShellBackCallback(this));
 
+        // Navigation bar in the page colour (AppShell repeats this when the theme changes).
+        SystemBars.Apply();
+
         // A recreated activity (savedInstanceState != null) carries the old intent: that tap was already handled.
         if (savedInstanceState is null)
         {

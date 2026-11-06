@@ -22,7 +22,7 @@
             <Label Text="{Binding RegisterText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasRegisterText}" />
 
             <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" />
-            <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" />
+            <views:DateField Date="{Binding Date, Converter={StaticResource DateOnly}}" />
             <Label Text="{Binding DateError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding DateError, Converter={StaticResource HasText}}" />
 
@@ -46,7 +46,7 @@
             </Grid>
             <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSubmitted}">
                 <Label Text="{Binding SubmittedOnLabel}" Style="{StaticResource MutedLabel}" />
-                <DatePicker Date="{Binding SubmittedOn, Converter={StaticResource DateOnly}}" />
+                <views:DateField Date="{Binding SubmittedOn, Converter={StaticResource DateOnly}}" />
                 <Label Text="{Binding SubmittedError}" Style="{StaticResource ErrorLabel}"
                        IsVisible="{Binding SubmittedError, Converter={StaticResource HasText}}" />
             </VerticalStackLayout>
@@ -54,16 +54,17 @@
             <!-- Photo of the dial: add, replace or remove. -->
             <Label Text="{Binding PhotoLabel}" Style="{StaticResource MutedLabel}" />
             <Label Text="{Binding PhotoText}" />
-            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
-                <Button Grid.Column="0" Text="{Binding TakePhotoText}" Command="{Binding TakePhotoCommand}"
-                        Style="{StaticResource SecondaryButton}" IsVisible="{Binding CanTakePhoto}" />
-                <Button Grid.Column="1" Text="{Binding ChoosePhotoText}" Command="{Binding ChoosePhotoCommand}"
-                        Style="{StaticResource SecondaryButton}" />
-                <Button Grid.Column="2" Style="{StaticResource DestructiveIconButton}" Text="{StaticResource IconDelete}"
+            <!-- Stacked at full width (R-14): "Выбрать изображение…" no longer shrinks to half the width. -->
+            <VerticalStackLayout Spacing="8">
+                <Button Text="{Binding TakePhotoText}" Command="{Binding TakePhotoCommand}"
+                        Style="{StaticResource SecondaryButton}" IsVisible="{Binding CanTakePhoto}" HorizontalOptions="Fill" />
+                <Button Text="{Binding ChoosePhotoText}" Command="{Binding ChoosePhotoCommand}"
+                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
+                <Button Style="{StaticResource DestructiveIconButton}" Text="{StaticResource IconDelete}" HorizontalOptions="Start"
                         Command="{Binding RemovePhotoCommand}" IsVisible="{Binding HasPhoto}"
                         ToolTipProperties.Text="{Binding RemovePhotoText}"
                         SemanticProperties.Description="{Binding RemovePhotoText}" />
-            </Grid>
+            </VerticalStackLayout>
             <Label Text="{Binding PhotoError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding PhotoError, Converter={StaticResource HasText}}" />
 
