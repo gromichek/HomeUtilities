@@ -1647,13 +1647,13 @@
   <data name="CleanUpButton" xml:space="preserve"><value>Clean up the database…</value></data>
   <data name="CleanUpAction" xml:space="preserve"><value>Clean up</value></data>
   <data name="CleanUpNothing" xml:space="preserve"><value>Nothing to clean up: there are no deleted records and no unused files.</value></data>
-  <data name="CleanUpConfirm" xml:space="preserve"><value>Deleted records: {0} · files of deleted photos and documents: {1} ({2}).
+  <data name="CleanUpConfirm" xml:space="preserve"><value>{0}.
 
 Deleted records cannot be brought back afterwards, except from the backup copy that is made now.</value></data>
   <data name="CleanUpConfirmSync" xml:space="preserve"><value>Sync is on: the cleaned data will be uploaded as the new cloud data, and your other devices will be asked to replace theirs.</value></data>
   <data name="CleanUpRunning" xml:space="preserve"><value>Cleaning up the database…</value></data>
-  <data name="CleanUpDone" xml:space="preserve"><value>Removed: {0} records and {1} files ({2}).
-Database size: {3} → {4}.</value></data>
+  <data name="CleanUpDone" xml:space="preserve"><value>Removed — {0}.
+Database size: {1} → {2}.</value></data>
   <data name="CleanUpKept" xml:space="preserve"><value>{0} table(s) still hold deleted records that other records refer to; they were kept. Details are in the error log.</value></data>
   <data name="CleanUpNotCompacted" xml:space="preserve"><value>The database file could not be made smaller now: {0}</value></data>
   <data name="CleanUpReplaceCloudQuestion" xml:space="preserve"><value>The cleaned data of this device becomes the new data in the cloud. Your other devices will be asked to replace their data with it. If you choose "Not now", sync is switched off until you decide in Settings → Sync.</value></data>
@@ -1661,4 +1661,30 @@ Database size: {3} → {4}.</value></data>
   <data name="CleanUpCloudReplaced" xml:space="preserve"><value>The cloud now holds the cleaned data.</value></data>
   <data name="CleanUpCloudFailed" xml:space="preserve"><value>The cloud could not be replaced now ({0}). Sync was switched off; switch it on in Settings → Sync and choose "Replace the data in the cloud with this device's data".</value></data>
   <data name="CleanUpSyncOff" xml:space="preserve"><value>Sync was switched off. Switch it on in Settings → Sync and choose "Replace the data in the cloud with this device's data".</value></data>
+  <data name="CleanUpKindCount" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="CleanUpKind_Properties" xml:space="preserve"><value>properties</value></data>
+  <data name="CleanUpKind_PropertyParameters" xml:space="preserve"><value>property parameters</value></data>
+  <data name="CleanUpKind_Categories" xml:space="preserve"><value>categories</value></data>
+  <data name="CleanUpKind_Suppliers" xml:space="preserve"><value>suppliers</value></data>
+  <data name="CleanUpKind_Contracts" xml:space="preserve"><value>contracts</value></data>
+  <data name="CleanUpKind_ContractMeters" xml:space="preserve"><value>contract meter links</value></data>
+  <data name="CleanUpKind_Meters" xml:space="preserve"><value>meters</value></data>
+  <data name="CleanUpKind_MeterRegisters" xml:space="preserve"><value>meter registers</value></data>
+  <data name="CleanUpKind_MeterReadings" xml:space="preserve"><value>readings</value></data>
+  <data name="CleanUpKind_VatRates" xml:space="preserve"><value>VAT rates</value></data>
+  <data name="CleanUpKind_VatRateVersions" xml:space="preserve"><value>VAT rate versions</value></data>
+  <data name="CleanUpKind_TariffComponents" xml:space="preserve"><value>tariff components</value></data>
+  <data name="CleanUpKind_TariffRates" xml:space="preserve"><value>tariff prices</value></data>
+  <data name="CleanUpKind_EqualizedPlans" xml:space="preserve"><value>equalized plans</value></data>
+  <data name="CleanUpKind_Bills" xml:space="preserve"><value>bills</value></data>
+  <data name="CleanUpKind_BillLines" xml:space="preserve"><value>bill lines</value></data>
+  <data name="CleanUpKind_BillTemplates" xml:space="preserve"><value>bill templates</value></data>
+  <data name="CleanUpKind_Payments" xml:space="preserve"><value>payments</value></data>
+  <data name="CleanUpKind_PaymentAllocations" xml:space="preserve"><value>payment allocations</value></data>
+  <data name="CleanUpKind_Attachments" xml:space="preserve"><value>attachments</value></data>
+  <data name="CleanUpKind_ImportBatches" xml:space="preserve"><value>imports</value></data>
+  <data name="CleanUpKind_ImportProfiles" xml:space="preserve"><value>import profiles</value></data>
+  <data name="CleanUpKind_Other" xml:space="preserve"><value>other records</value></data>
+  <data name="CleanUpFiles" xml:space="preserve"><value>(photos and documents: {0}, {1})</value></data>
+  <data name="CleanUpFilesOnly" xml:space="preserve"><value>files of photos and documents: {0} ({1})</value></data>
 </root>

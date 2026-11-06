@@ -1,17 +1,32 @@
 namespace HomeUtilities.Core.Abstractions;
 
-/// <summary>What a database clean-up would remove (T-037).</summary>
-/// <param name="DeletedRecords">Soft-deleted rows (<c>IsDeleted = 1</c>) in all data tables.</param>
+/// <summary>How many rows of one data table a clean-up removes (or would remove).</summary>
+/// <param name="Table">Table name in the database, e.g. <c>Bills</c>, <c>BillLines</c>, <c>Attachments</c>.</param>
+/// <param name="Count">Number of rows.</param>
+public sealed record CleanUpRecordCount(string Table, int Count);
+
+/// <summary>What a database clean-up would remove (T-037, T-037a). Counts exactly the rows the clean-up then removes.</summary>
+/// <param name="Records">Rows to remove per table; only tables with a count above zero.</param>
 /// <param name="OrphanFiles">Files in the attachments folder that belong to no live attachment row.</param>
 /// <param name="OrphanFileBytes">Total size of those files.</param>
-public sealed record CleanUpPreview(int DeletedRecords, int OrphanFiles, long OrphanFileBytes)
+/// <param name="KeptRecords">
+/// Deleted rows that would be <b>kept</b> because a live row still references them; one text per table. Empty in the normal case.
+/// </param>
+public sealed record CleanUpPreview(
+    IReadOnlyList<CleanUpRecordCount> Records,
+    int OrphanFiles,
+    long OrphanFileBytes,
+    IReadOnlyList<string> KeptRecords)
 {
+    /// <summary>Total number of rows to remove.</summary>
+    public int DeletedRecords => Records.Sum(r => r.Count);
+
     /// <summary>True if there is nothing to remove.</summary>
     public bool IsEmpty => DeletedRecords == 0 && OrphanFiles == 0;
 }
 
-/// <summary>The outcome of a database clean-up (T-037).</summary>
-/// <param name="RecordsRemoved">Rows deleted for good.</param>
+/// <summary>The outcome of a database clean-up (T-037, T-037a).</summary>
+/// <param name="Records">Rows deleted for good per table; only tables with a count above zero.</param>
 /// <param name="FilesRemoved">Attachment files deleted.</param>
 /// <param name="FileBytesRemoved">Total size of the deleted files.</param>
 /// <param name="DatabaseBytesBefore">Size of the database file before the clean-up.</param>
@@ -22,16 +37,20 @@ public sealed record CleanUpPreview(int DeletedRecords, int OrphanFiles, long Or
 /// </param>
 /// <param name="CompactionError">Why <c>VACUUM</c> could not run (the rows are removed all the same), or null.</param>
 public sealed record CleanUpResult(
-    int RecordsRemoved,
+    IReadOnlyList<CleanUpRecordCount> Records,
     int FilesRemoved,
     long FileBytesRemoved,
     long DatabaseBytesBefore,
     long DatabaseBytesAfter,
     IReadOnlyList<string> KeptRecords,
-    string? CompactionError = null);
+    string? CompactionError = null)
+{
+    /// <summary>Total number of rows removed.</summary>
+    public int RecordsRemoved => Records.Sum(r => r.Count);
+}
 
 /// <summary>
-/// "Clean up the database" (T-037): removes the soft-deleted rows of every data table for good, deletes the attachment files
+/// "Clean up the database" (T-037): removes the soft-deleted rows of every data table for good (attachments whose owner is deleted or missing count as deleted), deletes the attachment files
 /// that belong to no live attachment, and compacts the database. The backup copy before it and the sync consequences are the
 /// caller's business.
 /// </summary>

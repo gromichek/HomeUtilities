@@ -1,5 +1,6 @@
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
+using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Data.Backup;
 using Microsoft.Data.Sqlite;
@@ -165,9 +166,12 @@ public sealed class DatabaseCleanerTests : IDisposable
         var suppliersBefore = Counts()["Suppliers"].All;
         Run($"UPDATE Suppliers SET IsDeleted = 1 WHERE Id IN ('{usedId}', '{unused.Id.ToString().ToUpperInvariant()}')");
 
+        var preview = await Cleaner.PreviewAsync();
         var result = await Cleaner.CleanAsync();
 
-        // The unused deleted supplier is removed; the used one stays (still marked deleted) and is reported, its bills are untouched.
+        // The unused deleted supplier is removed; the used one stays (still marked deleted) and is reported - in the preview too.
+        Assert.Equal(1, preview.DeletedRecords);
+        Assert.Equal(result.KeptRecords, preview.KeptRecords);
         Assert.Equal(1, result.RecordsRemoved);
         Assert.Equal(suppliersBefore - 1, Counts()["Suppliers"].All);
         Assert.Equal(1, Counts()["Suppliers"].Deleted);
@@ -205,8 +209,8 @@ public sealed class DatabaseCleanerTests : IDisposable
         await _device.InitializeAsync();
         var store = _device.Get<IAttachmentStore>();
         var owner = Guid.NewGuid();
-        var live = await store.AddAsync(new Attachment { FileName = "live.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.MeterReading, OwnerId = owner }, new MemoryStream(new byte[1000]));
-        var deleted = await store.AddAsync(new Attachment { FileName = "gone.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.MeterReading, OwnerId = owner }, new MemoryStream(new byte[3000]));
+        var live = await store.AddAsync(new Attachment { FileName = "live.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.Other, OwnerId = owner }, new MemoryStream(new byte[1000]));
+        var deleted = await store.AddAsync(new Attachment { FileName = "gone.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.Other, OwnerId = owner }, new MemoryStream(new byte[3000]));
         await store.DeleteAsync(deleted.Id);
         var orphan = Guid.NewGuid() + ".pdf";
         _device.WriteAttachment(orphan, new string('x', 500));
@@ -216,7 +220,8 @@ public sealed class DatabaseCleanerTests : IDisposable
         var preview = await Cleaner.PreviewAsync();
 
         // 1 deleted attachment row + 2 files (the deleted attachment's and the orphan) = 3000 + 500 bytes.
-        Assert.Equal(new CleanUpPreview(1, 2, 3500), preview);
+        Assert.Equal([new CleanUpRecordCount("Attachments", 1)], preview.Records);
+        Assert.Equal((2, 3500L), (preview.OrphanFiles, preview.OrphanFileBytes));
 
         var result = await Cleaner.CleanAsync();
 
@@ -240,7 +245,8 @@ public sealed class DatabaseCleanerTests : IDisposable
         var result = await Cleaner.CleanAsync();
 
         Assert.True(preview.IsEmpty);
-        Assert.Equal(new CleanUpPreview(0, 0, 0), preview);
+        Assert.Empty(preview.Records);
+        Assert.Empty(preview.KeptRecords);
         Assert.Equal(0, result.RecordsRemoved);
         Assert.Equal(0, result.FilesRemoved);
         Assert.Equal(before, Counts());
@@ -269,6 +275,96 @@ public sealed class DatabaseCleanerTests : IDisposable
 
         Assert.True(preview.IsEmpty);
         Assert.Equal(0, result.RecordsRemoved);
+    }
+
+    private async Task<(Bill Bill, Attachment Photo)> AddBillWithLineAndPhotoAsync()
+    {
+        var property = new Property { Name = "P" };
+        await _device.Properties.SaveAsync(property);
+        var categoryId = Guid.Parse(Text("SELECT Id FROM Categories LIMIT 1"));
+        var bill = new Bill { PropertyId = property.Id, CategoryId = categoryId, Period = new(2026, 9), Gross = 10m, Kind = BillKind.OneOff, Title = "x" };
+        bill.Lines.Add(new BillLine { BillId = bill.Id, Description = "A", Gross = 10m, SortOrder = 1 });
+        await _device.Get<IBillStore>().SaveAsync(bill);
+        var photo = await _device.Get<IAttachmentStore>().AddAsync(
+            new Attachment { FileName = "p.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.Bill, OwnerId = bill.Id }, new MemoryStream(new byte[2000]));
+        return (bill, photo);
+    }
+
+    [Fact]
+    public async Task One_bill_with_a_line_and_a_photo_deleted_is_counted_alike_in_preview_and_result_and_the_file_goes()
+    {
+        await _device.InitializeAsync();
+        var (bill, photo) = await AddBillWithLineAndPhotoAsync();
+        await _device.Get<IBillStore>().DeleteAsync(bill.Id);
+
+        var preview = await Cleaner.PreviewAsync();
+        var result = await Cleaner.CleanAsync();
+
+        // Bill 1, line 1, attachment 1, file 1 (2000 bytes), nothing kept - in the preview and in the result.
+        CleanUpRecordCount[] expected = [new("Attachments", 1), new("BillLines", 1), new("Bills", 1)];
+        Assert.Equal(expected.OrderBy(r => r.Table), preview.Records.OrderBy(r => r.Table));
+        Assert.Equal(expected.OrderBy(r => r.Table), result.Records.OrderBy(r => r.Table));
+        Assert.Equal(3, preview.DeletedRecords);
+        Assert.Equal((1, 2000), (preview.OrphanFiles, preview.OrphanFileBytes));
+        Assert.Equal((1, 2000), (result.FilesRemoved, result.FileBytesRemoved));
+        Assert.Empty(preview.KeptRecords);
+        Assert.Empty(result.KeptRecords);
+        Assert.False(File.Exists(Path.Combine(_device.AttachmentsFolder, photo.Id + ".jpg")));
+        Assert.Equal(0, Counts()["Attachments"].All);
+
+        // A second run finds nothing.
+        Assert.True((await Cleaner.PreviewAsync()).IsEmpty);
+    }
+
+    [Fact]
+    public async Task Attachments_of_a_deleted_owner_from_before_the_cascade_are_purged_with_their_files()
+    {
+        await _device.InitializeAsync();
+        var (bill, photo) = await AddBillWithLineAndPhotoAsync();
+        // Existing data: the bill and its line are deleted by hand (old behaviour), the photo row is still live.
+        Run($"UPDATE BillLines SET IsDeleted = 1 WHERE BillId = '{bill.Id.ToString().ToUpperInvariant()}'");
+        Run($"UPDATE Bills SET IsDeleted = 1 WHERE Id = '{bill.Id.ToString().ToUpperInvariant()}'");
+
+        var preview = await Cleaner.PreviewAsync();
+        var result = await Cleaner.CleanAsync();
+
+        Assert.Equal(3, preview.DeletedRecords);
+        Assert.Equal(1, preview.OrphanFiles);
+        Assert.Equal(3, result.RecordsRemoved);
+        Assert.Equal(1, result.FilesRemoved);
+        Assert.False(File.Exists(Path.Combine(_device.AttachmentsFolder, photo.Id + ".jpg")));
+    }
+
+    [Fact]
+    public async Task An_attachment_whose_owner_row_is_missing_is_purged_but_one_of_another_kind_stays()
+    {
+        await _device.InitializeAsync();
+        var store = _device.Get<IAttachmentStore>();
+        var lost = await store.AddAsync(new Attachment { FileName = "a.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.MeterReading, OwnerId = Guid.NewGuid() }, new MemoryStream(new byte[100]));
+        var other = await store.AddAsync(new Attachment { FileName = "b.jpg", ContentType = "image/jpeg", OwnerKind = AttachmentOwnerKind.Other, OwnerId = Guid.NewGuid() }, new MemoryStream(new byte[100]));
+
+        var preview = await Cleaner.PreviewAsync();
+        var result = await Cleaner.CleanAsync();
+
+        Assert.Equal([new CleanUpRecordCount("Attachments", 1)], preview.Records);
+        Assert.Equal([new CleanUpRecordCount("Attachments", 1)], result.Records);
+        Assert.False(File.Exists(Path.Combine(_device.AttachmentsFolder, lost.Id + ".jpg")));
+        Assert.True(File.Exists(Path.Combine(_device.AttachmentsFolder, other.Id + ".jpg")));
+        Assert.NotNull(await store.GetAsync(other.Id));
+    }
+
+    [Fact]
+    public async Task Without_files_the_preview_has_no_file_bytes()
+    {
+        await _device.InitializeAsync();
+        var (bill, photo) = await AddBillWithLineAndPhotoAsync();
+        File.Delete(Path.Combine(_device.AttachmentsFolder, photo.Id + ".jpg"));
+        await _device.Get<IBillStore>().DeleteAsync(bill.Id);
+
+        var preview = await Cleaner.PreviewAsync();
+
+        Assert.Equal(3, preview.DeletedRecords);
+        Assert.Equal((0, 0L), (preview.OrphanFiles, preview.OrphanFileBytes));
     }
 
     private string Text(string sql)
