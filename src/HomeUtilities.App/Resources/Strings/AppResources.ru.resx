@@ -363,7 +363,7 @@
   <data name="MeterAddReading" xml:space="preserve"><value>Ввести показание</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>История</value></data>
   <data name="MeterHistoryReplaced" xml:space="preserve"><value>Замена: снят счётчик № {0} · {1:d}</value></data>
-  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Заменён счётчиком {0} {1:d}</value></data>
+  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Замена: установлен счётчик № {0} · {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>Новый регистр</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Регистр</value></data>
   <data name="RegisterExportHint" xml:space="preserve"><value>Считает энергию, отданную в сеть.</value></data>

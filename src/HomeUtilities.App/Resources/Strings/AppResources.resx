@@ -363,7 +363,7 @@
   <data name="MeterAddReading" xml:space="preserve"><value>Add reading</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>History</value></data>
   <data name="MeterHistoryReplaced" xml:space="preserve"><value>Replacement: removed meter no. {0} · {1:d}</value></data>
-  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replaced by {0} on {1:d}</value></data>
+  <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replacement: installed meter no. {0} · {1:d}</value></data>
   <data name="RegisterNew" xml:space="preserve"><value>New register</value></data>
   <data name="RegisterKindLabel" xml:space="preserve"><value>Register</value></data>
   <data name="RegisterExportHint" xml:space="preserve"><value>Counts energy fed into the grid.</value></data>

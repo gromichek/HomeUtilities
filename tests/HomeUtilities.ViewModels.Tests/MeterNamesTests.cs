@@ -79,3 +79,20 @@ public sealed class UnitFormatTests
     [Fact]
     public void WithUnit_WithoutUnit_IsJustTheNumber() => Assert.Equal("5", BillText.WithUnit("5", ""));
 }
+
+/// <summary>C-15: the two history lines of a replacement read alike.</summary>
+public sealed class MeterHistoryTextTests
+{
+    [Fact]
+    public void ReplacementLines_RemovedAndInstalled_UseTheSameWording()
+    {
+        var date = new DateOnly(2026, 3, 15);
+
+        var ru = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+        Assert.Equal(string.Format(ru, "Замена: снят счётчик № CW-1 · {0:d}", date), ResxLocalizer.Russian.Get("MeterHistoryReplaced", "CW-1", date));
+        Assert.Equal(
+            string.Format(ru, "Замена: установлен счётчик № CW-2 · {0:d}", date),
+            ResxLocalizer.Russian.Get("MeterHistoryReplacedBy", "CW-2", date));
+        Assert.StartsWith("Replacement: installed meter no. CW-2", ResxLocalizer.English.Get("MeterHistoryReplacedBy", "CW-2", date));
+    }
+}
