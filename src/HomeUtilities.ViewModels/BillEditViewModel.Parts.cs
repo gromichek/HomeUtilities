@@ -867,8 +867,9 @@ public sealed partial class BillEditViewModel
         }
 
         var state = BillStatus.Of(_bill, _paymentList, _clock.Today);
-        StatusKind = BillBadge.KindOf(state);
-        StatusText = BillBadge.TextOf(_localizer, state, CurrencySymbol);
+        // The same "due soon" rule as the Bills list (C-12).
+        StatusKind = BillBadge.KindOf(state, _bill.DueOn, _clock.Today);
+        StatusText = BillBadge.TextOf(_localizer, state, CurrencySymbol, StatusKind, _bill.DueOn);
         PaidAmountText = Money(state.Paid);
         OpenAmountText = Money(state.Open);
         CanMarkPaid = state.Open != 0 && Math.Sign(state.Open) == Math.Sign(_bill.Gross);

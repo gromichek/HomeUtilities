@@ -38,19 +38,10 @@ public sealed partial class BillItemViewModel : ObservableObject, ISelectableLis
         Color = color;
         TotalText = BillText.Money(bill.Gross, currencySymbol);
         IsDraft = bill.IsDraft;
-        Badge = IsDraft ? BillBadgeKind.Draft : BillBadge.KindOf(state);
-
-        // An unpaid bill that falls due within the next days is amber, with the date in the text (UI_GUIDELINES §8).
-        if (Badge == BillBadgeKind.Unpaid && today is { } now && bill.DueOn is { } due && due >= now && due <= now.AddDays(TodoBuilder.BillLookAheadDays))
-        {
-            Badge = BillBadgeKind.DueSoon;
-        }
-
+        Badge = IsDraft ? BillBadgeKind.Draft : BillBadge.KindOf(state, bill.DueOn, today);
         BadgeText = IsDraft
             ? (bill.Gross > 0 ? localizer["BillBadgeDraft"] : localizer["BillBadgeDraftAmount"])
-            : Badge == BillBadgeKind.DueSoon
-                ? localizer.Get("BillBadgeDueSoon", BillText.Date(bill.DueOn!.Value))
-                : BillBadge.TextOf(localizer, state, currencySymbol);
+            : BillBadge.TextOf(localizer, state, currencySymbol, Badge, bill.DueOn);
         IsHighlighted = isHighlighted;
         CanMarkPaid = !IsDraft && state.Open != 0 && Math.Sign(state.Open) == Math.Sign(bill.Gross);
         MarkPaidText = localizer["BillMarkPaid"];

@@ -420,6 +420,9 @@
                                 <DataTrigger TargetType="Label" x:DataType="vm:BillEditViewModel" Binding="{Binding IsStatusPartial}" Value="True">
                                     <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
                                 </DataTrigger>
+                                <DataTrigger TargetType="Label" x:DataType="vm:BillEditViewModel" Binding="{Binding IsStatusDueSoon}" Value="True">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                </DataTrigger>
                                 <DataTrigger TargetType="Label" x:DataType="vm:BillEditViewModel" Binding="{Binding IsStatusOverdue}" Value="True">
                                     <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
                                 </DataTrigger>
