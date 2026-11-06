@@ -108,8 +108,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - **T-037/2** The dialog counts raw rows ("Удалённых записей: 2" for one deleted bill = bill + bill line). Show what the
   user deleted, by kind (e.g. "счета: 1 · строки счетов: 1 · вложения: 1"), or only top-level records.
 - **T-037/3** "файлов … 0 (1 КБ)": the size is shown with a minimum of 1 KB even for no files — no size when 0.
-- **T-037/4** After the clean-up only the size before is shown (owner) — clarify: result message without "→ after"
-  (VACUUM failed / skipped?) or the backup list entry. Check the VACUUM path on Windows (open connections).
+- **T-037/4** (owner's screenshot) The dialog said "records: 2", the result "Удалено: записей 1, файлов 0 (1 КБ)" — no
+  "kept" line, so one counted row was neither removed nor reported. Preview and purge must count the same rows;
+  reproduce with one bill (one line, one photo) deleted. Size 960 KB → 960 KB is expected for one small row (SQLite
+  pages) — not a bug.
 - Windows icons blurred (owner, 2026-11-06) → fixed by #250 (menu/toolbar icons rendered at 16 DIP × display scale). / tech debt
 
 ### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02)
