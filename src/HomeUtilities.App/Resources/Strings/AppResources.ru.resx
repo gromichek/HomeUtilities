@@ -88,7 +88,6 @@
   <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
   <data name="DeletedUndoMessage" xml:space="preserve"><value>«{0}» удалено</value></data>
   <data name="Undo" xml:space="preserve"><value>Отменить</value></data>
-  <data name="Dialog_Delete_Dependants" xml:space="preserve"><value>Вместе с ним будут удалены: {0}.</value></data>
   <data name="Dialog_Error_Title" xml:space="preserve"><value>Ошибка</value></data>
   <data name="Dialog_Ok" xml:space="preserve"><value>OK</value></data>
   <data name="PropertyGeneral" xml:space="preserve"><value>Основное</value></data>

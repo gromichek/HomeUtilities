@@ -1,6 +1,5 @@
 using Android.Graphics.Drawables;
 using AndroidX.Core.View;
-using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Platform;
 
 namespace HomeUtilities.App;
@@ -17,7 +16,7 @@ internal static class SystemBars
     public static void Apply()
     {
         var app = Microsoft.Maui.Controls.Application.Current;
-        if (Platform.CurrentActivity?.Window is not { } window
+        if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity?.Window is not { } window
             || app is null
             || !app.Resources.TryGetValue(app.RequestedTheme == AppTheme.Dark ? "SurfaceDark" : "SurfaceLight", out var value)
             || value is not Color page)
@@ -31,7 +30,10 @@ internal static class SystemBars
         window.SetBackgroundDrawable(new ColorDrawable(color));
         if (!OperatingSystem.IsAndroidVersionAtLeast(35))
         {
+            // Deprecated from Android 15, where the bar is transparent and the window background shows through instead.
+#pragma warning disable CA1422, CS0618
             window.SetNavigationBarColor(color);
+#pragma warning restore CA1422, CS0618
         }
 
         if (OperatingSystem.IsAndroidVersionAtLeast(29))
