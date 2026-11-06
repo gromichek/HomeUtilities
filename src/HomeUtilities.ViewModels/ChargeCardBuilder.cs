@@ -230,15 +230,15 @@ public sealed class ChargeCardBuilder
         switch (basis)
         {
             case ChargeBasis.PerArea:
-                return $"{quantity.ToString("N2", culture)} {_localizer["Unit_Area"]}";
+                return BillText.WithUnit(quantity.ToString("N2", culture), _localizer["Unit_Area"]);
             case ChargeBasis.PerResident:
-                return $"{quantity.ToString("0.##", culture)} {_localizer[quantity == 1m ? "ChargeUnitResident_One" : "ChargeUnitResident_Many"]}";
+                return BillText.WithUnit(quantity.ToString("0.##", culture), _localizer[quantity == 1m ? "ChargeUnitResident_One" : "ChargeUnitResident_Many"]);
             case ChargeBasis.FixedMonthly:
-                return $"{quantity.ToString("0.##", culture)} {_localizer["Unit_Month"]}";
+                return BillText.WithUnit(quantity.ToString("0.##", culture), _localizer["Unit_Month"]);
             default:
                 // A metered line: the unit word of the component's meters.
                 var unit = describer.UnitOf(component ?? new TariffComponent { Basis = basis });
-                return $"{quantity.ToString("N3", culture)} {unit}";
+                return BillText.WithUnit(quantity.ToString("N3", culture), unit);
         }
     }
 

@@ -60,7 +60,7 @@
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Показать архивные</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>В архиве</value></data>
   <data name="PropertySummaryResidents" xml:space="preserve"><value>Жильцов: {0}</value></data>
-  <data name="PropertySummaryArea" xml:space="preserve"><value>Площадь: {0} м²</value></data>
+  <data name="PropertySummaryArea" xml:space="preserve"><value>Площадь: {0} м²</value></data>
   <data name="PropertyNew" xml:space="preserve"><value>Новый объект</value></data>
   <data name="PropertyName" xml:space="preserve"><value>Название</value></data>
   <data name="PropertyKindLabel" xml:space="preserve"><value>Тип</value></data>
@@ -536,8 +536,8 @@
   <data name="TariffExampleNoVat" xml:space="preserve"><value>Выберите ставку НДС, чтобы увидеть пример.</value></data>
   <data name="TariffExampleNoParameter" xml:space="preserve"><value>Укажите это значение в объекте, чтобы увидеть пример.</value></data>
   <data name="TariffExampleInvalid" xml:space="preserve"><value>Для этой цены пример недоступен.</value></data>
-  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
-  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + НДС {4} = {5} {6}</value></data>
+  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
+  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + НДС {4} = {5} {6}</value></data>
   <data name="TariffComponentNew" xml:space="preserve"><value>Новый компонент тарифа</value></data>
   <data name="TariffGeneral" xml:space="preserve"><value>Общее</value></data>
   <data name="TariffNameLabel" xml:space="preserve"><value>Название *</value></data>
@@ -654,7 +654,7 @@
   <data name="ChargeReadingStartMissing" xml:space="preserve"><value>Начало: нет показаний</value></data>
   <data name="ChargeReadingEnd" xml:space="preserve"><value>Конец: {0} на {1:d}</value></data>
   <data name="ChargeReadingEndMissing" xml:space="preserve"><value>Конец: нет показаний</value></data>
-  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Расход: {0} {1}</value></data>
+  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Расход: {0} {1}</value></data>
   <data name="ChargeSegmentOld" xml:space="preserve"><value>{0} (старый счётчик): {1} → итоговые {2} = {3}</value></data>
   <data name="ChargeSegmentNew" xml:space="preserve"><value>{0} (новый счётчик): начальные {1} → {2} = {3}</value></data>
   <data name="ChargeNoteRollover" xml:space="preserve"><value>Переход через ноль на счётчике «{0}»: {1} → {2}</value></data>
@@ -1030,6 +1030,7 @@
   <data name="OverviewSettlementRefund" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: возврат {1}</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3}</value></data>
+  <data name="OverviewYearLineNoPrevious" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="TodoReadings" xml:space="preserve"><value>Передать показания: {0}</value></data>
   <data name="TodoReadingsOpen" xml:space="preserve"><value>Окно {0} — открыто сейчас</value></data>
   <data name="TodoReadingsOpensTomorrow" xml:space="preserve"><value>Окно {0} — откроется завтра</value></data>

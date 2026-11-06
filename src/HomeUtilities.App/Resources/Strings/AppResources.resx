@@ -60,7 +60,7 @@
   <data name="PropertiesShowArchived" xml:space="preserve"><value>Show archived</value></data>
   <data name="PropertyArchivedBadge" xml:space="preserve"><value>Archived</value></data>
   <data name="PropertySummaryResidents" xml:space="preserve"><value>Residents: {0}</value></data>
-  <data name="PropertySummaryArea" xml:space="preserve"><value>Area: {0} m²</value></data>
+  <data name="PropertySummaryArea" xml:space="preserve"><value>Area: {0} m²</value></data>
   <data name="PropertyNew" xml:space="preserve"><value>New property</value></data>
   <data name="PropertyName" xml:space="preserve"><value>Name</value></data>
   <data name="PropertyKindLabel" xml:space="preserve"><value>Kind</value></data>
@@ -536,8 +536,8 @@
   <data name="TariffExampleNoVat" xml:space="preserve"><value>Choose a VAT rate to see an example.</value></data>
   <data name="TariffExampleNoParameter" xml:space="preserve"><value>Enter this value in the property to see an example.</value></data>
   <data name="TariffExampleInvalid" xml:space="preserve"><value>No example for this price.</value></data>
-  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
-  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + VAT {4} = {5} {6}</value></data>
+  <data name="TariffExampleSlice" xml:space="preserve"><value>{0} {1} × {2} = {3}</value></data>
+  <data name="TariffExampleTotal" xml:space="preserve"><value>{0} {1} → {2} + VAT {4} = {5} {6}</value></data>
   <data name="TariffComponentNew" xml:space="preserve"><value>New tariff component</value></data>
   <data name="TariffGeneral" xml:space="preserve"><value>General</value></data>
   <data name="TariffNameLabel" xml:space="preserve"><value>Name *</value></data>
@@ -654,7 +654,7 @@
   <data name="ChargeReadingStartMissing" xml:space="preserve"><value>Start: no reading</value></data>
   <data name="ChargeReadingEnd" xml:space="preserve"><value>End: {0} on {1:d}</value></data>
   <data name="ChargeReadingEndMissing" xml:space="preserve"><value>End: no reading</value></data>
-  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Consumption: {0} {1}</value></data>
+  <data name="ChargeReadingConsumption" xml:space="preserve"><value>Consumption: {0} {1}</value></data>
   <data name="ChargeSegmentOld" xml:space="preserve"><value>{0} (old meter): {1} → final {2} = {3}</value></data>
   <data name="ChargeSegmentNew" xml:space="preserve"><value>{0} (new meter): initial {1} → {2} = {3}</value></data>
   <data name="ChargeNoteRollover" xml:space="preserve"><value>Roll-over on {0}: {1} → {2}</value></data>
@@ -1030,6 +1030,7 @@
   <data name="OverviewSettlementRefund" xml:space="preserve"><value>Expected settlement, {0}: refund {1}</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} same period: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} same period: {3}</value></data>
+  <data name="OverviewYearLineNoPrevious" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="TodoReadings" xml:space="preserve"><value>Submit readings: {0}</value></data>
   <data name="TodoReadingsOpen" xml:space="preserve"><value>Window {0} — open now</value></data>
   <data name="TodoReadingsOpensTomorrow" xml:space="preserve"><value>Window {0} — opens tomorrow</value></data>

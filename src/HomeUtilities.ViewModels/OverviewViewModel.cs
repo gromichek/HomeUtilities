@@ -568,7 +568,9 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
                 .Select(c =>
                 {
                     var year = c.Year;
-                    var text = c.ChangePercent is { } percent
+                    var text = !c.HasLastYear
+                        ? _localizer.Get("OverviewYearLineNoPrevious", c.Year, Money(c.ThisYear, c.Currency))
+                        : c.ChangePercent is { } percent
                         ? _localizer.Get("OverviewYearLine", c.Year, Money(c.ThisYear, c.Currency), c.Year - 1, Money(c.LastYear, c.Currency), BillText.SignedPercent(percent))
                         : _localizer.Get("OverviewYearLineNoChange", c.Year, Money(c.ThisYear, c.Currency), c.Year - 1, Money(c.LastYear, c.Currency));
                     return new OverviewLineViewModel(text, OverviewTone.Neutral, Go(() => OpenBillsAsync(propertyId, BillStatusFilter.All, year)));

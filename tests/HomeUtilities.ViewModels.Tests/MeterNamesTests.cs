@@ -56,3 +56,26 @@ public sealed class MeterNamesTests
         Assert.Equal("Bathroom", MeterNames.ShortTitle(ResxLocalizer.English, Meter("Bathroom", "CW-1", RegisterKind.Total)));
     }
 }
+
+/// <summary>C-18: a number and its unit never wrap apart.</summary>
+public sealed class UnitFormatTests
+{
+    [Fact]
+    public void WithUnit_JoinsNumberAndUnitWithANonBreakingSpace()
+    {
+        var saved = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        try
+        {
+            Assert.Equal("1.267\u00A0m³", BillText.WithUnit(1.267m, "N3", "m³"));
+            Assert.Equal("54.7\u00A0m²", BillText.WithUnit("54.7", "m²"));
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = saved;
+        }
+    }
+
+    [Fact]
+    public void WithUnit_WithoutUnit_IsJustTheNumber() => Assert.Equal("5", BillText.WithUnit("5", ""));
+}

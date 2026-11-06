@@ -528,10 +528,23 @@ public class OverviewViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task This_year_without_last_year_has_no_percentage()
+    public async Task This_year_without_last_year_data_shows_no_comparison_line()
     {
         var water = _kit.AddWaterContract(tariff: false);
         _kit.AddBill(water, new YearMonth(2026, 3), 100m, due: null);
+
+        var vm = await LoadAsync();
+
+        // No bill in the same months of 2025: the line must not print "2025 …: 0,00 €" (C-05).
+        Assert.Equal($"OverviewYearLineNoPrevious 2026|{Money("100.00")} [en]", vm.YearBlocks[0].Lines[0].Text);
+    }
+
+    [Fact]
+    public async Task This_year_with_last_year_bills_that_sum_to_zero_keeps_the_comparison_without_percentage()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        _kit.AddBill(water, new YearMonth(2026, 3), 100m, due: null);
+        _kit.AddBill(water, new YearMonth(2025, 3), 0m, due: null);
 
         var vm = await LoadAsync();
 

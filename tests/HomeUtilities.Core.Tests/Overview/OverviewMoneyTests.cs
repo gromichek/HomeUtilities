@@ -145,7 +145,7 @@ public class OverviewMoneyTests
 
         var comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, Today));
 
-        Assert.Equal((100m, 0m, (decimal?)null), (comparison.ThisYear, comparison.LastYear, comparison.ChangePercent));
+        Assert.Equal((100m, 0m, (decimal?)null, false), (comparison.ThisYear, comparison.LastYear, comparison.ChangePercent, comparison.HasLastYear));
     }
 
     [Fact]

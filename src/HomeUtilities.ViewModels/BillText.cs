@@ -11,6 +11,14 @@ public static class BillText
     /// <summary>"46,02 €": two decimals, current culture, a non-breaking space and the currency symbol.</summary>
     public static string Money(decimal amount, string symbol) => $"{amount.ToString("N2", CultureInfo.CurrentCulture)}{NonBreakingSpace}{symbol}";
 
+    /// <summary>"1,267 m³": a number and its unit, joined by a non-breaking space so they never wrap apart (C-18).</summary>
+    public static string WithUnit(string number, string unit) =>
+        unit.Length == 0 ? number : $"{number}{NonBreakingSpace}{unit}";
+
+    /// <summary>"1,267 m³": the number with <paramref name="format"/> in the current culture, then the unit.</summary>
+    public static string WithUnit(decimal number, string format, string unit) =>
+        WithUnit(number.ToString(format, CultureInfo.CurrentCulture), unit);
+
     /// <summary>"+2,15 €" / "−0,50 €": always with a sign (zero without).</summary>
     public static string SignedMoney(decimal amount, string symbol) =>
         $"{amount.ToString("+0.00;-0.00;0.00", CultureInfo.CurrentCulture)}{NonBreakingSpace}{symbol}";
