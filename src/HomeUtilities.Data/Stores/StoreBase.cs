@@ -48,9 +48,13 @@ public abstract class StoreBase<T>(IDbContextFactory<HomeUtilitiesDbContext> fac
             return;
         }
 
+        await OnDeletingAsync(db, existing, ct);
         db.Remove(existing);
         await db.SaveChangesAsync(ct);
     }
+
+    /// <summary>Called inside <see cref="DeleteAsync"/> before the save; stores whose records own attachments delete them here.</summary>
+    protected virtual Task OnDeletingAsync(HomeUtilitiesDbContext db, T existing, CancellationToken ct) => Task.CompletedTask;
 
     /// <summary>Lists the aggregates matching a filter, in the default order.</summary>
     protected async Task<IReadOnlyList<T>> ListAsync(Func<IQueryable<T>, IQueryable<T>> filter, CancellationToken ct)

@@ -985,6 +985,18 @@ internal sealed class FakeAttachmentStore : IAttachmentStore
         Deleted.Add(id);
         return Task.CompletedTask;
     }
+
+    public Task DeleteByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, CancellationToken ct = default)
+    {
+        Deleted.AddRange(Added.Select(a => a.Meta).Where(a => a.OwnerKind == kind && a.OwnerId == ownerId).Select(a => a.Id));
+        return Task.CompletedTask;
+    }
+
+    public Task RestoreByOwnerAsync(AttachmentOwnerKind kind, Guid ownerId, DateTimeOffset ownerDeletedAt, CancellationToken ct = default)
+    {
+        Deleted.RemoveAll(id => Added.Any(a => a.Meta.Id == id && a.Meta.OwnerKind == kind && a.Meta.OwnerId == ownerId));
+        return Task.CompletedTask;
+    }
 }
 
 internal sealed class FakeMediaService : IMediaService

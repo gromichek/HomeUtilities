@@ -1028,12 +1028,15 @@ documents (and files that belong to no record at all), and then it makes the dat
 you have entered your data** (when you made and deleted some mistakes), and later now and then. Nothing you can see changes — lists,
 the Overview and the reports look exactly as before.
 
-- The dialog first shows what would go: *Deleted records: 37 · files of deleted photos and documents: 5 (2.3 MB)*. If there is
-  nothing to remove, you only get a short message.
+- The dialog first shows what would go, by kind of record — only the kinds that have something: *Bills: 1 · bill lines: 1 ·
+  attachments: 1 (photos and documents: 1, 2.3 MB)*. A photo or document belongs to the record it was added to (a bill, a meter, a
+  reading): when you delete that record, its photos and documents are deleted with it, and the clean-up removes their files too. The
+  size appears only when there are files. If there is nothing to remove, you only get a short message.
 - Deleted records **cannot be brought back** afterwards, except from the backup copy. That is why the app makes an automatic copy
   first (*Before the database clean-up*, see the list of copies on the same page). If that copy fails, the app asks whether to go on
   without it.
-- When it is done, a message shows how many records and files were removed and the size of the database before → after.
+- When it is done, a message shows the same counts for what was really removed (they match the dialog) and the size of the database
+  before → after.
 - If a deleted record is still used by a record you can see (this should not happen), it is **kept** and listed in *Settings → Error
   log*; nothing visible is touched.
 

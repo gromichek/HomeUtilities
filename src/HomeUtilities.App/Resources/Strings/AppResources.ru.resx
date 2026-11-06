@@ -1649,13 +1649,13 @@
   <data name="CleanUpButton" xml:space="preserve"><value>Очистить базу данных…</value></data>
   <data name="CleanUpAction" xml:space="preserve"><value>Очистить</value></data>
   <data name="CleanUpNothing" xml:space="preserve"><value>Очищать нечего: нет удалённых записей и неиспользуемых файлов.</value></data>
-  <data name="CleanUpConfirm" xml:space="preserve"><value>Удалённых записей: {0} · файлов удалённых фото и документов: {1} ({2}).
+  <data name="CleanUpConfirm" xml:space="preserve"><value>{0}.
 
 После очистки удалённые записи нельзя вернуть, кроме как из резервной копии, которая будет сделана сейчас.</value></data>
   <data name="CleanUpConfirmSync" xml:space="preserve"><value>Синхронизация включена: очищенные данные будут загружены как новые данные в облаке, а другие устройства попросят заменить свои данные.</value></data>
   <data name="CleanUpRunning" xml:space="preserve"><value>Очищаю базу данных…</value></data>
-  <data name="CleanUpDone" xml:space="preserve"><value>Удалено: записей {0}, файлов {1} ({2}).
-Размер базы данных: {3} → {4}.</value></data>
+  <data name="CleanUpDone" xml:space="preserve"><value>Удалено — {0}.
+Размер базы данных: {1} → {2}.</value></data>
   <data name="CleanUpKept" xml:space="preserve"><value>В таблицах ({0}) остались удалённые записи, на которые ссылаются другие записи; они сохранены. Подробности — в журнале ошибок.</value></data>
   <data name="CleanUpNotCompacted" xml:space="preserve"><value>Размер файла базы данных сейчас уменьшить не удалось: {0}</value></data>
   <data name="CleanUpReplaceCloudQuestion" xml:space="preserve"><value>Очищенные данные этого устройства станут новыми данными в облаке. Другие устройства попросят заменить свои данные ими. Если выбрать «Не сейчас», синхронизация будет выключена, пока вы не решите в Настройки → Синхронизация.</value></data>
@@ -1663,4 +1663,30 @@
   <data name="CleanUpCloudReplaced" xml:space="preserve"><value>Теперь в облаке очищенные данные.</value></data>
   <data name="CleanUpCloudFailed" xml:space="preserve"><value>Облако сейчас заменить не удалось ({0}). Синхронизация выключена; включите её в Настройки → Синхронизация и выберите «Заменить данные в облаке данными этого устройства».</value></data>
   <data name="CleanUpSyncOff" xml:space="preserve"><value>Синхронизация выключена. Включите её в Настройки → Синхронизация и выберите «Заменить данные в облаке данными этого устройства».</value></data>
+  <data name="CleanUpKindCount" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="CleanUpKind_Properties" xml:space="preserve"><value>объекты</value></data>
+  <data name="CleanUpKind_PropertyParameters" xml:space="preserve"><value>параметры объектов</value></data>
+  <data name="CleanUpKind_Categories" xml:space="preserve"><value>категории</value></data>
+  <data name="CleanUpKind_Suppliers" xml:space="preserve"><value>поставщики</value></data>
+  <data name="CleanUpKind_Contracts" xml:space="preserve"><value>договоры</value></data>
+  <data name="CleanUpKind_ContractMeters" xml:space="preserve"><value>привязки счётчиков к договорам</value></data>
+  <data name="CleanUpKind_Meters" xml:space="preserve"><value>счётчики</value></data>
+  <data name="CleanUpKind_MeterRegisters" xml:space="preserve"><value>тарифы счётчиков</value></data>
+  <data name="CleanUpKind_MeterReadings" xml:space="preserve"><value>показания</value></data>
+  <data name="CleanUpKind_VatRates" xml:space="preserve"><value>ставки НДС</value></data>
+  <data name="CleanUpKind_VatRateVersions" xml:space="preserve"><value>версии ставок НДС</value></data>
+  <data name="CleanUpKind_TariffComponents" xml:space="preserve"><value>компоненты тарифов</value></data>
+  <data name="CleanUpKind_TariffRates" xml:space="preserve"><value>цены тарифов</value></data>
+  <data name="CleanUpKind_EqualizedPlans" xml:space="preserve"><value>планы равномерных платежей</value></data>
+  <data name="CleanUpKind_Bills" xml:space="preserve"><value>счета</value></data>
+  <data name="CleanUpKind_BillLines" xml:space="preserve"><value>строки счетов</value></data>
+  <data name="CleanUpKind_BillTemplates" xml:space="preserve"><value>шаблоны счетов</value></data>
+  <data name="CleanUpKind_Payments" xml:space="preserve"><value>платежи</value></data>
+  <data name="CleanUpKind_PaymentAllocations" xml:space="preserve"><value>распределения платежей</value></data>
+  <data name="CleanUpKind_Attachments" xml:space="preserve"><value>вложения</value></data>
+  <data name="CleanUpKind_ImportBatches" xml:space="preserve"><value>импорты</value></data>
+  <data name="CleanUpKind_ImportProfiles" xml:space="preserve"><value>профили импорта</value></data>
+  <data name="CleanUpKind_Other" xml:space="preserve"><value>прочие записи</value></data>
+  <data name="CleanUpFiles" xml:space="preserve"><value>(фото и документы: {0}, {1})</value></data>
+  <data name="CleanUpFilesOnly" xml:space="preserve"><value>файлы фото и документов: {0} ({1})</value></data>
 </root>

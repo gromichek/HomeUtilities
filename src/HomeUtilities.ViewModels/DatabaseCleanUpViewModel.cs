@@ -71,7 +71,12 @@ public sealed partial class DatabaseCleanUpViewModel : ViewModelBase
             }
 
             var syncOn = _engine?.IsEnabled == true;
-            var message = _localizer.Get("CleanUpConfirm", preview.DeletedRecords, preview.OrphanFiles, FormatSize(preview.OrphanFileBytes));
+            var message = _localizer.Get("CleanUpConfirm", Describe(preview.Records, preview.OrphanFiles, preview.OrphanFileBytes));
+            if (preview.KeptRecords.Count > 0)
+            {
+                message += "\n\n" + _localizer.Get("CleanUpKept", preview.KeptRecords.Count);
+            }
+
             if (syncOn)
             {
                 message += "\n\n" + _localizer["CleanUpConfirmSync"];
@@ -153,15 +158,83 @@ public sealed partial class DatabaseCleanUpViewModel : ViewModelBase
 
     private string Summary(CleanUpResult result) => _localizer.Get(
         "CleanUpDone",
-        result.RecordsRemoved,
-        result.FilesRemoved,
-        FormatSize(result.FileBytesRemoved),
+        Describe(result.Records, result.FilesRemoved, result.FileBytesRemoved),
         FormatSize(result.DatabaseBytesBefore),
         FormatSize(result.DatabaseBytesAfter));
+
+    /// <summary>
+    /// "Bills: 1 · bill lines: 1 · attachments: 1 (photos and documents: 1, 2.3 MB)": the kinds of record that have a count, the
+    /// files of photos and documents behind the attachments, and a size only when there are files.
+    /// </summary>
+    private string Describe(IReadOnlyList<CleanUpRecordCount> records, int files, long fileBytes)
+    {
+        var counts = new List<(string Key, int Count)>();
+        var other = 0;
+        foreach (var (table, count) in records.Where(r => r.Count > 0))
+        {
+            if (KindKeys.TryGetValue(table, out var key))
+            {
+                counts.Add((key, count));
+            }
+            else
+            {
+                other += count;
+            }
+        }
+
+        if (other > 0)
+        {
+            counts.Add(("CleanUpKind_Other", other));
+        }
+
+        var parts = counts.Select(c => _localizer.Get("CleanUpKindCount", _localizer[c.Key], c.Count)).ToList();
+        if (files > 0)
+        {
+            var attachments = counts.FindIndex(c => c.Key == "CleanUpKind_Attachments");
+            if (attachments >= 0)
+            {
+                parts[attachments] += " " + _localizer.Get("CleanUpFiles", files, FormatSize(fileBytes));
+            }
+            else
+            {
+                parts.Add(_localizer.Get("CleanUpFilesOnly", files, FormatSize(fileBytes)));
+            }
+        }
+
+        var text = string.Join(" · ", parts);
+        return text.Length == 0 ? text : char.ToUpperInvariant(text[0]) + text[1..];
+    }
 
     private string FormatSize(long bytes) => bytes >= 1024 * 1024
         ? _localizer.Get("BackupSizeMb", bytes / (1024.0 * 1024.0))
         : _localizer.Get("BackupSizeKb", Math.Max(1, bytes / 1024.0));
+
+    // Table name in the database -> resource key of the kind's name; other tables are counted as "other records".
+    private static readonly Dictionary<string, string> KindKeys = new(StringComparer.Ordinal)
+    {
+        ["Properties"] = "CleanUpKind_Properties",
+        ["PropertyParameters"] = "CleanUpKind_PropertyParameters",
+        ["Categories"] = "CleanUpKind_Categories",
+        ["Suppliers"] = "CleanUpKind_Suppliers",
+        ["Contracts"] = "CleanUpKind_Contracts",
+        ["ContractMeters"] = "CleanUpKind_ContractMeters",
+        ["Meters"] = "CleanUpKind_Meters",
+        ["MeterRegisters"] = "CleanUpKind_MeterRegisters",
+        ["MeterReadings"] = "CleanUpKind_MeterReadings",
+        ["VatRates"] = "CleanUpKind_VatRates",
+        ["VatRateVersions"] = "CleanUpKind_VatRateVersions",
+        ["TariffComponents"] = "CleanUpKind_TariffComponents",
+        ["TariffRates"] = "CleanUpKind_TariffRates",
+        ["EqualizedPlans"] = "CleanUpKind_EqualizedPlans",
+        ["Bills"] = "CleanUpKind_Bills",
+        ["BillLines"] = "CleanUpKind_BillLines",
+        ["BillTemplates"] = "CleanUpKind_BillTemplates",
+        ["Payments"] = "CleanUpKind_Payments",
+        ["PaymentAllocations"] = "CleanUpKind_PaymentAllocations",
+        ["Attachments"] = "CleanUpKind_Attachments",
+        ["ImportBatches"] = "CleanUpKind_ImportBatches",
+        ["ImportProfiles"] = "CleanUpKind_ImportProfiles",
+    };
 
     protected override void RefreshTexts()
     {
