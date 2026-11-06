@@ -36,6 +36,13 @@ public sealed partial class RegisterEntryViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(NoteToggleText))]
     private bool _showNote;
 
+    /// <summary>
+    /// True for the last value field of the screen: its keyboard key is "Done", every other field's is "Next", which moves the
+    /// focus to the following value field (R-49).
+    /// </summary>
+    [ObservableProperty]
+    private bool _isLastEntry;
+
     [ObservableProperty]
     private string _previewText = string.Empty;
 
@@ -88,6 +95,9 @@ public sealed partial class RegisterEntryViewModel : ObservableObject
     public string NoteToggleText => _localizer[ShowNote ? "ReadingsNoteHide" : "ReadingsNoteShow"];
 
     public IRelayCommand ToggleNoteCommand { get; }
+
+    /// <summary>The note icon is marked while the register has a note, even when its field is collapsed.</summary>
+    public bool HasNote => NoteText.Length > 0;
 
     /// <summary>The consumption since the last reading as a number; null while nothing valid is typed or there is no earlier reading.</summary>
     public decimal? Consumption { get; private set; }
@@ -170,7 +180,11 @@ public sealed partial class RegisterEntryViewModel : ObservableObject
         _changed();
     }
 
-    partial void OnNoteTextChanged(string value) => _changed();
+    partial void OnNoteTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasNote));
+        _changed();
+    }
 
     private MeterReading NewReading(decimal value) => new()
     {

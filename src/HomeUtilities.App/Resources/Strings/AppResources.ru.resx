@@ -420,6 +420,7 @@
   <data name="ReadingsNoLast" xml:space="preserve"><value>показаний ещё нет</value></data>
   <data name="ReadingsNoteShow" xml:space="preserve"><value>Добавить заметку</value></data>
   <data name="ReadingsNoteHide" xml:space="preserve"><value>Скрыть заметку</value></data>
+  <data name="ReadingsHistoryTooltip" xml:space="preserve"><value>История показаний</value></data>
   <data name="ReadingsWarnHigh" xml:space="preserve"><value>Необычно много (в среднем {0})</value></data>
   <data name="ReadingsWarnZero" xml:space="preserve"><value>Нулевой расход</value></data>
   <data name="ReadingsWarnRollover" xml:space="preserve"><value>Предположен переход через ноль ({0} → {1})</value></data>

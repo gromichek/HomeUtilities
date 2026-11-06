@@ -45,6 +45,7 @@ public sealed partial class MeterCardViewModel : ObservableObject
         PhotoCommand = new AsyncRelayCommand(photoActions.Pick);
         RemovePhotoCommand = new RelayCommand(photoActions.Remove);
         PhotoTooltip = localizer["PhotoAddTooltip"];
+        HistoryTooltip = localizer["ReadingsHistoryTooltip"];
         RemovePhotoTooltip = localizer["PhotoRemove"];
     }
 
@@ -61,6 +62,8 @@ public sealed partial class MeterCardViewModel : ObservableObject
     public string PhotoName => Photo?.FileName ?? string.Empty;
 
     public string PhotoTooltip { get; }
+
+    public string HistoryTooltip { get; }
 
     public string RemovePhotoTooltip { get; }
 

@@ -420,6 +420,7 @@
   <data name="ReadingsNoLast" xml:space="preserve"><value>no readings yet</value></data>
   <data name="ReadingsNoteShow" xml:space="preserve"><value>Add a note</value></data>
   <data name="ReadingsNoteHide" xml:space="preserve"><value>Hide note</value></data>
+  <data name="ReadingsHistoryTooltip" xml:space="preserve"><value>Reading history</value></data>
   <data name="ReadingsWarnHigh" xml:space="preserve"><value>Unusually high (avg {0})</value></data>
   <data name="ReadingsWarnZero" xml:space="preserve"><value>Zero consumption</value></data>
   <data name="ReadingsWarnRollover" xml:space="preserve"><value>Roll-over assumed ({0} → {1})</value></data>

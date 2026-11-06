@@ -17,6 +17,7 @@
     <views:PageBase.Resources>
         <conv:DateOnlyConverter x:Key="DateOnly" />
         <conv:StreamFactoryImageConverter x:Key="StreamImage" />
+        <conv:BoolToReturnTypeConverter x:Key="ReturnKey" />
     </views:PageBase.Resources>
 
     <!-- Entry form with a fixed "Save all" bar at the bottom. -->
@@ -107,12 +108,12 @@
                                                         </DataTrigger>
                                                     </Border.Triggers>
                                                     <VerticalStackLayout Spacing="8">
-                                                        <!-- Tap the header to see the history of the meter. -->
-                                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                                            <Grid.GestureRecognizers>
-                                                                <TapGestureRecognizer Command="{Binding OpenHistoryCommand}" />
-                                                            </Grid.GestureRecognizers>
-                                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                        <!-- Tap the title or the history icon to see the history of the meter. -->
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                                            <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                                                <VerticalStackLayout.GestureRecognizers>
+                                                                    <TapGestureRecognizer Command="{Binding OpenHistoryCommand}" />
+                                                                </VerticalStackLayout.GestureRecognizers>
                                                                 <Label Text="{Binding Title}" FontAttributes="Bold" />
                                                                 <Label Text="{Binding SerialText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasSerial}" />
                                                             </VerticalStackLayout>
@@ -121,8 +122,10 @@
                                                                     Text="{StaticResource IconPhoto}" Command="{Binding PhotoCommand}"
                                                                     ToolTipProperties.Text="{Binding PhotoTooltip}"
                                                                     SemanticProperties.Description="{Binding PhotoTooltip}" />
-                                                            <Label Grid.Column="2" Text="{StaticResource IconHistory}" FontFamily="{DynamicResource IconFontFamily}"
-                                                                   FontSize="20" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                                            <Button Grid.Column="2" Style="{StaticResource IconButton}"
+                                                                    Text="{StaticResource IconHistory}" Command="{Binding OpenHistoryCommand}"
+                                                                    ToolTipProperties.Text="{Binding HistoryTooltip}"
+                                                                    SemanticProperties.Description="{Binding HistoryTooltip}" />
                                                         </Grid>
 
                                                         <!-- Thumbnail of the chosen photo with a remove (×) button. -->
@@ -156,13 +159,27 @@
                                                                     <VerticalStackLayout Spacing="4">
                                                                         <Label Text="{Binding Label}" FontAttributes="Bold" IsVisible="{Binding HasLabel}" />
                                                                         <Label Text="{Binding LastText}" Style="{StaticResource MutedLabel}" />
-                                                                        <Entry Text="{Binding ValueText}" Keyboard="Numeric"
-                                                                               MaxLength="{x:Static core:InputLimits.Number}" />
+                                                                        <!-- The value field with the note icon in its row; Next moves to the next value field. -->
+                                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                                                            <Entry Grid.Column="0" Text="{Binding ValueText}" Keyboard="Numeric"
+                                                                                   ReturnType="{Binding IsLastEntry, Converter={StaticResource ReturnKey}}"
+                                                                                   views:EntryFocusChain.Enabled="True"
+                                                                                   MaxLength="{x:Static core:InputLimits.Number}" />
+                                                                            <Button Grid.Column="1" Style="{StaticResource IconButton}"
+                                                                                    Text="{StaticResource IconNote}" Command="{Binding ToggleNoteCommand}"
+                                                                                    ToolTipProperties.Text="{Binding NoteToggleText}"
+                                                                                    SemanticProperties.Description="{Binding NoteToggleText}"
+                                                                                    TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}">
+                                                                                <Button.Triggers>
+                                                                                    <DataTrigger TargetType="Button" x:DataType="vm:RegisterEntryViewModel" Binding="{Binding HasNote}" Value="True">
+                                                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                                                                                    </DataTrigger>
+                                                                                </Button.Triggers>
+                                                                            </Button>
+                                                                        </Grid>
                                                                         <Label Text="{Binding PreviewText}" FontAttributes="Bold" IsVisible="{Binding HasPreview}" />
                                                                         <Label Text="{Binding WarningText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasWarning}" />
                                                                         <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
-                                                                        <Button Text="{Binding NoteToggleText}" Command="{Binding ToggleNoteCommand}"
-                                                                                Style="{StaticResource TextButton}" HorizontalOptions="Start" />
                                                                         <Editor Text="{Binding NoteText}" MaxLength="{x:Static core:InputLimits.Notes}"
                                                                                 AutoSize="TextChanges" MinimumHeightRequest="60" IsVisible="{Binding ShowNote}" />
                                                                     </VerticalStackLayout>

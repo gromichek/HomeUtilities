@@ -87,6 +87,42 @@ public class ReadingSubmitLinkTests
     }
 
     [Fact]
+    public async Task Submit_online_is_offered_once_in_the_banner_and_not_again_in_the_meter_cards()
+    {
+        // R-48: the contract has a reading window (banner) and a "submit readings" page: only the banner has the button.
+        var meter = AddMeter("Kitchen");
+        var other = AddMeter("Hall", MeterResource.Electricity);
+        var water = AddContract("Water", "Water utility", [Submit("https://water.example/readings")], [], meter);
+        water.ReadingDayFrom = 20;
+        water.ReadingDayTo = 26;
+        // A contract without a window keeps its button in the card of its meter.
+        AddContract("Power", "Power supplier", [Submit("https://power.example/readings")], [], other);
+
+        var vm = await LoadAsync();
+
+        var banner = Assert.Single(vm.Banners);
+        Assert.True(banner.HasSubmitLink);
+        Assert.Empty(Card(vm, "Kitchen").SubmitLinks);
+        Assert.False(Card(vm, "Kitchen").HasSubmitLinks);
+        Assert.Equal("https://power.example/readings", Assert.Single(Card(vm, "Hall").SubmitLinks).Uri.AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task Only_the_last_value_field_of_the_screen_says_Done_and_the_others_Next()
+    {
+        // R-49: Next moves through the fields in screen order (groups by resource, cards, registers).
+        AddMeter("Kitchen");
+        AddMeter("Bathroom");
+        AddMeter("Hall", MeterResource.Electricity);
+
+        var vm = await LoadAsync();
+
+        var rows = vm.Groups.SelectMany(g => g.Cards).SelectMany(c => c.Rows).ToList();
+        Assert.Equal(3, rows.Count);
+        Assert.Equal([false, false, true], rows.Select(r => r.IsLastEntry));
+    }
+
+    [Fact]
     public async Task Submit_readings_page_is_preferred_over_the_customer_portal()
     {
         var meter = AddMeter("Kitchen");

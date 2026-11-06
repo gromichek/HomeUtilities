@@ -568,6 +568,13 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
                 .Select(g => new ReadingGroupViewModel(EnumText.Get(_localizer, g.Key), [.. g])),
         ];
 
+        // Keyboard order = screen order; only the last field says "Done" (R-49).
+        var entryRows = Groups.SelectMany(g => g.Cards).SelectMany(c => c.Rows).ToList();
+        for (var i = 0; i < entryRows.Count; i++)
+        {
+            entryRows[i].IsLastEntry = i == entryRows.Count - 1;
+        }
+
         foreach (var row in cards.SelectMany(c => c.Rows))
         {
             if (entries.TryGetValue(row.RegisterId, out var kept))
@@ -630,8 +637,16 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
     private IReadOnlyList<SubmitLinkViewModel> SubmitLinksOf(Meter meter)
     {
         var pages = new List<(Uri Uri, List<ContractInfo> Contracts)>();
+        var today = YearMonth.From(_clock.Today);
         foreach (var info in _contracts.Where(c => c.MeterIds.Contains(meter.Id) && c.ButtonUri is not null))
         {
+            // A contract with a reading-window banner and a "submit readings" link already offers "Submit online" in its banner;
+            // the meter card repeats it only for the other pages (R-48).
+            if (info.SubmitLink is not null && info.Contract.GetReadingWindow(today) is not null)
+            {
+                continue;
+            }
+
             var uri = info.ButtonUri!;
             var page = pages.Find(p => string.Equals(p.Uri.AbsoluteUri, uri.AbsoluteUri, StringComparison.Ordinal));
             if (page.Contracts is null)
