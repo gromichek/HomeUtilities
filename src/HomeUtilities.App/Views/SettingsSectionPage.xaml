@@ -201,8 +201,7 @@
                 <VerticalStackLayout Spacing="12" BindingContext="{Binding Settings.Sync}" x:DataType="vm:SyncSettingsViewModel">
                     <Border Style="{StaticResource SectionCard}">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
-                            <Label Text="{Binding ProviderText}" Style="{StaticResource MutedLabel}" />
+                            <!-- Status first; the long explanation is an expander at the end of the card (R-42). -->
                             <Label Text="{Binding StatusText}" FontAttributes="Bold" />
                             <Label Text="{Binding AccountText}" IsVisible="{Binding ShowAccount}" />
                             <Label Text="{Binding MessageText}" IsVisible="{Binding HasMessage}">
@@ -225,7 +224,7 @@
                                     <Switch Grid.Column="1" IsToggled="{Binding SyncOn}" IsEnabled="{Binding IsNotBusy}" VerticalOptions="Center" />
                                 </Grid>
                                 <Label Text="{Binding SyncRunText}" FontAttributes="Bold" />
-                                <Label Text="{Binding LastSyncText}" Style="{StaticResource MutedLabel}" />
+                                <Label Text="{Binding LastSyncText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowLastSync}" />
                                 <Button Text="{Binding ReplaceFromCloudText}" Command="{Binding ReplaceFromCloudCommand}"
                                         IsVisible="{Binding ShowReplaceFromCloud}" Style="{StaticResource PrimaryButton}" />
                                 <Button Text="{Binding SyncNowText}" Command="{Binding SyncNowCommand}"
@@ -263,6 +262,24 @@
                                     IsVisible="{Binding IsSignedIn}" Style="{StaticResource SecondaryButton}" />
                             <Button Text="{Binding DisconnectText}" Command="{Binding DisconnectCommand}"
                                     IsVisible="{Binding CanDisconnect}" Style="{StaticResource DestructiveButton}" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleHowItWorksCommand}" />
+                                </Grid.GestureRecognizers>
+                                <Label Grid.Column="0" Text="{Binding HowItWorksText}" Style="{StaticResource SectionHeader}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}" FontSize="20"
+                                       VerticalOptions="Center" Style="{StaticResource MutedLabel}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" x:DataType="vm:SyncSettingsViewModel" Binding="{Binding HowItWorksExpanded}" Value="True">
+                                            <Setter Property="Text" Value="{StaticResource IconCollapse}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Grid>
+                            <VerticalStackLayout Spacing="8" IsVisible="{Binding HowItWorksExpanded}">
+                                <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" />
+                                <Label Text="{Binding ProviderText}" Style="{StaticResource MutedLabel}" />
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

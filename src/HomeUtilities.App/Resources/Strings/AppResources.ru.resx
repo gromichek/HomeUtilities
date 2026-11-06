@@ -1573,6 +1573,8 @@
   <data name="SyncStep_Read" xml:space="preserve"><value>чтение</value></data>
   <data name="SyncStep_Delete" xml:space="preserve"><value>удаление</value></data>
   <data name="SyncDisconnect" xml:space="preserve"><value>Отключить</value></data>
+  <data name="SyncDisconnectTitle" xml:space="preserve"><value>Отключить аккаунт Google?</value></data>
+  <data name="SyncHowItWorks" xml:space="preserve"><value>Как это работает</value></data>
   <data name="SyncDisconnectConfirm" xml:space="preserve"><value>Удалить аккаунт Google с этого устройства и отозвать доступ HomeUtilities к вашему Google Диску? Данные в приложении останутся как есть.</value></data>
   <data name="SyncDisconnected" xml:space="preserve"><value>Отключено.</value></data>
   <data name="SyncDisconnectedRevokeFailed" xml:space="preserve"><value>На этом устройстве аккаунт отключён, но связаться с Google и отозвать доступ не удалось. Его можно убрать в аккаунте Google: Безопасность → Доступ третьих сторон.</value></data>
@@ -1670,7 +1672,7 @@
   <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Отправлены изменения (записей: {0}).</value></data>
   <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Полная копия сохранена в облаке.</value></data>
   <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Старые файлы изменений удалены из облака.</value></data>
-  <data name="SyncDetail_Conflict" xml:space="preserve"><value>Конфликт при объединении данных.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>Одна и та же категория или ставка НДС создана на двух устройствах; сохранена одна из них. Проверьте списки категорий и ставок НДС.</value></data>
   <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Отправлен файл вложения.</value></data>
   <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Получен файл вложения.</value></data>
   <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>Полученный файл вложения повреждён, пробуем ещё раз.</value></data>

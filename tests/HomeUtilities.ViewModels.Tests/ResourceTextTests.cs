@@ -87,6 +87,21 @@ public class ResourceTextTests
     }
 
     [Fact]
+    public void SyncDetails_FromAnotherDay_StartWithTheDate()
+    {
+        var at = new DateTimeOffset(2026, 11, 5, 12, 52, 0, TimeSpan.Zero);
+        var local = at.ToLocalTime();
+        var date = DateOnly.FromDateTime(local.DateTime);
+        var time = local.ToString("HH:mm", CultureInfo.CurrentCulture);
+        var detail = new SyncDetail(at, SyncDetailKind.AppliedChanges, 2);
+
+        Assert.Equal($"{time} Received changes (records: 2).", SyncDetailText.Line(ResxLocalizer.English, detail, date));
+        Assert.Equal(
+            $"{HomeUtilities.ViewModels.Common.DateFormat.Full(date)} {time} Received changes (records: 2).",
+            SyncDetailText.Line(ResxLocalizer.English, detail, date.AddDays(1)));
+    }
+
+    [Fact]
     public void SyncDetails_AreShortLocalizedLines_WithoutFileNamesOrIds()
     {
         var at = new DateTimeOffset(2026, 11, 5, 12, 52, 0, TimeSpan.Zero);

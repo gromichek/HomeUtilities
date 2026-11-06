@@ -232,8 +232,20 @@ public class SyncSettingsViewModelTests
 
         await vm.DisconnectCommand.ExecuteAsync(null);
 
-        Assert.Single(_dialogs.Confirmations);
+        var (title, _) = Assert.Single(_dialogs.Confirmations);
+        Assert.Equal("SyncDisconnectTitle [en]", title); // a question, not the bare button text (C-14)
         Assert.True(vm.IsSignedIn);
+    }
+
+    [Fact]
+    public void HowItWorks_IsCollapsedUntilOpened()
+    {
+        var vm = Vm();
+
+        Assert.False(vm.HowItWorksExpanded);
+        vm.ToggleHowItWorksCommand.Execute(null);
+        Assert.True(vm.HowItWorksExpanded);
+        Assert.Equal("SyncHowItWorks [en]", vm.HowItWorksText);
     }
 
     [Fact]

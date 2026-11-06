@@ -1573,6 +1573,8 @@
   <data name="SyncStep_Read" xml:space="preserve"><value>read</value></data>
   <data name="SyncStep_Delete" xml:space="preserve"><value>delete</value></data>
   <data name="SyncDisconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="SyncDisconnectTitle" xml:space="preserve"><value>Disconnect the Google account?</value></data>
+  <data name="SyncHowItWorks" xml:space="preserve"><value>How it works</value></data>
   <data name="SyncDisconnectConfirm" xml:space="preserve"><value>Remove the Google account from this device and revoke the access of HomeUtilities to your Google Drive? The data in the app stay as they are.</value></data>
   <data name="SyncDisconnected" xml:space="preserve"><value>Disconnected.</value></data>
   <data name="SyncDisconnectedRevokeFailed" xml:space="preserve"><value>Disconnected on this device, but Google could not be reached to revoke the access. You can remove it in your Google account under Security → Third-party access.</value></data>
@@ -1670,7 +1672,7 @@
   <data name="SyncDetail_UploadedChanges" xml:space="preserve"><value>Sent changes (records: {0}).</value></data>
   <data name="SyncDetail_WroteSnapshot" xml:space="preserve"><value>Saved a full copy to the cloud.</value></data>
   <data name="SyncDetail_DeletedCovered" xml:space="preserve"><value>Removed old change files from the cloud.</value></data>
-  <data name="SyncDetail_Conflict" xml:space="preserve"><value>A conflict was met while merging.</value></data>
+  <data name="SyncDetail_Conflict" xml:space="preserve"><value>The same category or VAT rate was created on two devices; one of them was kept. Check the Categories and VAT rates lists.</value></data>
   <data name="SyncDetail_AttachmentUploaded" xml:space="preserve"><value>Sent an attachment file.</value></data>
   <data name="SyncDetail_AttachmentDownloaded" xml:space="preserve"><value>Received an attachment file.</value></data>
   <data name="SyncDetail_AttachmentChecksum" xml:space="preserve"><value>A received attachment file is damaged; trying again.</value></data>
