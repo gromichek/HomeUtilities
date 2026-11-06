@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Abstractions;
+using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,10 @@ public sealed class BillStore(IDbContextFactory<HomeUtilitiesDbContext> factory)
                 return q;
             },
             ct);
+
+    /// <inheritdoc />
+    protected override Task OnDeletingAsync(HomeUtilitiesDbContext db, Bill existing, CancellationToken ct) =>
+        AttachmentCascade.DeleteForOwnersAsync(db, AttachmentOwnerKind.Bill, [existing.Id], ct);
 
     /// <inheritdoc />
     protected override IQueryable<Bill> Include(IQueryable<Bill> query) => query.Include(b => b.Lines);
