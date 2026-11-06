@@ -246,6 +246,25 @@ public class ReportsViewModelTests : IDisposable
     }
 
     [Fact]
+    public void A_preset_closes_the_period_dialog_at_once_and_Custom_waits_for_OK()
+    {
+        var (from, to) = (new YearMonth(2026, 1), new YearMonth(2026, 12));
+        var dialog = new ReportPeriodDialogViewModel(_kit.Localizer, ReportPreset.ThisYear, from, to, from, to);
+        Assert.False(dialog.ShowOk);
+
+        // "Custom…" (the one row with extra inputs) shows the calendars and OK, and keeps the dialog open.
+        dialog.Presets.First(p => Equals(p.Value, ReportPreset.Custom)).ChooseCommand.Execute(null);
+        Assert.Equal(ReportPreset.Custom, dialog.Preset);
+        Assert.True(dialog.ShowOk);
+        Assert.False(dialog.Saved);
+
+        // A preset answers with one tap.
+        dialog.Presets.First(p => Equals(p.Value, ReportPreset.LastYear)).ChooseCommand.Execute(null);
+        Assert.Equal(ReportPreset.LastYear, dialog.Preset);
+        Assert.True(dialog.Saved);
+    }
+
+    [Fact]
     public void The_calendars_map_the_picked_dates_to_months_and_offer_the_range_of_the_data()
     {
         var (from, to) = (new YearMonth(2026, 3), new YearMonth(2026, 5));
@@ -314,7 +333,7 @@ public class ReportsViewModelTests : IDisposable
     public async Task Cancelling_the_report_dialog_keeps_the_report()
     {
         var vm = await LoadAsync();
-        _kit.Dialogs.EditorScript = editor => ((SingleChoiceDialogViewModel)editor).Items[1].ChooseCommand.Execute(null);
+        _kit.Dialogs.EditorScript = editor => ((SingleChoiceDialogViewModel)editor).CancelCommand.Execute(null);
 
         await vm.ChooseReportCommand.ExecuteAsync(null);
 
@@ -325,7 +344,7 @@ public class ReportsViewModelTests : IDisposable
     public async Task Cancelling_the_period_dialog_changes_nothing()
     {
         var vm = await LoadAsync();
-        _kit.Dialogs.EditorScript = editor => ((ReportPeriodDialogViewModel)editor).Presets[2].ChooseCommand.Execute(null);
+        _kit.Dialogs.EditorScript = editor => ((ReportPeriodDialogViewModel)editor).CancelCommand.Execute(null);
 
         await vm.ChoosePeriodCommand.ExecuteAsync(null);
 

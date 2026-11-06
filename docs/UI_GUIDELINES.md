@@ -20,6 +20,7 @@ The history of why a rule exists is in the appendix at the end.
 | 3 | (owner 2026-11-05) Compact-by-height only on Android | A short wide Windows window became a "phone". |
 | 3 | Period switcher ‹ › visible in the collapsed filter summary | Most common filter action without expanding (R-50). |
 | 3a | One choice field control; native `Picker` and action sheets not used for picking records; dialogs return Ids | Two field looks on one screen, no current-value mark, records matched by display text (R-03, R-04, R-06). |
+| 3a | (owner 2026-11-05) A choice row without extra inputs selects **and closes at once**; OK only for rows with extra inputs | Two taps per choice (tap the row, tap OK) were slower than the old action sheet (C-06). |
 | 3a | Segmented control allowed for 2–3 short options | The ban led to two plain buttons with the primary style as "selected" (R-40). |
 | 5 | Undo snackbar instead of a confirmation for a single delete; clearer confirmation text; standard texts for empty, loading, saved | "Will be hidden" is unclear; Undo infrastructure exists. |
 | 6 | One field look (bordered), read-only value pattern, unit suffix, `ReturnType=Next`, switch placement | Several patterns side by side (R-07, R-08, R-24). |
@@ -162,21 +163,25 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 
 ## 3a. Choices [CHANGED]
 - **[CHANGED] One choice field control** for every "pick one of a list" field in the app: caption above, current value
-  in a bordered box with `IconExpand`, a tap opens the choice dialog (today's `ReportFilterField`; rename it to
-  `ChoiceField`). The value wraps to at most 2 lines; it is never cut to one line.
+  in a bordered box with `IconExpand`, a tap opens the choice dialog (`ChoiceField`; bind `ItemsSource` + `DisplayMember` +
+  `SelectedIndex` / `SelectedItem` like a Picker, or `Value` + `Command` when the view model runs the dialog). The value wraps to
+  at most 2 lines; it is never cut to one line.
 - **[CHANGED] The native `Picker` is not used** (on Android it shows no current-value mark and looks like a text field).
   **`DisplayActionSheet` is used only to pick a *command*** (e.g. "Camera / Gallery"), never to pick a record or an
   option.
 - **[NEW] Choice dialogs return the Id** (or index) of the chosen item, never its display text — two records may have
   the same name (two contracts "Газ" after a change of supplier).
-- One look for every choice dialog: title top-left, content **directly under the title**, **Cancel** + **OK** at the
-  bottom (frame per §3.4). Rows are list rows: whole row tappable, height ≥ 48, the radio / check mark **directly
+- One look for every choice dialog: title top-left, content **directly under the title**, **Cancel** at the
+  bottom (frame per §3.4). **[CHANGED] (owner 2026-11-05)** In a single-choice dialog **a row without extra inputs selects and
+  closes the dialog at once** — there is no OK; **OK is shown only while a row with extra inputs is chosen** (e.g. "Custom…" with
+  its from / to months) and in multi-choice dialogs. Cancel / Back stay. Rows are list rows: whole row tappable, height ≥ 48, the radio / check mark **directly
   before** the text, optional colour dot between mark and text, text left-aligned. **The current value is marked when
   the dialog opens.**
-- Single choice: radio rows. Extra inputs of an option (e.g. "Custom…" → from/to month) appear under that row.
+- Single choice: radio rows. Extra inputs of an option (e.g. "Custom…" → from/to month) appear under that row; choosing such a row
+  does not close the dialog, OK does.
 - Multi choice: **All / None** as text buttons under the title, then the check rows.
 - An entry that creates a new record ("＋ Новый поставщик…") is the **last row**, visually separated, with `IconAdd`
-  instead of a radio mark.
+  instead of a radio mark; it acts at once (`IDialogService.ChooseAsync(..., actionText)`; the answer is `options.Count`).
 - **[NEW] Segmented control** for 2–3 short mutually exclusive options that switch a *view* (Table / Chart): one
   bordered group of equal columns, the selected segment tinted (`Highlight`) with a check icon — not the filled primary
   style. Labels ≤ 12 characters; otherwise use a choice field.
@@ -272,8 +277,9 @@ Use these wordings everywhere (resx keys in brackets).
   `TextDark`): unset, WinUI took the hover colours of Back from the system theme and Back vanished in the dark app theme (#246).
   Never a toolbar background colour on Windows.
 - **Windows renders `FontImageSource` at 96 dpi and the flyout / toolbar icon box is 16 DIP**; Material glyphs (24 grid) are
-  soft at 16 px whatever is done (#250 tried runtime sizing — no visible gain, to be removed). Menu icons therefore become
-  text (`Label` in the Material font, owner 2026-11-06); toolbar icons stay images.
+  soft at 16 px whatever is done (#250 tried runtime sizing — no visible gain, **removed in T-036b**). Menu icons are therefore
+  text: the flyout items use `Shell.ItemTemplate` with a `MenuIconLabel` (a `Label` in the Material font that takes its glyph from
+  `FlyoutItem.Icon`, same code points); toolbar icons stay images, as they were before #250 (owner 2026-11-06).
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.

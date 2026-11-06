@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
              x:Class="HomeUtilities.App.Views.ReadingHistoryView"
              x:DataType="vm:ReadingHistoryViewModel">
@@ -56,7 +57,7 @@
                                 </VerticalStackLayout>
 
                                 <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMore}"
-                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

@@ -13,8 +13,14 @@ public interface IDialogService
     /// **index** of the chosen option, or null if the user cancelled. Callers map the index back to their record, never
     /// the display text (two records may have the same name).
     /// </summary>
+    /// <remarks>
+    /// A row without extra inputs answers at once (UI_GUIDELINES §3a). With <paramref name="actionText"/> an extra row that
+    /// creates something new ("＋ New supplier…") is shown last, set apart, and answers with the index
+    /// <c>options.Count</c>.
+    /// </remarks>
     /// <param name="selectedIndex">The option marked when the dialog opens (null = none).</param>
-    Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null);
+    /// <param name="actionText">Text of the "create new" action row; null = none.</param>
+    Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null, string? actionText = null);
 
     /// <summary>
     /// Picks a **command** (e.g. Camera / Gallery) with the system action sheet. Returns the chosen text or null if the

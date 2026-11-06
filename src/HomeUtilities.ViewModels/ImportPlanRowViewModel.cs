@@ -35,7 +35,7 @@ public sealed class ImportPlanRowViewModel
         foreach (var reading in row.Readings)
         {
             var label = registerLabels.GetValueOrDefault(reading.RegisterId, string.Empty);
-            actions.Add(localizer.Get("ImportActionReading", label, Number(reading.Reading.Value), reading.Reading.Date.ToString("d", CultureInfo.CurrentCulture)));
+            actions.Add(localizer.Get("ImportActionReading", label, Number(reading.Reading.Value), DateFormat.Full(reading.Reading.Date)));
         }
 
         if (row.Bill is { } bill)
@@ -45,7 +45,7 @@ public sealed class ImportPlanRowViewModel
 
         if (row.Payment is { } payment)
         {
-            actions.Add(localizer.Get("ImportActionPayment", Number(payment.Amount), payment.Currency, payment.PaidOn.ToString("d", CultureInfo.CurrentCulture)));
+            actions.Add(localizer.Get("ImportActionPayment", Number(payment.Amount), payment.Currency, DateFormat.Full(payment.PaidOn)));
         }
 
         if (row.IsSkipped)

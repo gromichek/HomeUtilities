@@ -126,8 +126,18 @@ internal sealed class FakeDialogService : IDialogService
     /// <summary>The options and the marked index of every <see cref="ChooseAsync"/> call.</summary>
     public List<(IReadOnlyList<string> Options, int? Selected)> Choices { get; } = [];
 
-    public Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null)
+    /// <summary>The "create new" action texts passed to <see cref="ChooseAsync"/>, in order (null = none).</summary>
+    public List<string?> ChoiceActions { get; } = [];
+
+    public Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null, string? actionText = null)
     {
+        // The action row is the last option for the scripts (its index is options.Count, like in the app).
+        ChoiceActions.Add(actionText);
+        if (actionText is not null)
+        {
+            options = [.. options, actionText];
+        }
+
         Choices.Add((options, selectedIndex));
         if (ChooseIndexScript is not null)
         {
@@ -416,6 +426,41 @@ internal sealed class FakeClipboardService : IClipboardService
     {
         Texts.Add(text);
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// An <see cref="IDeleteUndoService"/> whose recordings return the rows a test says the delete touched, and that remembers
+/// what was restored. (The exact recording and restoring is tested against the real database in the Data tests.)
+/// </summary>
+internal sealed class FakeDeleteUndoService : IDeleteUndoService
+{
+    /// <summary>The rows every recording reports.</summary>
+    public List<DeletedRow> Touched { get; } = [];
+
+    public int Recordings { get; private set; }
+
+    public List<IReadOnlyCollection<DeletedRow>> Restored { get; } = [];
+
+    public IDeleteRecording BeginRecording()
+    {
+        Recordings++;
+        return new Recording(Touched);
+    }
+
+    public Task RestoreAsync(IReadOnlyCollection<DeletedRow> rows, CancellationToken ct = default)
+    {
+        Restored.Add(rows);
+        return Task.CompletedTask;
+    }
+
+    private sealed class Recording(List<DeletedRow> rows) : IDeleteRecording
+    {
+        public IReadOnlyList<DeletedRow> Rows => [.. rows];
+
+        public void Dispose()
+        {
+        }
     }
 }
 
@@ -789,6 +834,8 @@ internal sealed class ContractTestKit
 
     public ReadingHistoryViewModel CreateHistory() => new(Meters, Attachments, Viewer, Media, Localizer, Dialogs);
 
+    public ReadingHistoryViewModel CreateHistory(DeleteUndoSupport undo) => new(Meters, Attachments, Viewer, Media, Localizer, Dialogs, null, undo);
+
     public ReadingsViewModel CreateReadings() =>
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, CreateHistory);
 
@@ -801,8 +848,13 @@ internal sealed class ContractTestKit
     public BillTemplatesViewModel CreateTemplates(ISectionSelectionMemory? memory = null) =>
         new(Templates, Properties, Categories, Localizer, Navigation, Layout, memory ?? new SectionSelectionMemory(), CreateTemplateEditor);
 
-    public PaymentEditViewModel CreatePaymentEditor() =>
-        new(Payments, Bills, Contracts, Suppliers, Properties, Clock, Localizer, Dialogs, Navigation, Toast);
+    public PaymentEditViewModel CreatePaymentEditor() => CreatePaymentEditor(null);
+
+    public PaymentEditViewModel CreatePaymentEditor(DeleteUndoSupport? undo) =>
+        new(Payments, Bills, Contracts, Suppliers, Properties, Clock, Localizer, Dialogs, Navigation, Toast, undo);
+
+    /// <summary>The Undo support the editors of deletable records get in the app, over a fake recorder.</summary>
+    public DeleteUndoSupport CreateUndoSupport(FakeDeleteUndoService service) => new(service, Toast, Localizer);
 
     public Guid CategoryIdFor(ServiceKind kind) => BuiltInCategories.FindFor(kind, Categories.Stored)!.Value;
 }

@@ -25,14 +25,16 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
     public Task<bool> ConfirmAsync(string title, string message, string accept, string cancel) =>
         Page.DisplayAlertAsync(title, message, accept, cancel);
 
-    public async Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null)
+    public async Task<int?> ChooseAsync(string title, IReadOnlyList<string> options, int? selectedIndex = null, string? actionText = null)
     {
         // The row value is the index, so two options with the same text stay distinguishable.
-        var dialog = new SingleChoiceDialogViewModel(
-            localizer,
-            title,
-            options.Select((text, index) => new SingleChoiceOption(index, text)),
-            selectedIndex);
+        var rows = options.Select((text, index) => new SingleChoiceOption(index, text)).ToList();
+        if (actionText is not null)
+        {
+            rows.Add(new SingleChoiceOption(options.Count, actionText, IsAction: true));
+        }
+
+        var dialog = new SingleChoiceDialogViewModel(localizer, title, rows, selectedIndex);
         return await ShowEditorAsync(dialog) && dialog.SelectedValue is int picked ? picked : null;
     }
 
@@ -60,7 +62,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         if (layoutMode.Current == LayoutMode.Compact)
         {
             var modal = new EditorDialogPage(view, editor);
-            Action close = () => _ = modal.Navigation.PopModalAsync();
+            Action close = () => _ = CloseModalAsync(modal);
             editor.CloseRequested += close;
             try
             {
@@ -103,6 +105,12 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         }
 
         return editor.Saved;
+    }
+
+    private static async Task CloseModalAsync(EditorDialogPage modal)
+    {
+        await modal.Navigation.PopModalAsync();
+        modal.MarkClosed();
     }
 
     // One view per dialog view model; add a case with every new child-item dialog.

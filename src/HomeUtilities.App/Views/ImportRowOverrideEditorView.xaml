@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
              xmlns:core="clr-namespace:HomeUtilities.Core.Common;assembly=HomeUtilities.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
@@ -20,10 +21,7 @@
 
             <Label Text="{Binding PeriodLabel}" Style="{StaticResource MutedLabel}" />
             <!-- App-language month text; the picker lies over it, invisible, and opens on tap (R-02). -->
-            <Grid>
-                <Label Text="{Binding PeriodText}" VerticalOptions="Center" InputTransparent="True" />
-                <DatePicker Date="{Binding Period}" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" />
-            </Grid>
+            <views:DateField Text="{Binding PeriodText}" Date="{Binding Period}" />
 
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                 <Switch IsToggled="{Binding Covers}" />
@@ -31,10 +29,7 @@
             </Grid>
             <VerticalStackLayout Spacing="2" IsVisible="{Binding Covers}">
                 <Label Text="{Binding UntilLabel}" Style="{StaticResource MutedLabel}" />
-                <Grid>
-                    <Label Text="{Binding UntilText}" VerticalOptions="Center" InputTransparent="True" />
-                    <DatePicker Date="{Binding Until}" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}" />
-                </Grid>
+                <views:DateField Text="{Binding UntilText}" Date="{Binding Until}" />
             </VerticalStackLayout>
             <Label Text="{Binding RangeError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding RangeError, Converter={StaticResource HasText}}" />

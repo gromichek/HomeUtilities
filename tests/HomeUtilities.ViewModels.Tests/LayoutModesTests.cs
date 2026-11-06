@@ -26,4 +26,13 @@ public class LayoutModesTests
     {
         Assert.Equal(expected, LayoutModes.FromSize(width, height));
     }
+
+    [Theory]
+    [InlineData(900, 400, LayoutMode.Medium)] // a low but wide Windows window keeps the desktop layout
+    [InlineData(2000, 300, LayoutMode.Expanded)]
+    [InlineData(360, 300, LayoutMode.Compact)] // a narrow window is compact by width
+    public void FromSize_OutsideAndroidOnlyTheWidthCounts(double width, double height, LayoutMode expected)
+    {
+        Assert.Equal(expected, LayoutModes.FromSize(width, height, lowWindowIsPhone: false));
+    }
 }

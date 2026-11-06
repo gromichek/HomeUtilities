@@ -7,7 +7,9 @@ namespace HomeUtilities.ViewModels;
 /// <param name="Value">What the option stands for.</param>
 /// <param name="Text">The display name.</param>
 /// <param name="Description">One-line explanation; empty = none.</param>
-public readonly record struct SingleChoiceOption(object Value, string Text, string Description = "");
+/// <param name="IsAction">An entry that creates something new ("＋ New supplier…"); shown as a separate row at the end.</param>
+/// <param name="HasExtraInputs">Choosing the option shows more inputs, so the dialog stays open and needs OK.</param>
+public readonly record struct SingleChoiceOption(object Value, string Text, string Description = "", bool IsAction = false, bool HasExtraInputs = false);
 
 /// <summary>Implemented by the choice dialogs so the host can size a desktop popup to its list.</summary>
 public interface IChoiceDialog
@@ -17,8 +19,9 @@ public interface IChoiceDialog
 }
 
 /// <summary>
-/// A dialog with one radio row per option (and an optional explanation under each) and OK / Cancel. Reusable for any
-/// "pick one of a few" choice, e.g. the report of the Reports screen.
+/// A dialog with one radio row per option (and an optional explanation under each). A row without extra inputs selects
+/// and closes the dialog at once; OK is shown only when some row has extra inputs (UI_GUIDELINES §3a, owner 2026-11-05).
+/// Action rows ("＋ New…") come last and act at once. Reusable for any "pick one of a few" choice.
 /// </summary>
 public sealed partial class SingleChoiceDialogViewModel : EditorDialogViewModel, IChoiceDialog
 {
@@ -32,13 +35,19 @@ public sealed partial class SingleChoiceDialogViewModel : EditorDialogViewModel,
         Title = title;
         Message = message ?? string.Empty;
         OkText = localizer["Dialog_Ok"];
+        var rows = options.ToList();
+
+        // Action rows ("＋ New…") always stand at the end, whatever order the caller used.
         Items =
         [
-            .. options.Select(o => new ReportOptionViewModel(o.Text, Equals(o.Value, selected), Select)
-            {
-                Value = o.Value,
-                Description = o.Description,
-            }),
+            .. rows.Where(o => !o.IsAction).Concat(rows.Where(o => o.IsAction))
+                .Select(o => new ReportOptionViewModel(o.Text, !o.IsAction && Equals(o.Value, selected), Select)
+                {
+                    Value = o.Value,
+                    Description = o.Description,
+                    IsAction = o.IsAction,
+                    HasExtraInputs = o.HasExtraInputs,
+                }),
         ];
     }
 
@@ -56,6 +65,15 @@ public sealed partial class SingleChoiceDialogViewModel : EditorDialogViewModel,
 
     /// <summary>Text of the confirm button.</summary>
     public string OkText { get; }
+
+    /// <inheritdoc />
+    public override System.Windows.Input.ICommand PrimaryCommand => ConfirmCommand;
+
+    /// <inheritdoc />
+    public override bool ShowPrimary => ShowOk;
+
+    /// <summary>True when OK is shown: only if a row has extra inputs; every other choice closes the dialog at once.</summary>
+    public bool ShowOk => Items.Any(i => i.HasExtraInputs);
 
     /// <summary>The marked value; meaningful after the dialog was confirmed.</summary>
     public object? SelectedValue => Items.FirstOrDefault(i => i.IsSelected)?.Value;
@@ -82,6 +100,12 @@ public sealed partial class SingleChoiceDialogViewModel : EditorDialogViewModel,
         foreach (var item in Items)
         {
             item.IsSelected = ReferenceEquals(item, chosen);
+        }
+
+        // One tap: a row without extra inputs (and every action row) is the answer.
+        if (!chosen.HasExtraInputs)
+        {
+            CloseSaved();
         }
     }
 }

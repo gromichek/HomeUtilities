@@ -143,9 +143,11 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        ISnackbarService snackbar)
+        ISnackbarService snackbar,
+        DeleteUndoSupport? undo = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        UndoSupport = undo;
         _store = store;
         _contractStore = contractStore;
         _meterStore = meterStore;

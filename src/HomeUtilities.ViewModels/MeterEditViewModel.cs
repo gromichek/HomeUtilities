@@ -723,7 +723,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
                 {
                     var label = RegisterLabel.For(_localizer, _meter, x.Register);
                     var value = DecimalInput.Format(x.Reading.Value, CultureInfo.CurrentCulture, 3);
-                    return string.Join(" · ", new[] { x.Reading.Date.ToString("d", CultureInfo.CurrentCulture), label, $"{value} {unit}" }.Where(p => p.Length > 0));
+                    return string.Join(" · ", new[] { DateFormat.Full(x.Reading.Date), label, $"{value} {unit}" }.Where(p => p.Length > 0));
                 }),
         ];
         OnPropertyChanged(nameof(HasRecentReadings));

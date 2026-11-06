@@ -22,8 +22,8 @@
             <ContentView IsVisible="{Binding IsLanguage}">
                 <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
                     <Label Text="{Binding LanguageLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Languages}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:LanguageOption}"
+                    <views:ChoiceField ItemsSource="{Binding Languages}"
+                            DisplayMember="DisplayName"
                             SelectedItem="{Binding SelectedLanguage}" />
                 </VerticalStackLayout>
             </ContentView>
@@ -31,8 +31,8 @@
             <ContentView IsVisible="{Binding IsTheme}">
                 <VerticalStackLayout Spacing="8" BindingContext="{Binding Settings}" x:DataType="vm:SettingsViewModel">
                     <Label Text="{Binding ThemeLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Themes}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:ThemeOption}"
+                    <views:ChoiceField ItemsSource="{Binding Themes}"
+                            DisplayMember="DisplayName"
                             SelectedItem="{Binding SelectedTheme}" />
                 </VerticalStackLayout>
             </ContentView>

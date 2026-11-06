@@ -103,6 +103,15 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     /// <summary>True while "Custom…" is chosen (the month pickers are shown).</summary>
     public bool IsCustom => Preset == ReportPreset.Custom;
 
+    /// <inheritdoc />
+    public override System.Windows.Input.ICommand PrimaryCommand => ConfirmCommand;
+
+    /// <inheritdoc />
+    public override bool ShowPrimary => ShowOk;
+
+    /// <summary>OK is shown only while "Custom…" (the one row with extra inputs) is chosen; every preset closes the dialog at once.</summary>
+    public bool ShowOk => IsCustom;
+
     /// <summary>The chosen range of a custom period.</summary>
     public (YearMonth From, YearMonth To) Range => (YearMonth.From(FromDate), YearMonth.From(ToDate));
 
@@ -131,8 +140,20 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
     partial void OnPresetChanged(ReportPreset value)
     {
         OnPropertyChanged(nameof(IsCustom));
+        OnPropertyChanged(nameof(ShowOk));
+        OnPropertyChanged(nameof(ShowPrimary));
         Error = string.Empty;
         BuildPresets();
+    }
+
+    // One tap: a preset closes the dialog; "Custom…" shows the month pickers and waits for OK.
+    private void ChoosePreset(ReportOptionViewModel option)
+    {
+        Preset = (ReportPreset)option.Value!;
+        if (Preset != ReportPreset.Custom)
+        {
+            Confirm();
+        }
     }
 
     private void BuildPresets()
@@ -140,7 +161,7 @@ public sealed partial class ReportPeriodDialogViewModel : EditorDialogViewModel,
         ReportPreset[] all = [ReportPreset.ThisYear, ReportPreset.Last12Months, ReportPreset.LastYear, ReportPreset.All, ReportPreset.Custom];
         Presets =
         [
-            .. all.Select(p => new ReportOptionViewModel(_localizer["ReportPreset" + p], p == Preset, o => Preset = (ReportPreset)o.Value!) { Value = p }),
+            .. all.Select(p => new ReportOptionViewModel(_localizer["ReportPreset" + p], p == Preset, ChoosePreset) { Value = p, HasExtraInputs = p == ReportPreset.Custom }),
         ];
     }
 }

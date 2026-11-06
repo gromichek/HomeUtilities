@@ -92,6 +92,12 @@ public sealed class SyncEntityInterceptor(IClock clock, IDataChangeNotifier? not
                     break;
 
                 case EntityState.Deleted:
+                    if (!entity.IsDeleted && entry.Metadata.GetTableName() is { } deletedTable)
+                    {
+                        // Undo of a delete (UI_GUIDELINES §5.1) restores exactly the rows that changed here.
+                        DeleteRecording.Note(deletedTable, entity.Id);
+                    }
+
                     entry.State = EntityState.Unchanged;
                     entity.IsDeleted = true;
                     if (!preserve)

@@ -2,17 +2,17 @@ using HomeUtilities.ViewModels;
 
 namespace HomeUtilities.App.Views;
 
-/// <summary>A row of selectable buttons (reports, presets, groupings…) or chips (properties, categories).</summary>
-public partial class ReportOptionRow : ContentView
+/// <summary>2–3 short, mutually exclusive options that switch a view (Table | Chart), as one bordered group of equal segments.</summary>
+public partial class SegmentedControl : ContentView
 {
     public static readonly BindableProperty ItemsProperty = BindableProperty.Create(
         nameof(Items),
         typeof(IEnumerable<ReportOptionViewModel>),
-        typeof(ReportOptionRow),
+        typeof(SegmentedControl),
         null,
-        propertyChanged: (view, _, value) => BindableLayout.SetItemsSource(((ReportOptionRow)view).Row, value as IEnumerable<ReportOptionViewModel>));
+        propertyChanged: (view, _, value) => BindableLayout.SetItemsSource(((SegmentedControl)view).Row, value as IEnumerable<ReportOptionViewModel>));
 
-    public ReportOptionRow()
+    public SegmentedControl()
     {
         InitializeComponent();
     }

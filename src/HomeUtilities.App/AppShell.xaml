@@ -13,6 +13,35 @@
          Windows Shell.ForegroundColor also colours the Back and ☰ buttons, which stand outside the toolbar on the light
          window background (MAUI MauiToolbar.UpdateIconColor) — white on white. Windows keeps its default toolbar. -->
 
+    <!-- Menu icons as text (owner 2026-11-06): on Windows a FontImageSource is a soft 96 dpi bitmap in a 16 x 16 box, text is drawn
+         by the font renderer at the display's resolution. The glyph still comes from FlyoutItem.Icon (MenuGlyph* in Icons.xaml,
+         same code points as before); MenuIconLabel turns it into text. Selection highlight like the lists, both themes. -->
+    <Shell.ItemTemplate>
+        <DataTemplate x:DataType="BaseShellItem">
+            <Grid ColumnDefinitions="48,*" MinimumHeightRequest="48" HeightRequest="48">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource HighlightLight}, Dark={StaticResource HighlightDark}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+                <views:MenuIconLabel Grid.Column="0" Source="{Binding Icon}"
+                                     TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}" />
+                <Label Grid.Column="1" Text="{Binding Title}" VerticalOptions="Center" LineBreakMode="TailTruncation"
+                       TextColor="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
 
     <Shell.Triggers>
         <DataTrigger TargetType="Shell" x:DataType="vm:ShellViewModel" Binding="{Binding IsFlyoutLocked}" Value="True">

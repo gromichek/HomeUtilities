@@ -99,9 +99,11 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
         ILocalizer localizer,
         IDialogService dialogs,
         INavigationService navigation,
-        ISnackbarService snackbar)
+        ISnackbarService snackbar,
+        DeleteUndoSupport? undo = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        UndoSupport = undo;
         _payments = payments;
         _bills = bills;
         _contractStore = contractStore;

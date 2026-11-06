@@ -42,6 +42,9 @@ public sealed partial class MultiSelectItemViewModel : ObservableObject
 /// </summary>
 public sealed partial class MultiSelectDialogViewModel : EditorDialogViewModel, IChoiceDialog
 {
+    /// <inheritdoc />
+    public override System.Windows.Input.ICommand PrimaryCommand => ConfirmCommand;
+
     /// <summary>Creates the dialog; <paramref name="selected"/> are the ids checked at the start.</summary>
     public MultiSelectDialogViewModel(ILocalizer localizer, string title, IEnumerable<MultiSelectItemViewModel> items, IReadOnlyCollection<Guid> selected)
         : base(localizer)

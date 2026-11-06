@@ -60,6 +60,8 @@
 
     <!-- Overview to-do rows: readings = speed, due bill = event, missing bill = note_add, verification = build, settlement = balance. -->
     <x:String x:Key="IconTodoReadings">&#xE9E4;</x:String>
+    <!-- A calendar: the date and month fields (C-09); the glyph is `event`, the same as the Overview "due" icon. -->
+    <x:String x:Key="IconCalendar">&#xE878;</x:String>
     <x:String x:Key="IconTodoDue">&#xE878;</x:String>
     <x:String x:Key="IconTodoMissing">&#xE89C;</x:String>
     <x:String x:Key="IconTodoVerification">&#xE869;</x:String>

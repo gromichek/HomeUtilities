@@ -1,3 +1,5 @@
+using HomeUtilities.ViewModels.Common;
+
 namespace HomeUtilities.App.Views;
 
 /// <summary>
@@ -31,6 +33,17 @@ public sealed class AdaptiveFieldGrid : Grid
         propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).Arrange());
 
     /// <summary>
+    /// With <see cref="MinColumnWidth"/> set (an editor page) and only one column, the content is at most this wide and centred, so a
+    /// landscape phone does not stretch fields to 800 dp (UI_GUIDELINES §3.3, R-27). 0 = no limit.
+    /// </summary>
+    public static readonly BindableProperty SingleColumnMaxWidthProperty = BindableProperty.Create(
+        nameof(SingleColumnMaxWidth),
+        typeof(double),
+        typeof(AdaptiveFieldGrid),
+        600d,
+        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).CenterSingleColumn());
+
+    /// <summary>
     /// A child with <c>FullRow="True"</c> starts a new row and spans all columns (buttons and notes under the cards: on a wide
     /// window they must not become a cell next to a card and stretch to its height — owner, 2026-11-02).
     /// </summary>
@@ -47,6 +60,7 @@ public sealed class AdaptiveFieldGrid : Grid
 
     private bool _arranging;
     private int _arrangedColumns;
+    private Thickness? _designPadding;
 
     public AdaptiveFieldGrid()
     {
@@ -83,6 +97,13 @@ public sealed class AdaptiveFieldGrid : Grid
         set => SetValue(MinColumnWidthProperty, value);
     }
 
+    /// <summary>Maximum content width of the single-column layout of an editor page; 0 = no limit.</summary>
+    public double SingleColumnMaxWidth
+    {
+        get => (double)GetValue(SingleColumnMaxWidthProperty);
+        set => SetValue(SingleColumnMaxWidthProperty, value);
+    }
+
     /// <summary>Upper limit of the columns chosen from <see cref="MinColumnWidth"/>.</summary>
     public int MaxColumns
     {
@@ -97,6 +118,27 @@ public sealed class AdaptiveFieldGrid : Grid
         {
             Arrange();
         }
+
+        CenterSingleColumn();
+    }
+
+    // The padding the page asked for, before the centring below added a side margin.
+    private Thickness DesignPadding => _designPadding ??= Padding;
+
+    private void CenterSingleColumn()
+    {
+        if (MinColumnWidth <= 0 || Width <= 0)
+        {
+            return;
+        }
+
+        var design = DesignPadding;
+        var side = EffectiveColumns() == 1 ? ListLayoutRules.SideMarginFor(Width - design.HorizontalThickness, SingleColumnMaxWidth) : 0;
+        var wanted = new Thickness(design.Left + side, design.Top, design.Right + side, design.Bottom);
+        if (Padding != wanted)
+        {
+            Padding = wanted;
+        }
     }
 
     private int EffectiveColumns()
@@ -106,7 +148,7 @@ public sealed class AdaptiveFieldGrid : Grid
             return Math.Max(1, Columns);
         }
 
-        var available = Width - Padding.HorizontalThickness;
+        var available = Width - DesignPadding.HorizontalThickness;
         if (available <= 0)
         {
             return 1;
@@ -145,6 +187,12 @@ public sealed class AdaptiveFieldGrid : Grid
                 if (!GetFullRow(view) && view is Button { HorizontalOptions.Alignment: not LayoutAlignment.Fill } button)
                 {
                     button.HorizontalOptions = LayoutOptions.Fill;
+                }
+
+                // Cards in a row align to the top: a short card is not stretched to the height of its neighbour (R-27).
+                if (view is Border { VerticalOptions.Alignment: LayoutAlignment.Fill } card)
+                {
+                    card.VerticalOptions = LayoutOptions.Start;
                 }
 
                 if (GetFullRow(view))

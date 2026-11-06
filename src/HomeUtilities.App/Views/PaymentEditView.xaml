@@ -61,7 +61,7 @@
                         <Label Text="{Binding SelectedContractName}" FontAttributes="Bold" IsVisible="{Binding IsContractReadOnly}" />
 
                         <Label Text="{Binding Texts.PaidOnLabel}" Style="{StaticResource MutedLabel}" />
-                        <DatePicker Date="{Binding PaidOn, Converter={StaticResource DateOnly}}" />
+                        <views:DateField Date="{Binding PaidOn, Converter={StaticResource DateOnly}}" />
 
                         <!-- The numeric keyboard of MAUI is signed, so a refund (negative amount) can be typed. -->
                         <Label Text="{Binding Texts.AmountLabel}" Style="{StaticResource MutedLabel}" />
@@ -74,14 +74,14 @@
                                IsVisible="{Binding AmountError, Converter={StaticResource HasText}}" />
 
                         <Label Text="{Binding Texts.MethodLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Methods}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Methods}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedMethodIndex, Mode=TwoWay}" />
 
                         <Label Text="{Binding Texts.ReferenceLabel}" Style="{StaticResource MutedLabel}" />
                         <Entry Text="{Binding Reference}" MaxLength="{x:Static core:InputLimits.Notes}" />
                         <Button Text="{Binding Texts.FillReferenceText}" Command="{Binding FillReferenceCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                                 IsVisible="{Binding ShowFillReference}" />
                         <Label Text="{Binding ReferenceError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding ReferenceError, Converter={StaticResource HasText}}" />
@@ -122,7 +122,7 @@
                         </VerticalStackLayout>
 
                         <Button Text="{Binding Texts.AutoAllocateText}" Command="{Binding AutoAllocateCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
 
                         <!-- "Allocated 58,32 € · Prepayment 12,30 €"; red when the bills take more than the payment. -->
                         <Label Text="{Binding AllocationSummary}" FontAttributes="Bold"

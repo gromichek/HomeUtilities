@@ -21,7 +21,8 @@ public sealed class LayoutModeService : ILayoutModeService
             return;
         }
 
-        var mode = LayoutModes.FromSize(widthDp, heightDp);
+        // A low window is a phone on Android only; a short, wide Windows window keeps the desktop layout (owner 2026-11-05).
+        var mode = LayoutModes.FromSize(widthDp, heightDp, lowWindowIsPhone: DeviceInfo.Platform == DevicePlatform.Android);
         if (mode == Current)
         {
             return;

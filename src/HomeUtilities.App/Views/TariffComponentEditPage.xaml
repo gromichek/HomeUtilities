@@ -36,8 +36,8 @@
                            IsVisible="{Binding NameError, Converter={StaticResource HasText}}" />
 
                     <Label Text="{Binding ServiceLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Services}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Services}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedServiceIndex, Mode=TwoWay}" />
 
                     <Label Text="{Binding CategoryLabel}" Style="{StaticResource MutedLabel}" />
@@ -57,8 +57,8 @@
                     </Border>
 
                     <Label Text="{Binding BasisLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Bases}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Bases}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedBasisIndex, Mode=TwoWay}" />
                     <Label Text="{Binding BasisHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 
@@ -103,8 +103,8 @@
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowParameter}">
                         <Label Text="{Binding ParameterLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Parameters}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Parameters}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedParameterIndex, Mode=TwoWay}" />
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowCustomParameter}">
                             <Label Text="{Binding CustomParameterLabel}" Style="{StaticResource MutedLabel}" />
@@ -115,8 +115,8 @@
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowUnit}">
                         <Label Text="{Binding UnitLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Units}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Units}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedUnitIndex, Mode=TwoWay}" />
                     </VerticalStackLayout>
 
@@ -129,8 +129,8 @@
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding VatHeader}" Style="{StaticResource SectionHeader}" />
-                    <Picker ItemsSource="{Binding VatOptions}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=vm:VatOption}"
+                    <views:ChoiceField ItemsSource="{Binding VatOptions}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedVatIndex, Mode=TwoWay}" />
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsCustomVat}">
                         <Label Text="{Binding VatPercentLabel}" Style="{StaticResource MutedLabel}" />

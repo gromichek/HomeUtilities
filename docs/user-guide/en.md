@@ -59,11 +59,26 @@ bottom right. *Settings → About* shows the current layout (phone / tablet / de
   leaves an editor (asking **Save changes?** if needed) and goes up one page. On the main screen of a section it takes you to
   the **Overview**; on the Overview it sends the app to the background.
   After you close an editor, the list shows the same place again and the record you opened is **highlighted**.
-- **Delete** hides the record; its history is kept. Many records can instead be **archived** — hidden from lists and
-  pickers but still used in history. Use "Show archived" to see them again.
-- **Choosing from a list.** Every choice (supplier, contract, category, property, period, template…) opens the same dialog:
-  the options as rows with a round mark, the **current value already marked**, **Cancel** and **OK** at the bottom. The
-  record you pick is the one that is saved, even if two records have the same name (two contracts called *Gas*).
+- **Delete** is a red button at the **end of the form** (never in the ⋮ menu). It hides the record; its history is kept. Many
+  records can instead be **archived** — hidden from lists and pickers but still used in history. Use "Show archived" to see them
+  again.
+  A bill, a payment, a bill template, a tariff component, a VAT rate or your own category is deleted **at once, without a
+  question**; a bar appears at the bottom for about six seconds: **«Gas 09.2026» deleted · Undo**. **Undo** brings back exactly
+  what the delete changed — the record with its lines, and for a bill also the payments and shares of payments it released.
+  A record that others depend on — a **property, a contract, a supplier, a meter** — still asks **Delete «…»?** first, because
+  its records cannot be brought back that simply.
+- **Choosing from a list.** Every choice (supplier, contract, category, property, period, template, kind, unit…) is a **field
+  with a frame and an arrow** showing the current value; a tap opens the same dialog: the options as rows with a round mark,
+  the **current value already marked**. **Tap a row and the choice is made** — there is no OK to press. **OK** appears only when
+  an option needs more input (the *Custom…* period with its *From* and *To*). A line such as **＋ New supplier…** at the end,
+  set apart by a line, creates a new record. The record you pick is the one that is saved, even if two records have the same
+  name (two contracts called *Gas*). The phone's own list pickers are no longer used anywhere.
+- **Dialogs on a phone** fill the screen and have a bar at the top: **←** (cancels), the title (a dialog about a part of a record
+  names the record, for example *Edit reading · Cold water, bathroom*) and **✓** where the dialog needs a confirmation. The bar
+  stays in place while the form scrolls and the keyboard is open, so **✓** is never hidden by the keyboard.
+- **Dates** are written *15.03.2023* everywhere, whatever the language of the phone or Windows. A date or month field is a framed
+  box with a calendar icon; tap it to open the calendar. Text fields have the same frame (on Android there is no longer an
+  underline, which was black in the dark theme).
 - **Months** (the bill's month, the month of the charges, a template's start, report periods) are written in the app
   language (*November 2026*) also on Windows; tap the month to pick another one.
 - **Empty lists** say what to do: *No bills yet. Tap ＋ to add one.* A list that is still loading shows *Loading…* (only if it
@@ -71,7 +86,8 @@ bottom right. *Settings → About* shows the current layout (phone / tablet / de
 - **Amounts** are never split over two lines (*1 234,56 €*, *Total 49,22 €*). A value that could not be calculated is
   **—**, never *0,00*; **≈ 12,30** is a value based on incomplete data. Short month names are always three letters
   (*Jan … Dec* / *янв … дек*), in the report charts too.
-- **Colours.** The bar at the top and the icons on it (✓, ?, ☰, ←) are readable in the light and the dark theme. The dot of a
+- **Colours.** The bar at the top and the icons on it (✓, ?, ☰, ←) are readable in the light and the dark theme; on Android the
+  navigation bar at the bottom (◁ ○ ▢) has the colour of the page, with buttons that stand out from it. The dot of a
   category is never the pure green or red of a status; categories you created earlier keep their colours.
 - Fields marked * are required. A wrong value shows a red message under the field; the app does not save until
   it is fixed.
@@ -83,7 +99,8 @@ block anything — just carry on. On a phone the bar is at least 56 dp high and 
 it, so it is easy to hit; the bar sits above the ＋ button.
 
 **Child rows** (parameters, links, registers, custom fields…): the card header has ＋ to add; tap a row to edit it
-in a dialog; the trash icon deletes it (with confirmation).
+in a dialog; the trash icon deletes it (with confirmation). In the **reading history** of a meter a reading is deleted at once;
+the bar **«…» deleted · Undo** brings it back.
 
 ## Overview
 
@@ -612,7 +629,8 @@ payments (tap one to open it), **All payments** (this screen filtered to the con
 
 Tap a payment to change its date, amount, method or bills. A payment made with **Mark as paid** is an ordinary payment
 here; if you turn it into a partial payment or add other bills, it stops being a "quick payment". **Delete** hides the
-payment — *the bills it paid become unpaid again* — and the history is kept.
+payment at once — *the bills it paid become unpaid again* — and the history is kept; **Undo** in the bar at the bottom brings it back
+with its bills.
 
 ## 13. Equalized payments
 
@@ -703,7 +721,8 @@ by default and stays as you left it while the app runs. The exports are in the *
   *This year* (January to December), *Last 12 months*, *Last year*, *All* (from your first record to today or your last
   bill) and *Custom…*, which adds a *From* and a *To* field under the options; each opens a calendar where you pick any day of the month you mean (only the month and year count), and the calendar offers the months from your first bill or reading up to today or your last bill. The end cannot be before the start.
   Every choice dialog looks the same: the title on top, the options as rows (a round mark for one choice, a square one
-  for several) that you can tap anywhere, and *Cancel* / *OK* at the bottom right; on a phone it fills the screen.
+  for several) that you can tap anywhere. A single choice is made by the tap itself (*Custom…* is the one that waits for *OK*);
+  a choice of several items ends with *OK*; *Cancel* is at the bottom right. On a phone the dialog fills the screen.
 - **Properties** and **Categories** — a dialog with a check box per item (categories with their colour), the buttons
   *All* and *None* at the top and *OK* / *Cancel*. The field shows *All (3)*, the names (*Flat in town, Cottage*) or *4 of 15*.
   At least one item must stay checked, otherwise *OK* is disabled. A property you archived is off at first — check it to
@@ -781,7 +800,7 @@ paid too little, negative: too much); a *Settlement* bill is shown as billed in 
 
 ### Charts
 
-The same numbers can be drawn as **charts**. On a phone or a narrow window the buttons **View: Table / Chart** switch between
+The same numbers can be drawn as **charts**. On a phone or a narrow window the switch **View: Table | Chart** (two framed segments, the chosen one tinted with a check mark) switches between
 the two (your choice is remembered); on a wide window or a tablet in landscape the chart is shown above the table. Tap a bar or
 a point to see its period and value under the chart; the legend below lists the colours. The month names on the horizontal axis
 follow the app language. For a period longer than 10 years the table keeps its months, but the charts show **one point per

@@ -30,8 +30,8 @@
                     <!-- Property selector: only when there is something to choose from. -->
                     <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMultipleProperties}">
                         <Label Text="{Binding PropertyLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Properties}"
-                                ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                        <views:ChoiceField ItemsSource="{Binding Properties}"
+                                DisplayMember="Name"
                                 SelectedIndex="{Binding SelectedPropertyIndex, Mode=TwoWay}" />
                     </VerticalStackLayout>
 
@@ -83,7 +83,7 @@
                     <!-- One date for all readings. -->
                     <VerticalStackLayout Spacing="4" IsVisible="{Binding HasMeters}">
                         <Label Text="{Binding DateLabel}" Style="{StaticResource MutedLabel}" />
-                        <DatePicker Date="{Binding ReadingDate, Converter={StaticResource DateOnly}}" />
+                        <views:DateField Date="{Binding ReadingDate, Converter={StaticResource DateOnly}}" />
                     </VerticalStackLayout>
 
                     <Label Text="{Binding NoMetersText}" Style="{StaticResource MutedLabel}" HorizontalTextAlignment="Center"
@@ -145,7 +145,7 @@
                                                                 <DataTemplate x:DataType="vm:SubmitLinkViewModel">
                                                                     <Button Text="{Binding Text}" Command="{Binding Command}"
                                                                             ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
-                                                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </VerticalStackLayout>

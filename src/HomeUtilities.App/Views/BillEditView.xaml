@@ -28,7 +28,7 @@
                         <Label Text="{Binding DraftBannerText}" FontAttributes="Bold" />
                         <Button Text="{Binding Texts.ConfirmText}" Command="{Binding ConfirmDraftCommand}"
                                 ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
-                                Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -38,14 +38,14 @@
                         <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Button Text="{Binding Texts.FromTemplateText}" Command="{Binding FromTemplateCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                                 IsVisible="{Binding ShowFromTemplate}" />
 
                         <!-- First choice of a new bill: for a contract, or a one-off expense. -->
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowTypePicker}">
                             <Label Text="{Binding Texts.TypeLabel}" Style="{StaticResource MutedLabel}" />
-                            <Picker ItemsSource="{Binding TypeChoices}"
-                                    ItemDisplayBinding="{Binding Name, x:DataType=vm:ChoiceOption}"
+                            <views:ChoiceField ItemsSource="{Binding TypeChoices}"
+                                    DisplayMember="Name"
                                     SelectedIndex="{Binding SelectedTypeIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
 
@@ -85,18 +85,14 @@
 
                         <!-- The month the bill belongs to, with ‹ ›; tap the month to pick another. -->
                         <Label Text="{Binding Texts.PeriodLabel}" Style="{StaticResource MutedLabel}" />
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="4" HorizontalOptions="Center">
                             <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
                                     Command="{Binding PreviousPeriodCommand}"
                                     ToolTipProperties.Text="{Binding Texts.PreviousPeriodText}"
                                     SemanticProperties.Description="{Binding Texts.PreviousPeriodText}" />
-                            <!-- App-language month text; the picker lies over it, invisible, and opens on tap (R-02). -->
-                            <Grid Grid.Column="1" HorizontalOptions="Center">
-                                <Label Text="{Binding PeriodText}" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalOptions="Center"
-                                       Padding="12,0" InputTransparent="True" />
-                                <DatePicker x:Name="PeriodPicker" Opacity="0" MinimumHeightRequest="{StaticResource TouchSize}"
-                                            Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
-                            </Grid>
+                            <!-- Tap the month to pick another; the box shows the month in the app language and a calendar icon (R-02, C-09). -->
+                            <views:DateField x:Name="PeriodPicker" Grid.Column="1" MinimumWidthRequest="180" Text="{Binding PeriodText}"
+                                             Date="{Binding PickerDate, Converter={StaticResource DateOnly}}" />
                             <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="{StaticResource IconNext}" FontSize="24"
                                     Command="{Binding NextPeriodCommand}"
                                     ToolTipProperties.Text="{Binding Texts.NextPeriodText}"
@@ -106,8 +102,8 @@
 
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding IsKindEditable}">
                             <Label Text="{Binding Texts.KindLabel}" Style="{StaticResource MutedLabel}" />
-                            <Picker ItemsSource="{Binding Kinds}"
-                                    ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                            <views:ChoiceField ItemsSource="{Binding Kinds}"
+                                    DisplayMember="DisplayName"
                                     SelectedIndex="{Binding SelectedKindIndex, Mode=TwoWay}" />
                         </VerticalStackLayout>
 
@@ -130,7 +126,7 @@
                         </Grid>
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasIssuedOn}">
                             <Label Text="{Binding Texts.IssuedOnLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding IssuedOn, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding IssuedOn, Converter={StaticResource DateOnly}}" />
                         </VerticalStackLayout>
 
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
@@ -139,7 +135,7 @@
                         </Grid>
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasDueOn}">
                             <Label Text="{Binding Texts.DueOnLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding DueOn, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding DueOn, Converter={StaticResource DateOnly}}" />
                         </VerticalStackLayout>
                         <Label Text="{Binding DueOnError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding DueOnError, Converter={StaticResource HasText}}" />
@@ -150,11 +146,11 @@
                         </Grid>
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasServicePeriod}">
                             <Label Text="{Binding Texts.ServiceFromLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding ServiceFrom, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding ServiceFrom, Converter={StaticResource DateOnly}}" />
                             <Label Text="{Binding ServiceFromError}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding ServiceFromError, Converter={StaticResource HasText}}" />
                             <Label Text="{Binding Texts.ServiceToLabel}" Style="{StaticResource MutedLabel}" />
-                            <DatePicker Date="{Binding ServiceTo, Converter={StaticResource DateOnly}}" />
+                            <views:DateField Date="{Binding ServiceTo, Converter={StaticResource DateOnly}}" />
                             <Label Text="{Binding ServiceToError}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding ServiceToError, Converter={StaticResource HasText}}" />
                         </VerticalStackLayout>
@@ -220,6 +216,14 @@
                         </Grid>
                         <Label Text="{Binding GrossError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding GrossError, Converter={StaticResource HasText}}" />
+
+                        <!-- The one editable value of the comparison is typed here with the other amounts (R-24); the comparison card below only reads. -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowComparison}">
+                            <Label Text="{Binding Texts.ConsumptionLabel}" Style="{StaticResource MutedLabel}" />
+                            <Entry Text="{Binding ConsumptionText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                            <Label Text="{Binding ConsumptionError}" Style="{StaticResource ErrorLabel}"
+                                   IsVisible="{Binding ConsumptionError, Converter={StaticResource HasText}}" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 
@@ -254,12 +258,12 @@
                         <Label Text="{Binding Texts.ComparisonHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Label Text="{Binding BasisLabel}" Style="{StaticResource MutedLabel}" />
-                        <Label Text="{Binding CalculatedText}" FontAttributes="Bold" />
+                        <Label Text="{Binding CalculatedText}" />
                         <Label Text="{Binding ActualInfoText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowActualInfo}" />
 
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDifference}">
                             <Label Text="{Binding Texts.DifferenceLabel}" Style="{StaticResource MutedLabel}" />
-                            <Label Text="{Binding DifferenceText}" FontAttributes="Bold" Style="{StaticResource MutedLabel}">
+                            <Label Text="{Binding DifferenceText}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillEditViewModel" Binding="{Binding DifferenceHigher}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
@@ -273,23 +277,19 @@
 
                         <Label Text="{Binding ComparisonNote}" Style="{StaticResource WarningLabel}" IsVisible="{Binding ShowComparisonNote}" />
 
-                        <Label Text="{Binding Texts.ConsumptionLabel}" Style="{StaticResource MutedLabel}" />
-                        <Entry Text="{Binding ConsumptionText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
-                        <Label Text="{Binding ConsumptionError}" Style="{StaticResource ErrorLabel}"
-                               IsVisible="{Binding ConsumptionError, Converter={StaticResource HasText}}" />
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding MeteredText, Converter={StaticResource HasText}}">
                             <Label Text="{Binding Texts.MeteredLabel}" Style="{StaticResource MutedLabel}" />
                             <Label Text="{Binding MeteredText}" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowQuantityDifference}">
                             <Label Text="{Binding Texts.LossesLabel}" Style="{StaticResource MutedLabel}" />
-                            <Label Text="{Binding QuantityDifferenceText}" FontAttributes="Bold" />
+                            <Label Text="{Binding QuantityDifferenceText}" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowSnapshotChanged}">
                             <Label Text="{Binding SnapshotChangedText}" Style="{StaticResource WarningLabel}" />
                             <Button Text="{Binding Texts.UpdateSnapshotText}" Command="{Binding UpdateSnapshotCommand}"
-                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                         </VerticalStackLayout>
 
                         <Button Text="{Binding Texts.ShowChargesText}" Command="{Binding ShowChargesCommand}"
@@ -363,7 +363,7 @@
                                                 <Switch IsToggled="{Binding HasDate}" />
                                                 <Label Grid.Column="1" Text="{Binding DateSetText}" VerticalOptions="Center" />
                                             </Grid>
-                                            <DatePicker Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
+                                            <views:DateField Date="{Binding Date, Converter={StaticResource DateOnly}}" IsVisible="{Binding HasDate}" />
                                         </VerticalStackLayout>
                                         <Label Text="{Binding ErrorText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasError}" />
                                     </VerticalStackLayout>

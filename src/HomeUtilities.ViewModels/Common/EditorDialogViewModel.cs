@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 
 namespace HomeUtilities.ViewModels.Common;
@@ -22,6 +23,15 @@ public abstract partial class EditorDialogViewModel : ViewModelBase
     public string SaveText { get; private set; } = string.Empty;
 
     public string CancelText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// The dialog's primary action, shown as ✓ in the top bar of the phone dialog frame (UI_GUIDELINES §3.4): Save by default,
+    /// OK for the choice dialogs.
+    /// </summary>
+    public virtual ICommand PrimaryCommand => SaveCommand;
+
+    /// <summary>Whether the top bar shows the ✓ at all (a choice dialog whose rows answer at once has none).</summary>
+    public virtual bool ShowPrimary => true;
 
     /// <summary>Raised when the dialog wants to be closed (after Save or Cancel).</summary>
     public event Action? CloseRequested;

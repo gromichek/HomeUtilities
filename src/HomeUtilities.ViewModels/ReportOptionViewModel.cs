@@ -31,4 +31,19 @@ public sealed partial class ReportOptionViewModel : ObservableObject
 
     /// <summary>What the option stands for (a report kind, a property id…).</summary>
     public object? Value { get; init; }
+
+    /// <summary>
+    /// True for an entry that creates something new ("＋ New supplier…"): shown as the last row, visually separated, with the
+    /// add icon instead of a radio mark; it acts at once (UI_GUIDELINES §3a).
+    /// </summary>
+    public bool IsAction { get; init; }
+
+    /// <summary>
+    /// True when choosing the option shows more inputs (e.g. "Custom…" with dates): the dialog then stays open and needs OK.
+    /// A row without extra inputs selects and closes the dialog at once.
+    /// </summary>
+    public bool HasExtraInputs { get; init; }
+
+    /// <summary>True for a normal (radio) row, false for an action row.</summary>
+    public bool IsRadio => !IsAction;
 }

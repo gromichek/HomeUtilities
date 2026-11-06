@@ -27,5 +27,5 @@ public static class BillText
     public static string Period(Core.Common.YearMonth period) => period.FirstDay.ToString("MM.yyyy", CultureInfo.InvariantCulture);
 
     /// <summary>"03.11.2026".</summary>
-    public static string Date(DateOnly date) => date.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture);
+    public static string Date(DateOnly date) => Common.DateFormat.Full(date);
 }

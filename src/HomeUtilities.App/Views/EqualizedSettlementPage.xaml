@@ -37,7 +37,7 @@
                     <Label Text="{Binding IncompleteText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasIncompleteText}" />
                     <Label Text="{Binding HintText}" Style="{StaticResource MutedLabel}" FontSize="12" />
                     <Button Text="{Binding EnterBillText}" Command="{Binding EnterSettlementBillCommand}"
-                            Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                 </VerticalStackLayout>
             </Border>
 

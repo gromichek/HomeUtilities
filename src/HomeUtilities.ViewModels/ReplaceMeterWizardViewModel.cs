@@ -25,6 +25,9 @@ public enum ReplaceMeterStep
 /// </summary>
 public sealed partial class ReplaceMeterWizardViewModel : EditorDialogViewModel
 {
+    /// <summary>The wizard has its own Back / Next / Finish buttons: no ✓ in the top bar of the phone dialog frame.</summary>
+    public override bool ShowPrimary => false;
+
     private static readonly int StepCount = Enum.GetValues<ReplaceMeterStep>().Length;
 
     private readonly ILocalizer _localizer;

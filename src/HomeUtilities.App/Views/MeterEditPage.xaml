@@ -31,13 +31,13 @@
                     <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
 
                     <Label Text="{Binding Texts.ResourceLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Resources}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Resources}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedResourceIndex, Mode=TwoWay}" />
 
                     <Label Text="{Binding Texts.UnitLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Units}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Units}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedUnitIndex, Mode=TwoWay}" />
                     <Label Text="{Binding UnitError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding UnitError, Converter={StaticResource HasText}}" />
@@ -91,7 +91,7 @@
                     </VerticalStackLayout>
 
                     <Button Text="{Binding Texts.DualTariffText}" Command="{Binding ApplyDualTariffCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                             IsVisible="{Binding CanApplyDualTariff}" />
                     <Label Text="{Binding RegistersError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding RegistersError, Converter={StaticResource HasText}}" />
@@ -104,7 +104,7 @@
                     <Label Text="{Binding Texts.InstallationHeader}" Style="{StaticResource SectionHeader}" />
 
                     <Label Text="{Binding Texts.InstalledOnLabel}" Style="{StaticResource MutedLabel}" />
-                    <DatePicker Date="{Binding InstalledOn, Converter={StaticResource DateOnly}}" />
+                    <views:DateField Date="{Binding InstalledOn, Converter={StaticResource DateOnly}}" />
                     <Label Text="{Binding InstalledOnError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding InstalledOnError, Converter={StaticResource HasText}}" />
 
@@ -114,7 +114,7 @@
                     </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasVerifiedOn}">
                         <Label Text="{Binding Texts.VerifiedOnLabel}" Style="{StaticResource MutedLabel}" />
-                        <DatePicker Date="{Binding VerifiedOn, Converter={StaticResource DateOnly}}" />
+                        <views:DateField Date="{Binding VerifiedOn, Converter={StaticResource DateOnly}}" />
                     </VerticalStackLayout>
 
                     <Label Text="{Binding Texts.IntervalLabel}" Style="{StaticResource MutedLabel}" />
@@ -129,7 +129,7 @@
                     </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasDueOverride}">
                         <Label Text="{Binding Texts.DueOverrideLabel}" Style="{StaticResource MutedLabel}" />
-                        <DatePicker Date="{Binding DueOverride, Converter={StaticResource DateOnly}}" />
+                        <views:DateField Date="{Binding DueOverride, Converter={StaticResource DateOnly}}" />
                     </VerticalStackLayout>
 
                     <!-- Computed next verification with the same colours as the badge in the list. -->
@@ -187,7 +187,7 @@
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
                     <Button Text="{Binding Texts.AllReadingsText}" Command="{Binding ShowAllReadingsCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                             IsVisible="{Binding HasRecentReadings}" />
                 </VerticalStackLayout>
             </Border>

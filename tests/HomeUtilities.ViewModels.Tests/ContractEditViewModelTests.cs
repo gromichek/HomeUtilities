@@ -75,6 +75,9 @@ public class ContractEditViewModelTests
 
         await vm.ChooseSupplierCommand.ExecuteAsync(null);
 
+        // "＋ New supplier…" is an action row of the dialog, not an ordinary option (C-07).
+        Assert.Equal(newSupplier, Assert.Single(_kit.Dialogs.ChoiceActions));
+
         var visit = Assert.Single(_kit.Navigation.Visited);
         Assert.Equal(Routes.SupplierEdit, visit.Route);
         var editor = Assert.IsType<SupplierEditViewModel>(visit.Parameters![EditorNavigation.EditorParameter]);

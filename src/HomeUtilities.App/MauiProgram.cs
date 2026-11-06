@@ -34,6 +34,10 @@ public static class MauiProgram
             .UseMauiCommunityToolkit()
             .ConfigureFonts(fonts => fonts.AddFont("MaterialIconsOutlined-Regular.otf", "MaterialIcons"));
 
+#if ANDROID
+        // Bordered text fields instead of the platform underline (UI_GUIDELINES §6).
+        FieldBorder.Register();
+#endif
 #if WINDOWS
         builder.ConfigureLifecycleEvents(events => events.AddWindows(windows =>
             windows.OnWindowCreated(window => HomeUtilities.App.WinUI.WindowCloseGuard.Attach(window))));
@@ -202,6 +206,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ReadingHistoryViewModel>();
         builder.Services.AddTransient<Func<ReadingHistoryViewModel>>(sp => () => sp.GetRequiredService<ReadingHistoryViewModel>());
         builder.Services.AddSingleton<QuickPayService>();
+        builder.Services.AddSingleton<DeleteUndoSupport>();
         builder.Services.AddSingleton<DraftService>();
         builder.Services.AddSingleton<BillTemplateLauncher>();
         builder.Services.AddSingleton<PrepaymentService>();

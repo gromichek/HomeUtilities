@@ -38,8 +38,8 @@
                            IsVisible="{Binding ContractTitleError, Converter={StaticResource HasText}}" />
 
                     <Label Text="{Binding ServiceLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding Services}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding Services}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedServiceIndex, Mode=TwoWay}" />
 
                     <!-- Category and supplier are chosen from a list; the row shows the current value (with the colour dot). -->
@@ -78,8 +78,8 @@
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowCurrencyPicker}">
                         <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" />
-                        <Picker ItemsSource="{Binding Currencies}"
-                                ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                        <views:ChoiceField ItemsSource="{Binding Currencies}"
+                                DisplayMember="DisplayName"
                                 SelectedIndex="{Binding SelectedCurrencyIndex, Mode=TwoWay}" />
                     </VerticalStackLayout>
 
@@ -106,7 +106,7 @@
                     <Label Text="{Binding PortalLoginHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 
                     <Label Text="{Binding ValidFromLabel}" Style="{StaticResource MutedLabel}" />
-                    <DatePicker Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
+                    <views:DateField Date="{Binding ValidFrom, Converter={StaticResource DateOnly}}" />
 
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                         <Switch IsToggled="{Binding HasEndDate}" />
@@ -114,7 +114,7 @@
                     </Grid>
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEndDate}">
                         <Label Text="{Binding ValidToLabel}" Style="{StaticResource MutedLabel}" />
-                        <DatePicker Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />
+                        <views:DateField Date="{Binding ValidTo, Converter={StaticResource DateOnly}}" />
                     </VerticalStackLayout>
                     <Label Text="{Binding ValidToError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding ValidToError, Converter={StaticResource HasText}}" />
@@ -127,13 +127,13 @@
                     <Label Text="{Binding BillingHeader}" Style="{StaticResource SectionHeader}" />
 
                     <Label Text="{Binding BillingModeLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding BillingModes}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding BillingModes}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedBillingModeIndex, Mode=TwoWay}" />
 
                     <Label Text="{Binding BillingTimingLabel}" Style="{StaticResource MutedLabel}" />
-                    <Picker ItemsSource="{Binding BillingTimings}"
-                            ItemDisplayBinding="{Binding DisplayName, x:DataType=common:EnumOption}"
+                    <views:ChoiceField ItemsSource="{Binding BillingTimings}"
+                            DisplayMember="DisplayName"
                             SelectedIndex="{Binding SelectedBillingTimingIndex, Mode=TwoWay}" />
                     <Label Text="{Binding BillingTimingHint}" Style="{StaticResource MutedLabel}" FontSize="12" />
 
@@ -194,7 +194,7 @@
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:TariffPresetRowViewModel">
                                     <Button Text="{Binding Name}" Command="{Binding ApplyCommand}"
-                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
@@ -229,7 +229,7 @@
 
                     <!-- Expected charge of this contract for a month (read-only; nothing is stored). -->
                     <Button Text="{Binding ShowChargesText}" Command="{Binding ShowChargesCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                 </VerticalStackLayout>
             </Border>
 
@@ -269,7 +269,7 @@
 
                     <Label Text="{Binding PlanSummaryText}" FontAttributes="Bold" IsVisible="{Binding ShowSettlementSummary}" />
                     <Button Text="{Binding ShowSettlementText}" Command="{Binding ShowSettlementCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                             IsVisible="{Binding ShowSettlementSummary}" />
                 </VerticalStackLayout>
             </Border>
@@ -322,7 +322,7 @@
                                         </BindableLayout.ItemTemplate>
                                     </VerticalStackLayout>
                                     <Button Text="{Binding PayYearText}" Command="{Binding PayYearCommand}"
-                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                                             IsVisible="{Binding CanPayYear}" />
                                 </VerticalStackLayout>
                             </DataTemplate>
@@ -373,9 +373,9 @@
                     </VerticalStackLayout>
 
                     <Button Text="{Binding AllBillsText}" Command="{Binding OpenAllBillsCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                     <Button Text="{Binding TemplateFromContractText}" Command="{Binding TemplateFromContractCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                 </VerticalStackLayout>
             </Border>
 
@@ -410,7 +410,7 @@
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasUnallocated}">
                         <Label Text="{Binding UnallocatedText}" Style="{StaticResource MutedLabel}" />
                         <Button Text="{Binding UseForOpenBillsText}" Command="{Binding UseForOpenBillsCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
@@ -440,7 +440,7 @@
                     </VerticalStackLayout>
 
                     <Button Text="{Binding AllPaymentsText}" Command="{Binding OpenAllPaymentsCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                 </VerticalStackLayout>
             </Border>
 

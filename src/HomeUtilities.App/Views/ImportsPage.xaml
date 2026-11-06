@@ -16,7 +16,7 @@
         <VerticalStackLayout Padding="12" Spacing="12">
 
             <Button Text="{Binding StartImportText}" Command="{Binding StartImportCommand}"
-                    Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
+                    Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
 
             <!-- The reverse of the import: the data as a workbook like the owner's own. -->
             <VerticalStackLayout Spacing="4">

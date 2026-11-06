@@ -11,23 +11,33 @@ public sealed class EditorDialogPage : ContentPage
     public EditorDialogPage(View content, EditorDialogViewModel editor)
     {
         _editor = editor;
-        Content = content;
         BindingContext = editor;
+
+        // Top bar with ← and ✓ above the dialog's own content (UI_GUIDELINES §3.4); Back is the dialog's Cancel.
+        Content = new DialogFrame(content, editor);
+
+        // The zone behind the status bar has the toolbar colour, the one behind the navigation bar the page colour (C-04).
+        if (Application.Current?.Resources is { } resources
+            && resources.TryGetValue("DialogBackdropLight", out var light) && light is Brush lightBrush
+            && resources.TryGetValue("DialogBackdropDark", out var dark) && dark is Brush darkBrush)
+        {
+            this.SetAppTheme(BackgroundProperty, lightBrush, darkBrush);
+        }
     }
 
     /// <summary>Completes when the page has been removed.</summary>
     public Task Closed => _closed.Task;
+
+    /// <summary>
+    /// Called by the dialog service after it popped the page. Not tied to <c>OnDisappearing</c>: a choice dialog opened from a
+    /// field of this dialog is pushed on top of it, which also makes this page disappear — it is not closed then.
+    /// </summary>
+    public void MarkClosed() => _closed.TrySetResult();
 
     // Hardware / gesture Back behaves like the dialog's Cancel button.
     protected override bool OnBackButtonPressed()
     {
         _editor.CancelCommand.Execute(null);
         return true;
-    }
-
-    protected override void OnDisappearing()
-    {
-        base.OnDisappearing();
-        _closed.TrySetResult();
     }
 }

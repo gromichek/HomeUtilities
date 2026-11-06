@@ -17,6 +17,7 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
     private readonly IMeterStore _store;
     private readonly IAttachmentStore _attachments;
     private readonly IAttachmentFileSync? _fileSync;
+    private readonly DeleteUndoSupport? _undo;
     private readonly IFileViewer _viewer;
     private readonly IMediaService _media;
     private readonly ILocalizer _localizer;
@@ -46,8 +47,10 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
         IMediaService media,
         ILocalizer localizer,
         IDialogService dialogs,
-        IAttachmentFileSync? fileSync = null)
+        IAttachmentFileSync? fileSync = null,
+        DeleteUndoSupport? undo = null)
     {
+        _undo = undo;
         _fileSync = fileSync;
         _store = store;
         _attachments = attachments;
@@ -57,6 +60,9 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
         _dialogs = dialogs;
         RefreshTexts();
     }
+
+    /// <summary>Completes when the Undo snackbar of the last delete is gone (tests await it).</summary>
+    public Task UndoOffer { get; private set; } = Task.CompletedTask;
 
     public Guid MeterId { get; private set; }
 
@@ -255,18 +261,43 @@ public sealed partial class ReadingHistoryViewModel : ViewModelBase
             return;
         }
 
-        var confirmed = await _dialogs.ConfirmAsync(
-            _localizer["Dialog_DeleteRow_Title"],
-            _localizer.Get("Dialog_DeleteRow_Message", $"{reading.Date.ToString("d", CultureInfo.CurrentCulture)}: {DecimalInput.Format(reading.Value, CultureInfo.CurrentCulture, 3)}"),
-            _localizer["Delete"],
-            _localizer["Cancel"]);
-        if (!confirmed)
+        var name = $"{DateFormat.Full(reading.Date)}: {DecimalInput.Format(reading.Value, CultureInfo.CurrentCulture, 3)}";
+        if (_undo is null)
         {
+            var confirmed = await _dialogs.ConfirmAsync(
+                _localizer["Dialog_DeleteRow_Title"],
+                _localizer.Get("Dialog_DeleteRow_Message", name),
+                _localizer["Delete"],
+                _localizer["Cancel"]);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            await _store.DeleteReadingAsync(readingId);
+            await ChangedAsync();
             return;
         }
 
-        await _store.DeleteReadingAsync(readingId);
+        // A single reading is deleted at once; the snackbar offers Undo (UI_GUIDELINES §5.1).
+        IReadOnlyList<DeletedRow> deleted;
+        using (var recording = _undo.Begin())
+        {
+            await _store.DeleteReadingAsync(readingId);
+            deleted = recording.Rows;
+        }
+
         await ChangedAsync();
+        if (deleted.Count > 0)
+        {
+            UndoOffer = RunSafeAsync(async () =>
+            {
+                if (await _undo.OfferUndoAsync(name, deleted))
+                {
+                    await ChangedAsync();
+                }
+            });
+        }
     }
 
     private async Task ChangedAsync()
@@ -338,12 +369,12 @@ public sealed class ReadingHistoryRowViewModel
     {
         Id = reading.Id;
         Kind = reading.Kind;
-        DateText = reading.Date.ToString("d", CultureInfo.CurrentCulture);
+        DateText = DateFormat.Full(reading.Date);
         ValueText = DecimalInput.Format(reading.Value, CultureInfo.CurrentCulture, 3);
         ConsumptionText = consumptionText;
         KindText = reading.Kind == ReadingKind.Regular ? string.Empty : EnumText.Get(localizer, reading.Kind);
         SubmittedText = reading.SubmittedOn is { } submitted
-            ? localizer.Get("ReadingSubmittedOn", submitted.ToString("d", CultureInfo.CurrentCulture))
+            ? localizer.Get("ReadingSubmittedOn", DateFormat.Full(submitted))
             : string.Empty;
         Note = reading.Note ?? string.Empty;
         CanDelete = reading.Kind is not (ReadingKind.Initial or ReadingKind.Final);
