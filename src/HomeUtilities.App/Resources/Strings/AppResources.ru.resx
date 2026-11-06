@@ -270,6 +270,8 @@
   <data name="CustomFieldName" xml:space="preserve"><value>Название</value></data>
   <data name="CustomFieldKindLabel" xml:space="preserve"><value>Тип</value></data>
   <data name="CustomFieldTargetLabel" xml:space="preserve"><value>Относится к</value></data>
+  <data name="CustomFieldTargetHintBill" xml:space="preserve"><value>Поле счёта появляется в карточке «Дополнительные поля» счёта.</value></data>
+  <data name="CustomFieldTargetHintBillLine" xml:space="preserve"><value>Поле строки счёта появляется внутри каждой строки счёта.</value></data>
   <data name="CustomFieldRowDetail" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Enum_BillingMode_Actual" xml:space="preserve"><value>По потреблению</value></data>
   <data name="Enum_BillingMode_Equalized" xml:space="preserve"><value>Равномерные платежи</value></data>

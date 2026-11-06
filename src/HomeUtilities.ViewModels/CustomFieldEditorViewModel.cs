@@ -27,8 +27,12 @@ public sealed partial class CustomFieldEditorViewModel : EditorDialogViewModel
     private IReadOnlyList<EnumOption> _targets = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectedTargetIndex))]
+    [NotifyPropertyChangedFor(nameof(SelectedTargetIndex), nameof(TargetHint))]
     private EnumOption? _selectedTarget;
+
+    /// <summary>One line under "Applies to": where a field of the chosen target appears.</summary>
+    public string TargetHint => _localizer[
+        SelectedTarget?.Value is CustomFieldTarget.BillLine ? "CustomFieldTargetHintBillLine" : "CustomFieldTargetHintBill"];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NameError))]
@@ -139,5 +143,6 @@ public sealed partial class CustomFieldEditorViewModel : EditorDialogViewModel
         NameLabel = _localizer["CustomFieldName"];
         KindLabel = _localizer["CustomFieldKindLabel"];
         TargetLabel = _localizer["CustomFieldTargetLabel"];
+        OnPropertyChanged(nameof(TargetHint));
     }
 }

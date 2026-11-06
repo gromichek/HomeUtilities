@@ -270,6 +270,8 @@
   <data name="CustomFieldName" xml:space="preserve"><value>Name</value></data>
   <data name="CustomFieldKindLabel" xml:space="preserve"><value>Type</value></data>
   <data name="CustomFieldTargetLabel" xml:space="preserve"><value>Applies to</value></data>
+  <data name="CustomFieldTargetHintBill" xml:space="preserve"><value>A field of a bill appears in the card “Custom fields” of the bill.</value></data>
+  <data name="CustomFieldTargetHintBillLine" xml:space="preserve"><value>A field of a bill line appears inside every line of the bill.</value></data>
   <data name="CustomFieldRowDetail" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Enum_BillingMode_Actual" xml:space="preserve"><value>By consumption</value></data>
   <data name="Enum_BillingMode_Equalized" xml:space="preserve"><value>Equalized payments</value></data>
