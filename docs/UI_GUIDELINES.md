@@ -61,6 +61,7 @@ The history of why a rule exists is in the appendix at the end.
 | `IconHelp` | help (toolbar "?" opening the user guide at the screen's section) | `help_outline` |
 | `IconHistory` | history | `history` |
 | `IconPaid` | mark as paid — **[CHANGED]** must differ from `IconSave` | `task_alt` |
+| `IconNote` | note of a reading / register (T-036c) | `notes` |
 | `IconTodoReadings` / `Due` / `Missing` / `Verification` / `Settlement` | Overview to-do kinds | `speed` / `event` / `note_add` / `build` / `balance` |
 | `IconCheckOn` / `IconCheckOff` / `IconRadioOn` / `IconRadioOff` | marks in choice dialogs (§3a) | `check_box` / `check_box_outline_blank` / `radio_button_checked` / `radio_button_unchecked` |
 | `IconExpand` / `IconCollapse` | expand / collapse | `expand_more` / `expand_less` |
@@ -211,10 +212,11 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 Use these wordings everywhere (resx keys in brackets).
 
 ### 5.1 Dialogs
-**Undo of a delete (T-036b):** editors that opt in wrap the delete in `DeleteUndoSupport.Begin()`; the recorder collects every row the interceptor soft-deletes in that flow (the record, its attachments, rows the delete touched) and Undo restores exactly those with a newer `UpdatedAt`. Bill, payment, bill template, tariff component, VAT rate, category and history readings opt in; property, contract, supplier and meter keep the confirmation.
+**Undo of a delete (T-036b):** editors that opt in wrap the delete in `DeleteUndoSupport.Begin()`; the recorder collects every row the interceptor soft-deletes in that flow (the record, its attachments, rows the delete touched) and Undo restores exactly those with a newer `UpdatedAt`. Bill, payment, bill template, tariff component, VAT rate, category and history readings delete without a question. Property, contract and supplier ask with the **list of dependants** and offer Undo afterwards; a meter asks and says it can only be restored from a backup (its link end-dating is not recorded) (T-036c).
 
 | Situation | Title | Message | Buttons |
 |---|---|---|---|
+| Delete a record with dependants (T-036c) | Delete «{0}»? / Удалить «{0}»? | {kind} «{name}» will be deleted together with: {list}. You can undo this right after the deletion. / {Вид} «{имя}» будет удалён вместе с: {список}. Это можно отменить сразу после удаления. (Meter: "This cannot be undone except by restoring a backup." / «Это можно вернуть только из резервной копии.») | Delete (red) / Cancel |
 | Leaving with unsaved changes [`Dialog_Unsaved_*`] | Save changes? / Сохранить изменения? | — | **Save** / Сохранить · **Don't save** / Не сохранять · **Cancel** / Отмена |
 | **[CHANGED]** Delete a record that has dependent records [`Dialog_Delete_*`] | Delete «{0}»? / Удалить «{0}»? | {1} will be deleted with it. / Вместе с ним будут удалены: {1}. | **Delete** / Удалить · **Cancel** / Отмена |
 | Error | Error / Ошибка | {0} | **OK** |
