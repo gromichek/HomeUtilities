@@ -23,7 +23,10 @@
                 ImageSource="{StaticResource IconAddSource}" ContentLayout="Left,8"
                 HorizontalOptions="Start" IsVisible="{Binding ShowAddButton}" />
 
-        <CollectionView x:Name="ItemList" Grid.Row="1" ItemsSource="{Binding Items}" views:ListColumns.MinItemWidth="360" IsVisible="{Binding HasItems}">
+        <!-- Lists ordered by date stay one column, centred, at most 760 dp wide; wider windows use the extra width inside the row
+             (UI_GUIDELINES §3.1). -->
+        <Grid Grid.Row="1" views:ListColumns.MaxContentWidth="760">
+        <CollectionView x:Name="ItemList" ItemsSource="{Binding Items}" IsVisible="{Binding HasItems}">
             <!-- The filters are the list header: they scroll away with the cards (T-028a). -->
             <CollectionView.Header>
                 <VerticalStackLayout Spacing="8" Padding="0,0,0,4">
@@ -53,7 +56,8 @@
                         <VerticalStackLayout Spacing="8">
                             <!-- The period scope (All years / Year / Month) is a drop-down like the other filters (T-028f). -->
                             <views:ChoiceField Caption="{Binding Period.PeriodLabel}" Value="{Binding Period.ScopeText}" Command="{Binding Period.ChooseScopeCommand}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding Period.ShowStepper}">
+                    <!-- ‹ value › as one centred group, the arrows directly next to the value (R-09). -->
+                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="4" HorizontalOptions="Center" IsVisible="{Binding Period.ShowStepper}">
                         <Button Grid.Column="0" Style="{StaticResource IconButton}" Text="{StaticResource IconPrevious}" FontSize="24"
                                 Command="{Binding Period.PreviousCommand}"
                                 ToolTipProperties.Text="{Binding Period.PreviousText}"
@@ -82,7 +86,7 @@
             <CollectionView.Footer>
                 <VerticalStackLayout>
                     <Button Text="{Binding ShowMoreText}" Command="{Binding ShowMoreCommand}" IsVisible="{Binding HasMoreItems}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,4,0,0" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" Margin="0,4,0,0" />
                     <BoxView HeightRequest="88" Color="Transparent" />
                 </VerticalStackLayout>
             </CollectionView.Footer>
@@ -156,7 +160,7 @@
                             <!-- Quick action on open bills. -->
                             <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Text="{Binding MarkPaidText}" Command="{Binding MarkPaidCommand}"
                                     ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
-                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,6,0,0"
+                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" Margin="0,6,0,0"
                                     IsVisible="{Binding CanMarkPaid}"
                                     ToolTipProperties.Text="{Binding MarkPaidText}"
                                     SemanticProperties.Description="{Binding MarkPaidText}" />
@@ -164,7 +168,7 @@
                             <!-- Quick action on drafts: confirm (opens the editor when the amount is still missing). -->
                             <Button Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Text="{Binding ConfirmText}" Command="{Binding ConfirmCommand}"
                                     ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
-                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" Margin="0,6,0,0"
+                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" Margin="0,6,0,0"
                                     IsVisible="{Binding IsDraft}"
                                     ToolTipProperties.Text="{Binding ConfirmText}"
                                     SemanticProperties.Description="{Binding ConfirmText}" />
@@ -173,6 +177,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        </Grid>
 
         <!-- Loading (R-52): text only, shown after 300 ms of the first load. -->
         <Label Grid.Row="1" Text="{Binding LoadingText}" Style="{StaticResource MutedLabel}" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,24,0,0"

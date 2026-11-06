@@ -145,7 +145,7 @@
                                                                 <DataTemplate x:DataType="vm:SubmitLinkViewModel">
                                                                     <Button Text="{Binding Text}" Command="{Binding Command}"
                                                                             ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
-                                                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </VerticalStackLayout>

@@ -81,7 +81,7 @@
                         <Label Text="{Binding Texts.ReferenceLabel}" Style="{StaticResource MutedLabel}" />
                         <Entry Text="{Binding Reference}" MaxLength="{x:Static core:InputLimits.Notes}" />
                         <Button Text="{Binding Texts.FillReferenceText}" Command="{Binding FillReferenceCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                                 IsVisible="{Binding ShowFillReference}" />
                         <Label Text="{Binding ReferenceError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding ReferenceError, Converter={StaticResource HasText}}" />
@@ -122,7 +122,7 @@
                         </VerticalStackLayout>
 
                         <Button Text="{Binding Texts.AutoAllocateText}" Command="{Binding AutoAllocateCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
 
                         <!-- "Allocated 58,32 € · Prepayment 12,30 €"; red when the bills take more than the payment. -->
                         <Label Text="{Binding AllocationSummary}" FontAttributes="Bold"

@@ -28,7 +28,7 @@
                         <Label Text="{Binding DraftBannerText}" FontAttributes="Bold" />
                         <Button Text="{Binding Texts.ConfirmText}" Command="{Binding ConfirmDraftCommand}"
                                 ImageSource="{StaticResource IconPaidSource}" ContentLayout="Left,8"
-                                Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource PrimaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -38,7 +38,7 @@
                         <Label Text="{Binding Texts.GeneralHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Button Text="{Binding Texts.FromTemplateText}" Command="{Binding FromTemplateCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True"
                                 IsVisible="{Binding ShowFromTemplate}" />
 
                         <!-- First choice of a new bill: for a contract, or a one-off expense. -->
@@ -216,6 +216,14 @@
                         </Grid>
                         <Label Text="{Binding GrossError}" Style="{StaticResource ErrorLabel}"
                                IsVisible="{Binding GrossError, Converter={StaticResource HasText}}" />
+
+                        <!-- The one editable value of the comparison is typed here with the other amounts (R-24); the comparison card below only reads. -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowComparison}">
+                            <Label Text="{Binding Texts.ConsumptionLabel}" Style="{StaticResource MutedLabel}" />
+                            <Entry Text="{Binding ConsumptionText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
+                            <Label Text="{Binding ConsumptionError}" Style="{StaticResource ErrorLabel}"
+                                   IsVisible="{Binding ConsumptionError, Converter={StaticResource HasText}}" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 
@@ -250,12 +258,12 @@
                         <Label Text="{Binding Texts.ComparisonHeader}" Style="{StaticResource SectionHeader}" />
 
                         <Label Text="{Binding BasisLabel}" Style="{StaticResource MutedLabel}" />
-                        <Label Text="{Binding CalculatedText}" FontAttributes="Bold" />
+                        <Label Text="{Binding CalculatedText}" />
                         <Label Text="{Binding ActualInfoText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowActualInfo}" />
 
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowDifference}">
                             <Label Text="{Binding Texts.DifferenceLabel}" Style="{StaticResource MutedLabel}" />
-                            <Label Text="{Binding DifferenceText}" FontAttributes="Bold" Style="{StaticResource MutedLabel}">
+                            <Label Text="{Binding DifferenceText}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" x:DataType="vm:BillEditViewModel" Binding="{Binding DifferenceHigher}" Value="True">
                                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
@@ -269,23 +277,19 @@
 
                         <Label Text="{Binding ComparisonNote}" Style="{StaticResource WarningLabel}" IsVisible="{Binding ShowComparisonNote}" />
 
-                        <Label Text="{Binding Texts.ConsumptionLabel}" Style="{StaticResource MutedLabel}" />
-                        <Entry Text="{Binding ConsumptionText}" Keyboard="Numeric" MaxLength="{x:Static core:InputLimits.Number}" />
-                        <Label Text="{Binding ConsumptionError}" Style="{StaticResource ErrorLabel}"
-                               IsVisible="{Binding ConsumptionError, Converter={StaticResource HasText}}" />
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding MeteredText, Converter={StaticResource HasText}}">
                             <Label Text="{Binding Texts.MeteredLabel}" Style="{StaticResource MutedLabel}" />
                             <Label Text="{Binding MeteredText}" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding ShowQuantityDifference}">
                             <Label Text="{Binding Texts.LossesLabel}" Style="{StaticResource MutedLabel}" />
-                            <Label Text="{Binding QuantityDifferenceText}" FontAttributes="Bold" />
+                            <Label Text="{Binding QuantityDifferenceText}" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowSnapshotChanged}">
                             <Label Text="{Binding SnapshotChangedText}" Style="{StaticResource WarningLabel}" />
                             <Button Text="{Binding Texts.UpdateSnapshotText}" Command="{Binding UpdateSnapshotCommand}"
-                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                         </VerticalStackLayout>
 
                         <Button Text="{Binding Texts.ShowChargesText}" Command="{Binding ShowChargesCommand}"

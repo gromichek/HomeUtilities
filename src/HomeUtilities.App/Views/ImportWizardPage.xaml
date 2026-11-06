@@ -24,7 +24,7 @@
                 <VerticalStackLayout Spacing="8" IsVisible="{Binding IsFileStep}">
                     <Label Text="{Binding FileHint}" Style="{StaticResource MutedLabel}" />
                     <Button Text="{Binding PickFileText}" Command="{Binding PickFileCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                     <Label Text="{Binding FileText}" />
                     <Label Text="{Binding SheetsLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
                     <views:ChoiceField ItemsSource="{Binding Sheets}"
@@ -51,7 +51,7 @@
                             SelectedItem="{Binding SelectedContract}" />
                     <Label Text="{Binding TargetHintText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasTargetHint}" />
                     <Button Text="{Binding ShowContractText}" Command="{Binding ShowContractCommand}"
-                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
 
                     <Border Style="{StaticResource SectionCard}" IsVisible="{Binding HasMeters}">
                         <VerticalStackLayout Spacing="4">
@@ -148,13 +148,13 @@
                                                 <Entry Text="{Binding DayLimitText}" Keyboard="Numeric" MaxLength="2" />
                                             </VerticalStackLayout>
                                             <Button Text="{Binding RemoveText}" Command="{Binding RemoveCommand}"
-                                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                                         </VerticalStackLayout>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
                             <Button Text="{Binding AddRuleChangeText}" Command="{Binding AddRuleChangeCommand}"
-                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                    Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
 
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                 <Switch IsToggled="{Binding DateIsPaymentDate}" />
@@ -188,7 +188,7 @@
                                 <Label Text="{Binding NotesLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
                                 <Label Text="{Binding NotesSummary}" />
                                 <Button Text="{Binding ChooseNotesText}" Command="{Binding ChooseNotesCommand}"
-                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="{Binding CurrencyLabel}" Style="{StaticResource MutedLabel}" FontSize="12" />
@@ -237,10 +237,10 @@
                 <Label Text="{Binding BeforeStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasBeforeStart}" />
                 <Label Text="{Binding ReadingWindowText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasReadingWindowFix}" />
                 <Button Text="{Binding SetReadingWindowText}" Command="{Binding SetReadingWindowCommand}" Style="{StaticResource SecondaryButton}"
-                        HorizontalOptions="Start" IsVisible="{Binding HasReadingWindowFix}" />
+                        HorizontalOptions="Start" views:CompactFill.Enabled="True" IsVisible="{Binding HasReadingWindowFix}" />
                 <Label Text="{Binding LinkStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasLinkStart}" />
                 <Button Text="{Binding SetContractStartText}" Command="{Binding SetContractStartCommand}" Style="{StaticResource SecondaryButton}"
-                        HorizontalOptions="Start" IsVisible="{Binding HasStartFix}" />
+                        HorizontalOptions="Start" views:CompactFill.Enabled="True" IsVisible="{Binding HasStartFix}" />
             </VerticalStackLayout>
             <HorizontalStackLayout Grid.Row="2" Spacing="8">
                 <Label Text="{Binding FilterLabel}" VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
@@ -276,7 +276,7 @@
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                         <Button Text="{Binding RecalculateText}" Command="{Binding RecalculateCommand}"
-                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" />
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
                     </VerticalStackLayout>
                 </CollectionView.Header>
                 <CollectionView.EmptyView>
@@ -296,7 +296,7 @@
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
                                 <Button Text="{Binding EditPeriodText}" Command="{Binding EditPeriodCommand}"
-                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" IsVisible="{Binding CanEditPeriod}" />
+                                        Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" IsVisible="{Binding CanEditPeriod}" />
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Issues}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ImportIssueLine">
