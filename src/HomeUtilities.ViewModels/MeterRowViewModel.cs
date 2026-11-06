@@ -11,14 +11,11 @@ public sealed class MeterRowViewModel
     {
         Id = meter.Id;
         Resource = meter.Resource;
-        Title = MeterNames.Title(localizer, meter);
+        Title = MeterNames.ShortTitle(localizer, meter);
         SerialText = string.IsNullOrWhiteSpace(meter.SerialNumber) || string.IsNullOrWhiteSpace(meter.Location)
             ? string.Empty
             : meter.SerialNumber;
-        var registers = meter.Registers.Where(r => !r.IsDeleted).ToList();
-        RegistersText = registers.Count == 1 && registers[0].Kind == RegisterKind.Total
-            ? string.Empty
-            : string.Join(" / ", registers.Select(r => EnumText.Get(localizer, r.Kind)));
+        RegistersText = MeterNames.RegistersText(localizer, meter);
 
         IsRemoved = meter.RemovedOn is not null;
         RemovedText = meter.RemovedOn is { } removedOn ? localizer.Get("MeterRemoved", removedOn) : string.Empty;
@@ -73,17 +70,53 @@ public sealed class MeterGroupViewModel(string header, IReadOnlyList<MeterRowVie
 /// <summary>Display names shared by the meter list rows and the meter editor.</summary>
 public static class MeterNames
 {
-    /// <summary>The location; without one "Meter" plus the serial number; without either just "Meter".</summary>
+    /// <summary>
+    /// The name that tells two meters of one room apart (R-31): "location · serial number"; without a serial number "location ·
+    /// day / night" for a multi-register meter, else just the location; without a location "Meter" plus the serial number.
+    /// Used in the editor, the reading history and the reading dialog.
+    /// </summary>
     public static string Title(ILocalizer localizer, Meter meter)
     {
+        ArgumentNullException.ThrowIfNull(localizer);
+        var name = ShortTitle(localizer, meter);
+        if (string.IsNullOrWhiteSpace(meter.Location))
+        {
+            return name;
+        }
+
+        if (!string.IsNullOrWhiteSpace(meter.SerialNumber))
+        {
+            return $"{name} · {meter.SerialNumber.Trim()}";
+        }
+
+        var registers = RegistersText(localizer, meter);
+        return registers.Length == 0 ? name : $"{name} · {registers}";
+    }
+
+    /// <summary>
+    /// The location; without one "Meter" plus the serial number; without either just "Meter". For lists and cards that show the
+    /// serial number on a line of its own.
+    /// </summary>
+    public static string ShortTitle(ILocalizer localizer, Meter meter)
+    {
+        ArgumentNullException.ThrowIfNull(localizer);
         if (!string.IsNullOrWhiteSpace(meter.Location))
         {
-            return meter.Location;
+            return meter.Location.Trim();
         }
 
         return string.IsNullOrWhiteSpace(meter.SerialNumber)
             ? localizer["MeterUnnamed"]
-            : localizer.Get("MeterNumbered", meter.SerialNumber);
+            : localizer.Get("MeterNumbered", meter.SerialNumber.Trim());
+    }
+
+    /// <summary>"Day / Night" of a multi-register meter; empty for a single total register.</summary>
+    public static string RegistersText(ILocalizer localizer, Meter meter)
+    {
+        var registers = meter.Registers.Where(r => !r.IsDeleted).ToList();
+        return registers.Count == 1 && registers[0].Kind == RegisterKind.Total
+            ? string.Empty
+            : string.Join(" / ", registers.Select(r => EnumText.Get(localizer, r.Kind)));
     }
 
     /// <summary>The serial number, or the localized "no serial number" when it is empty.</summary>

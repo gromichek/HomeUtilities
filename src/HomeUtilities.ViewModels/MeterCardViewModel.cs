@@ -25,7 +25,7 @@ public sealed partial class MeterCardViewModel : ObservableObject
     {
         MeterId = meter.Id;
         Resource = meter.Resource;
-        Title = MeterNames.Title(localizer, meter);
+        Title = MeterNames.ShortTitle(localizer, meter);
         SerialText = string.IsNullOrWhiteSpace(meter.SerialNumber) || string.IsNullOrWhiteSpace(meter.Location)
             ? string.Empty
             : meter.SerialNumber;

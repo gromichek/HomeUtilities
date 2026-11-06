@@ -70,7 +70,7 @@ public class MeterEditViewModelTests
         Assert.Single(saved.Registers);
         Assert.False(vm.IsNew);
         Assert.False(vm.IsDirty);
-        Assert.Equal("Kitchen", vm.Title);
+        Assert.Equal("Kitchen · CW-1", vm.Title);
         Assert.Equal(0, _kit.Navigation.BackCount);
     }
 
