@@ -202,6 +202,7 @@ public static class MauiProgram
         builder.Services.AddTransient<ReadingHistoryViewModel>();
         builder.Services.AddTransient<Func<ReadingHistoryViewModel>>(sp => () => sp.GetRequiredService<ReadingHistoryViewModel>());
         builder.Services.AddSingleton<QuickPayService>();
+        builder.Services.AddSingleton<DeleteUndoSupport>();
         builder.Services.AddSingleton<DraftService>();
         builder.Services.AddSingleton<BillTemplateLauncher>();
         builder.Services.AddSingleton<PrepaymentService>();

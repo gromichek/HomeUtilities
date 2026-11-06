@@ -824,6 +824,8 @@ internal sealed class ContractTestKit
 
     public ReadingHistoryViewModel CreateHistory() => new(Meters, Attachments, Viewer, Media, Localizer, Dialogs);
 
+    public ReadingHistoryViewModel CreateHistory(DeleteUndoSupport undo) => new(Meters, Attachments, Viewer, Media, Localizer, Dialogs, null, undo);
+
     public ReadingsViewModel CreateReadings() =>
         new(Properties, Meters, Contracts, Suppliers, Clock, Localizer, Dialogs, Navigation, Toast, Launcher, Settings, Attachments, Media, CreateHistory);
 

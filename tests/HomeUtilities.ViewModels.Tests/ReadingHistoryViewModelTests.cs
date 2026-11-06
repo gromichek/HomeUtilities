@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
 
 namespace HomeUtilities.ViewModels.Tests;
@@ -303,5 +304,23 @@ public class ReadingHistoryViewModelTests
         Assert.Equal([_october.Id, _august.Id], vm.Groups[0].Rows.Select(r => r.Id));
         // the consumption of the row after the deleted one is recalculated: 125 - 100 = 25
         Assert.Contains("25", vm.Groups[0].Rows[0].ConsumptionText);
+    }
+
+    [Fact]
+    public async Task With_Undo_a_reading_is_deleted_at_once_and_the_snackbar_can_bring_it_back()
+    {
+        var service = new FakeDeleteUndoService();
+        service.Touched.Add(new DeletedRow("MeterReadings", _september.Id));
+        var vm = _kit.CreateHistory(new DeleteUndoSupport(service, _kit.Toast, _kit.Localizer));
+        await vm.LoadAsync(_meter.Id);
+        _kit.Toast.ActionResult = (_, _) => true;
+
+        await vm.Groups[0].Rows[1].DeleteCommand.ExecuteAsync(null);
+        await vm.UndoOffer;
+
+        Assert.Empty(_kit.Dialogs.Confirmations);
+        Assert.Equal([_september.Id], _kit.Meters.DeletedReadings);
+        Assert.Equal([new DeletedRow("MeterReadings", _september.Id)], Assert.Single(service.Restored));
+        Assert.Single(_kit.Toast.Calls, c => c.Action == "Undo [en]");
     }
 }
