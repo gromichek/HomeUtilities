@@ -91,6 +91,8 @@ is written; the list below is the plan and will change.
   also (owner 2026-11-05): Android navigation bar (◁ ○ ▢) in the page colour with matching button contrast — Android
   13/14 `SetNavigationBarColor` + light/dark nav icons, Android 15+ edge-to-edge (draw the page colour behind the bar,
   `isNavigationBarContrastEnforced = false`); Android Entry underline is black in the dark theme (bordered field look);
+  c (optional, owner 2026-11-06): the Windows calendar pop-up of DatePicker follows the Windows UI language
+  (English) — try setting the native control's `Language` to the app culture in a Windows-only handler mapping;
   c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
 
 - T-037 Database clean-up (owner, 2026-11-05): purge soft-deleted rows + orphan attachment files, VACUUM, backup first;
