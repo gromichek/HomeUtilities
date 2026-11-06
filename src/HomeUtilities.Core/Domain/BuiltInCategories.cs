@@ -7,8 +7,8 @@ public static class BuiltInCategories
     // colours of categories that already exist are never changed.
     private static readonly string[] Palette =
     [
-        "#1E88E5", "#00ACC1", "#8E24AA", "#FB8C00", "#D81B60", "#FDD835", "#546E7A", "#6D4C41",
-        "#00897B", "#3949AB", "#5E35B1", "#039BE5", "#AB47BC", "#C0CA33", "#FFB300", "#757575",
+        "#1E88E5", "#0097A7", "#8E24AA", "#C25E00", "#D81B60", "#B8860B", "#546E7A", "#6D4C41",
+        "#00897B", "#3949AB", "#5E35B1", "#0288D1", "#AB47BC", "#7D8B00", "#8D6E63", "#757575",
     ];
 
     /// <summary>Creates one new category per <see cref="ServiceKind"/> value, in enum order, with fixed colours.</summary>
