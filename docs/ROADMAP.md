@@ -96,6 +96,8 @@ is written; the list below is the plan and will change.
   c (guide, owner 2026-11-06): explain in the guide (templates and contracts) that custom fields with
   "Относится к: Строка счёта" appear inside each bill line, "Счёт" in the bill's "Дополнительные поля" card — the owner
   did not find them at first; consider a hint under "Относится к" in the field editor;
+  c (from T-036b): confirmation dialog with the list of dependants for property / contract / supplier / meter
+  deletes (§5.1 wording);
   c = screen-by-screen usability (bill editor order, meter, readings, sync layout, period switcher in the filter line).
 
 - T-037 Database clean-up (owner, 2026-11-05): purge soft-deleted rows + orphan attachment files, VACUUM, backup first;

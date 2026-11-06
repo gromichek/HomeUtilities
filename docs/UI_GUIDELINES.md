@@ -115,6 +115,8 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   the card.
 
 ### 3.3 Editor pages
+**Date and month fields** use `DateField` (bordered box + calendar icon, text from `DateFormat`) — never a bare `DatePicker` (T-036b).
+
 - Grouped into **cards/sections** with a header; a section that contains a list (parameters, links, lines, readings…)
   has its own `IconAdd` button **in the section header**.
 - **Editor commands (every device):** toolbar has **Back** + **Save** (`IconSave` ✓). **✓ only saves and never
@@ -141,6 +143,8 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   text buttons.
 
 ### 3.4 Dialogs [CHANGED]
+**Phone:** every dialog is wrapped in `DialogFrame` (top bar ← · title · ✓ bound to the view's `PrimaryCommand`); the view's own title / Cancel / Save are hidden there, so the primary action is never under the keyboard. System bars follow the page via `SystemBars` (T-036b).
+
 - **Adding/editing a child item opens a dialog** with its own title ("New parameter", "Edit parameter") and its own
   Save / Cancel — never an inline form inside the parent form.
 - **[CHANGED] One dialog frame for every dialog** (child-item editors, choice dialogs, wizards):
@@ -207,6 +211,8 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
 Use these wordings everywhere (resx keys in brackets).
 
 ### 5.1 Dialogs
+**Undo of a delete (T-036b):** editors that opt in wrap the delete in `DeleteUndoSupport.Begin()`; the recorder collects every row the interceptor soft-deletes in that flow (the record, its attachments, rows the delete touched) and Undo restores exactly those with a newer `UpdatedAt`. Bill, payment, bill template, tariff component, VAT rate, category and history readings opt in; property, contract, supplier and meter keep the confirmation.
+
 | Situation | Title | Message | Buttons |
 |---|---|---|---|
 | Leaving with unsaved changes [`Dialog_Unsaved_*`] | Save changes? / Сохранить изменения? | — | **Save** / Сохранить · **Don't save** / Не сохранять · **Cancel** / Отмена |
@@ -280,6 +286,10 @@ Use these wordings everywhere (resx keys in brackets).
   soft at 16 px whatever is done (#250 tried runtime sizing — no visible gain, **removed in T-036b**). Menu icons are therefore
   text: the flyout items use `Shell.ItemTemplate` with a `MenuIconLabel` (a `Label` in the Material font that takes its glyph from
   `FlyoutItem.Icon`, same code points); toolbar icons stay images, as they were before #250 (owner 2026-11-06).
+- **Modal over modal:** a choice dialog opened from a dialog page — `EditorDialogPage.Closed` completes when the page is
+  popped, not on `OnDisappearing` (which also fires when another modal covers it) (T-036b).
+- **`ListColumns` changes only `GridItemsLayout.Span`** — WinUI ignored a replaced `ItemsLayout` after the first layout
+  (R-21, T-036b).
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.
@@ -328,6 +338,8 @@ Use these wordings everywhere (resx keys in brackets).
 - Accent (`Primary`) colour only for interactive elements (buttons, links, selection), not for decoration.
 
 ## 9. Numbers, dates and empty values [NEW]
+Full dates via `DateFormat.Full` (`dd.MM.yyyy` for ru/lv), months via `MonthFormat` (T-036a/b).
+
 - All visible formatting is done in the ViewModel with the **app culture** (`LanguageService`), never by a control's
   `Format` property.
 - **Money:** `1 234,56 €` — group separator and the space before `€` are **non-breaking** (` `), so an amount
