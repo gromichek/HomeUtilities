@@ -35,6 +35,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     private readonly IContractStore _contractStore;
     private readonly IClock _clock;
     private readonly ILocalizer _localizer;
+    private readonly IDeleteImpactService? _impact;
     private readonly INavigationService _navigation;
     private readonly ISnackbarService _snackbar;
     private readonly Func<MeterEditViewModel> _editorFactory;
@@ -116,9 +117,11 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         IDialogService dialogs,
         INavigationService navigation,
         ISnackbarService snackbar,
-        Func<MeterEditViewModel> editorFactory)
+        Func<MeterEditViewModel> editorFactory,
+        IDeleteImpactService? impact = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        _impact = impact;
         _store = store;
         _contractStore = contractStore;
         _clock = clock;
@@ -568,6 +571,27 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     }
 
     protected override string DeleteName() => MeterNames.Title(_localizer, _meter);
+
+    protected override async Task<string?> ConfirmationMessageAsync()
+    {
+        if (_impact is null)
+        {
+            return await base.ConfirmationMessageAsync();
+        }
+
+        // The list of what goes with the record (UI_GUIDELINES §5.1); without dependants a record with Undo is deleted at once.
+        var dependants = DependantsText.List(_localizer, await _impact.ForMeterAsync(EntityId));
+        if (dependants.Length == 0 && UndoSupport is not null)
+        {
+            return null;
+        }
+
+        var kind = _localizer["DeleteKind_Meter"];
+        var what = dependants.Length == 0
+            ? _localizer.Get("Dialog_DeleteSimple_Message", kind, DeleteName())
+            : _localizer.Get("Dialog_DeleteDependants_Message", kind, DeleteName(), dependants);
+        return $"{what} {_localizer["Dialog_DeleteNoUndoHint"]}";
+    }
 
     private async Task SaveContractLinksAsync(Meter saved)
     {

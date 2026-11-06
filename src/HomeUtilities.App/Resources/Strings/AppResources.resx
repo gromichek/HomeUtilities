@@ -86,6 +86,35 @@
   <data name="Dialog_Delete_Message" xml:space="preserve"><value>It will be hidden; history is kept.</value></data>
   <data name="Dialog_DeleteRow_Title" xml:space="preserve"><value>Delete this entry?</value></data>
   <data name="Dialog_DeleteRow_Message" xml:space="preserve"><value>{0}</value></data>
+  <data name="Dependant_Contracts_One" xml:space="preserve"><value>{0} contract</value></data>
+  <data name="Dependant_Contracts_Many" xml:space="preserve"><value>{0} contracts</value></data>
+  <data name="Dependant_Contracts_Few" xml:space="preserve"><value>{0} contracts</value></data>
+  <data name="Dependant_Meters_One" xml:space="preserve"><value>{0} meter</value></data>
+  <data name="Dependant_Meters_Many" xml:space="preserve"><value>{0} meters</value></data>
+  <data name="Dependant_Meters_Few" xml:space="preserve"><value>{0} meters</value></data>
+  <data name="Dependant_Bills_One" xml:space="preserve"><value>{0} bill</value></data>
+  <data name="Dependant_Bills_Many" xml:space="preserve"><value>{0} bills</value></data>
+  <data name="Dependant_Bills_Few" xml:space="preserve"><value>{0} bills</value></data>
+  <data name="Dependant_Payments_One" xml:space="preserve"><value>{0} payment</value></data>
+  <data name="Dependant_Payments_Many" xml:space="preserve"><value>{0} payments</value></data>
+  <data name="Dependant_Payments_Few" xml:space="preserve"><value>{0} payments</value></data>
+  <data name="Dependant_Tariffs_One" xml:space="preserve"><value>{0} tariff</value></data>
+  <data name="Dependant_Tariffs_Many" xml:space="preserve"><value>{0} tariffs</value></data>
+  <data name="Dependant_Tariffs_Few" xml:space="preserve"><value>{0} tariffs</value></data>
+  <data name="Dependant_Readings_One" xml:space="preserve"><value>{0} reading</value></data>
+  <data name="Dependant_Readings_Many" xml:space="preserve"><value>{0} readings</value></data>
+  <data name="Dependant_Readings_Few" xml:space="preserve"><value>{0} readings</value></data>
+  <data name="Dependant_Links_One" xml:space="preserve"><value>{0} link to a contract</value></data>
+  <data name="Dependant_Links_Many" xml:space="preserve"><value>{0} links to contracts</value></data>
+  <data name="Dependant_Links_Few" xml:space="preserve"><value>{0} links to contracts</value></data>
+  <data name="DeleteKind_Property" xml:space="preserve"><value>Property</value></data>
+  <data name="DeleteKind_Contract" xml:space="preserve"><value>Contract</value></data>
+  <data name="DeleteKind_Supplier" xml:space="preserve"><value>Supplier</value></data>
+  <data name="DeleteKind_Meter" xml:space="preserve"><value>Meter</value></data>
+  <data name="Dialog_DeleteDependants_Message" xml:space="preserve"><value>{0} «{1}» will be deleted together with: {2}.</value></data>
+  <data name="Dialog_DeleteSimple_Message" xml:space="preserve"><value>{0} «{1}» will be deleted.</value></data>
+  <data name="Dialog_DeleteUndoHint" xml:space="preserve"><value>You can undo this right after the deletion.</value></data>
+  <data name="Dialog_DeleteNoUndoHint" xml:space="preserve"><value>This cannot be undone except by restoring a backup.</value></data>
   <data name="DeletedUndoMessage" xml:space="preserve"><value>«{0}» deleted</value></data>
   <data name="Undo" xml:space="preserve"><value>Undo</value></data>
   <data name="Dialog_Error_Title" xml:space="preserve"><value>Error</value></data>
