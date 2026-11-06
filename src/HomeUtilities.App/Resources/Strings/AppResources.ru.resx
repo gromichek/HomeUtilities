@@ -355,6 +355,10 @@
   <data name="MeterContractsHeader" xml:space="preserve"><value>Договоры</value></data>
   <data name="MeterContractsHint" xml:space="preserve"><value>Счётчик горячей воды обычно привязан и к договору на воду, и к договору на отопление.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>В этом объекте пока нет договоров.</value></data>
+  <data name="MeterContractsNoneLinked" xml:space="preserve"><value>Пока не связан ни с одним договором.</value></data>
+  <data name="MeterLinkContract" xml:space="preserve"><value>Связать с договором…</value></data>
+  <data name="MeterUnlinkContract" xml:space="preserve"><value>Убрать связь</value></data>
+  <data name="MeterAddReading" xml:space="preserve"><value>Ввести показание</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>История</value></data>
   <data name="MeterHistoryReplaced" xml:space="preserve"><value>Замена: снят счётчик № {0} · {1:d}</value></data>
   <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Заменён счётчиком {0} {1:d}</value></data>

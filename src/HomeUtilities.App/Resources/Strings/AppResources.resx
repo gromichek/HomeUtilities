@@ -355,6 +355,10 @@
   <data name="MeterContractsHeader" xml:space="preserve"><value>Contracts</value></data>
   <data name="MeterContractsHint" xml:space="preserve"><value>A hot water meter is usually linked to both the water and the heating contract.</value></data>
   <data name="MeterContractsEmpty" xml:space="preserve"><value>No contracts in this property yet.</value></data>
+  <data name="MeterContractsNoneLinked" xml:space="preserve"><value>Not linked to any contract yet.</value></data>
+  <data name="MeterLinkContract" xml:space="preserve"><value>Link to a contract…</value></data>
+  <data name="MeterUnlinkContract" xml:space="preserve"><value>Remove the link</value></data>
+  <data name="MeterAddReading" xml:space="preserve"><value>Add reading</value></data>
   <data name="MeterHistoryHeader" xml:space="preserve"><value>History</value></data>
   <data name="MeterHistoryReplaced" xml:space="preserve"><value>Replacement: removed meter no. {0} · {1:d}</value></data>
   <data name="MeterHistoryReplacedBy" xml:space="preserve"><value>Replaced by {0} on {1:d}</value></data>

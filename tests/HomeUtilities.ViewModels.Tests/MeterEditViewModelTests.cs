@@ -330,6 +330,65 @@ public class MeterEditViewModelTests
     }
 
     [Fact]
+    public async Task ContractsCard_ShowsOnlyLinkedContracts_AndLinkContractPicksFromTheOthersById()
+    {
+        // Two contracts with the same title: the pick is by position in the list, never by text.
+        var gas1 = AddContract("Gas");
+        var gas2 = AddContract("Gas");
+        AddContract("Waste");
+        var vm = await LoadNewAsync();
+        Assert.Empty(vm.LinkedContracts);
+        Assert.True(vm.ShowNoneLinked);
+        Assert.True(vm.CanLinkContract);
+
+        List<string>? offered = null;
+        _kit.Dialogs.ChooseIndexScript = options =>
+        {
+            offered = [.. options];
+            return 1; // the second "not linked" contract
+        };
+        await vm.LinkContractCommand.ExecuteAsync(null);
+
+        Assert.Equal(3, offered!.Count);
+        var linked = Assert.Single(vm.LinkedContracts);
+        Assert.Equal(vm.ContractSwitches.Where(r => r.IsOn).Single().ContractId, linked.ContractId);
+        Assert.True(vm.IsDirty);
+        Assert.False(vm.ShowNoneLinked);
+        Assert.True(vm.CanLinkContract);
+        Assert.Contains(linked.ContractId, new[] { gas1.Id, gas2.Id, vm.ContractSwitches.First(r => r.Title == "Waste").ContractId });
+
+        // Unlinking removes the row again.
+        linked.UnlinkCommand!.Execute(null);
+        Assert.Empty(vm.LinkedContracts);
+    }
+
+    [Fact]
+    public async Task ContractRow_LeavesOutASecondLineThatRepeatsTheTitle()
+    {
+        AddContract("Gas"); // title "Gas", service shown as "Enum_ServiceKind_..." by the fake localizer
+        var vm = await LoadNewAsync();
+
+        var row = Assert.Single(vm.ContractSwitches);
+        Assert.True(row.HasSubtitle);
+        var same = new MeterContractSwitchViewModel(row.Link, row.Title, false);
+        Assert.False(same.HasSubtitle);
+    }
+
+    [Fact]
+    public async Task AddReading_OpensTheReadingsOfThePropertyForToday()
+    {
+        var meter = StoredMeter(withReading: false);
+        var vm = await LoadAsync(meter);
+
+        await vm.AddReadingCommand.ExecuteAsync(null);
+
+        var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
+        Assert.Equal(Routes.ReadingsFor, route);
+        Assert.Equal(_kit.Property.Id, parameters![EditorNavigation.PropertyIdParameter]);
+        Assert.Equal(Today, parameters[ReadingsViewModel.DateParameter]);
+    }
+
+    [Fact]
     public async Task TurningAContractSwitchOn_CreatesALinkFromTheLaterOfInstallDateAndContractStart()
     {
         // Meter installed 01.10.2020, contract from 01.01.2020, linked today (23.10.2026): the link starts on the installation.
