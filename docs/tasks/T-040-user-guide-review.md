@@ -1,5 +1,5 @@
 # T-040: User guide review — check every section against the app, add what is missing (EN + RU)
-Phase: 9 · Depends on: T-038 (T-039 was reverted in #277 — describe the app as it is now) · Size: M · Docs only (no app code, except help-topic anchors if they break)
+Phase: 9 · Depends on: T-038 (T-039 was reverted in #278 — describe the app as it is now) · Size: M · Docs only (no app code, except help-topic anchors if they break)
 
 Owner (2026-11-07): "the guide must be re-read and corrected, what is missing added". The guide grew task by task
 (`docs/user-guide/en.md`, `ru.md`, ~1 450 lines each); several later changes were written as additions, and the

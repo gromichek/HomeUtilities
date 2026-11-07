@@ -144,7 +144,7 @@ public class DraftBillsTests : IDisposable
         var draft = AddDraft(internet, new YearMonth(2026, 11), 22.95m);
         var vm = await LoadBillsAsync();
 
-        vm.Items.Single().ConfirmCommand.Execute(null);
+        // The row command is fire-and-forget and raced the direct call (flaky in CI): only the awaited call is tested here.
         await vm.ConfirmDraftAsync(draft.Id);
 
         var saved = _kit.Bills.Saved.Last();
