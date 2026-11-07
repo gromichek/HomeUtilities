@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-038 | Overview charts (this year by month, spending by category, consumption) + 2 small fixes | Ready | | owner chose all three variants 2026-11-07 |
 
 ## Done
 
@@ -104,7 +105,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues
 
-### Collected for the next session task (2026-11-07)
+### Collected 2026-11-07 → handed over in T-038
 - **Readings: keep "Передать онлайн" visible after a submit** (owner, T-036c test): opening the link does not always mean
   the readings were submitted, and the button is gone afterwards. Keep it (e.g. with "submitted" state next to it).
 - **Remove `Platforms/Windows/DatePickerLanguage.cs`** (T-036c optional item): it does not change the calendar language on
