@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-039 | Performance and memory: editors' DB work off the UI thread, photo memory, small leaks, Windows ReadyToRun | Ready | | owner 2026-11-07: analyse leaks + UI stutter; lead audit in the task file |
 
 ## Done
 
@@ -55,6 +54,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-037a | Clean-up fixes | 2026-11-06, #260 | `AttachmentCascade` (owner delete soft-deletes its attachments, restore helper), cleaner purges attachments of deleted/missing owners, preview = result by kind, no size for 0 files. Session pushed without a PR — lead opened #260. Owner test 2026-11-06 OK. |
 | T-036c | UI review part 3: screens, details, delete with dependants, guide | 2026-11-06, #263 | Bill editor order + ⋮ Paid + due soon; meter title location · serial, linked contracts only, ＋ readings; Sync status first; Readings Next/Done, note icon, submit online once; filter ‹ month › in the collapsed line; C-05/08/16/18; `IDeleteImpactService` dependants + Undo (meter: backup only); custom field hint + guide; Windows DatePicker language (unverified). UI review 2026-11-05 complete. Owner test 2026-11-07 OK; Windows calendar pop-up stays English (owner: leave it). |
 | T-038 | Overview charts + 2 small fixes | 2026-11-07, #267 | A months vs last year (`ChartDrawable`), B top-5 categories + Other, C consumption per resource/unit, last complete month vs 11-month average, rise > 30 % (`OverviewCharts.RisePercent`), sparkline; loader reads 14 months of readings; `BillsFor` without property; "Передать онлайн" stays with "передано {date}" (session found no code that hid it — owner to give steps if it still vanishes); `DatePickerLanguage` removed. CI: `DraftBillsTests.Confirm_on_a_row…` failed once, passed on rerun (flaky: `ConfirmCommand.Execute` + direct `ConfirmDraftAsync` race) → tech debt. Owner test 2026-11-07: OK after #269 (category card, consumption fallback). |
+| T-039 | Performance and memory | 2026-11-07, #273 | 13 editors: all store calls via `OffUiAsync` (open, save, delete, Undo), Save disabled while saving, `Performance: <VM> open/save` lines (`PaneEditorViewModel.LoadCoreAsync`, `EditableViewModel`); `WindowsImageResizer` (2560 px, JPEG 85, EXIF) + thumbnails decoded at 360 px (`ImageSizing` in Core); `CoalescedAction` for `AdaptiveFieldGrid`; Overview weak sync subscription; Reports CTS disposed; dialogs checked; Windows publish `PublishReadyToRun=true`. Owner test pending (portrait photo orientation unverified). |
 | T-031 | Sync engine | 2026-11-03, #203 | `SyncOutbox` filled by the interceptor (received rows via raw SQL → no echo); `changes/<deviceId>/<seq:D10>.json` (≤ 500 rows), `snapshot/<deviceId>-<ts>.json.gz`; LWW by `UpdatedAt`, tie → higher deviceId; resurrect; unique clashes only `Categories.SystemKey` / `VatRates.Code` (lower id keeps it); newer format/migration stops; first join (Replace preselected + backup, Merge, empty device); `SyncScheduler` (start +3 s, resume ≥ 30 s, 10 s after a change, flush on leave, Sync now). New DeviceId per first join. Open: restore/JSON import on a syncing device (C9). |
 | — | Fix: icon images use the bundled font on all platforms | 2026-11-02, #199 | Unpackaged Windows: MAUI resolves an image font to a file URI; only a bundled font file works (system/default font → relative URI → exception; menu icons were invisible, theme change crashed). Possibly also the root of C5 (mixed colours). |
 | — | Fix: theme-switch crash on Windows, Google reconnect on Android | 2026-11-02, #197 | `IconImageFontFamily` (one family for `FontImageSource` on Windows); Android Disconnect/Connect clears the cached token (`AuthorizationClient.ClearToken`). |
@@ -270,9 +270,10 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - Flaky test fixed (shared static messenger in parallel VM tests → ViewModels.Tests run sequentially). CI now writes failed tests as check-run annotations (readable via API).
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
+- Flaky test `SnackbarServiceTests.TimerOfAReplacedMessage_DoesNotHideTheNewOne` (timing; failed once in six local runs, T-039 PR).
 - Flaky test `DraftBillsTests.Confirm_on_a_row_makes_the_draft_a_normal_bill` (fire-and-forget `ConfirmCommand.Execute` racing the direct `ConfirmDraftAsync`); failed once in CI of #267, passed on rerun — await the command (`ExecuteAsync`) in the next task touching Bills.
 - FlexLayout clips first item per row on Android — avoid it (UI_GUIDELINES §6a).
-- ~~Attachment files of soft-deleted rows are never removed~~ — Database clean-up (T-037/T-037a). Image shrinking only on Android.
+- ~~Attachment files of soft-deleted rows are never removed~~ — Database clean-up (T-037/T-037a). ~~Image shrinking only on Android~~ — Windows in T-039.
 
 ## Manual test log (owner)
 
