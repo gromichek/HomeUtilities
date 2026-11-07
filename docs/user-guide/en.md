@@ -172,7 +172,8 @@ year's bills). Without any bill this year the card says so in one line instead o
 readings like the *Consumption* report: the consumption of the **last complete month**, the change against the **average of the
 11 months before it** (*+8 %*) and a small line of the last 12 months. A day/night meter counts as its total. A month without
 a reading is a gap in the line — the app never invents a zero — and a figure that rests on an estimated or missing reading is
-marked **≈**. With fewer than three months of readings only the number is shown, without a line.
+marked **≈**. With fewer than three months of readings only the number is shown, without a line. When the last complete month has no
+readings yet, the latest month that has them is shown with its name (*38 m³ in Sep 26*) and compared with the months before it.
 
 If the last month is **more than 30 % above** the average, the row is marked with an amber warning icon and the change is shown
 in bold. This is only a hint — a guest at home, a filled pool or a leak all look the same to the app; a wrong reading does too.

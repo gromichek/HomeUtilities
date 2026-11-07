@@ -302,12 +302,20 @@ public class OverviewChartsTests
         Assert.False(short_.ShowLine);
         Assert.Equal(50m, short_.ChangePercent);
 
-        // The last month unknown: no number, no change, no rise.
+        // The last month unknown: the latest month with a figure (11, index 10) against the average of the ten before it
+        // (1..10 = 5.5): (11 - 5.5) / 5.5 = +100 %.
         decimal?[] missing = [1m, 2m, 3m, 4m, 5m, 6m, 7m, 8m, 9m, 10m, 11m, null];
         var gap = OverviewCharts.Trend(MeterResource.Electricity, MeterUnit.KWh, missing, new bool[12]);
-        Assert.Null(gap.Last);
-        Assert.Null(gap.ChangePercent);
-        Assert.False(gap.IsRise);
+        Assert.Equal(11m, gap.Last);
+        Assert.Equal(10, gap.LastIndex);
+        Assert.Equal(100m, gap.ChangePercent);
+
+        // No figure at all: no number, no change, no rise.
+        var none = OverviewCharts.Trend(MeterResource.Electricity, MeterUnit.KWh, new decimal?[12], new bool[12]);
+        Assert.Null(none.Last);
+        Assert.Equal(-1, none.LastIndex);
+        Assert.Null(none.ChangePercent);
+        Assert.False(none.IsRise);
     }
 
     [Fact]

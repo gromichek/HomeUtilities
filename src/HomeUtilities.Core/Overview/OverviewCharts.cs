@@ -48,11 +48,13 @@ public sealed record ConsumptionSeries(Guid PropertyId, MeterResource Resource, 
 /// <param name="Unit">The unit.</param>
 /// <param name="Values">Twelve monthly values for the small line, oldest first; null = a gap.</param>
 /// <param name="Approximate">Twelve flags, like <see cref="ConsumptionSeries.Approximate"/>.</param>
-/// <param name="Last">The last complete month; null when it is not known.</param>
+/// <param name="Last">The latest month with a figure (normally the last complete month); null when no month has one.</param>
 /// <param name="LastApproximate">Whether <paramref name="Last"/> rests on incomplete data.</param>
 /// <param name="ChangePercent">The last month against the average of the eleven before it, whole percent; null if either is missing or the average is zero.</param>
 /// <param name="IsRise">The rise is noticeable (above <see cref="OverviewCharts.RisePercent"/>).</param>
 /// <param name="ShowLine">Whether there are enough months (<see cref="OverviewCharts.MinMonthsForLine"/>) to draw the line.</param>
+/// <param name="LastIndex">Index of <paramref name="Last"/> in <paramref name="Values"/> (11 = the last complete month; smaller when
+/// that month has no readings and an older month is shown, with its name); -1 when there is none.</param>
 public sealed record ConsumptionTrend(
     MeterResource Resource,
     MeterUnit Unit,
@@ -62,7 +64,8 @@ public sealed record ConsumptionTrend(
     bool LastApproximate,
     decimal? ChangePercent,
     bool IsRise,
-    bool ShowLine);
+    bool ShowLine,
+    int LastIndex = -1);
 
 /// <summary>The figures of the three charts of the Overview (T-038). Pure functions over <see cref="OverviewData"/>.</summary>
 public static class OverviewCharts
@@ -255,8 +258,19 @@ public static class OverviewCharts
         ArgumentNullException.ThrowIfNull(values);
         ArgumentNullException.ThrowIfNull(approximate);
 
-        var last = values[^1];
-        var before = values.Take(values.Count - 1).OfType<decimal>().ToList();
+        // The latest month with a figure: the last complete month often has no readings yet (owner's test, T-038: "Газ —").
+        var lastIndex = -1;
+        for (var i = values.Count - 1; i >= 0; i--)
+        {
+            if (values[i] is not null)
+            {
+                lastIndex = i;
+                break;
+            }
+        }
+
+        var last = lastIndex >= 0 ? values[lastIndex] : null;
+        var before = values.Take(Math.Max(lastIndex, 0)).OfType<decimal>().ToList();
         decimal? change = null;
         if (last is { } latest && before.Count > 0 && before.Average() is var average and > 0)
         {
@@ -269,10 +283,11 @@ public static class OverviewCharts
             values,
             approximate,
             last,
-            approximate[^1],
+            lastIndex >= 0 && approximate[lastIndex],
             change,
             change > RisePercent,
-            values.Count(v => v is not null) >= MinMonthsForLine);
+            values.Count(v => v is not null) >= MinMonthsForLine,
+            lastIndex);
     }
 
     private static IEnumerable<Bill> CountedBills(OverviewData data, Guid? propertyId) =>

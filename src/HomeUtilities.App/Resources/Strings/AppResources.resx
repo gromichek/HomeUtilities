@@ -1069,6 +1069,7 @@
   <data name="OverviewCategoryOther" xml:space="preserve"><value>Other</value></data>
   <data name="OverviewConsumptionHeader" xml:space="preserve"><value>Consumption</value></data>
   <data name="OverviewConsumptionSubtitle" xml:space="preserve"><value>Last complete month; change against the average of the 11 months before.</value></data>
+  <data name="OverviewConsumptionInMonth" xml:space="preserve"><value>{0} in {1}</value></data>
   <data name="OverviewConsumptionRise" xml:space="preserve"><value>Higher than usual</value></data>
   <data name="OverviewConsumptionRowSummary" xml:space="preserve"><value>{0}: {1}, {2} against the average of the previous 11 months</value></data>
   <data name="OverviewOpenBills" xml:space="preserve"><value>Open bills {0}</value></data>

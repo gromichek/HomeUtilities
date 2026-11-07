@@ -1069,6 +1069,7 @@
   <data name="OverviewCategoryOther" xml:space="preserve"><value>Прочее</value></data>
   <data name="OverviewConsumptionHeader" xml:space="preserve"><value>Потребление</value></data>
   <data name="OverviewConsumptionSubtitle" xml:space="preserve"><value>Последний полный месяц; изменение к среднему за 11 предыдущих месяцев.</value></data>
+  <data name="OverviewConsumptionInMonth" xml:space="preserve"><value>{0} за {1}</value></data>
   <data name="OverviewConsumptionRise" xml:space="preserve"><value>Выше обычного</value></data>
   <data name="OverviewConsumptionRowSummary" xml:space="preserve"><value>{0}: {1}, {2} к среднему за предыдущие 11 месяцев</value></data>
   <data name="OverviewOpenBills" xml:space="preserve"><value>Неоплаченные счета {0}</value></data>
