@@ -48,10 +48,11 @@ public sealed partial class OverviewViewModel
     private string _categoriesSummary = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasCategories), nameof(ShowCategoriesEmpty))]
     private IReadOnlyList<ShareSegment> _categorySegments = [];
 
+    // The visibility follows the ROWS (set after the segments): notifying on the segments left the card body hidden (owner, T-038).
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCategories), nameof(ShowCategoriesEmpty))]
     private IReadOnlyList<CategoryRowViewModel> _categoryRows = [];
 
     [ObservableProperty]
@@ -252,6 +253,13 @@ public sealed partial class OverviewViewModel
             var value = trend.Last is { } last
                 ? (trend.LastApproximate ? "≈" + BillText.NonBreakingSpace : string.Empty) + BillText.WithUnit(last.ToString("#,0.##", CultureInfo.CurrentCulture), unit)
                 : "—";
+            if (trend.Last is not null && trend.LastIndex is >= 0 and < OverviewCharts.ConsumptionMonths - 1)
+            {
+                // An older month than the last complete one: say which.
+                var shown = YearMonth.From(_clock.Today).AddMonths(-OverviewCharts.ConsumptionMonths + trend.LastIndex);
+                value = _localizer.Get("OverviewConsumptionInMonth", value, MonthFormat.ShortWithYear(_localizer, shown.Year, shown.Month));
+            }
+
             var change = trend.ChangePercent is { } percent
                 ? $"{percent.ToString("+0;-0;0", CultureInfo.CurrentCulture)}{BillText.NonBreakingSpace}%"
                 : string.Empty;
