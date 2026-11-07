@@ -1006,7 +1006,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         await LoadTaxAsync();
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_contract.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_contract.Id));
 
     protected override string DeleteName() => _contract.Title;
 

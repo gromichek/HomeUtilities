@@ -372,7 +372,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
         _template = await OffUiAsync(() => _templates.GetAsync(template.Id)) ?? template;
     }
 
-    protected override Task DeleteCoreAsync() => _templates.DeleteAsync(_template.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _templates.DeleteAsync(_template.Id));
 
     protected override string DeleteName() => string.IsNullOrWhiteSpace(_template.Name) ? TemplateName : _template.Name;
 

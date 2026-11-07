@@ -453,7 +453,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         Title = TitleText();
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_component.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_component.Id));
 
     protected override string DeleteName() => _component.Name;
 

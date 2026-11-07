@@ -327,7 +327,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         FormatIban();
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_supplier.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_supplier.Id));
 
     protected override string DeleteName() => _supplier.Name;
 

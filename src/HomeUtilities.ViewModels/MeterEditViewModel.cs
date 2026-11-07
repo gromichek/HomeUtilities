@@ -634,7 +634,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
             throw new InvalidOperationException("A meter with readings cannot be deleted.");
         }
 
-        return _store.DeleteAsync(_meter.Id);
+        return OffUiAsync(() => _store.DeleteAsync(_meter.Id));
     }
 
     protected override string DeleteName() => MeterNames.Title(_localizer, _meter);

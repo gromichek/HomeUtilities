@@ -151,7 +151,7 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
     protected override Task DeleteCoreAsync() =>
         IsBuiltIn
             ? throw new InvalidOperationException("A built-in category cannot be deleted.")
-            : _store.DeleteAsync(_category.Id);
+            : OffUiAsync(() => _store.DeleteAsync(_category.Id));
 
     protected override string DeleteName() => CategoryNames.DisplayName(_category, _localizer);
 

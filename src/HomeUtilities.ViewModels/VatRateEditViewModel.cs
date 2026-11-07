@@ -227,7 +227,7 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
         return false;
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_rate.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_rate.Id));
 
     protected override string DeleteName() => _rate.Name;
 

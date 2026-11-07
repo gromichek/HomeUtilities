@@ -422,7 +422,7 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         Title = TitleText();
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_property.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_property.Id));
 
     protected override string DeleteName() => _property.Name;
 
