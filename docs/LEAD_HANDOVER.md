@@ -131,7 +131,7 @@ Prompt for a new lead session:
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
    **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). UI review 2026-11-05 done (review/ui-2026-11-05 branch → `docs/UI_REVIEW_2026-11-05.md`); UI_GUIDELINES revision 1
    adopted with the owner's decisions; T-036a tested OK; T-036b (#258) and T-037a (#260) merged and tested OK 2026-11-06; T-036c merged (#263) and tested OK — the UI review 2026-11-05 is complete. The ROADMAP is done except the postponed
-   T-032a; T-038 merged and tested. T-039 (#273, #275) **reverted** in #278 by the owner's decision (felt jerkier); **T-040 guide review Ready** (lead audit 2026-11-07: editors await SQLite on the UI
+   T-032a; T-038 merged and tested. T-039 (#273, #275) **reverted** in #278 by the owner's decision (felt jerkier); **T-040 guide review merged (#277)**, owner test pending (lead audit 2026-11-07: editors await SQLite on the UI
    thread — Microsoft.Data.Sqlite async is synchronous; WinUI decodes full-size thumbnails). Owner fills real data; next tasks
    come from his findings (scope in ROADMAP). R-21 confirmed by the owner: catalog
    lists show one column on Windows (`ListColumns` broken there) → T-036b. Old branches deleted by the owner. **T-037** (database clean-up) merged (#248), owner test pending —

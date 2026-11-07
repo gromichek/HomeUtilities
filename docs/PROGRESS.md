@@ -7,7 +7,6 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
-| T-040 | User guide review (EN + RU): check against the app, Quick start, Problems and answers | Ready | | owner 2026-11-07 |
 
 ## Done
 
@@ -56,6 +55,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-036c | UI review part 3: screens, details, delete with dependants, guide | 2026-11-06, #263 | Bill editor order + ⋮ Paid + due soon; meter title location · serial, linked contracts only, ＋ readings; Sync status first; Readings Next/Done, note icon, submit online once; filter ‹ month › in the collapsed line; C-05/08/16/18; `IDeleteImpactService` dependants + Undo (meter: backup only); custom field hint + guide; Windows DatePicker language (unverified). UI review 2026-11-05 complete. Owner test 2026-11-07 OK; Windows calendar pop-up stays English (owner: leave it). |
 | T-038 | Overview charts + 2 small fixes | 2026-11-07, #267 | A months vs last year (`ChartDrawable`), B top-5 categories + Other, C consumption per resource/unit, last complete month vs 11-month average, rise > 30 % (`OverviewCharts.RisePercent`), sparkline; loader reads 14 months of readings; `BillsFor` without property; "Передать онлайн" stays with "передано {date}" (session found no code that hid it — owner to give steps if it still vanishes); `DatePickerLanguage` removed. CI: `DraftBillsTests.Confirm_on_a_row…` failed once, passed on rerun (flaky: `ConfirmCommand.Execute` + direct `ConfirmDraftAsync` race) → tech debt. Owner test 2026-11-07: OK after #269 (category card, consumption fallback). |
 | T-039 | Performance and memory — **reverted** | 2026-11-07, #273 + #275, reverted in #278 | Owner: after T-039 the app felt jerkier on every tab (and a double tap opened two editors); the version before was smoother → owner decided to go back. Code is again as before #273. Lessons: moving editor loads off the UI thread makes pages appear first and fill in afterwards; the coalesced grid arrange adds a relayout after the first frame. Any new attempt in small, separately tested steps (photos on Windows first; no editor-threading without a design for "appears complete"). |
+| T-040 | User guide review (EN + RU): Quick start, Problems and answers, numbering | 2026-11-07, #277 | Sections 1–20 in the same order EN/RU (Overview 4, Bill templates 14), "Coming soon" removed, `HelpTopic` anchors renumbered + test that every in-page link hits a heading. Lead merged main (T-039 revert) and removed the reverted behaviour the session had described (editors open complete / double tap once / Windows photo shrinking). Session findings: the Russian **«Сохранить копию…»** is used for both *Save backup…* and *Save copy…* → next task; CI skips tests on guide-only PRs (suggestion). Owner test pending. |
 | T-031 | Sync engine | 2026-11-03, #203 | `SyncOutbox` filled by the interceptor (received rows via raw SQL → no echo); `changes/<deviceId>/<seq:D10>.json` (≤ 500 rows), `snapshot/<deviceId>-<ts>.json.gz`; LWW by `UpdatedAt`, tie → higher deviceId; resurrect; unique clashes only `Categories.SystemKey` / `VatRates.Code` (lower id keeps it); newer format/migration stops; first join (Replace preselected + backup, Merge, empty device); `SyncScheduler` (start +3 s, resume ≥ 30 s, 10 s after a change, flush on leave, Sync now). New DeviceId per first join. Open: restore/JSON import on a syncing device (C9). |
 | — | Fix: icon images use the bundled font on all platforms | 2026-11-02, #199 | Unpackaged Windows: MAUI resolves an image font to a file URI; only a bundled font file works (system/default font → relative URI → exception; menu icons were invisible, theme change crashed). Possibly also the root of C5 (mixed colours). |
 | — | Fix: theme-switch crash on Windows, Google reconnect on Android | 2026-11-02, #197 | `IconImageFontFamily` (one family for `FontImageSource` on Windows); Android Disconnect/Connect clears the cached token (`AuthorizationClient.ClearToken`). |
@@ -111,6 +111,9 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - **Overview → Money**: "Счетов и платежей пока нет." is shown when nothing is open, overdue or prepaid and the balance is 0 —
   also when bills exist and all are paid (owner's screenshot). With bills/payments: "Всё оплачено — долгов и предоплат нет."
   (new resx key); keep the old text only when there are really no bills and no payments.
+- **Russian label «Сохранить копию…»** is used for two buttons (*Save backup…* and *Save copy…*, T-040 finding): give them
+  different Russian texts (e.g. «Сохранить резервную копию…» for the backup) and update the guide RU.
+- Flaky `SnackbarServiceTests.TimerOfAReplacedMessage_DoesNotHideTheNewOne` (timing).
 - T-038 fixes done in #269: category card body hidden (notification order), consumption falls back to the latest month with
   readings ("38 м³ за сен 26"). Re-tested OK by the owner 2026-11-07.
 
