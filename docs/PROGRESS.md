@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-039 | Performance and memory: editors' DB work off the UI thread, photo memory, small leaks, Windows ReadyToRun | Ready | | owner 2026-11-07: analyse leaks + UI stutter; lead audit in the task file |
 
 ## Done
 
