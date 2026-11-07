@@ -103,5 +103,8 @@ is written; the list below is the plan and will change.
 - T-037 Database clean-up (owner, 2026-11-05): purge soft-deleted rows + orphan attachment files, VACUUM, backup first;
   with sync on → replace the cloud or NeedsRejoin.
 
+- T-038 Overview charts (owner, 2026-11-07): A this year by month vs last year, B spending by category, C consumption of
+  12 months with a rise hint; reuse the Reports chart drawing.
+
 ## Phase 10 — iOS (dropped)
 - ~~T-033 iOS~~ — dropped (owner, 2026-11-05: no Mac to develop on). Windows + Android only.
