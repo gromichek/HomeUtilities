@@ -110,8 +110,8 @@ public sealed partial class EqualizedSettlementViewModel : ViewModelBase
 
     public async Task ReloadAsync()
     {
-        _contract = await _contractStore.GetAsync(ContractId);
-        _report = _contract is null ? null : await _service.LoadAsync(ContractId);
+        _contract = await OffUiAsync(() => _contractStore.GetAsync(ContractId));
+        _report = _contract is null ? null : await OffUiAsync(() => _service.LoadAsync(ContractId));
         Rebuild();
     }
 

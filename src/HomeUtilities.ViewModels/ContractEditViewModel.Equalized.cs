@@ -67,13 +67,13 @@ public sealed partial class ContractEditViewModel
         }
         else if (_contract.BillingMode == BillingMode.Equalized)
         {
-            _equalizedReport = await _settlementService.LoadAsync(_contract.Id);
+            _equalizedReport = await OffUiAsync(() => _settlementService.LoadAsync(_contract.Id));
             _plans = _equalizedReport.Plans;
         }
         else
         {
             _equalizedReport = null;
-            _plans = await _planStore.ListByContractAsync(_contract.Id);
+            _plans = await OffUiAsync(() => _planStore.ListByContractAsync(_contract.Id));
         }
 
         RebuildEqualized();
@@ -161,7 +161,7 @@ public sealed partial class ContractEditViewModel
             return;
         }
 
-        await _planStore.DeleteAsync(plan.Id);
+        await OffUiAsync(() => _planStore.DeleteAsync(plan.Id));
         await LoadEqualizedAsync();
     }
 
@@ -171,10 +171,10 @@ public sealed partial class ContractEditViewModel
         foreach (var predecessor in EqualizedPlans.PredecessorsToClose(_plans, plan))
         {
             predecessor.ValidTo = plan.ValidFrom.AddDays(-1);
-            await _planStore.SaveAsync(predecessor);
+            await OffUiAsync(() => _planStore.SaveAsync(predecessor));
         }
 
-        await _planStore.SaveAsync(plan);
+        await OffUiAsync(() => _planStore.SaveAsync(plan));
         await LoadEqualizedAsync();
     }
 

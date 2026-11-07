@@ -1398,7 +1398,9 @@ are real dates, so Excel or LibreOffice can sum and sort them.
 
 **Settings → Error log**: if the app reports an error, tap **Copy log** and send the text to the developer. The page says how
 many entries the log holds. Besides errors the log contains lines *Performance: <screen> <ms> ms (<n> items)*: the app notes
-there when a screen needed 0.3 s or more to show its data (and once per start how long it took until the Overview appeared). They
+there when a screen needed 0.3 s or more to show its data (and once per start how long it took until the Overview appeared). An editor that
+needed 0.3 s or more to open or to save writes *Performance: <editor> open <ms> ms* or *Performance: <editor> save <ms> ms*. On Windows, photos you attach are
+shrunk to at most 2560 px on the long side (like on the phone), so the files stay small. They
 help to find slow screens — send them together with the log. **Clear** empties the log after a confirmation (*Clear the error log? The entries cannot be restored.*).
 
 ### Installing a new version

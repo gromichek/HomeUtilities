@@ -563,21 +563,21 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         return LoadAsync(id);
     }
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var existing = id is { } value ? await _store.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _store.GetAsync(value)) : null;
             _contract = existing ?? new Contract { PropertyId = _propertyId, ValidFrom = _clock.Today };
             _propertyId = _contract.PropertyId;
             IsNew = existing is null;
 
-            _property = await _propertyStore.GetAsync(_propertyId);
+            _property = await OffUiAsync(() => _propertyStore.GetAsync(_propertyId));
             _propertyName = _property?.Name ?? string.Empty;
-            _suppliers = await _supplierStore.ListAsync();
-            _categories = await _categoryStore.ListAsync();
+            _suppliers = await OffUiAsync(() => _supplierStore.ListAsync());
+            _categories = await OffUiAsync(() => _categoryStore.ListAsync());
             _hasLegacyCurrency = _contract.Currency != Currency.EUR;
             _categoryTouched = !IsNew;
 
@@ -696,7 +696,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         var service = SelectedService?.As<ServiceKind>() ?? _contract.Service;
         foreach (var component in TariffPresets.Create(preset, _contract.Id, service, key => _localizer["TariffPresetName_" + key], hot))
         {
-            await _tariffStore.SaveAsync(component);
+            await OffUiAsync(() => _tariffStore.SaveAsync(component));
         }
 
         await LoadTariffAsync();
@@ -718,7 +718,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             if (ordered[i].SortOrder != i)
             {
                 ordered[i].SortOrder = i;
-                await _tariffStore.SaveAsync(ordered[i]);
+                await OffUiAsync(() => _tariffStore.SaveAsync(ordered[i]));
             }
         }
 
@@ -735,14 +735,14 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         }
         else
         {
-            _components = await _tariffStore.ListByContractAsync(_contract.Id);
-            _catalog = await _vatStore.ListAsync();
-            var links = await _store.ListContractMetersAsync(_contract.Id);
+            _components = await OffUiAsync(() => _tariffStore.ListByContractAsync(_contract.Id));
+            _catalog = await OffUiAsync(() => _vatStore.ListAsync());
+            var links = await OffUiAsync(() => _store.ListContractMetersAsync(_contract.Id));
             var wanted = links
                 .Where(l => !l.IsDeleted && (l.ValidTo is null || l.ValidTo >= _clock.Today))
                 .Select(l => l.MeterId)
                 .ToHashSet();
-            var propertyMeters = await _meterStore.ListByPropertyAsync(_propertyId);
+            var propertyMeters = await OffUiAsync(() => _meterStore.ListByPropertyAsync(_propertyId));
             _linkedMeters = [.. propertyMeters.Where(m => wanted.Contains(m.Id))];
         }
 
@@ -841,7 +841,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
                 return;
             }
 
-            _suppliers = await _supplierStore.ListAsync();
+            _suppliers = await OffUiAsync(() => _supplierStore.ListAsync());
             SelectedSupplier = FindSupplierOption(editor.EntityId);
             RebuildLinks();
         };
@@ -996,7 +996,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     protected override async Task SaveCoreAsync()
     {
         var pending = _pending ?? BuildContract();
-        await _store.SaveAsync(pending);
+        await OffUiAsync(() => _store.SaveAsync(pending));
         _contract = pending;
         IsNew = false;
         Title = TitleText();
@@ -1006,7 +1006,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         await LoadTaxAsync();
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_contract.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_contract.Id));
 
     protected override string DeleteName() => _contract.Title;
 
@@ -1018,7 +1018,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         }
 
         // The list of what goes with the record (UI_GUIDELINES §5.1); without dependants a record with Undo is deleted at once.
-        var dependants = DependantsText.List(_localizer, await _impact.ForContractAsync(EntityId));
+        var dependants = DependantsText.List(_localizer, await OffUiAsync(() => _impact.ForContractAsync(EntityId)));
         if (dependants.Length == 0 && UndoSupport is not null)
         {
             return null;

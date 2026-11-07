@@ -298,21 +298,21 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
 
     public string ExampleHeader => _localizer["TariffExampleHeader"];
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var existing = id is { } value ? await _store.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _store.GetAsync(value)) : null;
             _component = existing ?? new TariffComponent { ContractId = ContractId };
             ContractId = _component.ContractId;
             IsNew = existing is null;
 
-            _contract = await _contractStore.GetAsync(ContractId) ?? new Contract { Id = ContractId };
-            _property = await _propertyStore.GetAsync(_contract.PropertyId);
-            _catalog = await _vatStore.ListAsync();
-            _categories = await _categoryStore.ListAsync();
+            _contract = await OffUiAsync(() => _contractStore.GetAsync(ContractId)) ?? new Contract { Id = ContractId };
+            _property = await OffUiAsync(() => _propertyStore.GetAsync(_contract.PropertyId));
+            _catalog = await OffUiAsync(() => _vatStore.ListAsync());
+            _categories = await OffUiAsync(() => _categoryStore.ListAsync());
             await LoadMetersAsync();
 
             Services = EnumText.Options<ServiceKind>(_localizer);
@@ -353,7 +353,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
     {
         // Nothing else edits a component while its page is open, but the property or the VAT catalog may have changed
         // behind a child page (e.g. help); a cheap re-read keeps the example honest.
-        _catalog = await _vatStore.ListAsync();
+        _catalog = await OffUiAsync(() => _vatStore.ListAsync());
         RaiseExample();
     }
 
@@ -439,7 +439,7 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
         var pending = _pending ?? BuildComponent(record: false);
         if (IsNew)
         {
-            var all = await _store.ListByContractAsync(ContractId);
+            var all = await OffUiAsync(() => _store.ListByContractAsync(ContractId));
             pending.SortOrder = all.Select(c => c.SortOrder).DefaultIfEmpty(-1).Max() + 1;
         }
         else
@@ -447,13 +447,13 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
             pending.SortOrder = _component.SortOrder;
         }
 
-        await _store.SaveAsync(pending);
+        await OffUiAsync(() => _store.SaveAsync(pending));
         _component = pending;
         IsNew = false;
         Title = TitleText();
     }
 
-    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_component.Id);
+    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_component.Id));
 
     protected override string DeleteName() => _component.Name;
 
@@ -587,14 +587,14 @@ public sealed partial class TariffComponentEditViewModel : PaneEditorViewModel
 
     private async Task LoadMetersAsync()
     {
-        var links = await _contractStore.ListContractMetersAsync(ContractId);
+        var links = await OffUiAsync(() => _contractStore.ListContractMetersAsync(ContractId));
         var today = _clock.Today;
         var wanted = links
             .Where(l => !l.IsDeleted && (l.ValidTo is null || l.ValidTo >= today))
             .Select(l => l.MeterId)
             .Concat(_component.MeterIds)
             .ToHashSet();
-        var propertyMeters = _contract.PropertyId == Guid.Empty ? [] : await _meterStore.ListByPropertyAsync(_contract.PropertyId);
+        var propertyMeters = _contract.PropertyId == Guid.Empty ? [] : await OffUiAsync(() => _meterStore.ListByPropertyAsync(_contract.PropertyId));
         _linkedMeters = [.. propertyMeters.Where(m => wanted.Contains(m.Id))];
     }
 

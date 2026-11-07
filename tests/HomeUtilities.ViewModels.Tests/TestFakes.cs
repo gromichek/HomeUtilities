@@ -329,7 +329,17 @@ internal sealed class FakeEqualizedPlanStore : IEqualizedPlanStore
 
     public List<EqualizedPlan> Saved { get; } = [];
 
-    public IEnumerable<EqualizedPlan> Stored => All.Where(p => !p.IsDeleted);
+    // Editors read and write on a pool thread (T-039): replacing a plan must not be seen half done.
+    public IEnumerable<EqualizedPlan> Stored
+    {
+        get
+        {
+            lock (All)
+            {
+                return [.. All.Where(p => !p.IsDeleted)];
+            }
+        }
+    }
 
     public Task<IReadOnlyList<EqualizedPlan>> ListAsync(CancellationToken ct = default) =>
         Task.FromResult<IReadOnlyList<EqualizedPlan>>([.. Stored.Select(Copy).OrderBy(p => p.ValidFrom)]);
@@ -342,9 +352,13 @@ internal sealed class FakeEqualizedPlanStore : IEqualizedPlanStore
 
     public Task SaveAsync(EqualizedPlan aggregate, CancellationToken ct = default)
     {
-        Saved.Add(Copy(aggregate));
-        All.RemoveAll(p => p.Id == aggregate.Id);
-        All.Add(Copy(aggregate));
+        lock (All)
+        {
+            Saved.Add(Copy(aggregate));
+            All.RemoveAll(p => p.Id == aggregate.Id);
+            All.Add(Copy(aggregate));
+        }
+
         return Task.CompletedTask;
     }
 

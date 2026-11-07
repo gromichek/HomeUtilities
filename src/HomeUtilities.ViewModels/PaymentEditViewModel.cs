@@ -184,34 +184,34 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 
     public bool HasAllocationsError => AllocationsError.Length > 0;
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var existing = id is { } value ? await _payments.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _payments.GetAsync(value)) : null;
             _payment = existing ?? new Payment { PaidOn = _clock.Today, Method = PaymentMethod.BankTransfer };
             _pending = null;
             IsNew = existing is null;
 
-            _contracts = await _contractStore.ListAsync();
+            _contracts = await OffUiAsync(() => _contractStore.ListAsync());
             _contractsById = _contracts.ToDictionary(c => c.Id);
             // Drafts are not bills yet: a payment cannot be allocated to one.
-            _billsById = (await _bills.ListAsync()).Where(b => !b.IsDraft).ToDictionary(b => b.Id);
-            _properties = await _propertyStore.ListAsync(false);
+            _billsById = (await OffUiAsync(() => _bills.ListAsync())).Where(b => !b.IsDraft).ToDictionary(b => b.Id);
+            _properties = await OffUiAsync(() => _propertyStore.ListAsync(false));
             if (existing is not null)
             {
                 foreach (var propertyId in PropertyIdsOf(existing).Where(p => _properties.All(known => known.Id != p)))
                 {
-                    if (await _propertyStore.GetAsync(propertyId) is { } own)
+                    if (await OffUiAsync(() => _propertyStore.GetAsync(propertyId)) is { } own)
                     {
                         _properties = [.. _properties, own];
                     }
                 }
             }
 
-            _paidByOthers = (await _payments.ListAsync())
+            _paidByOthers = (await OffUiAsync(() => _payments.ListAsync()))
                 .Where(p => p.Id != _payment.Id)
                 .SelectMany(p => p.Allocations)
                 .Where(a => !a.IsDeleted)
@@ -257,7 +257,7 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
     {
         var payment = _pending ?? throw new InvalidOperationException("Validate must run before saving.");
         PaymentRules.ApplyQuickFlagRule(payment);
-        await _payments.SaveAsync(payment);
+        await OffUiAsync(() => _payments.SaveAsync(payment));
         _payment = payment;
         IsNew = false;
         Title = TitleText();
@@ -268,7 +268,7 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
         OnPropertyChanged(nameof(IsPropertyReadOnly));
     }
 
-    protected override async Task DeleteCoreAsync() => await _payments.DeleteAsync(_payment.Id);
+    protected override async Task DeleteCoreAsync() => await OffUiAsync(() => _payments.DeleteAsync(_payment.Id));
 
     protected override string DeleteName() =>
         $"{PaymentText.Amount(_localizer, _payment.Amount, CurrencySymbol)} · {BillText.Date(_payment.PaidOn)}";
@@ -562,7 +562,7 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 
     private async Task<string?> PurposeAsync(Contract contract)
     {
-        var supplier = await _supplierStore.GetAsync(contract.SupplierId);
+        var supplier = await OffUiAsync(() => _supplierStore.GetAsync(contract.SupplierId));
         var template = (supplier is null ? contract.PaymentDetails : PaymentDetails.Effective(contract, supplier))?.PurposeTemplate;
         if (string.IsNullOrWhiteSpace(template))
         {
@@ -577,7 +577,7 @@ public sealed partial class PaymentEditViewModel : PaneEditorViewModel
 
         var typed = TypedAmount();
         decimal? amount = typed != 0 ? typed : _allocations.Count == 1 ? _allocations[0].Amount : null;
-        var property = await _propertyStore.GetAsync(contract.PropertyId);
+        var property = await OffUiAsync(() => _propertyStore.GetAsync(contract.PropertyId));
         var text = PaymentPurpose.Render(
             template,
             new PaymentPurposeContext(contract.CustomerNumber, contract.ContractNumber, bill?.Number, bill?.Period, amount, property?.Name));
