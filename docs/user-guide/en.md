@@ -115,9 +115,9 @@ my money stand?* It reads the records you keep elsewhere (contracts, meters, rea
 its own, so it is only as good as the data behind it. Pull down to refresh on a phone; the screen also refreshes every time you
 come back to it, for example after entering readings or a bill.
 
-With more than one property a **Property** filter at the top limits all three cards to one property (or *All properties*);
+With more than one property a **Property** filter at the top limits all the cards and charts to one property (or *All properties*);
 the app remembers your choice. On a phone the cards are one below the other; on a tablet or a wide window **To do** is on the
-left and **Money** and **This year** on the right. **?** opens this section.
+left and **Money**, **This year**, **Spending in {year} by category** and **Consumption** on the right. **?** opens this section.
 
 ### To do
 
@@ -150,7 +150,34 @@ For each property the gross total of the bills of this year, counted by the bill
 next to the same months of last year: *2026: 1,245.30 € · 2025 same period: 1,180.10 € (+5.5 %)*. A bill for a later month
 (for example internet paid in advance) is counted when its month comes. If there is no bill at all in the same months of last
 year, the line shows only this year (*2026: 1 245,30 €*) instead of an invented *0,00 €*. Tap to open the Bills screen for that year.
-Charts on this screen come later.
+
+Under the lines a **chart of the months** shows what each month of this year cost (the same bills with VAT, counted by the
+bill's month) as a bar next to the same month of last year, which is the lighter bar; the legend names the two years. Months
+that have not come yet are empty. The current month, and a month in which a draft bill is still waiting, are drawn
+paler with a dashed outline: they may still change. Without any bill in last year only this year's bars are shown. **Tap a month**
+to open the Bills screen for that month (and the chosen property). The chart is read-only and has a text description for screen readers.
+
+### Spending by category
+
+**Spending in {year} by category** shows where this year's money went: the gross total of the bills from January to the current
+month, split by the bill's category (the colour of the category is the colour of the bar). One bar shows the shares; below it
+there is a row per category with the amount and its share in percent, the largest first. At most five categories are named; the
+rest is summed up as **Other**. The line under the title says which months are counted and the total, for example *january –
+october, total 1,002.00 €*. Tap a row to open the Bills screen with this category for the whole year (**Other** opens all the
+year's bills). Without any bill this year the card says so in one line instead of showing an empty chart.
+
+### Consumption
+
+**Consumption** shows one row per service you have meters for (cold water, hot water, electricity, gas, heating…), taken from the
+readings like the *Consumption* report: the consumption of the **last complete month**, the change against the **average of the
+11 months before it** (*+8 %*) and a small line of the last 12 months. A day/night meter counts as its total. A month without
+a reading is a gap in the line — the app never invents a zero — and a figure that rests on an estimated or missing reading is
+marked **≈**. With fewer than three months of readings only the number is shown, without a line.
+
+If the last month is **more than 30 % above** the average, the row is marked with an amber warning icon and the change is shown
+in bold. This is only a hint — a guest at home, a filled pool or a leak all look the same to the app; a wrong reading does too.
+Tap a row to open **Reports → Consumption** for the last 12 months (and the chosen property). The card is hidden when you have no
+meters or no readings.
 
 ## 3. Properties
 
@@ -258,6 +285,8 @@ Menu **Readings**: the fastest way to enter monthly values.
 5. **Submit online** opens the supplier's *Submit readings* link. It is in the contract's banner; the meter cards repeat it
    only for pages that no banner offers (a contract without a reading window, or only a customer portal). When you come
    back, the app asks **Readings submitted?** — *Mark submitted* stores the date, so you can see which readings were sent.
+   The button **stays** after that, with *submitted {date}* next to it: opening the supplier's page does not always mean the
+   page took the readings, so you can open it again.
 6. **Keyboard.** The Enter key of the number keyboard says *Next* and moves to the next value field (the last field says
    *Done*). The small **note icon** at the right of a value field opens a note for that register; it is highlighted while the
    register has a note. The **history icon** in the card header (or a tap on the title) opens the history of the meter.
