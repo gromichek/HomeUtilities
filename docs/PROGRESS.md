@@ -52,7 +52,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-037 | Database clean-up | 2026-11-05, #248 | `DatabaseCleaner` (raw SQL, children first from `PRAGMA foreign_key_list`, deleted rows still referenced are kept + logged, Meters self-reference in passes, outbox of purged rows), orphan `attachments/<guid><ext>` files (not `.part`), VACUUM; backup reason `BeforeCleanUp`; sync on → Replace the cloud, "Not now" → `MarkNeedsRejoinAsync`. Owner test 2026-11-06: steps 1, 4, 5 OK; findings T-037/1–4 below (owner: fix together with other changes). |
 | T-036b | UI review part 2: choices, fields, phone dialogs, lists, delete + Undo, Windows icons | 2026-11-06, #258 | `ChoiceField` replaces 43 Pickers (one tap, OK only for rows with inputs), `DateField`/`DateFormat`, Android outlined fields, `DialogFrame` on the phone, `SystemBars` nav bar, Bills/Payments one column, `ListColumns` Span-only, `CompactFill`, `SegmentedControl`, delete + Undo via `IDeleteUndoService` recorder, #250 reverted + `MenuIconLabel`. Lead fixed CS1574 and merged main (T-037a). Open: confirmation text with the list of dependants (§5.1) for property/contract/supplier/meter → T-036c. Owner test 2026-11-06 OK. |
 | T-037a | Clean-up fixes | 2026-11-06, #260 | `AttachmentCascade` (owner delete soft-deletes its attachments, restore helper), cleaner purges attachments of deleted/missing owners, preview = result by kind, no size for 0 files. Session pushed without a PR — lead opened #260. Owner test 2026-11-06 OK. |
-| T-036c | UI review part 3: screens, details, delete with dependants, guide | 2026-11-06, #263 | Bill editor order + ⋮ Paid + due soon; meter title location · serial, linked contracts only, ＋ readings; Sync status first; Readings Next/Done, note icon, submit online once; filter ‹ month › in the collapsed line; C-05/08/16/18; `IDeleteImpactService` dependants + Undo (meter: backup only); custom field hint + guide; Windows DatePicker language (unverified). UI review 2026-11-05 complete. Owner test pending. |
+| T-036c | UI review part 3: screens, details, delete with dependants, guide | 2026-11-06, #263 | Bill editor order + ⋮ Paid + due soon; meter title location · serial, linked contracts only, ＋ readings; Sync status first; Readings Next/Done, note icon, submit online once; filter ‹ month › in the collapsed line; C-05/08/16/18; `IDeleteImpactService` dependants + Undo (meter: backup only); custom field hint + guide; Windows DatePicker language (unverified). UI review 2026-11-05 complete. Owner test 2026-11-07 OK; Windows calendar pop-up stays English (owner: leave it). |
 | T-031 | Sync engine | 2026-11-03, #203 | `SyncOutbox` filled by the interceptor (received rows via raw SQL → no echo); `changes/<deviceId>/<seq:D10>.json` (≤ 500 rows), `snapshot/<deviceId>-<ts>.json.gz`; LWW by `UpdatedAt`, tie → higher deviceId; resurrect; unique clashes only `Categories.SystemKey` / `VatRates.Code` (lower id keeps it); newer format/migration stops; first join (Replace preselected + backup, Merge, empty device); `SyncScheduler` (start +3 s, resume ≥ 30 s, 10 s after a change, flush on leave, Sync now). New DeviceId per first join. Open: restore/JSON import on a syncing device (C9). |
 | — | Fix: icon images use the bundled font on all platforms | 2026-11-02, #199 | Unpackaged Windows: MAUI resolves an image font to a file URI; only a bundled font file works (system/default font → relative URI → exception; menu icons were invisible, theme change crashed). Possibly also the root of C5 (mixed colours). |
 | — | Fix: theme-switch crash on Windows, Google reconnect on Android | 2026-11-02, #197 | `IconImageFontFamily` (one family for `FontImageSource` on Windows); Android Disconnect/Connect clears the cached token (`AuthorizationClient.ClearToken`). |
@@ -104,7 +104,13 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues
 
-### Collected for the next session task (2026-11-06)
+### Collected for the next session task (2026-11-07)
+- **Readings: keep "Передать онлайн" visible after a submit** (owner, T-036c test): opening the link does not always mean
+  the readings were submitted, and the button is gone afterwards. Keep it (e.g. with "submitted" state next to it).
+- **Remove `Platforms/Windows/DatePickerLanguage.cs`** (T-036c optional item): it does not change the calendar language on
+  the owner's PC; owner: leave the calendar English.
+
+### Done: collected 2026-11-06 (T-037a #260, T-036b #258)
 - **T-037/1** Deleting a bill (or any owner) leaves its attachments live (`Attachments.OwnerId` → deleted owner): the photo
   is never purged ("files 0" after deleting a bill with a photo). Owner deletes must soft-delete their attachments, and
   the cleaner must treat attachments whose owner is deleted or missing as deleted (existing data).
@@ -121,7 +127,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
   `Shell.ItemTemplate` (or `FlyoutItem` template) with a `Label` in the Material font (same glyph code points as now,
   20–24 px, like the Settings section icons), selection highlight and both themes kept; Settings icons are already text. / tech debt
 
-### Collected for the next session task (owner: collect fixes and hand them over together, 2026-11-02)
+### Done: collected 2026-11-02 (C1–C14 — T-028h, T-028i, T-032, #199)
 
 (C1–C4 done in T-028h #181. Suggestions for later: `ReloadGate` for the other section roots; `MeterStore.IncludeAll` loads all readings.)
 
@@ -241,22 +247,22 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 - Import: an installation-day row ignores the old-final value from a note (old final = last regular reading) — exact round trip only when they are equal (T-027a).
 
-- Some texts do not wrap on narrow screens (seen in the emulator, place not noted) → device polish pass on a real phone/tablet before backup/sync.
+- ~~Some texts do not wrap on narrow screens~~ — T-028a…T-036c.
 
 
 - `ViewModelBase` uses `WeakReferenceMessenger.RegisterAll` (reflection) — check Android release trimming; switch to explicit `Register<T>` if it breaks.
-- App icon and splash are placeholder SVGs (no MAUI template available offline).
+- ~~App icon and splash are placeholder SVGs~~ — done in T-034.
 - Cloud coding sessions cannot build the MAUI App; rely on CI for Android/Windows.
 - SQLite decimals lose trailing zeros (`-12.10` → `-12.1`); numerically equal, UI always formats amounts.
 - Snapshot `ChargeWarning.Args` come back as `JsonElement` (display only).
 - Timestamps of items inside JSON columns (links, custom field definitions) are not stamped; the owner row is (sync is row-level).
 - `AggregateMerger` adds new children via `db.Add` — UI must set the child's FK (e.g. `PropertyParameter.PropertyId`) before saving.
-- Saving an id that exists only as a soft-deleted row is not supported (resurrect needed for sync, T-030).
+- ~~Saving an id that exists only as a soft-deleted row~~ — resurrect done in T-031.
 - Flaky test fixed (shared static messenger in parallel VM tests → ViewModels.Tests run sequentially). CI now writes failed tests as check-run annotations (readable via API).
 - Android "≡" floating button seen by the owner is probably the Android **Accessibility Menu** shortcut, not our app — owner to confirm.
 - Link-list logic duplicated in supplier and contract editors (extract helper VM later).
 - FlexLayout clips first item per row on Android — avoid it (UI_GUIDELINES §6a).
-- Attachment files of soft-deleted rows are never removed (cleanup job later); image shrinking only on Android.
+- ~~Attachment files of soft-deleted rows are never removed~~ — Database clean-up (T-037/T-037a). Image shrinking only on Android.
 
 ## Manual test log (owner)
 

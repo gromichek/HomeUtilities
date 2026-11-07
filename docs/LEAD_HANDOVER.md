@@ -129,7 +129,8 @@ Prompt for a new lead session:
 ## 6. Next steps (ROADMAP)
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
    **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). UI review 2026-11-05 done (review/ui-2026-11-05 branch → `docs/UI_REVIEW_2026-11-05.md`); UI_GUIDELINES revision 1
-   adopted with the owner's decisions; T-036a tested OK; T-036b (#258) and T-037a (#260) merged and tested OK 2026-11-06; T-036c merged (#263) — the UI review 2026-11-05 is complete; owner test pending. No next task planned yet (scope in ROADMAP). R-21 confirmed by the owner: catalog
+   adopted with the owner's decisions; T-036a tested OK; T-036b (#258) and T-037a (#260) merged and tested OK 2026-11-06; T-036c merged (#263) and tested OK — the UI review 2026-11-05 is complete. The ROADMAP is done except the postponed
+   T-032a; two small items collected (2026-11-07). Owner now fills real data; next tasks come from his findings (scope in ROADMAP). R-21 confirmed by the owner: catalog
    lists show one column on Windows (`ListColumns` broken there) → T-036b. Old branches deleted by the owner. **T-037** (database clean-up) merged (#248), owner test pending —
    the owner fills data on one device, cleans, then brings it to the others (backup restore or sync replace). iOS (T-033) and contract templates
    (T-025b) dropped; second cloud (T-032a) postponed. T-032b and the snackbar fix (#220) passed the owner's tests.
