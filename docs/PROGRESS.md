@@ -105,6 +105,13 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 ## Known issues
 
+### Collected for the next session task (2026-11-07, after T-038)
+- **Overview → Money**: "Счетов и платежей пока нет." is shown when nothing is open, overdue or prepaid and the balance is 0 —
+  also when bills exist and all are paid (owner's screenshot). With bills/payments: "Всё оплачено — долгов и предоплат нет."
+  (new resx key); keep the old text only when there are really no bills and no payments.
+- T-038 fixes done in #269: category card body hidden (notification order), consumption falls back to the latest month with
+  readings ("38 м³ за сен 26"). Owner to re-test steps 2 and 3.
+
 ### Collected 2026-11-07 → handed over in T-038
 - **Readings: keep "Передать онлайн" visible after a submit** (owner, T-036c test): opening the link does not always mean
   the readings were submitted, and the button is gone afterwards. Keep it (e.g. with "submitted" state next to it).
