@@ -522,26 +522,26 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     public bool HasLinesError => LinesError.Length > 0;
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         _loading = true;
         try
         {
-            var existing = id is { } value ? await _bills.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _bills.GetAsync(value)) : null;
             _bill = existing ?? new Bill { Kind = BillKind.Regular, IssuedOn = _clock.Today };
             _pending = null;
             IsNew = existing is null;
 
-            _properties = await _propertyStore.ListAsync(false);
-            if (existing is not null && _properties.All(p => p.Id != existing.PropertyId) && await _propertyStore.GetAsync(existing.PropertyId) is { } own)
+            _properties = await OffUiAsync(() => _propertyStore.ListAsync(false));
+            if (existing is not null && _properties.All(p => p.Id != existing.PropertyId) && await OffUiAsync(() => _propertyStore.GetAsync(existing.PropertyId)) is { } own)
             {
                 _properties = [.. _properties, own];
             }
 
-            _suppliers = await _supplierStore.ListAsync();
-            _categories = await _categoryStore.ListAsync();
+            _suppliers = await OffUiAsync(() => _supplierStore.ListAsync());
+            _categories = await OffUiAsync(() => _categoryStore.ListAsync());
             _categoryTouched = !IsNew;
             _supplierTouched = !IsNew;
             _dueTouched = !IsNew;
@@ -597,11 +597,11 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         var bill = _pending ?? throw new InvalidOperationException("Validate must run before saving.");
         var attachmentIds = await StoreAttachmentsAsync(bill);
         bill.AttachmentIds = attachmentIds;
-        await _bills.SaveAsync(bill);
+        await OffUiAsync(() => _bills.SaveAsync(bill));
 
         foreach (var removed in _removedAttachments)
         {
-            await _attachmentStore.DeleteAsync(removed);
+            await OffUiAsync(() => _attachmentStore.DeleteAsync(removed));
         }
 
         _removedAttachments.Clear();
@@ -619,8 +619,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
 
     protected override async Task DeleteCoreAsync()
     {
-        await _quickPay.ReleasePaymentsAsync(_bill.Id);
-        await _bills.DeleteAsync(_bill.Id);
+        await OffUiAsync(() => _quickPay.ReleasePaymentsAsync(_bill.Id));
+        await OffUiAsync(() => _bills.DeleteAsync(_bill.Id));
     }
 
     protected override string DeleteName() => TitleText();

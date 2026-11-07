@@ -799,12 +799,14 @@ public class ContractEditViewModelTests
         await vm.LoadAsync(contract.PropertyId, contract.Id);
 
         vm.TariffRows[2].MoveUpCommand.Execute(null);
+        await TestWait.UntilAsync(() => vm.TariffRows.Select(r => r.Name).SequenceEqual(["Water supply", "Heating", "Sewerage"]));
 
         Assert.Equal(["Water supply", "Heating", "Sewerage"], vm.TariffRows.Select(r => r.Name));
         Assert.Equal((0, 2, 1), (water.SortOrder, sewerage.SortOrder, heating.SortOrder));
         Assert.Equal([heating.Id, sewerage.Id], _kit.Tariffs.Saved.Select(c => c.Id));
 
         vm.TariffRows[0].MoveDownCommand.Execute(null);
+        await TestWait.UntilAsync(() => vm.TariffRows[0].Name == "Heating");
 
         Assert.Equal(["Heating", "Water supply", "Sewerage"], vm.TariffRows.Select(r => r.Name));
         Assert.Equal((1, 2, 0), (water.SortOrder, sewerage.SortOrder, heating.SortOrder));

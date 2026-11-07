@@ -54,9 +54,9 @@ public sealed partial class ContractEditViewModel
         else
         {
             var rows = new List<(Bill, BillState)>();
-            foreach (var bill in (await _billStore.ListByContractAsync(_contract.Id)).Where(b => b.Kind == BillKind.TaxInstallment))
+            foreach (var bill in (await OffUiAsync(() => _billStore.ListByContractAsync(_contract.Id))).Where(b => b.Kind == BillKind.TaxInstallment))
             {
-                rows.Add((bill, BillStatus.Of(bill, await _paymentStore.ListByBillAsync(bill.Id), _clock.Today)));
+                rows.Add((bill, BillStatus.Of(bill, await OffUiAsync(() => _paymentStore.ListByBillAsync(bill.Id)), _clock.Today)));
             }
 
             _taxBills = rows;
@@ -166,14 +166,14 @@ public sealed partial class ContractEditViewModel
 
         foreach (var bill in replaced)
         {
-            await _billStore.DeleteAsync(bill.Id);
+            await OffUiAsync(() => _billStore.DeleteAsync(bill.Id));
         }
 
         var created = TaxInstallmentPlanner.CreateBills(
             _contract, input.Year, plan, p => _localizer.Get("TaxInstallmentTitle", input.Year, p.Number, p.Count), _clock);
         foreach (var bill in created)
         {
-            await _billStore.SaveAsync(bill);
+            await OffUiAsync(() => _billStore.SaveAsync(bill));
         }
 
         _snackbar.Notify(_localizer.Get("TaxCreated", created.Count, input.Year));

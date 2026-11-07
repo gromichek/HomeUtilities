@@ -186,13 +186,13 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
 
     public bool HasPurposePreview => PurposeTemplate.Trim().Length > 0;
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var existing = id is { } value ? await _store.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _store.GetAsync(value)) : null;
             _supplier = existing ?? new Supplier();
             IsNew = existing is null;
             Name = _supplier.Name;
@@ -320,7 +320,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
     protected override async Task SaveCoreAsync()
     {
         var pending = _pending ?? BuildSupplier();
-        await _store.SaveAsync(pending);
+        await OffUiAsync(() => _store.SaveAsync(pending));
         _supplier = pending;
         IsNew = false;
         Title = TitleText();
@@ -339,7 +339,7 @@ public sealed partial class SupplierEditViewModel : PaneEditorViewModel
         }
 
         // The list of what goes with the record (UI_GUIDELINES §5.1); without dependants a record with Undo is deleted at once.
-        var dependants = DependantsText.List(_localizer, await _impact.ForSupplierAsync(EntityId));
+        var dependants = DependantsText.List(_localizer, await OffUiAsync(() => _impact.ForSupplierAsync(EntityId)));
         if (dependants.Length == 0 && UndoSupport is not null)
         {
             return null;

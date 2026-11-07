@@ -214,13 +214,13 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     public IReadOnlyList<ParameterRowViewModel> Rows => _rows;
 
     /// <summary>Loads an existing property, or prepares a new one when <paramref name="id"/> is null.</summary>
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var existing = id is { } value ? await _store.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _store.GetAsync(value)) : null;
             _property = existing ?? new Property();
             IsNew = existing is null;
             Name = _property.Name;
@@ -253,7 +253,7 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
     /// <summary>Re-reads the meters of the property (after the meter editor closed).</summary>
     public async Task ReloadMetersAsync()
     {
-        _meters = IsNew ? [] : await _meterStore.ListByPropertyAsync(_property.Id);
+        _meters = IsNew ? [] : await OffUiAsync(() => _meterStore.ListByPropertyAsync(_property.Id));
         RebuildMeters();
     }
 
@@ -266,9 +266,9 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         }
         else
         {
-            _contracts = await _contractStore.ListByPropertyAsync(_property.Id);
-            _suppliers = (await _supplierStore.ListAsync()).ToDictionary(s => s.Id);
-            _categories = (await _categoryStore.ListAsync()).ToDictionary(c => c.Id);
+            _contracts = await OffUiAsync(() => _contractStore.ListByPropertyAsync(_property.Id));
+            _suppliers = (await OffUiAsync(() => _supplierStore.ListAsync())).ToDictionary(s => s.Id);
+            _categories = (await OffUiAsync(() => _categoryStore.ListAsync())).ToDictionary(c => c.Id);
         }
 
         RebuildContracts();
@@ -412,11 +412,11 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         var pending = _pending ?? BuildProperty();
         if (IsNew)
         {
-            var all = await _store.ListAsync(true);
+            var all = await OffUiAsync(() => _store.ListAsync(true));
             pending.SortOrder = all.Select(p => p.SortOrder).DefaultIfEmpty(-1).Max() + 1;
         }
 
-        await _store.SaveAsync(pending);
+        await OffUiAsync(() => _store.SaveAsync(pending));
         _property = pending;
         IsNew = false;
         Title = TitleText();
@@ -434,7 +434,7 @@ public sealed partial class PropertyEditViewModel : PaneEditorViewModel
         }
 
         // The list of what goes with the record (UI_GUIDELINES §5.1); without dependants a record with Undo is deleted at once.
-        var dependants = DependantsText.List(_localizer, await _impact.ForPropertyAsync(EntityId));
+        var dependants = DependantsText.List(_localizer, await OffUiAsync(() => _impact.ForPropertyAsync(EntityId)));
         if (dependants.Length == 0 && UndoSupport is not null)
         {
             return null;

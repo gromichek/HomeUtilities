@@ -264,13 +264,13 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         return LoadAsync(id);
     }
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var existing = id is { } value ? await _store.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _store.GetAsync(value)) : null;
             _meter = existing ?? NewMeter();
             _propertyId = _meter.PropertyId;
             IsNew = existing is null;
@@ -331,11 +331,11 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         var rows = new List<MeterContractSwitchViewModel>();
         if (_propertyId != Guid.Empty)
         {
-            foreach (var contract in await _contractStore.ListByPropertyAsync(_propertyId))
+            foreach (var contract in await OffUiAsync(() => _contractStore.ListByPropertyAsync(_propertyId)))
             {
                 IReadOnlyList<ContractMeter> pair = IsNew
                     ? []
-                    : [.. (await _contractStore.ListContractMetersAsync(contract.Id)).Where(l => l.MeterId == _meter.Id && !l.IsDeleted)];
+                    : [.. (await OffUiAsync(() => _contractStore.ListContractMetersAsync(contract.Id))).Where(l => l.MeterId == _meter.Id && !l.IsDeleted)];
                 var open = pair.Where(l => MeterContractLink.IsOpen(l, today)).ToList();
                 var inUse = open.Count > 0;
                 if (!inUse && (contract.IsArchived || contract.ValidTo is { } end && end < today))
@@ -438,7 +438,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         link.ValidTo = result.ValidTo;
         try
         {
-            await _contractStore.SaveContractMeterAsync(link);
+            await OffUiAsync(() => _contractStore.SaveContractMeterAsync(link));
         }
         catch
         {
@@ -455,7 +455,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         var rows = new List<MeterHistoryRowViewModel>();
         if (!IsNew)
         {
-            var all = await _store.ListByPropertyAsync(_propertyId);
+            var all = await OffUiAsync(() => _store.ListByPropertyAsync(_propertyId));
             if (all.FirstOrDefault(m => m.Id == _meter.ReplacedMeterId) is { } previous)
             {
                 rows.Add(new MeterHistoryRowViewModel(
@@ -569,7 +569,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
             return;
         }
 
-        var fresh = await _store.GetAsync(_meter.Id);
+        var fresh = await OffUiAsync(() => _store.GetAsync(_meter.Id));
         if (fresh is null || fresh.RemovedOn is not null)
         {
             return;
@@ -577,9 +577,9 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
 
         var today = _clock.Today;
         var contracts = new List<MeterContractLink>();
-        foreach (var contract in await _contractStore.ListByPropertyAsync(_propertyId))
+        foreach (var contract in await OffUiAsync(() => _contractStore.ListByPropertyAsync(_propertyId)))
         {
-            var open = (await _contractStore.ListContractMetersAsync(contract.Id))
+            var open = (await OffUiAsync(() => _contractStore.ListContractMetersAsync(contract.Id)))
                 .Where(l => l.MeterId == fresh.Id && MeterContractLink.IsOpen(l, today))
                 .ToList();
             if (open.Count > 0 || (!contract.IsArchived && (contract.ValidTo is not { } end || end >= today)))
@@ -622,7 +622,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
     protected override async Task SaveCoreAsync()
     {
         var pending = _pending ?? BuildMeter(null);
-        await _store.SaveAsync(pending);
+        await OffUiAsync(() => _store.SaveAsync(pending));
         await SaveContractLinksAsync(pending);
         await LoadAsync(pending.Id);
     }
@@ -647,7 +647,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
         }
 
         // The list of what goes with the record (UI_GUIDELINES §5.1); without dependants a record with Undo is deleted at once.
-        var dependants = DependantsText.List(_localizer, await _impact.ForMeterAsync(EntityId));
+        var dependants = DependantsText.List(_localizer, await OffUiAsync(() => _impact.ForMeterAsync(EntityId)));
         if (dependants.Length == 0 && UndoSupport is not null)
         {
             return null;
@@ -673,7 +673,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
                     MeterId = saved.Id,
                     ValidFrom = MeterLinkRules.NewLinkStart(saved.InstalledOn, row.Link.Contract.ValidFrom, row.PairLinks),
                 };
-                await _contractStore.SaveContractMeterAsync(link);
+                await OffUiAsync(() => _contractStore.SaveContractMeterAsync(link));
             }
             else if (!row.IsOn && row.Link.IsLinked)
             {
@@ -681,7 +681,7 @@ public sealed partial class MeterEditViewModel : PaneEditorViewModel
                 {
                     var yesterday = today.AddDays(-1);
                     link.ValidTo = yesterday < link.ValidFrom ? link.ValidFrom : yesterday;
-                    await _contractStore.SaveContractMeterAsync(link);
+                    await OffUiAsync(() => _contractStore.SaveContractMeterAsync(link));
                 }
             }
         }

@@ -98,13 +98,13 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
 
     public string NotesError => Lookup(nameof(Category.Notes));
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var all = await _store.ListAsync();
+            var all = await OffUiAsync(() => _store.ListAsync());
             var existing = id is { } value ? all.FirstOrDefault(c => c.Id == value) : null;
             _category = existing ?? new Category { Color = CategoryNames.NextColor(all) };
             IsNew = existing is null;
@@ -137,11 +137,11 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
         var pending = _pending ?? BuildCategory();
         if (IsNew)
         {
-            var all = await _store.ListAsync();
+            var all = await OffUiAsync(() => _store.ListAsync());
             pending.SortOrder = all.Select(c => c.SortOrder).DefaultIfEmpty(-1).Max() + 1;
         }
 
-        await _store.SaveAsync(pending);
+        await OffUiAsync(() => _store.SaveAsync(pending));
         _category = pending;
         IsNew = false;
         Title = TitleText();

@@ -98,8 +98,8 @@ public sealed partial class ContractEditViewModel
         }
         else
         {
-            var bills = await _billStore.ListByContractAsync(_contract.Id);
-            var payments = await _paymentStore.ListByContractAsync(_contract.Id);
+            var bills = await OffUiAsync(() => _billStore.ListByContractAsync(_contract.Id));
+            var payments = await OffUiAsync(() => _paymentStore.ListByContractAsync(_contract.Id));
             _balance = ContractBalance.Of(_contract.Id, bills, payments, _clock.Today);
             _unallocated = payments
                 .Where(p => p.ContractId == _contract.Id)
@@ -149,7 +149,7 @@ public sealed partial class ContractEditViewModel
     [RelayCommand]
     private Task UseForOpenBillsAsync() => RunSafeAsync(async () =>
     {
-        var result = await _prepayments.UseForOpenBillsAsync(_contract.Id);
+        var result = await OffUiAsync(() => _prepayments.UseForOpenBillsAsync(_contract.Id));
         await LoadBillsAsync();
         if (result is null)
         {
@@ -159,7 +159,7 @@ public sealed partial class ContractEditViewModel
 
         if (await _snackbar.ShowAsync(_localizer["PrepaymentUsed"], _localizer["BillUndo"]))
         {
-            await _prepayments.UndoAsync(result);
+            await OffUiAsync(() => _prepayments.UndoAsync(result));
             await LoadBillsAsync();
         }
     });

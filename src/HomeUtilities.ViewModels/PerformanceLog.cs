@@ -32,6 +32,22 @@ public static class PerformanceLog
         return true;
     }
 
+    /// <summary>The line written for a slow editor open or save, e.g. <c>Performance: BillEditViewModel save 412 ms</c>.</summary>
+    public static string FormatEditor(string name, string phase, TimeSpan elapsed) =>
+        string.Create(CultureInfo.InvariantCulture, $"Performance: {name} {phase} {(long)elapsed.TotalMilliseconds} ms");
+
+    /// <summary>Logs an editor's <c>open</c> / <c>save</c> when it was slow (T-039); returns whether it was logged.</summary>
+    public static bool ReportEditor(string name, string phase, TimeSpan elapsed)
+    {
+        if (elapsed < Threshold || Sink is not { } sink)
+        {
+            return false;
+        }
+
+        sink.Note("Performance", FormatEditor(name, phase, elapsed));
+        return true;
+    }
+
     /// <summary>Debug builds only: a section that skipped its reload because nothing changed (T-028i).</summary>
     [Conditional("DEBUG")]
     public static void ReportSkipped(string name) => Sink?.Note("Performance", $"Performance: {name} skipped (no change)");

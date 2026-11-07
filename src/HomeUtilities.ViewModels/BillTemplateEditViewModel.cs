@@ -303,26 +303,26 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
 
     public bool HasLinesError => LinesError.Length > 0;
 
-    public override async Task LoadAsync(Guid? id)
+    protected override async Task LoadCoreAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         _loading = true;
         try
         {
-            var existing = id is { } value ? await _templates.GetAsync(value) : null;
+            var existing = id is { } value ? await OffUiAsync(() => _templates.GetAsync(value)) : null;
             _template = existing ?? new BillTemplate();
             _pending = null;
             IsNew = existing is null;
 
-            _properties = await _propertyStore.ListAsync(false);
-            if (existing is not null && _properties.All(p => p.Id != existing.PropertyId) && await _propertyStore.GetAsync(existing.PropertyId) is { } own)
+            _properties = await OffUiAsync(() => _propertyStore.ListAsync(false));
+            if (existing is not null && _properties.All(p => p.Id != existing.PropertyId) && await OffUiAsync(() => _propertyStore.GetAsync(existing.PropertyId)) is { } own)
             {
                 _properties = [.. _properties, own];
             }
 
-            _suppliers = await _supplierStore.ListAsync();
-            _categories = await _categoryStore.ListAsync();
+            _suppliers = await OffUiAsync(() => _supplierStore.ListAsync());
+            _categories = await OffUiAsync(() => _categoryStore.ListAsync());
             _categoryTouched = !IsNew;
             _supplierTouched = !IsNew;
 
@@ -362,14 +362,14 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     protected override async Task SaveCoreAsync()
     {
         var template = _pending ?? throw new InvalidOperationException("Validate must run before saving.");
-        await _templates.SaveAsync(template);
+        await OffUiAsync(() => _templates.SaveAsync(template));
         _template = template;
         IsNew = false;
         Title = TitleText();
 
         // A template saved with a start month in the past has drafts due right away.
-        await _templates.GenerateDraftsAsync(_clock.Today);
-        _template = await _templates.GetAsync(template.Id) ?? template;
+        await OffUiAsync(() => _templates.GenerateDraftsAsync(_clock.Today));
+        _template = await OffUiAsync(() => _templates.GetAsync(template.Id)) ?? template;
     }
 
     protected override Task DeleteCoreAsync() => _templates.DeleteAsync(_template.Id);
@@ -454,11 +454,11 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
         SelectedProperty = _properties.Count == 1 ? PropertyOption(_properties[0]) : null;
         CurrencySymbol = _localizer["Currency_Symbol_" + Currency.EUR];
 
-        if (PresetBillId is { } billId && await _billStore.GetAsync(billId) is { } bill)
+        if (PresetBillId is { } billId && await OffUiAsync(() => _billStore.GetAsync(billId)) is { } bill)
         {
             await PrepareFromBillAsync(bill);
         }
-        else if (PresetContractId is { } contractId && await _contractStore.GetAsync(contractId) is { } contract)
+        else if (PresetContractId is { } contractId && await OffUiAsync(() => _contractStore.GetAsync(contractId)) is { } contract)
         {
             await PrepareFromContractAsync(contract);
         }
@@ -481,7 +481,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
         SelectedSupplier = SupplierOptions().FirstOrDefault(s => s.Id == contract.SupplierId);
 
         // The amount of the newest bill is the usual one.
-        var last = (await _billStore.ListByContractAsync(contract.Id)).LastOrDefault();
+        var last = (await OffUiAsync(() => _billStore.ListByContractAsync(contract.Id))).LastOrDefault();
         if (last is not null)
         {
             Amounts.Load(new AmountSet(last.Net, last.VatPercent, last.Vat, last.Gross));
@@ -501,7 +501,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
     private async Task PrepareFromBillAsync(Bill bill)
     {
         await SelectPropertyCoreAsync(bill.PropertyId);
-        if (bill.ContractId is { } contractId && await _contractStore.GetAsync(contractId) is { } contract)
+        if (bill.ContractId is { } contractId && await OffUiAsync(() => _contractStore.GetAsync(contractId)) is { } contract)
         {
             ApplyContract(contract);
         }
@@ -531,7 +531,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
 
     private async Task ShowExistingAsync(BillTemplate existing)
     {
-        _contract = existing.ContractId is { } contractId ? await _contractStore.GetAsync(contractId) : null;
+        _contract = existing.ContractId is { } contractId ? await OffUiAsync(() => _contractStore.GetAsync(contractId)) : null;
         _contracts = existing.PropertyId == Guid.Empty ? [] : await ContractsOfAsync(existing.PropertyId);
         _lines.Clear();
         _lines.AddRange(existing.Lines.Select(Copy));
@@ -578,7 +578,7 @@ public sealed partial class BillTemplateEditViewModel : PaneEditorViewModel
 
     private async Task<IReadOnlyList<Contract>> ContractsOfAsync(Guid propertyId) =>
     [
-        .. (await _contractStore.ListByPropertyAsync(propertyId))
+        .. (await OffUiAsync(() => _contractStore.ListByPropertyAsync(propertyId)))
             .Where(c => !c.IsDeleted && !c.IsArchived)
             .OrderBy(c => c.Title, StringComparer.CurrentCultureIgnoreCase),
     ];
