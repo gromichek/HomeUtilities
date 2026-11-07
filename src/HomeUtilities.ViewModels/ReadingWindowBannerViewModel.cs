@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace HomeUtilities.ViewModels;
@@ -16,7 +17,7 @@ public enum ReadingWindowState
 }
 
 /// <summary>The banner of a contract's reading window with the "Submit online" button.</summary>
-public sealed class ReadingWindowBannerViewModel
+public sealed partial class ReadingWindowBannerViewModel : ObservableObject
 {
     public ReadingWindowBannerViewModel(Guid contractId, ReadingWindowState state, string text, string submitText, IAsyncRelayCommand? submitCommand)
     {
@@ -46,6 +47,13 @@ public sealed class ReadingWindowBannerViewModel
     public IAsyncRelayCommand? SubmitCommand { get; }
 
     public bool HasSubmitLink => SubmitCommand is not null;
+
+    /// <summary>"submitted 07.11.2026" once the owner marked the readings as submitted; the button stays (the page may not have taken them).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSubmittedText))]
+    private string _submittedText = string.Empty;
+
+    public bool HasSubmittedText => SubmittedText.Length > 0;
 }
 
 /// <summary>"Mark as submitted to {supplier}?" shown after the readings were saved.</summary>

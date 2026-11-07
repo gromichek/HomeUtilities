@@ -42,6 +42,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
     private IReadOnlyList<ContractInfo> _contracts = [];
     private List<(Guid MeterId, MeterReading Reading)> _lastSaved = [];
     private List<Guid> _dismissedPrompts = [];
+    private readonly Dictionary<Guid, DateOnly> _submittedMarks = [];
     private readonly Dictionary<Guid, PickedFile> _photos = [];
     private readonly HashSet<Guid> _pendingSubmit = [];
     private Guid? _selectedPropertyId;
@@ -266,6 +267,7 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
         _openedMeterId = null;
         _lastSaved = [];
         _dismissedPrompts = [];
+        _submittedMarks.Clear();
         await LoadPropertyAsync();
         OnPropertyChanged(nameof(SelectedPropertyIndex));
     });
@@ -587,7 +589,26 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
 
         MarkSelectedCard(_openedMeterId);
         Prompts = [.. BuildPrompts()];
+        ApplySubmittedMarks();
         OnPropertyChanged(nameof(HasUnsavedValues));
+    }
+
+    /// <summary>
+    /// Writes "submitted {date}" next to the Submit buttons of the contracts marked as submitted. The buttons stay: opening the
+    /// supplier's page does not prove that the readings were accepted there.
+    /// </summary>
+    private void ApplySubmittedMarks()
+    {
+        foreach (var banner in Banners)
+        {
+            banner.SubmittedText = _submittedMarks.TryGetValue(banner.ContractId, out var day) ? _localizer.Get("ReadingSubmittedOn", DateFormat.Full(day)) : string.Empty;
+        }
+
+        foreach (var link in Groups.SelectMany(g => g.Cards).SelectMany(c => c.SubmitLinks))
+        {
+            var marked = link.ContractIds.Where(_submittedMarks.ContainsKey).Select(id => _submittedMarks[id]).ToList();
+            link.SubmittedText = marked.Count == link.ContractIds.Count ? _localizer.Get("ReadingSubmittedOn", DateFormat.Full(marked.Max())) : string.Empty;
+        }
     }
 
     /// <summary>The reading window (days) of the first contract that has one and uses the meter.</summary>
@@ -772,6 +793,8 @@ public sealed partial class ReadingsViewModel : ViewModelBase, IUnsavedChangesGu
         }
 
         await _meterStore.UpdateReadingsAsync(readings);
+        _submittedMarks[contractId] = today;
+        ApplySubmittedMarks();
         Dismiss(contractId);
         _snackbar.Notify(_localizer["ReadingsMarked"]);
     }
