@@ -546,6 +546,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         var source = new CancellationTokenSource();
         var older = Interlocked.Exchange(ref _buildCancellation, source);
         older?.Cancel();
+        older?.Dispose();
         var token = source.Token;
 
         var culture = CultureInfo.CurrentCulture;
