@@ -7,6 +7,7 @@ using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Overview;
+using HomeUtilities.Core.Reports;
 using HomeUtilities.Core.Sync;
 using HomeUtilities.ViewModels.Common;
 
@@ -14,7 +15,7 @@ namespace HomeUtilities.ViewModels;
 
 /// <summary>
 /// The start screen: what to do now (readings, bills to pay or enter, verifications, expected settlements), where the money
-/// stands per property and what this year cost against the same months of last year. It also opens the database once at the
+/// stands per property and what this year cost against the same months of last year, three charts (this year by month, spending by category, consumption). It also opens the database once at the
 /// start of the app (migration and seeding). The data is loaded in one go on every appearing and after a quick payment.
 /// </summary>
 public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>
@@ -34,6 +35,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     private readonly ISettingsStore _settings;
     private readonly ILayoutModeService _layoutModeService;
     private readonly ReloadGate? _gate;
+    private readonly ReportFilterState? _reportState;
 
     private OverviewData _data = OverviewData.Empty;
     private IReadOnlyList<TodoItem> _todo = [];
@@ -87,7 +89,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     private IReadOnlyList<OverviewBlockViewModel> _yearBlocks = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowTodoEmpty), nameof(ShowMoneyEmpty), nameof(ShowYearEmpty))]
+    [NotifyPropertyChangedFor(nameof(ShowTodoEmpty), nameof(ShowMoneyEmpty), nameof(ShowYearEmpty), nameof(ShowCategoriesEmpty))]
     private bool _isLoaded;
 
     [ObservableProperty]
@@ -115,8 +117,10 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         ILayoutModeService layoutModeService,
         IDataChangeNotifier? changes = null,
         ISyncEngine? sync = null,
-        IUiDispatcher? dispatcher = null)
+        IUiDispatcher? dispatcher = null,
+        ReportFilterState? reportState = null)
     {
+        _reportState = reportState;
         _sync = sync;
         if (sync is not null)
         {
@@ -222,19 +226,20 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
         var today = _clock.Today;
         (long Version, DateOnly Day)? snapshot = null;
-        var (data, todo) = await OffUiAsync(
+        var (data, todo, consumption) = await OffUiAsync(
             async () =>
             {
                 // Drafts of the templates that came due since the last visit are created before the data is read.
                 await _templateStore.GenerateDraftsAsync(today, ct);
                 snapshot = _gate?.Snapshot();
                 var loaded = await _loader.LoadAsync(today, ct);
-                return (loaded, TodoBuilder.Build(loaded, today));
+                return (loaded, TodoBuilder.Build(loaded, today), OverviewCharts.Consumption(loaded, today));
             },
             ct);
         ct.ThrowIfCancellationRequested();
         _data = data;
         _todo = todo;
+        _consumption = consumption;
         PropertyCount = _data.Properties.Count;
         if (_propertyFilter is { } filter && _data.Properties.All(p => p.Id != filter))
         {
@@ -340,6 +345,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         MoneyEmptyText = _localizer["OverviewMoneyEmpty"];
         YearHeader = _localizer["OverviewYearHeader"];
         YearEmptyText = _localizer["OverviewYearEmpty"];
+        RefreshChartTexts();
         PropertyFilterLabel = _localizer["OverviewPropertyFilter"];
         RefreshDatabaseStatus();
         _gate?.Invalidate();
@@ -359,6 +365,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         TodoRows = [.. _todo.Where(Matches).Select(CreateRow)];
         MoneyBlocks = BuildMoney();
         YearBlocks = BuildYear();
+        BuildCharts();
     }
 
     private bool Matches(TodoItem item) => _propertyFilter is not { } filter || item.PropertyId == filter;

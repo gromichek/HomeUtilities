@@ -208,12 +208,12 @@ public sealed partial class BillsViewModel : MasterDetailViewModel<BillEditViewM
     public const string CategoryParameter = "categoryId";
 
     /// <summary>
-    /// Opens the screen for a property with the bills of every year (or of one <paramref name="year"/> or <paramref name="month"/>)
+    /// Opens the screen for a property (null = all properties) with the bills of every year (or of one <paramref name="year"/> or <paramref name="month"/>)
     /// and the given status; the contract's bills are highlighted and only the <paramref name="categoryId"/>'s bills are shown
     /// ("All bills", a number of a report).
     /// </summary>
     public Task OpenForAsync(
-        Guid propertyId,
+        Guid? propertyId,
         Guid? contractId,
         BillStatusFilter status = BillStatusFilter.All,
         int? year = null,

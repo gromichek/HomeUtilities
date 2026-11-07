@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:HomeUtilities.App.Views"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.OverviewConsumptionCard"
+             x:DataType="vm:OverviewViewModel">
+
+    <!-- Consumption: a row per service with the last complete month, the change against the usual and a small line. Hidden without meters. -->
+    <Border Style="{StaticResource SectionCard}" IsVisible="{Binding HasConsumption}">
+        <VerticalStackLayout Spacing="8">
+            <Label Text="{Binding ConsumptionHeader}" Style="{StaticResource SectionHeader}" />
+            <Label Text="{Binding ConsumptionSubtitle}" Style="{StaticResource MutedLabel}" />
+
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding ConsumptionRows}" Spacing="0">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ConsumptionRowViewModel">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" MinimumHeightRequest="56"
+                              SemanticProperties.Description="{Binding Description}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                            </Grid.GestureRecognizers>
+
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="0">
+                                <Label Text="{Binding Name}" />
+                                <Label Text="{Binding ValueText}" FontAttributes="Bold" />
+                                <HorizontalStackLayout Spacing="6" IsVisible="{Binding HasChange}">
+                                    <!-- The rise is a hint: warning colour and icon, not red. -->
+                                    <Label Text="{StaticResource IconWarning}" FontFamily="{DynamicResource IconFontFamily}" VerticalOptions="Center"
+                                           IsVisible="{Binding IsRise}" ToolTipProperties.Text="{Binding RiseText}"
+                                           TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                    <Label Text="{Binding ChangeText}" VerticalOptions="Center" Style="{StaticResource MutedLabel}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" x:DataType="vm:ConsumptionRowViewModel" Binding="{Binding IsRise}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                                                <Setter Property="FontAttributes" Value="Bold" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <views:Sparkline Grid.Column="1" Data="{Binding Line}" VerticalOptions="Center" IsVisible="{Binding HasLine}" />
+                            <Label Grid.Column="2" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
+                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                        </Grid>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

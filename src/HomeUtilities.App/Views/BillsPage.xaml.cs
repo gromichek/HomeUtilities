@@ -18,7 +18,14 @@ public partial class BillsPage : PageBase, IQueryAttributable
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (BindingContext is not BillsViewModel viewModel || !TryGuid(query, EditorNavigation.PropertyIdParameter, out var propertyId))
+        if (BindingContext is not BillsViewModel viewModel)
+        {
+            return;
+        }
+
+        // The Overview opens the bills of a month, a year or a category for all properties: no property then.
+        Guid? propertyId = TryGuid(query, EditorNavigation.PropertyIdParameter, out var property) ? property : null;
+        if (propertyId is null && !query.ContainsKey(BillsViewModel.MonthParameter) && !query.ContainsKey(BillsViewModel.YearParameter) && !query.ContainsKey(BillsViewModel.CategoryParameter))
         {
             return;
         }

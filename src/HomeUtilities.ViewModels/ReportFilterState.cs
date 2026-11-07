@@ -53,6 +53,12 @@ public sealed class ReportFilterState
     /// <summary>The report shown.</summary>
     public ReportKind Kind { get; set; } = ReportKind.Costs;
 
+    /// <summary>
+    /// True when another screen (the Overview) changed the filters before opening the Reports: the screen then recalculates even if
+    /// no data changed. The Reports screen clears it.
+    /// </summary>
+    public bool ChangedExternally { get; set; }
+
     /// <summary>The period preset.</summary>
     public ReportPreset Preset { get; set; } = ReportPreset.ThisYear;
 
