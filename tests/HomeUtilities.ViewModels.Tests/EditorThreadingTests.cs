@@ -61,6 +61,27 @@ public class EditorThreadingTests : IDisposable
     }
 
     [Fact]
+    public async Task EditorIsNotReadyWhileLoading_AndReadyAfterwards()
+    {
+        // The page hides the form while IsEditorReady is false, so the fields never pop in one by one.
+        var vm = new CategoryEditViewModel(new FakeCategoryStore(), new FakeLocalizer(_language), new FakeDialogService(), new FakeNavigationService(), new FakeSnackbarService());
+        var seen = new List<bool>();
+        vm.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(vm.IsEditorReady))
+            {
+                seen.Add(vm.IsEditorReady);
+            }
+        };
+
+        Assert.True(vm.IsEditorReady);
+        await vm.LoadAsync(null);
+
+        Assert.Equal([false, true], seen);
+        Assert.True(vm.IsEditorReady);
+    }
+
+    [Fact]
     public async Task FastOpenAndSave_LogNothing()
     {
         var vm = new CategoryEditViewModel(new FakeCategoryStore(), new FakeLocalizer(_language), new FakeDialogService(), new FakeNavigationService(), new FakeSnackbarService());
