@@ -1059,6 +1059,18 @@
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>Счетов и платежей пока нет.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>Этот год</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>Счетов за этот год пока нет.</value></data>
+  <data name="OverviewChartHint" xml:space="preserve"><value>Нажмите на месяц, чтобы открыть его счета.</value></data>
+  <data name="OverviewChartMonth" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="OverviewChartMonthWithLast" xml:space="preserve"><value>{0}: {1}, {2}: {3}</value></data>
+  <data name="OverviewCategoriesHeader" xml:space="preserve"><value>Расходы за {0} по категориям</value></data>
+  <data name="OverviewCategoriesSubtitle" xml:space="preserve"><value>{0} – {1}, всего {2}</value></data>
+  <data name="OverviewCategoriesSubtitleOne" xml:space="preserve"><value>{0}, всего {1}</value></data>
+  <data name="OverviewCategoriesEmpty" xml:space="preserve"><value>Счетов за этот год пока нет.</value></data>
+  <data name="OverviewCategoryOther" xml:space="preserve"><value>Прочее</value></data>
+  <data name="OverviewConsumptionHeader" xml:space="preserve"><value>Потребление</value></data>
+  <data name="OverviewConsumptionSubtitle" xml:space="preserve"><value>Последний полный месяц; изменение к среднему за 11 предыдущих месяцев.</value></data>
+  <data name="OverviewConsumptionRise" xml:space="preserve"><value>Выше обычного</value></data>
+  <data name="OverviewConsumptionRowSummary" xml:space="preserve"><value>{0}: {1}, {2} к среднему за предыдущие 11 месяцев</value></data>
   <data name="OverviewOpenBills" xml:space="preserve"><value>Неоплаченные счета {0}</value></data>
   <data name="OverviewOverdueBills" xml:space="preserve"><value>Просрочено {0}</value></data>
   <data name="OverviewPrepayments" xml:space="preserve"><value>Предоплата {0}</value></data>

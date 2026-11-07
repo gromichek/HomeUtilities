@@ -50,14 +50,18 @@
                     <views:OverviewTodoCard />
                     <views:OverviewMoneyCard />
                     <views:OverviewYearCard />
+                    <views:OverviewCategoriesCard />
+                    <views:OverviewConsumptionCard />
                 </VerticalStackLayout>
 
-                <!-- Tablet / desktop: to do on the left (wider), money and this year on the right. -->
+                <!-- Tablet / desktop: to do on the left (wider), money, this year and the charts on the right. -->
                 <Grid ColumnDefinitions="3*,2*" ColumnSpacing="12" IsVisible="{Binding IsWide}">
                     <views:OverviewTodoCard Grid.Column="0" VerticalOptions="Start" />
                     <VerticalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Start">
                         <views:OverviewMoneyCard />
                         <views:OverviewYearCard />
+                        <views:OverviewCategoriesCard />
+                        <views:OverviewConsumptionCard />
                     </VerticalStackLayout>
                 </Grid>
             </VerticalStackLayout>

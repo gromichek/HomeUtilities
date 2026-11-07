@@ -12,7 +12,10 @@ namespace HomeUtilities.Data.Stores;
 /// <summary>EF Core implementation of <see cref="IOverviewDataLoader"/>: one query per table, no query per contract.</summary>
 public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext> factory, IChargeInputLoader chargeLoader) : IOverviewDataLoader
 {
-    /// <summary>Readings older than this many days are not loaded: the newest reading window is at most about two months back.</summary>
+    /// <summary>
+    /// Readings older than this many days are not loaded for the to-do list: the newest reading window is at most about two months
+    /// back. The consumption card needs more (<see cref="OverviewCharts.ReadingMonths"/> months), which is the effective limit.
+    /// </summary>
     public const int ReadingHistoryDays = 100;
 
     /// <summary>
@@ -33,11 +36,12 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
             .ToListAsync(ct);
         var contracts = await db.Contracts.AsNoTracking().ToListAsync(ct);
         var contractMeters = await db.ContractMeters.AsNoTracking().ToListAsync(ct);
-        var cutoff = today.AddDays(-ReadingHistoryDays);
+        var cutoff = Earliest(today.AddDays(-ReadingHistoryDays), YearMonth.From(today).AddMonths(-OverviewCharts.ReadingMonths).FirstDay);
         var meters = await db.Meters.AsNoTracking()
             .Include(m => m.Registers).ThenInclude(r => r.Readings.Where(x => x.Date >= cutoff))
             .AsSplitQuery()
             .ToListAsync(ct);
+        var categories = await db.Categories.AsNoTracking().ToListAsync(ct);
         var allBills = await db.Bills.AsNoTracking().ToListAsync(ct);
         var bills = allBills.Where(b => !b.IsDraft).ToList();
         var drafts = allBills.Where(b => b.IsDraft).ToList();
@@ -87,6 +91,8 @@ public sealed class OverviewDataLoader(IDbContextFactory<HomeUtilitiesDbContext>
             settlements[contract.Id] = EqualizedSettlement.Calculate(contractPlans, contractBills, charges, from, to).Expected;
         }
 
-        return new OverviewData(properties, contracts, contractMeters, meters, bills, payments, settlements, drafts) { BillTemplates = templates };
+        return new OverviewData(properties, contracts, contractMeters, meters, bills, payments, settlements, drafts) { BillTemplates = templates, Categories = categories };
     }
+
+    private static DateOnly Earliest(DateOnly a, DateOnly b) => a < b ? a : b;
 }

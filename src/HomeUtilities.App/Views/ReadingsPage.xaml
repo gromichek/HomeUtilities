@@ -72,9 +72,13 @@
                                             <Label Text="{Binding Text}" IsVisible="{Binding IsUpcoming}" />
                                             <Label Text="{Binding Text}" Style="{StaticResource MutedLabel}" IsVisible="{Binding IsClosed}" />
                                         </Grid>
-                                        <Button Grid.Column="1" Text="{Binding SubmitText}" Command="{Binding SubmitCommand}"
-                                                ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
-                                                Style="{StaticResource SecondaryButton}" IsVisible="{Binding HasSubmitLink}" />
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" IsVisible="{Binding HasSubmitLink}">
+                                            <Button Text="{Binding SubmitText}" Command="{Binding SubmitCommand}"
+                                                    ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
+                                                    Style="{StaticResource SecondaryButton}" />
+                                            <Label Text="{Binding SubmittedText}" Style="{StaticResource SuccessLabel}" FontSize="12"
+                                                   HorizontalTextAlignment="Center" IsVisible="{Binding HasSubmittedText}" />
+                                        </VerticalStackLayout>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -146,9 +150,13 @@
                                                                              BindableLayout.ItemsSource="{Binding SubmitLinks}">
                                                             <BindableLayout.ItemTemplate>
                                                                 <DataTemplate x:DataType="vm:SubmitLinkViewModel">
-                                                                    <Button Text="{Binding Text}" Command="{Binding Command}"
-                                                                            ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
-                                                                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
+                                                                    <VerticalStackLayout Spacing="2">
+                                                                        <Button Text="{Binding Text}" Command="{Binding Command}"
+                                                                                ImageSource="{StaticResource IconOpenLinkSource}" ContentLayout="Left,8"
+                                                                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Start" views:CompactFill.Enabled="True" />
+                                                                        <Label Text="{Binding SubmittedText}" Style="{StaticResource SuccessLabel}" FontSize="12"
+                                                                               IsVisible="{Binding HasSubmittedText}" />
+                                                                    </VerticalStackLayout>
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </VerticalStackLayout>

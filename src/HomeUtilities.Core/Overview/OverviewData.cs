@@ -28,6 +28,9 @@ public sealed record OverviewData(
     /// <summary>The bill templates (the reminders use their <c>RemindDaysBefore</c>); empty when none were loaded.</summary>
     public IReadOnlyList<BillTemplate> BillTemplates { get; init; } = [];
 
+    /// <summary>The categories (the charts colour and name the bills' categories); empty when none were loaded.</summary>
+    public IReadOnlyList<Category> Categories { get; init; } = [];
+
     /// <summary>No data at all.</summary>
     public static OverviewData Empty { get; } = new([], [], [], [], [], [], new Dictionary<Guid, decimal>());
 }

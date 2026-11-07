@@ -31,6 +31,24 @@ public class OverviewSampleDataTests
     }
 
     [Fact]
+    public async Task The_three_charts_have_content_on_the_sample_data()
+    {
+        var (data, _, today) = await LoadAsync(new DateTimeOffset(2026, 10, 20, 8, 0, 0, TimeSpan.Zero));
+
+        var months = OverviewCharts.MonthlyComparison(data, today, null);
+        var spending = OverviewCharts.SpendingByCategory(data, today, null);
+        var consumption = OverviewCharts.Consumption(data, today);
+        var trends = OverviewCharts.Trends(consumption, null);
+
+        Assert.NotNull(months);
+        Assert.Contains(months.ThisYear, v => v is not null);
+        Assert.NotNull(spending);
+        Assert.True(spending.Slices.Count >= 2);
+        Assert.NotEmpty(trends);
+        Assert.All(trends, t => Assert.True(t.ShowLine));
+    }
+
+    [Fact]
     public async Task Every_kind_of_item_appears_on_the_test_date()
     {
         var (_, todo, today) = await LoadAsync(new DateTimeOffset(2026, 10, 20, 8, 0, 0, TimeSpan.Zero));

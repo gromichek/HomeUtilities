@@ -29,7 +29,11 @@ internal sealed class OverviewScenario
         Properties.Add(Flat);
     }
 
-    public OverviewData Data => new(Properties, Contracts, Links, Meters, Bills, Payments, Settlements);
+    public List<Category> Categories { get; } = [];
+
+    public List<Bill> Drafts { get; } = [];
+
+    public OverviewData Data => new(Properties, Contracts, Links, Meters, Bills, Payments, Settlements, Drafts) { Categories = Categories };
 
     public IReadOnlyList<TodoItem> Todo(DateOnly today) => TodoBuilder.Build(Data, today);
 

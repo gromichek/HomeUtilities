@@ -210,7 +210,11 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
     public override async Task OnAppearingAsync()
     {
         await base.OnAppearingAsync();
-        await RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), null, _data is not null));
+
+        // The Overview set the filters (consumption of the last 12 months): rebuild even if the data did not change.
+        var forced = _state.ChangedExternally;
+        _state.ChangedExternally = false;
+        await RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), null, _data is not null && !forced));
     }
 
     /// <summary>Loads the data again (the screen appears, or the owner changed something elsewhere) and recalculates the table.</summary>

@@ -289,4 +289,48 @@ public class ReadingSubmitLinkTests
 
         Assert.Empty(_kit.Dialogs.Confirmations);
     }
+
+    [Fact]
+    public async Task The_card_button_stays_after_marking_and_shows_the_submitted_date()
+    {
+        // T-038: opening the supplier's page does not prove the readings were taken there, so the button never disappears.
+        var (vm, _) = await SavedReadingWithLinkAsync();
+        var link = Card(vm, "Kitchen").SubmitLinks[0];
+        Assert.False(link.HasSubmittedText);
+
+        await vm.Prompts[0].MarkCommand.ExecuteAsync(null);
+
+        var after = Assert.Single(Card(vm, "Kitchen").SubmitLinks);
+        Assert.True(Card(vm, "Kitchen").HasSubmitLinks);
+        Assert.True(after.Command.CanExecute(null));
+        Assert.True(after.HasSubmittedText);
+        Assert.StartsWith("ReadingSubmittedOn ", after.SubmittedText, StringComparison.Ordinal);
+
+        // It is still there after the card list is rebuilt (a reload), and still opens the page.
+        await vm.OnAppearingAsync();
+        var rebuilt = Assert.Single(Card(vm, "Kitchen").SubmitLinks);
+        Assert.True(rebuilt.HasSubmittedText);
+        await rebuilt.Command.ExecuteAsync(null);
+        Assert.Equal("https://water.example/readings", _kit.Launcher.Opened[^1].AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task The_banner_button_stays_after_marking_and_shows_the_submitted_date()
+    {
+        var meter = AddMeter("Kitchen");
+        var water = AddContract("Water", "Water utility", [Submit("https://water.example/readings")], [], meter);
+        water.ReadingDayFrom = 20;
+        water.ReadingDayTo = 26;
+        var vm = await LoadAsync();
+        Card(vm, "Kitchen").Rows[0].ValueText = "110";
+        await vm.SaveAllCommand.ExecuteAsync(null);
+        var banner = Assert.Single(vm.Banners);
+        Assert.False(banner.HasSubmittedText);
+
+        await vm.Prompts[0].MarkCommand.ExecuteAsync(null);
+
+        Assert.True(banner.HasSubmitLink);
+        Assert.True(banner.SubmitCommand!.CanExecute(null));
+        Assert.True(banner.HasSubmittedText);
+    }
 }
