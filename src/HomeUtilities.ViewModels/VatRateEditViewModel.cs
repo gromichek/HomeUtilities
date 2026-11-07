@@ -104,13 +104,13 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
 
     public string AddVersionText => _localizer["VatVersionAdd"];
 
-    protected override async Task LoadCoreAsync(Guid? id)
+    public override async Task LoadAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var all = await OffUiAsync(() => _store.ListAsync());
+            var all = await _store.ListAsync();
             var existing = id is { } value ? all.FirstOrDefault(r => r.Id == value) : null;
             _rate = existing ?? new VatRate();
             _takenCodes = [.. all.Where(r => r.Id != _rate.Id).Select(r => r.Code)];
@@ -207,7 +207,7 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
     protected override async Task SaveCoreAsync()
     {
         var pending = _pending ?? BuildRate();
-        await OffUiAsync(() => _store.SaveAsync(pending));
+        await _store.SaveAsync(pending);
         _rate = pending;
         IsNew = false;
         Title = TitleText();
@@ -217,7 +217,7 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
 
     protected override async Task<bool> CanDeleteAsync()
     {
-        var used = (await OffUiAsync(() => _tariffStore.ListAsync())).Count(c => !c.IsDeleted && c.VatCode == _rate.Code);
+        var used = (await _tariffStore.ListAsync()).Count(c => !c.IsDeleted && c.VatCode == _rate.Code);
         if (used == 0)
         {
             return true;
@@ -227,7 +227,7 @@ public sealed partial class VatRateEditViewModel : PaneEditorViewModel
         return false;
     }
 
-    protected override Task DeleteCoreAsync() => OffUiAsync(() => _store.DeleteAsync(_rate.Id));
+    protected override Task DeleteCoreAsync() => _store.DeleteAsync(_rate.Id);
 
     protected override string DeleteName() => _rate.Name;
 

@@ -38,9 +38,9 @@ public sealed partial class BillEditViewModel
         IsDraft = false;
         _templateSource = null;
         _templateDatesEdited = false;
-        CanUseTemplate = (await OffUiAsync(() => _templateStore.ListAsync())).Any(t => t.IsActive);
+        CanUseTemplate = (await _templateStore.ListAsync()).Any(t => t.IsActive);
 
-        var preset = PresetContractId is { } contractId ? await OffUiAsync(() => _contractStore.GetAsync(contractId)) : null;
+        var preset = PresetContractId is { } contractId ? await _contractStore.GetAsync(contractId) : null;
         Guid? propertyId = preset?.PropertyId ?? PresetPropertyId ?? (_properties.Count == 1 ? _properties[0].Id : null);
 
         IsOneOff = false;
@@ -92,11 +92,11 @@ public sealed partial class BillEditViewModel
         _live = null;
         IsDraft = existing.IsDraft;
         _templateDatesEdited = true;
-        _templateSource = existing.TemplateId is { } templateId ? await OffUiAsync(() => _templateStore.GetAsync(templateId)) : null;
+        _templateSource = existing.TemplateId is { } templateId ? await _templateStore.GetAsync(templateId) : null;
         OnPropertyChanged(nameof(DraftBannerText));
         IsOneOff = existing.Kind == BillKind.OneOff || existing.ContractId is null;
-        _contract = existing.ContractId is { } contractId ? await OffUiAsync(() => _contractStore.GetAsync(contractId)) : null;
-        _contracts = existing.PropertyId == Guid.Empty ? [] : await OffUiAsync(() => _contractStore.ListByPropertyAsync(existing.PropertyId));
+        _contract = existing.ContractId is { } contractId ? await _contractStore.GetAsync(contractId) : null;
+        _contracts = existing.PropertyId == Guid.Empty ? [] : await _contractStore.ListByPropertyAsync(existing.PropertyId);
         CurrencySymbol = _localizer["Currency_Symbol_" + existing.Currency];
 
         SelectedProperty = _properties.Where(p => p.Id == existing.PropertyId).Select(PropertyOption).FirstOrDefault();
@@ -129,7 +129,7 @@ public sealed partial class BillEditViewModel
         SelectedProperty = _properties.Where(p => p.Id == propertyId).Select(PropertyOption).FirstOrDefault();
         _contracts =
         [
-            .. (await OffUiAsync(() => _contractStore.ListByPropertyAsync(propertyId)))
+            .. (await _contractStore.ListByPropertyAsync(propertyId))
                 .Where(c => !c.IsDeleted && !c.IsArchived)
                 .OrderBy(c => c.Title, StringComparer.CurrentCultureIgnoreCase),
         ];
@@ -331,10 +331,10 @@ public sealed partial class BillEditViewModel
         {
             try
             {
-                input = await OffUiAsync(() => _chargeLoader.LoadAsync(contract.Id, period));
+                input = await _chargeLoader.LoadAsync(contract.Id, period);
                 if (contract.BillingMode == BillingMode.Equalized)
                 {
-                    plans = await OffUiAsync(() => _planStore.ListByContractAsync(contract.Id));
+                    plans = await _planStore.ListByContractAsync(contract.Id);
                 }
 
                 if (input is not null && input.Components.Any(c => !c.IsDeleted))
@@ -723,7 +723,7 @@ public sealed partial class BillEditViewModel
         var stored = new List<Attachment>();
         foreach (var id in _bill.AttachmentIds.Where(id => !_removedAttachments.Contains(id)))
         {
-            if (await OffUiAsync(() => _attachmentStore.GetAsync(id)) is { } attachment)
+            if (await _attachmentStore.GetAsync(id) is { } attachment)
             {
                 stored.Add(attachment);
             }
@@ -818,7 +818,7 @@ public sealed partial class BillEditViewModel
             try
             {
                 await using var content = await file.OpenAsync();
-                var attachment = await OffUiAsync(() => _attachmentStore.AddAsync(PhotoPicking.ToAttachment(file, AttachmentOwnerKind.Bill, bill.Id), content));
+                var attachment = await _attachmentStore.AddAsync(PhotoPicking.ToAttachment(file, AttachmentOwnerKind.Bill, bill.Id), content);
                 ids.Add(attachment.Id);
             }
             catch (AttachmentRejectedException ex)
@@ -834,8 +834,8 @@ public sealed partial class BillEditViewModel
 
     private async Task RefreshPaymentsAsync()
     {
-        _paymentList = IsNew ? [] : [.. await OffUiAsync(() => _paymentStore.ListByBillAsync(_bill.Id))];
-        _prepaymentAvailable = !IsNew && _bill.ContractId is { } contractId ? await OffUiAsync(() => _prepayments.AvailableAsync(contractId)) : 0m;
+        _paymentList = IsNew ? [] : [.. await _paymentStore.ListByBillAsync(_bill.Id)];
+        _prepaymentAvailable = !IsNew && _bill.ContractId is { } contractId ? await _prepayments.AvailableAsync(contractId) : 0m;
         UpdatePaymentCard();
     }
 
@@ -906,7 +906,7 @@ public sealed partial class BillEditViewModel
             return;
         }
 
-        var payment = await OffUiAsync(() => _quickPay.MarkPaidAsync(_bill.Id));
+        var payment = await _quickPay.MarkPaidAsync(_bill.Id);
         await PaymentsChangedAsync();
         if (payment is null)
         {
@@ -915,7 +915,7 @@ public sealed partial class BillEditViewModel
 
         if (await _snackbar.ShowAsync(_localizer["BillMarkedPaid"], _localizer["BillUndo"]))
         {
-            await OffUiAsync(() => _quickPay.UndoAsync(payment.Id));
+            await _quickPay.UndoAsync(payment.Id);
             await PaymentsChangedAsync();
         }
     });
@@ -959,7 +959,7 @@ public sealed partial class BillEditViewModel
             return;
         }
 
-        var result = await OffUiAsync(() => _prepayments.UseForBillAsync(_bill.Id));
+        var result = await _prepayments.UseForBillAsync(_bill.Id);
         await PaymentsChangedAsync();
         if (result is null)
         {
@@ -968,7 +968,7 @@ public sealed partial class BillEditViewModel
 
         if (await _snackbar.ShowAsync(_localizer["PrepaymentUsed"], _localizer["BillUndo"]))
         {
-            await OffUiAsync(() => _prepayments.UndoAsync(result));
+            await _prepayments.UndoAsync(result);
             await PaymentsChangedAsync();
         }
     });
@@ -986,7 +986,7 @@ public sealed partial class BillEditViewModel
             return;
         }
 
-        await OffUiAsync(() => _quickPay.RemovePaymentAsync(_bill.Id, payment.Id));
+        await _quickPay.RemovePaymentAsync(_bill.Id, payment.Id);
         await PaymentsChangedAsync();
         _snackbar.Notify(_localizer["BillPaymentRemoved"]);
     });
@@ -1050,7 +1050,7 @@ public sealed partial class BillEditViewModel
             return;
         }
 
-        var templates = (await OffUiAsync(() => _templateStore.ListAsync())).Where(t => t.IsActive).OrderBy(t => t.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var templates = (await _templateStore.ListAsync()).Where(t => t.IsActive).OrderBy(t => t.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
         if (templates.Count == 0)
         {
             CanUseTemplate = false;
@@ -1082,14 +1082,14 @@ public sealed partial class BillEditViewModel
         _dueTouched = true;
 
         IsOneOff = template.ContractId is null;
-        if (_properties.All(p => p.Id != template.PropertyId) && await OffUiAsync(() => _propertyStore.GetAsync(template.PropertyId)) is { } own)
+        if (_properties.All(p => p.Id != template.PropertyId) && await _propertyStore.GetAsync(template.PropertyId) is { } own)
         {
             _properties = [.. _properties, own];
         }
 
         await SelectPropertyCoreAsync(template.PropertyId);
         if (template.ContractId is { } contractId
-            && (_contracts.FirstOrDefault(c => c.Id == contractId) ?? await OffUiAsync(() => _contractStore.GetAsync(contractId))) is { } contract)
+            && (_contracts.FirstOrDefault(c => c.Id == contractId) ?? await _contractStore.GetAsync(contractId)) is { } contract)
         {
             ApplyContract(contract);
         }

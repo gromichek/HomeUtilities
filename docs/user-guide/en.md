@@ -112,9 +112,6 @@ bottom right. *Settings → About* shows the current layout (phone / tablet / de
   deletion and brings everything back. A **meter** cannot be brought back that way (its links to contracts end on deletion), so
   the question says that it can be undone only by restoring a backup. If a property, contract or supplier has nothing
   that depends on it, it is deleted at once, like a bill.
-- **Editors open complete.** An editor page appears when its data has loaded, so you never see half-filled fields that jump into
-  place a moment later. On a large record this takes a fraction of a second. A quick **double tap** on a list row, on **＋** or on a
-  menu item opens the page **once**; the second tap is ignored.
 - **Choosing from a list.** Every choice (supplier, contract, category, property, period, template, kind, unit…) is a **field
   with a frame and an arrow** showing the current value; a tap opens the same dialog: the options as rows with a round mark,
   the **current value already marked**. **Tap a row and the choice is made** — there is no OK to press. **OK** appears only when
@@ -290,8 +287,8 @@ Open a property → card **Contracts** → **Add contract**.
 
 Open a property → card **Meters** → **Add meter**.
 - **General:** resource (cold/hot water, electricity, gas, heat, other), unit (m³, kWh, MWh, Gcal), serial number,
-  location, notes, **photo** (camera on Android, image file on Windows; a photo is shrunk to at most 2560 px on its long side, on Windows too, so that the
-  database and the backups stay small). The **title** of the meter in the editor, in the
+  location, notes, **photo** (camera on Android, image file on Windows; on Android a photo is shrunk to at most 2560 px on its long side so that the
+  database and the backups stay small; on Windows the file is kept as it is). The **title** of the meter in the editor, in the
   reading history and in the reading dialog is *location · serial number* (*Bathroom · CW-1*), so that two meters in one room can
   be told apart; without a serial number a meter with several registers shows *location · Day / Night*.
 - **Dial digits:** how many digits the dial has. Needed to recognise a roll-over (99999 → 00000).
@@ -578,7 +575,7 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
    warning, not an error — suppliers round differently.
 7. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*); fields that apply to the
    *Bill line* are inside each line instead.
-8. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). A photo is shrunk like a meter photo. Tap a
+8. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). A photo is shrunk like a meter photo (on Android). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
 9. **Comment.**
 
@@ -1445,8 +1442,7 @@ are real dates, so Excel or LibreOffice can sum and sort them.
 
 **Settings → Error log**: if the app reports an error, tap **Copy log** and send the text to the developer. The page says how
 many entries the log holds. Besides errors the log contains lines *Performance: <screen> <ms> ms (<n> items)*: the app notes
-there when a screen needed 0.3 s or more to show its data (and once per start how long it took until the Overview appeared). An editor that
-needed 0.3 s or more to open or to save writes *Performance: <editor> open <ms> ms* or *Performance: <editor> save <ms> ms*. They
+there when a screen needed 0.3 s or more to show its data (and once per start how long it took until the Overview appeared). They
 help to find slow screens — send them together with the log. **Clear** empties the log after a confirmation (*Clear the error log? The entries cannot be restored.*).
 
 ### Installing a new version

@@ -1,5 +1,4 @@
 using HomeUtilities.ViewModels;
-using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.App.Views;
 
@@ -19,50 +18,6 @@ public abstract class PageBase : ContentPage
             root.SizeChanged += (_, _) => host.FitTo(root.Width);
             return root;
         });
-    }
-
-    private PaneEditorViewModel? _editor;
-
-    // An editor's content stays transparent while its data loads off the UI thread, then shows at once (complete form, no
-    // fields popping in). Opacity, not IsVisible: the layout is built meanwhile, and the toolbar stays usable.
-    protected override void OnBindingContextChanged()
-    {
-        base.OnBindingContextChanged();
-        if (_editor is not null)
-        {
-            _editor.PropertyChanged -= OnEditorPropertyChanged;
-        }
-
-        _editor = BindingContext as PaneEditorViewModel;
-        if (_editor is not null)
-        {
-            _editor.PropertyChanged += OnEditorPropertyChanged;
-        }
-
-        ApplyEditorReady();
-    }
-
-    private void OnEditorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(PaneEditorViewModel.IsEditorReady))
-        {
-            if (Dispatcher.IsDispatchRequired)
-            {
-                Dispatcher.Dispatch(ApplyEditorReady);
-            }
-            else
-            {
-                ApplyEditorReady();
-            }
-        }
-    }
-
-    private void ApplyEditorReady()
-    {
-        if (Content is { } content)
-        {
-            content.Opacity = _editor is { IsEditorReady: false } ? 0 : 1;
-        }
     }
 
     protected override async void OnAppearing()

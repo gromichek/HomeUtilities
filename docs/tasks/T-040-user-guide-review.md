@@ -1,5 +1,5 @@
 # T-040: User guide review — check every section against the app, add what is missing (EN + RU)
-Phase: 9 · Depends on: T-039 (#273, #275) · Size: M · Docs only (no app code, except help-topic anchors if they break)
+Phase: 9 · Depends on: T-038 (T-039 was reverted in #278 — describe the app as it is now) · Size: M · Docs only (no app code, except help-topic anchors if they break)
 
 Owner (2026-11-07): "the guide must be re-read and corrected, what is missing added". The guide grew task by task
 (`docs/user-guide/en.md`, `ru.md`, ~1 450 lines each); several later changes were written as additions, and the
@@ -16,8 +16,7 @@ obvious to him (owner's words; example: he did not find where custom fields with
    - choices: one tap selects, OK only for rows with inputs, "＋ New …" action rows;
    - delete without a question + Undo (which records), delete with the list of dependants (property, contract, supplier),
      the meter's "only from a backup";
-   - editors appear complete after loading; a quick double tap opens a page once;
-   - Database clean-up (T-037/T-037a); Windows photo shrinking (T-039); "Show sync messages" also hides errors;
+   - Database clean-up (T-037/T-037a); "Show sync messages" also hides errors;
    - "Передать онлайн" stays after a submit with "передано {date}";
    - custom fields: "Относится к: Счёт" → the bill's "Дополнительные поля" card, "Строка счёта" → inside each bill line
      (check T-036c wrote it in both the contract and the template sections);

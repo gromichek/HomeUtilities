@@ -703,7 +703,7 @@ public class PropertyEditViewModelTests
         await vm.LoadAsync(property);
 
         vm.MeterGroups[0].Rows[0].SelectCommand.Execute(null);
-        await TestWait.UntilAsync(() => kit.Navigation.Visited.Count > 0);
+        await Task.Yield();
 
         var (route, parameters) = Assert.Single(kit.Navigation.Visited);
         Assert.Equal(Routes.MeterEdit, route);
@@ -875,7 +875,7 @@ public class PropertyEditViewModelTests
         await vm.LoadAsync(kit.Property.Id);
 
         vm.ContractRows[0].SelectCommand.Execute(null);
-        await TestWait.UntilAsync(() => kit.Navigation.Visited.Count > 0);
+        await Task.Yield();
 
         var editor = Assert.IsType<ContractEditViewModel>(
             Assert.Single(kit.Navigation.Visited).Parameters![EditorNavigation.EditorParameter]);

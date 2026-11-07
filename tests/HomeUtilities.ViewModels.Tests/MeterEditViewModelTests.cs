@@ -664,7 +664,6 @@ public class MeterEditViewModelTests
         Assert.Contains("MeterHistoryReplacedBy CW-2", replacedBy.Text);
 
         replacedBy.SelectCommand.Execute(null);
-        await TestWait.UntilAsync(() => _kit.Navigation.Visited.Count > 0);
         var (route, parameters) = Assert.Single(_kit.Navigation.Visited);
         Assert.Equal(Routes.MeterEdit, route);
         var opened = Assert.IsType<MeterEditViewModel>(parameters![EditorNavigation.EditorParameter]);
@@ -710,9 +709,7 @@ public class MeterEditViewModelTests
             wizard.NextCommand.Execute(null);
             wizard.NextCommand.Execute(null);
             wizard.NextCommand.Execute(null);
-
-            // The wizard saves on a pool thread: the dialog script waits for it, like the real dialog stays open meanwhile.
-            wizard.ReplaceCommand.ExecuteAsync(null).Wait(TimeSpan.FromSeconds(5));
+            wizard.ReplaceCommand.Execute(null);
         };
 
         await vm.ReplaceCommand.ExecuteAsync(null);
