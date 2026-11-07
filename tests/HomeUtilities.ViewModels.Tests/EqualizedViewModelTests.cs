@@ -613,9 +613,9 @@ public class EqualizedViewModelTests : IDisposable
     [Fact]
     public void HelpTopics_HaveAnAnchorInBothLanguages()
     {
-        Assert.Equal("13-equalized-payments", HelpTopics.GetAnchor(HelpTopic.EqualizedPayments, "en"));
-        Assert.Equal("14-property-tax", HelpTopics.GetAnchor(HelpTopic.PropertyTax, "en"));
-        Assert.Equal("13-равномерные-платежи", HelpTopics.GetAnchor(HelpTopic.EqualizedPayments, "ru"));
-        Assert.Equal("14-налог-на-недвижимость", HelpTopics.GetAnchor(HelpTopic.PropertyTax, "ru"));
+        Assert.Equal("16-equalized-payments", HelpTopics.GetAnchor(HelpTopic.EqualizedPayments, "en"));
+        Assert.Equal("17-property-tax", HelpTopics.GetAnchor(HelpTopic.PropertyTax, "en"));
+        Assert.Equal("16-равномерные-платежи", HelpTopics.GetAnchor(HelpTopic.EqualizedPayments, "ru"));
+        Assert.Equal("17-налог-на-недвижимость", HelpTopics.GetAnchor(HelpTopic.PropertyTax, "ru"));
     }
 }

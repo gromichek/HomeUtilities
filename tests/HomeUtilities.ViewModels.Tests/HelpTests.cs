@@ -211,6 +211,28 @@ public class HelpContentServiceTests
         }
     }
 
+    // Links inside the guide (table of contents, Quick start, cross references) must not point at a heading that was renamed.
+    [Theory]
+    [InlineData("en", "1-quick-start", "20-problems-and-answers")]
+    [InlineData("ru", "1-быстрый-старт", "20-проблемы-и-ответы")]
+    public async Task RealGuide_EveryInPageLinkHasAHeading_AndHasQuickStartAndProblems(string language, string quickStart, string problems)
+    {
+        var service = Create(new RepositoryGuideReader());
+
+        var html = (await service.LoadAsync(language)).Html;
+
+        var ids = Regex.Matches(html, "<h[1-6] id=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToHashSet();
+        // Markdig percent-encodes non-ASCII hrefs; the page script decodes them the same way before looking the heading up.
+        var links = Regex.Matches(html, "<a href=\"#([^\"]+)\"").Select(m => Uri.UnescapeDataString(m.Groups[1].Value)).Distinct().ToList();
+
+        Assert.Contains(quickStart, ids);
+        Assert.Contains(problems, ids);
+        Assert.NotEmpty(links);
+        var broken = links.Where(link => !ids.Contains(link)).ToList();
+        Assert.True(broken.Count == 0, $"{language}.md links to missing headings: {string.Join(", ", broken)}");
+        Assert.Contains(quickStart, links);
+    }
+
     [Theory]
     [InlineData("en")]
     [InlineData("ru")]
@@ -289,11 +311,11 @@ public class HelpViewModelTests
         vm.Topic = HelpTopic.Properties;
 
         await vm.OnAppearingAsync();
-        Assert.Contains("getElementById(\"3-properties\")", vm.Html);
+        Assert.Contains("getElementById(\"5-properties\")", vm.Html);
 
         _language.SetLanguage("ru");
         await Task.Delay(50);
-        Assert.Contains("getElementById(\"3-объекты\")", vm.Html);
+        Assert.Contains("getElementById(\"5-объекты\")", vm.Html);
     }
 
     [Fact]
