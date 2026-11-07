@@ -9,7 +9,8 @@ public sealed class ShellNavigationService : INavigationService
         Routes.Overview, Routes.Properties, Routes.Suppliers, Routes.Readings, Routes.Charges, Routes.Bills, Routes.Payments, Routes.Reports, Routes.Help, Routes.Settings,
     ];
 
-    private readonly NavigationGate _pushGate = new();
+    // 600 ms after a push the next push is ignored: the second tap of a double tap lands while the page still animates in.
+    private readonly NavigationGate _pushGate = new(cooldown: TimeSpan.FromMilliseconds(600));
 
     public async Task GoToAsync(string route, IReadOnlyDictionary<string, object>? parameters = null)
     {
