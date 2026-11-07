@@ -92,15 +92,39 @@ public class OverviewDataLoaderTests
     }
 
     [Fact]
-    public async Task Only_recent_readings_are_loaded()
+    public async Task Only_readings_of_the_last_fourteen_months_are_loaded()
     {
+        // The consumption card needs the twelve months and the reading that starts the first one (T-038); older readings stay in the file.
         using var test = new TestDb();
-        await ArrangeAsync(test);
+        var (_, _, meter) = await ArrangeAsync(test);
+        await using (var db = await test.Factory.CreateDbContextAsync())
+        {
+            var register = db.MeterRegisters.Single(r => r.MeterId == meter.Id);
+            db.MeterReadings.Add(new MeterReading { RegisterId = register.Id, Date = Today.AddYears(-3), Value = 1m });
+            db.MeterReadings.Add(new MeterReading { RegisterId = register.Id, Date = Today.AddMonths(-16), Value = 2m });
+            await db.SaveChangesAsync();
+        }
 
         var data = await Loader(test).LoadAsync(Today);
 
-        var reading = Assert.Single(Assert.Single(Assert.Single(data.Meters).Registers).Readings);
-        Assert.Equal(Today.AddDays(-30), reading.Date);
+        var readings = Assert.Single(Assert.Single(data.Meters).Registers).Readings.OrderBy(r => r.Date).ToList();
+        Assert.Equal([Today.AddDays(-150), Today.AddDays(-30)], readings.Select(r => r.Date));
+    }
+
+    [Fact]
+    public async Task Categories_are_loaded_for_the_charts()
+    {
+        using var test = new TestDb();
+        await ArrangeAsync(test);
+        await using (var db = await test.Factory.CreateDbContextAsync())
+        {
+            db.Categories.Add(new Category { Name = "Gym", Color = "#112233" });
+            await db.SaveChangesAsync();
+        }
+
+        var data = await Loader(test).LoadAsync(Today);
+
+        Assert.Contains(data.Categories, c => c.Name == "Gym" && c.Color == "#112233");
     }
 
     [Fact]
