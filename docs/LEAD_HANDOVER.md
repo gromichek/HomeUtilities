@@ -102,6 +102,7 @@ Prompt for a new lead session:
 | 2026-11-02 | Sync storage replaceable (`ISyncStorage`); Google Drive first; one provider per user; OneDrive/Dropbox/WebDAV later if needed (T-032a). |
 | 2026-11-05 | iOS dropped (no Mac); Windows + Android only. Second cloud provider postponed (OneDrive declined: needs an Azure tenant; Dropbox possible later). Contract templates (T-025b) dropped. |
 | 2026-11-05 | UI_GUIDELINES revision 1 (UI review): date lists one column; compact-by-height Android only; Delete only as red button at the end of the form; single delete with Undo snackbar instead of a confirmation — snackbar ≥ 56 dp, action ≥ 48 dp (owner: easy to hit); Material icons on both platforms. Review split into T-036a/b/c. |
+| 2026-11-07 | T-039 (performance: editors off the UI thread, grid arrange coalescing, Windows photos, ReadyToRun) reverted — the previous version felt smoother to the owner. New performance work only in small steps the owner tests one by one. |
 | 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |
 
 ## 4. The owner's data (private — never in the repo)
@@ -130,7 +131,7 @@ Prompt for a new lead session:
 1. **T-034** merged (#222) and tested OK (2026-11-05): the owner's builds use his own key; no open task. Next by the
    **T-035** merged (#227) and tested OK; releases via `scripts/publish-release.ps1` (docs/RELEASE.md). UI review 2026-11-05 done (review/ui-2026-11-05 branch → `docs/UI_REVIEW_2026-11-05.md`); UI_GUIDELINES revision 1
    adopted with the owner's decisions; T-036a tested OK; T-036b (#258) and T-037a (#260) merged and tested OK 2026-11-06; T-036c merged (#263) and tested OK — the UI review 2026-11-05 is complete. The ROADMAP is done except the postponed
-   T-032a; T-038 merged and tested. **T-039 merged (#273)** + #275 (double open, editors hidden until loaded), owner re-test pending; **T-040 guide review Ready** (lead audit 2026-11-07: editors await SQLite on the UI
+   T-032a; T-038 merged and tested. T-039 (#273, #275) **reverted** in #277 by the owner's decision (felt jerkier); **T-040 guide review Ready** (lead audit 2026-11-07: editors await SQLite on the UI
    thread — Microsoft.Data.Sqlite async is synchronous; WinUI decodes full-size thumbnails). Owner fills real data; next tasks
    come from his findings (scope in ROADMAP). R-21 confirmed by the owner: catalog
    lists show one column on Windows (`ListColumns` broken there) → T-036b. Old branches deleted by the owner. **T-037** (database clean-up) merged (#248), owner test pending —

@@ -292,8 +292,9 @@ Use these wordings everywhere (resx keys in brackets).
   popped, not on `OnDisappearing` (which also fires when another modal covers it) (T-036b).
 - **`ListColumns` changes only `GridItemsLayout.Span`** — WinUI ignored a replaced `ItemsLayout` after the first layout
   (R-21, T-036b).
-- **SQLite "async" is synchronous** (Microsoft.Data.Sqlite has no async I/O): every store call from a view model goes
-  through `OffUiAsync` — lists and editors alike (T-039) — or the UI freezes for the query.
+- **SQLite "async" is synchronous** (Microsoft.Data.Sqlite has no async I/O): list loads go through `OffUiAsync`.
+  Editors still read on the UI thread: T-039 moved them off it and was reverted (owner: the app felt jerkier — pages showed
+  first and filled in afterwards, a double tap opened two editors). Do not change this without the owner's go-ahead.
 - **A view that is shown later must have its `IsVisible` bound** (or set in code).
 - `IsVisible` on an element whose `BindingContext` is changed by the same element is evaluated against the **new**
   context — wrap it in a `ContentView`.
