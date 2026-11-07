@@ -51,7 +51,7 @@ public sealed partial class ContractEditViewModel
         }
         else
         {
-            var recent = (await OffUiAsync(() => _billStore.ListByContractAsync(_contract.Id)))
+            var recent = (await _billStore.ListByContractAsync(_contract.Id))
                 .OrderByDescending(b => b.Period)
                 .ThenByDescending(b => b.CreatedAt)
                 .Take(BillsShown)
@@ -59,7 +59,7 @@ public sealed partial class ContractEditViewModel
             var rows = new List<(Bill, BillState)>();
             foreach (var bill in recent)
             {
-                rows.Add((bill, BillStatus.Of(bill, await OffUiAsync(() => _paymentStore.ListByBillAsync(bill.Id)), _clock.Today)));
+                rows.Add((bill, BillStatus.Of(bill, await _paymentStore.ListByBillAsync(bill.Id), _clock.Today)));
             }
 
             _recentBills = rows;

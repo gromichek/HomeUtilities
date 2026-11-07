@@ -124,7 +124,18 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         _sync = sync;
         if (sync is not null)
         {
-            SubscribeWeakly(sync, this, dispatcher);
+            // The engine raises the event on the sync thread; the hint is bound to the UI (C11).
+            sync.StatusChanged += (_, _) =>
+            {
+                if (dispatcher is null)
+                {
+                    UpdateSyncHint();
+                }
+                else
+                {
+                    dispatcher.Post(UpdateSyncHint);
+                }
+            };
         }
 
         _gate = changes is null ? null : new ReloadGate(changes, clock);
@@ -145,35 +156,6 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     }
 
     private readonly ISyncEngine? _sync;
-
-    /// <summary>
-    /// The engine is a singleton that outlives the Overview: it must not keep a re-created Overview alive (T-039). The handler
-    /// holds the view model weakly and removes itself once the view model is gone. The engine raises the event on the sync thread;
-    /// the hint is bound to the UI (C11), so it is posted to the dispatcher.
-    /// </summary>
-    private static void SubscribeWeakly(ISyncEngine sync, OverviewViewModel target, IUiDispatcher? dispatcher)
-    {
-        var weak = new WeakReference<OverviewViewModel>(target);
-        EventHandler? handler = null;
-        handler = (_, _) =>
-        {
-            if (!weak.TryGetTarget(out var viewModel))
-            {
-                sync.StatusChanged -= handler;
-                return;
-            }
-
-            if (dispatcher is null)
-            {
-                viewModel.UpdateSyncHint();
-            }
-            else
-            {
-                dispatcher.Post(viewModel.UpdateSyncHint);
-            }
-        };
-        sync.StatusChanged += handler;
-    }
 
     /// <summary>Shown only when the sync is on and has not worked for more than a day (T-031).</summary>
     [ObservableProperty]

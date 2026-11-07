@@ -7,8 +7,8 @@ namespace HomeUtilities.App.Services;
 
 /// <summary>
 /// Shrinks photos whose long side exceeds <see cref="MaxSide"/> pixels to that size and re-encodes them as JPEG (quality 85).
-/// Smaller images and images that cannot be decoded are stored unchanged. Android uses <c>BitmapFactory</c>, Windows
-/// <c>Windows.Graphics.Imaging</c> (<c>WindowsImageResizer</c>); the size rules are the same (<c>ImageSizing</c>).
+/// Smaller images and images that cannot be decoded are stored unchanged. Only implemented on Android, where the
+/// big camera photos come from; elsewhere every image is stored as it is.
 /// </summary>
 public sealed class ImageProcessor : IImageProcessor
 {
@@ -21,20 +21,10 @@ public sealed class ImageProcessor : IImageProcessor
     {
 #if ANDROID
         return Task.Run(() => Shrink(content, contentType), ct);
-#elif WINDOWS
-        return ShrinkOnWindowsAsync(content, contentType, ct);
 #else
         return Task.FromResult(Unchanged(content, contentType));
 #endif
     }
-
-#if WINDOWS
-    private static async Task<ProcessedImage> ShrinkOnWindowsAsync(Stream content, string contentType, CancellationToken ct)
-    {
-        var shrunk = await WindowsImageResizer.ResizeAsync(content, MaxSide, JpegQuality / 100d, alwaysEncode: false, ct);
-        return shrunk is null ? Unchanged(content, contentType) : new ProcessedImage(shrunk, AttachmentContentTypes.Jpeg);
-    }
-#endif
 
     private static ProcessedImage Unchanged(Stream content, string contentType)
     {

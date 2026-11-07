@@ -214,7 +214,7 @@ public sealed partial class ReplaceMeterWizardViewModel : EditorDialogViewModel
         try
         {
             // A fresh copy every time: Replace changes the meter it is given, and a failed attempt must leave nothing behind.
-            var old = await OffUiAsync(() => _store.GetAsync(_old.Id)) ?? throw new InvalidOperationException("The meter no longer exists.");
+            var old = await _store.GetAsync(_old.Id) ?? throw new InvalidOperationException("The meter no longer exists.");
             var values = Registers.ToDictionary(r => r.Kind, r => (Final: ParseValue(r.FinalText), Initial: ParseValue(r.InitialText)));
             var result = MeterReplacement.Replace(old, ReplacementDate, values, _clock);
 
@@ -250,7 +250,7 @@ public sealed partial class ReplaceMeterWizardViewModel : EditorDialogViewModel
                 }
             }
 
-            await OffUiAsync(() => _store.SaveReplacementAsync(old, newMeter, close, create));
+            await _store.SaveReplacementAsync(old, newMeter, close, create);
             NewMeterId = newMeter.Id;
         }
         finally

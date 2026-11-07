@@ -51,40 +51,8 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
     /// <summary>"Delete …" at the end of the form.</summary>
     public bool ShowFormDelete => CanShowDelete;
 
-    private bool _isEditorReady = true;
-
-    /// <summary>
-    /// False while <see cref="LoadAsync"/> runs: the page keeps its content hidden until the data is in, so the form
-    /// appears once and complete instead of empty fields filling in one after another (owner, 2026-11-07, after T-039).
-    /// </summary>
-    public bool IsEditorReady
-    {
-        get => _isEditorReady;
-        private set => SetProperty(ref _isEditorReady, value);
-    }
-
     /// <summary>Loads an existing item, or prepares a new one when <paramref name="id"/> is null.</summary>
-    public async Task LoadAsync(Guid? id)
-    {
-        var watch = PerformanceLog.Start();
-        IsEditorReady = false;
-        try
-        {
-            await LoadCoreAsync(id);
-        }
-        finally
-        {
-            IsEditorReady = true;
-        }
-
-        PerformanceLog.ReportEditor(GetType().Name, "open", watch.Elapsed);
-    }
-
-    /// <summary>
-    /// The editor's own load: reads everything the editor needs off the UI thread (<c>OffUiAsync</c>) and sets the observable
-    /// properties on the UI thread. <see cref="LoadAsync"/> times it for the error log.
-    /// </summary>
-    protected abstract Task LoadCoreAsync(Guid? id);
+    public abstract Task LoadAsync(Guid? id);
 
     protected void NotifyDeleteVisibilityChanged()
     {
