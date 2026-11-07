@@ -52,18 +52,7 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
     public bool ShowFormDelete => CanShowDelete;
 
     /// <summary>Loads an existing item, or prepares a new one when <paramref name="id"/> is null.</summary>
-    public async Task LoadAsync(Guid? id)
-    {
-        var watch = PerformanceLog.Start();
-        await LoadCoreAsync(id);
-        PerformanceLog.ReportEditor(GetType().Name, "open", watch.Elapsed);
-    }
-
-    /// <summary>
-    /// The editor's own load: reads everything the editor needs off the UI thread (<c>OffUiAsync</c>) and sets the observable
-    /// properties on the UI thread. <see cref="LoadAsync"/> times it for the error log.
-    /// </summary>
-    protected abstract Task LoadCoreAsync(Guid? id);
+    public abstract Task LoadAsync(Guid? id);
 
     protected void NotifyDeleteVisibilityChanged()
     {

@@ -179,15 +179,6 @@ public abstract partial class ViewModelBase : ObservableObject, IRecipient<Langu
     /// <summary>Runs database / calculation work on a pool thread; the caller assigns the result on the UI thread afterwards.</summary>
     protected static Task<T> OffUiAsync<T>(Func<Task<T>> work, CancellationToken ct) => Task.Run(work, ct);
 
-    /// <summary>
-    /// Runs store / database work of an editor (load, save, delete) on a pool thread: Microsoft.Data.Sqlite has no real
-    /// asynchronous I/O, so awaiting a store on the UI thread blocks it. Properties are set after the await, on the UI thread.
-    /// </summary>
-    protected static Task<T> OffUiAsync<T>(Func<Task<T>> work) => Task.Run(work);
-
-    /// <summary>Like <see cref="OffUiAsync{T}(Func{Task{T}})"/> for work without a result.</summary>
-    protected static Task OffUiAsync(Func<Task> work) => Task.Run(work);
-
     /// <summary>Re-reads all localized texts; called after the language changed.</summary>
     protected virtual void RefreshTexts()
     {

@@ -145,7 +145,7 @@ public class DraftBillsTests : IDisposable
         var vm = await LoadBillsAsync();
 
         vm.Items.Single().ConfirmCommand.Execute(null);
-        await TestWait.UntilAsync(() => _kit.Kit.Toast.Messages.Count > 0);
+        await vm.ConfirmDraftAsync(draft.Id);
 
         var saved = _kit.Bills.Saved.Last();
         Assert.Equal(draft.Id, saved.Id);

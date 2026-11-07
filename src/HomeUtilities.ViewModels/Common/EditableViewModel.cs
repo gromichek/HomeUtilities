@@ -190,7 +190,6 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
         }
 
         IsBusy = true;
-        var watch = PerformanceLog.Start();
         try
         {
             await SaveCoreAsync();
@@ -201,7 +200,6 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
             IsBusy = false;
         }
 
-        PerformanceLog.ReportEditor(GetType().Name, "save", watch.Elapsed);
         return true;
     }
 
@@ -213,19 +211,7 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
         DeleteText = _editableLocalizer["Delete"];
     }
 
-    // Disabled while a save or delete is running (no double save).
-    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        base.OnPropertyChanged(e);
-        if (e.PropertyName == nameof(IsBusy))
-        {
-            SaveCommand.NotifyCanExecuteChanged();
-        }
-    }
-
-    private bool CanSave() => !IsBusy;
-
-    [RelayCommand(CanExecute = nameof(CanSave))]
+    [RelayCommand]
     private Task SaveAsync() => RunSafeAsync(async () =>
     {
         if (await TrySaveAsync())

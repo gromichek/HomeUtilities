@@ -258,7 +258,7 @@ public class EqualizedViewModelTests : IDisposable
         };
 
         vm.PlanRows[0].EditCommand.Execute(null);
-        await TestWait.UntilAsync(() => _kit.Kit.Plans.Stored.Any(p => p.MonthlyAmount == 41.5m));
+        await Task.Yield();
 
         var stored = Assert.Single(_kit.Kit.Plans.Stored);
         Assert.Equal((plan.Id, 41.5m), (stored.Id, stored.MonthlyAmount));
@@ -273,12 +273,12 @@ public class EqualizedViewModelTests : IDisposable
         _kit.Kit.Dialogs.ConfirmResult = false;
 
         vm.PlanRows[0].RemoveCommand.Execute(null);
-        await Task.Delay(50);
+        await Task.Yield();
         Assert.Single(_kit.Kit.Plans.Stored);
 
         _kit.Kit.Dialogs.ConfirmResult = true;
         vm.PlanRows[0].RemoveCommand.Execute(null);
-        await TestWait.UntilAsync(() => vm.HasNoPlans);
+        await Task.Yield();
 
         Assert.Empty(_kit.Kit.Plans.Stored);
         Assert.True(_kit.Kit.Plans.All.Single(p => p.Id == plan.Id).IsDeleted);

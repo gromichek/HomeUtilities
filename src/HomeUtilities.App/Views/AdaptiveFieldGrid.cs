@@ -16,21 +16,21 @@ public sealed class AdaptiveFieldGrid : Grid
         typeof(int),
         typeof(AdaptiveFieldGrid),
         1,
-        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).ArrangeNow());
+        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).Arrange());
 
     public static readonly BindableProperty MinColumnWidthProperty = BindableProperty.Create(
         nameof(MinColumnWidth),
         typeof(double),
         typeof(AdaptiveFieldGrid),
         0d,
-        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).ArrangeNow());
+        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).Arrange());
 
     public static readonly BindableProperty MaxColumnsProperty = BindableProperty.Create(
         nameof(MaxColumns),
         typeof(int),
         typeof(AdaptiveFieldGrid),
         3,
-        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).ArrangeNow());
+        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).Arrange());
 
     /// <summary>
     /// With <see cref="MinColumnWidth"/> set (an editor page) and only one column, the content is at most this wide and centred, so a
@@ -52,21 +52,18 @@ public sealed class AdaptiveFieldGrid : Grid
         typeof(bool),
         typeof(AdaptiveFieldGrid),
         false,
-        propertyChanged: (child, _, _) => ((child as Element)?.Parent as AdaptiveFieldGrid)?._arrange.Request());
+        propertyChanged: (child, _, _) => ((child as Element)?.Parent as AdaptiveFieldGrid)?.Arrange());
 
     public static bool GetFullRow(BindableObject view) => (bool)view.GetValue(FullRowProperty);
 
     public static void SetFullRow(BindableObject view, bool value) => view.SetValue(FullRowProperty, value);
 
-    // Children added one after the other (building an editor) or shown / hidden in a burst arrange once per dispatcher turn.
-    private readonly CoalescedAction _arrange;
     private bool _arranging;
     private int _arrangedColumns;
     private Thickness? _designPadding;
 
     public AdaptiveFieldGrid()
     {
-        _arrange = new CoalescedAction(Arrange, run => Dispatcher is { } dispatcher && dispatcher.Dispatch(run));
         ColumnSpacing = 12;
         RowSpacing = 8;
         ChildAdded += (_, e) =>
@@ -77,14 +74,14 @@ public sealed class AdaptiveFieldGrid : Grid
                 {
                     if (args.PropertyName == nameof(IsVisible))
                     {
-                        _arrange.Request();
+                        Arrange();
                     }
                 };
             }
 
-            _arrange.Request();
+            Arrange();
         };
-        ChildRemoved += (_, _) => _arrange.Request();
+        ChildRemoved += (_, _) => Arrange();
     }
 
     public int Columns
@@ -119,7 +116,7 @@ public sealed class AdaptiveFieldGrid : Grid
         base.OnSizeAllocated(width, height);
         if (MinColumnWidth > 0 && EffectiveColumns() != _arrangedColumns)
         {
-            ArrangeNow();
+            Arrange();
         }
 
         CenterSingleColumn();
@@ -160,8 +157,6 @@ public sealed class AdaptiveFieldGrid : Grid
         var fit = (int)Math.Floor((available + ColumnSpacing) / (MinColumnWidth + ColumnSpacing));
         return Math.Clamp(fit, 1, Math.Max(1, MaxColumns));
     }
-
-    private void ArrangeNow() => _arrange.RunNow();
 
     private void Arrange()
     {

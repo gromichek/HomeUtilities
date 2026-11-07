@@ -98,13 +98,13 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
 
     public string NotesError => Lookup(nameof(Category.Notes));
 
-    protected override async Task LoadCoreAsync(Guid? id)
+    public override async Task LoadAsync(Guid? id)
     {
         var previous = SuppressDirty;
         SuppressDirty = true;
         try
         {
-            var all = await OffUiAsync(() => _store.ListAsync());
+            var all = await _store.ListAsync();
             var existing = id is { } value ? all.FirstOrDefault(c => c.Id == value) : null;
             _category = existing ?? new Category { Color = CategoryNames.NextColor(all) };
             IsNew = existing is null;
@@ -137,11 +137,11 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
         var pending = _pending ?? BuildCategory();
         if (IsNew)
         {
-            var all = await OffUiAsync(() => _store.ListAsync());
+            var all = await _store.ListAsync();
             pending.SortOrder = all.Select(c => c.SortOrder).DefaultIfEmpty(-1).Max() + 1;
         }
 
-        await OffUiAsync(() => _store.SaveAsync(pending));
+        await _store.SaveAsync(pending);
         _category = pending;
         IsNew = false;
         Title = TitleText();
@@ -151,7 +151,7 @@ public sealed partial class CategoryEditViewModel : PaneEditorViewModel
     protected override Task DeleteCoreAsync() =>
         IsBuiltIn
             ? throw new InvalidOperationException("A built-in category cannot be deleted.")
-            : OffUiAsync(() => _store.DeleteAsync(_category.Id));
+            : _store.DeleteAsync(_category.Id);
 
     protected override string DeleteName() => CategoryNames.DisplayName(_category, _localizer);
 
