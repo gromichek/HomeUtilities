@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-043 | Small fixes: Overview "all paid" text, distinct backup button texts, flaky tests | Ready | | collected items |
 
 ## Done
 
@@ -116,7 +117,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 - M-2 (AppShell singleton) checked by the owner with "Don't keep activities": not reproduced. R-3 (snapshot in memory) deferred.
 - Overview loads in ~1 s on the phone with real data (cards fill in, no freeze): fine, kept for comparison.
 
-### Collected for the next session task (2026-11-07, after T-038)
+### Collected 2026-11-07 (after T-038) → handed over in T-043
 - **Overview → Money**: "Счетов и платежей пока нет." is shown when nothing is open, overdue or prepaid and the balance is 0 —
   also when bills exist and all are paid (owner's screenshot). With bills/payments: "Всё оплачено — долгов и предоплат нет."
   (new resx key); keep the old text only when there are really no bills and no payments.
