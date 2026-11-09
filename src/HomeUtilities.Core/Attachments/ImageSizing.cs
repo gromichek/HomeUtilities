@@ -44,6 +44,14 @@ public static class ImageSizing
         _ => 0,
     };
 
+    /// <summary>
+    /// Whether a photo has to be decoded and re-encoded before it is stored (T-042a): when its long side exceeds
+    /// <paramref name="maxSide"/> <b>or</b> its EXIF orientation is not "upright" — a small photo with orientation 6 is rotated
+    /// too, so no stored JPEG depends on a viewer honouring EXIF.
+    /// </summary>
+    public static bool NeedsReencoding(int width, int height, int maxSide, int exifOrientation) =>
+        NeedsShrinking(width, height, maxSide) || RotationFor(exifOrientation) != 0;
+
     /// <summary>Whether the rotation swaps width and height.</summary>
     public static bool SwapsSides(int exifOrientation) => RotationFor(exifOrientation) is 90 or 270;
 }
