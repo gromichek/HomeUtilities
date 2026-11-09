@@ -287,8 +287,8 @@ Open a property → card **Contracts** → **Add contract**.
 
 Open a property → card **Meters** → **Add meter**.
 - **General:** resource (cold/hot water, electricity, gas, heat, other), unit (m³, kWh, MWh, Gcal), serial number,
-  location, notes, **photo** (camera on Android, image file on Windows; on Android a photo is shrunk to at most 2560 px on its long side so that the
-  database and the backups stay small; on Windows the file is kept as it is). The **title** of the meter in the editor, in the
+  location, notes, **photo** (camera on Android, image file on Windows; a photo is shrunk to at most 2560 px on its long side (on Android and on Windows) so that the
+  database and the backups stay small; only JPEG and PNG photos are shrunk, other files are kept as they are). The **title** of the meter in the editor, in the
   reading history and in the reading dialog is *location · serial number* (*Bathroom · CW-1*), so that two meters in one room can
   be told apart; without a serial number a meter with several registers shows *location · Day / Night*.
 - **Dial digits:** how many digits the dial has. Needed to recognise a roll-over (99999 → 00000).
@@ -575,7 +575,7 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
    warning, not an error — suppliers round differently.
 7. **Custom fields** — the fields you defined on the contract for bills (for example *Supplier reference*); fields that apply to the
    *Bill line* are inside each line instead.
-8. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). A photo is shrunk like a meter photo (on Android). Tap a
+8. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). A photo is shrunk like a meter photo (on Android and Windows). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
 9. **Comment.**
 
