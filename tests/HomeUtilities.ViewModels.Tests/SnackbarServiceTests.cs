@@ -23,6 +23,30 @@ public class SnackbarServiceTests
         public void ElapseLast() => _waits[^1].Done.TrySetResult();
     }
 
+    /// <summary>
+    /// Completes when the bar is hidden. The timer completes the pending call first and hides the bar a moment later on its
+    /// own continuation, so a test that awaits the call must also await this before checking <c>IsVisible</c>.
+    /// </summary>
+    private static Task HiddenAsync(SnackbarService snackbar)
+    {
+        var hidden = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        void OnChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (!snackbar.IsVisible)
+            {
+                hidden.TrySetResult();
+            }
+        }
+
+        snackbar.PropertyChanged += OnChanged;
+        if (!snackbar.IsVisible)
+        {
+            hidden.TrySetResult();
+        }
+
+        return hidden.Task.WaitAsync(TimeSpan.FromSeconds(30));
+    }
+
     [Fact]
     public async Task PlainMessage_IsVisibleThreeSeconds_ThenDisappearsWithFalse()
     {
@@ -37,9 +61,11 @@ public class SnackbarServiceTests
         Assert.Equal([TimeSpan.FromSeconds(3)], delay.Durations);
         Assert.False(shown.IsCompleted);
 
+        var hidden = HiddenAsync(snackbar);
         delay.ElapseLast();
 
         Assert.False(await shown);
+        await hidden;
         Assert.False(snackbar.IsVisible);
     }
 
@@ -90,8 +116,10 @@ public class SnackbarServiceTests
         var delay = new ManualDelay();
         var snackbar = new SnackbarService(delay.Wait);
         var shown = snackbar.ShowAsync("Bill marked as paid", "Undo");
+        var hidden = HiddenAsync(snackbar);
         delay.ElapseLast();
         Assert.False(await shown);
+        await hidden;
 
         snackbar.InvokeActionCommand.Execute(null);
 
@@ -130,8 +158,10 @@ public class SnackbarServiceTests
 
         Assert.True(snackbar.IsVisible);
         Assert.Equal("Two", snackbar.Message);
+        var hidden = HiddenAsync(snackbar);
         delay.ElapseLast();
         Assert.False(await second);
+        await hidden;
         Assert.False(snackbar.IsVisible);
     }
 

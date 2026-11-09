@@ -381,8 +381,7 @@ public class BillsViewModelTests : IDisposable
         _kit.AddBill(water, new YearMonth(2026, 10), 46.02m);
         var vm = await LoadAsync();
 
-        vm.Items[0].MarkPaidCommand.Execute(null);
-        await Task.Delay(100);
+        await vm.MarkPaidAsync(vm.Items[0].Id);
 
         Assert.Single(_kit.Payments.Stored);
     }

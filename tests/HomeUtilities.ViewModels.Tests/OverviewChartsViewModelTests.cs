@@ -80,8 +80,7 @@ public class OverviewChartsViewModelTests : IDisposable
         _kit.AddBill(water, new YearMonth(2026, 10), 95m);
         var vm = await LoadAsync();
 
-        vm.OpenMonthCommand.Execute(10);
-        await Task.Delay(50);
+        await vm.OpenMonthCommand.ExecuteAsync(10);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.BillsFor, route);
@@ -95,8 +94,7 @@ public class OverviewChartsViewModelTests : IDisposable
         var filtered = await LoadAsync();
         _kit.Kit.Navigation.Visited.Clear();
 
-        filtered.OpenMonthCommand.Execute(10);
-        await Task.Delay(50);
+        await filtered.OpenMonthCommand.ExecuteAsync(10);
 
         Assert.Equal(_kit.Kit.Property.Id, Assert.Single(_kit.Kit.Navigation.Visited).Parameters![EditorNavigation.PropertyIdParameter]);
     }
