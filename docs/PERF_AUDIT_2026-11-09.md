@@ -311,3 +311,14 @@ private static async Task<WeakReference> CreateShowAndHideAsync(FakeSyncEngine e
 - **Windows memory:** Task Manager (private working set) or Visual Studio → Diagnostic Tools → two heap snapshots
   before / after the scenario; look for `*Page` and `*ViewModel` types with a growing instance count.
 - **Feel:** at every step the owner confirms that the app works the same as before.
+
+## Lead notes (2026-11-09, after reading the audit with the owner)
+
+| ID | Decision |
+| --- | --- |
+| M-2 | **Checked by the owner, not reproduced**: Android "Don't keep activities" on, left and returned to the app on Overview, Bills, an open editor and an open choice dialog several times — the window is rebuilt, everything works, the error log holds only `Performance:` lines. `AppShell` stays a singleton; no step 4. |
+| M-1, M-3…M-6, R-4, R-5 | **T-041**. R-5 also in `ReadingHistoryPage.xaml.cs:34` and `EqualizedSettlementPage.xaml.cs:31` (same `_ = LoadAsync(id)`). M-1 preferably through `WeakReferenceMessenger` (the engine's status as a message), so the hint does not depend on `OnAppearing`. M-3: an unsubscription in `Unloaded` needs the matching subscription in `Loaded` — Shell tab switches raise `Unloaded`, and a host that does not subscribe again loses every snackbar (the #220 bug). |
+| R-1, R-2 | **T-042**, but **without** switching to `MediaPickerOptions`: on Windows that replaces the `FilePicker` dialog (a visible change), and the PNG claim rests on a third-party blog. Keep `ImageProcessor` as the single place: Windows implementation with `Windows.Graphics.Imaging`, Android with less memory. |
+| R-3 | **Low**, deferred: one household's snapshot is a few MB of JSON. The sample uses `FileSystem.CacheDirectory`, which `HomeUtilities.Data` must not use (no MAUI there) — a later task gets the temporary folder through an interface. |
+| New | `Performance: Startup to Overview 3987402 ms` (owner's log 2026-11-09 08:15Z): the time is measured from the **process** start, and Android started the process in the background about an hour earlier (e.g. a reminder alarm) without a window. Fixed in T-041. |
+| Speed | Owner (2026-11-09): the current speed is fine. Overview takes ~1 s to load on the phone (`OverviewViewModel 1016 ms`), the cards fill in without a freeze — **not touched**; the number is kept for comparison. |
