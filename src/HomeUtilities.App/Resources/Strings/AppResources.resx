@@ -1057,6 +1057,7 @@
   <data name="OverviewTodoEmpty" xml:space="preserve"><value>Nothing to do — all readings submitted and bills paid.</value></data>
   <data name="OverviewMoneyHeader" xml:space="preserve"><value>Money</value></data>
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>No bills or payments yet.</value></data>
+  <data name="OverviewMoneyAllPaid" xml:space="preserve"><value>Everything is paid — no debts or prepayments.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>This year</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>No bills this year yet.</value></data>
   <data name="OverviewChartHint" xml:space="preserve"><value>Tap a month to open its bills.</value></data>

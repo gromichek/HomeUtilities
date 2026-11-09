@@ -433,6 +433,66 @@ public class OverviewViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Money_card_without_bills_and_payments_says_there_are_none()
+    {
+        var vm = await LoadAsync();
+
+        Assert.True(vm.ShowMoneyEmpty);
+        Assert.Equal("OverviewMoneyEmpty [en]", vm.MoneyEmptyText);
+    }
+
+    [Fact]
+    public async Task Money_card_with_all_bills_paid_says_everything_is_paid()
+    {
+        // 50 bill, 50 paid: nothing open, nothing overdue, no prepayment, balance 0 -> no lines, but records exist.
+        var water = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(water, new YearMonth(2026, 9), 50m, due: new DateOnly(2026, 10, 20));
+        _kit.AddPayment(50m, (bill, 50m));
+
+        var vm = await LoadAsync();
+
+        Assert.Empty(vm.MoneyBlocks);
+        Assert.True(vm.ShowMoneyEmpty);
+        Assert.Equal("OverviewMoneyAllPaid [en]", vm.MoneyEmptyText);
+    }
+
+    [Fact]
+    public async Task Money_card_text_follows_the_property_filter()
+    {
+        // The flat has a paid bill; the cottage has no bill and no payment.
+        var water = _kit.AddWaterContract(tariff: false);
+        var bill = _kit.AddBill(water, new YearMonth(2026, 9), 50m, due: new DateOnly(2026, 10, 20));
+        _kit.AddPayment(50m, (bill, 50m));
+        var cottage = new Property { Name = "Cottage" };
+        _kit.Kit.Properties.Stored.Add(cottage);
+        var vm = await LoadAsync();
+        Assert.Equal("OverviewMoneyAllPaid [en]", vm.MoneyEmptyText);
+
+        _kit.Kit.Dialogs.ChooseScript = options => options.Contains("Cottage") ? "Cottage" : null;
+        await vm.ChoosePropertyFilterCommand.ExecuteAsync(null);
+        Assert.Equal("Cottage", vm.PropertyFilterName);
+        Assert.Equal("OverviewMoneyEmpty [en]", vm.MoneyEmptyText);
+
+        _kit.Kit.Dialogs.ChooseScript = options => options[0];
+        await vm.ChoosePropertyFilterCommand.ExecuteAsync(null);
+        Assert.Null(vm.PropertyFilterId);
+        Assert.Equal("OverviewMoneyAllPaid [en]", vm.MoneyEmptyText);
+    }
+
+    [Fact]
+    public async Task Money_card_with_a_payment_but_no_bill_counts_as_having_records()
+    {
+        // A lone payment is a prepayment, so the card shows a line, not an empty text; the text itself is the "paid" one.
+        var water = _kit.AddWaterContract(tariff: false);
+        _kit.Payments.All.Add(new Payment { ContractId = water.Id, PaidOn = new DateOnly(2026, 10, 25), Amount = 12.30m });
+
+        var vm = await LoadAsync();
+
+        Assert.NotEmpty(vm.MoneyBlocks);
+        Assert.Equal("OverviewMoneyAllPaid [en]", vm.MoneyEmptyText);
+    }
+
+    [Fact]
     public async Task Money_numbers_equal_the_bills_and_payments_screens_for_the_same_filters()
     {
         AddMoneyScenario();

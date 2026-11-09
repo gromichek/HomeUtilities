@@ -184,6 +184,7 @@ part past its due date), **Prepayments** (money you paid that no bill uses yet, 
 all the property's contracts — **Debt …** in red or **Paid in advance …** in green, the same figure as the *Balance* card of each
 contract added up. Equalized contracts add a line **Expected settlement, {contract}: surcharge / refund …**. Tap a line to open
 the Bills screen (filtered to open or overdue bills), the Payments screen, or the settlement page.
+If there are bills or payments but everything is paid and nothing is prepaid, the card says **Everything is paid — no debts or prepayments.**; *No bills or payments yet.* stays only for when there really are none (with the property filter: none for the chosen property).
 
 ### This year
 
