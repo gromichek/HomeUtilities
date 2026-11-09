@@ -140,6 +140,24 @@ public static class OverviewMoney
     }
 
     /// <summary>The property a payment is counted under: its own, its contract's, or that of the first bill it settles.</summary>
+    /// <summary>
+    /// Whether there is any bill (not a draft) or payment, of all properties or only of <paramref name="propertyId"/>.
+    /// Tells "nothing is open" (everything paid) from "no records at all" on the Money card.
+    /// </summary>
+    public static bool HasRecords(OverviewData data, Guid? propertyId = null)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        if (data.Bills.Any(b => !b.IsDeleted && !b.IsDraft && (propertyId is null || b.PropertyId == propertyId)))
+        {
+            return true;
+        }
+
+        var contractProperty = data.Contracts.Where(c => !c.IsDeleted).ToDictionary(c => c.Id, c => c.PropertyId);
+        var billProperty = data.Bills.Where(b => !b.IsDeleted && !b.IsDraft).ToDictionary(b => b.Id, b => b.PropertyId);
+        return data.Payments.Any(p => !p.IsDeleted && (propertyId is null || PropertyOf(p, contractProperty, billProperty) == propertyId));
+    }
+
     private static Guid? PropertyOf(Payment payment, Dictionary<Guid, Guid> contractProperty, Dictionary<Guid, Guid> billProperty)
     {
         if (payment.PropertyId is { } own)

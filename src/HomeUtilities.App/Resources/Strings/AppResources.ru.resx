@@ -489,7 +489,7 @@
   <data name="Error_attachment_hash_invalid" xml:space="preserve"><value>Не удалось проверить файл.</value></data>
   <data name="SettingsBackup" xml:space="preserve"><value>Резервная копия</value></data>
   <data name="SettingsBackupHint" xml:space="preserve"><value>Резервная копия — это один файл со всеми вашими данными и вложениями. Храните его вне приложения (например, на диске Google или на компьютере): после переустановки приложения из него можно восстановить всё. В файле все ваши данные, поэтому не передавайте его посторонним.</value></data>
-  <data name="SettingsBackupSave" xml:space="preserve"><value>Сохранить копию…</value></data>
+  <data name="SettingsBackupSave" xml:space="preserve"><value>Создать резервную копию…</value></data>
   <data name="SettingsBackupRestore" xml:space="preserve"><value>Восстановить из копии…</value></data>
   <data name="SettingsBackupLast" xml:space="preserve"><value>Последняя копия на этом устройстве: {0:g}</value></data>
   <data name="SettingsBackupNever" xml:space="preserve"><value>На этом устройстве копия ещё не создавалась.</value></data>
@@ -1057,6 +1057,7 @@
   <data name="OverviewTodoEmpty" xml:space="preserve"><value>Делать нечего — показания переданы, счета оплачены.</value></data>
   <data name="OverviewMoneyHeader" xml:space="preserve"><value>Деньги</value></data>
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>Счетов и платежей пока нет.</value></data>
+  <data name="OverviewMoneyAllPaid" xml:space="preserve"><value>Всё оплачено — долгов и предоплат нет.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>Этот год</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>Счетов за этот год пока нет.</value></data>
   <data name="OverviewChartHint" xml:space="preserve"><value>Нажмите на месяц, чтобы открыть его счета.</value></data>
@@ -1519,7 +1520,7 @@
   <data name="SettingsBackupManualHeader" xml:space="preserve"><value>Файл резервной копии</value></data>
   <data name="SettingsBackupLastSize" xml:space="preserve"><value>Последняя сохранённая вами копия: {0:g} ({1})</value></data>
   <data name="SettingsBackupAutoHeader" xml:space="preserve"><value>Автоматические копии</value></data>
-  <data name="SettingsBackupAutoHint" xml:space="preserve"><value>Приложение само хранит копии всех ваших данных на этом устройстве: при запуске, если последней копии больше установленного срока и с тех пор что-то изменилось, а также всегда перед импортом, восстановлением и удалением данных. Эти копии лежат на этом устройстве и удаляются вместе с приложением — время от времени сохраняйте копию в другом месте кнопкой «Сохранить копию…».</value></data>
+  <data name="SettingsBackupAutoHint" xml:space="preserve"><value>Приложение само хранит копии всех ваших данных на этом устройстве: при запуске, если последней копии больше установленного срока и с тех пор что-то изменилось, а также всегда перед импортом, восстановлением и удалением данных. Эти копии лежат на этом устройстве и удаляются вместе с приложением — время от времени сохраняйте копию в другом месте кнопкой «Сохранить как…».</value></data>
   <data name="SettingsBackupAutoEnabled" xml:space="preserve"><value>Делать автоматические копии</value></data>
   <data name="SettingsBackupAutoInterval" xml:space="preserve"><value>Как часто</value></data>
   <data name="SettingsBackupAutoKeep" xml:space="preserve"><value>Сколько копий хранить</value></data>
@@ -1536,7 +1537,7 @@
   <data name="SettingsBackupCopiesHeader" xml:space="preserve"><value>Автоматические копии на этом устройстве</value></data>
   <data name="SettingsBackupCopiesEmpty" xml:space="preserve"><value>Автоматических копий пока нет.</value></data>
   <data name="BackupCopyRestore" xml:space="preserve"><value>Восстановить</value></data>
-  <data name="BackupCopySave" xml:space="preserve"><value>Сохранить копию…</value></data>
+  <data name="BackupCopySave" xml:space="preserve"><value>Сохранить как…</value></data>
   <data name="BackupCopyMissing" xml:space="preserve"><value>Этой копии больше нет.</value></data>
   <data name="AutoBackupReason_Scheduled" xml:space="preserve"><value>Автоматически</value></data>
   <data name="AutoBackupReason_BeforeImport" xml:space="preserve"><value>Перед импортом</value></data>

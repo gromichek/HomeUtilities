@@ -344,7 +344,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         TodoHeader = _localizer["OverviewTodoHeader"];
         TodoEmptyText = _localizer["OverviewTodoEmpty"];
         MoneyHeader = _localizer["OverviewMoneyHeader"];
-        MoneyEmptyText = _localizer["OverviewMoneyEmpty"];
+        UpdateMoneyEmptyText();
         YearHeader = _localizer["OverviewYearHeader"];
         YearEmptyText = _localizer["OverviewYearEmpty"];
         RefreshChartTexts();
@@ -366,9 +366,14 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
             : _localizer["BillAllProperties"];
         TodoRows = [.. _todo.Where(Matches).Select(CreateRow)];
         MoneyBlocks = BuildMoney();
+        UpdateMoneyEmptyText();
         YearBlocks = BuildYear();
         BuildCharts();
     }
+
+    // Nothing open and no balance is "everything is paid" when bills or payments exist, and "no records" only when there are none.
+    private void UpdateMoneyEmptyText() =>
+        MoneyEmptyText = _localizer[IsLoaded && OverviewMoney.HasRecords(_data, _propertyFilter) ? "OverviewMoneyAllPaid" : "OverviewMoneyEmpty"];
 
     private bool Matches(TodoItem item) => _propertyFilter is not { } filter || item.PropertyId == filter;
 
