@@ -546,6 +546,7 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
         var source = new CancellationTokenSource();
         var older = Interlocked.Exchange(ref _buildCancellation, source);
         older?.Cancel();
+        older?.Dispose(); // cancelled first, so a running build only sees a cancelled token
         var token = source.Token;
 
         var culture = CultureInfo.CurrentCulture;
@@ -602,6 +603,12 @@ public sealed partial class ReportsViewModel : ViewModelBase, IRecipient<LayoutM
             {
                 _busyCount = 0;
                 IsBusy = false;
+            }
+
+            // Nobody awaits this token any more. Disposed here unless a newer build already took it over (and disposed it).
+            if (Interlocked.CompareExchange(ref _buildCancellation, null, source) == source)
+            {
+                source.Dispose();
             }
         }
 

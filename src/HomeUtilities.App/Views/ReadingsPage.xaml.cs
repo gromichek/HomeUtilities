@@ -36,19 +36,30 @@ public partial class ReadingsPage : PageBase, IQueryAttributable
     {
         base.OnAppearing();
         // Coming back from the browser does not make the page appear again; the window is activated instead.
+        UnsubscribeWindow();
         if (Window is { } window)
         {
+            _activatedWindow = window;
             window.Activated += OnWindowActivated;
+        }
+    }
+
+    // The window that was subscribed (M-6): Window may already be null when the page disappears.
+    private Window? _activatedWindow;
+
+    private void UnsubscribeWindow()
+    {
+        if (_activatedWindow is { } subscribed)
+        {
+            subscribed.Activated -= OnWindowActivated;
+            _activatedWindow = null;
         }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        if (Window is { } window)
-        {
-            window.Activated -= OnWindowActivated;
-        }
+        UnsubscribeWindow();
     }
 
     private async void OnWindowActivated(object? sender, EventArgs e)

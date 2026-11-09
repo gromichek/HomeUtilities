@@ -43,7 +43,7 @@ public abstract class EditorPageBase : PageBase, IQueryAttributable
                     _ => null,
                 }
                 : null;
-            _ = fresh.LoadAsync(id);
+            _ = fresh.LoadSafeAsync(id);
         }
     }
 

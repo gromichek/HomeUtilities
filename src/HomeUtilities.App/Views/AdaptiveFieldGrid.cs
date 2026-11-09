@@ -70,18 +70,30 @@ public sealed class AdaptiveFieldGrid : Grid
         {
             if (e.Element is View view)
             {
-                view.PropertyChanged += (_, args) =>
-                {
-                    if (args.PropertyName == nameof(IsVisible))
-                    {
-                        Arrange();
-                    }
-                };
+                view.PropertyChanged -= OnChildPropertyChanged;
+                view.PropertyChanged += OnChildPropertyChanged;
             }
 
             Arrange();
         };
-        ChildRemoved += (_, _) => Arrange();
+        ChildRemoved += (_, e) =>
+        {
+            if (e.Element is View view)
+            {
+                view.PropertyChanged -= OnChildPropertyChanged;
+            }
+
+            Arrange();
+        };
+    }
+
+    // Named (not a lambda) so a removed child stops poking this grid (M-5).
+    private void OnChildPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(IsVisible))
+        {
+            Arrange();
+        }
     }
 
     public int Columns

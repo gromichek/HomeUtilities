@@ -54,6 +54,12 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
     /// <summary>Loads an existing item, or prepares a new one when <paramref name="id"/> is null.</summary>
     public abstract Task LoadAsync(Guid? id);
 
+    /// <summary>
+    /// Starts <see cref="LoadAsync"/> at once (same moment as a direct call) and observes its failure: the standard error dialog
+    /// and an error-log entry instead of a lost exception; the page stays as it is (R-5).
+    /// </summary>
+    public Task LoadSafeAsync(Guid? id) => RunSafeAsync(() => LoadAsync(id), nameof(LoadAsync));
+
     protected void NotifyDeleteVisibilityChanged()
     {
         OnPropertyChanged(nameof(CanShowDelete));

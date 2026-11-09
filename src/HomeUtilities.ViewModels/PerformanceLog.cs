@@ -36,8 +36,24 @@ public static class PerformanceLog
     [Conditional("DEBUG")]
     public static void ReportSkipped(string name) => Sink?.Note("Performance", $"Performance: {name} skipped (no change)");
 
-    /// <summary>When the process started (set by the app at startup); used for the cold-start line.</summary>
+    /// <summary>When the process started (set by the app at startup); the cold-start line is measured from it (see <see cref="StartupOrigin"/>).</summary>
     public static DateTimeOffset? AppStarted { get; set; }
+
+    /// <summary>When the first window was created (set by the app in <c>CreateWindow</c>); see <see cref="StartupOrigin"/>.</summary>
+    public static DateTimeOffset? FirstWindowCreated { get; set; }
+
+    /// <summary>
+    /// A window created later than this after the process start means the process was started without a window (Android starts it
+    /// for a reminder alarm); the cold-start time is then measured from the window, not from the process.
+    /// </summary>
+    public static readonly TimeSpan MaxProcessToWindow = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// The moment the cold start is measured from: the process start when the first window followed it shortly, otherwise the
+    /// first window. Without a window time the process start is used.
+    /// </summary>
+    public static DateTimeOffset StartupOrigin(DateTimeOffset processStart, DateTimeOffset? firstWindow) =>
+        firstWindow is { } window && window - processStart > MaxProcessToWindow ? window : processStart;
 
     private static int _startupReported;
 
@@ -52,7 +68,7 @@ public static class PerformanceLog
             return;
         }
 
-        sink.Note("Performance", Format("Startup to Overview", DateTimeOffset.UtcNow - started, items));
+        sink.Note("Performance", Format("Startup to Overview", DateTimeOffset.UtcNow - StartupOrigin(started, FirstWindowCreated), items));
     }
 
     /// <summary>Starts a stopwatch for <see cref="Report"/>.</summary>

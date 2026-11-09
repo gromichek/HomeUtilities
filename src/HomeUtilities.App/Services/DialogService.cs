@@ -6,7 +6,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.App.Services;
 
-public sealed class DialogService(ILocalizer localizer, ILayoutModeService layoutMode) : IDialogService
+public sealed class DialogService(ILocalizer localizer, ILayoutModeService layoutMode, IErrorLog? errorLog = null) : IDialogService
 {
     private const double PopupWidth = 480;
 
@@ -62,7 +62,7 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         if (layoutMode.Current == LayoutMode.Compact)
         {
             var modal = new EditorDialogPage(view, editor);
-            Action close = () => _ = CloseModalAsync(modal);
+            Action close = () => _ = CloseModalAsync(modal, errorLog);
             editor.CloseRequested += close;
             try
             {
@@ -107,11 +107,9 @@ public sealed class DialogService(ILocalizer localizer, ILayoutModeService layou
         return editor.Saved;
     }
 
-    private static async Task CloseModalAsync(EditorDialogPage modal)
-    {
-        await modal.Navigation.PopModalAsync();
-        modal.MarkClosed();
-    }
+    // ShowEditorAsync always finishes, even when popping the modal page failed; the failure goes to the error log.
+    private static Task CloseModalAsync(EditorDialogPage modal, IErrorLog? errorLog) =>
+        ModalClose.RunAsync(() => modal.Navigation.PopModalAsync(), modal.MarkClosed, errorLog);
 
     // One view per dialog view model; add a case with every new child-item dialog.
     private static View CreateView(EditorDialogViewModel editor) => editor switch

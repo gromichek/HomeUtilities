@@ -34,6 +34,54 @@ public class SafeCommandTests : IDisposable
     }
 
     [Fact]
+    public async Task EditorLoadFailure_IsReported_NotLost()
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = new CategoryEditViewModel(new ThrowingCategoryStore { FailList = true }, kit.Localizer, kit.Dialogs, kit.Navigation, kit.Toast);
+        var reporter = new RecordingReporter();
+        ViewModelBase.ErrorReporter = reporter;
+
+        await vm.LoadSafeAsync(Guid.NewGuid()); // the store throws while loading
+
+        var failure = Assert.Single(reporter.Reported);
+        Assert.Equal("store failed", failure.Message);
+    }
+
+    [Fact]
+    public async Task EditorLoadFailure_ReachesTheErrorLogAndTheDialog()
+    {
+        var kit = new ContractTestKit(new DateOnly(2026, 10, 23));
+        var vm = new CategoryEditViewModel(new ThrowingCategoryStore { FailList = true }, kit.Localizer, kit.Dialogs, kit.Navigation, kit.Toast);
+
+        await vm.LoadSafeAsync(Guid.NewGuid()); // reporter from the constructor: ErrorReporter(log, dialogs)
+
+        Assert.Equal("store failed", Assert.Single(_log.Entries).Exception.Message);
+        Assert.Single(_dialogs.Alerts);
+    }
+
+    [Fact]
+    public async Task ModalClose_MarksClosedEvenWhenPoppingFails_AndLogsTheError()
+    {
+        var closed = false;
+
+        await ModalClose.RunAsync(() => Task.FromException(new InvalidOperationException("pop failed")), () => closed = true, _log);
+
+        Assert.True(closed);
+        Assert.Equal("pop failed", Assert.Single(_log.Entries).Exception.Message);
+    }
+
+    [Fact]
+    public async Task ModalClose_MarksClosedAfterASuccessfulPop()
+    {
+        var closed = false;
+
+        await ModalClose.RunAsync(() => Task.CompletedTask, () => closed = true, _log);
+
+        Assert.True(closed);
+        Assert.Empty(_log.Entries);
+    }
+
+    [Fact]
     public async Task ErrorReporter_WritesTheLogAndShowsTheStandardMessage()
     {
         var reporter = new ErrorReporter(_log, _dialogs, new FakeLocalizer(new FakeLanguageService()));
@@ -61,8 +109,12 @@ public class SafeCommandTests : IDisposable
 
     private sealed class ThrowingCategoryStore : HomeUtilities.Core.Abstractions.ICategoryStore
     {
+        public bool FailList { get; init; }
+
         public Task<IReadOnlyList<HomeUtilities.Core.Domain.Category>> ListAsync(CancellationToken ct = default) =>
-            Task.FromResult<IReadOnlyList<HomeUtilities.Core.Domain.Category>>([]);
+            FailList
+                ? throw new InvalidOperationException("store failed")
+                : Task.FromResult<IReadOnlyList<HomeUtilities.Core.Domain.Category>>([]);
 
         public Task<HomeUtilities.Core.Domain.Category?> GetAsync(Guid id, CancellationToken ct = default) =>
             throw new InvalidOperationException("store failed");

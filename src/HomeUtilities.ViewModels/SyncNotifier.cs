@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using HomeUtilities.Core.Backup;
 using HomeUtilities.Core.Sync;
 
@@ -52,6 +53,7 @@ public sealed class SyncNotifier : IDisposable
 
     private void OnStatusChanged(object? sender, EventArgs e)
     {
+        WeakReferenceMessenger.Default.Send(new SyncStatusChangedMessage());
         var status = _engine.Status;
         var previous = _previous;
         _previous = status.Kind;
