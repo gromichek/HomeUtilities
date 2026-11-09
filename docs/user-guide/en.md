@@ -332,8 +332,8 @@ Menu **Readings**: the fastest way to enter monthly values.
    page took the readings, so you can open it again.
 6. **Keyboard.** The Enter key of the number keyboard says *Next* and moves to the next value field (the last field says
    *Done*). The small **note icon** at the right of a value field opens a note for that register; it is highlighted while the
-   register has a note. The **history icon** in the card header (or a tap on the title) opens the history of the meter. On a phone in landscape the keyboard no longer fills the whole screen:
-   the field stays visible and `,` and `.` can be typed as in portrait.
+   register has a note. The **history icon** in the card header (or a tap on the title) opens the history of the meter. On a phone in landscape the keyboard of a number field no longer fills the whole screen
+   (text fields keep the big full-screen keyboard): the field stays visible and `,` and `.` can be typed as in portrait.
 
 Tap a meter to see its reading history; tap a reading to edit it (date, value, kind, note, submitted). Initial and
 final readings belong to a meter replacement and cannot be deleted. A long history (twenty years of monthly readings) opens

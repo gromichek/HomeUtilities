@@ -22,10 +22,10 @@ internal static class FieldBorder
         EntryHandler.Mapper.AppendToMapping("FieldBorder", (handler, _) => Track(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping("FieldBorder", (handler, _) => Track(handler.PlatformView));
 
-        // Landscape: no full-screen "extract" keyboard (T-042a). ExtractEditText does not keep the field's number key listener, so
+        // Landscape: no full-screen "extract" keyboard for NUMBER fields only (T-042a; owner 2026-11-09: text is typed more
+        // comfortably on the big full-screen keyboard, numbers are fine on the small one). ExtractEditText does not keep the field's number key listener, so
         // the decimal separator was dropped there ("360,34" became "36034"); with NoExtractUi the field stays visible and edited itself.
         EntryHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
-        EditorHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
 
         // MAUI's ReturnType mapping assigns ImeOptions (dropping the flag) whenever the return key changes (e.g. the reading
         // dialog's Next / Done binding), so the flag is set again after it.
@@ -38,7 +38,9 @@ internal static class FieldBorder
         // Last line of defence, whatever mapping ran last: when a field gets the focus without the flag, set it and restart the
         // input connection, so the keyboard never opens full-screen in landscape.
         EntryHandler.Mapper.AppendToMapping("NoExtractUiOnFocus", (handler, _) => GuardOnFocus(handler.PlatformView));
-        EditorHandler.Mapper.AppendToMapping("NoExtractUiOnFocus", (handler, _) => GuardOnFocus(handler.PlatformView));
+
+        // The keyboard type decides whether the field is a number field.
+        EntryHandler.Mapper.AppendToMapping(nameof(IEntry.Keyboard), (handler, _) => NoExtractUi(handler.PlatformView));
 
         // The default background mapping runs again when a view's background changes and would bring the underline back.
         EntryHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
@@ -53,8 +55,16 @@ internal static class FieldBorder
     private static bool HasNoExtractUi(EditText edit) =>
         ((int)edit.ImeOptions & (int)Android.Views.InputMethods.ImeFlags.NoExtractUi) != 0;
 
-    private static void NoExtractUi(EditText edit) =>
-        edit.ImeOptions = (Android.Views.InputMethods.ImeAction)((int)edit.ImeOptions | (int)Android.Views.InputMethods.ImeFlags.NoExtractUi);
+    private static bool IsNumber(EditText edit) =>
+        (edit.InputType & Android.Text.InputTypes.MaskClass) == Android.Text.InputTypes.ClassNumber;
+
+    private static void NoExtractUi(EditText edit)
+    {
+        if (IsNumber(edit))
+        {
+            edit.ImeOptions = (Android.Views.InputMethods.ImeAction)((int)edit.ImeOptions | (int)Android.Views.InputMethods.ImeFlags.NoExtractUi);
+        }
+    }
 
     private static void GuardOnFocus(EditText edit)
     {
@@ -65,7 +75,7 @@ internal static class FieldBorder
 
         edit.FocusChange += (sender, args) =>
         {
-            if (!args.HasFocus || sender is not EditText focused || HasNoExtractUi(focused))
+            if (!args.HasFocus || sender is not EditText focused || !IsNumber(focused) || HasNoExtractUi(focused))
             {
                 return;
             }
