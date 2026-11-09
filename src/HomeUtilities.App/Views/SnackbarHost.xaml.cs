@@ -19,6 +19,11 @@ public partial class SnackbarHost : ContentView
     public SnackbarHost()
     {
         InitializeComponent();
+
+        // Shell raises Unloaded on tab switches: unsubscribe there (M-3) and subscribe again in Loaded, otherwise the host
+        // would lose every snackbar (the #220 bug). Connect is idempotent, so Loaded + HandlerChanged never subscribe twice.
+        Loaded += (_, _) => Connect();
+        Unloaded += (_, _) => Disconnect();
     }
 
     /// <summary>Full width on phones, at most <see cref="MaxWidth"/> and centred on wide windows.</summary>
@@ -33,15 +38,23 @@ public partial class SnackbarHost : ContentView
     protected override void OnHandlerChanged()
     {
         base.OnHandlerChanged();
+        Disconnect();
+        Connect();
+    }
 
+    private void Disconnect()
+    {
         if (_service is not null)
         {
             _service.PropertyChanged -= OnServicePropertyChanged;
             _service = null;
             IsVisible = false;
         }
+    }
 
-        if (Handler?.MauiContext?.Services.GetService<SnackbarService>() is { } service)
+    private void Connect()
+    {
+        if (_service is null && Handler?.MauiContext?.Services.GetService<SnackbarService>() is { } service)
         {
             _service = service;
             BindingContext = service;

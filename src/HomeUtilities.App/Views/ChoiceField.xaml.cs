@@ -39,6 +39,8 @@ public partial class ChoiceField : ContentView
     public static readonly BindableProperty DialogTitleProperty = BindableProperty.Create(nameof(DialogTitle), typeof(string), typeof(ChoiceField), string.Empty);
 
     private INotifyCollectionChanged? _observed;
+    private INotifyCollectionChanged? _source;
+    private bool _isLoaded;
     private bool _syncing;
     private bool _picking;
     private string _displayText = string.Empty;
@@ -49,6 +51,20 @@ public partial class ChoiceField : ContentView
 
         // The inner layout binds to the control; the control itself keeps the page's binding context.
         Field.BindingContext = this;
+
+        // The collection is observed only while the field is on screen (M-4): a source that outlives the page (a singleton
+        // filter state) must not keep the field alive. Loaded subscribes again and shows the current items.
+        Loaded += (_, _) =>
+        {
+            _isLoaded = true;
+            Observe();
+            UpdateDisplay();
+        };
+        Unloaded += (_, _) =>
+        {
+            _isLoaded = false;
+            Observe();
+        };
     }
 
     /// <summary>Label above the field; empty = none (the page then has its own label above).</summary>
@@ -135,19 +151,30 @@ public partial class ChoiceField : ContentView
 
     private void OnItemsSourceChanged(IEnumerable? oldValue, IEnumerable? newValue)
     {
+        _source = newValue as INotifyCollectionChanged;
+        Observe();
+        UpdateDisplay();
+    }
+
+    // Keeps the subscription in line with "loaded and has an observable source".
+    private void Observe()
+    {
+        var wanted = _isLoaded ? _source : null;
+        if (ReferenceEquals(_observed, wanted))
+        {
+            return;
+        }
+
         if (_observed is not null)
         {
             _observed.CollectionChanged -= OnItemsChanged;
-            _observed = null;
         }
 
-        if (newValue is INotifyCollectionChanged observable)
+        _observed = wanted;
+        if (wanted is not null)
         {
-            _observed = observable;
-            observable.CollectionChanged += OnItemsChanged;
+            wanted.CollectionChanged += OnItemsChanged;
         }
-
-        UpdateDisplay();
     }
 
     private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => UpdateDisplay();

@@ -51,6 +51,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
+        PerformanceLog.FirstWindowCreated ??= DateTimeOffset.UtcNow; // only the first window counts for the start-up measurement
         var window = new Window(_services.GetRequiredService<AppShell>());
         _layoutModeService.Attach(window);
         ShowRestoreFailureOnce(window);

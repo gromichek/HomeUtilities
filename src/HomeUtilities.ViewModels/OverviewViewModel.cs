@@ -18,7 +18,7 @@ namespace HomeUtilities.ViewModels;
 /// stands per property and what this year cost against the same months of last year, three charts (this year by month, spending by category, consumption). It also opens the database once at the
 /// start of the app (migration and seeding). The data is loaded in one go on every appearing and after a quick payment.
 /// </summary>
-public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>
+public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<LayoutModeChangedMessage>, IRecipient<SyncStatusChangedMessage>
 {
     /// <summary>Settings key of the remembered property filter.</summary>
     public const string PropertyFilterKey = "overview.property";
@@ -122,21 +122,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     {
         _reportState = reportState;
         _sync = sync;
-        if (sync is not null)
-        {
-            // The engine raises the event on the sync thread; the hint is bound to the UI (C11).
-            sync.StatusChanged += (_, _) =>
-            {
-                if (dispatcher is null)
-                {
-                    UpdateSyncHint();
-                }
-                else
-                {
-                    dispatcher.Post(UpdateSyncHint);
-                }
-            };
-        }
+        _dispatcher = dispatcher;
 
         _gate = changes is null ? null : new ReloadGate(changes, clock);
         _localizer = localizer;
@@ -156,6 +142,21 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     }
 
     private readonly ISyncEngine? _sync;
+    private readonly IUiDispatcher? _dispatcher;
+
+    // The engine's status arrives as a weak message from SyncNotifier (M-1): no subscription to the singleton engine.
+    // It is raised on the sync thread; the hint is bound to the UI (C11).
+    void IRecipient<SyncStatusChangedMessage>.Receive(SyncStatusChangedMessage message)
+    {
+        if (_dispatcher is null)
+        {
+            UpdateSyncHint();
+        }
+        else
+        {
+            _dispatcher.Post(UpdateSyncHint);
+        }
+    }
 
     /// <summary>Shown only when the sync is on and has not worked for more than a day (T-031).</summary>
     [ObservableProperty]
@@ -201,6 +202,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
+        UpdateSyncHint(); // catch up with a status change missed in between
         await InitializeDatabaseAsync();
         if (_gate is { IsFresh: true } && IsLoaded)
         {

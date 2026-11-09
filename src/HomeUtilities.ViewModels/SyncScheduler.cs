@@ -144,8 +144,7 @@ public sealed class SyncScheduler : IDisposable
         lock (_lock)
         {
             pending = _pending;
-            _debounce?.Cancel();
-            _debounce = null;
+            CancelDebounce();
         }
 
         return pending ? RunAsync(SyncTrigger.Leaving, ct) : Task.CompletedTask;
@@ -161,9 +160,20 @@ public sealed class SyncScheduler : IDisposable
 
         lock (_lock)
         {
-            _debounce?.Cancel();
+            CancelDebounce();
             _retryTimer?.Dispose();
             _retryTimer = null;
+        }
+    }
+
+    // Cancel first, then dispose: the waiting task only holds the (cancelled) token. Call with _lock held.
+    private void CancelDebounce()
+    {
+        if (_debounce is { } old)
+        {
+            _debounce = null;
+            old.Cancel();
+            old.Dispose();
         }
     }
 
@@ -176,18 +186,20 @@ public sealed class SyncScheduler : IDisposable
         }
 
         CancellationTokenSource cts;
+        CancellationToken token;
         lock (_lock)
         {
             _pending = true;
-            _debounce?.Cancel();
+            CancelDebounce();
             cts = _debounce = new CancellationTokenSource();
+            token = cts.Token; // read now: a later change disposes this source
         }
 
         _ = Task.Run(async () =>
         {
             try
             {
-                await Task.Delay(_delay, cts.Token);
+                await Task.Delay(_delay, token);
                 await RunAsync(SyncTrigger.Debounced, CancellationToken.None);
             }
             catch (OperationCanceledException)
