@@ -104,6 +104,7 @@ Prompt for a new lead session:
 | 2026-11-05 | UI_GUIDELINES revision 1 (UI review): date lists one column; compact-by-height Android only; Delete only as red button at the end of the form; single delete with Undo snackbar instead of a confirmation — snackbar ≥ 56 dp, action ≥ 48 dp (owner: easy to hit); Material icons on both platforms. Review split into T-036a/b/c. |
 | 2026-11-07 | T-039 (performance: editors off the UI thread, grid arrange coalescing, Windows photos, ReadyToRun) reverted — the previous version felt smoother to the owner. New performance work only in small steps the owner tests one by one. |
 | 2026-11-09 | Performance audit 2026-11-09 accepted with lead notes: speed stays as it is (owner), only defects fixed in small steps — T-041 robustness, T-042 photos; M-2 not reproduced; R-3 deferred; no `MediaPickerOptions` switch. |
+| 2026-11-09 | Android landscape keyboard: no full-screen (extract) keyboard only for **number** fields (decimal separator was dropped there); text fields keep the standard big keyboard (owner). Flag set in `FieldBorder` after MAUI's mappings + focus guard (#289, #290). |
 | 2026-11-02 | **Do not fix findings one by one.** Collect the owner's findings (PROGRESS "Collected for the next session task") and hand them over together as one task file for a session. Only real breakage (crash, data loss, app unusable) is fixed at once. |
 
 ## 4. The owner's data (private — never in the repo)
