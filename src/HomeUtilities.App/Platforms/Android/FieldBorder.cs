@@ -31,13 +31,51 @@ internal static class FieldBorder
         // dialog's Next / Done binding), so the flag is set again after it.
         EntryHandler.Mapper.AppendToMapping(nameof(IEntry.ReturnType), (handler, _) => NoExtractUi(handler.PlatformView));
 
+        // MAUI Controls maps the Android platform-specific ImeOptions property after the handler mappings and assigns ImeOptions
+        // again (owner 2026-11-09: editors and dialogs still showed the full-screen keyboard), so the flag follows it as well.
+        EntryHandler.Mapper.AppendToMapping(ImeOptionsKey, (handler, _) => NoExtractUi(handler.PlatformView));
+
+        // Last line of defence, whatever mapping ran last: when a field gets the focus without the flag, set it and restart the
+        // input connection, so the keyboard never opens full-screen in landscape.
+        EntryHandler.Mapper.AppendToMapping("NoExtractUiOnFocus", (handler, _) => GuardOnFocus(handler.PlatformView));
+        EditorHandler.Mapper.AppendToMapping("NoExtractUiOnFocus", (handler, _) => GuardOnFocus(handler.PlatformView));
+
         // The default background mapping runs again when a view's background changes and would bring the underline back.
         EntryHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
     }
 
+    private static readonly string ImeOptionsKey =
+        Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific.Entry.ImeOptionsProperty.PropertyName;
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<EditText, object> FocusGuarded = [];
+
+    private static bool HasNoExtractUi(EditText edit) =>
+        ((int)edit.ImeOptions & (int)Android.Views.InputMethods.ImeFlags.NoExtractUi) != 0;
+
     private static void NoExtractUi(EditText edit) =>
         edit.ImeOptions = (Android.Views.InputMethods.ImeAction)((int)edit.ImeOptions | (int)Android.Views.InputMethods.ImeFlags.NoExtractUi);
+
+    private static void GuardOnFocus(EditText edit)
+    {
+        if (!FocusGuarded.TryAdd(edit, new object()))
+        {
+            return;
+        }
+
+        edit.FocusChange += (sender, args) =>
+        {
+            if (!args.HasFocus || sender is not EditText focused || HasNoExtractUi(focused))
+            {
+                return;
+            }
+
+            NoExtractUi(focused);
+            var input = focused.Context?.GetSystemService(Android.Content.Context.InputMethodService)
+                as Android.Views.InputMethods.InputMethodManager;
+            input?.RestartInput(focused);
+        };
+    }
 
     private static void Track(EditText edit)
     {
