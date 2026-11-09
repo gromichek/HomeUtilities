@@ -27,12 +27,17 @@ internal static class FieldBorder
         EntryHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
 
+        // MAUI's ReturnType mapping assigns ImeOptions (dropping the flag) whenever the return key changes (e.g. the reading
+        // dialog's Next / Done binding), so the flag is set again after it.
+        EntryHandler.Mapper.AppendToMapping(nameof(IEntry.ReturnType), (handler, _) => NoExtractUi(handler.PlatformView));
+
         // The default background mapping runs again when a view's background changes and would bring the underline back.
         EntryHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
     }
 
-    private static void NoExtractUi(EditText edit) => edit.ImeOptions |= Android.Views.InputMethods.ImeFlags.NoExtractUi;
+    private static void NoExtractUi(EditText edit) =>
+        edit.ImeOptions = (Android.Views.InputMethods.ImeAction)((int)edit.ImeOptions | (int)Android.Views.InputMethods.ImeFlags.NoExtractUi);
 
     private static void Track(EditText edit)
     {
