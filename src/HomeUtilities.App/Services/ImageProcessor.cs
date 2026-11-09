@@ -7,8 +7,8 @@ namespace HomeUtilities.App.Services;
 
 /// <summary>
 /// Shrinks photos whose long side exceeds <see cref="MaxSide"/> pixels to that size and re-encodes them as JPEG (quality 85).
-/// Smaller images and images that cannot be decoded are stored unchanged. Only implemented on Android, where the
-/// big camera photos come from; elsewhere every image is stored as it is.
+/// Smaller images and images that cannot be decoded are stored unchanged. Android uses <c>BitmapFactory</c>, Windows
+/// <c>Windows.Graphics.Imaging</c> (<c>WindowsImageResizer</c>); the size rules are the same (<c>ImageSizing</c>).
 /// </summary>
 public sealed class ImageProcessor : IImageProcessor
 {
@@ -21,6 +21,8 @@ public sealed class ImageProcessor : IImageProcessor
     {
 #if ANDROID
         return Task.Run(() => Shrink(content, contentType), ct);
+#elif WINDOWS
+        return ShrinkOnWindowsAsync(content, contentType, ct);
 #else
         return Task.FromResult(Unchanged(content, contentType));
 #endif
@@ -32,59 +34,104 @@ public sealed class ImageProcessor : IImageProcessor
         return new ProcessedImage(content, contentType);
     }
 
+#if WINDOWS
+    private static async Task<ProcessedImage> ShrinkOnWindowsAsync(Stream content, string contentType, CancellationToken ct)
+    {
+        var shrunk = await WindowsImageResizer.ResizeAsync(content, MaxSide, JpegQuality / 100d, alwaysEncode: false, ct);
+        return shrunk is null ? Unchanged(content, contentType) : new ProcessedImage(shrunk, AttachmentContentTypes.Jpeg);
+    }
+#endif
+
 #if ANDROID
+    // Peak for a 4000x3000 JPEG (~5 MB), was ~100 MB: file bytes 5 MB (read once, no ToArray copy) + decoded straight to
+    // 2560x1920 by the density scaling (19.7 MB, no full-size 48 MB bitmap, no separate scaled copy) + 19.7 MB for the
+    // rotated copy only when the photo needs rotating (the decoded bitmap is recycled right after) = ~45 MB; ~25 MB without rotation.
     private static ProcessedImage Shrink(Stream content, string contentType)
     {
         try
         {
             using var buffer = new MemoryStream();
             content.CopyTo(buffer);
-            var bytes = buffer.ToArray();
-
-            using var bounds = new BitmapFactory.Options { InJustDecodeBounds = true };
-            BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length, bounds);
-            var longSide = Math.Max(bounds.OutWidth, bounds.OutHeight);
-            if (longSide <= MaxSide)
+            if (!buffer.TryGetBuffer(out var segment) || segment.Array is null)
             {
-                return Unchanged(new MemoryStream(bytes), contentType);
+                return Unchanged(content, contentType);
             }
 
+            var bytes = segment.Array;
+            var offset = segment.Offset;
+            var count = segment.Count;
+
+            using var bounds = new BitmapFactory.Options { InJustDecodeBounds = true };
+            BitmapFactory.DecodeByteArray(bytes, offset, count, bounds);
+            var sourceWidth = bounds.OutWidth;
+            var sourceHeight = bounds.OutHeight;
+            var longSide = Math.Max(sourceWidth, sourceHeight);
+            if (longSide <= MaxSide)
+            {
+                return Unchanged(new MemoryStream(bytes, offset, count, writable: false), contentType);
+            }
+
+            var rotation = ImageSizing.RotationFor(ReadOrientation(bytes, offset, count));
+            var (targetWidth, targetHeight) = ImageSizing.Fit(sourceWidth, sourceHeight, MaxSide);
+
+            // Power-of-two sample size while the result stays >= the target, then the decoder scales the rest (density scaling).
             var sampleSize = 1;
             while (longSide / (sampleSize * 2) >= MaxSide)
             {
                 sampleSize *= 2;
             }
 
-            using var decodeOptions = new BitmapFactory.Options { InSampleSize = sampleSize };
-            using var decoded = BitmapFactory.DecodeByteArray(bytes, 0, bytes.Length, decodeOptions);
+            using var decodeOptions = new BitmapFactory.Options
+            {
+                InSampleSize = sampleSize,
+                InScaled = true,
+                InDensity = longSide,
+                InTargetDensity = Math.Max(targetWidth, targetHeight) * sampleSize,
+            };
+            var decoded = BitmapFactory.DecodeByteArray(bytes, offset, count, decodeOptions);
             if (decoded is null)
             {
-                return Unchanged(new MemoryStream(bytes), contentType);
+                return Unchanged(new MemoryStream(bytes, offset, count, writable: false), contentType);
             }
 
-            var scale = (double)MaxSide / Math.Max(decoded.Width, decoded.Height);
-            var width = Math.Max(1, (int)Math.Round(decoded.Width * Math.Min(1d, scale)));
-            var height = Math.Max(1, (int)Math.Round(decoded.Height * Math.Min(1d, scale)));
-            using var scaled = Bitmap.CreateScaledBitmap(decoded, width, height, true);
-
-            // Decoding drops the EXIF orientation; rotate the pixels so that a portrait photo stays upright.
-            using var matrix = new Matrix();
-            matrix.PostRotate(RotationDegrees(bytes));
-            using var upright = scaled is null ? null : Bitmap.CreateBitmap(scaled, 0, 0, scaled.Width, scaled.Height, matrix, true);
-            if (upright is null)
+            var upright = decoded;
+            try
             {
-                return Unchanged(new MemoryStream(bytes), contentType);
-            }
+                if (rotation != 0)
+                {
+                    using var matrix = new Matrix();
+                    matrix.PostRotate(rotation);
+                    var rotated = Bitmap.CreateBitmap(decoded, 0, 0, decoded.Width, decoded.Height, matrix, true);
+                    if (rotated is null)
+                    {
+                        return Unchanged(new MemoryStream(bytes, offset, count, writable: false), contentType);
+                    }
 
-            var output = new MemoryStream();
-            if (!upright.Compress(Bitmap.CompressFormat.Jpeg!, JpegQuality, output))
+                    decoded.Recycle();
+                    upright = rotated;
+                }
+
+                var output = new MemoryStream();
+                if (!upright.Compress(Bitmap.CompressFormat.Jpeg!, JpegQuality, output))
+                {
+                    output.Dispose();
+                    return Unchanged(new MemoryStream(bytes, offset, count, writable: false), contentType);
+                }
+
+                output.Position = 0;
+                return new ProcessedImage(output, AttachmentContentTypes.Jpeg);
+            }
+            finally
             {
-                output.Dispose();
-                return Unchanged(new MemoryStream(bytes), contentType);
-            }
+                if (!ReferenceEquals(upright, decoded))
+                {
+                    upright.Recycle();
+                    upright.Dispose();
+                }
 
-            output.Position = 0;
-            return new ProcessedImage(output, AttachmentContentTypes.Jpeg);
+                decoded.Recycle();
+                decoded.Dispose();
+            }
         }
         catch (Exception ex) when (ex is Java.Lang.Exception or IOException or InvalidOperationException or OutOfMemoryException)
         {
@@ -93,23 +140,17 @@ public sealed class ImageProcessor : IImageProcessor
         }
     }
 
-    private static float RotationDegrees(byte[] jpeg)
+    private static int ReadOrientation(byte[] bytes, int offset, int count)
     {
         try
         {
-            using var stream = new MemoryStream(jpeg);
+            using var stream = new MemoryStream(bytes, offset, count, writable: false);
             using var exif = new Android.Media.ExifInterface(stream);
-            return exif.GetAttributeInt(Android.Media.ExifInterface.TagOrientation, 1) switch
-            {
-                6 => 90f,
-                3 => 180f,
-                8 => 270f,
-                _ => 0f,
-            };
+            return exif.GetAttributeInt(Android.Media.ExifInterface.TagOrientation, 1);
         }
         catch (Exception ex) when (ex is Java.Lang.Exception or IOException)
         {
-            return 0f;
+            return 1;
         }
     }
 #endif
