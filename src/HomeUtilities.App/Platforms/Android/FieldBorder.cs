@@ -22,25 +22,22 @@ internal static class FieldBorder
         EntryHandler.Mapper.AppendToMapping("FieldBorder", (handler, _) => Track(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping("FieldBorder", (handler, _) => Track(handler.PlatformView));
 
-        // Landscape: no full-screen "extract" keyboard for NUMBER fields only (T-042a; owner 2026-11-09: text is typed more
-        // comfortably on the big full-screen keyboard, numbers are fine on the small one). ExtractEditText does not keep the field's number key listener, so
-        // the decimal separator was dropped there ("360,34" became "36034"); with NoExtractUi the field stays visible and edited itself.
-        EntryHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
+        // Number fields (Keyboard="Numeric") on Android, configured after every MAUI mapping that rewrites the input settings:
+        // - no full-screen "extract" keyboard in landscape (T-042a): ExtractEditText dropped the decimal separator
+        //   ("360,34" became "36034"); text fields keep the big full-screen keyboard (owner 2026-11-09);
+        // - both "." and "," accepted (owner 2026-11-09, tablet): MAUI's number key listener allows only the separator of the app
+        //   culture (",") while the Samsung tablet keyboard offers only "." — nothing decimal could be typed. DecimalInput parses
+        //   both, as agreed at the start of the project;
+        // - the app culture as the keyboard's hint locale, so keyboards that can offer "," do so.
+        foreach (var key in new[] { "NumberField", nameof(IEntry.Keyboard), nameof(IEntry.ReturnType), nameof(IEntry.IsReadOnly),
+                     nameof(IEntry.IsTextPredictionEnabled), nameof(IEntry.IsSpellCheckEnabled), ImeOptionsKey })
+        {
+            EntryHandler.Mapper.AppendToMapping(key, (handler, _) => ConfigureNumberField(handler));
+        }
 
-        // MAUI's ReturnType mapping assigns ImeOptions (dropping the flag) whenever the return key changes (e.g. the reading
-        // dialog's Next / Done binding), so the flag is set again after it.
-        EntryHandler.Mapper.AppendToMapping(nameof(IEntry.ReturnType), (handler, _) => NoExtractUi(handler.PlatformView));
-
-        // MAUI Controls maps the Android platform-specific ImeOptions property after the handler mappings and assigns ImeOptions
-        // again (owner 2026-11-09: editors and dialogs still showed the full-screen keyboard), so the flag follows it as well.
-        EntryHandler.Mapper.AppendToMapping(ImeOptionsKey, (handler, _) => NoExtractUi(handler.PlatformView));
-
-        // Last line of defence, whatever mapping ran last: when a field gets the focus without the flag, set it and restart the
-        // input connection, so the keyboard never opens full-screen in landscape.
-        EntryHandler.Mapper.AppendToMapping("NoExtractUiOnFocus", (handler, _) => GuardOnFocus(handler.PlatformView));
-
-        // The keyboard type decides whether the field is a number field.
-        EntryHandler.Mapper.AppendToMapping(nameof(IEntry.Keyboard), (handler, _) => NoExtractUi(handler.PlatformView));
+        // Last line of defence, whatever mapping ran last: when a number field gets the focus with other settings, configure it
+        // again and restart the input connection.
+        EntryHandler.Mapper.AppendToMapping("NumberFieldOnFocus", (handler, _) => GuardOnFocus(handler));
 
         // The default background mapping runs again when a view's background changes and would bring the underline back.
         EntryHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
@@ -52,35 +49,64 @@ internal static class FieldBorder
 
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<EditText, object> FocusGuarded = [];
 
-    private static bool HasNoExtractUi(EditText edit) =>
-        ((int)edit.ImeOptions & (int)Android.Views.InputMethods.ImeFlags.NoExtractUi) != 0;
+    private static readonly Android.Text.Method.DigitsKeyListener NumberKeys =
+        Android.Text.Method.DigitsKeyListener.GetInstance("0123456789.,-")!;
+
+    private const Android.Text.InputTypes NumberInput =
+        Android.Text.InputTypes.ClassNumber | Android.Text.InputTypes.NumberFlagDecimal | Android.Text.InputTypes.NumberFlagSigned;
 
     private static bool IsNumber(EditText edit) =>
         (edit.InputType & Android.Text.InputTypes.MaskClass) == Android.Text.InputTypes.ClassNumber;
 
-    private static void NoExtractUi(EditText edit)
-    {
-        if (IsNumber(edit))
-        {
-            edit.ImeOptions = (Android.Views.InputMethods.ImeAction)((int)edit.ImeOptions | (int)Android.Views.InputMethods.ImeFlags.NoExtractUi);
-        }
-    }
+    private static bool IsConfigured(EditText edit) =>
+        ReferenceEquals(edit.KeyListener, NumberKeys)
+        && ((int)edit.ImeOptions & (int)Android.Views.InputMethods.ImeFlags.NoExtractUi) != 0;
 
-    private static void GuardOnFocus(EditText edit)
+    private static void ConfigureNumberField(IEntryHandler handler)
     {
-        if (!FocusGuarded.TryAdd(edit, new object()))
+        var edit = handler.PlatformView;
+
+        // Read-only fields are left alone: setting a key listener makes a view focusable again.
+        if (edit is null || !IsNumber(edit) || handler.VirtualView is null || handler.VirtualView.IsReadOnly)
         {
             return;
         }
 
+        edit.ImeOptions = (Android.Views.InputMethods.ImeAction)((int)edit.ImeOptions | (int)Android.Views.InputMethods.ImeFlags.NoExtractUi);
+
+        if (!ReferenceEquals(edit.KeyListener, NumberKeys))
+        {
+            // SetKeyListener switches the input type to the listener's (text, as "," is not a standard number key);
+            // SetRawInputType restores the number keyboard without replacing the listener.
+            edit.KeyListener = NumberKeys;
+            edit.SetRawInputType(NumberInput);
+        }
+
+        var culture = System.Globalization.CultureInfo.CurrentCulture.Name;
+        if (culture.Length > 0)
+        {
+            edit.ImeHintLocales = new Android.OS.LocaleList(Java.Util.Locale.ForLanguageTag(culture)!);
+        }
+    }
+
+    private static void GuardOnFocus(IEntryHandler handler)
+    {
+        var edit = handler.PlatformView;
+        if (edit is null || !FocusGuarded.TryAdd(edit, new object()))
+        {
+            return;
+        }
+
+        var weakHandler = new WeakReference<IEntryHandler>(handler);
         edit.FocusChange += (sender, args) =>
         {
-            if (!args.HasFocus || sender is not EditText focused || !IsNumber(focused) || HasNoExtractUi(focused))
+            if (!args.HasFocus || sender is not EditText focused || !IsNumber(focused) || IsConfigured(focused)
+                || !weakHandler.TryGetTarget(out var current) || !ReferenceEquals(current.PlatformView, focused))
             {
                 return;
             }
 
-            NoExtractUi(focused);
+            ConfigureNumberField(current);
             var input = focused.Context?.GetSystemService(Android.Content.Context.InputMethodService)
                 as Android.Views.InputMethods.InputMethodManager;
             input?.RestartInput(focused);
