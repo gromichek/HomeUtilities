@@ -41,10 +41,14 @@ internal static class WindowsImageResizer
             }
 
             var (width, height) = ImageSizing.Fit(shownWidth, shownHeight, maxSide);
+
+            // The transform scales first and applies the EXIF rotation afterwards, so the scaled size is given in the stored
+            // (unrotated) orientation; for a portrait phone photo (stored landscape, EXIF 90/270) width and height swap here.
+            var rotated = decoder.PixelWidth != decoder.OrientedPixelWidth;
             var transform = new BitmapTransform
             {
-                ScaledWidth = (uint)width,
-                ScaledHeight = (uint)height,
+                ScaledWidth = (uint)(rotated ? height : width),
+                ScaledHeight = (uint)(rotated ? width : height),
                 InterpolationMode = BitmapInterpolationMode.Fant,
             };
 
