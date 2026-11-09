@@ -7,6 +7,8 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-041 | Robustness: lost editor load errors, hanging dialog, unsubscriptions, token disposal, startup measurement | Ready | | audit 2026-11-09 step 1 |
+| T-042 | Photos: shrink on Windows, less memory on Android, small thumbnails on Windows | Ready | | audit 2026-11-09 step 2; start after the owner tested T-041 |
 
 ## Done
 
@@ -106,6 +108,12 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 | T-016a | Attachments, meter/reading photos, submit links on meter cards | 2026-10-24, #54 | Image shrinking on Android only. Soft-deleted attachment files kept (cleanup later). |
 
 ## Known issues
+
+### Performance and memory audit 2026-11-09 (`docs/PERF_AUDIT_2026-11-09.md`)
+- Owner decision: the current speed and smoothness are fine — **do not touch UI threading, editor loading or layout**; fix only
+  clear defects, each step tested by the owner and reverted if the app feels different. Preloading before an editor opens: no.
+- M-2 (AppShell singleton) checked by the owner with "Don't keep activities": not reproduced. R-3 (snapshot in memory) deferred.
+- Overview loads in ~1 s on the phone with real data (cards fill in, no freeze): fine, kept for comparison.
 
 ### Collected for the next session task (2026-11-07, after T-038)
 - **Overview → Money**: "Счетов и платежей пока нет." is shown when nothing is open, overdue or prepaid and the balance is 0 —
