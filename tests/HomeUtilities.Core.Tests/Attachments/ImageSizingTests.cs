@@ -44,4 +44,15 @@ public class ImageSizingTests
     [InlineData(3, false)]
     [InlineData(1, false)]
     public void SwapsSides_OnlyForQuarterTurns(int orientation, bool expected) => Assert.Equal(expected, ImageSizing.SwapsSides(orientation));
+
+    [Theory]
+    [InlineData(1920, 1080, 6, true)] // small photo, orientation 6: rotate (T-042a)
+    [InlineData(1920, 1080, 8, true)]
+    [InlineData(1920, 1080, 3, true)]
+    [InlineData(1920, 1080, 1, false)] // small and upright: stored unchanged
+    [InlineData(4000, 3000, 1, true)] // big: shrink
+    [InlineData(4000, 3000, 6, true)]
+    [InlineData(2560, 1440, 1, false)]
+    public void NeedsReencoding_WhenTooBigOrNotUpright(int width, int height, int orientation, bool expected) =>
+        Assert.Equal(expected, ImageSizing.NeedsReencoding(width, height, 2560, orientation));
 }

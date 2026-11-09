@@ -22,10 +22,17 @@ internal static class FieldBorder
         EntryHandler.Mapper.AppendToMapping("FieldBorder", (handler, _) => Track(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping("FieldBorder", (handler, _) => Track(handler.PlatformView));
 
+        // Landscape: no full-screen "extract" keyboard (T-042a). ExtractEditText does not keep the field's number key listener, so
+        // the decimal separator was dropped there ("360,34" became "36034"); with NoExtractUi the field stays visible and edited itself.
+        EntryHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
+        EditorHandler.Mapper.AppendToMapping("NoExtractUi", (handler, _) => NoExtractUi(handler.PlatformView));
+
         // The default background mapping runs again when a view's background changes and would bring the underline back.
         EntryHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
         EditorHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => Apply(handler.PlatformView));
     }
+
+    private static void NoExtractUi(EditText edit) => edit.ImeOptions |= Android.Views.InputMethods.ImeFlags.NoExtractUi;
 
     private static void Track(EditText edit)
     {
