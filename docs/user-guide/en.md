@@ -1361,6 +1361,14 @@ The wizard has four steps:
    already, the total is missing so only the readings are imported, net + VAT do not match the total so only the total is kept).
    Grey lines are only information (for example which fallback column was used). A **Period…** button on a row lets you
    correct that row (see below). Proposed **meter replacements** are listed above the rows. Press **Import** to run it.
+   - **Which meter each column goes to.** Under the summary there is one line per meter register: *Column B “Meter reading” →
+     meter “Bathroom · 12345678”*. The wizard suggests reading columns from the header texts, so check these lines — in
+     particular when one meter is linked to two contracts (for example hot water for the water and the heating contract):
+     the same column may have been suggested on both sheets.
+   - **Duplicate readings.** If the meter already has a reading with the **same value within 7 days** (from an earlier
+     import or typed by hand), the reading is not imported again. The preview says it once, for example *Readings: 44 already
+     exist for the meter (same value within 7 days) — not imported*, and the result after the import repeats the count. The
+     switch **Import them anyway** (off) imports them nevertheless. The rest of the row (the bill) is imported as usual.
 
 **Dates and periods.** In many workbooks the date in the first column is not the billing month. The wizard suggests a rule from
 the kind of service of the contract; you can change it, and the preview shows the result for every row (*Row 5 · 2004-04*):

@@ -1366,6 +1366,11 @@
   <data name="ImportFieldTotalFallback" xml:space="preserve"><value>Bill total — used when the column above is empty</value></data>
   <data name="ImportFieldNetFallback" xml:space="preserve"><value>Amount excl. VAT — used when the column above is empty</value></data>
   <data name="ImportFieldVatFallback" xml:space="preserve"><value>VAT amount — used when the column above is empty</value></data>
+  <data name="ImportDuplicateReadings" xml:space="preserve"><value>Readings: {0} already exist for the meter (same value within {1} days) — not imported.</value></data>
+  <data name="ImportDuplicateReadingsAnyway" xml:space="preserve"><value>Import them anyway</value></data>
+  <data name="ImportColumnAssignment" xml:space="preserve"><value>Column {0} “{1}” → meter “{2}”</value></data>
+  <data name="ImportDoneDuplicates" xml:space="preserve"><value>Readings not imported because they already exist: {0}.</value></data>
+  <data name="Error_import_issue_reading_duplicate" xml:space="preserve"><value>Column {0}: the meter already has this value within a week of {1}; not imported.</value></data>
   <data name="ImportDetectReplacements" xml:space="preserve"><value>Find meter replacements in the readings</value></data>
   <data name="ImportReplacementsHeader" xml:space="preserve"><value>Meter replacements</value></data>
   <data name="ImportReplacementsHint" xml:space="preserve"><value>The readings show that these meters were replaced. Check the values against your papers, correct them and press «Apply corrections». The import creates the new meters, the final readings of the old ones and moves the contract links.</value></data>

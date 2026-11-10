@@ -235,6 +235,18 @@
             <VerticalStackLayout Grid.Row="1" Spacing="6">
                 <Label Text="{Binding PlanProblemText}" Style="{StaticResource ErrorLabel}" IsVisible="{Binding HasPlanProblem}" />
                 <Label Text="{Binding BeforeStartText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasBeforeStart}" />
+                <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding ColumnAssignmentLines}" IsVisible="{Binding HasColumnAssignments}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Label Text="{Binding .}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <Label Text="{Binding DuplicatesText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasDuplicates}" />
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding HasDuplicateSwitch}">
+                    <Switch IsToggled="{Binding ImportDuplicateReadings}" />
+                    <Label Grid.Column="1" Text="{Binding ImportDuplicateReadingsLabel}" VerticalOptions="Center" />
+                </Grid>
                 <Label Text="{Binding ReadingWindowText}" Style="{StaticResource WarningLabel}" IsVisible="{Binding HasReadingWindowFix}" />
                 <Button Text="{Binding SetReadingWindowText}" Command="{Binding SetReadingWindowCommand}" Style="{StaticResource SecondaryButton}"
                         HorizontalOptions="Start" views:CompactFill.Enabled="True" IsVisible="{Binding HasReadingWindowFix}" />

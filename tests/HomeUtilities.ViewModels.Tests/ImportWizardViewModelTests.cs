@@ -264,6 +264,38 @@ public class ImportWizardViewModelTests
     }
 
     [Fact]
+    public async Task The_preview_names_the_meter_every_reading_column_goes_to()
+    {
+        var vm = await ToPreviewStepAsync();
+
+        var line = Assert.Single(vm.ColumnAssignmentLines);
+        Assert.True(vm.HasColumnAssignments);
+        Assert.StartsWith("ImportColumnAssignment B|Холодная показания|", line);
+    }
+
+    [Fact]
+    public async Task Duplicate_readings_are_announced_with_a_count_and_imported_when_the_switch_is_on()
+    {
+        var vm = await ToMappingStepAsync();
+        // The sheet's January reading (10) already exists three days earlier.
+        _meter.Registers[0].Readings.Add(new MeterReading { RegisterId = _meter.Registers[0].Id, Date = Jan.AddDays(-3), Value = 10m, Kind = ReadingKind.Regular });
+        vm.DetectReplacements = false;
+        await vm.NextCommand.ExecuteAsync(null);
+
+        Assert.Equal($"ImportDuplicateReadings 1|{ImportPlanner.DuplicateReadingDays} [en]", vm.DuplicatesText);
+        Assert.True(vm.HasDuplicateSwitch);
+        Assert.False(vm.ImportDuplicateReadings);
+        Assert.Equal(1, vm.Plan!.Counts.DuplicateReadings);
+
+        vm.ImportDuplicateReadings = true;
+        await vm.RecalculateCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, vm.DuplicatesText);
+        Assert.True(vm.HasDuplicateSwitch); // stays so that it can be switched off again
+        Assert.Equal(0, vm.Plan!.Counts.DuplicateReadings);
+    }
+
+    [Fact]
     public async Task The_filters_show_only_errors_or_only_warnings()
     {
         var vm = await ToPreviewStepAsync();

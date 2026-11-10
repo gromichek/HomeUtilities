@@ -1366,6 +1366,11 @@
   <data name="ImportFieldTotalFallback" xml:space="preserve"><value>Сумма счёта — если столбец выше пуст</value></data>
   <data name="ImportFieldNetFallback" xml:space="preserve"><value>Сумма без НДС — если столбец выше пуст</value></data>
   <data name="ImportFieldVatFallback" xml:space="preserve"><value>Сумма НДС — если столбец выше пуст</value></data>
+  <data name="ImportDuplicateReadings" xml:space="preserve"><value>Показания: {0} уже есть у счётчика (то же значение в пределах {1} дней) — не импортируются.</value></data>
+  <data name="ImportDuplicateReadingsAnyway" xml:space="preserve"><value>Импортировать всё равно</value></data>
+  <data name="ImportColumnAssignment" xml:space="preserve"><value>Столбец {0} «{1}» → счётчик «{2}»</value></data>
+  <data name="ImportDoneDuplicates" xml:space="preserve"><value>Показаний не импортировано, так как они уже есть: {0}.</value></data>
+  <data name="Error_import_issue_reading_duplicate" xml:space="preserve"><value>Столбец {0}: у счётчика уже есть это значение в пределах недели от {1}; не импортируется.</value></data>
   <data name="ImportDetectReplacements" xml:space="preserve"><value>Искать замены счётчиков по показаниям</value></data>
   <data name="ImportReplacementsHeader" xml:space="preserve"><value>Замены счётчиков</value></data>
   <data name="ImportReplacementsHint" xml:space="preserve"><value>По показаниям видно, что эти счётчики меняли. Сверьте значения с бумагами, исправьте их и нажмите «Применить исправления». При импорте создаются новые счётчики, конечные показания старых, а привязки к договорам переносятся.</value></data>

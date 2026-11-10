@@ -220,6 +220,43 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     [ObservableProperty]
     private bool _detectReplacements = true;
 
+    /// <summary>"Import anyway": readings that duplicate an existing one are imported too (off by default).</summary>
+    [ObservableProperty]
+    private bool _importDuplicateReadings;
+
+    /// <summary>"Readings: N already exist …"; empty when no reading is a duplicate.</summary>
+    [ObservableProperty]
+    private string _duplicatesText = string.Empty;
+
+    /// <summary>One line per register: the sheet column and the meter its readings go to.</summary>
+    [ObservableProperty]
+    private IReadOnlyList<string> _columnAssignmentLines = [];
+
+    /// <summary>True when the switch for duplicate readings is shown (there are duplicates, or the owner switched it on).</summary>
+    public bool HasDuplicateSwitch => DuplicatesText.Length > 0 || ImportDuplicateReadings;
+
+    public bool HasDuplicates => DuplicatesText.Length > 0;
+
+    public bool HasColumnAssignments => ColumnAssignmentLines.Count > 0;
+
+    partial void OnDuplicatesTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasDuplicates));
+        OnPropertyChanged(nameof(HasDuplicateSwitch));
+    }
+
+    partial void OnColumnAssignmentLinesChanged(IReadOnlyList<string> value) => OnPropertyChanged(nameof(HasColumnAssignments));
+
+    // The switch lives in the preview: changing it plans the import again.
+    partial void OnImportDuplicateReadingsChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HasDuplicateSwitch));
+        if (IsPreviewStep && _plan is not null && !IsBusy)
+        {
+            _ = RecalculateAsync();
+        }
+    }
+
     [ObservableProperty]
     private IReadOnlyList<ImportRuleChangeRowViewModel> _ruleChanges = [];
 
@@ -404,6 +441,8 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
     public string AddRuleChangeText { get; private set; } = string.Empty;
 
     public string DetectReplacementsLabel { get; private set; } = string.Empty;
+
+    public string ImportDuplicateReadingsLabel { get; private set; } = string.Empty;
 
     public string ReplacementsHeader { get; private set; } = string.Empty;
 
@@ -728,6 +767,10 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             var saved = await SaveProfileAsync(profile);
             var batch = await _batches.ApplyAsync(new ImportApplyRequest(_plan, _fileName, profile.SheetName, _contract.Id, saved.Id));
             ResultText = _localizer.Get("ImportDone", batch.ReadingCount, batch.BillCount, batch.PaymentCount, batch.SkippedCount, batch.ReplacementCount);
+            if (counts.DuplicateReadings > 0)
+            {
+                ResultText += " " + _localizer.Get("ImportDoneDuplicates", counts.DuplicateReadings);
+            }
             CanImport = false;
             Step = ImportWizardStep.Done;
         }
@@ -785,6 +828,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         RuleChangesHeader = _localizer["ImportRuleChangesHeader"];
         AddRuleChangeText = _localizer["ImportAddRuleChange"];
         DetectReplacementsLabel = _localizer["ImportDetectReplacements"];
+        ImportDuplicateReadingsLabel = _localizer["ImportDuplicateReadingsAnyway"];
         ReplacementsHeader = _localizer["ImportReplacementsHeader"];
         ReplacementsHint = _localizer["ImportReplacementsHint"];
         RecalculateText = _localizer["ImportRecalculate"];
@@ -1061,6 +1105,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         PeriodDayLimitText = profile.PeriodDayLimit.ToString(CultureInfo.InvariantCulture);
         DateIsPaymentDate = profile.DateIsPaymentDate;
         DetectReplacements = profile.DetectReplacements;
+        ImportDuplicateReadings = false; // never kept from a saved profile: a new import checks for duplicates again
         _rowOverrides = [.. profile.RowOverrides];
         RuleChanges = [.. profile.PeriodRuleChanges.OrderBy(c => c.FromDate).Select(NewRuleChangeRow)];
         RebuildColumnOptions(profile.HeaderRow, profile);
@@ -1190,6 +1235,7 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
             PeriodRuleChanges = [.. RuleChanges.Select(r => r.ToChange()).OrderBy(c => c.FromDate)],
             DateIsPaymentDate = DateIsPaymentDate,
             DetectReplacements = DetectReplacements,
+            ImportDuplicateReadings = ImportDuplicateReadings,
             RowOverrides = [.. _rowOverrides],
             PaidColumn = PaidPicker.Column,
             PaidMarker = PaidMarker.Trim(),
@@ -1220,6 +1266,22 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
         return true;
     }
 
+    // «Column B "Meter reading" → meter "Bathroom · 12345678"»: so that a column the guesser pre-selected is seen before the import.
+    private List<string> BuildColumnAssignmentLines(ImportProfile profile, SheetData sheet)
+    {
+        var header = sheet.Row(profile.HeaderRow);
+        return
+        [
+            .. profile.Registers
+                .Where(r => r.ReadingColumn > 0)
+                .Select(r => _localizer.Get(
+                    "ImportColumnAssignment",
+                    SheetData.ColumnLetter(r.ReadingColumn),
+                    header?.Cell(r.ReadingColumn).Text.Trim() ?? string.Empty,
+                    _registerLabels.GetValueOrDefault(r.RegisterId, string.Empty))),
+        ];
+    }
+
     private async Task EnterPreviewAsync(ImportProfile profile)
     {
         var sheet = _sheet!;
@@ -1242,6 +1304,8 @@ public sealed partial class ImportWizardViewModel : ViewModelBase
                 .Select(line => new ImportReplacementRowViewModel(replacement, line, _registerLabels.GetValueOrDefault(line.PositionRegisterId, string.Empty), _localizer))),
         ];
         var counts = plan.Counts;
+        DuplicatesText = counts.DuplicateReadings > 0 ? _localizer.Get("ImportDuplicateReadings", counts.DuplicateReadings, ImportPlanner.DuplicateReadingDays) : string.Empty;
+        ColumnAssignmentLines = BuildColumnAssignmentLines(profile, sheet);
         SummaryText = plan.Problems.Count > 0
             ? string.Empty
             : _localizer.Get("ImportSummary", counts.Readings, counts.Bills, counts.Payments, counts.SkippedRows, plan.ErrorRows, plan.WarningRows, counts.Replacements);
