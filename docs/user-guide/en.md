@@ -250,6 +250,14 @@ Open a property → card **Contracts** → **Add contract**.
   from / to, archived. **Valid from** is the day the contract starts: [Charges](#12-charges) and the [reports](#18-reports)
   treat the months before it as outside the contract. If you keep older bills (or are about to import them), set it to the
   first day of the history.
+  **Changing the category of a saved contract:** the bills of the contract keep the category they were created with, and
+  the [Overview](#4-overview) and the [reports](#18-reports) group by the **bill's** category. So when you tap ✓ after changing
+  the category, the app counts the contract's existing bills (drafts included) and bill templates that are still in the
+  *old* category and asks: «The contract category changes from “Water” to “Heating and hot water”. Change it for the existing
+  records of this contract too: bills: 42, templates: 1?» Choose **Change** to move them together with the contract in one
+  save, or **Contract only** to leave them as they are; closing the question cancels the save. Bills or templates you put into
+  another category yourself, and the lines of a bill that have their own category, are never changed. There is no Undo — change
+  the category back the same way if you made a mistake. The question does not appear when nothing would change.
 - **Account:** customer number, contract number, portal login (no password).
 - **Billing:**
   - *Billing mode* — **By consumption** (meters), **Fixed fee**, **Equalized payments** (the same amount every month,
@@ -345,6 +353,12 @@ quickly: each register shows its newest 30 readings first, and **Show more (N le
 **Settings → Categories.** Categories group contracts and payments in lists and reports and give them a colour.
 Built-in categories can be renamed (leave the name empty to return to the default) and archived but not deleted;
 you can add your own.
+
+A bill gets the category of its contract when it is created, and the [Overview](#4-overview) and the
+[reports](#18-reports) group by the **bill's** category. The *service kind* of a contract (water, heating…) only decides
+which tariff presets and meters make sense; it does not change the category. To regroup a contract (for example, move a
+heating contract to your own category «Heating and hot water»), change the category in the [contract](#7-contracts): the app
+offers to change the existing bills and bill templates of that contract too.
 
 ## 11. Tariffs
 
