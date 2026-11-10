@@ -1742,4 +1742,11 @@ Database size: {1} → {2}.</value></data>
   <data name="CleanUpKind_Other" xml:space="preserve"><value>other records</value></data>
   <data name="CleanUpFiles" xml:space="preserve"><value>(photos and documents: {0}, {1})</value></data>
   <data name="CleanUpFilesOnly" xml:space="preserve"><value>files of photos and documents: {0} ({1})</value></data>
+  <data name="ContractCategoryChangeTitle" xml:space="preserve"><value>Change the category of existing records?</value></data>
+  <data name="ContractCategoryChangeQuestion" xml:space="preserve"><value>The contract category changes from “{0}” to “{1}”. Change it for the existing records of this contract too: {2}?</value></data>
+  <data name="ContractCategoryChangeAll" xml:space="preserve"><value>Change</value></data>
+  <data name="ContractCategoryChangeOnly" xml:space="preserve"><value>Contract only</value></data>
+  <data name="ContractCategoryChangeBills" xml:space="preserve"><value>bills: {0}</value></data>
+  <data name="ContractCategoryChangeTemplates" xml:space="preserve"><value>templates: {0}</value></data>
+  <data name="ContractCategoryChanged" xml:space="preserve"><value>Saved · category changed — {0}</value></data>
 </root>

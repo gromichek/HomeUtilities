@@ -1742,4 +1742,11 @@
   <data name="CleanUpKind_Other" xml:space="preserve"><value>прочие записи</value></data>
   <data name="CleanUpFiles" xml:space="preserve"><value>(фото и документы: {0}, {1})</value></data>
   <data name="CleanUpFilesOnly" xml:space="preserve"><value>файлы фото и документов: {0} ({1})</value></data>
+  <data name="ContractCategoryChangeTitle" xml:space="preserve"><value>Изменить категорию существующих записей?</value></data>
+  <data name="ContractCategoryChangeQuestion" xml:space="preserve"><value>Категория договора меняется с «{0}» на «{1}». Поменять её и у существующих записей этого договора: {2}?</value></data>
+  <data name="ContractCategoryChangeAll" xml:space="preserve"><value>Поменять</value></data>
+  <data name="ContractCategoryChangeOnly" xml:space="preserve"><value>Только договор</value></data>
+  <data name="ContractCategoryChangeBills" xml:space="preserve"><value>счета: {0}</value></data>
+  <data name="ContractCategoryChangeTemplates" xml:space="preserve"><value>шаблоны: {0}</value></data>
+  <data name="ContractCategoryChanged" xml:space="preserve"><value>Сохранено · категория изменена — {0}</value></data>
 </root>

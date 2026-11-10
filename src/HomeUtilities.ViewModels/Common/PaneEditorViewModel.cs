@@ -66,12 +66,15 @@ public abstract partial class PaneEditorViewModel : EditableViewModel
         OnPropertyChanged(nameof(ShowFormDelete));
     }
 
+    /// <summary>Text of the "saved" message when the save did more than the usual (returns null for the standard "Saved").</summary>
+    protected virtual string? TakeSavedMessage() => null;
+
     protected override async Task OnFinishedAsync(EditOutcome outcome)
     {
         // Save keeps the editor page open; only Cancel / Delete leave it.
         if (outcome == EditOutcome.Saved)
         {
-            _saveSnackbar.Notify(_paneLocalizer["Saved"]);
+            _saveSnackbar.Notify(TakeSavedMessage() ?? _paneLocalizer["Saved"]);
         }
         else
         {

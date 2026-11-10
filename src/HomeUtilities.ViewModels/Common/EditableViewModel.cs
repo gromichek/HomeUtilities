@@ -85,6 +85,12 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
 
     protected abstract Task SaveCoreAsync();
 
+    /// <summary>
+    /// Called after validation, before <see cref="SaveCoreAsync"/>: an editor may ask a question about the consequences of the
+    /// save. Returning false cancels the save (nothing is written, the editor stays as it is).
+    /// </summary>
+    protected virtual Task<bool> ConfirmSaveAsync() => Task.FromResult(true);
+
     protected abstract Task DeleteCoreAsync();
 
     /// <summary>
@@ -185,6 +191,11 @@ public abstract partial class EditableViewModel : ViewModelBase, IUnsavedChanges
         var errors = Validate();
         SetErrors(errors);
         if (errors.Count > 0)
+        {
+            return false;
+        }
+
+        if (!await ConfirmSaveAsync())
         {
             return false;
         }

@@ -70,6 +70,8 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     private IReadOnlyList<Supplier> _suppliers = [];
     private IReadOnlyList<Category> _categories = [];
     private bool _categoryTouched;
+    private (Guid Old, ContractCategoryRecords Records)? _categoryChange;
+    private ContractCategoryRecords? _changedRecords;
     private bool _hasLegacyCurrency;
     private IReadOnlyList<ValidationError> _inputErrors = [];
 
@@ -993,10 +995,94 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         return [.. _inputErrors, .. ContractValidator.Validate(_pending).Errors];
     }
 
+    /// <summary>
+    /// Asks about the existing bills and templates when the category of a saved contract changes (T-044). Counted off the UI
+    /// thread; no question when nothing would change. Closing the dialog cancels the save.
+    /// </summary>
+    protected override async Task<bool> ConfirmSaveAsync()
+    {
+        _categoryChange = null;
+        var pending = _pending ?? BuildContract();
+        var oldCategory = _contract.CategoryId;
+        if (IsNew || oldCategory == Guid.Empty || pending.CategoryId == oldCategory)
+        {
+            return true;
+        }
+
+        var records = await Task.Run(() => _store.CountCategoryRecordsAsync(_contract.Id, oldCategory));
+        if (records.IsEmpty)
+        {
+            return true;
+        }
+
+        var counts = CategoryChangeCounts(records);
+        var picked = await Dialogs.ChooseWithMessageAsync(
+            _localizer,
+            _localizer["ContractCategoryChangeTitle"],
+            _localizer.Get(
+                "ContractCategoryChangeQuestion",
+                CategoryName(oldCategory),
+                CategoryName(pending.CategoryId),
+                counts),
+            [
+                new SingleChoiceOption(true, _localizer["ContractCategoryChangeAll"]),
+                new SingleChoiceOption(false, _localizer["ContractCategoryChangeOnly"]),
+            ],
+            true);
+        if (picked is not bool change)
+        {
+            return false;
+        }
+
+        if (change)
+        {
+            _categoryChange = (oldCategory, records);
+        }
+
+        return true;
+    }
+
+    private string CategoryName(Guid id) => FindCategoryOption(id)?.Name ?? string.Empty;
+
+    private string CategoryChangeCounts(ContractCategoryRecords records)
+    {
+        var parts = new List<string>();
+        if (records.Bills > 0)
+        {
+            parts.Add(_localizer.Get("ContractCategoryChangeBills", records.Bills));
+        }
+
+        if (records.Templates > 0)
+        {
+            parts.Add(_localizer.Get("ContractCategoryChangeTemplates", records.Templates));
+        }
+
+        return string.Join(", ", parts);
+    }
+
+    /// <inheritdoc />
+    protected override string? TakeSavedMessage()
+    {
+        var changed = _changedRecords;
+        _changedRecords = null;
+        return changed is { IsEmpty: false } records
+            ? _localizer.Get("ContractCategoryChanged", CategoryChangeCounts(records))
+            : null;
+    }
+
     protected override async Task SaveCoreAsync()
     {
         var pending = _pending ?? BuildContract();
-        await _store.SaveAsync(pending);
+        if (_categoryChange is { } change)
+        {
+            _changedRecords = await Task.Run(() => _store.SaveWithCategoryChangeAsync(pending, change.Old));
+            _categoryChange = null;
+        }
+        else
+        {
+            await _store.SaveAsync(pending);
+        }
+
         _contract = pending;
         IsNew = false;
         Title = TitleText();

@@ -518,6 +518,27 @@ internal sealed class FakeContractStore : IContractStore
     public Task<IReadOnlyList<ContractMeter>> ListContractMetersAsync(Guid contractId, CancellationToken ct = default) =>
         Task.FromResult<IReadOnlyList<ContractMeter>>([.. Links.Where(l => l.ContractId == contractId)]);
 
+    /// <summary>What the next category question counts (T-044).</summary>
+    public ContractCategoryRecords CategoryRecords { get; set; }
+
+    public int CategoryCounts { get; private set; }
+
+    /// <summary>Old category ids of every <see cref="SaveWithCategoryChangeAsync"/> call.</summary>
+    public List<Guid> CategoryChanges { get; } = [];
+
+    public Task<ContractCategoryRecords> CountCategoryRecordsAsync(Guid contractId, Guid oldCategoryId, CancellationToken ct = default)
+    {
+        CategoryCounts++;
+        return Task.FromResult(CategoryRecords);
+    }
+
+    public async Task<ContractCategoryRecords> SaveWithCategoryChangeAsync(Contract contract, Guid oldCategoryId, CancellationToken ct = default)
+    {
+        CategoryChanges.Add(oldCategoryId);
+        await SaveAsync(contract, ct);
+        return CategoryRecords;
+    }
+
     public Task SaveContractMeterAsync(ContractMeter contractMeter, CancellationToken ct = default)
     {
         SavedLinks.Add(contractMeter);

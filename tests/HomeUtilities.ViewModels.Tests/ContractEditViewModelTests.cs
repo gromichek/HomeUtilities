@@ -1,3 +1,4 @@
+using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Billing;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
@@ -1197,6 +1198,125 @@ public class ContractEditViewModelTests
         var vm = await FilledNewAsync();
 
         Assert.False(vm.ShowBalanceCard);
+    }
+
+    // ---- T-044: changing the category of a saved contract ----
+
+    private async Task<ContractEditViewModel> CategoryChangedAsync(int bills, int templates)
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        _kit.Contracts.CategoryRecords = new ContractCategoryRecords(bills, templates);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        _kit.Dialogs.ChooseScript = options => options.Single(o => o == "Enum_ServiceKind_Gas [en]");
+        await vm.ChooseCategoryCommand.ExecuteAsync(null);
+        _kit.Dialogs.ChooseScript = null;
+        return vm;
+    }
+
+    [Fact]
+    public async Task CategoryChange_AsksWithTheCountsByKind_AndChangesTheRecordsOnTheFirstAnswer()
+    {
+        var vm = await CategoryChangedAsync(42, 1);
+        string? message = null;
+        _kit.Dialogs.EditorScript = editor =>
+        {
+            var dialog = (SingleChoiceDialogViewModel)editor;
+            message = dialog.Message;
+            dialog.Items[0].ChooseCommand.Execute(null);
+        };
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Contains("ContractCategoryChangeBills 42 [en], ContractCategoryChangeTemplates 1 [en]", message);
+        Assert.Single(_kit.Contracts.CategoryChanges);
+        Assert.Equal(_kit.CategoryIdFor(ServiceKind.ColdWater), _kit.Contracts.CategoryChanges[0]);
+        Assert.Equal(_kit.CategoryIdFor(ServiceKind.Gas), _kit.Contracts.Saved.Single().CategoryId);
+        Assert.Equal("ContractCategoryChanged ContractCategoryChangeBills 42 [en], ContractCategoryChangeTemplates 1 [en] [en]", _kit.Toast.Messages.Last());
+    }
+
+    [Fact]
+    public async Task CategoryChange_ContractOnly_SavesJustTheContract()
+    {
+        var vm = await CategoryChangedAsync(3, 0);
+        _kit.Dialogs.EditorScript = editor => ((SingleChoiceDialogViewModel)editor).Items[1].ChooseCommand.Execute(null);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Contracts.CategoryChanges);
+        Assert.Equal(_kit.CategoryIdFor(ServiceKind.Gas), _kit.Contracts.Saved.Single().CategoryId);
+        Assert.Equal("Saved [en]", _kit.Toast.Messages.Last());
+    }
+
+    [Fact]
+    public async Task CategoryChange_ClosingTheQuestion_SavesNothingAndKeepsTheEditorDirty()
+    {
+        var vm = await CategoryChangedAsync(3, 1);
+        _kit.Dialogs.EditorScript = editor => ((SingleChoiceDialogViewModel)editor).CancelCommand.Execute(null);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_kit.Contracts.Saved);
+        Assert.Empty(_kit.Contracts.CategoryChanges);
+        Assert.True(vm.IsDirty);
+        Assert.Empty(_kit.Toast.Messages);
+    }
+
+    [Fact]
+    public async Task CategoryChange_NothingMatches_NoQuestion()
+    {
+        var vm = await CategoryChangedAsync(0, 0);
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, _kit.Dialogs.EditorsShown);
+        Assert.Single(_kit.Contracts.Saved);
+    }
+
+    [Fact]
+    public async Task CategoryChange_CategoryUnchanged_NoQuestionAndNoCount()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        _kit.Contracts.CategoryRecords = new ContractCategoryRecords(5, 5);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        vm.ContractTitle = "Water renamed";
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, _kit.Dialogs.EditorsShown);
+        Assert.Equal(0, _kit.Contracts.CategoryCounts);
+        Assert.Single(_kit.Contracts.Saved);
+    }
+
+    [Fact]
+    public async Task CategoryChange_OnlyKindsWithACountAreListed()
+    {
+        var vm = await CategoryChangedAsync(0, 2);
+        string? message = null;
+        _kit.Dialogs.EditorScript = editor =>
+        {
+            var dialog = (SingleChoiceDialogViewModel)editor;
+            message = dialog.Message;
+            dialog.Items[0].ChooseCommand.Execute(null);
+        };
+
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.DoesNotContain("ContractCategoryChangeBills", message);
+        Assert.Contains("ContractCategoryChangeTemplates 2", message);
+    }
+
+    [Fact]
+    public void CategoryChange_TextsReadWellInBothLanguages()
+    {
+        Assert.Equal("счета: 42", ResxLocalizer.Russian.Get("ContractCategoryChangeBills", 42));
+        Assert.Equal("шаблоны: 1", ResxLocalizer.Russian.Get("ContractCategoryChangeTemplates", 1));
+        Assert.Equal(
+            "Категория договора меняется с «Вода» на «Отопление и горячая вода». Поменять её и у существующих записей этого договора: счета: 42, шаблоны: 1?",
+            ResxLocalizer.Russian.Get("ContractCategoryChangeQuestion", "Вода", "Отопление и горячая вода", "счета: 42, шаблоны: 1"));
+        Assert.Equal("bills: 42", ResxLocalizer.English.Get("ContractCategoryChangeBills", 42));
+        Assert.Equal("templates: 1", ResxLocalizer.English.Get("ContractCategoryChangeTemplates", 1));
     }
 
     private Contract AddContract(ServiceKind kind)
