@@ -16,6 +16,16 @@ public enum OverviewTone
     Good,
 }
 
+/// <summary>
+/// Row actions are asynchronous so a test can await them; the UI executes the command as before (a tap runs at once, several taps
+/// are not blocked while the first one is running).
+/// </summary>
+internal static class Row
+{
+    internal static IAsyncRelayCommand Command(Func<Task> action) =>
+        new AsyncRelayCommand(action, AsyncRelayCommandOptions.AllowConcurrentExecutions);
+}
+
 /// <summary>One row of the "To do" card: an icon by kind, a text coloured by severity, a date or amount and its action.</summary>
 public sealed class TodoRowViewModel
 {
@@ -26,8 +36,8 @@ public sealed class TodoRowViewModel
         string amountText,
         string payText,
         string enterText,
-        Action open,
-        Action? pay)
+        Func<Task> open,
+        Func<Task>? pay)
     {
         Item = item;
         Text = text;
@@ -35,8 +45,8 @@ public sealed class TodoRowViewModel
         AmountText = amountText;
         PayText = payText;
         EnterText = enterText;
-        OpenCommand = new RelayCommand(open);
-        PayCommand = pay is null ? null : new RelayCommand(pay);
+        OpenCommand = Row.Command(open);
+        PayCommand = pay is null ? null : Row.Command(pay);
     }
 
     public TodoItem Item { get; }
@@ -83,16 +93,16 @@ public sealed class TodoRowViewModel
     public bool IsInfo => Severity == TodoSeverity.Info;
 
     /// <summary>Opens the screen of the item (the row tap).</summary>
-    public IRelayCommand OpenCommand { get; }
+    public IAsyncRelayCommand OpenCommand { get; }
 
     /// <summary>The inline "Paid" quick action; null unless the item is a bill that can be paid.</summary>
-    public IRelayCommand? PayCommand { get; }
+    public IAsyncRelayCommand? PayCommand { get; }
 
     public bool CanPay => PayCommand is not null;
 }
 
 /// <summary>One tappable line of the Money or This year card.</summary>
-public sealed class OverviewLineViewModel(string text, OverviewTone tone, Action open)
+public sealed class OverviewLineViewModel(string text, OverviewTone tone, Func<Task> open)
 {
     public string Text { get; } = text;
 
@@ -102,7 +112,7 @@ public sealed class OverviewLineViewModel(string text, OverviewTone tone, Action
 
     public bool IsGood => Tone == OverviewTone.Good;
 
-    public IRelayCommand OpenCommand { get; } = new RelayCommand(open);
+    public IAsyncRelayCommand OpenCommand { get; } = Row.Command(open);
 }
 
 /// <summary>The lines of one property in the Money or This year card.</summary>

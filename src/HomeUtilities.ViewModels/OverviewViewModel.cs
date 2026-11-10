@@ -421,8 +421,8 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
             amount,
             _localizer["BillMarkPaid"],
             _localizer["TodoEnterBill"],
-            () => _ = RunSafeAsync(() => OpenAsync(item)),
-            item.BillId is { } billId && item.Kind is TodoKind.BillDue or TodoKind.TaxInstallmentDue ? () => _ = MarkPaidAsync(billId) : null);
+            () => RunSafeAsync(() => OpenAsync(item)),
+            item.BillId is { } billId && item.Kind is TodoKind.BillDue or TodoKind.TaxInstallmentDue ? () => MarkPaidAsync(billId) : null);
     }
 
     private string ReadingsDetail(TodoItem item, DateOnly today)
@@ -511,7 +511,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         Routes.PaymentsFor,
         new Dictionary<string, object> { [EditorNavigation.PropertyIdParameter] = propertyId });
 
-    private Action Go(Func<Task> open) => () => _ = RunSafeAsync(open);
+    private Func<Task> Go(Func<Task> open) => () => RunSafeAsync(open);
 
     private IReadOnlyList<OverviewBlockViewModel> BuildMoney()
     {

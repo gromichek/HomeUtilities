@@ -209,8 +209,7 @@ public class OverviewViewModelTests : IDisposable
         var vm = await LoadAsync();
         _kit.Kit.Toast.ActionResult = (_, _) => false;
 
-        vm.TodoRows[0].PayCommand!.Execute(null);
-        await Task.Delay(50);
+        await vm.TodoRows[0].PayCommand!.ExecuteAsync(null);
 
         Assert.Empty(vm.TodoRows);
         var payment = Assert.Single(_kit.Payments.Stored);
@@ -247,8 +246,7 @@ public class OverviewViewModelTests : IDisposable
         var bill = _kit.AddBill(water, new YearMonth(2026, 9), 50m, due: new DateOnly(2026, 10, 20));
         var vm = await LoadAsync();
 
-        vm.TodoRows[0].OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await vm.TodoRows[0].OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.BillEdit, route);
@@ -269,8 +267,7 @@ public class OverviewViewModelTests : IDisposable
         Assert.False(row.CanPay);
         Assert.Equal("TodoEnterBill [en]", row.EnterText);
 
-        row.OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await row.OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.BillEdit, route);
@@ -294,8 +291,7 @@ public class OverviewViewModelTests : IDisposable
         Assert.Equal("Sample flat · TodoReadingsOpen 25–28 Oct [en]", row.DetailText);
         Assert.True(row.IsReadings && row.IsToday);
 
-        row.OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await row.OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.ReadingsFor, route);
@@ -329,8 +325,7 @@ public class OverviewViewModelTests : IDisposable
         Assert.True(row.IsInfo);
         Assert.False(row.CanPay);
 
-        row.OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await row.OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.BillsFor, route);
@@ -366,8 +361,7 @@ public class OverviewViewModelTests : IDisposable
         Assert.Equal("Sample flat · TodoVerificationOverdue 01.09.2026 [en]", row.DetailText);
         Assert.True(row.IsVerification && row.IsOverdue);
 
-        row.OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await row.OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.MeterEdit, route);
@@ -389,8 +383,7 @@ public class OverviewViewModelTests : IDisposable
         Assert.Equal($"-8.35\u00A0{Eur}", row.AmountText);
         Assert.True(row.IsInfo && row.IsSettlement);
 
-        row.OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await row.OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.EqualizedSettlement, route);
@@ -550,10 +543,8 @@ public class OverviewViewModelTests : IDisposable
 
         foreach (var line in lines)
         {
-            line.OpenCommand.Execute(null);
+            await line.OpenCommand.ExecuteAsync(null);
         }
-
-        await Task.Delay(50);
 
         var visited = _kit.Kit.Navigation.Visited;
         Assert.Equal([Routes.BillsFor, Routes.BillsFor, Routes.PaymentsFor, Routes.BillsFor, Routes.EqualizedSettlement], visited.Select(v => v.Route));
@@ -578,8 +569,7 @@ public class OverviewViewModelTests : IDisposable
         var line = Assert.Single(block.Lines);
         Assert.Equal($"OverviewYearLine 2026|{Money("1,245.30")}|2025|{Money("1,180.10")}|+5.5\u00A0% [en]", line.Text);
 
-        line.OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await line.OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.BillsFor, route);

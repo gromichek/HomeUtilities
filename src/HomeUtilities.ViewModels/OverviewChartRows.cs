@@ -8,7 +8,7 @@ namespace HomeUtilities.ViewModels;
 public sealed record ShareSegment(double Fraction, string Color);
 
 /// <summary>One tappable row of the "by category" card: colour dot, name, amount and share; opens the bills of the category.</summary>
-public sealed class CategoryRowViewModel(string name, string color, string amountText, string shareText, string description, Action open)
+public sealed class CategoryRowViewModel(string name, string color, string amountText, string shareText, string description, Func<Task> open)
 {
     public string Name { get; } = name;
 
@@ -25,7 +25,7 @@ public sealed class CategoryRowViewModel(string name, string color, string amoun
     /// <summary>Accessibility text: "Water: 120,00 €, 12 %".</summary>
     public string Description { get; } = description;
 
-    public IRelayCommand OpenCommand { get; } = new RelayCommand(open);
+    public IAsyncRelayCommand OpenCommand { get; } = Row.Command(open);
 }
 
 /// <summary>The data of a small line chart: twelve monthly values; a null value is a gap, an approximate one is drawn muted.</summary>
@@ -43,7 +43,7 @@ public sealed class ConsumptionRowViewModel(
     string riseText,
     SparklineData? line,
     string description,
-    Action open)
+    Func<Task> open)
 {
     public string Name { get; } = name;
 
@@ -69,5 +69,5 @@ public sealed class ConsumptionRowViewModel(
     /// <summary>Accessibility text of the whole row.</summary>
     public string Description { get; } = description;
 
-    public IRelayCommand OpenCommand { get; } = new RelayCommand(open);
+    public IAsyncRelayCommand OpenCommand { get; } = Row.Command(open);
 }
