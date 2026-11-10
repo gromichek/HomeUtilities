@@ -257,8 +257,10 @@ the national rate is entered once. A bill or component can override with an expl
 ### Charge calculation (Core: `ChargeCalculator`)
 For contract C and period P, per component:
 1. Determine quantity (consumption / area / residents / 1 / none for FromBill).
-2. Pick the rate valid on the period's reference date (first day of P; components with readings use the
-   end reading date). Price changes inside a period are **not** split in v1 (documented limitation).
+2. Pick the rate valid on the **first day of P for every component**, metered ones included (decision 2026-11-10, T-045:
+   the owner's supplier bills price all lines of a bill with the prices of the service month; the reading window only
+   decides which readings belong to P, the reading date never decides the price). Price changes inside a period are
+   **not** split (documented limitation).
 3. Net = quantity × price (if price includes VAT: gross = quantity × price, net = gross / (1+vat)).
 4. Net is rounded to 0.01 first. **VAT is calculated on the total** (decision 2026-10-25, as on the owner's
    supplier invoices): lines are grouped by VAT %; per group VAT = Round(Σ rounded line Net × vat%) — if all
