@@ -102,6 +102,12 @@ public sealed class ImportProfile
     /// <summary>True when a reading that drops (or jumps) is proposed as a meter replacement instead of being an error.</summary>
     public bool DetectReplacements { get; set; } = true;
 
+    /// <summary>
+    /// True when readings that duplicate an existing one (same value within <see cref="ImportPlanner.DuplicateReadingDays"/> days) are
+    /// imported anyway. Off by default: such readings are skipped.
+    /// </summary>
+    public bool ImportDuplicateReadings { get; set; }
+
     /// <summary>Header texts and column letters of the mapped fields as read from the workbook (for an export in the same layout).</summary>
     public List<ImportColumnHeader> ColumnHeaders { get; set; } = [];
 
@@ -162,6 +168,7 @@ public sealed class ImportProfile
         DateIsPaymentDate = DateIsPaymentDate,
         RowOverrides = [.. RowOverrides.Select(o => new ImportRowOverride { RowDate = o.RowDate, Period = o.Period, CoversUntil = o.CoversUntil, Remark = o.Remark })],
         DetectReplacements = DetectReplacements,
+        ImportDuplicateReadings = ImportDuplicateReadings,
         ColumnHeaders = [.. ColumnHeaders.Select(h => new ImportColumnHeader { Field = h.Field, Column = h.Column, Header = h.Header })],
     };
 }

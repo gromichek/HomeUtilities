@@ -354,6 +354,68 @@ public class ImportPlannerTests
         Assert.NotNull(row.Bill);
     }
 
+    private ImportPlan PlanWithStoredReading(DateOnly date, decimal value, bool importAnyway = false)
+    {
+        _f.PowerRegister.Readings.Add(new MeterReading { RegisterId = _f.PowerRegister.Id, Date = date, Value = value, Kind = ReadingKind.Regular });
+        var profile = _f.ElectricityProfile();
+        profile.ImportDuplicateReadings = importAnyway;
+        return ImportPlanner.Plan(profile, Read(SyntheticWorkbook.Electricity), _f.Context(_f.Power));
+    }
+
+    [Fact]
+    public void A_reading_with_the_same_value_within_seven_days_is_a_duplicate_and_not_imported()
+    {
+        // Stored 1000 on 18 Jan; the sheet has 1000 on 25 Jan (7 days) -> duplicate; the bill stays.
+        var plan = PlanWithStoredReading(new DateOnly(2014, 1, 18), 1000m);
+
+        var row = Row(plan, 2);
+        Assert.True(Has(row, ImportIssueCodes.ReadingDuplicate, ImportIssueSeverity.Warning));
+        Assert.Empty(row.Readings);
+        Assert.NotNull(row.Bill);
+        Assert.Equal(1, plan.Counts.DuplicateReadings);
+        Assert.Equal(1, plan.Counts.Readings); // 25 Jan is a duplicate; the other rows give one reading in total
+    }
+
+    [Fact]
+    public void A_stored_reading_after_the_sheet_date_counts_too()
+    {
+        // Stored 1000 on 31 Jan (6 days after 25 Jan) -> duplicate
+        var plan = PlanWithStoredReading(new DateOnly(2014, 1, 31), 1000m);
+
+        Assert.Equal(1, plan.Counts.DuplicateReadings);
+    }
+
+    [Fact]
+    public void A_reading_eight_days_apart_is_imported()
+    {
+        // Stored 1000 on 17 Jan; the sheet has 1000 on 25 Jan (8 days) -> not a duplicate
+        var plan = PlanWithStoredReading(new DateOnly(2014, 1, 17), 1000m);
+
+        Assert.Single(Row(plan, 2).Readings);
+        Assert.False(Has(Row(plan, 2), ImportIssueCodes.ReadingDuplicate, ImportIssueSeverity.Warning));
+        Assert.Equal(0, plan.Counts.DuplicateReadings);
+        Assert.Equal(2, plan.Counts.Readings);
+    }
+
+    [Fact]
+    public void A_reading_with_a_different_value_is_imported_even_when_close_in_time()
+    {
+        var plan = PlanWithStoredReading(new DateOnly(2014, 1, 24), 999m);
+
+        Assert.Single(Row(plan, 2).Readings);
+        Assert.Equal(0, plan.Counts.DuplicateReadings);
+    }
+
+    [Fact]
+    public void Import_anyway_creates_the_duplicate_and_counts_none()
+    {
+        var plan = PlanWithStoredReading(new DateOnly(2014, 1, 18), 1000m, importAnyway: true);
+
+        Assert.Single(Row(plan, 2).Readings);
+        Assert.Equal(0, plan.Counts.DuplicateReadings);
+        Assert.Equal(2, plan.Counts.Readings);
+    }
+
     [Fact]
     public void A_reading_before_the_meter_was_installed_is_an_error()
     {

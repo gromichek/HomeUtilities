@@ -162,7 +162,8 @@ public sealed record ReplacementEdit(int RowNumber, Guid PositionRegisterId, Dat
 /// <param name="Payments">Payments to create.</param>
 /// <param name="SkippedRows">Rows that create nothing.</param>
 /// <param name="Replacements">Meter replacements to carry out.</param>
-public sealed record ImportCounts(int Readings, int Bills, int Payments, int SkippedRows, int Replacements = 0);
+/// <param name="DuplicateReadings">Readings not imported because the register already has the same value within a week.</param>
+public sealed record ImportCounts(int Readings, int Bills, int Payments, int SkippedRows, int Replacements = 0, int DuplicateReadings = 0);
 
 /// <summary>The dry run of an import: what every row of the sheet would create.</summary>
 public sealed class ImportPlan
@@ -181,7 +182,8 @@ public sealed class ImportPlan
             rows.Count(r => r.Bill is not null),
             rows.Count(r => r.Payment is not null),
             rows.Count(r => r.IsSkipped),
-            Replacements.Count);
+            Replacements.Count,
+            rows.Sum(r => r.Issues.Count(i => i.Code == ImportIssueCodes.ReadingDuplicate)));
     }
 
     /// <summary>Meter replacements proposed by the readings or taken from notes, oldest first.</summary>
@@ -272,6 +274,12 @@ public static class ImportIssueCodes
 
     /// <summary>A reading already exists on that date and is not imported; Args: column letter, date.</summary>
     public const string ReadingExists = "import_issue.reading_exists";
+
+    /// <summary>
+    /// The register already has a reading with the same value within <see cref="ImportPlanner.DuplicateReadingDays"/> days; the reading is
+    /// not imported (unless <see cref="ImportProfile.ImportDuplicateReadings"/>); Args: column letter, date.
+    /// </summary>
+    public const string ReadingDuplicate = "import_issue.reading_duplicate";
 
     /// <summary>The reading date is outside the installation period of the meter; Args: column letter, date.</summary>
     public const string ReadingOutsideInstallation = "import_issue.reading_outside_installation";

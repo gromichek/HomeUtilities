@@ -127,7 +127,7 @@ public static partial class ImportPlanner
         }
 
         EstimateFinals(profile, sheet, drafts, allCandidates);
-        AssignAndValidate(positions, replacements);
+        AssignAndValidate(profile, positions, replacements);
         return [.. replacements.OrderBy(r => r.Date).ThenBy(r => r.RowNumber)];
     }
 
@@ -528,7 +528,7 @@ public static partial class ImportPlanner
         }
     }
 
-    private static void AssignAndValidate(List<Position> positions, List<PlannedReplacement> replacements)
+    private static void AssignAndValidate(ImportProfile profile, List<Position> positions, List<PlannedReplacement> replacements)
     {
         foreach (var position in positions)
         {
@@ -561,7 +561,7 @@ public static partial class ImportPlanner
 
             foreach (var (registerId, list) in perRegister)
             {
-                ValidateRegister(position, list, replacements);
+                ValidateRegister(profile, list, replacements);
             }
         }
 
@@ -581,7 +581,7 @@ public static partial class ImportPlanner
         }
     }
 
-    private static void ValidateRegister(Position position, List<ReadingCandidate> list, List<PlannedReplacement> replacements)
+    private static void ValidateRegister(ImportProfile profile, List<ReadingCandidate> list, List<PlannedReplacement> replacements)
     {
         var segment = list[0].Segment!;
         var meter = segment.Meter;
@@ -614,6 +614,14 @@ public static partial class ImportPlanner
             if (accepted.Any(a => a.Date == candidate.Date))
             {
                 Warning(candidate.Row, ImportIssueCodes.ReadingExists, candidate.Column, candidate.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+                continue;
+            }
+
+            // The same value shortly before or after a stored reading (another import, typed by hand) is the same reading again.
+            if (!profile.ImportDuplicateReadings
+                && existing.Any(e => e.Value == candidate.Value && Math.Abs(e.Date.DayNumber - candidate.Date.DayNumber) <= DuplicateReadingDays))
+            {
+                Warning(candidate.Row, ImportIssueCodes.ReadingDuplicate, candidate.Column, candidate.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
                 continue;
             }
 

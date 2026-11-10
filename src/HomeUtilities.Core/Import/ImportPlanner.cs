@@ -14,6 +14,9 @@ public static partial class ImportPlanner
 {
     private const decimal AmountTolerance = 0.02m;
 
+    /// <summary>A reading with the same value as an existing one within this many days (either side) is a duplicate.</summary>
+    public const int DuplicateReadingDays = 7;
+
     /// <summary>Plans the import of a sheet.</summary>
     public static ImportPlan Plan(ImportProfile profile, SheetData sheet, ImportContext context)
     {

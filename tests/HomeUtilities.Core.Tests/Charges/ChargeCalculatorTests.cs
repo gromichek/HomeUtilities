@@ -300,9 +300,10 @@ public class ChargeCalculatorTests
     private static (decimal?, decimal?, decimal, decimal, decimal) Tuple(ChargeLine l) => (l.Quantity, l.UnitPrice, l.Net, l.Vat, l.Gross);
 
     [Fact]
-    public void Rate_valid_on_the_end_reading_date_is_used()
+    public void Rate_valid_on_the_first_day_of_the_period_is_used_not_the_end_reading_date()
     {
-        // 1.30 from 2026-01-01, 1.41 from 2026-09-15; end reading 2026-09-26 -> 1.41; 10 m3 * 1.41 = 14.10
+        // T-045 (was: end reading date). 1.30 from 2026-01-01, 1.41 from 2026-09-15; end reading 2026-09-26 -> still 1.30
+        // (price of 1 Sep); 10 m3 * 1.30 = 13.00
         var b = new ChargeBuilder().Window(20, 26);
         var meter = b.AddMeter(Meter(D(2020, 1, 1), 6));
         meter.Add(D(2026, 8, 26), 100m);
@@ -312,8 +313,137 @@ public class ChargeCalculatorTests
 
         var line = b.Calculate(Sep2026).Lines.Single();
 
-        Assert.Equal(1.41m, line.UnitPrice);
-        Assert.Equal(14.10m, line.Net);
+        Assert.Equal(1.30m, line.UnitPrice);
+        Assert.Equal(13.00m, line.Net);
+    }
+
+    private static ChargeBuilder CrossingWindowBuilder(out TariffComponent metered, out TariffComponent fromBill)
+    {
+        // Window 28 - 3; price 3.50 until 30 Sep, 3.88 from 1 Oct.
+        var b = new ChargeBuilder().Window(28, 3);
+        var meter = b.AddMeter(Meter(D(2020, 1, 1), 6));
+        meter.Add(D(2026, 9, 1), 100.000m);
+        meter.Add(D(2026, 10, 1), 108.722m);
+        meter.Add(D(2026, 11, 1), 117.444m);
+        metered = b.Add("Hot water", ChargeBasis.PerUnit, 3.50m);
+        metered.Rates.Add(ChargeBuilder.Rate(metered, D(2026, 10, 1), 3.88m));
+        fromBill = b.Add("Hot water difference", ChargeBasis.QuantityFromBill, 3.50m, sortOrder: 1);
+        fromBill.Rates.Add(ChargeBuilder.Rate(fromBill, D(2026, 10, 1), 3.88m));
+        b.Quantities[fromBill.Id] = 2m;
+        return b;
+    }
+
+    [Fact]
+    public void Crossing_window_prices_the_september_meter_line_with_the_september_price()
+    {
+        // 01 Sep 100.000 -> 01 Oct 108.722 = 8.722 m3; September price 3.50: 8.722 * 3.50 = 30.527 -> 30.53 (old rule: 3.88 -> 33.84)
+        var b = CrossingWindowBuilder(out _, out _);
+
+        var line = b.Calculate(Sep2026).Lines[0];
+
+        Assert.Equal(8.722m, line.Quantity);
+        Assert.Equal(3.50m, line.UnitPrice);
+        Assert.Equal(30.53m, line.Net);
+    }
+
+    [Fact]
+    public void Crossing_window_prices_the_october_meter_line_with_the_october_price()
+    {
+        // 01 Oct 108.722 -> 01 Nov 117.444 = 8.722 m3 * 3.88 = 33.841 -> 33.84
+        var b = CrossingWindowBuilder(out _, out _);
+
+        var line = b.Calculate(new YearMonth(2026, 10)).Lines[0];
+
+        Assert.Equal(3.88m, line.UnitPrice);
+        Assert.Equal(33.84m, line.Net);
+    }
+
+    [Fact]
+    public void Quantity_from_the_bill_line_uses_the_same_price_as_the_meter_line_of_the_month()
+    {
+        // September: both 3.50 (2 * 3.50 = 7.00); October: both 3.88 (2 * 3.88 = 7.76)
+        var b = CrossingWindowBuilder(out _, out _);
+
+        var sep = b.Calculate(Sep2026).Lines;
+        var oct = b.Calculate(new YearMonth(2026, 10)).Lines;
+
+        Assert.Equal([3.50m, 3.50m], sep.Select(l => l.UnitPrice!.Value));
+        Assert.Equal(7.00m, sep[1].Net);
+        Assert.Equal([3.88m, 3.88m], oct.Select(l => l.UnitPrice!.Value));
+        Assert.Equal(7.76m, oct[1].Net);
+    }
+
+    [Fact]
+    public void Vat_rate_is_taken_on_the_first_day_of_the_period_too()
+    {
+        // Standard VAT changes to 25% on 1 Oct; the September end reading is dated 1 Oct, VAT stays the September one.
+        var b = CrossingWindowBuilder(out _, out _);
+        var standard = b.Vat.Single(v => v.Code == "LV-STANDARD");
+        var septemberPercent = standard.PercentAt(D(2026, 9, 1))!.Value;
+        standard.Versions.Add(new VatRateVersion { VatRateId = standard.Id, ValidFrom = D(2026, 10, 1), Percent = 25m });
+
+        var line = b.Calculate(Sep2026).Lines[0];
+
+        Assert.Equal(septemberPercent, line.VatPercent);
+        Assert.NotEqual(25m, line.VatPercent);
+    }
+
+    [Fact]
+    public void Tiered_line_uses_the_rate_of_the_first_day_of_the_period()
+    {
+        // Rate valid from 1 Oct (tiers 0.20) does not price September although the end reading is dated 1 Oct;
+        // September rate: up to 100 -> 0.10, above 0.15; 8.722 m3 * 0.10 = 0.8722 -> 0.87
+        var b = new ChargeBuilder().Window(28, 3);
+        var meter = b.AddMeter(Meter(D(2020, 1, 1), 6));
+        meter.Add(D(2026, 9, 1), 100.000m);
+        meter.Add(D(2026, 10, 1), 108.722m);
+        var component = b.Add("Electricity", ChargeBasis.PerUnit, 0.10m);
+        component.Rates[0].Tiers = [new(100m, 0.10m), new(null, 0.15m)];
+        component.Rates[0].TierPeriod = TierPeriod.Month;
+        var october = ChargeBuilder.Rate(component, D(2026, 10, 1), 0.20m);
+        october.Tiers = [new(100m, 0.20m), new(null, 0.30m)];
+        october.TierPeriod = TierPeriod.Month;
+        component.Rates.Add(october);
+
+        var line = b.Calculate(Sep2026).Lines.Single();
+
+        Assert.Equal(0.10m, line.UnitPrice);
+        Assert.Equal(0.87m, line.Net);
+    }
+
+    [Fact]
+    public void Net_export_uses_the_rate_of_the_first_day_of_the_period()
+    {
+        // export 1200 -> 1250 = 50 kWh; price 0.05 until 30 Sep, 0.08 from 1 Oct; end reading 1 Oct; -50 * 0.05 = -2.50
+        var b = new ChargeBuilder().Window(28, 3);
+        var meter = b.AddMeter(Meter(D(2020, 1, 1), 7, null, RegisterKind.Export));
+        meter.Add(D(2026, 9, 1), 1200m, register: RegisterKind.Export);
+        meter.Add(D(2026, 10, 1), 1250m, register: RegisterKind.Export);
+        var component = b.Add("Solar export", ChargeBasis.NetExport, 0.05m);
+        component.Rates.Add(ChargeBuilder.Rate(component, D(2026, 10, 1), 0.08m));
+
+        var line = b.Calculate(Sep2026).Lines.Single();
+
+        Assert.Equal(0.05m, line.UnitPrice);
+        Assert.Equal(-2.50m, line.Net);
+    }
+
+    [Fact]
+    public void Missing_end_reading_does_not_move_the_rate_date_to_the_last_day()
+    {
+        // Rate valid from 30 Sep only: the first day (1 Sep) has no rate, although the last day (30 Sep) would.
+        var b = new ChargeBuilder();
+        var meter = b.AddMeter(Meter(D(2020, 1, 1), 6));
+        meter.Add(D(2026, 8, 31), 100m);
+        var component = b.Add("Water supply", ChargeBasis.PerUnit, 1m);
+        component.Rates.Clear();
+        component.Rates.Add(ChargeBuilder.Rate(component, D(2026, 9, 30), 1.41m));
+
+        var charge = b.Calculate(Sep2026);
+
+        Assert.Contains(ChargeWarningCodes.NoRateForDate, Codes(charge));
+        var warning = charge.Warnings.First(w => w.Code == ChargeWarningCodes.NoRateForDate);
+        Assert.Equal("2026-09-01", warning.Args![0]!.ToString());
     }
 
     [Fact]

@@ -409,14 +409,10 @@ prices (you enter the prices afterwards): *Water + sewerage*, *Heating as one su
   price** with the new date instead of editing the old one — earlier months are then still calculated with the old
   price. The price dialog has the price (up to 6 decimals), *Price includes VAT* (suppliers often quote gross
   prices) and the currency of the contract.
-- **Which price a month gets.** A line *By consumption (meters)* uses the price valid on the date of the **end reading**
-  of that month; all other lines (*Quantity from the bill*, *By area*, *Per resident*, *Fixed amount per month*) use the
-  price valid on the **first day of the service month**. When the readings of a month are taken in the next month (a
-  reading window such as 28 – 3), a new price from the 1st reaches the meter line **one month earlier** than the other lines.
-  Example: a new hot water price from 1 November, readings for October taken on 2 November — October's *Hot water* is
-  calculated with the November price, October's *Hot water difference* with the October price. If your supplier bills the
-  meter line of that month with the old price, enter the new price **of the meter line only** with **Valid from** = the day
-  after the last end reading of the old price (e.g. 4 November for a window ending on the 3rd); the other lines keep the 1st. A price change inside a month is never split.
+- **Which price a month gets.** Every line (*By consumption (meters)*, *Quantity from the bill*, *By area*, *Per resident*,
+  *Fixed amount per month*) uses the price and VAT valid on the **1st day of the service month**. The reading window only
+  decides which readings belong to the month. Enter a new price once, with **Valid from** = the 1st of the month from which
+  the supplier applies it. A price change inside a month is never split.
 - **Stepped price:** switch *Stepped price* on to enter steps, for example "up to 100 kWh: 0.1065 €, above: 0.0818 €".
   The last step is "and above" (no limit). *Tier period* says whether the thresholds count per month or per year.
 - **Example:** a live calculation with the newest price, for example "10 m³ → 14.10 + VAT 2.96 = 17.06 €". For a
@@ -1365,6 +1361,14 @@ The wizard has four steps:
    already, the total is missing so only the readings are imported, net + VAT do not match the total so only the total is kept).
    Grey lines are only information (for example which fallback column was used). A **Period…** button on a row lets you
    correct that row (see below). Proposed **meter replacements** are listed above the rows. Press **Import** to run it.
+   - **Which meter each column goes to.** Under the summary there is one line per meter register: *Column B “Meter reading” →
+     meter “Bathroom · 12345678”*. The wizard suggests reading columns from the header texts, so check these lines — in
+     particular when one meter is linked to two contracts (for example hot water for the water and the heating contract):
+     the same column may have been suggested on both sheets.
+   - **Duplicate readings.** If the meter already has a reading with the **same value within 7 days** (from an earlier
+     import or typed by hand), the reading is not imported again. The preview says it once, for example *Readings: 44 already
+     exist for the meter (same value within 7 days) — not imported*, and the result after the import repeats the count. The
+     switch **Import them anyway** (off) imports them nevertheless. The rest of the row (the bill) is imported as usual.
 
 **Dates and periods.** In many workbooks the date in the first column is not the billing month. The wizard suggests a rule from
 the kind of service of the contract; you can change it, and the preview shows the result for every row (*Row 5 · 2004-04*):
