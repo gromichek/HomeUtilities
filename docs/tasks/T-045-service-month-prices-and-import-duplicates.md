@@ -39,7 +39,7 @@ Phase: 9 · Depends on: T-044 (#298) · Size: M
    пределах 7 дней) — не импортируются.» (EN + RU), with a switch «Импортировать всё равно» (off). Also counted in the result
    (`SkippedCount` or a new count — say which).
 2. The column guesser keeps suggesting reading columns, but the preview shows **which meter** each reading column was
-   assigned to (one line per register: «Столбец B «Показания счетчика» → счётчик «Ванная комната · 7…»»), so a pre-selection
+   assigned to (one line per register: «Столбец B «Показания счетчика» → счётчик «Ванная · 12345678»»), so a pre-selection
    is visible before the import.
 3. Guide EN + RU, section Import: the duplicate rule and the meter line in the preview.
 
