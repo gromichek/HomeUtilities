@@ -122,8 +122,7 @@ public class OverviewChartsViewModelTests : IDisposable
         Assert.True(vm.HasCategories);
         Assert.False(vm.ShowCategoriesEmpty);
 
-        vm.CategoryRows[0].OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await vm.CategoryRows[0].OpenCommand.ExecuteAsync(null);
 
         var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
         Assert.Equal(Routes.BillsFor, route);
@@ -202,8 +201,7 @@ public class OverviewChartsViewModelTests : IDisposable
         AddMeter(10m, 10m, 10m, 10m, 10m, 10m, 10m, 10m, 10m, 10m, 10m, 14m);
         var vm = await LoadAsync();
 
-        vm.ConsumptionRows[0].OpenCommand.Execute(null);
-        await Task.Delay(50);
+        await vm.ConsumptionRows[0].OpenCommand.ExecuteAsync(null);
 
         Assert.Equal(Routes.Reports, Assert.Single(_kit.Kit.Navigation.Visited).Route);
         Assert.Equal(ReportKind.Consumption, _reports.Kind);

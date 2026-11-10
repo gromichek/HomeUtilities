@@ -231,7 +231,7 @@ public sealed partial class OverviewViewModel
                 shareText,
                 shareText.Length > 0 ? $"{name}: {amount}, {shareText}" : $"{name}: {amount}",
                 // "Other" has no single category to filter by: it opens the year's bills.
-                () => _ = RunSafeAsync(() => _navigation.GoToAsync(Routes.BillsFor, BillsQuery(today.Year, null, categoryId)))));
+                () => RunSafeAsync(() => _navigation.GoToAsync(Routes.BillsFor, BillsQuery(today.Year, null, categoryId)))));
         }
 
         CategorySegments = segments;
@@ -270,7 +270,7 @@ public sealed partial class OverviewViewModel
             var line = trend.ShowLine
                 ? new SparklineData(trend.Values, trend.Approximate, ReportChartBuilder.Palette[i % ReportChartBuilder.Palette.Count])
                 : null;
-            rows.Add(new ConsumptionRowViewModel(name, value, change, trend.IsRise, rise, line, description, () => _ = RunSafeAsync(OpenConsumptionAsync)));
+            rows.Add(new ConsumptionRowViewModel(name, value, change, trend.IsRise, rise, line, description, () => RunSafeAsync(OpenConsumptionAsync)));
         }
 
         ConsumptionRows = rows;
