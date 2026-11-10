@@ -10,14 +10,15 @@ namespace HomeUtilities.Core.Charges;
 /// meter consumption and property parameters. The result is later compared with the supplier's bill.
 /// </summary>
 /// <remarks>
-/// Limitation (v1): a month is never split at a mid-month price change; one rate is chosen per component
-/// (the one valid on the end reading date for metered bases, on the first day of the month otherwise).
+/// Limitation (v1): a month is never split at a mid-month price change; one rate (and VAT rate) is chosen per component:
+/// the one valid on the first day of the period, for every basis. The reading window only decides which readings
+/// belong to the period.
 /// </remarks>
 public static class ChargeCalculator
 {
     private sealed record Source(MeterChain Chain, RegisterKind Kind, ConsumptionResult Result);
 
-    private sealed record Metered(IReadOnlyList<Source> Sources, decimal Quantity, bool IsComplete, DateOnly RateDate)
+    private sealed record Metered(IReadOnlyList<Source> Sources, decimal Quantity, bool IsComplete)
     {
         public IReadOnlyList<ConsumptionResult> Results => [.. Sources.Select(s => s.Result)];
     }
@@ -106,7 +107,7 @@ public static class ChargeCalculator
 
         var isMetered = component.Basis is ChargeBasis.PerUnit or ChargeBasis.NetExport;
         var metered = isMetered ? Meter(input, component, warnings) : null;
-        var rateDate = metered?.RateDate ?? period.FirstDay;
+        var rateDate = period.FirstDay;
         var consumption = metered?.Results ?? [];
 
         List<ChargeLine> Failed(string code, params object?[] args)
@@ -301,9 +302,7 @@ public static class ChargeCalculator
         }
 
         var quantity = MoneyMath.RoundQuantity(sources.Sum(s => s.Result.Quantity));
-        var endDates = sources.Where(s => s.Result.EndReading is not null).Select(s => s.Result.EndReading!.Date).ToList();
-        var rateDate = endDates.Count == 0 ? period.LastDay : endDates.Max();
-        return new Metered(sources, quantity, complete, rateDate);
+        return new Metered(sources, quantity, complete);
     }
 
     private static IEnumerable<(MeterChain Chain, RegisterKind Kind)> ChainsAndKinds(ChargeInput input, TariffComponent component)
