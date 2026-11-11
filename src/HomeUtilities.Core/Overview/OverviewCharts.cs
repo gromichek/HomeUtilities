@@ -23,7 +23,7 @@ public sealed record MonthlyBars(
     bool HasLastYear);
 
 /// <summary>One slice of the spending by category.</summary>
-/// <param name="CategoryId">The category; null = the slice "Other" (the categories beyond the largest ones).</param>
+/// <param name="CategoryId">The category; null = the bills whose category is missing or deleted.</param>
 /// <param name="Amount">Gross of its bills.</param>
 public sealed record CategorySlice(Guid? CategoryId, decimal Amount);
 
@@ -32,7 +32,7 @@ public sealed record CategorySlice(Guid? CategoryId, decimal Amount);
 /// <param name="ThroughMonth">The last month counted (the current month), 1–12.</param>
 /// <param name="Currency">The currency of the amounts.</param>
 /// <param name="Total">Gross of all the bills counted.</param>
-/// <param name="Slices">The largest categories first, then "Other" if there are more than <see cref="OverviewCharts.MaxCategories"/>.</param>
+/// <param name="Slices">One slice per category with bills, the largest first; bills without a known category form one last-resort slice with a null id.</param>
 public sealed record CategorySpending(int Year, int ThroughMonth, Currency Currency, decimal Total, IReadOnlyList<CategorySlice> Slices);
 
 /// <summary>The last twelve complete months of the consumption of one resource of one property.</summary>
@@ -70,9 +70,6 @@ public sealed record ConsumptionTrend(
 /// <summary>The figures of the three charts of the Overview (T-038). Pure functions over <see cref="OverviewData"/>.</summary>
 public static class OverviewCharts
 {
-    /// <summary>The largest categories shown by name; the others are summed up as "Other".</summary>
-    public const int MaxCategories = 5;
-
     /// <summary>A last month more than this many percent above the average of the eleven before it is marked as a rise.</summary>
     public const decimal RisePercent = 30m;
 
@@ -131,8 +128,8 @@ public static class OverviewCharts
     }
 
     /// <summary>
-    /// Gross of the bills from January to the month of <paramref name="today"/> by the bill's category, largest first: up to
-    /// <see cref="MaxCategories"/> categories and the rest as one slice without category. Null if there is no bill.
+    /// Gross of the bills from January to the month of <paramref name="today"/> by the bill's category, largest first: one slice
+    /// per category, plus one slice (null id) for bills whose category is missing or deleted. Null if there is no bill.
     /// </summary>
     /// <param name="data">The loaded data.</param>
     /// <param name="today">Today.</param>
@@ -162,11 +159,7 @@ public static class OverviewCharts
             return null;
         }
 
-        // Bills of a category that no longer exists belong to "Other" as well.
-        var named = groups.Where(s => s.CategoryId is not null).Take(MaxCategories).ToList();
-        var other = groups.Except(named).Sum(s => s.Amount);
-        var slices = other != 0 ? [.. named, new CategorySlice(null, other)] : named;
-        return new CategorySpending(today.Year, today.Month, currency, bills.Sum(b => b.Gross), slices);
+        return new CategorySpending(today.Year, today.Month, currency, bills.Sum(b => b.Gross), groups);
     }
 
     /// <summary>

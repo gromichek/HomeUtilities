@@ -131,6 +131,25 @@ public class OverviewChartsViewModelTests : IDisposable
     }
 
     [Fact]
+    public void Share_texts_show_whole_percent_and_less_than_one_below_half_a_percent()
+    {
+        var nb = BillText.NonBreakingSpace;
+        Assert.Equal($"1{nb}%", ShareText.Format(0.005m));     // 0.5 % rounds up to 1 %
+        Assert.Equal($"<{nb}1{nb}%", ShareText.Format(0.0049m)); // 0.49 % -> "< 1 %"
+        Assert.Equal($"<{nb}1{nb}%", ShareText.Format(0.0001m));
+        Assert.Equal($"1{nb}%", ShareText.Format(0.01m));
+        Assert.Equal($"75{nb}%", ShareText.Format(0.75m));
+        Assert.Equal(string.Empty, ShareText.Format(0m));
+    }
+
+    [Fact]
+    public void A_tiny_segment_is_drawn_at_least_one_percent_wide()
+    {
+        Assert.Equal(0.01, new ShareSegment(0.0001, "#112233").VisibleFraction);
+        Assert.Equal(0.25, new ShareSegment(0.25, "#112233").VisibleFraction);
+    }
+
+    [Fact]
     public async Task Category_card_without_bills_this_year_shows_one_line_and_no_chart()
     {
         var water = _kit.AddWaterContract(tariff: false);
@@ -219,7 +238,7 @@ public class OverviewChartsViewModelTests : IDisposable
         string[] keys =
         [
             "OverviewChartHint", "OverviewChartMonth", "OverviewChartMonthWithLast", "OverviewCategoriesHeader", "OverviewCategoriesSubtitle",
-            "OverviewCategoriesSubtitleOne", "OverviewCategoriesEmpty", "OverviewCategoryOther", "OverviewConsumptionHeader",
+            "OverviewCategoriesSubtitleOne", "OverviewCategoriesEmpty", "OverviewCategoryNone", "OverviewConsumptionHeader",
             "OverviewConsumptionSubtitle", "OverviewConsumptionRise", "OverviewConsumptionRowSummary",
         ];
         foreach (var key in keys)
@@ -233,7 +252,7 @@ public class OverviewChartsViewModelTests : IDisposable
         Assert.Equal("январь – октябрь, всего 1 002,00 €", ResxLocalizer.Russian.Get("OverviewCategoriesSubtitle", "январь", "октябрь", "1 002,00 €"));
         Assert.Equal("Счетов за этот год пока нет.", ResxLocalizer.Russian["OverviewCategoriesEmpty"]);
         Assert.Equal("Потребление", ResxLocalizer.Russian["OverviewConsumptionHeader"]);
-        Assert.Equal("Прочее", ResxLocalizer.Russian["OverviewCategoryOther"]);
+        Assert.Equal("Без категории", ResxLocalizer.Russian["OverviewCategoryNone"]);
     }
 
     private sealed class Initializer : IDatabaseInitializer

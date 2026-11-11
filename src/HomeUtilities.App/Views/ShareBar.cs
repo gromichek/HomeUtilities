@@ -26,7 +26,7 @@ public sealed class ShareBar : ContentView
         var grid = new Grid { ColumnSpacing = 1, HeightRequest = 18 };
         for (var i = 0; i < segments.Count; i++)
         {
-            grid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(Math.Max(segments[i].Fraction, 0.005), GridUnitType.Star)));
+            grid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(segments[i].VisibleFraction, GridUnitType.Star)));
             var part = new BoxView { Color = Color.TryParse(segments[i].Color, out var color) ? color : Colors.Gray };
             grid.Add(part, i, 0);
         }

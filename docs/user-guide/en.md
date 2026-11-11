@@ -203,9 +203,9 @@ to open the Bills screen for that month (and the chosen property). The chart is 
 
 **Spending in {year} by category** shows where this year's money went: the gross total of the bills from January to the current
 month, split by the bill's category (the colour of the category is the colour of the bar). One bar shows the shares; below it
-there is a row per category with the amount and its share in percent, the largest first. At most five categories are named; the
-rest is summed up as **Other**. The line under the title says which months are counted and the total, for example *january –
-october, total 1,002.00 €*. Tap a row to open the Bills screen with this category for the whole year (**Other** opens all the
+there is a row per category with the amount and its share in percent (*< 1 %* for a very small share), the largest first. Every
+category with bills this year is listed; bills without a known category form one row **No category**. The line under the title says which months are counted and the total, for example *january –
+october, total 1,002.00 €*. Tap a row to open the Bills screen with this category for the whole year (**No category** opens all the
 year's bills). Without any bill this year the card says so in one line instead of showing an empty chart.
 
 ### Consumption

@@ -132,21 +132,22 @@ public class OverviewChartsTests
     }
 
     [Fact]
-    public void Seven_categories_become_five_and_other_sorted_by_amount()
+    public void Seven_categories_give_seven_slices_sorted_by_amount()
     {
-        // 10, 70, 30, 60, 20, 50, 40 -> 70, 60, 50, 40, 30 named; 20 + 10 = 30 "Other"; total 280.
+        // 10, 70, 30, 60, 20, 50, 40 -> 70, 60, 50, 40, 30, 20, 10; total 280.
         var (s, _, ids) = Categorized(10m, 70m, 30m, 60m, 20m, 50m, 40m);
 
         var spending = OverviewCharts.SpendingByCategory(s.Data, Today, null)!;
 
         Assert.Equal(280m, spending.Total);
-        Assert.Equal([ids[1], ids[3], ids[5], ids[6], ids[2], null], spending.Slices.Select(x => x.CategoryId));
-        Assert.Equal([70m, 60m, 50m, 40m, 30m, 30m], spending.Slices.Select(x => x.Amount));
+        Assert.Equal([ids[1], ids[3], ids[5], ids[6], ids[2], ids[4], ids[0]], spending.Slices.Select(x => x.CategoryId));
+        Assert.Equal([70m, 60m, 50m, 40m, 30m, 20m, 10m], spending.Slices.Select(x => x.Amount));
+        Assert.Equal(spending.Total, spending.Slices.Sum(x => x.Amount));
         Assert.Equal((2026, 11, Currency.EUR), (spending.Year, spending.ThroughMonth, spending.Currency));
     }
 
     [Fact]
-    public void Up_to_five_categories_have_no_other_slice()
+    public void Three_categories_give_three_slices()
     {
         var (s, _, ids) = Categorized(10m, 20m, 30m);
 
@@ -174,7 +175,7 @@ public class OverviewChartsTests
     }
 
     [Fact]
-    public void A_bill_of_a_removed_category_goes_to_other()
+    public void A_bill_of_a_removed_category_has_its_own_slice_without_category()
     {
         var s = new OverviewScenario();
         var water = s.AddContract("Water");
@@ -187,6 +188,46 @@ public class OverviewChartsTests
 
         Assert.Equal([category.Id, null], spending.Slices.Select(x => x.CategoryId));
         Assert.Equal([10m, 5m], spending.Slices.Select(x => x.Amount));
+    }
+
+    [Fact]
+    public void A_deleted_category_is_a_slice_without_category_and_the_total_still_adds_up()
+    {
+        var s = new OverviewScenario();
+        var water = s.AddContract("Water");
+        var live = new Category { Name = "Live" };
+        var gone = new Category { Name = "Gone", IsDeleted = true };
+        s.Categories.Add(live);
+        s.Categories.Add(gone);
+        Bill(s, water, 2026, 2, 10m, category: live.Id);
+        Bill(s, water, 2026, 3, 4m, category: gone.Id);
+        Bill(s, water, 2026, 4, 1m, category: Guid.NewGuid());
+
+        var spending = OverviewCharts.SpendingByCategory(s.Data, Today, null)!;
+
+        Assert.Equal([live.Id, null], spending.Slices.Select(x => x.CategoryId));
+        Assert.Equal([10m, 5m], spending.Slices.Select(x => x.Amount));
+        Assert.Equal(15m, spending.Total);
+    }
+
+    [Fact]
+    public void The_category_slices_follow_the_property_filter()
+    {
+        var s = new OverviewScenario();
+        var cottage = new Property { Name = "Cottage" };
+        s.Properties.Add(cottage);
+        var water = s.AddContract("Water");
+        var power = s.AddContract("Power", cottage);
+        var a = new Category { Name = "A" };
+        var b = new Category { Name = "B" };
+        s.Categories.Add(a);
+        s.Categories.Add(b);
+        Bill(s, water, 2026, 5, 30m, category: a.Id);
+        Bill(s, power, 2026, 5, 70m, cottage, b.Id);
+
+        Assert.Equal([b.Id, a.Id], OverviewCharts.SpendingByCategory(s.Data, Today, null)!.Slices.Select(x => x.CategoryId));
+        Assert.Equal([a.Id], OverviewCharts.SpendingByCategory(s.Data, Today, s.Flat.Id)!.Slices.Select(x => x.CategoryId));
+        Assert.Equal([b.Id], OverviewCharts.SpendingByCategory(s.Data, Today, cottage.Id)!.Slices.Select(x => x.CategoryId));
     }
 
     [Fact]
