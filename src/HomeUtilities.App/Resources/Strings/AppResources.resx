@@ -997,6 +997,10 @@
   <data name="EqPlanHasValidTo" xml:space="preserve"><value>Valid to (leave off if it has no end date)</value></data>
   <data name="EqPlanValidTo" xml:space="preserve"><value>Valid to</value></data>
   <data name="EqPlanAmount" xml:space="preserve"><value>Monthly amount (total with VAT)</value></data>
+  <data name="EqPlanCarryOver" xml:space="preserve"><value>Carry-over from the previous period, € per month (optional)</value></data>
+  <data name="EqPlanCarryOverHint" xml:space="preserve"><value>The supplier's line "difference from the previous period", with its sign: minus = refund of an overpayment, plus = surcharge. It is already included in the monthly amount.</value></data>
+  <data name="EqPlanRowCarryOver" xml:space="preserve"><value>(incl. carry-over {0})</value></data>
+  <data name="EqRowCarryOver" xml:space="preserve"><value>carry-over {0}</value></data>
   <data name="EqPlanNote" xml:space="preserve"><value>Notes</value></data>
   <data name="EqSettlementTitle" xml:space="preserve"><value>Settlement</value></data>
   <data name="EqSettlementPageTitle" xml:space="preserve"><value>Settlement · {0}</value></data>

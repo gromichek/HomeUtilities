@@ -160,7 +160,8 @@ public sealed partial class EqualizedSettlementViewModel : ViewModelBase
                 m.IsComplete,
                 m.Difference,
                 m.IsComplete ? string.Empty : _localizer["EqReadingsMissing"],
-                () => _ = RunSafeAsync(() => OpenReadingsAsync(m.Period)))),
+                () => _ = RunSafeAsync(() => OpenReadingsAsync(m.Period)),
+                m.CarryOver is { } carryOver ? _localizer.Get("EqRowCarryOver", BillText.SignedMoney(carryOver, symbol)) : string.Empty)),
         ];
 
         TotalsText = _localizer.Get(

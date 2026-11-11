@@ -421,6 +421,22 @@ public class BillEditViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task Settlement_WithATotalOfZero_IsSaved_WithoutAnAmountError()
+    {
+        var contract = _kit.AddWaterContract(tariff: false);
+        var vm = await NewEditorAsync(contract);
+        vm.SelectedKind = vm.Kinds.First(k => k.As<BillKind>() == BillKind.Settlement);
+        vm.Amounts.VatPercentText = string.Empty;
+
+        vm.Amounts.GrossText = "0,00";
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Bills.Saved);
+        Assert.Equal((BillKind.Settlement, 0m), (saved.Kind, saved.Gross));
+        Assert.Equal(string.Empty, vm.GrossError);
+    }
+
+    [Fact]
     public async Task Amounts_WithoutAnyAmount_ShowsAnErrorUnderTheTotal_AndSavesNothing()
     {
         var contract = _kit.AddWaterContract(tariff: false);

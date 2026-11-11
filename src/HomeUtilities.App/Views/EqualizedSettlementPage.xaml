@@ -77,6 +77,8 @@
                                         </Label>
                                         <Label Grid.Column="4" Text="{Binding RunningText}" FontSize="13" FontAttributes="Bold" HorizontalTextAlignment="End" />
                                     </Grid>
+                                    <Label Text="{Binding CarryOverText}" Style="{StaticResource MutedLabel}" FontSize="11"
+                                           IsVisible="{Binding HasCarryOver}" />
                                     <Button Text="{Binding MissingText}" Command="{Binding OpenReadingsCommand}"
                                             Style="{StaticResource TextButton}" HorizontalOptions="Start"
                                             IsVisible="{Binding IsIncomplete}" />

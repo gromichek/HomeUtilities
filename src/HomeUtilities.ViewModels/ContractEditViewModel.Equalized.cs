@@ -86,9 +86,7 @@ public sealed partial class ContractEditViewModel
         [
             .. _plans.OrderByDescending(p => p.ValidFrom).Select(plan => new EqualizedPlanRowViewModel(
                 plan.Id,
-                plan.ValidTo is { } to
-                    ? _localizer.Get("EqPlanRowTo", BillText.Date(plan.ValidFrom), BillText.Date(to), BillText.Money(plan.MonthlyAmount, symbol))
-                    : _localizer.Get("EqPlanRow", BillText.Date(plan.ValidFrom), BillText.Money(plan.MonthlyAmount, symbol)),
+                PlanText(plan, symbol),
                 plan.Notes ?? string.Empty,
                 _localizer["Delete"],
                 () => _ = RunSafeAsync(() => EditPlanAsync(plan)),
@@ -102,6 +100,17 @@ public sealed partial class ContractEditViewModel
         OnPropertyChanged(nameof(ShowSettlementSummary));
         ShowSettlementCommand.NotifyCanExecuteChanged();
         AddPlanCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>"from 01.07.2026 — 30,00 €/month (incl. carry-over −4,00 €)"; the carry-over part only when the plan has one.</summary>
+    private string PlanText(EqualizedPlan plan, string symbol)
+    {
+        var text = plan.ValidTo is { } to
+            ? _localizer.Get("EqPlanRowTo", BillText.Date(plan.ValidFrom), BillText.Date(to), BillText.Money(plan.MonthlyAmount, symbol))
+            : _localizer.Get("EqPlanRow", BillText.Date(plan.ValidFrom), BillText.Money(plan.MonthlyAmount, symbol));
+        return plan.CarryOverMonthly is { } carryOver
+            ? text + " " + _localizer.Get("EqPlanRowCarryOver", BillText.SignedMoney(carryOver, symbol))
+            : text;
     }
 
     /// <summary>"Expected settlement: +9,50 € (surcharge) for 06.2026–11.2026", plus a note when months are missing.</summary>
@@ -153,10 +162,7 @@ public sealed partial class ContractEditViewModel
     private async Task RemovePlanAsync(EqualizedPlan plan)
     {
         var symbol = _localizer["Currency_Symbol_" + _contract.Currency];
-        var text = plan.ValidTo is { } to
-            ? _localizer.Get("EqPlanRowTo", BillText.Date(plan.ValidFrom), BillText.Date(to), BillText.Money(plan.MonthlyAmount, symbol))
-            : _localizer.Get("EqPlanRow", BillText.Date(plan.ValidFrom), BillText.Money(plan.MonthlyAmount, symbol));
-        if (!await ConfirmRowDeleteAsync(text))
+        if (!await ConfirmRowDeleteAsync(PlanText(plan, symbol)))
         {
             return;
         }
