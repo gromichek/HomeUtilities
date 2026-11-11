@@ -155,7 +155,7 @@ public class StoreTests
         await new ContractStore(test.Factory).SaveAsync(contract);
         await new ContractStore(test.Factory).SaveAsync(other);
         var store = new EqualizedPlanStore(test.Factory);
-        await store.SaveAsync(new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2026, 6, 1), MonthlyAmount = 45.50m, Notes = "new price" });
+        await store.SaveAsync(new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2026, 6, 1), MonthlyAmount = 45.50m, CarryOverMonthly = -4.25m, Notes = "new price" });
         await store.SaveAsync(new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2025, 6, 1), ValidTo = new DateOnly(2026, 5, 31), MonthlyAmount = 40m });
         await store.SaveAsync(new EqualizedPlan { ContractId = other.Id, ValidFrom = new DateOnly(2026, 1, 1), MonthlyAmount = 12m });
         var removed = new EqualizedPlan { ContractId = contract.Id, ValidFrom = new DateOnly(2024, 1, 1), MonthlyAmount = 1m };
@@ -167,6 +167,7 @@ public class StoreTests
         Assert.Equal([new DateOnly(2026, 5, 31), null], list.Select(p => p.ValidTo));
         Assert.Equal([40m, 45.50m], list.Select(p => p.MonthlyAmount));
         Assert.Equal("new price", list[1].Notes);
+        Assert.Equal([null, -4.25m], list.Select(p => p.CarryOverMonthly));
         Assert.Single(await store.ListByContractAsync(other.Id));
     }
 

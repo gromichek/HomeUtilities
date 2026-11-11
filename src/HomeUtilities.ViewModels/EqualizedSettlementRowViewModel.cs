@@ -15,7 +15,8 @@ public sealed class EqualizedSettlementRowViewModel
         bool isComplete,
         decimal? difference,
         string missingText,
-        Action openReadings)
+        Action openReadings,
+        string carryOverText = "")
     {
         PeriodText = periodText;
         PlanText = planText;
@@ -28,6 +29,7 @@ public sealed class EqualizedSettlementRowViewModel
         IsRefund = difference < 0;
         MissingText = missingText;
         OpenReadingsCommand = new RelayCommand(openReadings);
+        CarryOverText = carryOverText;
     }
 
     /// <summary>"06.2026".</summary>
@@ -56,6 +58,11 @@ public sealed class EqualizedSettlementRowViewModel
 
     /// <summary>"Readings missing" — a link to the readings screen; empty for complete months.</summary>
     public string MissingText { get; }
+
+    /// <summary>"carry-over −4,00 €": the part of the billed amount that was last period's difference; empty when none.</summary>
+    public string CarryOverText { get; }
+
+    public bool HasCarryOver => CarryOverText.Length > 0;
 
     public IRelayCommand OpenReadingsCommand { get; }
 }

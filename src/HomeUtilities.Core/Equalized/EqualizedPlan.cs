@@ -17,6 +17,13 @@ public class EqualizedPlan : SyncEntity, IVersioned
     /// <summary>The amount billed every month, gross (including VAT).</summary>
     public decimal MonthlyAmount { get; set; }
 
+    /// <summary>
+    /// The "difference from the previous period" line the supplier adds to every monthly payment of this plan (gross, signed as
+    /// printed: negative = refund of an overpayment, positive = surcharge); null = none. It is already part of
+    /// <see cref="MonthlyAmount"/>, so the settlement counts the billed amount without it.
+    /// </summary>
+    public decimal? CarryOverMonthly { get; set; }
+
     /// <summary>Free-text comment.</summary>
     public string? Notes { get; set; }
 }

@@ -368,6 +368,7 @@ internal sealed class FakeEqualizedPlanStore : IEqualizedPlanStore
         ValidFrom = plan.ValidFrom,
         ValidTo = plan.ValidTo,
         MonthlyAmount = plan.MonthlyAmount,
+        CarryOverMonthly = plan.CarryOverMonthly,
         Notes = plan.Notes,
     };
 }

@@ -997,6 +997,10 @@
   <data name="EqPlanHasValidTo" xml:space="preserve"><value>Действует по (выключите, если срока окончания нет)</value></data>
   <data name="EqPlanValidTo" xml:space="preserve"><value>Действует по</value></data>
   <data name="EqPlanAmount" xml:space="preserve"><value>Месячная сумма (всего с НДС)</value></data>
+  <data name="EqPlanCarryOver" xml:space="preserve"><value>Перенос с прошлого периода, € в месяц (необязательно)</value></data>
+  <data name="EqPlanCarryOverHint" xml:space="preserve"><value>Строка поставщика „разница с прошлого периода“, со знаком: минус — возврат переплаты, плюс — доплата. Уже входит в месячную сумму.</value></data>
+  <data name="EqPlanRowCarryOver" xml:space="preserve"><value>(в т. ч. перенос {0})</value></data>
+  <data name="EqRowCarryOver" xml:space="preserve"><value>перенос {0}</value></data>
   <data name="EqPlanNote" xml:space="preserve"><value>Заметки</value></data>
   <data name="EqSettlementTitle" xml:space="preserve"><value>Перерасчёт</value></data>
   <data name="EqSettlementPageTitle" xml:space="preserve"><value>Перерасчёт · {0}</value></data>

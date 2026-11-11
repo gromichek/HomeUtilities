@@ -760,7 +760,7 @@ public class SampleDataGeneratorTests
         Assert.Equal(1, result.MissingMonths);
         Assert.False(result.Months[^1].IsComplete);
         Assert.True(result.Expected > 0, $"expected a surcharge, got {result.Expected}");
-        Assert.Equal(result.TotalActual - result.TotalBilled, result.Expected);
+        Assert.Equal(result.TotalActual - (result.TotalBilled - result.TotalCarryOver), result.Expected);
     }
 
     [Fact]

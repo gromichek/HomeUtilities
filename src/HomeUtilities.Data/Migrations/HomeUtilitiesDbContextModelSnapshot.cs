@@ -1012,6 +1012,9 @@ namespace HomeUtilities.Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal?>("CarryOverMonthly")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("ContractId")
                         .HasColumnType("TEXT");
 

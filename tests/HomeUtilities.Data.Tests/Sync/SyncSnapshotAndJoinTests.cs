@@ -184,6 +184,14 @@ public class SyncSnapshotAndJoinTests
         await a.Engine.EnableAsync(FirstJoinChoice.StartHere);
         await b.Engine.EnableAsync(FirstJoinChoice.Replace);
         Assert.Equal(await a.ExportAsync(), await b.ExportAsync());
+        await using (var sent = await a.Factory.CreateDbContextAsync())
+        await using (var received = await b.Factory.CreateDbContextAsync())
+        {
+            // The sample plan with a carry-over (T-046) travels through the snapshot with its value.
+            var carryOvers = await received.EqualizedPlans.Where(p => p.CarryOverMonthly != null).Select(p => p.CarryOverMonthly).ToListAsync();
+            Assert.Equal([HomeUtilities.Data.Sample.SampleDataGenerator.SampleCarryOver], carryOvers);
+            Assert.Equal(await sent.EqualizedPlans.CountAsync(), await received.EqualizedPlans.CountAsync());
+        }
 
         // The same through change files only: Merge from the changes of a device that never wrote a snapshot of that data.
         using var c = await SyncDevice.CreateAsync(cloud);

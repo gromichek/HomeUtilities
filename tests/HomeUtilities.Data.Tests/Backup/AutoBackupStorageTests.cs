@@ -154,6 +154,29 @@ public class AutoBackupStorageTests
     }
 
     [Fact]
+    public async Task An_equalized_plan_from_before_the_carry_over_column_migrates_with_a_null_carry_over()
+    {
+        // An old backup restores into a database without CarryOverMonthly; the startup migration adds it (T-046).
+        using var device = new BackupFixture();
+        var factory = device.Get<IDbContextFactory<HomeUtilitiesDbContext>>();
+        var id = Guid.CreateVersion7();
+        await using (var db = await factory.CreateDbContextAsync())
+        {
+            db.GetService<IMigrator>().Migrate("20261102120000_AddSyncTables");
+            await db.Database.ExecuteSqlRawAsync("PRAGMA foreign_keys = OFF");
+            await db.Database.ExecuteSqlAsync(
+                $"INSERT INTO EqualizedPlans (Id, ContractId, CreatedAt, IsDeleted, MonthlyAmount, UpdatedAt, ValidFrom) VALUES ({id}, {Guid.CreateVersion7()}, 0, 0, '40.5', 0, '2026-06-01')");
+        }
+
+        await using (var db = await factory.CreateDbContextAsync())
+        {
+            await db.Database.MigrateAsync();
+            var plan = await db.EqualizedPlans.SingleAsync(p => p.Id == id);
+            Assert.Equal((40.5m, (decimal?)null), (plan.MonthlyAmount, plan.CarryOverMonthly));
+        }
+    }
+
+    [Fact]
     public async Task A_new_or_up_to_date_database_makes_no_migration_copy()
     {
         using var device = new BackupFixture();

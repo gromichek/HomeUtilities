@@ -7,7 +7,7 @@ using HomeUtilities.ViewModels.Common;
 
 namespace HomeUtilities.ViewModels;
 
-/// <summary>Dialog that adds or edits one version of an equalized plan (valid from, optional valid to, monthly amount).</summary>
+/// <summary>Dialog that adds or edits one version of an equalized plan (valid from, optional valid to, monthly amount, optional carry-over).</summary>
 public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
 {
     private readonly ILocalizer _localizer;
@@ -27,10 +27,13 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
     private string _amountText = string.Empty;
 
     [ObservableProperty]
+    private string _carryOverText = string.Empty;
+
+    [ObservableProperty]
     private string _note = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ValidFromError), nameof(ValidToError), nameof(AmountError), nameof(NoteError))]
+    [NotifyPropertyChangedFor(nameof(ValidFromError), nameof(ValidToError), nameof(AmountError), nameof(CarryOverError), nameof(NoteError))]
     private IReadOnlyDictionary<string, string> _errors = new Dictionary<string, string>();
 
     [ObservableProperty]
@@ -44,6 +47,12 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
 
     [ObservableProperty]
     private string _amountLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _carryOverLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _carryOverHint = string.Empty;
 
     [ObservableProperty]
     private string _noteLabel = string.Empty;
@@ -65,6 +74,7 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
         HasValidTo = existing?.ValidTo is not null;
         ValidTo = existing?.ValidTo ?? ValidFrom;
         AmountText = existing is null ? string.Empty : AmountEditor.FormatMoney(existing.MonthlyAmount);
+        CarryOverText = existing?.CarryOverMonthly is { } carryOver ? AmountEditor.FormatMoney(carryOver) : string.Empty;
         Note = existing?.Notes ?? string.Empty;
         RefreshTexts();
     }
@@ -76,6 +86,8 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
     public string ValidToError => Lookup(nameof(EqualizedPlan.ValidTo));
 
     public string AmountError => Lookup(nameof(EqualizedPlan.MonthlyAmount));
+
+    public string CarryOverError => Lookup(nameof(EqualizedPlan.CarryOverMonthly));
 
     public string NoteError => Lookup(nameof(EqualizedPlan.Notes));
 
@@ -90,11 +102,26 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
             errors.Add(new(CommonErrorCodes.NumberInvalid, nameof(EqualizedPlan.MonthlyAmount)));
         }
 
+        // Optional and signed: empty = no carry-over; a negative amount is a refund of an overpayment.
+        decimal? carryOver = null;
+        if (!string.IsNullOrWhiteSpace(CarryOverText))
+        {
+            if (DecimalInput.TryParse(CarryOverText, CultureInfo.CurrentCulture, out var parsedCarryOver))
+            {
+                carryOver = parsedCarryOver;
+            }
+            else
+            {
+                errors.Add(new(CommonErrorCodes.NumberInvalid, nameof(EqualizedPlan.CarryOverMonthly)));
+            }
+        }
+
         var candidate = new EqualizedPlan
         {
             ValidFrom = ValidFrom,
             ValidTo = HasValidTo ? ValidTo : null,
             MonthlyAmount = amount,
+            CarryOverMonthly = carryOver,
             Notes = string.IsNullOrWhiteSpace(Note) ? null : Note.Trim(),
         };
         if (_existing is not null)
@@ -129,6 +156,8 @@ public sealed partial class EqualizedPlanEditorViewModel : EditorDialogViewModel
         HasValidToLabel = _localizer["EqPlanHasValidTo"];
         ValidToLabel = _localizer["EqPlanValidTo"];
         AmountLabel = _localizer["EqPlanAmount"];
+        CarryOverLabel = _localizer["EqPlanCarryOver"];
+        CarryOverHint = _localizer["EqPlanCarryOverHint"];
         NoteLabel = _localizer["EqPlanNote"];
     }
 

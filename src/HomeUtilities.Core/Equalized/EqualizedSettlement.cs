@@ -10,8 +10,10 @@ namespace HomeUtilities.Core.Equalized;
 /// <param name="Billed">Gross of the non-deleted Equalized bills of the month.</param>
 /// <param name="Actual">Gross of the calculated charge; null when it could not be calculated at all.</param>
 /// <param name="IsComplete">False when the calculation lacks readings or prices: the month is not counted in the totals.</param>
-/// <param name="Difference">Actual − Billed; null when the month is incomplete.</param>
+/// <param name="Difference">Actual − (Billed − CarryOver); null when the month is incomplete.</param>
 /// <param name="RunningTotal">Sum of the differences of the complete months up to and including this one.</param>
+/// <param name="CarryOver">The carry-over from the previous period contained in the billed amount (signed, as the supplier
+/// prints it); null when the month has no bill or its plan has no carry-over.</param>
 public sealed record SettlementMonth(
     YearMonth Period,
     decimal? PlanAmount,
@@ -19,7 +21,8 @@ public sealed record SettlementMonth(
     decimal? Actual,
     bool IsComplete,
     decimal? Difference,
-    decimal RunningTotal);
+    decimal RunningTotal,
+    decimal? CarryOver = null);
 
 /// <summary>The settlement table of a contract and what it adds up to.</summary>
 /// <param name="From">First month of the table.</param>
@@ -27,7 +30,7 @@ public sealed record SettlementMonth(
 /// <param name="Months">The months, oldest first.</param>
 /// <param name="TotalBilled">Billed in the complete months.</param>
 /// <param name="TotalActual">Actual in the complete months.</param>
-/// <param name="Expected">Expected settlement = TotalActual − TotalBilled (positive = surcharge, negative = refund).</param>
+/// <param name="Expected">Expected settlement = TotalActual − (TotalBilled − TotalCarryOver) (positive = surcharge, negative = refund).</param>
 /// <param name="MissingMonths">Number of incomplete months, left out of the totals.</param>
 public sealed record EqualizedSettlementResult(
     YearMonth From,
@@ -36,7 +39,8 @@ public sealed record EqualizedSettlementResult(
     decimal TotalBilled,
     decimal TotalActual,
     decimal Expected,
-    int MissingMonths)
+    int MissingMonths,
+    decimal TotalCarryOver = 0)
 {
     /// <summary>True when every month could be calculated.</summary>
     public bool IsComplete => MissingMonths == 0;
@@ -98,18 +102,23 @@ public static class EqualizedSettlement
             .ToDictionary(g => g.Key, g => g.Sum(b => b.Gross));
 
         var months = new List<SettlementMonth>();
-        decimal totalBilled = 0, totalActual = 0, running = 0;
+        decimal totalBilled = 0, totalActual = 0, totalCarryOver = 0, running = 0;
         var missing = 0;
         for (var month = from; month <= to; month = month.AddMonths(1))
         {
             var monthBilled = billed.GetValueOrDefault(month);
             var charge = actual.GetValueOrDefault(month);
             var complete = charge is { IsComplete: true };
+
+            // The carry-over is part of the amount to pay, so it is taken out of the billed amount; a month without a bill
+            // did not contain it.
+            var carryOver = billed.ContainsKey(month) ? EqualizedPlans.CarryOverFor(planList, month) : null;
             decimal? difference = null;
             if (complete)
             {
-                difference = charge!.TotalGross - monthBilled;
+                difference = charge!.TotalGross - (monthBilled - (carryOver ?? 0));
                 totalBilled += monthBilled;
+                totalCarryOver += carryOver ?? 0;
                 totalActual += charge.TotalGross;
                 running += difference.Value;
             }
@@ -119,9 +128,9 @@ public static class EqualizedSettlement
             }
 
             months.Add(new SettlementMonth(
-                month, EqualizedPlans.AmountFor(planList, month), monthBilled, charge?.TotalGross, complete, difference, running));
+                month, EqualizedPlans.AmountFor(planList, month), monthBilled, charge?.TotalGross, complete, difference, running, carryOver));
         }
 
-        return new EqualizedSettlementResult(from, to, months, totalBilled, totalActual, totalActual - totalBilled, missing);
+        return new EqualizedSettlementResult(from, to, months, totalBilled, totalActual, totalActual - (totalBilled - totalCarryOver), missing, totalCarryOver);
     }
 }

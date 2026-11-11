@@ -133,4 +133,29 @@ public class EqualizedPlanTests
         Assert.Empty(EqualizedPlans.PredecessorsToClose([existing], edited));
         Assert.True(EqualizedPlans.ValidateWith([existing], edited).IsValid);
     }
+
+    [Fact]
+    public void Carry_over_is_optional_and_may_be_negative_or_positive()
+    {
+        var plan = Plan("2026-07-01", 30m);
+        Assert.Null(plan.CarryOverMonthly);
+        Assert.True(EqualizedPlanValidator.Validate(plan).IsValid);
+
+        plan.CarryOverMonthly = -4m;
+        Assert.True(EqualizedPlanValidator.Validate(plan).IsValid);
+        plan.CarryOverMonthly = 1.50m;
+        Assert.True(EqualizedPlanValidator.Validate(plan).IsValid);
+    }
+
+    [Fact]
+    public void CarryOverFor_follows_the_plan_version_of_the_month()
+    {
+        var first = Plan("2026-07-01", 30m, "2026-12-31");
+        first.CarryOverMonthly = -4m;
+        var second = Plan("2027-01-01", 34m);
+
+        Assert.Equal(-4m, EqualizedPlans.CarryOverFor([first, second], new YearMonth(2026, 9)));
+        Assert.Null(EqualizedPlans.CarryOverFor([first, second], new YearMonth(2027, 2)));
+        Assert.Null(EqualizedPlans.CarryOverFor([first, second], new YearMonth(2026, 1)));
+    }
 }

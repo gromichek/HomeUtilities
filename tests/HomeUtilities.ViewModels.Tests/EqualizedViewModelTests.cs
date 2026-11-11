@@ -30,7 +30,7 @@ public class EqualizedViewModelTests : IDisposable
         return contract;
     }
 
-    private EqualizedPlan AddPlan(Contract contract, string from, decimal amount, string? to = null)
+    private EqualizedPlan AddPlan(Contract contract, string from, decimal amount, string? to = null, decimal? carryOver = null)
     {
         var plan = new EqualizedPlan
         {
@@ -38,6 +38,7 @@ public class EqualizedViewModelTests : IDisposable
             ValidFrom = DateOnly.Parse(from, CultureInfo.InvariantCulture),
             ValidTo = to is null ? null : DateOnly.Parse(to, CultureInfo.InvariantCulture),
             MonthlyAmount = amount,
+            CarryOverMonthly = carryOver,
         };
         _kit.Kit.Plans.All.Add(plan);
         return plan;
@@ -88,6 +89,19 @@ public class EqualizedViewModelTests : IDisposable
 
         Assert.Equal(new YearMonth(2026, 9), settlement.From);
         Assert.Equal(new YearMonth(2026, 10), settlement.To);
+    }
+
+    [Fact]
+    public async Task Service_TakesTheCarryOverOutOfTheBilledAmount()
+    {
+        // October: actual 45.10; plan 40.00 includes the carry-over -4.00; billed 40.00; 45.10 - (40.00 + 4.00) = +1.10 (without: +5.10)
+        var contract = AddEqualizedContract();
+        AddPlan(contract, "2026-10-01", 40m, carryOver: -4m);
+        AddEqualizedBill(contract, new YearMonth(2026, 10), 40m);
+
+        var settlement = (await _kit.Kit.Settlement.LoadAsync(contract.Id)).Settlement;
+
+        Assert.Equal((40m, -4m, 45.10m, 1.10m), (settlement.TotalBilled, settlement.TotalCarryOver, settlement.TotalActual, settlement.Expected));
     }
 
     // ---- Contract editor: the Equalized plan card -------------------------------------------------------------------
@@ -192,6 +206,75 @@ public class EqualizedViewModelTests : IDisposable
         Assert.Equal((contract.Id, new DateOnly(2026, 12, 1), (DateOnly?)null, 45.50m, "new price"), (plans[1].ContractId, plans[1].ValidFrom, plans[1].ValidTo, plans[1].MonthlyAmount, plans[1].Notes));
         Assert.Equal(2, vm.PlanRows.Count);
         Assert.True(EqualizedPlanValidator.ValidateSet(plans).IsValid);
+    }
+
+    [Fact]
+    public async Task Card_PlanRowShowsTheCarryOver()
+    {
+        var contract = AddEqualizedContract();
+        AddPlan(contract, "2026-07-01", 30m, carryOver: -4m);
+
+        var vm = await OpenContractAsync(contract);
+
+        Assert.Equal(
+            "EqPlanRow 01.07.2026|30.00\u00A0Currency_Symbol_EUR [en] [en] EqPlanRowCarryOver -4.00\u00A0Currency_Symbol_EUR [en] [en]",
+            Assert.Single(vm.PlanRows).DisplayText);
+    }
+
+    [Fact]
+    public async Task AddPlan_SavesTheOptionalSignedCarryOver_AndRejectsNonsense()
+    {
+        var contract = AddEqualizedContract();
+        var vm = await OpenContractAsync(contract);
+        EqualizedPlanEditorViewModel? dialogSeen = null;
+        _kit.Kit.Dialogs.EditorScript = e =>
+        {
+            var dialog = dialogSeen = (EqualizedPlanEditorViewModel)e;
+            Assert.Equal(string.Empty, dialog.CarryOverText);
+            dialog.AmountText = "30";
+            dialog.CarryOverText = "x";
+            dialog.SaveCommand.Execute(null);
+            Assert.NotEqual(string.Empty, dialog.CarryOverError);
+            dialog.CarryOverText = "-4.00";
+            dialog.SaveCommand.Execute(null);
+        };
+
+        await vm.AddPlanCommand.ExecuteAsync(null);
+
+        Assert.Equal(string.Empty, dialogSeen!.CarryOverError);
+        Assert.Equal(-4m, Assert.Single(_kit.Kit.Plans.Stored).CarryOverMonthly);
+    }
+
+    [Fact]
+    public async Task AddPlan_WithoutACarryOverStoresNull()
+    {
+        var contract = AddEqualizedContract();
+        var vm = await OpenContractAsync(contract);
+        _kit.Kit.Dialogs.EditorScript = e =>
+        {
+            var dialog = (EqualizedPlanEditorViewModel)e;
+            dialog.AmountText = "30";
+            dialog.SaveCommand.Execute(null);
+        };
+
+        await vm.AddPlanCommand.ExecuteAsync(null);
+
+        Assert.Null(Assert.Single(_kit.Kit.Plans.Stored).CarryOverMonthly);
+    }
+
+    [Fact]
+    public async Task Page_ShowsTheCarryOverOfAMonthAsASecondLine()
+    {
+        var contract = AddEqualizedContract();
+        AddPlan(contract, "2026-10-01", 40m, carryOver: -4m);
+        AddEqualizedBill(contract, new YearMonth(2026, 10), 40m);
+
+        var vm = await OpenSettlementAsync(contract);
+
+        var row = Assert.Single(vm.Rows);
+        Assert.Equal("EqRowCarryOver -4.00\u00A0Currency_Symbol_EUR [en] [en]", row.CarryOverText);
+        Assert.True(row.HasCarryOver);
+        Assert.Equal("+1.10\u00A0Currency_Symbol_EUR [en]", row.DifferenceText);
     }
 
     [Fact]

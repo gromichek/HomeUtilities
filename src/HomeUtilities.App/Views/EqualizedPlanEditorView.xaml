@@ -40,6 +40,12 @@
             <Label Text="{Binding AmountError}" Style="{StaticResource ErrorLabel}"
                    IsVisible="{Binding AmountError, Converter={StaticResource HasText}}" />
 
+            <Label Text="{Binding CarryOverLabel}" Style="{StaticResource MutedLabel}" />
+            <Entry Text="{Binding CarryOverText}" MaxLength="{x:Static core:InputLimits.Number}" Keyboard="Text" />
+            <Label Text="{Binding CarryOverHint}" Style="{StaticResource MutedLabel}" />
+            <Label Text="{Binding CarryOverError}" Style="{StaticResource ErrorLabel}"
+                   IsVisible="{Binding CarryOverError, Converter={StaticResource HasText}}" />
+
             <Label Text="{Binding NoteLabel}" Style="{StaticResource MutedLabel}" />
             <Entry Text="{Binding Note}" MaxLength="{x:Static core:InputLimits.Notes}" />
             <Label Text="{Binding NoteError}" Style="{StaticResource ErrorLabel}"
