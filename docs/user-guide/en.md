@@ -785,6 +785,25 @@ When the supplier sends the settlement, press **Enter settlement bill**: a new b
 month opens, with the expected amount as a hint in the empty *Total* field (it is not filled in — type what the supplier
 billed; a refund is a negative amount). After you save it, the next settlement period starts with the following month.
 
+**A supplier without a settlement bill (the difference moves into next year's payments).** Some suppliers never send a
+settlement bill. Their equalized year runs, for example, July – June; the difference of the year (actual cost − forecast) is
+divided by 12 and **added to the monthly payment of the next year** as a printed line "difference from the previous period"
+(positive = you still owe, negative = a refund). The amount to pay therefore already contains it. Left as it is, the app
+would count last year's refund as a new underpayment. Tell it about the line instead:
+
+1. In the plan version enter the *Monthly amount* (the amount to pay) and, in **Carry-over from the previous period, € per
+   month**, the supplier's line with its sign (minus = refund of an overpayment, plus = surcharge). The plan row then reads
+   e.g. *from 01.07.2026 — 30,00 €/month (incl. carry-over -4,00 €)*.
+2. Enter the monthly bills with the amount to pay, as before.
+3. For the last month of each equalized year (e.g. 06.2026) enter a bill of kind *Settlement (annual reconciliation)* with a
+   **Total of 0,00 €**. It needs no payment, creates no reminder and leaves the balance unchanged, but it ends the period: the
+   next one starts with the following month.
+
+In the settlement the billed amount of a month counts **without** the carry-over: difference = actual − (billed − carry-over).
+The month row shows a second line *carry-over -4,00 €*. Example (invented): forecast 34,00, carry-over −4,00 → amount to pay
+30,00; the readings of the month cost 36,50 → difference 36,50 − (30,00 − (−4,00)) = **+2,50 €** (without the carry-over the
+app would show +6,50 €). The expected settlement on the contract card, on the Overview and on [Charges](#12-charges) uses the same value.
+
 ## 17. Property tax
 
 Property tax (land, building) is assessed **once a year** and paid in **installments** with fixed due dates. Make a contract
