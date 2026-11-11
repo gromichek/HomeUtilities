@@ -43,6 +43,7 @@ public static class ContractValidator
 
         CheckDay(errors, contract.ReadingDayFrom, nameof(Contract.ReadingDayFrom));
         CheckDay(errors, contract.ReadingDayTo, nameof(Contract.ReadingDayTo));
+        CheckDay(errors, contract.ReadingReminderDay, nameof(Contract.ReadingReminderDay));
         CheckDay(errors, contract.BillDay, nameof(Contract.BillDay));
         CheckDay(errors, contract.PaymentDueDay, nameof(Contract.PaymentDueDay));
 

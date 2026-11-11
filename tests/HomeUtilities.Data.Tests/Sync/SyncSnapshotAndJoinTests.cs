@@ -191,6 +191,11 @@ public class SyncSnapshotAndJoinTests
             var carryOvers = await received.EqualizedPlans.Where(p => p.CarryOverMonthly != null).Select(p => p.CarryOverMonthly).ToListAsync();
             Assert.Equal([HomeUtilities.Data.Sample.SampleDataGenerator.SampleCarryOver], carryOvers);
             Assert.Equal(await sent.EqualizedPlans.CountAsync(), await received.EqualizedPlans.CountAsync());
+
+            // The sample contract with its own reminder day (T-047) travels through the snapshot with its value.
+            var sentDays = await sent.Contracts.Where(c => c.ReadingReminderDay != null).Select(c => c.ReadingReminderDay).ToListAsync();
+            Assert.Single(sentDays);
+            Assert.Equal(sentDays, await received.Contracts.Where(c => c.ReadingReminderDay != null).Select(c => c.ReadingReminderDay).ToListAsync());
         }
 
         // The same through change files only: Merge from the changes of a device that never wrote a snapshot of that data.

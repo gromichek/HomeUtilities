@@ -271,7 +271,12 @@ Open a property → card **Contracts** → **Add contract**.
 - **Reading submission window:** the days of the month when the supplier accepts readings, e.g. 25–28. A window
   like 28–3 continues into the next month. The Readings screen uses it to show "open now / opens in N days".
   The switch **Remind me about readings** (on by default) under the days decides whether the [reminders](#reminders)
-  announce the opening of this window; switch it off for a contract whose readings you never submit by a date.
+  announce this window; switch it off for a contract whose readings you never submit by a date. With the switch on, the
+  choice field **Reminder day** appears: **On the first day of the window** (default) or one of the days of the window, listed in
+  window order (28–3 gives 28, 29, 30, 31, 1, 2, 3). The 31st is listed, but in a shorter month the reminder comes on the
+  last day of that month. If you later change the window so that the chosen day is no longer in it, the contract is saved
+  with "On the first day of the window". Each contract has its own day and its own notification, so two contracts of one
+  property can remind you on different days.
 - **Payment details / Links:** leave a field empty to use the supplier's value. "Effective payment details" shows
   the result, including the payment purpose filled with this contract's numbers.
 - **Tariff:** the priced components of this contract (see [Tariffs](#11-tariffs)). Available after the contract is
@@ -1008,11 +1013,12 @@ the settings of that section. On a wide window the rows are in two or three colu
 **Settings → Reminders** (a page with switches, the time of day and the buttons below) makes the app remind you of the same things that are on the Overview [To do](#to-do) list, even when
 the app is closed (Android). Each reminder is a notification; tapping it opens the right screen.
 
-- **Submit readings** — on the first day of the reading window of a contract (see [Contracts](#7-contracts)), at the set
-  time. Contracts of one property with the same window give one notification. Nothing is sent if the readings of that window
-  are already entered, or if the contract has **Remind me about readings** switched off. If the readings are still missing on
-  the **last day** of the window, a second notification "Last day to submit readings to …" comes at the same time of day
-  (a one-day window has only one); once you enter the readings, it disappears.
+- **Submit readings** — on the **Reminder day** of the reading window of a contract (by default its first day; see
+  [Contracts](#7-contracts)), at the set time. Every contract gets **its own notification** ("Submit readings", with the
+  property, the contract and the last day), even when several contracts of one property have the same window. Nothing is sent if the
+  readings of that window are already entered, or if the contract has **Remind me about readings** switched off. If the readings are
+  still missing on the **last day** of the window and the chosen day is not the last day itself, a second notification "Last day
+  to submit readings: …" comes at the same time of day (a one-day window has only one); once you enter the readings, it disappears.
 - **Bills and tax installments due** — a few days before the due date (the setting *Remind about a bill … days before it is
   due*, 0–14, default 2; a [template](#14-bill-templates-and-drafts) can have its own number) and again on the due day. Only
   open bills are reminded: a paid bill, a draft or a bill without a due date is not.

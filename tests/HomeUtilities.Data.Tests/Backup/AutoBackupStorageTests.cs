@@ -177,6 +177,49 @@ public class AutoBackupStorageTests
     }
 
     [Fact]
+    public async Task A_database_from_before_the_reading_reminder_day_migrates_with_a_null_day()
+    {
+        // An old backup restores into a database without Contracts.ReadingReminderDay; the startup migration adds it (T-047).
+        using var device = new BackupFixture();
+        var factory = device.Get<IDbContextFactory<HomeUtilitiesDbContext>>();
+        await using (var db = await factory.CreateDbContextAsync())
+        {
+            db.GetService<IMigrator>().Migrate("20261111120000_AddEqualizedCarryOver");
+            Assert.DoesNotContain("ReadingReminderDay", await ColumnsOfAsync(db, "Contracts"));
+        }
+
+        await using (var db = await factory.CreateDbContextAsync())
+        {
+            await db.Database.MigrateAsync();
+            Assert.Contains("ReadingReminderDay", await ColumnsOfAsync(db, "Contracts"));
+            Assert.Empty(await db.Contracts.Where(c => c.ReadingReminderDay != null).ToListAsync());
+        }
+    }
+
+    private static async Task<List<string>> ColumnsOfAsync(HomeUtilitiesDbContext db, string table)
+    {
+        var connection = db.Database.GetDbConnection();
+        await connection.OpenAsync();
+        try
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = $"SELECT name FROM pragma_table_info('{table}')";
+            await using var reader = await command.ExecuteReaderAsync();
+            var names = new List<string>();
+            while (await reader.ReadAsync())
+            {
+                names.Add(reader.GetString(0));
+            }
+
+            return names;
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
+    }
+
+    [Fact]
     public async Task A_new_or_up_to_date_database_makes_no_migration_copy()
     {
         using var device = new BackupFixture();

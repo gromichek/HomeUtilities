@@ -85,6 +85,10 @@ public class SampleDataGeneratorTests
         Assert.Contains(contracts, c => c.Service == ServiceKind.InternetTv && c.BillingTiming == HomeUtilities.Core.Billing.BillingTiming.InAdvance);
         Assert.Contains(contracts, c => c is { ReadingDayFrom: 25, ReadingDayTo: 28 });
         Assert.Contains(contracts, c => c is { ReadingDayFrom: 28, ReadingDayTo: 3 });
+
+        // One contract has its own reminder day, a day of its window (T-047).
+        var withDay = Assert.Single(contracts, c => c.ReadingReminderDay is not null);
+        Assert.True(ReadingWindow.Contains(withDay.ReadingDayFrom!.Value, withDay.ReadingDayTo!.Value, withDay.ReadingReminderDay!.Value));
     }
 
     [Fact]

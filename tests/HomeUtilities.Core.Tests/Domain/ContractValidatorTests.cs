@@ -86,6 +86,7 @@ public class ContractValidatorTests
     [Theory]
     [InlineData("ReadingDayFrom", 0)]
     [InlineData("ReadingDayTo", 32)]
+    [InlineData("ReadingReminderDay", 32)]
     [InlineData("BillDay", -1)]
     [InlineData("PaymentDueDay", 32)]
     public void Day_out_of_range_fails(string field, int day)

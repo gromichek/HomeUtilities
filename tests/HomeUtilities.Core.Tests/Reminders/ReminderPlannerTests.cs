@@ -59,8 +59,8 @@ public class ReminderPlannerTests
         Assert.Equal(At(10, 25, 10, 30), reminder.At);
         Assert.Equal(ReminderKind.SubmitReadings, reminder.Kind);
         Assert.Equal("ReminderReadingsBody", reminder.Body.Key);
-        Assert.Equal(["Flat", "Water", 25, 28], reminder.Body.Args);
-        Assert.Equal($"readings:{scenario.Flat.Id}:2026-10-25", reminder.Key);
+        Assert.Equal(["Flat", "Water", 28], reminder.Body.Args);
+        Assert.Equal($"readings:{water.Id}:2026-10-25", reminder.Key);
         Assert.Equal(ReminderRoutes.ReadingsFor, reminder.Target.Route);
         Assert.Equal("2026-10-25", reminder.Target.Parameters["date"]);
         Assert.Equal(scenario.Flat.Id.ToString(), reminder.Target.Parameters["propertyId"]);
@@ -79,7 +79,7 @@ public class ReminderPlannerTests
     }
 
     [Fact]
-    public void Contracts_of_one_property_with_the_same_window_are_merged()
+    public void Contracts_of_one_property_with_the_same_window_get_one_notification_each()
     {
         var scenario = new OverviewScenario();
         var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
@@ -89,8 +89,11 @@ public class ReminderPlannerTests
 
         var plan = Plan(scenario, Now(10, 20), horizon: 6);
 
-        var reminder = Assert.Single(plan);
-        Assert.Equal("Gas, Water", reminder.Body.Args[1]);
+        Assert.Equal(2, plan.Count);
+        Assert.Equal([At(10, 25), At(10, 25)], plan.Select(r => r.At));
+        Assert.Equal(2, plan.Select(r => r.Key).Distinct().Count());
+        Assert.Equal(["Gas", "Water"], plan.Select(r => (string)r.Body.Args[1]).Order());
+        Assert.Equal([$"readings:{gas.Id}:2026-10-25", $"readings:{water.Id}:2026-10-25"], plan.Select(r => r.Key).OrderBy(k => k.Contains(gas.Id.ToString(), StringComparison.Ordinal) ? 0 : 1));
     }
 
     [Fact]
@@ -167,17 +170,15 @@ public class ReminderPlannerTests
     {
         var scenario = new OverviewScenario();
         var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
-        var gas = scenario.AddContract("Gas", windowFrom: 25, windowTo: 28);
         scenario.AddMeter(water);
-        scenario.AddMeter(gas, "Boiler");
 
         // Window 25-28 Oct planned on 20 Oct: the first day and the last day.
         var plan = Plan(scenario, Now(10, 20), horizon: 10);
 
         Assert.Equal([At(10, 25), At(10, 28)], plan.Select(r => r.At));
-        Assert.Equal([$"readings:{scenario.Flat.Id}:2026-10-25", $"readings:{scenario.Flat.Id}:2026-10-25:last"], plan.Select(r => r.Key));
+        Assert.Equal([$"readings:{water.Id}:2026-10-25", $"readings:{water.Id}:2026-10-25:last"], plan.Select(r => r.Key));
         Assert.Equal("ReminderReadingsLastDayBody", plan[1].Body.Key);
-        Assert.Equal(["Gas, Water"], plan[1].Body.Args);
+        Assert.Equal(["Flat", "Water"], plan[1].Body.Args);
         Assert.Equal(ReminderRoutes.ReadingsFor, plan[1].Target.Route);
         Assert.Equal("2026-10-25", plan[1].Target.Parameters["date"]);
     }
@@ -226,6 +227,134 @@ public class ReminderPlannerTests
         var reminder = Assert.Single(plan);
         Assert.Equal(At(10, 25), reminder.At);
         Assert.Equal("ReminderReadingsBody", reminder.Body.Key);
+    }
+
+    // ---- Reminder day inside the window (T-047) -------------------------------------------------------------------
+
+    [Fact]
+    public void Chosen_day_is_the_reminder_day_and_the_last_day_stays()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        water.ReadingReminderDay = 26;
+        scenario.AddMeter(water);
+
+        // Window 25-28 Nov: reminder on 26 Nov 09:00, last-day reminder on 28 Nov.
+        var plan = Plan(scenario, Now(11, 20), horizon: 12);
+
+        Assert.Equal([At(11, 26), At(11, 28)], plan.Select(r => r.At));
+        Assert.Equal(["ReminderReadingsBody", "ReminderReadingsLastDayBody"], plan.Select(r => r.Body.Key));
+        Assert.Equal([$"readings:{water.Id}:2026-11-25", $"readings:{water.Id}:2026-11-25:last"], plan.Select(r => r.Key));
+    }
+
+    [Fact]
+    public void Readings_entered_between_the_reminder_day_and_the_last_day_remove_the_last_day_reminder()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        water.ReadingReminderDay = 26;
+        scenario.AddMeter(water, "Kitchen", D(11, 27));
+
+        Assert.Empty(Plan(scenario, Now(11, 26, 8), horizon: 12));
+    }
+
+    [Fact]
+    public void Last_day_as_the_chosen_day_gives_one_reminder()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        water.ReadingReminderDay = 28;
+        scenario.AddMeter(water);
+
+        var reminder = Assert.Single(Plan(scenario, Now(11, 20), horizon: 12));
+
+        Assert.Equal(At(11, 28), reminder.At);
+        Assert.Equal("ReminderReadingsBody", reminder.Body.Key);
+    }
+
+    [Fact]
+    public void Chosen_day_before_the_start_day_of_a_window_crossing_the_month_end_is_in_the_next_month()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 28, windowTo: 3);
+        water.ReadingReminderDay = 1;
+        scenario.AddMeter(water);
+
+        // Window 28 Nov - 3 Dec: reminder on 1 Dec, last day 3 Dec.
+        var plan = Plan(scenario, Now(11, 20), horizon: 20);
+
+        Assert.Equal([At(12, 1), At(12, 3)], plan.Select(r => r.At).Where(at => at.Month == 12).Take(2));
+        Assert.DoesNotContain(plan, r => r.At == At(11, 28));
+    }
+
+    [Fact]
+    public void Chosen_day_at_or_after_the_start_day_is_in_the_start_month()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 28, windowTo: 3);
+        water.ReadingReminderDay = 30;
+        scenario.AddMeter(water);
+
+        var plan = Plan(scenario, Now(11, 20), horizon: 15);
+
+        Assert.Equal([At(11, 30), At(12, 3)], plan.Select(r => r.At));
+    }
+
+    [Fact]
+    public void Chosen_day_beyond_the_month_length_falls_on_the_last_day_of_the_month()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 28, windowTo: 3);
+        water.ReadingReminderDay = 30;
+        scenario.AddMeter(water);
+
+        // February 2027 has 28 days: the window starts on 28 Feb and the 30th falls on 28 Feb.
+        var plan = ReminderPlanner.Plan(scenario.Data, On, new DateTime(2027, 2, 20, 7, 0, 0), 12);
+
+        Assert.Equal(new DateTime(2027, 2, 28, 9, 0, 0), plan[0].At);
+        Assert.Equal(new DateTime(2027, 3, 3, 9, 0, 0), plan[1].At);
+    }
+
+    [Fact]
+    public void No_chosen_day_means_the_first_day_of_the_window()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        Assert.Null(water.ReadingReminderDay);
+        scenario.AddMeter(water);
+
+        Assert.Equal([At(11, 25), At(11, 28)], Plan(scenario, Now(11, 20), horizon: 12).Select(r => r.At));
+    }
+
+    [Fact]
+    public void Chosen_day_outside_the_window_after_a_window_change_means_the_first_day()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        water.ReadingReminderDay = 26;
+        water.ReadingDayFrom = 10;
+        water.ReadingDayTo = 14;
+        scenario.AddMeter(water);
+
+        Assert.Equal([At(11, 10), At(11, 14)], Plan(scenario, Now(11, 5), horizon: 12).Select(r => r.At));
+    }
+
+    [Fact]
+    public void Two_contracts_of_one_property_with_different_days_are_planned_separately()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water", windowFrom: 25, windowTo: 28);
+        var gas = scenario.AddContract("Gas", windowFrom: 25, windowTo: 28);
+        water.ReadingReminderDay = 26;
+        gas.ReadingReminderDay = 27;
+        scenario.AddMeter(water);
+        scenario.AddMeter(gas, "Boiler");
+
+        var plan = Plan(scenario, Now(11, 20), horizon: 12);
+
+        Assert.Equal(
+            [(At(11, 26), water.Id), (At(11, 27), gas.Id), (At(11, 28), water.Id), (At(11, 28), gas.Id)],
+            plan.Select(r => (r.At, Guid.Parse(r.Key.Split(':')[1]))).OrderBy(x => x.At).ThenBy(x => x.Item2 == water.Id ? 0 : 1));
     }
 
     // ---- Bills ----------------------------------------------------------------------------------------------------

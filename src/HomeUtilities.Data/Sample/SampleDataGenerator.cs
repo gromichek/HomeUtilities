@@ -96,6 +96,7 @@ public sealed partial class SampleDataGenerator(
         // bill has never been entered and is expected from the 1st, so it always lists "enter the bill".
         cPowerCottage.ReadingDayFrom = Math.Min(_today.Day, 28);
         cPowerCottage.ReadingDayTo = cPowerCottage.ReadingDayFrom + 3;
+        cPowerCottage.ReadingReminderDay = cPowerCottage.ReadingDayFrom + 1;
         cPowerGarage.BillDay = 1;
         foreach (var contract in new[] { cWater, cHeat, cPowerFlat, cWaste, cMaint, cNet, cPowerCottage, cLand, cPowerGarage, cGarageTax })
         {

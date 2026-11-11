@@ -1433,6 +1433,9 @@
   <data name="ReportKindHintUnitCost" xml:space="preserve"><value>Price per unit: cost divided by consumption</value></data>
   <data name="ReportKindHintCalculatedVsBilled" xml:space="preserve"><value>What the app calculated against what the supplier billed</value></data>
   <data name="ContractRemindAboutReadings" xml:space="preserve"><value>Remind me about readings</value></data>
+  <data name="ContractReminderDayLabel" xml:space="preserve"><value>Reminder day</value></data>
+  <data name="ContractReminderDayFirst" xml:space="preserve"><value>On the first day of the window</value></data>
+  <data name="ContractReminderDayHint" xml:space="preserve"><value>If there are no readings by the last day, one more reminder comes.</value></data>
   <data name="SettingsReminders" xml:space="preserve"><value>Reminders</value></data>
   <data name="SettingsRemindersHint" xml:space="preserve"><value>The app reminds you about readings, bills, meter verification and drafts, also when it is closed (Android), at the time of day you set.</value></data>
   <data name="SettingsRemindersEnabled" xml:space="preserve"><value>Remind me</value></data>
@@ -1467,8 +1470,8 @@
   <data name="ReminderReason_LeavingApp" xml:space="preserve"><value>leaving the app</value></data>
   <data name="ReminderLeadDays" xml:space="preserve"><value>Remind about a bill {0} day(s) before it is due (0 = on the due day only)</value></data>
   <data name="ReminderReadingsTitle" xml:space="preserve"><value>Submit readings</value></data>
-  <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — the reading window is open, days {2}–{3}.</value></data>
-  <data name="ReminderReadingsLastDayBody" xml:space="preserve"><value>Last day to submit readings to {0}</value></data>
+  <data name="ReminderReadingsBody" xml:space="preserve"><value>{0}: {1} — submit readings by day {2}.</value></data>
+  <data name="ReminderReadingsLastDayBody" xml:space="preserve"><value>Last day to submit readings: {0}: {1}</value></data>
   <data name="ReminderBillTitle" xml:space="preserve"><value>Bill due</value></data>
   <data name="ReminderTaxTitle" xml:space="preserve"><value>Tax installment due</value></data>
   <data name="ReminderBillBodyToday" xml:space="preserve"><value>{0}: {1:N2} {2} is due today.</value></data>
