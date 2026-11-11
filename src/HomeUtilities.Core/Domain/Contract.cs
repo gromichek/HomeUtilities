@@ -64,6 +64,11 @@ public class Contract : SyncEntity
     /// <summary>Whether the reminders announce the opening of the reading window (on by default).</summary>
     public bool RemindAboutReadings { get; set; } = true;
 
+    /// <summary>
+    /// Day of the month the reading reminder is shown; it must be a day of the reading window. Null = the first day of the window.
+    /// </summary>
+    public int? ReadingReminderDay { get; set; }
+
     /// <summary>Custom fields that reappear on every bill of the contract.</summary>
     public List<CustomFieldDefinition> CustomFields { get; set; } = [];
 
@@ -113,5 +118,20 @@ public class Contract : SyncEntity
         }
 
         return ReadingWindow.For(period, from, to);
+    }
+
+    /// <summary>
+    /// The date the reading reminder of the window of <paramref name="period"/> is shown: <see cref="ReadingReminderDay"/> inside
+    /// that window (clamped to the month length), or the first day of the window if no day is set or the day is not a day of the
+    /// window. Null if the contract has no reading window.
+    /// </summary>
+    public DateOnly? GetReadingReminderDate(YearMonth period)
+    {
+        if (ReadingDayFrom is not { } from || ReadingDayTo is not { } to)
+        {
+            return null;
+        }
+
+        return ReadingWindow.ReminderDate(period, from, to, ReadingReminderDay);
     }
 }

@@ -60,6 +60,26 @@ public class InterceptorTests
     }
 
     [Fact]
+    public async Task Contract_reading_reminder_day_defaults_to_null_and_is_stored()
+    {
+        using var test = new TestDb();
+        var (property, supplier, category) = Basics();
+        var contract = new Contract { PropertyId = property.Id, SupplierId = supplier.Id, CategoryId = category.Id, Title = "Water", ValidFrom = new DateOnly(2026, 1, 1), ReadingDayFrom = 25, ReadingDayTo = 28 };
+        var plain = new Contract { PropertyId = property.Id, SupplierId = supplier.Id, CategoryId = category.Id, Title = "Gas", ValidFrom = new DateOnly(2026, 1, 1) };
+        Assert.Null(contract.ReadingReminderDay);
+        contract.ReadingReminderDay = 26;
+        await using (var db = test.NewContext())
+        {
+            db.AddRange(property, supplier, category, contract, plain);
+            await db.SaveChangesAsync();
+        }
+
+        await using var read = test.NewContext();
+        var days = await read.Contracts.AsNoTracking().OrderBy(c => c.Title).Select(c => c.ReadingReminderDay).ToListAsync();
+        Assert.Equal([null, 26], days);
+    }
+
+    [Fact]
     public async Task Insert_stamps_both_timestamps()
     {
         using var test = new TestDb();
