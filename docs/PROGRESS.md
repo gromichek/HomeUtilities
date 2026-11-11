@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-047 | Reading reminders: own day per contract, one notification per contract | Ready | | owner 2026-11-11; start after T-046 |
 | T-046 | Equalized payments: carry-over from the previous period (supplier without settlement bill) | Ready | | owner 2026-11-11 |
 
 ## Done
