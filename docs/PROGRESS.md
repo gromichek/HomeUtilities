@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-049 | Overview: compare the same months (up to the last month with bills) | Ready | | owner 2026-11-11 |
 
 ## Done
 
