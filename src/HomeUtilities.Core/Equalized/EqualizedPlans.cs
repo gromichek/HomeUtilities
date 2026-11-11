@@ -28,6 +28,9 @@ public static class EqualizedPlans
     /// <summary>The monthly amount of a month, or null when no plan covers it.</summary>
     public static decimal? AmountFor(IEnumerable<EqualizedPlan> plans, YearMonth month) => For(plans, month)?.MonthlyAmount;
 
+    /// <summary>The monthly carry-over of the plan that covers the month, or null when there is none.</summary>
+    public static decimal? CarryOverFor(IEnumerable<EqualizedPlan> plans, YearMonth month) => For(plans, month)?.CarryOverMonthly;
+
     /// <summary>
     /// The plans that run into <paramref name="candidate"/> and must end the day before it starts: earlier plans that are
     /// open-ended or end on or after the candidate's start. A new plan "from next month" thereby closes the current one.
@@ -53,7 +56,7 @@ public static class EqualizedPlans
         var list = others.Where(p => !p.IsDeleted && p.Id != candidate.Id).ToList();
         var closing = PredecessorsToClose(list, candidate).Select(p => p.Id).ToHashSet();
         var adjusted = list.Select(p => closing.Contains(p.Id)
-            ? new EqualizedPlan { Id = p.Id, ContractId = p.ContractId, ValidFrom = p.ValidFrom, ValidTo = candidate.ValidFrom.AddDays(-1), MonthlyAmount = p.MonthlyAmount }
+            ? new EqualizedPlan { Id = p.Id, ContractId = p.ContractId, ValidFrom = p.ValidFrom, ValidTo = candidate.ValidFrom.AddDays(-1), MonthlyAmount = p.MonthlyAmount, CarryOverMonthly = p.CarryOverMonthly }
             : p);
         return EqualizedPlanValidator.ValidateSet([.. adjusted, candidate]);
     }

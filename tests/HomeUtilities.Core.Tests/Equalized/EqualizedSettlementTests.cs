@@ -19,6 +19,13 @@ public class EqualizedSettlementTests
         MonthlyAmount = amount,
     };
 
+    private static EqualizedPlan PlanWithCarryOver(string from, decimal amount, decimal carryOver, string? to = null)
+    {
+        var plan = Plan(from, amount, to);
+        plan.CarryOverMonthly = carryOver;
+        return plan;
+    }
+
     private static Bill Billed(YearMonth period, decimal gross, BillKind kind = BillKind.Equalized)
     {
         var bill = BillFor(Contract(BillingMode.Equalized), gross, period);
@@ -136,5 +143,101 @@ public class EqualizedSettlementTests
         var bills = new[] { Billed(new YearMonth(2026, 10), 5m, BillKind.Settlement) };
         var (from, to) = EqualizedSettlement.Range([], bills, new YearMonth(2026, 10));
         Assert.Equal((to, to), (from, to));
+    }
+
+    // ---- Carry-over from the previous period (T-046) ------------------------------------------------------------------
+
+    [Fact]
+    public void Carry_over_refund_is_taken_out_of_the_billed_amount()
+    {
+        // plan 30,00 includes the carry-over -4,00; billed 30,00; actual 36,50; 36,50 - (30,00 - (-4,00)) = +2,50 (old rule: +6,50)
+        var result = EqualizedSettlement.Calculate(
+            [PlanWithCarryOver("2026-06-01", 30m, -4m)], [Billed(June, 30m)], Actuals((June, 36.50m, true)), June, June);
+
+        var month = Assert.Single(result.Months);
+        Assert.Equal((30m, -4m, 2.50m), (month.Billed, month.CarryOver, month.Difference));
+        Assert.Equal((30m, -4m, 2.50m), (result.TotalBilled, result.TotalCarryOver, result.Expected));
+    }
+
+    [Fact]
+    public void Carry_over_surcharge_is_taken_out_of_the_billed_amount()
+    {
+        // plan 40,00 includes the carry-over +1,50; billed 40,00; actual 37,00; 37,00 - (40,00 - 1,50) = -1,50
+        var result = EqualizedSettlement.Calculate(
+            [PlanWithCarryOver("2026-06-01", 40m, 1.50m)], [Billed(June, 40m)], Actuals((June, 37m, true)), June, June);
+
+        Assert.Equal(-1.50m, result.Months[0].Difference);
+        Assert.Equal(-1.50m, result.Expected);
+    }
+
+    [Fact]
+    public void Twelve_months_with_a_carry_over_expect_actual_minus_billed_plus_the_refund()
+    {
+        // plan 30,00 incl. -4,00 for 12 months: billed 360,00; actual 33 + 35 + ... + 55 = 12 x 44 = 528,00
+        // expected = 528,00 - (360,00 + 12 x 4,00) = 528,00 - 408,00 = +120,00 (old rule: +168,00)
+        var start = new YearMonth(2026, 7);
+        var bills = Enumerable.Range(0, 12).Select(i => Billed(start.AddMonths(i), 30m)).ToList();
+        var actual = Actuals([.. Enumerable.Range(0, 12).Select(i => (start.AddMonths(i), 33m + 2 * i, true))]);
+
+        var result = EqualizedSettlement.Calculate(
+            [PlanWithCarryOver("2026-07-01", 30m, -4m)], bills, actual, start, start.AddMonths(11));
+
+        Assert.Equal((360m, 528m, -48m), (result.TotalBilled, result.TotalActual, result.TotalCarryOver));
+        Assert.Equal(120m, result.Expected);
+        Assert.Equal(120m, result.Months[^1].RunningTotal);
+    }
+
+    [Fact]
+    public void Plan_versions_with_different_carry_overs_apply_per_month_and_a_month_without_one_is_unchanged()
+    {
+        // 06: plan 40,00 without carry-over: 45,00 - 40,00 = +5,00
+        // 07: plan 30,00 with -4,00:        36,00 - 34,00 = +2,00
+        // 08: plan 32,00 with +1,00 (new version): 30,00 - 31,00 = -1,00
+        var plans = new[]
+        {
+            Plan("2026-06-01", 40m, "2026-06-30"),
+            PlanWithCarryOver("2026-07-01", 30m, -4m, "2026-07-31"),
+            PlanWithCarryOver("2026-08-01", 32m, 1m),
+        };
+        var bills = new[] { Billed(June, 40m), Billed(June.AddMonths(1), 30m), Billed(June.AddMonths(2), 32m) };
+        var actual = Actuals((June, 45m, true), (June.AddMonths(1), 36m, true), (June.AddMonths(2), 30m, true));
+
+        var result = EqualizedSettlement.Calculate(plans, bills, actual, June, June.AddMonths(2));
+
+        Assert.Equal([5m, 2m, -1m], result.Months.Select(m => m.Difference!.Value));
+        Assert.Equal([null, -4m, 1m], result.Months.Select(m => m.CarryOver));
+        Assert.Equal(6m, result.Expected);
+    }
+
+    [Fact]
+    public void A_month_without_a_bill_does_not_count_a_carry_over()
+    {
+        // nothing billed for 06, so nothing was paid and no carry-over was included
+        var result = EqualizedSettlement.Calculate(
+            [PlanWithCarryOver("2026-06-01", 30m, -4m)], [], Actuals((June, 36m, true)), June, June);
+
+        Assert.Null(result.Months[0].CarryOver);
+        Assert.Equal(36m, result.Expected);
+    }
+
+    [Fact]
+    public void An_incomplete_month_leaves_the_carry_over_out_of_the_totals()
+    {
+        var result = EqualizedSettlement.Calculate(
+            [PlanWithCarryOver("2026-06-01", 30m, -4m)], [Billed(June, 30m)], Actuals((June, 10m, false)), June, June);
+
+        Assert.Equal((0m, 0m), (result.TotalBilled, result.TotalCarryOver));
+        Assert.Equal(0m, result.Expected);
+    }
+
+    [Fact]
+    public void A_settlement_bill_of_zero_starts_the_next_period_after_it()
+    {
+        var plans = new[] { PlanWithCarryOver("2026-07-01", 30m, -4m) };
+        var bills = new[] { Billed(June, 0m, BillKind.Settlement), Billed(June.AddMonths(1), 30m) };
+
+        var (from, to) = EqualizedSettlement.Range(plans, bills, November);
+
+        Assert.Equal((new YearMonth(2026, 7), November), (from, to));
     }
 }

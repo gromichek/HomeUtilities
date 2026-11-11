@@ -25,6 +25,19 @@ public class BillValidatorTests
     }
 
     [Fact]
+    public void A_settlement_bill_of_zero_is_valid_and_fully_paid()
+    {
+        // Suppliers that carry the yearly difference into the next year's payments send no settlement bill: the owner enters 0,00.
+        var contract = Contract();
+        var bill = BillFor(contract, 0m);
+        bill.Kind = BillKind.Settlement;
+
+        Assert.True(BillValidator.Validate(bill, contract).IsValid);
+        var state = BillStatus.Of(bill, [], new DateOnly(2026, 7, 15));
+        Assert.Equal((0m, 0m, true, false), (state.Paid, state.Open, state.IsPaid, state.IsOverdue));
+    }
+
+    [Fact]
     public void Valid_one_off_passes()
     {
         var bill = Bill.CreateOneOff(Guid.CreateVersion7(), Guid.CreateVersion7(), "Repair", new YearMonth(2026, 10), Clock);

@@ -13,6 +13,9 @@ public sealed partial class SampleDataGenerator
     /// <summary>Months of equalized bills (the twelve months before the current one).</summary>
     public const int EqualizedBillMonths = 12;
 
+    /// <summary>The refund of last year's overpayment contained in every monthly amount of the second plan (negative = refund).</summary>
+    public const decimal SampleCarryOver = -1m;
+
     /// <summary>The first plan ends and the second starts this many months ago.</summary>
     private const int PlanChangeMonthsAgo = 6;
 
@@ -47,7 +50,7 @@ public sealed partial class SampleDataGenerator
         EqualizedPlan[] plans =
         [
             new() { ContractId = contract.Id, ValidFrom = current.AddMonths(-18).FirstDay, ValidTo = changeMonth.AddMonths(-1).LastDay, MonthlyAmount = earlier, Notes = "Invented sample plan." },
-            new() { ContractId = contract.Id, ValidFrom = changeMonth.FirstDay, MonthlyAmount = recent, Notes = "Amount raised after the yearly review (invented)." },
+            new() { ContractId = contract.Id, ValidFrom = changeMonth.FirstDay, MonthlyAmount = recent, CarryOverMonthly = SampleCarryOver, Notes = "Amount raised after the yearly review; includes last year's difference (invented)." },
         ];
         foreach (var plan in plans)
         {
