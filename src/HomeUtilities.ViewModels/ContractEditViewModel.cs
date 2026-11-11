@@ -35,7 +35,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
     [
         nameof(ContractTitle), nameof(SelectedService), nameof(SelectedCategory), nameof(SelectedSupplier), nameof(SelectedCurrency),
         nameof(IsArchived), nameof(CustomerNumber), nameof(ContractNumber), nameof(PortalLogin), nameof(ValidFrom),
-        nameof(HasEndDate), nameof(ValidTo), nameof(SelectedBillingMode), nameof(SelectedBillingTiming), nameof(VatOnTotal), nameof(HasReadingWindow), nameof(RemindAboutReadings),
+        nameof(HasEndDate), nameof(ValidTo), nameof(SelectedBillingMode), nameof(SelectedBillingTiming), nameof(VatOnTotal), nameof(HasReadingWindow), nameof(RemindAboutReadings), nameof(SelectedReminderDay),
         nameof(ReadingDayFromText), nameof(ReadingDayToText), nameof(BillDayText), nameof(PaymentDueDayText),
         nameof(RecipientName), nameof(RecipientRegistrationNumber), nameof(IbanText), nameof(Bic), nameof(BankName),
         nameof(PurposeTemplate), nameof(Notes),
@@ -156,6 +156,17 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
 
     [ObservableProperty]
     private string _remindAboutReadingsLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _reminderDayLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _reminderDayHint = string.Empty;
+
+    /// <summary>The saved reminder day (null = first day of the window); kept even while the window text is being edited.</summary>
+    private int? _reminderDay;
+
+    private IReadOnlyList<EnumOption> _reminderDayOptions = [];
 
     [ObservableProperty]
     private string _readingDayFromText = string.Empty;
@@ -489,6 +500,31 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         set => SelectedBillingMode = Pick(BillingModes, value) ?? SelectedBillingMode;
     }
 
+    /// <summary>
+    /// The choices of the reminder day: the first day of the window (value 0) and one row per day of the window in window order.
+    /// </summary>
+    public IReadOnlyList<EnumOption> ReminderDayOptions => _reminderDayOptions;
+
+    /// <summary>The reminder day as a number (0 = first day of the window); a day outside the window reads as the first day.</summary>
+    public int SelectedReminderDay => ReminderDayOptions.Any(o => o.Value.Equals(_reminderDay ?? 0)) ? _reminderDay ?? 0 : 0;
+
+    public int SelectedReminderDayIndex
+    {
+        get => Math.Max(0, ReminderDayOptions.ToList().FindIndex(o => o.Value.Equals(SelectedReminderDay)));
+        set
+        {
+            if (Pick(ReminderDayOptions, value) is { } option && !option.Value.Equals(SelectedReminderDay))
+            {
+                _reminderDay = (int)option.Value is var day && day > 0 ? day : null;
+                OnPropertyChanged(nameof(SelectedReminderDay));
+                OnPropertyChanged(nameof(SelectedReminderDayIndex));
+            }
+        }
+    }
+
+    /// <summary>The reminder day is offered when the contract has a reading window and reminds about readings.</summary>
+    public bool HasReminderDay => HasReadingWindow && RemindAboutReadings;
+
     public int SelectedBillingTimingIndex
     {
         get => IndexOf(BillingTimings, SelectedBillingTiming);
@@ -606,6 +642,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             VatOnTotal = _contract.VatCalculation == VatCalculation.OnTotal;
             HasReadingWindow = _contract.ReadingDayFrom is not null || _contract.ReadingDayTo is not null;
             RemindAboutReadings = _contract.RemindAboutReadings;
+            _reminderDay = _contract.ReadingReminderDay;
             ReadingDayFromText = _contract.ReadingDayFrom?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
             ReadingDayToText = _contract.ReadingDayTo?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
             BillDayText = _contract.BillDay?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
@@ -1165,6 +1202,16 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             MarkDirty();
         }
 
+        if (name is nameof(HasReadingWindow) or nameof(RemindAboutReadings))
+        {
+            OnPropertyChanged(nameof(HasReminderDay));
+        }
+
+        if (name is nameof(HasReadingWindow) or nameof(ReadingDayFromText) or nameof(ReadingDayToText))
+        {
+            RebuildReminderDayOptions();
+        }
+
         if (name == nameof(SelectedBillingMode))
         {
             OnPropertyChanged(nameof(ShowEqualizedCard));
@@ -1245,6 +1292,9 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             VatOnTotalHint = _localizer["ContractVatOnTotalHint"];
             ReadingWindowLabel = _localizer["ContractReadingWindow"];
             RemindAboutReadingsLabel = _localizer["ContractRemindAboutReadings"];
+            ReminderDayLabel = _localizer["ContractReminderDayLabel"];
+            ReminderDayHint = _localizer["ContractReminderDayHint"];
+            RebuildReminderDayOptions();
             ReadingFromLabel = _localizer["ContractReadingFrom"];
             ReadingToLabel = _localizer["ContractReadingTo"];
             ReadingWindowHint = _localizer["ContractReadingHint"];
@@ -1319,6 +1369,26 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
         {
             SuppressDirty = previous;
         }
+    }
+
+    /// <summary>
+    /// Rebuilds the reminder-day choices from the window days typed so far. The saved day is kept while the window is being
+    /// edited; a day outside the final window reads as "first day" and is saved as null (silently).
+    /// </summary>
+    private void RebuildReminderDayOptions()
+    {
+        var options = new List<EnumOption> { new(0, _localizer["ContractReminderDayFirst"]) };
+        if (HasReadingWindow
+            && int.TryParse(ReadingDayFromText.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var from)
+            && int.TryParse(ReadingDayToText.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var to))
+        {
+            options.AddRange(ReadingWindow.Days(from, to).Select(d => new EnumOption(d, d.ToString(CultureInfo.CurrentCulture))));
+        }
+
+        _reminderDayOptions = options;
+        OnPropertyChanged(nameof(ReminderDayOptions));
+        OnPropertyChanged(nameof(SelectedReminderDay));
+        OnPropertyChanged(nameof(SelectedReminderDayIndex));
     }
 
     private static int IndexOf(IReadOnlyList<EnumOption> options, EnumOption? selected) =>
@@ -1566,6 +1636,7 @@ public sealed partial class ContractEditViewModel : PaneEditorViewModel
             BillingTiming = SelectedBillingTiming?.As<BillingTiming>() ?? BillingTiming.InArrears,
             VatCalculation = VatOnTotal ? VatCalculation.OnTotal : VatCalculation.PerLine,
             RemindAboutReadings = RemindAboutReadings,
+            ReadingReminderDay = HasReadingWindow && SelectedReminderDay > 0 ? SelectedReminderDay : null,
             ReadingDayFrom = HasReadingWindow ? ParseDay(ReadingDayFromText, nameof(Contract.ReadingDayFrom)) : null,
             ReadingDayTo = HasReadingWindow ? ParseDay(ReadingDayToText, nameof(Contract.ReadingDayTo)) : null,
             BillDay = ParseDay(BillDayText, nameof(Contract.BillDay)),

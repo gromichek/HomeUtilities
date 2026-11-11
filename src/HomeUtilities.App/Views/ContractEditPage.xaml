@@ -159,6 +159,13 @@
                         <Switch IsToggled="{Binding RemindAboutReadings}" />
                         <Label Grid.Column="1" Text="{Binding RemindAboutReadingsLabel}" VerticalOptions="Center" />
                     </Grid>
+                    <Label Text="{Binding ReminderDayLabel}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasReminderDay}" />
+                    <views:ChoiceField ItemsSource="{Binding ReminderDayOptions}"
+                            DisplayMember="DisplayName"
+                            SelectedIndex="{Binding SelectedReminderDayIndex, Mode=TwoWay}"
+                            IsVisible="{Binding HasReminderDay}" />
+                    <Label Text="{Binding ReminderDayHint}" Style="{StaticResource MutedLabel}" FontSize="12"
+                           IsVisible="{Binding HasReminderDay}" />
                     <Label Text="{Binding ReadingWindowError}" Style="{StaticResource ErrorLabel}"
                            IsVisible="{Binding ReadingWindowError, Converter={StaticResource HasText}}" />
 

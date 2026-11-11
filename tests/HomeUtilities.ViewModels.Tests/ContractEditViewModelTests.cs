@@ -544,6 +544,103 @@ public class ContractEditViewModelTests
     }
 
     [Fact]
+    public async Task ReminderDay_OffersTheFirstDayAndEveryDayOfTheWindowInWindowOrder()
+    {
+        var vm = await FilledNewAsync();
+        vm.HasReadingWindow = true;
+        vm.ReadingDayFromText = "28";
+        vm.ReadingDayToText = "3";
+
+        Assert.True(vm.HasReminderDay);
+        Assert.Equal(["ContractReminderDayFirst [en]", "28", "29", "30", "31", "1", "2", "3"], vm.ReminderDayOptions.Select(o => o.DisplayName));
+        Assert.Equal([0, 28, 29, 30, 31, 1, 2, 3], vm.ReminderDayOptions.Select(o => (int)o.Value));
+        Assert.Equal(0, vm.SelectedReminderDayIndex);
+    }
+
+    [Fact]
+    public async Task ReminderDay_IsHiddenWithoutAWindowOrWhenTheReminderIsOff()
+    {
+        var vm = await FilledNewAsync();
+        Assert.False(vm.HasReminderDay);
+
+        vm.HasReadingWindow = true;
+        Assert.True(vm.HasReminderDay);
+
+        vm.RemindAboutReadings = false;
+        Assert.False(vm.HasReminderDay);
+    }
+
+    [Fact]
+    public async Task ReminderDay_IsSavedLoadedAndMarksTheEditorDirty()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        (contract.ReadingDayFrom, contract.ReadingDayTo) = (25, 28);
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.False(vm.IsDirty);
+        Assert.Equal(0, vm.SelectedReminderDay);
+
+        vm.SelectedReminderDayIndex = 3; // rows: first day, 25, 26, 27, 28
+        Assert.True(vm.IsDirty);
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        var saved = Assert.Single(_kit.Contracts.Saved);
+        Assert.Equal(27, saved.ReadingReminderDay);
+        var reloaded = _kit.CreateContractEditor();
+        await reloaded.LoadAsync(saved.PropertyId, saved.Id);
+        Assert.Equal(27, reloaded.SelectedReminderDay);
+        Assert.False(reloaded.IsDirty);
+    }
+
+    [Fact]
+    public async Task ReminderDay_ChosenAsTheFirstDayIsSavedAsNull()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        (contract.ReadingDayFrom, contract.ReadingDayTo) = (25, 28);
+        contract.ReadingReminderDay = 26;
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+        Assert.Equal(26, vm.SelectedReminderDay);
+
+        vm.SelectedReminderDayIndex = 0;
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Null(Assert.Single(_kit.Contracts.Saved).ReadingReminderDay);
+    }
+
+    [Fact]
+    public async Task ReminderDay_OutsideTheChangedWindowFallsBackToTheFirstDayOnSave()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        (contract.ReadingDayFrom, contract.ReadingDayTo) = (25, 28);
+        contract.ReadingReminderDay = 26;
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        vm.ReadingDayFromText = "10";
+        vm.ReadingDayToText = "14";
+        Assert.Equal(0, vm.SelectedReminderDay);
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Null(Assert.Single(_kit.Contracts.Saved).ReadingReminderDay);
+    }
+
+    [Fact]
+    public async Task ReminderDay_IsNotSavedWhenTheWindowIsSwitchedOff()
+    {
+        var contract = AddContract(ServiceKind.ColdWater);
+        (contract.ReadingDayFrom, contract.ReadingDayTo) = (25, 28);
+        contract.ReadingReminderDay = 26;
+        var vm = _kit.CreateContractEditor();
+        await vm.LoadAsync(contract.PropertyId, contract.Id);
+
+        vm.HasReadingWindow = false;
+        await vm.SaveCommand.ExecuteAsync(null);
+
+        Assert.Null(Assert.Single(_kit.Contracts.Saved).ReadingReminderDay);
+    }
+
+    [Fact]
     public async Task VatOnTotal_SwitchedOff_SavesPerLine_AndMarksTheEditorDirty()
     {
         var contract = AddContract(ServiceKind.ColdWater);
