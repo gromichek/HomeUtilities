@@ -149,6 +149,58 @@ public class OverviewMoneyTests
     }
 
     [Fact]
+    public void Year_to_date_stops_at_the_last_month_with_a_bill_and_follows_it_when_a_later_bill_comes()
+    {
+        var november = new DateOnly(2026, 11, 11);
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water");
+        // This year January – October: 100 + 200 + 300 = 600. Last year all twelve months, 100 each = 1200.
+        scenario.AddBill(water, 100m, null, new YearMonth(2026, 1));
+        scenario.AddBill(water, 200m, null, new YearMonth(2026, 6));
+        scenario.AddBill(water, 300m, null, new YearMonth(2026, 10));
+        for (var month = 1; month <= 12; month++)
+        {
+            scenario.AddBill(water, 100m, null, new YearMonth(2025, month));
+        }
+
+        // Draft and deleted bills of November do not count.
+        scenario.AddBill(water, 999m, null, new YearMonth(2026, 11)).IsDraft = true;
+        scenario.AddBill(water, 888m, null, new YearMonth(2026, 11)).IsDeleted = true;
+
+        var comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, november));
+
+        // Last year January – October = 10 × 100 = 1000; (600 − 1000) / 1000 = −40 %.
+        Assert.Equal((600m, 1000m, 10, -40m), (comparison.ThisYear, comparison.LastYear, comparison.ThroughMonth, comparison.ChangePercent));
+
+        // A bill for November is entered: both years go through November (700 vs 1100).
+        scenario.AddBill(water, 100m, null, new YearMonth(2026, 11));
+
+        comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, november));
+
+        Assert.Equal((700m, 1100m, 11), (comparison.ThisYear, comparison.LastYear, comparison.ThroughMonth));
+    }
+
+    [Fact]
+    public void Year_to_date_end_month_is_per_property()
+    {
+        var november = new DateOnly(2026, 11, 11);
+        var scenario = new OverviewScenario();
+        var cottage = new Property { Name = "Cottage" };
+        scenario.Properties.Add(cottage);
+        var water = scenario.AddContract("Water");
+        var power = scenario.AddContract("Power", cottage);
+        scenario.AddBill(water, 10m, null, new YearMonth(2026, 10));
+        scenario.AddBill(water, 5m, null, new YearMonth(2025, 10));
+        scenario.AddBill(water, 7m, null, new YearMonth(2025, 11));
+        scenario.AddBill(power, 20m, null, new YearMonth(2026, 11), property: cottage);
+        scenario.AddBill(power, 8m, null, new YearMonth(2025, 11), property: cottage);
+
+        var rows = OverviewMoney.YearToDate(scenario.Data, november);
+
+        Assert.Equal([(10, 5m), (11, 8m)], rows.Select(r => (r.ThroughMonth, r.LastYear)));
+    }
+
+    [Fact]
     public void Settlements_list_every_equalized_contract_with_a_result_even_small_ones()
     {
         var scenario = new OverviewScenario();

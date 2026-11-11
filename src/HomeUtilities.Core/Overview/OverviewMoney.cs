@@ -25,10 +25,11 @@ public sealed record ExpectedSettlement(Guid PropertyId, Guid ContractId, string
 /// <param name="PropertyId">The property.</param>
 /// <param name="Currency">The currency of the amounts.</param>
 /// <param name="Year">This year.</param>
-/// <param name="ThisYear">Gross of the bills with a period from January to the current month of this year.</param>
-/// <param name="LastYear">Gross of the bills with a period in the same months of the year before.</param>
+/// <param name="ThisYear">Gross of the bills with a period from January to <paramref name="ThroughMonth"/> of this year.</param>
+/// <param name="LastYear">Gross of the bills with a period in the same months (January to <paramref name="ThroughMonth"/>) of the year before.</param>
 /// <param name="HasLastYear">Whether there is any bill in those months; without one "0,00" would be a false figure (UI_GUIDELINES §9).</param>
-public sealed record YearComparison(Guid PropertyId, Currency Currency, int Year, decimal ThisYear, decimal LastYear, bool HasLastYear = true)
+/// <param name="ThroughMonth">The last month counted in both years: the last month of this year with a bill (not after the current month).</param>
+public sealed record YearComparison(Guid PropertyId, Currency Currency, int Year, decimal ThisYear, decimal LastYear, bool HasLastYear = true, int ThroughMonth = 12)
 {
     /// <summary>This year against last year in percent, rounded to one decimal; null when last year is zero.</summary>
     public decimal? ChangePercent => LastYear == 0 ? null : Math.Round((ThisYear - LastYear) / LastYear * 100m, 1, MidpointRounding.AwayFromZero);
@@ -112,8 +113,8 @@ public static class OverviewMoney
     }
 
     /// <summary>
-    /// Per property and currency: the gross of the bills of this year from January to the month of <paramref name="today"/> and of
-    /// the same months of last year (by the bill's period, like the period filter of the Bills screen).
+    /// Per property and currency: the gross of the bills of this year from January to the last month that has a bill (at most the month of
+    /// <paramref name="today"/>) and of the same months of last year (by the bill's period, like the period filter of the Bills screen).
     /// </summary>
     public static IReadOnlyList<YearComparison> YearToDate(OverviewData data, DateOnly today)
     {
@@ -126,13 +127,23 @@ public static class OverviewMoney
             foreach (var group in bills.Where(b => b.PropertyId == property.Id && b.Period.Year >= today.Year - 1 && b.Period.Year <= today.Year)
                 .GroupBy(b => b.Currency).OrderBy(g => g.Key))
             {
+                // Bills arrive a month late: both years are counted up to the last month of this year that has a bill.
+                var thisYearBills = group.Where(b => b.Period.Year == today.Year).ToList();
+                if (thisYearBills.Count == 0)
+                {
+                    continue;
+                }
+
+                var throughMonth = thisYearBills.Max(b => b.Period.Month);
+                var lastYearBills = group.Where(b => b.Period.Year == today.Year - 1 && b.Period.Month <= throughMonth).ToList();
                 result.Add(new YearComparison(
                     property.Id,
                     group.Key,
                     today.Year,
-                    group.Where(b => b.Period.Year == today.Year).Sum(b => b.Gross),
-                    group.Where(b => b.Period.Year == today.Year - 1).Sum(b => b.Gross),
-                    group.Any(b => b.Period.Year == today.Year - 1)));
+                    thisYearBills.Sum(b => b.Gross),
+                    lastYearBills.Sum(b => b.Gross),
+                    lastYearBills.Count > 0,
+                    throughMonth));
             }
         }
 

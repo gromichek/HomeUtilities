@@ -29,7 +29,7 @@ public sealed record CategorySlice(Guid? CategoryId, decimal Amount);
 
 /// <summary>What this year cost so far, by category.</summary>
 /// <param name="Year">This year.</param>
-/// <param name="ThroughMonth">The last month counted (the current month), 1–12.</param>
+/// <param name="ThroughMonth">The last month counted: the last month of this year with a bill, at most the current month (1–12).</param>
 /// <param name="Currency">The currency of the amounts.</param>
 /// <param name="Total">Gross of all the bills counted.</param>
 /// <param name="Slices">One slice per category with bills, the largest first; bills without a known category form one last-resort slice with a null id.</param>
@@ -128,7 +128,7 @@ public static class OverviewCharts
     }
 
     /// <summary>
-    /// Gross of the bills from January to the month of <paramref name="today"/> by the bill's category, largest first: one slice
+    /// Gross of the bills from January to the last month that has a bill (at most the month of <paramref name="today"/>) by the bill's category, largest first: one slice
     /// per category, plus one slice (null id) for bills whose category is missing or deleted. Null if there is no bill.
     /// </summary>
     /// <param name="data">The loaded data.</param>
@@ -146,6 +146,7 @@ public static class OverviewCharts
 
         var currency = PrimaryCurrency(bills);
         bills = [.. bills.Where(b => b.Currency == currency)];
+        var throughMonth = bills.Max(b => b.Period.Month);   // bills arrive a month late: stop at the last month with a bill
         var known = data.Categories.Where(c => !c.IsDeleted).Select(c => c.Id).ToHashSet();
         var groups = bills
             .GroupBy(b => known.Contains(b.CategoryId) ? (Guid?)b.CategoryId : null)
@@ -159,7 +160,7 @@ public static class OverviewCharts
             return null;
         }
 
-        return new CategorySpending(today.Year, today.Month, currency, bills.Sum(b => b.Gross), groups);
+        return new CategorySpending(today.Year, throughMonth, currency, bills.Sum(b => b.Gross), groups);
     }
 
     /// <summary>
