@@ -5,7 +5,33 @@ namespace HomeUtilities.ViewModels;
 /// <summary>One part of the stacked bar of the "by category" card.</summary>
 /// <param name="Fraction">Share of the whole, 0–1.</param>
 /// <param name="Color">Colour as <c>#RRGGBB</c> (the category's own colour).</param>
-public sealed record ShareSegment(double Fraction, string Color);
+public sealed record ShareSegment(double Fraction, string Color)
+{
+    /// <summary>The smallest drawn share: 1 % is about 3 dp on a phone bar, so a tiny slice stays visible (at least 2 dp from 200 dp up).</summary>
+    public const double MinVisibleFraction = 0.01;
+
+    /// <summary>The fraction the bar draws: never below <see cref="MinVisibleFraction"/>, so no slice is invisible.</summary>
+    public double VisibleFraction => Math.Max(Fraction, MinVisibleFraction);
+}
+
+/// <summary>Text of a share of the total for the rows of the "by category" card.</summary>
+public static class ShareText
+{
+    /// <summary>"12 %"; "&lt; 1 %" below 0.5 %; empty for no share (zero or negative amounts).</summary>
+    /// <param name="share">Share of the total, 0–1.</param>
+    public static string Format(decimal share)
+    {
+        if (share <= 0m)
+        {
+            return string.Empty;
+        }
+
+        var percent = Math.Round(share * 100m, 0, MidpointRounding.AwayFromZero);
+        return percent < 1m
+            ? $"<{BillText.NonBreakingSpace}1{BillText.NonBreakingSpace}%"
+            : $"{percent.ToString("0", System.Globalization.CultureInfo.CurrentCulture)}{BillText.NonBreakingSpace}%";
+    }
+}
 
 /// <summary>One tappable row of the "by category" card: colour dot, name, amount and share; opens the bills of the category.</summary>
 public sealed class CategoryRowViewModel(string name, string color, string amountText, string shareText, string description, Func<Task> open)

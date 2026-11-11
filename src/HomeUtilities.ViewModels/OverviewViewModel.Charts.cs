@@ -213,10 +213,10 @@ public sealed partial class OverviewViewModel
         foreach (var slice in spending.Slices)
         {
             var category = slice.CategoryId is { } id && categories.TryGetValue(id, out var found) ? found : null;
-            var name = category is null ? _localizer["OverviewCategoryOther"] : CategoryNames.DisplayName(category, _localizer);
+            var name = category is null ? _localizer["OverviewCategoryNone"] : CategoryNames.DisplayName(category, _localizer);
             var color = category?.Color ?? ReportChartBuilder.OtherColor;
             var share = positive > 0 && slice.Amount > 0 ? slice.Amount / positive : 0m;
-            var shareText = share > 0 ? $"{Math.Round(share * 100m, 0, MidpointRounding.AwayFromZero).ToString("0", CultureInfo.CurrentCulture)}{BillText.NonBreakingSpace}%" : string.Empty;
+            var shareText = ShareText.Format(share);
             var amount = BillText.Money(slice.Amount, symbol);
             if (share > 0)
             {
@@ -230,7 +230,7 @@ public sealed partial class OverviewViewModel
                 amount,
                 shareText,
                 shareText.Length > 0 ? $"{name}: {amount}, {shareText}" : $"{name}: {amount}",
-                // "Other" has no single category to filter by: it opens the year's bills.
+                // Bills without a known category have nothing to filter by: the row opens the year's bills.
                 () => RunSafeAsync(() => _navigation.GoToAsync(Routes.BillsFor, BillsQuery(today.Year, null, categoryId)))));
         }
 

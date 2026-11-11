@@ -1071,7 +1071,7 @@
   <data name="OverviewCategoriesSubtitle" xml:space="preserve"><value>{0} – {1}, total {2}</value></data>
   <data name="OverviewCategoriesSubtitleOne" xml:space="preserve"><value>{0}, total {1}</value></data>
   <data name="OverviewCategoriesEmpty" xml:space="preserve"><value>No bills this year yet.</value></data>
-  <data name="OverviewCategoryOther" xml:space="preserve"><value>Other</value></data>
+  <data name="OverviewCategoryNone" xml:space="preserve"><value>No category</value></data>
   <data name="OverviewConsumptionHeader" xml:space="preserve"><value>Consumption</value></data>
   <data name="OverviewConsumptionSubtitle" xml:space="preserve"><value>Last complete month; change against the average of the 11 months before.</value></data>
   <data name="OverviewConsumptionInMonth" xml:space="preserve"><value>{0} in {1}</value></data>
