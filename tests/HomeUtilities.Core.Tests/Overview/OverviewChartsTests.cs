@@ -143,7 +143,7 @@ public class OverviewChartsTests
         Assert.Equal([ids[1], ids[3], ids[5], ids[6], ids[2], ids[4], ids[0]], spending.Slices.Select(x => x.CategoryId));
         Assert.Equal([70m, 60m, 50m, 40m, 30m, 20m, 10m], spending.Slices.Select(x => x.Amount));
         Assert.Equal(spending.Total, spending.Slices.Sum(x => x.Amount));
-        Assert.Equal((2026, 11, Currency.EUR), (spending.Year, spending.ThroughMonth, spending.Currency));
+        Assert.Equal((2026, 7, Currency.EUR), (spending.Year, spending.ThroughMonth, spending.Currency));   // the last bill is in July (month 7 of 1..7)
     }
 
     [Fact]
@@ -172,6 +172,22 @@ public class OverviewChartsTests
         var spending = OverviewCharts.SpendingByCategory(s.Data, Today, null)!;
 
         Assert.Equal(30m, spending.Total);
+    }
+
+    [Fact]
+    public void Spending_stops_at_the_last_month_with_a_bill_and_drafts_do_not_move_it()
+    {
+        var s = new OverviewScenario();
+        var water = s.AddContract("Water");
+        var category = new Category { Name = "Water" };
+        s.Categories.Add(category);
+        Bill(s, water, 2026, 1, 10m, category: category.Id);
+        Bill(s, water, 2026, 10, 20m, category: category.Id);
+        Bill(s, water, 2026, 11, 500m, category: category.Id).IsDraft = true;   // a draft is not counted
+
+        var spending = OverviewCharts.SpendingByCategory(s.Data, Today, null)!;
+
+        Assert.Equal((10, 30m), (spending.ThroughMonth, spending.Total));
     }
 
     [Fact]
