@@ -74,8 +74,18 @@
                                         Command="{Binding PayCommand}" IsVisible="{Binding CanPay}" VerticalOptions="Center"
                                         ToolTipProperties.Text="{Binding PayText}"
                                         SemanticProperties.Description="{Binding PayText}" />
-                                <Button Grid.Column="3" Text="{Binding EnterText}" Style="{StaticResource SecondaryButton}"
-                                        Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center" />
+                                <!-- Phone: the text button squeezed the row text into a narrow column (owner 2026-11-12), so an icon
+                                     button there; tablet and desktop keep the text button. -->
+                                <ContentView Grid.Column="3" VerticalOptions="Center" IsVisible="{OnIdiom Phone=False, Default=True}">
+                                    <Button Text="{Binding EnterText}" Style="{StaticResource SecondaryButton}"
+                                            Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center" />
+                                </ContentView>
+                                <ContentView Grid.Column="3" VerticalOptions="Center" IsVisible="{OnIdiom Phone=True, Default=False}">
+                                    <Button Style="{StaticResource IconButton}" Text="{StaticResource IconAdd}"
+                                            Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center"
+                                            ToolTipProperties.Text="{Binding EnterText}"
+                                            SemanticProperties.Description="{Binding EnterText}" />
+                                </ContentView>
 
                                 <!-- The row opens another page (R-16). -->
                                 <Label Grid.Column="4" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
