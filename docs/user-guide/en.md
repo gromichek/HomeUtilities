@@ -169,7 +169,7 @@ open the matching screen; **Back** returns to the Overview and the row is gone i
 |---|---|---|---|
 | **Submit readings: Water, Heating** | A contract's *reading window* (set on the contract, e.g. 25–28) is open, opens within the next 3 days, or ended less than 4 days ago — and none of the contract's meters has a reading dated inside that window. Contracts with the same window share one row. | You save a reading of the meter inside the window, or 3 days after the window ended. | Opens **Readings** of that property for today. |
 | **Pay {contract} for {month}** (a bill, and **Pay Property tax …** for a tax installment) | An open bill whose due date is within the next 7 days, is today, or has passed. The amount is what is still open. | The bill is paid in full. | Tap opens the bill. **Mark as paid** (the ✓ button) marks the open amount as paid today and shows **Bill marked as paid · Undo**; **Undo** takes it back and the row returns. |
-| **Bill for {month} from {contract} not entered yet** | A contract with a *bill day* has no bill for its expected month yet: the **previous** month for a contract billed in arrears, the **next** month for a prepaid one — and today is on or after the bill day (in the month after the period, or in the month before it when prepaid). Tax contracts are not checked. | You enter a bill for that contract and month. | **Enter bill** opens a new bill with the contract and the month filled in. |
+| **Bill for {month} from {contract} not entered yet** | A contract with a *bill day* has no bill for its expected month yet: the **previous** month for a contract billed in arrears, the **next** month for a prepaid one, the **current** month for one billed *In the service month* — and today is on or after the bill day (in the month after the period, in the month before it when prepaid, or in the period's own month). Tax contracts are not checked. | You enter a bill for that contract and month. | **Enter bill** opens a new bill with the contract and the month filled in. |
 | **Draft bills to confirm: 3** | One or more **draft bills** created from your bill templates wait for you (one row per property). Information only. | You confirm or delete the drafts. | Opens **Bills** of that property, filtered to **Drafts**. |
 | **Verify meter …** | A meter in use has its verification due within 60 days, or it is overdue. | The verification date of the meter is moved forward. | Opens the meter. |
 | **Expected settlement: {contract}** | An equalized contract (see "Equalized payments") expects a settlement of 1.00 € or more, either way (surcharge or refund). Information only. | The settlement bill is entered, or the amount falls below 1.00 €. | Opens the settlement page. |
@@ -264,8 +264,9 @@ Open a property → card **Contracts** → **Add contract**.
 - **Billing:**
   - *Billing mode* — **By consumption** (meters), **Fixed fee**, **Equalized payments** (the same amount every month,
     settled once a year), **Tax (annual amount)**.
-  - *Billing timing* — **In arrears** (the bill comes after the month of service: water, electricity) or
-    **In advance** (paid before the month: internet, TV).
+  - *Billing timing* — **In arrears** (the bill comes after the month of service: water, electricity, so the October
+    bill arrives in November), **In advance** (paid before the month: internet, TV; the December bill arrives in November) or
+    **In the service month** (the bill for November arrives in November, e.g. house maintenance billed around the 10th).
   - Usual bill day, payment due day, currency.
   - *VAT is calculated on the bill total* (on by default) — most suppliers add up the net amounts of all lines with the
     same VAT rate and calculate VAT once on that sum. Switch it off only if your supplier rounds the VAT of every line
@@ -552,7 +553,7 @@ the list shows only the bills of that category, that property and that month.
 
 **Which month does a bill belong to?** To the month of the **service**, not to the month it was issued: readings of
 25–28 October, bill arrives in November → the bill is for **October**. Services paid **in advance** (internet, TV; set
-on the contract as *In advance*) belong to the month they are for: paid in October for November → **November**. The
+on the contract as *In advance*) belong to the month they are for: paid in October for November → **November**. A bill that arrives in its own month (*In the service month*) belongs to that month. The
 editor suggests the right month for the contract and you can change it with ‹ › or by tapping the month.
 
 ### Entering a bill
@@ -646,7 +647,7 @@ template can also point to a contract (internet with the FiberNet contract) so t
   or **Every year**; the *First period* (the month the schedule counts from — a yearly template starts in the month the
   payment falls, for example March), an optional *Last period*, and the *Issue day of the month* (1–31; 31 in February
   becomes 28 or 29). *Billing timing*: **In advance** (a prepaid bill is issued in the month **before** its period, as internet paid
-  in October for November) or **In arrears** (issued in the month **after** it). *Due after … days* counts from the issue day;
+  in October for November) or **In arrears** (issued in the month **after** it) or **In the service month** (issued in the period's own month, on the issue day). *Due after … days* counts from the issue day;
   *Remind … days before* is how long before the due date the [reminder](#reminders) of the bill comes; empty = the general setting. A line **Next drafts** shows the next three periods with
   their issue and due dates, for example *10.2026 (issued 05.11.2026, due 19.11.2026)*.
 - **Default amount** — any two of *Amount excl. VAT*, *VAT %* and *Total*, as in a bill. It may stay **empty** when the amount is
@@ -657,7 +658,7 @@ template can also point to a contract (internet with the FiberNet contract) so t
 - **Comment.**
 
 **How drafts appear.** Every time you open **Overview** or **Bills** the app creates the drafts that are due and not made yet:
-a monthly template in arrears has a draft for every month up to the **previous** month; one in advance up to the **next** month.
+a monthly template in arrears has a draft for every month up to the **previous** month; one in advance up to the **next** month; one *In the service month* has the draft of the current month from its issue day on (not before it).
 When you save a template whose first period lies in the past, the drafts of those months appear at once. Nothing is created
 twice: a draft you **delete** does not come back, and re-opening the app adds nothing new. An inactive template creates no drafts.
 

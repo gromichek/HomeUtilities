@@ -33,6 +33,23 @@ public class BillTests
     }
 
     [Fact]
+    public void DefaultPeriod_in_the_service_month_is_the_current_month()
+    {
+        // today 12 Nov 2026: in the service month -> 11.2026; in arrears -> 10.2026; in advance -> 12.2026
+        var today = new DateOnly(2026, 11, 12);
+        Assert.Equal(new YearMonth(2026, 11), Bill.DefaultPeriod(Contract(timing: BillingTiming.InServiceMonth), today));
+        Assert.Equal(new YearMonth(2026, 10), Bill.DefaultPeriod(Contract(timing: BillingTiming.InArrears), today));
+        Assert.Equal(new YearMonth(2026, 12), Bill.DefaultPeriod(Contract(timing: BillingTiming.InAdvance), today));
+    }
+
+    [Theory]
+    [InlineData(BillingTiming.InArrears, 1)]
+    [InlineData(BillingTiming.InAdvance, -1)]
+    [InlineData(BillingTiming.InServiceMonth, 0)]
+    public void ArrivalOffset_maps_each_timing_to_a_month_offset(BillingTiming timing, int expected) =>
+        Assert.Equal(expected, timing.ArrivalOffset());
+
+    [Fact]
     public void DefaultPeriod_crosses_year_boundary()
     {
         Assert.Equal(new YearMonth(2025, 12), Bill.DefaultPeriod(Contract(), new DateOnly(2026, 1, 5)));

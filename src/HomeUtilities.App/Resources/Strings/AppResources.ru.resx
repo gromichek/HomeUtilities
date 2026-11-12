@@ -249,6 +249,7 @@
   <data name="ContractBillingTimingLabel" xml:space="preserve"><value>Время выставления счёта</value></data>
   <data name="ContractTimingHint_InArrears" xml:space="preserve"><value>Счёт приходит после месяца услуги (вода, электричество).</value></data>
   <data name="ContractTimingHint_InAdvance" xml:space="preserve"><value>Услуга оплачивается до начала месяца (интернет, ТВ).</value></data>
+  <data name="ContractTimingHint_InServiceMonth" xml:space="preserve"><value>Счёт за месяц приходит в этом же месяце (обслуживание дома: счёт за ноябрь приходит в ноябре).</value></data>
   <data name="ContractReadingWindow" xml:space="preserve"><value>Окно передачи показаний</value></data>
   <data name="ContractReadingFrom" xml:space="preserve"><value>С числа</value></data>
   <data name="ContractReadingTo" xml:space="preserve"><value>По число</value></data>
@@ -279,6 +280,7 @@
   <data name="Enum_BillingMode_Assessed" xml:space="preserve"><value>Налог (годовая сумма)</value></data>
   <data name="Enum_BillingTiming_InArrears" xml:space="preserve"><value>После периода</value></data>
   <data name="Enum_BillingTiming_InAdvance" xml:space="preserve"><value>Вперёд</value></data>
+  <data name="Enum_BillingTiming_InServiceMonth" xml:space="preserve"><value>В месяце услуги</value></data>
   <data name="Enum_CustomFieldKind_Text" xml:space="preserve"><value>Текст</value></data>
   <data name="Enum_CustomFieldKind_Number" xml:space="preserve"><value>Число</value></data>
   <data name="Enum_CustomFieldKind_Money" xml:space="preserve"><value>Сумма</value></data>
@@ -1211,7 +1213,7 @@
   <data name="BillTemplateEndLabel" xml:space="preserve"><value>Последний период</value></data>
   <data name="BillTemplateDayLabel" xml:space="preserve"><value>День месяца выставления счёта (1–31)</value></data>
   <data name="BillTemplateDayHint" xml:space="preserve"><value>Необязательно. По нему считаются даты выставления и оплаты черновиков; 31-е в коротком месяце становится последним днём.</value></data>
-  <data name="BillTemplateTimingHint" xml:space="preserve"><value>Вперёд: счёт выставляется в месяце перед периодом. После периода: в месяце после него.</value></data>
+  <data name="BillTemplateTimingHint" xml:space="preserve"><value>Вперёд: счёт выставляется в месяце перед периодом. После периода: в месяце после него. В месяце услуги: в самом месяце периода (счёт за ноябрь приходит в ноябре).</value></data>
   <data name="BillTemplateDueOffsetLabel" xml:space="preserve"><value>Оплатить через … дн.</value></data>
   <data name="BillTemplateRemindLabel" xml:space="preserve"><value>Напомнить за … дн. до оплаты</value></data>
   <data name="BillTemplatePreviewHeader" xml:space="preserve"><value>Ближайшие черновики</value></data>

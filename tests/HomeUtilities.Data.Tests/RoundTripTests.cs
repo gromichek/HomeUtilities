@@ -114,7 +114,7 @@ public class RoundTripTests
             ReadingDayTo = 3,
             BillDay = 10,
             PaymentDueDay = 20,
-            BillingTiming = BillingTiming.InAdvance,
+            BillingTiming = BillingTiming.InServiceMonth,
             VatCalculation = VatCalculation.PerLine,
             PaymentDetails = Details,
         };
@@ -137,7 +137,8 @@ public class RoundTripTests
         await using var read = test.NewContext();
         var loaded = await read.Contracts.SingleAsync();
         Assert.Equal(Currency.LVL, loaded.Currency);
-        Assert.Equal(BillingTiming.InAdvance, loaded.BillingTiming);
+        Assert.Equal(BillingTiming.InServiceMonth, loaded.BillingTiming);
+        Assert.Equal(2, (int)loaded.BillingTiming);
         Assert.Equal(VatCalculation.PerLine, loaded.VatCalculation);
         Assert.Equal(new DateOnly(2030, 12, 31), loaded.ValidTo);
         Assert.Equal((25, 3), (loaded.ReadingDayFrom, loaded.ReadingDayTo));

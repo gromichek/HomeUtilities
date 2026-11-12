@@ -20,7 +20,7 @@ public static class BillDefaults
             return null;
         }
 
-        var month = period.AddMonths(contract.BillingTiming == BillingTiming.InAdvance ? -1 : 1);
+        var month = period.AddMonths(contract.BillingTiming.ArrivalOffset());
         return new DateOnly(month.Year, month.Month, Math.Clamp(day, 1, DateTime.DaysInMonth(month.Year, month.Month)));
     }
 }

@@ -206,7 +206,7 @@ public static class TodoBuilder
                 continue;
             }
 
-            var arrives = period.AddMonths(contract.BillingTiming == BillingTiming.InAdvance ? -1 : 1);
+            var arrives = period.AddMonths(contract.BillingTiming.ArrivalOffset());
             var arrivesOn = new DateOnly(arrives.Year, arrives.Month, Math.Clamp(billDay, 1, DateTime.DaysInMonth(arrives.Year, arrives.Month)));
             if (today < arrivesOn)
             {
