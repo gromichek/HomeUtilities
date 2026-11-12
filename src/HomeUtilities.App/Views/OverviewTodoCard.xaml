@@ -20,8 +20,9 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenCommand}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
-                                <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Center"
+                            <!-- Layout B (owner 2026-11-12): icon column, one content column (title + amount, detail, action), chevron. -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0" FontFamily="{DynamicResource IconFontFamily}" FontSize="22" VerticalOptions="Start"
                                        Text="{StaticResource IconTodoDue}"
                                        TextColor="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource PrimaryDark}}">
                                     <Label.Triggers>
@@ -53,7 +54,10 @@
                                 </Label>
 
                                 <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                    <Label Text="{Binding Text}" FontAttributes="Bold" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Text}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding AmountText}" FontAttributes="Bold" IsVisible="{Binding HasAmount}" />
+                                    </Grid>
                                     <Label Text="{Binding DetailText}" FontSize="13" Style="{StaticResource MutedLabel}">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" x:DataType="vm:TodoRowViewModel" Binding="{Binding IsOverdue}" Value="True">
@@ -64,31 +68,18 @@
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>
+
+                                    <!-- Actions under the text: "Paid" for a bill that is due, "Enter bill" for a bill not entered yet. -->
+                                    <HorizontalStackLayout Spacing="8" Margin="0,6,0,0" IsVisible="{Binding HasAction}">
+                                        <Button Text="{Binding PayText}" Style="{StaticResource SecondaryButton}"
+                                                Command="{Binding PayCommand}" IsVisible="{Binding CanPay}" />
+                                        <Button Text="{Binding EnterText}" Style="{StaticResource SecondaryButton}"
+                                                Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" />
+                                    </HorizontalStackLayout>
                                 </VerticalStackLayout>
 
-                                <Label Grid.Column="2" Text="{Binding AmountText}" FontAttributes="Bold" VerticalOptions="Center"
-                                       IsVisible="{Binding HasAmount}" />
-
-                                <!-- Paid: the quick action of a bill that is due. Enter bill: a bill that has not been entered yet. -->
-                                <Button Grid.Column="3" Style="{StaticResource IconButton}" Text="{StaticResource IconPaid}"
-                                        Command="{Binding PayCommand}" IsVisible="{Binding CanPay}" VerticalOptions="Center"
-                                        ToolTipProperties.Text="{Binding PayText}"
-                                        SemanticProperties.Description="{Binding PayText}" />
-                                <!-- Phone: the text button squeezed the row text into a narrow column (owner 2026-11-12), so an icon
-                                     button there; tablet and desktop keep the text button. -->
-                                <ContentView Grid.Column="3" VerticalOptions="Center" IsVisible="{OnIdiom Phone=False, Default=True}">
-                                    <Button Text="{Binding EnterText}" Style="{StaticResource SecondaryButton}"
-                                            Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center" />
-                                </ContentView>
-                                <ContentView Grid.Column="3" VerticalOptions="Center" IsVisible="{OnIdiom Phone=True, Default=False}">
-                                    <Button Style="{StaticResource IconButton}" Text="{StaticResource IconAdd}"
-                                            Command="{Binding OpenCommand}" IsVisible="{Binding IsMissing}" VerticalOptions="Center"
-                                            ToolTipProperties.Text="{Binding EnterText}"
-                                            SemanticProperties.Description="{Binding EnterText}" />
-                                </ContentView>
-
                                 <!-- The row opens another page (R-16). -->
-                                <Label Grid.Column="4" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
+                                <Label Grid.Column="2" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
                                        VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
                             </Grid>
                         </Border>
