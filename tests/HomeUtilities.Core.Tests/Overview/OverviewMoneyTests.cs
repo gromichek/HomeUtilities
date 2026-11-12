@@ -264,4 +264,178 @@ public class OverviewMoneyTests
 
         Assert.Equal([("Cottage electricity", 8.35m), ("Other", -0.40m)], rows.Select(r => (r.Title, r.Expected)));
     }
+
+    // ---- Sections of the Money card (T-052) ----------------------------------------------------------------------
+
+    private static OverviewScenario Example()
+    {
+        // Gas: bill 12.25 due 05.10. (overdue on 27.10.); house: bill 25.15 due 25.11.; electricity: 13.25 paid on top, no bill uses it.
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas", mode: BillingMode.Equalized);
+        var house = scenario.AddContract("House");
+        var electricity = scenario.AddContract("Electricity", mode: BillingMode.Equalized);
+        scenario.AddBill(gas, 12.25m, D(10, 5), new YearMonth(2026, 9));
+        scenario.AddBill(house, 25.15m, D(11, 25), new YearMonth(2026, 10));
+        scenario.AddPayment(13.25m, D(10, 20), electricity);
+        scenario.Settlements[gas.Id] = -9.32m;
+        scenario.Settlements[electricity.Id] = 2.87m;
+        return scenario;
+    }
+
+    [Fact]
+    public void Sections_list_what_to_pay_what_is_overpaid_and_the_expected_settlements_per_contract()
+    {
+        var scenario = Example();
+
+        var sections = Assert.Single(OverviewMoney.Sections(scenario.Data, Today));
+
+        // To pay 12.25 + 25.15 = 37.40: gas first (overdue since 05.10.), then the house (due 25.11.).
+        Assert.Equal(
+            [("Gas", 12.25m, (DateOnly?)D(10, 5), (DateOnly?)null), ("House", 25.15m, null, D(11, 25))],
+            sections.ToPay.Select(r => (r.Title!, r.Amount, r.OverdueSince, r.NextDue)));
+        Assert.Equal(37.40m, sections.ToPay.Sum(r => r.Amount));
+        Assert.Equal([("Electricity", 13.25m)], sections.Overpaid.Select(r => (r.Title!, r.Amount)));
+        Assert.Equal([("Electricity", 2.87m), ("Gas", -9.32m)], sections.Settlements.Select(s => (s.Title, s.Expected)));
+    }
+
+    [Fact]
+    public void Only_an_overpayment_leaves_the_to_pay_section_empty()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas", mode: BillingMode.Equalized);
+        scenario.AddPayment(22.24m, D(10, 20), gas);
+        scenario.Settlements[gas.Id] = -9.32m;
+
+        var sections = Assert.Single(OverviewMoney.Sections(scenario.Data, Today));
+
+        Assert.Empty(sections.ToPay);
+        Assert.Equal(22.24m, Assert.Single(sections.Overpaid).Amount);
+        Assert.Single(sections.Settlements);
+    }
+
+    [Fact]
+    public void A_debt_of_one_contract_is_not_netted_with_an_overpayment_of_another()
+    {
+        var scenario = new OverviewScenario();
+        var electricity = scenario.AddContract("Electricity");
+        var gas = scenario.AddContract("Gas");
+        scenario.AddBill(electricity, 10m, D(11, 20), new YearMonth(2026, 10));
+        scenario.AddPayment(10m, D(10, 20), gas);
+
+        var sections = Assert.Single(OverviewMoney.Sections(scenario.Data, Today));
+
+        Assert.Equal(("Electricity", 10m), (sections.ToPay[0].Title!, sections.ToPay[0].Amount));
+        Assert.Equal(("Gas", 10m), (sections.Overpaid[0].Title!, sections.Overpaid[0].Amount));
+    }
+
+    [Fact]
+    public void One_contract_with_an_open_bill_and_an_unallocated_payment_is_in_both_sections()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas");
+        scenario.AddBill(gas, 30m, D(11, 20), new YearMonth(2026, 10));
+        scenario.AddPayment(12m, D(10, 20), gas);
+
+        var sections = Assert.Single(OverviewMoney.Sections(scenario.Data, Today));
+
+        Assert.Equal(30m, Assert.Single(sections.ToPay).Amount);
+        Assert.Equal(12m, Assert.Single(sections.Overpaid).Amount);
+    }
+
+    [Fact]
+    public void A_partly_paid_bill_counts_with_its_open_remainder_and_the_oldest_overdue_date()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas");
+        var sep = scenario.AddBill(gas, 50m, D(10, 20), new YearMonth(2026, 9));
+        scenario.AddBill(gas, 40m, D(10, 5), new YearMonth(2026, 8));
+        scenario.AddBill(gas, 60m, D(11, 20), new YearMonth(2026, 10));
+        scenario.AddPayment(20m, D(10, 18), gas, null, (sep, 20m));
+
+        var row = Assert.Single(Assert.Single(OverviewMoney.Sections(scenario.Data, Today)).ToPay);
+
+        // 40 + 30 + 60 = 130; overdue since the oldest due date (05.10.); the next one not overdue is 20.11.
+        Assert.Equal((130m, (DateOnly?)D(10, 5), (DateOnly?)D(11, 20)), (row.Amount, row.OverdueSince, row.NextDue));
+    }
+
+    [Fact]
+    public void A_bill_without_a_due_date_has_no_second_line_dates()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas");
+        scenario.AddBill(gas, 30m, null, new YearMonth(2026, 10));
+
+        var row = Assert.Single(Assert.Single(OverviewMoney.Sections(scenario.Data, Today)).ToPay);
+
+        Assert.Equal((null, null), (row.OverdueSince, row.NextDue));
+    }
+
+    [Fact]
+    public void To_pay_is_ordered_overdue_oldest_first_then_by_due_date_then_by_name()
+    {
+        var scenario = new OverviewScenario();
+        var b = scenario.AddContract("B");
+        var a = scenario.AddContract("A");
+        var late = scenario.AddContract("Late");
+        var older = scenario.AddContract("Older");
+        var none = scenario.AddContract("Z-no-date");
+        scenario.AddBill(b, 1m, D(11, 10), new YearMonth(2026, 10));
+        scenario.AddBill(a, 1m, D(11, 20), new YearMonth(2026, 10));
+        scenario.AddBill(late, 1m, D(10, 20), new YearMonth(2026, 9));
+        scenario.AddBill(older, 1m, D(10, 1), new YearMonth(2026, 9));
+        scenario.AddBill(none, 1m, null, new YearMonth(2026, 9));
+
+        var titles = Assert.Single(OverviewMoney.Sections(scenario.Data, Today)).ToPay.Select(r => r.Title);
+
+        Assert.Equal(["Older", "Late", "B", "A", "Z-no-date"], titles);
+    }
+
+    [Fact]
+    public void A_payment_without_a_contract_is_a_row_without_a_title_and_overpaid_is_sorted_by_amount()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas");
+        scenario.AddPayment(5m, D(10, 20), gas);
+        scenario.AddPayment(8m, D(10, 21));   // no contract, the property's own
+
+        var overpaid = Assert.Single(OverviewMoney.Sections(scenario.Data, Today)).Overpaid;
+
+        Assert.Equal([(null, 8m), ("Gas", 5m)], overpaid.Select(r => (r.Title, r.Amount)));
+        Assert.Null(overpaid[0].ContractId);
+    }
+
+    [Fact]
+    public void Everything_closed_gives_no_sections()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas");
+        var bill = scenario.AddBill(gas, 50m, D(10, 20), new YearMonth(2026, 9));
+        scenario.AddPayment(50m, D(10, 18), gas, null, (bill, 50m));
+        scenario.AddBill(gas, 70m, D(11, 20), new YearMonth(2026, 10)).IsDraft = true;   // a draft counts nowhere
+
+        Assert.Empty(OverviewMoney.Sections(scenario.Data, Today));
+    }
+
+    [Fact]
+    public void A_settlement_under_one_cent_is_left_out()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas", mode: BillingMode.Equalized);
+        scenario.Settlements[gas.Id] = 0.004m;
+
+        Assert.Empty(OverviewMoney.Sections(scenario.Data, Today));
+    }
+
+    [Fact]
+    public void Two_currencies_of_one_contract_are_two_rows()
+    {
+        var scenario = new OverviewScenario();
+        var gas = scenario.AddContract("Gas");
+        scenario.AddBill(gas, 10m, null, new YearMonth(2026, 10));
+        scenario.AddBill(gas, 20m, null, new YearMonth(2026, 9)).Currency = Currency.LVL;
+
+        var rows = Assert.Single(OverviewMoney.Sections(scenario.Data, Today)).ToPay;
+
+        Assert.Equal([(Currency.EUR, 10m), (Currency.LVL, 20m)], rows.OrderBy(r => r.Currency).Select(r => (r.Currency, r.Amount)));
+    }
 }

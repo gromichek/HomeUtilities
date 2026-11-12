@@ -82,7 +82,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasMoney), nameof(ShowMoneyEmpty))]
-    private IReadOnlyList<OverviewBlockViewModel> _moneyBlocks = [];
+    private IReadOnlyList<OverviewMoneyBlockViewModel> _moneyBlocks = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasYear), nameof(ShowYearEmpty))]
@@ -492,7 +492,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
         Routes.EqualizedSettlement,
         new Dictionary<string, object> { [EditorNavigation.ContractIdParameter] = contractId });
 
-    private Task OpenBillsAsync(Guid propertyId, BillStatusFilter status, int? year = null)
+    private Task OpenBillsAsync(Guid propertyId, BillStatusFilter status, int? year = null, Guid? contractId = null)
     {
         var parameters = new Dictionary<string, object>
         {
@@ -504,70 +504,111 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
             parameters[BillsViewModel.YearParameter] = shown;
         }
 
+        if (contractId is { } contract)
+        {
+            parameters[EditorNavigation.ContractIdParameter] = contract;
+        }
+
         return _navigation.GoToAsync(Routes.BillsFor, parameters);
     }
 
-    private Task OpenPaymentsAsync(Guid propertyId) => _navigation.GoToAsync(
-        Routes.PaymentsFor,
-        new Dictionary<string, object> { [EditorNavigation.PropertyIdParameter] = propertyId });
+    private Task OpenPaymentsAsync(Guid propertyId, Guid? contractId = null)
+    {
+        var parameters = new Dictionary<string, object> { [EditorNavigation.PropertyIdParameter] = propertyId };
+        if (contractId is { } contract)
+        {
+            parameters[EditorNavigation.ContractIdParameter] = contract;
+        }
+
+        return _navigation.GoToAsync(Routes.PaymentsFor, parameters);
+    }
 
     private Func<Task> Go(Func<Task> open) => () => RunSafeAsync(open);
 
-    private IReadOnlyList<OverviewBlockViewModel> BuildMoney()
+    /// <summary>At most this many rows per Money section; the rest is behind a "N more" row.</summary>
+    public const int MoneyRowsShown = 5;
+
+    private IReadOnlyList<OverviewMoneyBlockViewModel> BuildMoney()
     {
-        var money = OverviewMoney.PerProperty(_data, _clock.Today);
-        var settlements = OverviewMoney.Settlements(_data);
-        var blocks = new List<OverviewBlockViewModel>();
+        var sections = OverviewMoney.Sections(_data, _clock.Today);
+        var blocks = new List<OverviewMoneyBlockViewModel>();
         foreach (var property in VisibleProperties())
         {
-            var lines = new List<OverviewLineViewModel>();
-            foreach (var row in money.Where(m => m.PropertyId == property.Id))
+            if (sections.FirstOrDefault(s => s.PropertyId == property.Id) is not { } money)
             {
-                var propertyId = property.Id;
-                var currency = row.Currency;
-                if (row.OpenBills != 0)
-                {
-                    lines.Add(new(_localizer.Get("OverviewOpenBills", Money(row.OpenBills, currency)), OverviewTone.Neutral, Go(() => OpenBillsAsync(propertyId, BillStatusFilter.Open))));
-                }
-
-                if (row.OverdueBills != 0)
-                {
-                    lines.Add(new(_localizer.Get("OverviewOverdueBills", Money(row.OverdueBills, currency)), OverviewTone.Debt, Go(() => OpenBillsAsync(propertyId, BillStatusFilter.Overdue))));
-                }
-
-                if (row.Prepayments != 0)
-                {
-                    lines.Add(new(_localizer.Get("OverviewPrepayments", Money(row.Prepayments, currency)), OverviewTone.Good, Go(() => OpenPaymentsAsync(propertyId))));
-                }
-
-                if (row.Balance != 0)
-                {
-                    lines.Add(row.Balance < 0
-                        ? new(_localizer.Get("ContractBalanceDebt", Money(-row.Balance, currency)), OverviewTone.Debt, Go(() => OpenBillsAsync(propertyId, BillStatusFilter.All)))
-                        : new(_localizer.Get("ContractBalanceAdvance", Money(row.Balance, currency)), OverviewTone.Good, Go(() => OpenPaymentsAsync(propertyId))));
-                }
+                continue;
             }
 
-            // A recalculation of less than one cent says nothing: the line is not shown (R-18, UI_GUIDELINES §9).
-            foreach (var settlement in settlements.Where(s => s.PropertyId == property.Id && Math.Abs(s.Expected) >= 0.01m))
+            var propertyId = property.Id;
+            var shown = new List<OverviewMoneySectionViewModel>();
+
+            if (money.ToPay.Count > 0)
             {
-                var contractId = settlement.ContractId;
-                lines.Add(new(
-                    _localizer.Get(
-                        settlement.Expected >= 0 ? "OverviewSettlementSurcharge" : "OverviewSettlementRefund",
-                        settlement.Title,
-                        Money(Math.Abs(settlement.Expected), settlement.Currency)),
+                var rows = money.ToPay.Select(r => new OverviewMoneyRowViewModel(
+                    ContractName(r),
+                    Money(r.Amount, r.Currency),
+                    r.OverdueSince is { } since
+                        ? _localizer.Get("OverviewMoneyOverdueSince", Day(since))
+                        : r.NextDue is { } due ? _localizer.Get("OverviewMoneyDueOn", Day(due)) : string.Empty,
+                    r.OverdueSince is null ? OverviewTone.Neutral : OverviewTone.Debt,
+                    Go(() => OpenBillsAsync(propertyId, BillStatusFilter.Open, contractId: r.ContractId)))).ToList();
+                shown.Add(Section("OverviewMoneyToPay", money.ToPay, rows, () => OpenBillsAsync(propertyId, BillStatusFilter.Open)));
+            }
+
+            if (money.Overpaid.Count > 0)
+            {
+                var rows = money.Overpaid.Select(r => new OverviewMoneyRowViewModel(
+                    ContractName(r),
+                    Money(r.Amount, r.Currency),
+                    string.Empty,
                     OverviewTone.Neutral,
-                    Go(() => OpenSettlementAsync(contractId))));
+                    Go(() => OpenPaymentsAsync(propertyId, r.ContractId)))).ToList();
+                shown.Add(Section("OverviewMoneyOverpaid", money.Overpaid, rows, () => OpenPaymentsAsync(propertyId)));
             }
 
-            if (lines.Count > 0)
+            if (money.Settlements.Count > 0)
             {
-                blocks.Add(new OverviewBlockViewModel(property.Name, lines));
+                var rows = money.Settlements.Select(s => new OverviewMoneyRowViewModel(
+                    s.Title,
+                    SignedMoney(s.Expected, s.Currency),
+                    _localizer[s.Expected >= 0 ? "OverviewMoneySurcharge" : "OverviewMoneyRefund"],
+                    OverviewTone.Neutral,
+                    Go(() => OpenSettlementAsync(s.ContractId)))).ToList();
+
+                // The "N more" row has no list of its own to open; the first settlement not shown is the simplest existing target.
+                var firstHidden = money.Settlements.Count > MoneyRowsShown ? money.Settlements[MoneyRowsShown].ContractId : Guid.Empty;
+                shown.Add(new OverviewMoneySectionViewModel(
+                    _localizer["OverviewMoneySettlement"],
+                    string.Empty,
+                    Limit(rows, () => OpenSettlementAsync(firstHidden))));
             }
+
+            blocks.Add(new OverviewMoneyBlockViewModel(property.Name, shown));
         }
 
         return blocks;
+    }
+
+    private string ContractName(MoneyRow row) => row.Title ?? _localizer["OverviewMoneyNoContract"];
+
+    // A section total only when all rows share one currency (the amounts of two currencies cannot be added).
+    private OverviewMoneySectionViewModel Section(string headerKey, IReadOnlyList<MoneyRow> source, List<OverviewMoneyRowViewModel> rows, Func<Task> openAll)
+    {
+        var currencies = source.Select(r => r.Currency).Distinct().ToList();
+        var total = currencies.Count == 1 ? Money(source.Sum(r => r.Amount), currencies[0]) : string.Empty;
+        return new OverviewMoneySectionViewModel(_localizer[headerKey], total, Limit(rows, openAll));
+    }
+
+    private List<OverviewMoneyRowViewModel> Limit(List<OverviewMoneyRowViewModel> rows, Func<Task> openAll)
+    {
+        if (rows.Count <= MoneyRowsShown)
+        {
+            return rows;
+        }
+
+        var more = new OverviewMoneyRowViewModel(
+            _localizer.Get("OverviewMoneyMore", rows.Count - MoneyRowsShown), string.Empty, string.Empty, OverviewTone.Neutral, Go(openAll));
+        return [.. rows.Take(MoneyRowsShown), more];
     }
 
     private IReadOnlyList<OverviewBlockViewModel> BuildYear()
