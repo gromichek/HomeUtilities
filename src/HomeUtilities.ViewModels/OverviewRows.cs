@@ -99,6 +99,9 @@ public sealed class TodoRowViewModel
     public IAsyncRelayCommand? PayCommand { get; }
 
     public bool CanPay => PayCommand is not null;
+
+    /// <summary>Whether the row shows an action button under its text (Paid or Enter bill).</summary>
+    public bool HasAction => CanPay || IsMissing;
 }
 
 /// <summary>One tappable line of the Money or This year card.</summary>
