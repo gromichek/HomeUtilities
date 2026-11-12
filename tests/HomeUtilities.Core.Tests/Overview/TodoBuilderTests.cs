@@ -349,6 +349,34 @@ public class TodoBuilderTests
         }
     }
 
+    [Theory]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    public void Service_month_contract_expects_this_months_bill_from_the_bill_day(int day, bool listed)
+    {
+        var scenario = new OverviewScenario();
+        scenario.AddContract("House maintenance", billDay: 10, timing: BillingTiming.InServiceMonth);
+
+        var items = scenario.Todo(new DateOnly(2026, 11, day));
+
+        Assert.Equal(listed, items.Count == 1);
+        if (listed)
+        {
+            Assert.Equal(new YearMonth(2026, 11), items[0].Period);
+            Assert.Equal(new DateOnly(2026, 11, 10), items[0].Date);
+        }
+    }
+
+    [Fact]
+    public void Service_month_contract_has_no_to_do_once_the_bill_exists()
+    {
+        var scenario = new OverviewScenario();
+        var maintenance = scenario.AddContract("House maintenance", billDay: 10, timing: BillingTiming.InServiceMonth);
+        scenario.AddBill(maintenance, 30m, new DateOnly(2026, 11, 28), new YearMonth(2026, 11));
+
+        Assert.Empty(scenario.Todo(new DateOnly(2026, 11, 12)));
+    }
+
     [Fact]
     public void Bill_day_beyond_the_month_length_means_the_last_day()
     {

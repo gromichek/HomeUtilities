@@ -16,7 +16,7 @@ public static class BillTemplateScheduler
     /// the next month for a prepaid one.
     /// </summary>
     public static YearMonth Horizon(BillingTiming timing, DateOnly today) =>
-        YearMonth.From(today).AddMonths(timing == BillingTiming.InAdvance ? 1 : -1);
+        YearMonth.From(today).AddMonths(-timing.ArrivalOffset());
 
     /// <summary>All periods of a schedule from its start up to and including <paramref name="upTo"/> (and its end month).</summary>
     public static IReadOnlyList<YearMonth> ScheduledPeriods(Schedule schedule, YearMonth upTo)
@@ -57,9 +57,16 @@ public static class BillTemplateScheduler
         return
         [
             .. ScheduledPeriods(template.Schedule, Horizon(template.Timing, today))
-                .Where(p => (template.LastGeneratedPeriod is not { } last || p > last) && !taken.Contains(p)),
+                .Where(p => (template.LastGeneratedPeriod is not { } last || p > last) && !taken.Contains(p) && IssuedBy(template, p, today)),
         ];
     }
+
+    /// <summary>
+    /// A bill issued in its own service month is drafted from the template's day of that month on (before it, nothing);
+    /// the other timings are decided by the horizon month alone.
+    /// </summary>
+    private static bool IssuedBy(BillTemplate template, YearMonth period, DateOnly today) =>
+        template.Timing != BillingTiming.InServiceMonth || IssueDate(template, period) is not { } issued || issued <= today;
 
     /// <summary>The next scheduled periods after the horizon (what is not due yet), for the preview in the editor.</summary>
     public static IReadOnlyList<YearMonth> UpcomingPeriods(BillTemplate template, DateOnly today, int count)
@@ -75,7 +82,7 @@ public static class BillTemplateScheduler
         return
         [
             .. Periods(template.Schedule)
-                .SkipWhile(p => p <= horizon)
+                .SkipWhile(p => p <= horizon && IssuedBy(template, p, today))
                 .Take(count),
         ];
     }
@@ -93,7 +100,7 @@ public static class BillTemplateScheduler
             return null;
         }
 
-        var month = period.AddMonths(template.Timing == BillingTiming.InAdvance ? -1 : 1);
+        var month = period.AddMonths(template.Timing.ArrivalOffset());
         return new DateOnly(month.Year, month.Month, Math.Clamp(day, 1, DateTime.DaysInMonth(month.Year, month.Month)));
     }
 

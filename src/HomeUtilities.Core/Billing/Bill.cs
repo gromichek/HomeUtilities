@@ -136,11 +136,11 @@ public class Bill : SyncEntity
         return bill;
     }
 
-    /// <summary>The period a new bill defaults to: previous month in arrears, next month in advance.</summary>
+    /// <summary>The period a new bill defaults to: previous month in arrears, next month in advance, this month in the service month.</summary>
     public static YearMonth DefaultPeriod(Contract contract, DateOnly today)
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        return YearMonth.From(today).AddMonths(contract.BillingTiming == BillingTiming.InAdvance ? 1 : -1);
+        return YearMonth.From(today).AddMonths(-contract.BillingTiming.ArrivalOffset());
     }
 }

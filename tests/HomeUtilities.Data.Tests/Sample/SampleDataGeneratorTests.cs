@@ -82,6 +82,7 @@ public class SampleDataGeneratorTests
         var contracts = await rig.Contracts.ListAsync();
         Assert.Equal(10, contracts.Count);
         Assert.Equal([6, 2, 2], properties.Select(p => contracts.Count(c => c.PropertyId == p.Id)));
+        Assert.Contains(contracts, c => c.Service == ServiceKind.Maintenance && c.BillingTiming == HomeUtilities.Core.Billing.BillingTiming.InServiceMonth && c.BillDay == 10);
         Assert.Contains(contracts, c => c.Service == ServiceKind.InternetTv && c.BillingTiming == HomeUtilities.Core.Billing.BillingTiming.InAdvance);
         Assert.Contains(contracts, c => c is { ReadingDayFrom: 25, ReadingDayTo: 28 });
         Assert.Contains(contracts, c => c is { ReadingDayFrom: 28, ReadingDayTo: 3 });

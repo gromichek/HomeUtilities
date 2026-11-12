@@ -18,6 +18,19 @@ public class BillTemplateSchedulerTests
 
     private static string[] Text(IEnumerable<YearMonth> periods) => [.. periods.Select(p => p.ToString())];
 
+    [Theory]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    public void Monthly_InServiceMonth_DraftsTheCurrentMonthFromTheIssueDay(int day, bool due)
+    {
+        var template = Template(ScheduleKind.Monthly, new YearMonth(2026, 11), BillingTiming.InServiceMonth, day: 10);
+        template.LastGeneratedPeriod = null;
+
+        // template day 10: on 10 Nov a draft for 2026-11, on 9 Nov none
+        Assert.Equal(due ? ["2026-11"] : [], Text(BillTemplateScheduler.DuePeriods(template, new DateOnly(2026, 11, day))));
+        Assert.Equal(new DateOnly(2026, 11, 10), BillTemplateScheduler.IssueDate(template, new YearMonth(2026, 11)));
+    }
+
     [Fact]
     public void Monthly_InArrears_StopsAtThePreviousMonth()
     {

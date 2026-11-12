@@ -163,9 +163,9 @@ public sealed partial class BillEditViewModel
             SelectedKind = Kinds.FirstOrDefault(k => k.Value.Equals(kind)) ?? Kinds[0];
             if (!_periodTouched)
             {
-                Period = contract.BillingTiming == BillingTiming.InAdvance
-                    ? YearMonth.From(_clock.Today).AddMonths(1)
-                    : ChargePeriodDefaults.For(_contracts, _clock.Today);
+                Period = contract.BillingTiming == BillingTiming.InArrears
+                    ? ChargePeriodDefaults.For(_contracts, _clock.Today)
+                    : Bill.DefaultPeriod(contract, _clock.Today);
             }
 
             _snapshot = null;
@@ -1100,7 +1100,7 @@ public sealed partial class BillEditViewModel
         {
             var offset = template.ContractId is null && template.Schedule.Kind == ScheduleKind.Once
                 ? 0
-                : template.Timing == BillingTiming.InAdvance ? 1 : -1;
+                : -template.Timing.ArrivalOffset();
             Period = YearMonth.From(_clock.Today).AddMonths(offset);
             _periodTouched = true;
             SelectedCategory = CategoryOptions().FirstOrDefault(c => c.Id == template.CategoryId);

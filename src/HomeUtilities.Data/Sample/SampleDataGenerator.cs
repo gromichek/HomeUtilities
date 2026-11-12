@@ -79,6 +79,8 @@ public sealed partial class SampleDataGenerator(
         var cMaint = NewContract(flat, manager, ServiceKind.Maintenance, "Maintenance (per area)", BillingMode.Actual, $"CN-{++cn}", start, null, null);
         var cNet = NewContract(flat, net, ServiceKind.InternetTv, "Internet and TV", BillingMode.Fixed, $"CN-{++cn}", start, null, null);
         cNet.BillingTiming = BillingTiming.InAdvance;
+        cMaint.BillingTiming = BillingTiming.InServiceMonth;
+        cMaint.BillDay = 10;
         cPowerFlat.CustomFields.Add(new CustomFieldDefinition
         {
             OwnerId = cPowerFlat.Id,
@@ -333,7 +335,7 @@ public sealed partial class SampleDataGenerator(
         var bill = Bill.CreateFor(contract, period, clock);
         bill.TemplateId = contract.Service == ServiceKind.InternetTv ? _internetTemplate?.Id : null;
         bill.Number = $"INV-{period.Year}-{counter:0000}";
-        var issued = DayOf(contract.BillingTiming == BillingTiming.InAdvance ? period.AddMonths(-1) : period.AddMonths(1), contract.BillDay ?? 5);
+        var issued = DayOf(period.AddMonths(contract.BillingTiming.ArrivalOffset()), contract.BillDay ?? 5);
         bill.IssuedOn = issued > _today ? _today : issued;
         var due = BillDefaults.DueDate(contract, period) ?? bill.IssuedOn.Value;
         bill.DueOn = due < bill.IssuedOn ? bill.IssuedOn : due;
@@ -364,7 +366,7 @@ public sealed partial class SampleDataGenerator(
         await bills.SaveAsync(bill, ct);
 
         var overdueWaste = contract.Service == ServiceKind.Waste && monthsAgo == OverdueWasteMonthsAgo;
-        var latestUnpaid = monthsAgo == LatestBillsMonthsAgo && contract.BillingTiming == BillingTiming.InArrears;
+        var latestUnpaid = monthsAgo == LatestBillsMonthsAgo && contract.BillingTiming != BillingTiming.InAdvance;
         var partlyPaid = contract.Service == ServiceKind.Maintenance && monthsAgo == PartlyPaidMonthsAgo;
         if (latestUnpaid && contract.Service is ServiceKind.Waste or ServiceKind.Maintenance)
         {

@@ -249,6 +249,7 @@
   <data name="ContractBillingTimingLabel" xml:space="preserve"><value>Billing timing</value></data>
   <data name="ContractTimingHint_InArrears" xml:space="preserve"><value>The bill comes after the service month (water, electricity).</value></data>
   <data name="ContractTimingHint_InAdvance" xml:space="preserve"><value>The service is paid before the month starts (internet, TV).</value></data>
+  <data name="ContractTimingHint_InServiceMonth" xml:space="preserve"><value>The bill for a month comes in that same month (house maintenance: the bill for November arrives in November).</value></data>
   <data name="ContractReadingWindow" xml:space="preserve"><value>Reading submission window</value></data>
   <data name="ContractReadingFrom" xml:space="preserve"><value>From day</value></data>
   <data name="ContractReadingTo" xml:space="preserve"><value>To day</value></data>
@@ -279,6 +280,7 @@
   <data name="Enum_BillingMode_Assessed" xml:space="preserve"><value>Tax (annual amount)</value></data>
   <data name="Enum_BillingTiming_InArrears" xml:space="preserve"><value>In arrears</value></data>
   <data name="Enum_BillingTiming_InAdvance" xml:space="preserve"><value>In advance</value></data>
+  <data name="Enum_BillingTiming_InServiceMonth" xml:space="preserve"><value>In the service month</value></data>
   <data name="Enum_CustomFieldKind_Text" xml:space="preserve"><value>Text</value></data>
   <data name="Enum_CustomFieldKind_Number" xml:space="preserve"><value>Number</value></data>
   <data name="Enum_CustomFieldKind_Money" xml:space="preserve"><value>Amount</value></data>
@@ -1211,7 +1213,7 @@
   <data name="BillTemplateEndLabel" xml:space="preserve"><value>Last period</value></data>
   <data name="BillTemplateDayLabel" xml:space="preserve"><value>Issue day of the month (1–31)</value></data>
   <data name="BillTemplateDayHint" xml:space="preserve"><value>Optional. Gives the issue and due dates of the drafts; day 31 becomes the last day of a shorter month.</value></data>
-  <data name="BillTemplateTimingHint" xml:space="preserve"><value>In advance: the bill is issued in the month before the period. In arrears: in the month after it.</value></data>
+  <data name="BillTemplateTimingHint" xml:space="preserve"><value>In advance: the bill is issued in the month before the period. In arrears: in the month after it. In the service month: in the period's own month (the bill for November arrives in November).</value></data>
   <data name="BillTemplateDueOffsetLabel" xml:space="preserve"><value>Due after … days</value></data>
   <data name="BillTemplateRemindLabel" xml:space="preserve"><value>Remind … days before the due date</value></data>
   <data name="BillTemplatePreviewHeader" xml:space="preserve"><value>Next drafts</value></data>
