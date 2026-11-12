@@ -1070,8 +1070,7 @@
   <data name="OverviewChartMonth" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="OverviewChartMonthWithLast" xml:space="preserve"><value>{0}: {1}, {2}: {3}</value></data>
   <data name="OverviewCategoriesHeader" xml:space="preserve"><value>Spending in {0} by category</value></data>
-  <data name="OverviewCategoriesSubtitle" xml:space="preserve"><value>{0} – {1}, total {2}</value></data>
-  <data name="OverviewCategoriesSubtitleOne" xml:space="preserve"><value>{0}, total {1}</value></data>
+  <data name="OverviewCategoriesSubtitleYear" xml:space="preserve"><value>since the start of the year, total {0}</value></data>
   <data name="OverviewCategoriesEmpty" xml:space="preserve"><value>No bills this year yet.</value></data>
   <data name="OverviewCategoryNone" xml:space="preserve"><value>No category</value></data>
   <data name="OverviewConsumptionHeader" xml:space="preserve"><value>Consumption</value></data>

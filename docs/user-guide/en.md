@@ -189,10 +189,11 @@ If there are bills or payments but everything is paid and nothing is prepaid, th
 ### This year
 
 For each property the gross total of the bills of this year, counted by the bill's month, next to the same months of last year: *2026: 1,245.30 € · 2025 same period: 1,180.10 € (+5.5 %)*.
-Both years are counted over the same months: from January to the last month of this year that already has a bill. Bills arrive
-a month late, so in November, with bills up to October, last year is also counted from January to October (not to November).
-A bill for a later month
-(for example internet paid in advance) is counted when its month comes. If there is no bill at all in the same months of last
+Both years are counted over the same months **for each contract**: from January to the month of that contract's last bill this
+year; last year the same months of the same contract. Contracts are billed differently (water in arrears, house maintenance or
+internet in the service month), so one early bill for the current month does not drag last year's full month in for the others.
+One-off bills without a contract form one group of their own. A contract without any bill this year (it may have ended) is
+left out of both years. A bill for a later month is counted when its month comes. If there is no bill at all in the same months of last
 year, the line shows only this year (*2026: 1 245,30 €*) instead of an invented *0,00 €*. Tap to open the Bills screen for that year.
 
 Under the lines a **chart of the months** shows what each month of this year cost (the same bills with VAT, counted by the
@@ -203,11 +204,9 @@ to open the Bills screen for that month (and the chosen property). The chart is 
 
 ### Spending by category
 
-**Spending in {year} by category** shows where this year's money went: the gross total of the bills from January to the last month that already has a bill (the same months as in
-*This year*), split by the bill's category (the colour of the category is the colour of the bar). One bar shows the shares; below it
+**Spending in {year} by category** shows where this year's money went: the gross total of this year's bills from January up to the current month, split by the bill's category (the colour of the category is the colour of the bar). One bar shows the shares; below it
 there is a row per category with the amount and its share in percent (*< 1 %* for a very small share), the largest first. Every
-category with bills this year is listed; bills without a known category form one row **No category**. The line under the title says which months are counted and the total, for example *january –
-october, total 1,002.00 €*. Tap a row to open the Bills screen with this category for the whole year (**No category** opens all the
+category with bills this year is listed; bills without a known category form one row **No category**. The line under the title shows the total, for example *since the start of the year, total 1,002.00 €*. Tap a row to open the Bills screen with this category for the whole year (**No category** opens all the
 year's bills). Without any bill this year the card says so in one line instead of showing an empty chart.
 
 ### Consumption

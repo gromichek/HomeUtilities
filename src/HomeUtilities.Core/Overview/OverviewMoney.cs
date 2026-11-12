@@ -28,7 +28,7 @@ public sealed record ExpectedSettlement(Guid PropertyId, Guid ContractId, string
 /// <param name="ThisYear">Gross of the bills with a period from January to <paramref name="ThroughMonth"/> of this year.</param>
 /// <param name="LastYear">Gross of the bills with a period in the same months (January to <paramref name="ThroughMonth"/>) of the year before.</param>
 /// <param name="HasLastYear">Whether there is any bill in those months; without one "0,00" would be a false figure (UI_GUIDELINES §9).</param>
-/// <param name="ThroughMonth">The last month counted in both years: the last month of this year with a bill (not after the current month).</param>
+/// <param name="ThroughMonth">The latest of the contracts' own end months (informational; each contract is counted up to its own last month with a bill this year).</param>
 public sealed record YearComparison(Guid PropertyId, Currency Currency, int Year, decimal ThisYear, decimal LastYear, bool HasLastYear = true, int ThroughMonth = 12)
 {
     /// <summary>This year against last year in percent, rounded to one decimal; null when last year is zero.</summary>
@@ -113,8 +113,9 @@ public static class OverviewMoney
     }
 
     /// <summary>
-    /// Per property and currency: the gross of the bills of this year from January to the last month that has a bill (at most the month of
-    /// <paramref name="today"/>) and of the same months of last year (by the bill's period, like the period filter of the Bills screen).
+    /// Per property and currency: the gross of the bills of this year, for each contract from January to its own last month with a bill
+    /// (at most the month of <paramref name="today"/>), and of the same months of the same contract last year (by the bill's period, like the
+    /// period filter of the Bills screen). Bills without a contract form one group. A contract without a bill this year counts in neither year.
     /// </summary>
     public static IReadOnlyList<YearComparison> YearToDate(OverviewData data, DateOnly today)
     {
@@ -127,23 +128,33 @@ public static class OverviewMoney
             foreach (var group in bills.Where(b => b.PropertyId == property.Id && b.Period.Year >= today.Year - 1 && b.Period.Year <= today.Year)
                 .GroupBy(b => b.Currency).OrderBy(g => g.Key))
             {
-                // Bills arrive a month late: both years are counted up to the last month of this year that has a bill.
-                var thisYearBills = group.Where(b => b.Period.Year == today.Year).ToList();
-                if (thisYearBills.Count == 0)
+                // Every contract (and the one group of bills without a contract) is counted up to ITS OWN last month with a bill this
+                // year, and last year up to the same month: bills arrive in different months for different contracts.
+                decimal thisYear = 0, lastYear = 0;
+                var hasLastYear = false;
+                var throughMonth = 0;
+                foreach (var contract in group.GroupBy(b => b.ContractId))
+                {
+                    var thisYearBills = contract.Where(b => b.Period.Year == today.Year).ToList();
+                    if (thisYearBills.Count == 0)
+                    {
+                        continue;   // no bill this year (maybe the contract ended): in neither year
+                    }
+
+                    var contractMonth = thisYearBills.Max(b => b.Period.Month);
+                    var lastYearBills = contract.Where(b => b.Period.Year == today.Year - 1 && b.Period.Month <= contractMonth).ToList();
+                    thisYear += thisYearBills.Sum(b => b.Gross);
+                    lastYear += lastYearBills.Sum(b => b.Gross);
+                    hasLastYear |= lastYearBills.Count > 0;
+                    throughMonth = Math.Max(throughMonth, contractMonth);
+                }
+
+                if (throughMonth == 0)
                 {
                     continue;
                 }
 
-                var throughMonth = thisYearBills.Max(b => b.Period.Month);
-                var lastYearBills = group.Where(b => b.Period.Year == today.Year - 1 && b.Period.Month <= throughMonth).ToList();
-                result.Add(new YearComparison(
-                    property.Id,
-                    group.Key,
-                    today.Year,
-                    thisYearBills.Sum(b => b.Gross),
-                    lastYearBills.Sum(b => b.Gross),
-                    lastYearBills.Count > 0,
-                    throughMonth));
+                result.Add(new YearComparison(property.Id, group.Key, today.Year, thisYear, lastYear, hasLastYear, throughMonth));
             }
         }
 

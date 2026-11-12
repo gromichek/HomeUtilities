@@ -198,13 +198,7 @@ public sealed partial class OverviewViewModel
         }
 
         var symbol = Symbol(spending.Currency);
-        var names = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
-        var first = names[0].ToLower(CultureInfo.CurrentCulture);
-        var last = names[spending.ThroughMonth - 1].ToLower(CultureInfo.CurrentCulture);
-        var total = BillText.Money(spending.Total, symbol);
-        CategoriesSubtitle = spending.ThroughMonth == 1
-            ? _localizer.Get("OverviewCategoriesSubtitleOne", first, total)
-            : _localizer.Get("OverviewCategoriesSubtitle", first, last, total);
+        CategoriesSubtitle = _localizer.Get("OverviewCategoriesSubtitleYear", BillText.Money(spending.Total, symbol));
 
         var positive = spending.Slices.Where(s => s.Amount > 0).Sum(s => s.Amount);
         var categories = _data.Categories.ToDictionary(c => c.Id);
