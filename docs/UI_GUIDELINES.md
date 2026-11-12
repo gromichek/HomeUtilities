@@ -393,3 +393,6 @@ No other sizes in pages; styles carry the sizes.
   the change.
 - 2026-11-05: UI review → revision 1 (this text), agreed with the owner: date lists in one column, compact-by-height on
   Android only, Delete only at the end of the form, single delete with Undo instead of a confirmation (bigger snackbar).
+
+### List rows with an action (owner 2026-11-12, #329)
+A row that has a title, a detail line, an amount and an action button: **icon column | one content column (title with the amount on its right, detail, action buttons as text buttons under the text) | chevron**. Never put the text button in its own column next to the text — on a phone in portrait it squeezes the title into a narrow column (Overview → «Что сделать» before #329).
