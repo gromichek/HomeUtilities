@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-051 | Overview: same months per contract; categories "с начала года" | Ready | | owner 2026-11-12 |
 
 ## Done
 
