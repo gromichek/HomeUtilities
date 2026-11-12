@@ -114,7 +114,7 @@ public class OverviewChartsViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         Assert.Equal("OverviewCategoriesHeader 2026 [en]", vm.CategoriesHeader);
-        Assert.Equal($"OverviewCategoriesSubtitle january|october|{Money("1,002.00")} [en]", vm.CategoriesSubtitle);
+        Assert.Equal($"OverviewCategoriesSubtitleYear {Money("1,002.00")} [en]", vm.CategoriesSubtitle);
         Assert.Equal(2, vm.CategoryRows.Count);
         Assert.Equal([Money("750.00"), Money("252.00")], vm.CategoryRows.Select(r => r.AmountText));
         Assert.Equal(["75 %", "25 %"], vm.CategoryRows.Select(r => r.ShareText));
@@ -237,8 +237,8 @@ public class OverviewChartsViewModelTests : IDisposable
     {
         string[] keys =
         [
-            "OverviewChartHint", "OverviewChartMonth", "OverviewChartMonthWithLast", "OverviewCategoriesHeader", "OverviewCategoriesSubtitle",
-            "OverviewCategoriesSubtitleOne", "OverviewCategoriesEmpty", "OverviewCategoryNone", "OverviewConsumptionHeader",
+            "OverviewChartHint", "OverviewChartMonth", "OverviewChartMonthWithLast", "OverviewCategoriesHeader",
+            "OverviewCategoriesSubtitleYear", "OverviewCategoriesEmpty", "OverviewCategoryNone", "OverviewConsumptionHeader",
             "OverviewConsumptionSubtitle", "OverviewConsumptionRise", "OverviewConsumptionRowSummary",
         ];
         foreach (var key in keys)
@@ -249,7 +249,8 @@ public class OverviewChartsViewModelTests : IDisposable
         }
 
         Assert.Equal("Расходы за 2026 по категориям", ResxLocalizer.Russian.Get("OverviewCategoriesHeader", 2026));
-        Assert.Equal("январь – октябрь, всего 1 002,00 €", ResxLocalizer.Russian.Get("OverviewCategoriesSubtitle", "январь", "октябрь", "1 002,00 €"));
+        Assert.Equal("с начала года, всего 1 002,00 €", ResxLocalizer.Russian.Get("OverviewCategoriesSubtitleYear", "1 002,00 €"));
+        Assert.Equal("since the start of the year, total 1,002.00 €", ResxLocalizer.English.Get("OverviewCategoriesSubtitleYear", "1,002.00 €"));
         Assert.Equal("Счетов за этот год пока нет.", ResxLocalizer.Russian["OverviewCategoriesEmpty"]);
         Assert.Equal("Потребление", ResxLocalizer.Russian["OverviewConsumptionHeader"]);
         Assert.Equal("Без категории", ResxLocalizer.Russian["OverviewCategoryNone"]);

@@ -201,6 +201,57 @@ public class OverviewMoneyTests
     }
 
     [Fact]
+    public void Year_to_date_counts_each_contract_up_to_its_own_last_month()
+    {
+        var november = new DateOnly(2026, 11, 11);
+        var scenario = new OverviewScenario();
+        var arrears = scenario.AddContract("Water");          // billed a month late: Jan–Oct this year
+        var serviceMonth = scenario.AddContract("House");     // billed in the service month: Jan–Nov this year
+        for (var month = 1; month <= 12; month++)
+        {
+            scenario.AddBill(arrears, 100m, null, new YearMonth(2025, month));
+            scenario.AddBill(serviceMonth, 10m, null, new YearMonth(2025, month));
+            if (month <= 10)
+            {
+                scenario.AddBill(arrears, 110m, null, new YearMonth(2026, month));
+            }
+
+            if (month <= 11)
+            {
+                scenario.AddBill(serviceMonth, 12m, null, new YearMonth(2026, month));
+            }
+        }
+
+        var comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, november));
+
+        // This year: 10 × 110 + 11 × 12 = 1232. Last year, the same months: 10 × 100 + 11 × 10 = 1110 (not Jan–Nov of the water: 1200 + ...).
+        // Change: (1232 − 1110) / 1110 = 10.99 % -> 11.0.
+        Assert.Equal((1232m, 1110m, 11.0m), (comparison.ThisYear, comparison.LastYear, comparison.ChangePercent));
+    }
+
+    [Fact]
+    public void Year_to_date_leaves_out_a_contract_without_bills_this_year_and_groups_bills_without_a_contract()
+    {
+        var november = new DateOnly(2026, 11, 11);
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water");
+        var ended = scenario.AddContract("Old internet");
+        scenario.AddBill(water, 50m, null, new YearMonth(2026, 3));
+        scenario.AddBill(water, 40m, null, new YearMonth(2025, 3));
+        scenario.AddBill(water, 99m, null, new YearMonth(2025, 8));        // after the contract's last month this year
+        scenario.AddBill(ended, 700m, null, new YearMonth(2025, 5));       // ended last year: in neither sum
+        // One-off bills without a contract: one group, its own last month (September).
+        scenario.AddBill(water, 30m, null, new YearMonth(2026, 9)).ContractId = null;
+        scenario.AddBill(water, 20m, null, new YearMonth(2025, 9)).ContractId = null;
+        scenario.AddBill(water, 8m, null, new YearMonth(2025, 10)).ContractId = null;
+
+        var comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, november));
+
+        // This year 50 + 30 = 80; last year 40 (water, up to March) + 20 (one-off, up to September) = 60.
+        Assert.Equal((80m, 60m), (comparison.ThisYear, comparison.LastYear));
+    }
+
+    [Fact]
     public void Settlements_list_every_equalized_contract_with_a_result_even_small_ones()
     {
         var scenario = new OverviewScenario();
