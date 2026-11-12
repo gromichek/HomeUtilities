@@ -5,38 +5,50 @@
              x:Class="HomeUtilities.App.Views.OverviewMoneyCard"
              x:DataType="vm:OverviewViewModel">
 
-    <!-- Money: one block per property, one tappable line per figure. -->
+    <!-- Money: one block per property; sections To pay / Overpaid / Expected settlement, one tappable row per contract. -->
     <Border Style="{StaticResource SectionCard}">
         <VerticalStackLayout Spacing="8">
             <Label Text="{Binding MoneyHeader}" Style="{StaticResource SectionHeader}" />
 
             <Label Text="{Binding MoneyEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding ShowMoneyEmpty}" />
 
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MoneyBlocks}" Spacing="10" IsVisible="{Binding HasMoney}">
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MoneyBlocks}" Spacing="12" IsVisible="{Binding HasMoney}">
                 <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="vm:OverviewBlockViewModel">
-                        <VerticalStackLayout Spacing="2">
+                    <DataTemplate x:DataType="vm:OverviewMoneyBlockViewModel">
+                        <VerticalStackLayout Spacing="6">
                             <Label Text="{Binding Header}" FontAttributes="Bold" />
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Lines}" Spacing="0">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Sections}" Spacing="8">
                                 <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:OverviewLineViewModel">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" MinimumHeightRequest="36">
-                                            <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding OpenCommand}" />
-                                            </Grid.GestureRecognizers>
-                                            <Label Grid.Column="0" Text="{Binding Text}" VerticalOptions="Center">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label" x:DataType="vm:OverviewLineViewModel" Binding="{Binding IsDebt}" Value="True">
-                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
-                                                    </DataTrigger>
-                                                    <DataTrigger TargetType="Label" x:DataType="vm:OverviewLineViewModel" Binding="{Binding IsGood}" Value="True">
-                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
-                                            <Label Grid.Column="1" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
-                                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
-                                        </Grid>
+                                    <DataTemplate x:DataType="vm:OverviewMoneySectionViewModel">
+                                        <VerticalStackLayout Spacing="0" SemanticProperties.Description="{Binding Description}">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Grid.Column="0" Text="{Binding Header}" Style="{StaticResource MutedLabel}" FontAttributes="Bold" VerticalOptions="Center" />
+                                                <Label Grid.Column="1" Text="{Binding Total}" IsVisible="{Binding HasTotal}" FontAttributes="Bold" VerticalOptions="Center" />
+                                            </Grid>
+                                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Rows}" Spacing="0">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:OverviewMoneyRowViewModel">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8"
+                                                              Padding="8,0,0,0" MinimumHeightRequest="{StaticResource TouchSize}">
+                                                            <Grid.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                                                            </Grid.GestureRecognizers>
+                                                            <Label Grid.Row="0" Grid.Column="0" Text="{Binding Text}" VerticalOptions="Center" />
+                                                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding Amount}" IsVisible="{Binding HasAmount}" VerticalOptions="Center" HorizontalTextAlignment="End" />
+                                                            <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Text="{StaticResource IconChevron}" FontFamily="{DynamicResource IconFontFamily}"
+                                                                   VerticalOptions="Center" Style="{StaticResource MutedLabel}" />
+                                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Detail}" IsVisible="{Binding HasDetail}" FontSize="12" Style="{StaticResource MutedLabel}">
+                                                                <Label.Triggers>
+                                                                    <DataTrigger TargetType="Label" x:DataType="vm:OverviewMoneyRowViewModel" Binding="{Binding IsDetailDebt}" Value="True">
+                                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ErrorLight}, Dark={StaticResource ErrorDark}}" />
+                                                                    </DataTrigger>
+                                                                </Label.Triggers>
+                                                            </Label>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>

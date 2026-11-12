@@ -1063,7 +1063,7 @@
   <data name="OverviewTodoEmpty" xml:space="preserve"><value>Делать нечего — показания переданы, счета оплачены.</value></data>
   <data name="OverviewMoneyHeader" xml:space="preserve"><value>Деньги</value></data>
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>Счетов и платежей пока нет.</value></data>
-  <data name="OverviewMoneyAllPaid" xml:space="preserve"><value>Всё оплачено — долгов и предоплат нет.</value></data>
+  <data name="OverviewMoneyAllPaid" xml:space="preserve"><value>Расчёты закрыты — долгов и переплат нет.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>Этот год</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>Счетов за этот год пока нет.</value></data>
   <data name="OverviewChartHint" xml:space="preserve"><value>Нажмите на месяц, чтобы открыть его счета.</value></data>
@@ -1078,11 +1078,15 @@
   <data name="OverviewConsumptionInMonth" xml:space="preserve"><value>{0} за {1}</value></data>
   <data name="OverviewConsumptionRise" xml:space="preserve"><value>Выше обычного</value></data>
   <data name="OverviewConsumptionRowSummary" xml:space="preserve"><value>{0}: {1}, {2} к среднему за предыдущие 11 месяцев</value></data>
-  <data name="OverviewOpenBills" xml:space="preserve"><value>Неоплаченные счета {0}</value></data>
-  <data name="OverviewOverdueBills" xml:space="preserve"><value>Просрочено {0}</value></data>
-  <data name="OverviewPrepayments" xml:space="preserve"><value>Предоплата {0}</value></data>
-  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: доплата {1}</value></data>
-  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Ожидаемый перерасчёт, {0}: возврат {1}</value></data>
+  <data name="OverviewMoneyToPay" xml:space="preserve"><value>К оплате</value></data>
+  <data name="OverviewMoneyOverpaid" xml:space="preserve"><value>Переплата</value></data>
+  <data name="OverviewMoneySettlement" xml:space="preserve"><value>Ожидаемый перерасчёт</value></data>
+  <data name="OverviewMoneyOverdueSince" xml:space="preserve"><value>просрочено с {0}</value></data>
+  <data name="OverviewMoneyDueOn" xml:space="preserve"><value>до {0}</value></data>
+  <data name="OverviewMoneyRefund" xml:space="preserve"><value>возврат</value></data>
+  <data name="OverviewMoneySurcharge" xml:space="preserve"><value>доплата</value></data>
+  <data name="OverviewMoneyMore" xml:space="preserve"><value>ещё {0}</value></data>
+  <data name="OverviewMoneyNoContract" xml:space="preserve"><value>Без договора</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} за тот же период: {3}</value></data>
   <data name="OverviewYearLineNoPrevious" xml:space="preserve"><value>{0}: {1}</value></data>

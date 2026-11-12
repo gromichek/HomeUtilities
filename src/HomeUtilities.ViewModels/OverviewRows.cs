@@ -122,3 +122,55 @@ public sealed class OverviewBlockViewModel(string header, IReadOnlyList<Overview
 
     public IReadOnlyList<OverviewLineViewModel> Lines { get; } = lines;
 }
+
+/// <summary>One tappable row of a Money section: name and amount on the first line, an optional detail under the name.</summary>
+public sealed class OverviewMoneyRowViewModel(string text, string amount, string detail, OverviewTone detailTone, Func<Task> open)
+{
+    /// <summary>The contract's name (or "N more").</summary>
+    public string Text { get; } = text;
+
+    /// <summary>The amount, formatted with the app culture; empty on the "N more" row.</summary>
+    public string Amount { get; } = amount;
+
+    /// <summary>The second line: "overdue since …", "due …", "refund", "surcharge"; empty when there is none.</summary>
+    public string Detail { get; } = detail;
+
+    public OverviewTone DetailTone { get; } = detailTone;
+
+    public bool HasDetail => Detail.Length > 0;
+
+    public bool HasAmount => Amount.Length > 0;
+
+    public bool IsDetailDebt => DetailTone == OverviewTone.Debt;
+
+    public bool IsDetailGood => DetailTone == OverviewTone.Good;
+
+    public IAsyncRelayCommand OpenCommand { get; } = Row.Command(open);
+
+    /// <summary>One line for screen readers: "Gas, 12,25 €, overdue since 05.11.2026".</summary>
+    public string Description => string.Join(", ", new[] { Text, Amount, Detail }.Where(part => part.Length > 0));
+}
+
+/// <summary>A section of the Money card ("To pay", "Overpaid", "Expected settlement") with its rows and, where it makes sense, a total.</summary>
+public sealed class OverviewMoneySectionViewModel(string header, string total, IReadOnlyList<OverviewMoneyRowViewModel> rows)
+{
+    public string Header { get; } = header;
+
+    /// <summary>The sum of the rows; empty when the section has no total (settlements, several currencies).</summary>
+    public string Total { get; } = total;
+
+    public bool HasTotal => Total.Length > 0;
+
+    public IReadOnlyList<OverviewMoneyRowViewModel> Rows { get; } = rows;
+
+    /// <summary>One line for screen readers: the header, the total and every row.</summary>
+    public string Description => $"{Header} {Total}".Trim() + ": " + string.Join("; ", Rows.Select(r => r.Description));
+}
+
+/// <summary>The Money sections of one property.</summary>
+public sealed class OverviewMoneyBlockViewModel(string header, IReadOnlyList<OverviewMoneySectionViewModel> sections)
+{
+    public string Header { get; } = header;
+
+    public IReadOnlyList<OverviewMoneySectionViewModel> Sections { get; } = sections;
+}

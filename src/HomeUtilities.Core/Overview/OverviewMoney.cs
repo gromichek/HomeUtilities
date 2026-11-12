@@ -13,6 +13,30 @@ namespace HomeUtilities.Core.Overview;
 public sealed record PropertyMoney(
     Guid PropertyId, Currency Currency, decimal OpenBills, decimal OverdueBills, decimal Prepayments, decimal Balance);
 
+/// <summary>One contract's row in the "To pay" or "Overpaid" section of the Money card.</summary>
+/// <param name="ContractId">The contract; null = bills or payments without a contract (one row).</param>
+/// <param name="Title">The contract's title; null when <paramref name="ContractId"/> is null (the UI names it).</param>
+/// <param name="Currency">The currency of the amount.</param>
+/// <param name="Amount">To pay: the open remainders of the contract's bills. Overpaid: its payments that no bill uses. Always positive.</param>
+/// <param name="OverdueSince">To pay only: the due date of the oldest open bill that is past due; null when none is.</param>
+/// <param name="NextDue">To pay only: the nearest due date of the open bills that are not overdue; null when there is none.</param>
+public sealed record MoneyRow(Guid? ContractId, string? Title, Currency Currency, decimal Amount, DateOnly? OverdueSince = null, DateOnly? NextDue = null);
+
+/// <summary>
+/// The three sections of the Money card for one property. Debts and overpayments of different contracts are never netted:
+/// a contract with an open bill and an unallocated payment is in <see cref="ToPay"/> and in <see cref="Overpaid"/>.
+/// </summary>
+/// <param name="PropertyId">The property.</param>
+/// <param name="ToPay">One row per contract (and currency) with open bills: overdue first (oldest first), then by due date, then by name.</param>
+/// <param name="Overpaid">One row per contract (and currency) with unallocated payments, the biggest amount first.</param>
+/// <param name="Settlements">The expected settlements of the property's equalized contracts (no total: refunds and surcharges of different suppliers).</param>
+public sealed record PropertyMoneySections(
+    Guid PropertyId, IReadOnlyList<MoneyRow> ToPay, IReadOnlyList<MoneyRow> Overpaid, IReadOnlyList<ExpectedSettlement> Settlements)
+{
+    /// <summary>Whether all three sections are empty.</summary>
+    public bool IsEmpty => ToPay.Count == 0 && Overpaid.Count == 0 && Settlements.Count == 0;
+}
+
 /// <summary>What an equalized contract expects to settle.</summary>
 /// <param name="PropertyId">The property.</param>
 /// <param name="ContractId">The equalized contract.</param>
@@ -91,6 +115,81 @@ public static class OverviewMoney
                     .Where(c => c.Currency == currency)
                     .Sum(c => ContractBalance.Of(c.Id, bills, payments, today).Value);
                 result.Add(new PropertyMoney(property.Id, currency, open, overdue, prepayments, balance));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The sections of the Money card per property on <paramref name="today"/>: what is to pay per contract, what is overpaid per contract and
+    /// the expected settlements (a recalculation under one cent is left out). Properties in list order; those with nothing to show are omitted.
+    /// </summary>
+    public static IReadOnlyList<PropertyMoneySections> Sections(OverviewData data, DateOnly today)
+    {
+        ArgumentNullException.ThrowIfNull(data);
+
+        var bills = data.Bills.Where(b => !b.IsDeleted && !b.IsDraft).ToList();
+        var payments = data.Payments.Where(p => !p.IsDeleted).ToList();
+        var contracts = data.Contracts.Where(c => !c.IsDeleted).ToList();
+        var titles = contracts.ToDictionary(c => c.Id, c => c.Title);
+        var contractProperty = contracts.ToDictionary(c => c.Id, c => c.PropertyId);
+        var billProperty = bills.ToDictionary(b => b.Id, b => b.PropertyId);
+        var allocationsByBill = payments
+            .SelectMany(p => p.Allocations.Where(a => !a.IsDeleted))
+            .GroupBy(a => a.BillId)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Amount));
+        var settlements = Settlements(data).Where(s => Math.Abs(s.Expected) >= 0.01m).ToList();
+
+        string? TitleOf(Guid? contractId) => contractId is { } id ? titles.GetValueOrDefault(id, string.Empty) : null;
+
+        var result = new List<PropertyMoneySections>();
+        foreach (var property in data.Properties.Where(p => !p.IsDeleted))
+        {
+            var toPay = new List<MoneyRow>();
+            var open = bills
+                .Where(b => b.PropertyId == property.Id)
+                .Select(b => (Bill: b, Left: b.Gross - allocationsByBill.GetValueOrDefault(b.Id)))
+                .Where(x => x.Left > 0)
+                .GroupBy(x => (x.Bill.ContractId, x.Bill.Currency));
+            foreach (var group in open)
+            {
+                var overdue = group.Where(x => x.Bill.DueOn is { } due && due < today).Select(x => x.Bill.DueOn!.Value).ToList();
+                var upcoming = group.Where(x => x.Bill.DueOn is { } due && due >= today).Select(x => x.Bill.DueOn!.Value).ToList();
+                toPay.Add(new MoneyRow(
+                    group.Key.ContractId,
+                    TitleOf(group.Key.ContractId),
+                    group.Key.Currency,
+                    group.Sum(x => x.Left),
+                    overdue.Count > 0 ? overdue.Min() : null,
+                    upcoming.Count > 0 ? upcoming.Min() : null));
+            }
+
+            var overpaid = payments
+                .Where(p => PropertyOf(p, contractProperty, billProperty) == property.Id)
+                .Select(p => (Payment: p, Left: PaymentRules.Unallocated(p)))
+                .Where(x => x.Left > 0)
+                .GroupBy(x => (x.Payment.ContractId, x.Payment.Currency))
+                .Select(g => new MoneyRow(g.Key.ContractId, TitleOf(g.Key.ContractId), g.Key.Currency, g.Sum(x => x.Left)))
+                .OrderByDescending(r => r.Amount)
+                .ThenBy(r => r.Title, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var sections = new PropertyMoneySections(
+                property.Id,
+                [
+                    .. toPay
+                        .OrderBy(r => r.OverdueSince is null)
+                        .ThenBy(r => r.OverdueSince)
+                        .ThenBy(r => r.NextDue is null)
+                        .ThenBy(r => r.NextDue)
+                        .ThenBy(r => r.Title, StringComparer.OrdinalIgnoreCase),
+                ],
+                overpaid,
+                [.. settlements.Where(s => s.PropertyId == property.Id)]);
+            if (!sections.IsEmpty)
+            {
+                result.Add(sections);
             }
         }
 

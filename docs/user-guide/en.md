@@ -179,12 +179,27 @@ The thresholds (3 days, 7 days, 60 days, 1.00 €) are fixed in this version. If
 
 ### Money
 
-For each property: **Open bills** (everything still unpaid, as on the Bills screen with the status *Open*), **Overdue** (the
-part past its due date), **Prepayments** (money you paid that no bill uses yet, as on the Payments screen) and the **balance** of
-all the property's contracts — **Debt …** in red or **Paid in advance …** in green, the same figure as the *Balance* card of each
-contract added up. Equalized contracts add a line **Expected settlement, {contract}: surcharge / refund …**. Tap a line to open
-the Bills screen (filtered to open or overdue bills), the Payments screen, or the settlement page.
-If there are bills or payments but everything is paid and nothing is prepaid, the card says **Everything is paid — no debts or prepayments.**; *No bills or payments yet.* stays only for when there really are none (with the property filter: none for the chosen property).
+For each property the card has up to three sections, in this order; an empty section is not shown.
+
+- **To pay** — one row per contract with open bills: the sum still unpaid (as on the Bills screen with the status *Open*). The
+  second line says *overdue since 05.11.2026* in red when its oldest open bill is past due, otherwise *due 25.11.2026* (the nearest
+  due date). Overdue contracts come first. The header shows the total.
+- **Overpaid** — one row per contract: money you paid that no bill uses yet (as *Prepayment* on the Payments screen). A payment
+  without a contract is shown as *No contract*. The header shows the total.
+- **Expected settlement** — one row per equalized contract (see "Equalized payments") with the signed amount and the word
+  *refund* or *surcharge*. There is no total: a refund from one supplier and a surcharge from another are not added up.
+
+**Debts and overpayments of different contracts are never offset**, because different suppliers do not settle with each other.
+A contract that has both an open bill and a payment that no bill uses appears in **both** sections: allocate the payment on the
+Payments screen. A section with several currencies has no total. More than 5 rows: the first 5 and a row *2 more* that opens the list.
+
+Example (invented): *To pay 37,40 €* — Gas 12,25 € (*overdue since 05.11.2026*), House maintenance 25,15 € (*due 25.11.2026*);
+*Overpaid 13,25 €* — Electricity 13,25 €; *Expected settlement* — Gas −9,32 € (*refund*), Electricity +2,87 € (*surcharge*).
+Gas is to pay and gets a refund at the same time; the two are not mixed into one figure.
+
+Tap a row: **To pay** opens Bills (open bills, the contract's bills highlighted), **Overpaid** opens Payments of that contract,
+**Expected settlement** opens the settlement page. If there are bills or payments but nothing is open, overpaid or expected, the
+card says **All settled — no debts or overpayments.**; *No bills or payments yet.* stays only for when there really are none (with the property filter: none for the chosen property).
 
 ### This year
 

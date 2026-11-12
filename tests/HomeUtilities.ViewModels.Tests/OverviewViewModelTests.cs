@@ -346,7 +346,7 @@ public class OverviewViewModelTests : IDisposable
         var vm = await LoadAsync();
 
         Assert.DoesNotContain(vm.TodoRows, r => r.IsDue);
-        Assert.DoesNotContain(vm.MoneyBlocks.SelectMany(b => b.Lines), l => l.Text.Contains("500", StringComparison.Ordinal));
+        Assert.DoesNotContain(vm.MoneyBlocks.SelectMany(b => b.Sections).SelectMany(x => x.Rows), r => r.Description.Contains("500", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -406,7 +406,7 @@ public class OverviewViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Money_card_lists_open_overdue_prepayment_and_balance_of_the_property()
+    public async Task Money_card_lists_to_pay_and_overpaid_sections_of_the_property_without_netting()
     {
         AddMoneyScenario();
 
@@ -414,15 +414,126 @@ public class OverviewViewModelTests : IDisposable
 
         var block = Assert.Single(vm.MoneyBlocks);
         Assert.Equal("Sample flat", block.Header);
-        Assert.Equal(
-            [
-                $"OverviewOpenBills {Money("90.00")} [en]",
-                $"OverviewOverdueBills {Money("30.00")} [en]",
-                $"OverviewPrepayments {Money("22.00")} [en]",
-                $"ContractBalanceDebt {Money("68.00")} [en]",
-            ],
-            block.Lines.Select(l => l.Text));
-        Assert.Equal([OverviewTone.Neutral, OverviewTone.Debt, OverviewTone.Good, OverviewTone.Debt], block.Lines.Select(l => l.Tone));
+        Assert.Equal(["OverviewMoneyToPay [en]", "OverviewMoneyOverpaid [en]"], block.Sections.Select(x => x.Header));
+
+        // 30 (Sep, overdue since 20.10.) + 60 (Oct, due 20.11.) = 90 to pay; the 22 no bill uses is overpaid. No balance line.
+        var toPay = block.Sections[0];
+        Assert.Equal(Money("90.00"), toPay.Total);
+        var row = Assert.Single(toPay.Rows);
+        Assert.Equal(("Water", Money("90.00"), $"OverviewMoneyOverdueSince {BillText.Date(new DateOnly(2026, 10, 20))} [en]", OverviewTone.Debt),
+            (row.Text, row.Amount, row.Detail, row.DetailTone));
+
+        var overpaid = block.Sections[1];
+        Assert.Equal(Money("22.00"), overpaid.Total);
+        var over = Assert.Single(overpaid.Rows);
+        Assert.Equal(("Water", Money("22.00"), string.Empty), (over.Text, over.Amount, over.Detail));
+    }
+
+    [Fact]
+    public async Task A_row_without_overdue_bills_shows_the_nearest_due_date_and_without_a_due_date_nothing()
+    {
+        var water = _kit.AddWaterContract(tariff: false);
+        _kit.AddBill(water, new YearMonth(2026, 10), 60m, due: new DateOnly(2026, 11, 20));
+        var vm = await LoadAsync();
+        var row = Assert.Single(vm.MoneyBlocks[0].Sections[0].Rows);
+        Assert.Equal(($"OverviewMoneyDueOn {BillText.Date(new DateOnly(2026, 11, 20))} [en]", OverviewTone.Neutral), (row.Detail, row.DetailTone));
+        Assert.False(row.IsDetailDebt);
+    }
+
+    [Fact]
+    public async Task Money_card_example_has_three_sections_with_totals_and_signed_settlements()
+    {
+        var gas = _kit.AddWaterContract("Gas", tariff: false);
+        var house = _kit.AddWaterContract("House", tariff: false);
+        var power = _kit.AddWaterContract("Electricity", tariff: false);
+        _kit.AddBill(gas, new YearMonth(2026, 9), 12.25m, due: new DateOnly(2026, 10, 5));
+        _kit.AddBill(house, new YearMonth(2026, 10), 25.15m, due: new DateOnly(2026, 11, 25));
+        _kit.Payments.All.Add(new Payment { ContractId = power.Id, PaidOn = new DateOnly(2026, 10, 20), Amount = 13.25m });
+        gas.BillingMode = BillingMode.Equalized;
+        power.BillingMode = BillingMode.Equalized;
+        _loader.Settlements[gas.Id] = -9.32m;
+        _loader.Settlements[power.Id] = 2.87m;
+
+        var vm = await LoadAsync();
+
+        var sections = Assert.Single(vm.MoneyBlocks).Sections;
+        Assert.Equal(["OverviewMoneyToPay [en]", "OverviewMoneyOverpaid [en]", "OverviewMoneySettlement [en]"], sections.Select(x => x.Header));
+        Assert.Equal([Money("37.40"), Money("13.25"), string.Empty], sections.Select(x => x.Total));
+        Assert.Equal([false, false, false], sections.Select(x => x.Rows.Count == 0));
+        Assert.Equal(["Gas", "House"], sections[0].Rows.Select(r => r.Text));
+        Assert.Equal(["Electricity"], sections[1].Rows.Select(r => r.Text));
+        Assert.Equal([("Electricity", $"+{Money("2.87")}", "OverviewMoneySurcharge [en]"), ("Gas", $"-{Money("9.32")}", "OverviewMoneyRefund [en]")],
+            sections[2].Rows.Select(r => (r.Text, r.Amount, r.Detail)));
+        Assert.False(sections[2].HasTotal);
+    }
+
+    [Fact]
+    public async Task A_debt_of_one_contract_and_an_overpayment_of_another_do_not_say_everything_is_settled()
+    {
+        var water = _kit.AddWaterContract("Water", tariff: false);
+        _kit.AddBill(water, new YearMonth(2026, 10), 10m, due: new DateOnly(2026, 11, 20));
+        var gas = _kit.AddWaterContract("Gas", tariff: false);
+        _kit.Payments.All.Add(new Payment { ContractId = gas.Id, PaidOn = new DateOnly(2026, 10, 20), Amount = 10m });
+
+        var vm = await LoadAsync();
+
+        Assert.True(vm.HasMoney);
+        Assert.False(vm.ShowMoneyEmpty);
+        Assert.Equal(["OverviewMoneyToPay [en]", "OverviewMoneyOverpaid [en]"], vm.MoneyBlocks[0].Sections.Select(x => x.Header));
+    }
+
+    [Fact]
+    public async Task Only_an_overpayment_shows_no_to_pay_section_and_a_payment_without_a_contract_is_named()
+    {
+        _kit.AddWaterContract(tariff: false);
+        _kit.Payments.All.Add(new Payment { PropertyId = _kit.Kit.Property.Id, PaidOn = new DateOnly(2026, 10, 20), Amount = 22.24m });
+
+        var vm = await LoadAsync();
+
+        var section = Assert.Single(Assert.Single(vm.MoneyBlocks).Sections);
+        Assert.Equal("OverviewMoneyOverpaid [en]", section.Header);
+        Assert.Equal("OverviewMoneyNoContract [en]", Assert.Single(section.Rows).Text);
+    }
+
+    [Fact]
+    public async Task More_than_five_rows_show_five_and_a_more_row_that_opens_the_list()
+    {
+        for (var i = 1; i <= 7; i++)
+        {
+            var contract = _kit.AddWaterContract($"C{i}", tariff: false);
+            _kit.AddBill(contract, new YearMonth(2026, 10), 10m, due: new DateOnly(2026, 11, i));
+        }
+
+        var vm = await LoadAsync();
+
+        var section = Assert.Single(vm.MoneyBlocks[0].Sections);
+        Assert.Equal(Money("70.00"), section.Total);
+        Assert.Equal(6, section.Rows.Count);
+        var more = section.Rows[^1];
+        Assert.Equal("OverviewMoneyMore 2 [en]", more.Text);
+        Assert.False(more.HasAmount);
+
+        await more.OpenCommand.ExecuteAsync(null);
+
+        var (route, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
+        Assert.Equal(Routes.BillsFor, route);
+        Assert.Equal("Open", parameters![BillsViewModel.StatusParameter]);
+        Assert.False(parameters.ContainsKey(EditorNavigation.ContractIdParameter));
+    }
+
+    [Fact]
+    public async Task A_section_with_two_currencies_has_no_total()
+    {
+        var water = _kit.AddWaterContract("Water", tariff: false);
+        _kit.AddBill(water, new YearMonth(2026, 10), 10m, due: new DateOnly(2026, 11, 20));
+        var old = _kit.AddBill(water, new YearMonth(2026, 9), 20m, due: new DateOnly(2026, 11, 20));
+        old.Currency = Currency.LVL;
+
+        var vm = await LoadAsync();
+
+        var section = Assert.Single(vm.MoneyBlocks[0].Sections);
+        Assert.Equal(2, section.Rows.Count);
+        Assert.False(section.HasTotal);
     }
 
     [Fact]
@@ -475,7 +586,6 @@ public class OverviewViewModelTests : IDisposable
     [Fact]
     public async Task Money_card_with_a_payment_but_no_bill_counts_as_having_records()
     {
-        // A lone payment is a prepayment, so the card shows a line, not an empty text; the text itself is the "paid" one.
         var water = _kit.AddWaterContract(tariff: false);
         _kit.Payments.All.Add(new Payment { ContractId = water.Id, PaidOn = new DateOnly(2026, 10, 25), Amount = 12.30m });
 
@@ -490,67 +600,59 @@ public class OverviewViewModelTests : IDisposable
     {
         AddMoneyScenario();
         var overview = await LoadAsync();
-        var lines = overview.MoneyBlocks[0].Lines.Select(l => l.Text).ToList();
+        var sections = overview.MoneyBlocks[0].Sections;
 
-        // Bills screen: all years, status Open -> the "open" total; status Overdue -> the overdue total.
+        // Bills screen: all years, status Open -> the "open" total = the To pay total.
         _kit.Filter.Period = PeriodFilter.ForAllYears(2026);
         _kit.Filter.Status = BillStatusFilter.Open;
         var bills = _kit.CreateBills();
         await bills.ReloadAsync();
-        var openOnBills = LastPart(bills.TotalsText, 2);
-        Assert.Contains($"OverviewOpenBills {openOnBills} [en]", lines);
+        Assert.Equal(LastPart(bills.TotalsText, 2), sections[0].Total);
 
-        _kit.Filter.Status = BillStatusFilter.Overdue;
-        bills = _kit.CreateBills();
-        await bills.ReloadAsync();
-        var overdueOnBills = LastPart(bills.TotalsText, 2);
-        Assert.Contains($"OverviewOverdueBills {overdueOnBills} [en]", lines);
-
-        // Payments screen: all years -> the prepayment total.
+        // Payments screen: all years -> the prepayment total = the Overpaid total.
         _kit.PaymentFilter.Period = PeriodFilter.ForAllYears(2026);
         var payments = _kit.CreatePayments();
         await payments.ReloadAsync();
-        var prepaymentOnPayments = LastPart(payments.TotalsText, 1);
-        Assert.Contains($"OverviewPrepayments {prepaymentOnPayments} [en]", lines);
+        Assert.Equal(LastPart(payments.TotalsText, 1), sections[1].Total);
     }
 
     [Fact]
-    public async Task Prepaid_contract_shows_paid_in_advance()
+    public async Task Prepaid_contract_shows_only_the_overpaid_section()
     {
         var water = _kit.AddWaterContract(tariff: false);
         var bill = _kit.AddBill(water, new YearMonth(2026, 9), 50m, due: new DateOnly(2026, 10, 20));
         _kit.AddPayment(50m, (bill, 50m));
-        var extra = new Payment { ContractId = water.Id, PaidOn = new DateOnly(2026, 10, 25), Amount = 12.30m };
-        _kit.Payments.Add(extra);
+        _kit.Payments.Add(new Payment { ContractId = water.Id, PaidOn = new DateOnly(2026, 10, 25), Amount = 12.30m });
 
         var vm = await LoadAsync();
 
-        Assert.Equal(
-            [$"OverviewPrepayments {Money("12.30")} [en]", $"ContractBalanceAdvance {Money("12.30")} [en]"],
-            vm.MoneyBlocks[0].Lines.Select(l => l.Text));
-        Assert.Equal([OverviewTone.Good, OverviewTone.Good], vm.MoneyBlocks[0].Lines.Select(l => l.Tone));
+        var section = Assert.Single(vm.MoneyBlocks[0].Sections);
+        Assert.Equal(("OverviewMoneyOverpaid [en]", Money("12.30")), (section.Header, section.Total));
     }
 
     [Fact]
-    public async Task Money_lines_open_bills_filtered_payments_or_the_settlement()
+    public async Task Money_rows_open_the_contract_bills_the_contract_payments_or_the_settlement()
     {
         var (water, _, _, _) = AddMoneyScenario();
         water.BillingMode = BillingMode.Equalized;
         _loader.Settlements[water.Id] = 8.35m;
         var vm = await LoadAsync();
-        var lines = vm.MoneyBlocks[0].Lines;
-        Assert.Equal($"OverviewSettlementSurcharge Water|{Money("8.35")} [en]", lines[^1].Text);
+        var sections = vm.MoneyBlocks[0].Sections;
+        Assert.Equal(3, sections.Count);
+        Assert.Equal(("Water", $"+{Money("8.35")}", "OverviewMoneySurcharge [en]"), (sections[2].Rows[0].Text, sections[2].Rows[0].Amount, sections[2].Rows[0].Detail));
 
-        foreach (var line in lines)
+        foreach (var row in sections.SelectMany(x => x.Rows))
         {
-            await line.OpenCommand.ExecuteAsync(null);
+            await row.OpenCommand.ExecuteAsync(null);
         }
 
         var visited = _kit.Kit.Navigation.Visited;
-        Assert.Equal([Routes.BillsFor, Routes.BillsFor, Routes.PaymentsFor, Routes.BillsFor, Routes.EqualizedSettlement], visited.Select(v => v.Route));
-        Assert.Equal(["Open", "Overdue", null, "All"], visited.Take(4).Select(v => v.Parameters!.GetValueOrDefault(BillsViewModel.StatusParameter)));
-        Assert.All(visited.Take(4), v => Assert.Equal(_kit.Kit.Property.Id, v.Parameters![EditorNavigation.PropertyIdParameter]));
-        Assert.Equal(water.Id, visited[4].Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal([Routes.BillsFor, Routes.PaymentsFor, Routes.EqualizedSettlement], visited.Select(v => v.Route));
+        Assert.Equal("Open", visited[0].Parameters![BillsViewModel.StatusParameter]);
+        Assert.Equal(_kit.Kit.Property.Id, visited[0].Parameters![EditorNavigation.PropertyIdParameter]);
+        Assert.Equal(water.Id, visited[0].Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal(water.Id, visited[1].Parameters![EditorNavigation.ContractIdParameter]);
+        Assert.Equal(water.Id, visited[2].Parameters![EditorNavigation.ContractIdParameter]);
     }
 
     [Fact]

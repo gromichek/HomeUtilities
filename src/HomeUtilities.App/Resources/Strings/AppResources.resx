@@ -1063,7 +1063,7 @@
   <data name="OverviewTodoEmpty" xml:space="preserve"><value>Nothing to do — all readings submitted and bills paid.</value></data>
   <data name="OverviewMoneyHeader" xml:space="preserve"><value>Money</value></data>
   <data name="OverviewMoneyEmpty" xml:space="preserve"><value>No bills or payments yet.</value></data>
-  <data name="OverviewMoneyAllPaid" xml:space="preserve"><value>Everything is paid — no debts or prepayments.</value></data>
+  <data name="OverviewMoneyAllPaid" xml:space="preserve"><value>All settled — no debts or overpayments.</value></data>
   <data name="OverviewYearHeader" xml:space="preserve"><value>This year</value></data>
   <data name="OverviewYearEmpty" xml:space="preserve"><value>No bills this year yet.</value></data>
   <data name="OverviewChartHint" xml:space="preserve"><value>Tap a month to open its bills.</value></data>
@@ -1078,11 +1078,15 @@
   <data name="OverviewConsumptionInMonth" xml:space="preserve"><value>{0} in {1}</value></data>
   <data name="OverviewConsumptionRise" xml:space="preserve"><value>Higher than usual</value></data>
   <data name="OverviewConsumptionRowSummary" xml:space="preserve"><value>{0}: {1}, {2} against the average of the previous 11 months</value></data>
-  <data name="OverviewOpenBills" xml:space="preserve"><value>Open bills {0}</value></data>
-  <data name="OverviewOverdueBills" xml:space="preserve"><value>Overdue {0}</value></data>
-  <data name="OverviewPrepayments" xml:space="preserve"><value>Prepayments {0}</value></data>
-  <data name="OverviewSettlementSurcharge" xml:space="preserve"><value>Expected settlement, {0}: surcharge {1}</value></data>
-  <data name="OverviewSettlementRefund" xml:space="preserve"><value>Expected settlement, {0}: refund {1}</value></data>
+  <data name="OverviewMoneyToPay" xml:space="preserve"><value>To pay</value></data>
+  <data name="OverviewMoneyOverpaid" xml:space="preserve"><value>Overpaid</value></data>
+  <data name="OverviewMoneySettlement" xml:space="preserve"><value>Expected settlement</value></data>
+  <data name="OverviewMoneyOverdueSince" xml:space="preserve"><value>overdue since {0}</value></data>
+  <data name="OverviewMoneyDueOn" xml:space="preserve"><value>due {0}</value></data>
+  <data name="OverviewMoneyRefund" xml:space="preserve"><value>refund</value></data>
+  <data name="OverviewMoneySurcharge" xml:space="preserve"><value>surcharge</value></data>
+  <data name="OverviewMoneyMore" xml:space="preserve"><value>{0} more</value></data>
+  <data name="OverviewMoneyNoContract" xml:space="preserve"><value>No contract</value></data>
   <data name="OverviewYearLine" xml:space="preserve"><value>{0}: {1} · {2} same period: {3} ({4})</value></data>
   <data name="OverviewYearLineNoChange" xml:space="preserve"><value>{0}: {1} · {2} same period: {3}</value></data>
   <data name="OverviewYearLineNoPrevious" xml:space="preserve"><value>{0}: {1}</value></data>
