@@ -416,6 +416,12 @@ prices (you enter the prices afterwards): *Water + sewerage*, *Heating as one su
   meter is counted automatically, so you do not need to edit the tariff. For *By area* and *Per resident* pick
   the **parameter** of the property (total area, heated area, residents, or your own); the line "now: 52.3 m²" shows its
   current value — change it in the property (Parameters card).
+  **One contract, several meters, different prices.** Example: one electricity contract covers the flat (meter *EL-1*)
+  and the summer house (meter *EL-2*), but the supplier bills the house at a higher price. Add two lines, *Electricity flat*
+  and *Electricity house*, both *By consumption*: in the first line switch on only *EL-1*, in the second only *EL-2*. A line with
+  **no meter selected counts all meters** of the contract. A meter joins a contract **from a date**: open the meter, card
+  *Contracts*, **Link to a contract…**, then tap the row to set *Valid from* ([Meters](#8-meters)); readings before that
+  date do not belong to the contract.
 - **Quantity from the bill:** for this basis pick the **unit** of the quantity (m³, kWh, MWh or Gcal) and enter the
   prices as usual. The quantity itself is typed in the bill (see [Bills](#13-bills)); until it is typed the line is
   *incomplete*. Use it when the supplier distributes a building meter among the flats by its own formula, which the app
@@ -570,6 +576,62 @@ the list shows only the bills of that category, that property and that month.
 on the contract as *In advance*) belong to the month they are for: paid in October for November → **November**. A bill that arrives in its own month (*In the service month*) belongs to that month. The
 editor suggests the right month for the contract and you can change it with ‹ › or by tapping the month.
 
+### Bill kinds
+
+The **Kind** field on the *General* card says what a bill is. Most of the time it is *Regular bill* (the editor
+proposes *Equalized payment* by itself for a contract with an [equalized plan](#16-equalized-payments)); the other kinds
+exist so that special records do not distort the months, the reports and the to-do list.
+
+| Kind | What it is for | How to fill it (period) |
+|---|---|---|
+| **Regular bill** | The ordinary invoice of a supplier for a month. | *Period* = the month of the service (see above). |
+| **Equalized payment** | The fixed monthly amount the supplier asks under an [equalized plan](#16-equalized-payments). | *Period* = the month the instalment is for. The *Total* is proposed from the plan. |
+| **Settlement (annual reconciliation)** | The yearly reconciliation of an equalized plan: a surcharge (positive) or a refund (negative total — one of the two kinds that may be negative). | Created from the settlement screen. *Period* = the last month the reconciliation covers; the next settlement starts with the following month. A total of 0,00 € is allowed. |
+| **Correction** | A fix of an **earlier** bill: the supplier charged too little or too much and corrects it in a later invoice. Can be negative. | *Period* = the month of the **bill that is being corrected**, not the month the correction arrived in. Use the bill number of the invoice that contains the correction. |
+| **Tax installment** | One payment of a [property tax](#17-property-tax). | Created from the tax contract; *Period* = the month the installment belongs to. |
+| **One-off expense** | A repair or a purchase without a contract. | *Period* = the month of the expense; it needs a *Title* and a *Category*. |
+
+**Where each kind counts** (✓ = counted, — = not counted):
+
+| Kind | Expenses by month, Overview, categories | *Calculated vs billed* | Equalized settlement | To do: "enter the bill of the month" | *Unit cost* |
+|---|---|---|---|---|---|
+| Regular bill | ✓ | ✓ | — | ✓ (the bill of the month) | ✓ |
+| Equalized payment | ✓ | ✓ (billed = the plan) | ✓ (the amount billed) | ✓ | — |
+| Settlement | ✓ | ✓ (as billed, nothing to compare with) | — (it **starts** the next period) | — | — |
+| Correction | ✓ | — | — | — | ✓ |
+| Tax installment | ✓ | — | — | — (installments are created by the tax contract) | — |
+| One-off expense | ✓ | — | — | — (no contract) | — |
+
+- *Expenses by month, Overview, categories*: every kind is a cost of its *Period* (or is spread over its service period) —
+  the [Costs report](#costs), the cards of the [Overview](#4-overview) and the spending by category add them all up.
+- A **Settlement** or a **Correction** is not "the bill of the month": if only one of them exists for a month, the
+  Overview still reminds you that the ordinary bill of that month is missing. They are not compared with the calculation
+  either, because the calculation knows nothing about them.
+- An unpaid correction or settlement is an ordinary open amount: it appears in the to-do list as a bill to pay and in the
+  balance of the contract.
+- *Unit cost* divides the billed amount by the quantity, so a correction of a water bill changes the price per m³ of its
+  month.
+
+### Example: the supplier made a mistake in last month's bill
+
+Invented numbers. The supplier billed **September** 20,00 € **too little** (45,00 € instead of 65,00 €). In the invoice for
+October (number *A-1042*) it adds the missing 20,00 €. The invoice total is 55,00 € + 20,00 € = 75,00 €.
+
+1. **The September bill stays as it was issued** (45,00 €). Do not change it: it is what the supplier sent.
+2. **October:** enter an ordinary bill (*Regular bill*, period October) with the amounts of the month: 55,00 €, number *A-1042*.
+3. Add a second bill for the same contract: kind **Correction**, *Period* = **September**, *Total* **+20,00 €**, the same
+   number *A-1042* (the number is how you recognise that both are one invoice).
+4. **One payment covers both:** in the [payment editor](#15-payments) enter 75,00 € and add both bills under *Bills paid*
+   (or use *Allocate automatically*); both turn *Paid ✓*.
+
+What the reports show afterwards: the monthly costs are right — September 65,00 €, October 55,00 €; the category and the
+Overview follow. *Calculated vs billed* keeps September as billed (45,00 €, the old −20,00 € against the calculation stays visible as
+history) and compares October with its calculation as usual — the correction is not part of that report. *Unit cost* for
+September uses 65,00 €.
+
+The alternative is **one bill with +20,00 €** (October as 75,00 €). It is quicker, but then October looks 20,00 € more
+expensive than it was, September 20,00 € cheaper, and *Calculated vs billed* shows a false +20,00 € for October.
+
 ### Entering a bill
 
 **New bill** asks first what it is for: **For a contract** (choose the property, then the contract) or **One-off
@@ -620,6 +682,12 @@ check it, change the month with ‹ › if needed, and save. The cards of the ed
 8. **Bill document** — attach the PDF or a photo of the bill (camera or gallery on a phone, a file on Windows). A photo is shrunk like a meter photo (on Android and Windows). Tap a
    document to open it in the system viewer. The file is stored when you save the bill.
 9. **Comment.**
+
+**Quantity on the bill.** The field *Quantity on the bill* (in the comparison card) is the quantity the supplier printed
+(for example 12,500 m³ of water for the whole month). It has one purpose: the report
+[*Calculated vs billed*](#calculated-vs-billed) → *Quantity difference (losses)* = *Quantity on the bill* − the quantity you metered,
+e.g. 12,500 − 12,150 = 0,350 m³. **Without it that month is empty in the report.** Only this number is used: the loss lines of
+the tariff are not involved.
 
 **Save as template** (at the end of the form, for a saved bill) opens the template editor with this bill's content, so a
 payment you typed once can become a template. A **draft** bill shows a banner *Draft from template «…» — check and confirm*
@@ -739,6 +807,15 @@ Examples (invented):
 - **Partial payment:** a bill of 46,02 €, you pay 20,00 € → the bill is *Partially paid · open 26,02 €*.
 - **Refund:** the manager returns 12,40 € after the yearly settlement. The settlement is a bill with a negative total;
   record the refund as a payment of −12,40 € and allocate it to that bill.
+
+### One payment for several open bills
+
+Often you transfer one amount for everything the supplier has asked: the current bill and last month's. Create **one**
+payment of the whole amount for the contract. Under *Bills paid* ＋ offers the open bills of the contract; the amount of
+each new row is the open amount of the bill or what is left of the payment. **Allocate automatically** does it for you: the
+rest of the payment goes to the oldest open bills first (by due date), never more than is open on a bill. Tap a row to change its
+amount (for example to pay the newer bill first), the trash can removes the row. If the payment is bigger than the bills, the
+difference stays as a [prepayment](#prepayment); if the bills take more than the payment, the line turns red and the payment cannot be saved.
 
 ### Prepayment
 
@@ -955,6 +1032,9 @@ shows what was billed and the quantities, while the calculated amount and the di
 calculate with, which is not the same as zero). In a month an **equalized** plan covers, *billed* is the plan and
 *calculated* is what the readings cost by the tariff, so the difference is what will go into the settlement (positive: you
 paid too little, negative: too much); a *Settlement* bill is shown as billed in its own month.
+
+The *Quantity difference (losses)* of a month needs the field **Quantity on the bill** in the bill ([Bills](#13-bills)); a
+month whose bill has no quantity stays empty there. A *Correction* bill is not part of this report.
 
 ### Charts
 
@@ -1606,6 +1686,34 @@ Nothing syncs in the background, so check in this order:
 confirmation, makes a copy of the current data first (*Before a restore*), asks you to close it, and the older data is there after the
 restart. If sync was on, it is **off** now: switch it on and choose which side wins ([Restore and sync](#restore-and-sync)). The same
 applies to **Import all data (JSON)…** ([All data as one JSON file](#all-data-as-one-json-file)).
+
+### The expected amount does not match the bill
+
+Check in this order:
+
+1. **The price date.** The price and the VAT are taken on the **1st day of the service month** (a new price must have
+   *Valid from* = the 1st of the month it applies from) — [Tariffs](#11-tariffs).
+2. **The reading window.** Which readings belong to the month is decided by the contract's reading window; a reading outside it
+   is marked and may be used for the wrong month — see the next entry.
+3. **Missing readings.** A month without a start or an end reading is incomplete (≈) and cannot be compared.
+4. **The snapshot.** A bill compares with the calculation stored when it was entered. If prices or readings changed since, the bill
+   says *The calculation changed since the bill was entered* — open it, tap **Update snapshot** and save.
+5. **Amounts typed from the bill.** A quantity from the bill typed with a typo, or a rounded quantity (use the optional
+   *Amount on the bill (excl. VAT)*), changes the result; so does a wrong VAT %.
+
+### A reading landed in the wrong month
+
+The contract's **reading window** decides it. A window that starts late in the month and ends early in the next one
+(for example **28 – 3**) belongs to the month in which it starts: the window of October is 28 October – 3 November. A reading
+dated **1 November** is therefore in the window of **October**, and the November window is 28 November – 3 December. If you
+want it in November, check the date of the reading, or the window in the contract. A reading outside every window is used
+for the nearest month and gets the warning *No reading inside the reading window — the nearest one was used.*
+
+### The comparison with last year looks strange
+
+The Overview compares the **same months** for **each contract**: this year from January to the month of that contract's last bill, last year the same months of the same contract. A water contract billed with a delay ends one month earlier than a contract billed in the
+service month, so a total on the card is not "the whole year to date". A one-off expense counts in the months it belongs to.
+Open the [Overview](#4-overview), **This year**, for the exact rule.
 
 ### I deleted something by mistake
 
