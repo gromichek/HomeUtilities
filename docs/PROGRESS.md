@@ -7,6 +7,7 @@ Maintained by the project lead only (coding sessions do not edit it). Statuses: 
 
 | Task | Title | Status | PR | Notes |
 |---|---|---|---|---|
+| T-053 | Guide: bill kinds, correction example, "Количество в счёте", meters per tariff line, problems and answers | Ready | | owner 2026-11-13 |
 
 ## Done
 
