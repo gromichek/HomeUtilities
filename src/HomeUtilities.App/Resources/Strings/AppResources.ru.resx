@@ -1767,4 +1767,45 @@
   <data name="ContractCategoryChangeBills" xml:space="preserve"><value>счета: {0}</value></data>
   <data name="ContractCategoryChangeTemplates" xml:space="preserve"><value>шаблоны: {0}</value></data>
   <data name="ContractCategoryChanged" xml:space="preserve"><value>Сохранено · категория изменена — {0}</value></data>
+  <data name="BillFillFromPdf" xml:space="preserve"><value>Заполнить из PDF</value></data>
+  <data name="PdfCannotRead" xml:space="preserve"><value>Не удалось прочитать PDF. {0}</value></data>
+  <data name="Error_pdf_too_large" xml:space="preserve"><value>Файл больше 20 МБ.</value></data>
+  <data name="Error_pdf_encrypted" xml:space="preserve"><value>PDF защищён паролем.</value></data>
+  <data name="Error_pdf_unreadable" xml:space="preserve"><value>Файл повреждён или это не PDF.</value></data>
+  <data name="Error_pdf_no_text" xml:space="preserve"><value>В PDF нет текста (возможно, это скан или фото).</value></data>
+  <data name="PdfNoLayout" xml:space="preserve"><value>Для этого PDF нет подходящего макета, поэтому ничего не изменено. Макеты находятся в Настройки → Импорты → Макеты PDF-счетов; кнопка «Показать текст PDF…» там показывает, что приложение читает из этого PDF, — по этому тексту можно написать макет.</value></data>
+  <data name="PdfSummaryLayout" xml:space="preserve"><value>Макет: {0}</value></data>
+  <data name="PdfSummaryFilled" xml:space="preserve"><value>Заполнено:</value></data>
+  <data name="PdfSummaryNotFound" xml:space="preserve"><value>Не найдено (оставлено как было): {0}</value></data>
+  <data name="PdfSummaryCheck" xml:space="preserve"><value>Сверьте значения с бумажным счётом и сохраните счёт как обычно. Пока ничего не сохранено.</value></data>
+  <data name="PdfWarningTimeout" xml:space="preserve"><value>{0}: поиск занял слишком много времени и пропущен.</value></data>
+  <data name="PdfWarningUnparsable" xml:space="preserve"><value>{0}: найден текст «{1}», но это не подходящее значение, поэтому он пропущен.</value></data>
+  <data name="PdfWarningOtherSupplier" xml:space="preserve"><value>Возможно, этот PDF от другого поставщика: регистрационного номера поставщика в нём нет.</value></data>
+  <data name="PdfField_Number" xml:space="preserve"><value>Номер счёта</value></data>
+  <data name="PdfField_IssuedOn" xml:space="preserve"><value>Выписан</value></data>
+  <data name="PdfField_Period" xml:space="preserve"><value>Период</value></data>
+  <data name="PdfField_DueOn" xml:space="preserve"><value>Оплатить до</value></data>
+  <data name="PdfField_Gross" xml:space="preserve"><value>Итого</value></data>
+  <data name="PdfField_VatPercent" xml:space="preserve"><value>НДС %</value></data>
+  <data name="PdfField_Vat" xml:space="preserve"><value>НДС</value></data>
+  <data name="PdfTextTitle" xml:space="preserve"><value>Текст PDF</value></data>
+  <data name="PdfTextHint" xml:space="preserve"><value>Это текст, который приложение читает из PDF. В нём могут быть личные данные (имена, адреса, номера): отправляйте его только тому, кто пишет макет для этого поставщика.</value></data>
+  <data name="PdfTextCopy" xml:space="preserve"><value>Копировать</value></data>
+  <data name="PdfTextCopied" xml:space="preserve"><value>Скопировано</value></data>
+  <data name="PdfLayoutsHeader" xml:space="preserve"><value>Макеты PDF-счетов</value></data>
+  <data name="PdfLayoutsHint" xml:space="preserve"><value>Макет подсказывает приложению, где в PDF-счёте одного поставщика искать номер, даты и суммы. Макеты приходят файлом; редактор счёта использует их в «Заполнить из PDF».</value></data>
+  <data name="PdfLayoutsEmpty" xml:space="preserve"><value>Макетов пока нет.</value></data>
+  <data name="PdfLayoutsImport" xml:space="preserve"><value>Импортировать макеты…</value></data>
+  <data name="PdfLayoutsExport" xml:space="preserve"><value>Экспортировать все…</value></data>
+  <data name="PdfLayoutsShowText" xml:space="preserve"><value>Показать текст PDF…</value></data>
+  <data name="PdfLayoutsNothingToExport" xml:space="preserve"><value>Нет макетов для экспорта.</value></data>
+  <data name="PdfLayoutsImported" xml:space="preserve"><value>Макеты: добавлено {0}, заменено {1}</value></data>
+  <data name="PdfLayoutMarkers" xml:space="preserve"><value>Узнаётся по: {0}</value></data>
+  <data name="PdfLayoutFields" xml:space="preserve"><value>Полей: {0}</value></data>
+  <data name="PdfLayoutDelete" xml:space="preserve"><value>Удалить макет</value></data>
+  <data name="Error_pdf_layout_file_invalid" xml:space="preserve"><value>Этот файл не является файлом макетов PDF-счетов.</value></data>
+  <data name="Error_pdf_layout_name_required" xml:space="preserve"><value>У макета {0} в файле нет названия.</value></data>
+  <data name="Error_pdf_layout_markers_required" xml:space="preserve"><value>У макета «{0}» нет признаков.</value></data>
+  <data name="Error_pdf_layout_pattern_invalid" xml:space="preserve"><value>Макет «{0}», поле {1}: неверное регулярное выражение. {2}</value></data>
+  <data name="CleanUpKind_PdfBillLayouts" xml:space="preserve"><value>макеты PDF-счетов</value></data>
 </root>

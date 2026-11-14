@@ -78,6 +78,17 @@ public sealed partial class AmountEditor : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Shows complete amounts that were read from a document (a PDF bill) and counts as an edit by the user: Total and Net
+    /// stay fixed when the amounts carry no VAT %, else Total and VAT %. Net + VAT = Total is kept as given.
+    /// </summary>
+    public void Fill(AmountSet amounts)
+    {
+        ArgumentNullException.ThrowIfNull(amounts);
+        Load(amounts);
+        Edited?.Invoke();
+    }
+
     /// <summary>Sets the Total a new bill starts with (an equalized plan amount); it counts as filled in but is not an edit by the user.</summary>
     public void SetDefaultGross(decimal? gross)
     {

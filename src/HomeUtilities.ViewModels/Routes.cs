@@ -119,6 +119,9 @@ public static class Routes
     /// <summary>Pushed page opened from Settings: the Excel import wizard.</summary>
     public const string ImportWizard = "ImportWizard";
 
+    /// <summary>Pushed page opened from the Imports screen: the text extracted from a PDF (read-only, with Copy), parameter <c>text</c>.</summary>
+    public const string PdfText = "PdfText";
+
     /// <summary>Pushed page opened from Settings or the wizard: the list of imports with Undo and the saved import profiles.</summary>
     public const string Imports = "Imports";
 

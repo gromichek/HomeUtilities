@@ -172,8 +172,10 @@ public sealed partial class ImportsViewModel : ViewModelBase
         INavigationService navigation,
         ISnackbarService snackbar,
         ILocalizer localizer,
-        WorkbookExportFlow export)
+        WorkbookExportFlow export,
+        PdfLayoutsViewModel pdfLayouts)
     {
+        PdfLayouts = pdfLayouts;
         _export = export;
         _batches = batches;
         _profiles = profiles;
@@ -187,6 +189,9 @@ public sealed partial class ImportsViewModel : ViewModelBase
         _localizer = localizer;
         RefreshTexts();
     }
+
+    /// <summary>The "PDF bill layouts" section (T-055).</summary>
+    public PdfLayoutsViewModel PdfLayouts { get; }
 
     public bool HasBatches => BatchItems.Count > 0;
 
@@ -219,7 +224,7 @@ public sealed partial class ImportsViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasNoProfiles));
     }
 
-    public override Task OnAppearingAsync() => RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), () => BatchItems.Count + ProfileItems.Count, _loaded));
+    public override Task OnAppearingAsync() => RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), () => BatchItems.Count + ProfileItems.Count + PdfLayouts.Items.Count, _loaded));
 
     private bool _loaded;
 
@@ -230,6 +235,7 @@ public sealed partial class ImportsViewModel : ViewModelBase
         ct.ThrowIfCancellationRequested();
         BatchItems = [.. batches.Select(b => new ImportBatchItemViewModel(b, _localizer, UndoAsync))];
         ProfileItems = [.. profiles.Select(p => new ImportProfileItemViewModel(p, _localizer, SaveNameAsync, ExportAsync, DeleteProfileAsync))];
+        await PdfLayouts.ReloadAsync(ct);
         await LoadLinkRepairAsync(ct);
         _loaded = true;
     }

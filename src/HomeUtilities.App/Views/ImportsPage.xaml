@@ -76,6 +76,34 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- PDF bill layouts (T-055): how to read the header of a supplier's PDF bill; they come as a file. -->
+            <Border Style="{StaticResource SectionCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding PdfLayouts.Header}" Style="{StaticResource SectionHeader}" />
+                    <Label Text="{Binding PdfLayouts.Hint}" Style="{StaticResource MutedLabel}" FontSize="13" />
+                    <Label Text="{Binding PdfLayouts.EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding PdfLayouts.HasNoLayouts}" />
+                    <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding PdfLayouts.Items}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PdfLayoutItemViewModel">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                    <Label Text="{Binding MarkersText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    <Label Text="{Binding FieldsText}" Style="{StaticResource MutedLabel}" FontSize="12" />
+                                    <Button Text="{Binding DeleteText}" Command="{Binding DeleteCommand}"
+                                            Style="{StaticResource DestructiveButton}" HorizontalOptions="Fill" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Button Text="{Binding PdfLayouts.ImportText}" Command="{Binding PdfLayouts.ImportCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
+                    <Button Text="{Binding PdfLayouts.ExportText}" Command="{Binding PdfLayouts.ExportCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
+                    <Button Text="{Binding PdfLayouts.ShowTextText}" Command="{Binding PdfLayouts.ShowTextCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Repair: links that start after the meter was installed hide the earlier readings. -->
             <Border Style="{StaticResource SectionCard}">
                 <VerticalStackLayout Spacing="8">

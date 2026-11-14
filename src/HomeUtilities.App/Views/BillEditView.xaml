@@ -453,6 +453,10 @@
                                     SemanticProperties.Description="{Binding Texts.AddAttachmentText}" />
                         </Grid>
                         <Label Text="{Binding Texts.AttachmentsEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoAttachments}" />
+                        <!-- Reads the header of the supplier's PDF with a layout; nothing is saved (T-055). -->
+                        <Button Text="{Binding Texts.FillFromPdfText}" Command="{Binding FillFromPdfCommand}"
+                                Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill"
+                                IsVisible="{Binding CanFillFromPdf}" />
                         <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding AttachmentRows}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:BillAttachmentRowViewModel">

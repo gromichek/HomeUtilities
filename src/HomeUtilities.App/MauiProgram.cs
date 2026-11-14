@@ -5,6 +5,7 @@ using HomeUtilities.Core;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Attachments;
 using HomeUtilities.Core.Export;
+using HomeUtilities.Core.PdfBills;
 using HomeUtilities.Data.Backup;
 using HomeUtilities.Data;
 using HomeUtilities.Core.Reports;
@@ -140,10 +141,13 @@ public static class MauiProgram
         builder.Services.AddSingleton<IReportWorkbookWriter, ClosedXmlReportWriter>();
         builder.Services.AddSingleton<IExportWorkbookWriter, ClosedXmlExportWriter>();
         builder.Services.AddSingleton<IWorkbookReader, ClosedXmlWorkbookReader>();
+        builder.Services.AddSingleton<IPdfTextReader, PdfTextReader>();
         builder.Services.AddTransient<WorkbookExportFlow>();
         builder.Services.AddSingleton<IImportFileService, ImportFileService>();
         builder.Services.AddTransient<ImportWizardViewModel>();
         builder.Services.AddTransient<ImportsViewModel>();
+        builder.Services.AddTransient<PdfLayoutsViewModel>();
+        builder.Services.AddTransient<PdfTextViewModel>();
         builder.Services.AddTransient<ReportsViewModel>();
         builder.Services.AddTransient<OverviewViewModel>();
         // Sync (T-030): Google account + hidden Drive folder. Client ids come from the embedded secrets.json (absent in CI).
@@ -258,6 +262,7 @@ public static class MauiProgram
         builder.Services.AddTransient<VatRateEditPage>();
         builder.Services.AddTransient<ImportWizardPage>();
         builder.Services.AddTransient<ImportsPage>();
+        builder.Services.AddTransient<PdfTextPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

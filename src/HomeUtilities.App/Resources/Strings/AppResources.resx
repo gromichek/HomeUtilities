@@ -1767,4 +1767,45 @@ Database size: {1} → {2}.</value></data>
   <data name="ContractCategoryChangeBills" xml:space="preserve"><value>bills: {0}</value></data>
   <data name="ContractCategoryChangeTemplates" xml:space="preserve"><value>templates: {0}</value></data>
   <data name="ContractCategoryChanged" xml:space="preserve"><value>Saved · category changed — {0}</value></data>
+  <data name="BillFillFromPdf" xml:space="preserve"><value>Fill from PDF</value></data>
+  <data name="PdfCannotRead" xml:space="preserve"><value>The PDF could not be read. {0}</value></data>
+  <data name="Error_pdf_too_large" xml:space="preserve"><value>The file is larger than 20 MB.</value></data>
+  <data name="Error_pdf_encrypted" xml:space="preserve"><value>The PDF is protected by a password.</value></data>
+  <data name="Error_pdf_unreadable" xml:space="preserve"><value>The file is damaged or is not a PDF.</value></data>
+  <data name="Error_pdf_no_text" xml:space="preserve"><value>The PDF has no text (it may be a scan or a photo).</value></data>
+  <data name="PdfNoLayout" xml:space="preserve"><value>No layout fits this PDF, so nothing was changed. Layouts are managed in Settings → Imports → PDF bill layouts; "Show PDF text…" there shows what the app reads from this PDF, so that a layout can be written for it.</value></data>
+  <data name="PdfSummaryLayout" xml:space="preserve"><value>Layout: {0}</value></data>
+  <data name="PdfSummaryFilled" xml:space="preserve"><value>Filled in:</value></data>
+  <data name="PdfSummaryNotFound" xml:space="preserve"><value>Not found (left as they were): {0}</value></data>
+  <data name="PdfSummaryCheck" xml:space="preserve"><value>Check the values against the paper bill, then save the bill as usual. Nothing has been saved yet.</value></data>
+  <data name="PdfWarningTimeout" xml:space="preserve"><value>{0}: the search took too long and was skipped.</value></data>
+  <data name="PdfWarningUnparsable" xml:space="preserve"><value>{0}: the text "{1}" was found but is not a valid value, so it was skipped.</value></data>
+  <data name="PdfWarningOtherSupplier" xml:space="preserve"><value>This PDF may be from another supplier: the supplier's registration number is not in it.</value></data>
+  <data name="PdfField_Number" xml:space="preserve"><value>Bill number</value></data>
+  <data name="PdfField_IssuedOn" xml:space="preserve"><value>Issued on</value></data>
+  <data name="PdfField_Period" xml:space="preserve"><value>Period</value></data>
+  <data name="PdfField_DueOn" xml:space="preserve"><value>Due on</value></data>
+  <data name="PdfField_Gross" xml:space="preserve"><value>Total</value></data>
+  <data name="PdfField_VatPercent" xml:space="preserve"><value>VAT %</value></data>
+  <data name="PdfField_Vat" xml:space="preserve"><value>VAT</value></data>
+  <data name="PdfTextTitle" xml:space="preserve"><value>PDF text</value></data>
+  <data name="PdfTextHint" xml:space="preserve"><value>This is the text the app reads from the PDF. It can contain personal data (names, addresses, numbers): send it only to whoever writes the layout for this supplier.</value></data>
+  <data name="PdfTextCopy" xml:space="preserve"><value>Copy</value></data>
+  <data name="PdfTextCopied" xml:space="preserve"><value>Copied</value></data>
+  <data name="PdfLayoutsHeader" xml:space="preserve"><value>PDF bill layouts</value></data>
+  <data name="PdfLayoutsHint" xml:space="preserve"><value>A layout tells the app where to find the number, dates and amounts in one supplier's PDF bill. Layouts come as a file; the bill editor uses them in "Fill from PDF".</value></data>
+  <data name="PdfLayoutsEmpty" xml:space="preserve"><value>No layouts yet.</value></data>
+  <data name="PdfLayoutsImport" xml:space="preserve"><value>Import layouts…</value></data>
+  <data name="PdfLayoutsExport" xml:space="preserve"><value>Export all…</value></data>
+  <data name="PdfLayoutsShowText" xml:space="preserve"><value>Show PDF text…</value></data>
+  <data name="PdfLayoutsNothingToExport" xml:space="preserve"><value>There are no layouts to export.</value></data>
+  <data name="PdfLayoutsImported" xml:space="preserve"><value>Layouts: {0} added, {1} replaced</value></data>
+  <data name="PdfLayoutMarkers" xml:space="preserve"><value>Recognized by: {0}</value></data>
+  <data name="PdfLayoutFields" xml:space="preserve"><value>Fields: {0}</value></data>
+  <data name="PdfLayoutDelete" xml:space="preserve"><value>Delete layout</value></data>
+  <data name="Error_pdf_layout_file_invalid" xml:space="preserve"><value>This file is not a PDF bill layouts file.</value></data>
+  <data name="Error_pdf_layout_name_required" xml:space="preserve"><value>Layout {0} of the file has no name.</value></data>
+  <data name="Error_pdf_layout_markers_required" xml:space="preserve"><value>Layout "{0}" has no markers.</value></data>
+  <data name="Error_pdf_layout_pattern_invalid" xml:space="preserve"><value>Layout "{0}", field {1}: the pattern is not valid. {2}</value></data>
+  <data name="CleanUpKind_PdfBillLayouts" xml:space="preserve"><value>PDF bill layouts</value></data>
 </root>
