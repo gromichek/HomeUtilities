@@ -24,6 +24,7 @@ Status: **agreed baseline** (2026-10-19). Changes go through the project lead.
 | Storage | SQLite via EF Core 10 (`Microsoft.EntityFrameworkCore.Sqlite`) | migrations in `HomeUtilities.Data` |
 | Charts | LiveChartsCore (SkiaSharp, MAUI) | bar charts, multi-property series |
 | Excel import/export | ClosedXML | |
+| PDF text (bill layouts, T-055) | PdfPig (Apache-2.0) | layouts are user data in the database, never in the repo |
 | Notifications | behind `INotificationService` | Android: own `ReminderAlarms` (AlarmManager) + Plugin.LocalNotification for permission/test; Windows: Windows App SDK app notifications |
 | Google Drive | Google.Apis.Drive.v3 | scope `drive.appdata` (hidden app folder only) |
 | Tests | xUnit, plain `Assert` | no FluentAssertions (license) |
@@ -41,7 +42,7 @@ src/
   HomeUtilities.Core/          domain model, calculation engine, interfaces. net10.0, no dependencies on EF/MAUI
   HomeUtilities.Data/          EF Core DbContext, configurations, migrations, repositories. net10.0
   HomeUtilities.ViewModels/    screen logic (MVVM), navigation abstractions. net10.0, no MAUI
-  HomeUtilities.Import/        Excel import/export (ClosedXML). net10.0           (added in phase 7)
+  HomeUtilities.Import/        Excel import/export (ClosedXML), PDF text (PdfPig). net10.0 (added in phase 7)
   HomeUtilities.Sync/          Google Drive sync engine. net10.0                    (added in phase 9)
   HomeUtilities.App/           MAUI app: XAML pages, resources, platform services
 tests/
