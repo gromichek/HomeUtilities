@@ -47,7 +47,7 @@ public static class PdfBillLayoutFile
                 {
                     Name = l.Name,
                     Markers = [.. l.Markers],
-                    Fields = [.. l.Fields.Select(f => new FieldDto { Field = f.Field, Pattern = f.Pattern })],
+                    Fields = [.. l.Fields.Select(ToDto)],
                     Notes = l.Notes,
                 }),
             ],
@@ -85,7 +85,7 @@ public static class PdfBillLayoutFile
             {
                 Name = Clip(dto.Name?.Trim() ?? string.Empty, InputLimits.Name),
                 Markers = [.. (dto.Markers ?? []).Where(m => !string.IsNullOrWhiteSpace(m)).Select(m => m.Trim())],
-                Fields = [.. (dto.Fields ?? []).Where(f => f is not null).Select(f => new PdfBillFieldPattern { Field = f.Field, Pattern = f.Pattern ?? string.Empty })],
+                Fields = [.. (dto.Fields ?? []).Where(f => f is not null).Select(FromDto)],
                 Notes = string.IsNullOrWhiteSpace(dto.Notes) ? null : Clip(dto.Notes.Trim(), InputLimits.Notes),
             });
         }
@@ -112,18 +112,83 @@ public static class PdfBillLayoutFile
 
         foreach (var field in layout.Fields)
         {
+            Regex? regex = null;
             try
             {
-                _ = new Regex(field.Pattern, PdfBillReader.PatternOptions, PdfBillReader.MatchTimeout);
+                regex = new Regex(field.Pattern, PdfBillReader.PatternOptions, PdfBillReader.MatchTimeout);
             }
             catch (ArgumentException ex)
             {
                 errors.Add(new(ErrorCodes.PdfLayoutPatternInvalid, field.Field.ToString(), [layout.Name, field.Field.ToString(), ex.Message]));
             }
+
+            ValidateOptions(layout, field, regex, errors);
         }
 
         return errors;
     }
+
+    // component / name / combine / format of one entry.
+    private static void ValidateOptions(PdfBillLayout layout, PdfBillFieldPattern entry, Regex? regex, List<ValidationError> errors)
+    {
+        var field = entry.Field;
+        var fieldName = field.ToString();
+        if (field is PdfBillField.Quantity or PdfBillField.ComponentAmount && string.IsNullOrWhiteSpace(entry.Component))
+        {
+            errors.Add(new(ErrorCodes.PdfLayoutComponentRequired, fieldName, [layout.Name, fieldName]));
+        }
+
+        if (field == PdfBillField.CustomField && string.IsNullOrWhiteSpace(entry.Name))
+        {
+            errors.Add(new(ErrorCodes.PdfLayoutFieldNameRequired, fieldName, [layout.Name, fieldName]));
+        }
+
+        var combine = entry.Combine;
+        var allowed = combine switch
+        {
+            PdfCombine.First => true,
+            PdfCombine.Sum => field is PdfBillField.Gross or PdfBillField.VatPercent or PdfBillField.Vat or PdfBillField.Net
+                or PdfBillField.Consumption or PdfBillField.Quantity or PdfBillField.ComponentAmount or PdfBillField.CustomField,
+            PdfCombine.All => field is PdfBillField.Notes or PdfBillField.Lines,
+            _ => false,
+        };
+        if (!allowed)
+        {
+            errors.Add(new(ErrorCodes.PdfLayoutCombineInvalid, fieldName, [layout.Name, fieldName, combine.ToString().ToLowerInvariant()]));
+        }
+
+        if (!string.IsNullOrEmpty(entry.Format) && field != PdfBillField.Notes)
+        {
+            errors.Add(new(ErrorCodes.PdfLayoutFormatInvalid, fieldName, [layout.Name, fieldName]));
+        }
+
+        if (field == PdfBillField.Lines && regex is not null && !regex.GetGroupNames().Contains("description", StringComparer.Ordinal))
+        {
+            errors.Add(new(ErrorCodes.PdfLayoutLinesDescriptionRequired, fieldName, [layout.Name]));
+        }
+    }
+
+    private static FieldDto ToDto(PdfBillFieldPattern f) => new()
+    {
+        Field = f.Field,
+        Pattern = f.Pattern,
+        Component = string.IsNullOrWhiteSpace(f.Component) ? null : f.Component,
+        Name = string.IsNullOrWhiteSpace(f.Name) ? null : f.Name,
+        Combine = f.Combine == PdfCombine.First ? null : f.Combine.ToString().ToLowerInvariant(),
+        Format = string.IsNullOrEmpty(f.Format) ? null : f.Format,
+    };
+
+    // An unknown combine word is kept as an invalid value (-1) so that validation reports it.
+    private static PdfBillFieldPattern FromDto(FieldDto f) => new()
+    {
+        Field = f.Field,
+        Pattern = f.Pattern ?? string.Empty,
+        Component = string.IsNullOrWhiteSpace(f.Component) ? null : f.Component.Trim(),
+        Name = string.IsNullOrWhiteSpace(f.Name) ? null : f.Name.Trim(),
+        Combine = string.IsNullOrWhiteSpace(f.Combine) ? PdfCombine.First
+            : Enum.TryParse<PdfCombine>(f.Combine.Trim(), true, out var combine) && Enum.IsDefined(combine) ? combine : (PdfCombine)(-1),
+        Format = string.IsNullOrEmpty(f.Format) ? null : f.Format,
+    };
 
     /// <summary>
     /// Plans an import: a layout with the same name (ignoring case) as a stored one replaces it in place, the others are added.
@@ -186,5 +251,17 @@ public static class PdfBillLayoutFile
         public PdfBillField Field { get; set; }
 
         public string? Pattern { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Component { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Name { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Combine { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Format { get; set; }
     }
 }

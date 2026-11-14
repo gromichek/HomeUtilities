@@ -405,6 +405,21 @@ public static class ErrorCodes
     /// <summary>A pattern of a layout is not a valid regular expression. Field: the field name; Args: layout name, field name, the error.</summary>
     public const string PdfLayoutPatternInvalid = "pdf.layout_pattern_invalid";
 
+    /// <summary>A Quantity or ComponentAmount pattern has no component. Args: layout name, field name.</summary>
+    public const string PdfLayoutComponentRequired = "pdf.layout_component_required";
+
+    /// <summary>A CustomField pattern has no name. Args: layout name, field name.</summary>
+    public const string PdfLayoutFieldNameRequired = "pdf.layout_field_name_required";
+
+    /// <summary>The combine value is unknown or not allowed for the field. Args: layout name, field name, the value.</summary>
+    public const string PdfLayoutCombineInvalid = "pdf.layout_combine_invalid";
+
+    /// <summary>A format is set on a field other than Notes. Args: layout name, field name.</summary>
+    public const string PdfLayoutFormatInvalid = "pdf.layout_format_invalid";
+
+    /// <summary>A Lines pattern has no <c>description</c> group. Args: layout name.</summary>
+    public const string PdfLayoutLinesDescriptionRequired = "pdf.layout_lines_description_required";
+
     /// <summary>The PDF is larger than the limit.</summary>
     public const string PdfTooLarge = "pdf.too_large";
 

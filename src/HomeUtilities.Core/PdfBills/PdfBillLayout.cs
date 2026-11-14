@@ -33,4 +33,29 @@ public sealed class PdfBillFieldPattern
     /// Multiline). The value is the named group <c>v</c>, else group 1, else the whole match; the first match wins.
     /// </summary>
     public string Pattern { get; set; } = string.Empty;
+
+    /// <summary>The name of the contract's tariff line (<see cref="PdfBillField.Quantity"/>, <see cref="PdfBillField.ComponentAmount"/>).</summary>
+    public string? Component { get; set; }
+
+    /// <summary>The name of the bill's custom field (<see cref="PdfBillField.CustomField"/>).</summary>
+    public string? Name { get; set; }
+
+    /// <summary>What to do with several matches; default: the first one.</summary>
+    public PdfCombine Combine { get; set; } = PdfCombine.First;
+
+    /// <summary>A .NET substitution string applied to each match (<see cref="PdfBillField.Notes"/> only).</summary>
+    public string? Format { get; set; }
+}
+
+/// <summary>How several matches of one pattern make one value.</summary>
+public enum PdfCombine
+{
+    /// <summary>The first match.</summary>
+    First = 0,
+
+    /// <summary>Every match parsed as a decimal and added.</summary>
+    Sum = 1,
+
+    /// <summary>Every match (Notes: joined with "; "; Lines: one line per match).</summary>
+    All = 2,
 }
