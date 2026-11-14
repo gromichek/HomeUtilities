@@ -31,7 +31,8 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     /// <summary>The month the picker can reach at the latest.</summary>
     public static readonly YearMonth LatestMonth = new(2200, 12);
 
-    private sealed record Calculated(Contract Contract, string SupplierName, string Color, ChargeInput? Input, CalculatedCharge? Charge);
+    /// <summary>One contract's calculation for its service month (<see cref="Service"/>), which differs from the screen month by the billing timing.</summary>
+    private sealed record Calculated(Contract Contract, YearMonth Service, string SupplierName, string Color, ChargeInput? Input, CalculatedCharge? Charge);
 
     private readonly IPropertyStore _propertyStore;
     private readonly IContractStore _contractStore;
@@ -66,7 +67,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     private IReadOnlyList<ChoiceOption> _properties = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(MonthText), nameof(PickerDate))]
+    [NotifyPropertyChangedFor(nameof(MonthText), nameof(PickerDate), nameof(MonthLabel))]
     [NotifyCanExecuteChangedFor(nameof(PreviousMonthCommand), nameof(NextMonthCommand))]
     private YearMonth _month;
 
@@ -92,9 +93,6 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
 
     [ObservableProperty]
     private string _propertyLabel = string.Empty;
-
-    [ObservableProperty]
-    private string _monthLabel = string.Empty;
 
     [ObservableProperty]
     private string _previousMonthText = string.Empty;
@@ -147,7 +145,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         _layoutModeService = layoutModeService;
         _errorLog = errorLog;
         _isWide = layoutModeService.Current != LayoutMode.Compact;
-        _month = YearMonth.From(clock.Today).AddMonths(-1);
+        _month = YearMonth.From(clock.Today);
         RefreshTexts();
     }
 
@@ -165,6 +163,9 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     public bool ShowNoContracts => IsLoaded && Properties.Count > 0 && Cards.Count == 0;
 
     public Guid? SelectedPropertyId => _selectedPropertyId;
+
+    /// <summary>"November 2026 · to pay": the screen month is the month of payment (T-054).</summary>
+    public string MonthLabel => _localizer.Get("ChargesMonthHeader", MonthFormat.Long(Month));
 
     /// <summary>"October 2026".</summary>
     public string MonthText
@@ -281,7 +282,6 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         Title = _localizer["SectionCharges"];
         HelpText = _localizer["SectionHelp"];
         PropertyLabel = _localizer["ReadingsPropertyLabel"];
-        MonthLabel = _localizer["ChargesMonthLabel"];
         PreviousMonthText = _localizer["ChargesPreviousMonth"];
         NextMonthText = _localizer["ChargesNextMonth"];
         TotalsLabel = _localizer["ChargesTotalsLabel"];
@@ -289,6 +289,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         NoPropertiesText = _localizer["ReadingsNoProperties"];
         NoContractsText = _localizer["ChargesNoContracts"];
         OnPropertyChanged(nameof(MonthText));
+        OnPropertyChanged(nameof(MonthLabel));
         _reloadGate?.Invalidate();
         if (IsLoaded)
         {
@@ -399,21 +400,23 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         CalculateCoreAsync(Guid propertyId, bool monthChosen, YearMonth chosenMonth, DateOnly today, CancellationToken ct)
     {
         var contracts = await _contractStore.ListByPropertyAsync(propertyId, ct);
-        var period = monthChosen ? chosenMonth : ChargePeriodDefaults.For(contracts, today);
+        // The screen month is the month of payment; the default is the current month (T-054).
+        var period = monthChosen ? chosenMonth : YearMonth.From(today);
         var suppliers = (await _supplierStore.ListAsync(ct)).ToDictionary(s => s.Id, s => s.Name);
         var categories = (await _categoryStore.ListAsync(ct)).ToDictionary(c => c.Id, c => c.Color);
 
         var results = new List<Calculated>();
-        var active = contracts
-            .Where(c => !c.IsDeleted && c.ValidFrom <= period.LastDay && (c.ValidTo is null || c.ValidTo >= period.FirstDay))
-            .OrderBy(c => c.Title, StringComparer.CurrentCultureIgnoreCase);
-        var activeList = active.ToList();
+        var activeList = contracts
+            .Select(c => (Contract: c, Service: ServiceMonth(c, period)))
+            .Where(x => !x.Contract.IsDeleted && x.Contract.ValidFrom <= x.Service.LastDay && (x.Contract.ValidTo is null || x.Contract.ValidTo >= x.Service.FirstDay))
+            .OrderBy(x => x.Contract.Title, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
 
         // One read for all contracts of the property (T-028h); if it fails, each contract is loaded alone so only the broken one gets an error card.
         IReadOnlyDictionary<(Guid ContractId, YearMonth Period), ChargeInput>? batch = null;
         try
         {
-            batch = await _loader.LoadManyAsync([.. activeList.Select(c => (c.Id, period))], ct);
+            batch = await _loader.LoadManyAsync([.. activeList.Select(x => (x.Contract.Id, x.Service))], ct);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -421,28 +424,36 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             batch = null;
         }
 
-        foreach (var contract in activeList)
+        foreach (var (contract, service) in activeList)
         {
             var supplier = suppliers.GetValueOrDefault(contract.SupplierId, string.Empty);
             var color = categories.GetValueOrDefault(contract.CategoryId, "#808080");
             try
             {
-                var input = batch is null ? await _loader.LoadAsync(contract.Id, period, ct) : batch.GetValueOrDefault((contract.Id, period));
+                var input = batch is null ? await _loader.LoadAsync(contract.Id, service, ct) : batch.GetValueOrDefault((contract.Id, service));
                 results.Add(input is null
-                    ? new Calculated(contract, supplier, color, null, null)
-                    : new Calculated(contract, supplier, color, input, ChargeCalculator.Calculate(input)));
+                    ? new Calculated(contract, service, supplier, color, null, null)
+                    : new Calculated(contract, service, supplier, color, input, ChargeCalculator.Calculate(input)));
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                _errorLog.Append($"{nameof(ChargesViewModel)}.{nameof(CalculateAsync)} (contract {contract.Id}, {period})", ex);
-                results.Add(new Calculated(contract, supplier, color, null, null));
+                _errorLog.Append($"{nameof(ChargesViewModel)}.{nameof(CalculateAsync)} (contract {contract.Id}, {service})", ex);
+                results.Add(new Calculated(contract, service, supplier, color, null, null));
             }
         }
 
-        var bills = await LoadBillsAsync(propertyId, period, today, ct);
-        var equalized = await LoadEqualizedAsync(active, ct);
+        var bills = await LoadBillsAsync(propertyId, activeList, today, ct);
+        var equalized = await LoadEqualizedAsync(activeList.Select(x => x.Contract), ct);
         return (period, results, bills, equalized);
     }
+
+    /// <summary>
+    /// The service month a contract is calculated for when the screen shows payment month <paramref name="payment"/>:
+    /// the payment month minus the arrival offset of its billing timing (after the period 1, in the month 0, in advance −1).
+    /// A changed timing applies to past screen months too (documented limitation).
+    /// </summary>
+    internal static YearMonth ServiceMonth(Contract contract, YearMonth payment) =>
+        payment.AddMonths(-contract.BillingTiming.ArrivalOffset());
 
     /// <summary>The settlement report of each equalized contract; a failing one is logged and left out.</summary>
     private async Task<Dictionary<Guid, EqualizedReport>> LoadEqualizedAsync(IEnumerable<Contract> contracts, CancellationToken ct)
@@ -464,11 +475,18 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     }
 
     /// <summary>The bill of each contract for the month (the first one entered) with its payment state.</summary>
-    private async Task<Dictionary<Guid, (Bill Bill, BillState State)>> LoadBillsAsync(Guid propertyId, YearMonth period, DateOnly today, CancellationToken ct)
+    private async Task<Dictionary<Guid, (Bill Bill, BillState State)>> LoadBillsAsync(
+        Guid propertyId, IReadOnlyList<(Contract Contract, YearMonth Service)> contracts, DateOnly today, CancellationToken ct)
     {
         var result = new Dictionary<Guid, (Bill, BillState)>();
-        var bills = (await _billStore.ListByPropertyAsync(propertyId, period, period, ct))
-            .Where(b => b.ContractId is not null)
+        if (contracts.Count == 0)
+        {
+            return result;
+        }
+
+        var serviceOf = contracts.ToDictionary(x => x.Contract.Id, x => x.Service);
+        var bills = (await _billStore.ListByPropertyAsync(propertyId, serviceOf.Values.Min(), serviceOf.Values.Max(), ct))
+            .Where(b => b.ContractId is { } id && serviceOf.TryGetValue(id, out var service) && b.Period == service)
             .OrderBy(b => b.CreatedAt);
         foreach (var bill in bills)
         {
@@ -487,14 +505,15 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     /// <summary>Builds the cards and totals from the last calculation (also after a language change).</summary>
     private void Rebuild()
     {
-        var builder = new ChargeCardBuilder(
-            _localizer,
-            new ChargeNavigation(OpenComponentAsync, OpenPropertyAsync, OpenReadingsAsync, OpenContractAsync),
-            _clock.Today);
-
         var cards = new List<ChargeCardViewModel>();
         foreach (var item in _calculated)
         {
+            // Everything on a card works on the card's own service month, never on the screen month (T-054).
+            var service = item.Service;
+            var builder = new ChargeCardBuilder(
+                _localizer,
+                new ChargeNavigation(OpenComponentAsync, OpenPropertyAsync, propertyId => OpenReadingsAsync(propertyId, service), OpenContractAsync),
+                _clock.Today);
             ChargeCardViewModel card;
             try
             {
@@ -509,8 +528,9 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
             }
 
             var id = item.Contract.Id;
-            ApplyBill(card, item.Contract, item.Charge);
-            ApplyEqualized(card, item.Contract, item.Charge);
+            card.ServiceMonthText = _localizer.Get("ChargeServiceMonth", MonthFormat.Long(service));
+            ApplyBill(card, item.Contract, item.Charge, service);
+            ApplyEqualized(card, item.Contract, item.Charge, service);
             card.IsExpanded = _focusContractId == id || _expanded.GetValueOrDefault(id, IsWide);
             card.PropertyChanged += (_, e) =>
             {
@@ -528,7 +548,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     }
 
     /// <summary>The plan, the actual charge and the running difference since the last settlement of an equalized contract.</summary>
-    private void ApplyEqualized(ChargeCardViewModel card, Contract contract, CalculatedCharge? charge)
+    private void ApplyEqualized(ChargeCardViewModel card, Contract contract, CalculatedCharge? charge, YearMonth service)
     {
         if (!_equalizedOfContract.TryGetValue(contract.Id, out var report) || report.Plans.Count == 0)
         {
@@ -536,7 +556,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
 
         var symbol = _localizer["Currency_Symbol_" + contract.Currency];
-        var plan = EqualizedPlans.AmountFor(report.Plans, Month);
+        var plan = EqualizedPlans.AmountFor(report.Plans, service);
         if (plan is null)
         {
             // A month before the first plan was billed by consumption: a normal card.
@@ -551,7 +571,7 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
     }
 
     /// <summary>The card's link to the month's bill, or the "Enter bill" button with the calculated total as a suggestion.</summary>
-    private void ApplyBill(ChargeCardViewModel card, Contract contract, CalculatedCharge? charge)
+    private void ApplyBill(ChargeCardViewModel card, Contract contract, CalculatedCharge? charge, YearMonth service)
     {
         if (_billOfContract.TryGetValue(contract.Id, out var found))
         {
@@ -573,16 +593,16 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
         }
 
         card.EnterBillText = _localizer["ChargesEnterBill"];
-        card.EnterBillCommand = new RelayCommand(() => _ = RunSafeAsync(() => EnterBillAsync(contract, charge)));
+        card.EnterBillCommand = new RelayCommand(() => _ = RunSafeAsync(() => EnterBillAsync(contract, charge, service)));
     }
 
-    private Task EnterBillAsync(Contract contract, CalculatedCharge? charge)
+    private Task EnterBillAsync(Contract contract, CalculatedCharge? charge, YearMonth service)
     {
         var parameters = new Dictionary<string, object>
         {
             [EditorNavigation.ContractIdParameter] = contract.Id,
             [EditorNavigation.PropertyIdParameter] = contract.PropertyId,
-            [BillEditViewModel.PeriodParameter] = Month.ToString(),
+            [BillEditViewModel.PeriodParameter] = service.ToString(),
         };
         if (charge is { IsComplete: true, Lines.Count: > 0 } && charge.Lines.Any(l => !l.IsFromBill))
         {
@@ -636,10 +656,10 @@ public sealed partial class ChargesViewModel : ViewModelBase, IRecipient<LayoutM
                 [EditorNavigation.IdParameter] = contractId,
             }));
 
-    /// <summary>Readings of the property, dated the last day of the month shown (today if that is still ahead).</summary>
-    private Task OpenReadingsAsync(Guid propertyId)
+    /// <summary>Readings of the property, dated the last day of the card's service month (today if that is still ahead).</summary>
+    private Task OpenReadingsAsync(Guid propertyId, YearMonth service)
     {
-        var date = Month.LastDay > _clock.Today ? _clock.Today : Month.LastDay;
+        var date = service.LastDay > _clock.Today ? _clock.Today : service.LastDay;
         return RunSafeAsync(() => _navigation.GoToAsync(
             Routes.ReadingsFor,
             new Dictionary<string, object>

@@ -621,7 +621,8 @@ public sealed partial class BillEditViewModel
             {
                 [EditorNavigation.PropertyIdParameter] = contract.PropertyId,
                 [EditorNavigation.ContractIdParameter] = contract.Id,
-                [ChargesViewModel.MonthParameter] = Period.ToString(),
+                // The bill's period is the service month; the charges screen shows the month of payment.
+                [ChargesViewModel.MonthParameter] = Period.AddMonths(contract.BillingTiming.ArrivalOffset()).ToString(),
             });
     });
 

@@ -655,6 +655,7 @@ public class EqualizedViewModelTests : IDisposable
     public async Task Charges_CardOfAnEqualizedContractShowsPlanActualAndTheRunningDifference()
     {
         var contract = AddEqualizedContract();
+        contract.BillingTiming = BillingTiming.InServiceMonth;   // the screen month 10.2026 = service month 10.2026 (T-054)
         AddPlan(contract, "2026-10-01", 40m);
         AddEqualizedBill(contract, new YearMonth(2026, 10), 40m);
         var vm = _kit.Kit.CreateCharges();

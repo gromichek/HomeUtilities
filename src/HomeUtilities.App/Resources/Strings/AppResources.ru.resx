@@ -661,10 +661,11 @@
   <data name="VatRateDelete" xml:space="preserve"><value>Удалить ставку НДС</value></data>
   <data name="VatRateInUse" xml:space="preserve"><value>«{0}» используется в компонентах тарифов ({1}), удалить нельзя.</value></data>
   <data name="SectionCharges" xml:space="preserve"><value>Начисления</value></data>
-  <data name="ChargesMonthLabel" xml:space="preserve"><value>Месяц</value></data>
+  <data name="ChargesMonthHeader" xml:space="preserve"><value>{0} · к оплате</value></data>
+  <data name="ChargeServiceMonth" xml:space="preserve"><value>за {0}</value></data>
   <data name="ChargesPreviousMonth" xml:space="preserve"><value>Предыдущий месяц</value></data>
   <data name="ChargesNextMonth" xml:space="preserve"><value>Следующий месяц</value></data>
-  <data name="ChargesTotalsLabel" xml:space="preserve"><value>Ожидаемое начисление за месяц</value></data>
+  <data name="ChargesTotalsLabel" xml:space="preserve"><value>Сумма к оплате в этом месяце</value></data>
   <data name="ChargesIncomplete" xml:space="preserve"><value>Неполно — часть сумм не удалось рассчитать.</value></data>
   <data name="ChargesNoContracts" xml:space="preserve"><value>В этом месяце нет действующих договоров.</value></data>
   <data name="ChargesTotals" xml:space="preserve"><value>Без НДС {0} · НДС {1} · Итого {2}</value></data>

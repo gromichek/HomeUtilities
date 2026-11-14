@@ -48,7 +48,7 @@ public class OverviewChartsTests
         Assert.Equal(201m, bars.ThisYear[0]);
         Assert.Equal(215m, bars.ThisYear[9]);
         Assert.Null(bars.ThisYear[10]);   // November: this month, no bill yet
-        Assert.Null(bars.ThisYear[11]);   // December: future
+        Assert.Null(bars.ThisYear[11]);   // December: later month without a bill stays empty
         Assert.Equal(101m, bars.LastYear[0]);
         Assert.Equal(112m, bars.LastYear[11]);
         Assert.True(bars.HasLastYear);
@@ -158,7 +158,7 @@ public class OverviewChartsTests
     }
 
     [Fact]
-    public void Only_the_months_up_to_the_current_one_of_this_year_count()
+    public void All_counted_bills_of_this_year_count_also_those_of_later_months()
     {
         var s = new OverviewScenario();
         var water = s.AddContract("Water");
@@ -166,12 +166,32 @@ public class OverviewChartsTests
         s.Categories.Add(category);
         Bill(s, water, 2026, 1, 10m, category: category.Id);
         Bill(s, water, 2026, 11, 20m, category: category.Id);
-        Bill(s, water, 2026, 12, 400m, category: category.Id);   // prepaid December: later than the current month
+        Bill(s, water, 2026, 12, 400m, category: category.Id);   // December entered in November: counts (T-054)
+        Bill(s, water, 2027, 1, 7m, category: category.Id);      // next year: never
         Bill(s, water, 2025, 6, 300m, category: category.Id);    // last year
 
         var spending = OverviewCharts.SpendingByCategory(s.Data, Today, null)!;
 
-        Assert.Equal(30m, spending.Total);
+        Assert.Equal((12, 430m), (spending.ThroughMonth, spending.Total));   // 10 + 20 + 400
+    }
+
+    [Fact]
+    public void A_bill_for_a_later_month_shows_its_bar_marked_approximate_and_drafts_do_not()
+    {
+        var s = new OverviewScenario();
+        var internet = s.AddContract("Internet");
+        Bill(s, internet, 2026, 10, 20m);
+        Bill(s, internet, 2026, 12, 30m);                                   // entered in November
+        Bill(s, internet, 2026, 9, 99m).IsDraft = true;
+        Bill(s, internet, 2025, 12, 25m);
+
+        var bars = OverviewCharts.MonthlyComparison(s.Data, Today, null)!;
+
+        Assert.Equal(30m, bars.ThisYear[11]);
+        Assert.True(bars.ThisYearApproximate[11]);
+        Assert.False(bars.ThisYearApproximate[9]);
+        Assert.Null(bars.ThisYear[10]);   // November: nothing yet
+        Assert.Equal(25m, bars.LastYear[11]);
     }
 
     [Fact]
