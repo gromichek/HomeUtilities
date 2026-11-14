@@ -795,6 +795,25 @@ puts `1111111111: 105.20 – 106.10; 2222222222: 8200.00 – 8315.40` into the *
 `{ "field": "Quantity", "component": "Heat", "pattern": "Heat ([\\d.]+) MWh" }`. Like all layouts these come as a file from the person who
 sets the app up for you; when a supplier changes its bill you get an updated file and import it (a layout with the same name is replaced).
 
+**Reading a pattern (cheat sheet).** A pattern is a .NET regular expression; upper/lower case does not matter. The pieces used in
+typical layouts:
+
+| Piece | Means |
+|---|---|
+| `Pay by:` | this text as it is |
+| `\s+` | one or more spaces (also between columns) |
+| `\d` | a digit; `\d{2}` — exactly two digits |
+| `[\d.,]+` | a number: digits, dots and commas |
+| `\.` | a dot itself (a plain `.` means "any character") |
+| `\p{L}+` | a word of letters, Latvian letters included |
+| `^` / `$` | the start / the end of a line |
+| `( … )` | **the value** that goes into the field; `(?<name> … )` — a named value for `format` and `Lines` |
+
+Example: `Pay by:\s+(\d{2}\.\d{2}\.\d{4})` — find "Pay by:", skip the spaces, take a date like `30.11.2026`. In the JSON file every
+backslash is written twice (`\s` becomes `\\s`). To try a pattern, copy the text with **Show PDF text…**, paste it into a regular
+expression tester that supports the .NET flavour and look what lands in the brackets — the text contains your name and address, so
+replace them first if the tester is a website. An invalid pattern is reported on import with the field it belongs to.
+
 ### Paid, Undo and Remove payment
 
 The **Mark as paid** button (on a row of the list and in the *Payment* card; the hint under it appears together with the button) records that you paid the bill: one bank
