@@ -1,4 +1,5 @@
 using HomeUtilities.Core.Import;
+using HomeUtilities.Core.PdfBills;
 
 namespace HomeUtilities.Core.Abstractions;
 
@@ -54,4 +55,9 @@ public interface IImportBatchStore
     /// <see cref="UndoImportOutcome.NeedsConfirmation"/> is returned.
     /// </summary>
     Task<UndoImportResult> UndoAsync(Guid batchId, bool confirmEdited, CancellationToken ct = default);
+}
+
+/// <summary>Store of PDF bill layouts (user data; synced and backed up like every other record).</summary>
+public interface IPdfBillLayoutStore : IStore<PdfBillLayout>
+{
 }
