@@ -1789,6 +1789,24 @@
   <data name="PdfField_Gross" xml:space="preserve"><value>Итого</value></data>
   <data name="PdfField_VatPercent" xml:space="preserve"><value>НДС %</value></data>
   <data name="PdfField_Vat" xml:space="preserve"><value>НДС</value></data>
+  <data name="PdfField_Net" xml:space="preserve"><value>Сумма без НДС</value></data>
+  <data name="PdfField_ServiceFrom" xml:space="preserve"><value>Услуга с</value></data>
+  <data name="PdfField_ServiceTo" xml:space="preserve"><value>Услуга по</value></data>
+  <data name="PdfField_Title" xml:space="preserve"><value>Название</value></data>
+  <data name="PdfField_Consumption" xml:space="preserve"><value>Количество в счёте</value></data>
+  <data name="PdfField_Quantity" xml:space="preserve"><value>Количество</value></data>
+  <data name="PdfField_ComponentAmount" xml:space="preserve"><value>Сумма строки тарифа</value></data>
+  <data name="PdfField_CustomField" xml:space="preserve"><value>Дополнительное поле</value></data>
+  <data name="PdfField_Notes" xml:space="preserve"><value>Комментарий</value></data>
+  <data name="PdfField_Lines" xml:space="preserve"><value>Строки счёта</value></data>
+  <data name="PdfWarningComponentMissing" xml:space="preserve"><value>Строки тарифа «{0}» в этом счёте нет — больше ничего не меняется.</value></data>
+  <data name="PdfWarningFieldMissing" xml:space="preserve"><value>Дополнительного поля «{0}» в этом счёте нет — больше ничего не меняется.</value></data>
+  <data name="PdfWarningLinesExist" xml:space="preserve"><value>В счёте уже есть строки — не изменены.</value></data>
+  <data name="PdfWarningServicePeriodPartial" xml:space="preserve"><value>Период услуги: найдена только одна из двух дат, поэтому он не задан.</value></data>
+  <data name="PdfWarningNotesTooLong" xml:space="preserve"><value>Комментарий: текст обрезан до {0} символов.</value></data>
+  <data name="PdfWarningAmountsMismatch" xml:space="preserve"><value>Итог, сумма без НДС и НДС не сходятся; взят итог.</value></data>
+  <data name="PdfWarningNetNeedsTotal" xml:space="preserve"><value>Сумма без НДС: нужен ещё итог, поэтому она пропущена.</value></data>
+  <data name="PdfSummaryLinesAdded" xml:space="preserve"><value>добавлено: {0}</value></data>
   <data name="PdfTextTitle" xml:space="preserve"><value>Текст PDF</value></data>
   <data name="PdfTextHint" xml:space="preserve"><value>Это текст, который приложение читает из PDF. В нём могут быть личные данные (имена, адреса, номера): отправляйте его только тому, кто пишет макет для этого поставщика.</value></data>
   <data name="PdfTextCopy" xml:space="preserve"><value>Копировать</value></data>
@@ -1808,5 +1826,10 @@
   <data name="Error_pdf_layout_name_required" xml:space="preserve"><value>У макета {0} в файле нет названия.</value></data>
   <data name="Error_pdf_layout_markers_required" xml:space="preserve"><value>У макета «{0}» нет признаков.</value></data>
   <data name="Error_pdf_layout_pattern_invalid" xml:space="preserve"><value>Макет «{0}», поле {1}: неверное регулярное выражение. {2}</value></data>
+  <data name="Error_pdf_layout_component_required" xml:space="preserve"><value>Макет «{0}», поле {1}: не указано название строки тарифа («component»).</value></data>
+  <data name="Error_pdf_layout_field_name_required" xml:space="preserve"><value>Макет «{0}», поле {1}: не указано название дополнительного поля («name»).</value></data>
+  <data name="Error_pdf_layout_combine_invalid" xml:space="preserve"><value>Макет «{0}», поле {1}: «combine: {2}» для этого поля не допускается.</value></data>
+  <data name="Error_pdf_layout_format_invalid" xml:space="preserve"><value>Макет «{0}», поле {1}: «format» допускается только для Notes.</value></data>
+  <data name="Error_pdf_layout_lines_description_required" xml:space="preserve"><value>Макет «{0}», поле Lines: в выражении нужна группа с именем «description».</value></data>
   <data name="CleanUpKind_PdfBillLayouts" xml:space="preserve"><value>макеты PDF-счетов</value></data>
 </root>

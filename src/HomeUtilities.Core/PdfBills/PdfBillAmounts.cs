@@ -10,14 +10,24 @@ public static class PdfBillAmounts
 
     /// <summary>
     /// The total is taken as printed. With a VAT amount, Net = Total − VAT (the printed VAT rate is kept when it matches);
-    /// with only a rate, Net and VAT are derived from it; with the total alone Net and VAT stay empty.
-    /// The invariant Net + VAT = Total holds. Null when there is no total.
+    /// with a net amount (no VAT amount), VAT = Total − Net; with only a rate, Net and VAT are derived from it; with the
+    /// total alone Net and VAT stay empty. When all three amounts are given the total wins (the VAT amount is kept).
+    /// Without a total it is derived from net + VAT or from net and the rate. The invariant Net + VAT = Total holds.
+    /// Null when there is no total and none can be derived.
     /// </summary>
     public static AmountSet? Resolve(PdfBillValues values)
     {
         ArgumentNullException.ThrowIfNull(values);
 
-        if (values.Gross is not { } gross)
+        var total = values.Gross;
+        if (total is null && values.Net is { } onlyNet)
+        {
+            total = values.Vat is { } onlyVat
+                ? onlyNet + onlyVat
+                : values.VatPercent is { } onlyRate ? Amounts.Complete(onlyNet, onlyRate, null).Result?.Gross : null;
+        }
+
+        if (total is not { } gross)
         {
             return null;
         }
@@ -28,6 +38,15 @@ public static class PdfBillAmounts
             var net = gross - MoneyMath.Round(vat);
             var percent = values.VatPercent is { } printed && Math.Abs(MoneyMath.FromNet(net, printed).Gross - gross) <= Tolerance
                 ? printed
+                : Amounts.Complete(net, null, gross).Result?.VatPercent;
+            return new AmountSet(net, percent, gross - net, gross);
+        }
+
+        if (values.Net is { } printedNet)
+        {
+            var net = MoneyMath.Round(printedNet);
+            var percent = values.VatPercent is { } rated && Math.Abs(MoneyMath.FromNet(net, rated).Gross - gross) <= Tolerance
+                ? rated
                 : Amounts.Complete(net, null, gross).Result?.VatPercent;
             return new AmountSet(net, percent, gross - net, gross);
         }
