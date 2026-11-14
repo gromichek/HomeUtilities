@@ -150,12 +150,39 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
     {
         if (_dispatcher is null)
         {
-            UpdateSyncHint();
+            OnSyncStatusChanged();
         }
         else
         {
-            _dispatcher.Post(UpdateSyncHint);
+            _dispatcher.Post(OnSyncStatusChanged);
         }
+    }
+
+    // True between appearing and disappearing.
+    private bool _shown;
+
+    // The run whose received rows were already reloaded, so a repeated message does not reload twice.
+    private DateTimeOffset? _reloadedForSync;
+
+    private void OnSyncStatusChanged()
+    {
+        UpdateSyncHint();
+
+        // A finished run that wrote rows of other devices makes the shown data stale: reload in place while the page is
+        // shown. The engine sends the status before it bumps the data version, so the decision uses the status itself.
+        // A hidden page reloads on its next appearance through the gate anyway.
+        if (_shown && IsLoaded && _sync?.Status is { Kind: SyncStateKind.Synced, Received: > 0 } status
+            && status.LastSyncAt != _reloadedForSync)
+        {
+            _reloadedForSync = status.LastSyncAt;
+            _ = RunSafeAsync(() => RunLoadAsync(ct => ReloadAsync(ct), () => PropertyCount));
+        }
+    }
+
+    public override Task OnDisappearingAsync()
+    {
+        _shown = false;
+        return base.OnDisappearingAsync();
     }
 
     /// <summary>Shown only when the sync is on and has not worked for more than a day (T-031).</summary>
@@ -202,6 +229,7 @@ public sealed partial class OverviewViewModel : ViewModelBase, IRecipient<Layout
 
     public override Task OnAppearingAsync() => RunSafeAsync(async () =>
     {
+        _shown = true;
         UpdateSyncHint(); // catch up with a status change missed in between
         await InitializeDatabaseAsync();
         if (_gate is { IsFresh: true } && IsLoaded)

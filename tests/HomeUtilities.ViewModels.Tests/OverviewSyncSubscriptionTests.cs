@@ -53,9 +53,60 @@ public class OverviewSyncSubscriptionTests
             Task.FromResult(new OverviewData([], [], [], [], [], [], new Dictionary<Guid, decimal>(), []));
     }
 
-    private static OverviewViewModel Create(BillTestKit kit, ISyncEngine engine) => new(
-        kit.Kit.Localizer, kit.Kit.Clock, new Initializer(), new EmptyLoader(), kit.Templates, kit.QuickPay, kit.Kit.Toast,
+    private static OverviewViewModel Create(BillTestKit kit, ISyncEngine engine, IOverviewDataLoader? loader = null) => new(
+        kit.Kit.Localizer, kit.Kit.Clock, new Initializer(), loader ?? new EmptyLoader(), kit.Templates, kit.QuickPay, kit.Kit.Toast,
         kit.Kit.Navigation, kit.Kit.Dialogs, kit.Kit.Settings, kit.Kit.Layout, sync: engine);
+
+    private sealed class CountingLoader : IOverviewDataLoader
+    {
+        public int Loads { get; private set; }
+
+        public Task<OverviewData> LoadAsync(DateOnly today, CancellationToken ct = default)
+        {
+            Loads++;
+            return new EmptyLoader().LoadAsync(today, ct);
+        }
+    }
+
+    [Fact]
+    public async Task Shown_Overview_Reloads_OnceAfterASyncThatReceivedRows()
+    {
+        var kit = new BillTestKit(Today);
+        var engine = new RaisingEngine { IsEnabled = true };
+        var loader = new CountingLoader();
+        var vm = Create(kit, engine, loader);
+        await vm.OnAppearingAsync();
+        Assert.Equal(1, loader.Loads);
+
+        // A run that only sent changes: nothing to reload.
+        engine.Status = new SyncStatus(SyncStateKind.Synced, LastSyncAt: kit.Kit.Clock.UtcNow, Sent: 2);
+        WeakReferenceMessenger.Default.Send(new SyncStatusChangedMessage());
+        Assert.Equal(1, loader.Loads);
+
+        // A run that wrote 3 rows of another device: reloaded in place, and only once for that run.
+        engine.Status = new SyncStatus(SyncStateKind.Synced, LastSyncAt: kit.Kit.Clock.UtcNow.AddMinutes(1), Received: 3);
+        WeakReferenceMessenger.Default.Send(new SyncStatusChangedMessage());
+        await WaitUntilAsync(() => loader.Loads == 2);
+        WeakReferenceMessenger.Default.Send(new SyncStatusChangedMessage());
+        Assert.Equal(2, loader.Loads);
+
+        // Hidden: no reload from the message (the next appearance decides).
+        await vm.OnDisappearingAsync();
+        engine.Status = new SyncStatus(SyncStateKind.Synced, LastSyncAt: kit.Kit.Clock.UtcNow.AddMinutes(2), Received: 1);
+        WeakReferenceMessenger.Default.Send(new SyncStatusChangedMessage());
+        Assert.Equal(2, loader.Loads);
+        GC.KeepAlive(vm);
+    }
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (var i = 0; i < 200 && !condition(); i++)
+        {
+            await Task.Delay(10);
+        }
+
+        Assert.True(condition());
+    }
 
     [Fact]
     public async Task Hint_FollowsTheStatusMessage_AndIsCaughtUpWhenAppearing()
