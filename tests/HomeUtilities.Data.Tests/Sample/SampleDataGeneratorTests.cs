@@ -116,11 +116,13 @@ public class SampleDataGeneratorTests
         Assert.True(PdfBillLayoutFile.Validate(layout).Count == 0);
         Assert.Contains("sample", layout.Name, StringComparison.OrdinalIgnoreCase);
         // The layout reads a bill text with the same invented supplier.
-        var text = "SIA \"Piemērs Ūdens\"  RĒĶINS NR.: UD-1\nDATUMS: 06.11.2026\nPERIODS: 2026. gada oktobris\nAPMAKSAS TERMIŅŠ: 20.11.2026\nPVN 21 %\nKOPĀ APMAKSAI EUR: 59,49\n";
+        var text = "SIA \"Piemērs Ūdens\"  RĒĶINS NR.: UD-1\nDATUMS: 06.11.2026\nPERIODS: 2026. gada oktobris\nAPMAKSAS TERMIŅŠ: 20.11.2026\nPVN 21 %\nDAUDZUMS: 5,120 m3\nKARSTĀ ŪDENS STARPĪBA: 0,310\nKOPĀ APMAKSAI EUR: 59,49\n";
         var result = PdfBillReader.Read(text, [layout]);
         Assert.Equal("UD-1", result.Values.Number);
         Assert.Equal(59.49m, result.Values.Gross);
         Assert.Equal(new YearMonth(2026, 10), result.Values.Period);
+        Assert.Equal(5.120m, result.Values.Consumption);
+        Assert.Equal([new PdfBillNamedNumber("Hot water difference", 0.310m)], result.Values.Quantities);
         Assert.Equal([PdfBillField.Vat], result.NotFound);
     }
 

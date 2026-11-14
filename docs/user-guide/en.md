@@ -732,9 +732,12 @@ set the app up; you do not write them yourself.
 
 1. The app reads the PDF and picks the layout whose texts all occur in it. If none fits, you get the message *No layout fits this PDF*
    and nothing changes.
-2. Every value it finds goes into the form exactly as if you had typed it: *Bill number*, *Issued on*, *Period*, *Due on* and the
-   amounts. Fields it does not find keep what they had. The **Total** is taken as printed; with a printed VAT amount the *Amount excl. VAT*
-   is Total − VAT, with only a VAT rate the rest is calculated from it. The *kind* of the bill (regular, equalized…) is not changed.
+2. Every value it finds goes into the form exactly as if you had typed it: *Bill number*, *Issued on*, *Period*, *Due on*, the
+   amounts, and — when the layout reads them — *Title*, *Service from / to*, *Quantity on the bill*, the quantities and amounts of
+   tariff lines, *Comment*, custom fields and the bill lines (see below). Fields it does not find keep what they had. The **Total**
+   is taken as printed; with a printed VAT amount the *Amount excl. VAT* is Total − VAT, with a printed *Amount excl. VAT* the VAT
+   is Total − Amount excl. VAT, with only a VAT rate the rest is calculated from it (Amount excl. VAT + VAT always equals the Total;
+   if all three are printed and do not add up, the Total wins and the summary warns). The *kind* of the bill (regular, equalized…) is not changed.
 3. If the PDF does not print a period, the app uses the period a bill issued that day normally belongs to for this contract
    (for example a bill issued in November for a contract paid in arrears is for October).
 4. The PDF is added to the *Bill document* card (once — the same file name is not added twice) and is stored when you save the bill.
@@ -754,8 +757,43 @@ The layout example (invented supplier) as the person who writes layouts sees it:
               { "field": "Gross",  "pattern": "KOPĀ APMAKSAI EUR:\\s+([\\d.,]+)" } ] } ] }
 ```
 
-*markers* — texts that must all occur in the PDF; *fields* — the field (`Number`, `IssuedOn`, `Period`, `DueOn`, `Gross`,
-`VatPercent`, `Vat`) and a regular expression whose first group is the value.
+*markers* — texts that must all occur in the PDF; *fields* — the field and a regular expression whose first group is the value.
+
+**Every field of the bill.** A layout can read `Number`, `IssuedOn`, `Period`, `DueOn`, `Gross`, `VatPercent`, `Vat`, and also
+`Net` (*Amount excl. VAT*), `ServiceFrom` and `ServiceTo` (*Service from / to* — both must be found, otherwise nothing is set),
+`Title`, `Consumption` (*Quantity on the bill*), `Notes` (*Comment*), `Quantity` and `ComponentAmount` (the quantity and the amount of one
+tariff line taken from the bill), `CustomField` (one custom field of the bill) and `Lines` (the bill lines). The same
+field may appear several times with different `component` / `name`.
+
+- **`component`** is the **name of the tariff line exactly as it is in the contract** (capitals do not matter). The quantity goes
+  into the row of that line in the *Quantities from the bill* card. If the bill has no such row — the name is different, the line is
+  not "quantity from the bill" or does not exist in that month — the summary says *Tariff line "…" is not on this bill* and everything
+  else is still filled. **If you rename the line in the contract, the layout must be updated.** `name` does the same for a custom field
+  (its value is read by the kind of the field: text, number, money or date).
+- **`combine`** says what to do when the text appears several times: `first` (default) takes the first one, `sum` adds all of them
+  (numbers only; if one of them is not a number the field is skipped), `all` takes all of them (`Notes` and `Lines` only).
+- **`format`** (only `Notes`) shapes each match, e.g. `"${meter}: ${from} – ${to}"`.
+- **Comment**: the text is added on a new line after what is already there, and **not added again** if the comment already contains it —
+  filling twice from the same PDF does not double it.
+- **Lines**: each match is one line; the pattern must name the groups `description` and may name `quantity`, `unit`, `price`, `net`, `vat`.
+  Lines are added **only if the bill has no lines yet** (otherwise the summary says so and keeps yours). They get no category of their own.
+
+Examples (invented). A supplier prints the consumption as two lines — `Hot water declared 6.420 m3` and `Hot water difference 0.310 m3`:
+
+```json
+{ "field": "Consumption", "pattern": "Hot water \\w+ ([\\d.]+) m3", "combine": "sum" }
+```
+
+gives *Quantity on the bill* 6.730. An invented electricity bill that prints one line per meter, `1111111111  105.20 - 106.10`:
+
+```json
+{ "field": "Notes", "combine": "all", "format": "${meter}: ${from} – ${to}",
+  "pattern": "^(?<meter>\\d{10})\\s+(?<from>[\\d.]+) - (?<to>[\\d.]+)$" }
+```
+
+puts `1111111111: 105.20 – 106.10; 2222222222: 8200.00 – 8315.40` into the *Comment*. A tariff line:
+`{ "field": "Quantity", "component": "Heat", "pattern": "Heat ([\\d.]+) MWh" }`. Like all layouts these come as a file from the person who
+sets the app up for you; when a supplier changes its bill you get an updated file and import it (a layout with the same name is replaced).
 
 ### Paid, Undo and Remove payment
 

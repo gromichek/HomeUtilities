@@ -22,6 +22,8 @@ public sealed partial class SampleDataGenerator
                     new() { Field = PdfBillField.DueOn, Pattern = @"APMAKSAS TERMIŅŠ:?\s+(\d{2}\.\d{2}\.\d{4})" },
                     new() { Field = PdfBillField.Gross, Pattern = @"KOPĀ APMAKSAI EUR:?\s+([\d .,]+\d)" },
                     new() { Field = PdfBillField.VatPercent, Pattern = @"PVN\s+(\d+(?:[.,]\d+)?)\s*%" },
+                    new() { Field = PdfBillField.Consumption, Pattern = @"DAUDZUMS:?\s+([\d.,]+)\s*m3" },
+                    new() { Field = PdfBillField.Quantity, Component = "Hot water difference", Pattern = @"KARSTĀ ŪDENS STARPĪBA:?\s+([\d.,]+)" },
                 ],
                 Notes = "Invented layout for the sample data.",
             },
