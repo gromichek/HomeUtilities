@@ -19,7 +19,7 @@ public class ImportsViewModelTests
     private readonly FakeSnackbarService _snackbar = new();
 
     private ImportsViewModel Create() =>
-        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow());
+        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow(), new PdfLayoutsViewModel(new FakePdfLayoutStore(), _files, _saver, new FakeMediaService(), new FakePdfTextReader(), _dialogs, _navigation, _snackbar, new FakeLocalizer(_language)));
 
     private WorkbookExportFlow ExportFlow() => new(
         new FakeExportLoader(), new FakePaymentStore(), new FakeSupplierStore(), _profiles, new FakeExportWriter(), _saver, _dialogs, _snackbar, new FakeLocalizer(_language), new TestClock(new DateOnly(2026, 10, 29)));

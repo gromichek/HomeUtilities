@@ -54,6 +54,7 @@ public sealed class BillEditTexts
         FieldDateSetText = localizer["BillFieldDateSet"];
         AttachmentsHeader = localizer["BillAttachments"];
         AddAttachmentText = localizer["BillAttachmentAdd"];
+        FillFromPdfText = localizer["BillFillFromPdf"];
         AttachmentsEmptyText = localizer["BillAttachmentsEmpty"];
         OpenAttachmentText = localizer["BillAttachmentOpen"];
         RemoveAttachmentText = localizer["BillAttachmentRemove"];
@@ -169,6 +170,8 @@ public sealed class BillEditTexts
     public string AttachmentsHeader { get; }
 
     public string AddAttachmentText { get; }
+
+    public string FillFromPdfText { get; }
 
     public string AttachmentsEmptyText { get; }
 

@@ -53,13 +53,13 @@ public partial class DataExchangeTests
         {
             "Properties", "PropertyParameters", "Categories", "Suppliers", "Contracts", "ContractMeters", "Meters", "MeterRegisters",
             "MeterReadings", "VatRates", "VatRateVersions", "TariffComponents", "TariffRates", "EqualizedPlans", "Bills", "BillLines",
-            "BillTemplates", "Payments", "PaymentAllocations", "Attachments", "ImportBatches", "ImportProfiles",
+            "BillTemplates", "Payments", "PaymentAllocations", "Attachments", "ImportBatches", "ImportProfiles", "PdfBillLayouts",
         })
         {
             Assert.Contains(expected, names);
         }
 
-        foreach (var table in new[] { "Properties", "Suppliers", "Contracts", "Meters", "MeterReadings", "Bills", "Payments", "TariffRates", "EqualizedPlans", "BillTemplates", "Categories", "VatRates", "ImportProfiles" })
+        foreach (var table in new[] { "Properties", "Suppliers", "Contracts", "Meters", "MeterReadings", "Bills", "Payments", "TariffRates", "EqualizedPlans", "BillTemplates", "Categories", "VatRates", "ImportProfiles", "PdfBillLayouts" })
         {
             Assert.True(tables.GetProperty(table).GetArrayLength() > 0, table + " is empty");
         }

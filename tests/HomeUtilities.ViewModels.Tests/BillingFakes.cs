@@ -251,9 +251,14 @@ internal sealed class BillTestKit
         PaymentDetails = new HomeUtilities.Core.Payments.PaymentDetails(null, null, null, null, null, "Abon. Nr. {CustomerNumber}, {Period:MM.yyyy}"),
     };
 
+    public FakePdfTextReader PdfReader { get; } = new();
+
+    public FakePdfLayoutStore PdfLayouts { get; } = new();
+
     public BillEditViewModel CreateEditor() =>
         new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, Kit.ChargeLoader, Kit.Plans, Kit.Attachments,
-            Kit.Media, Kit.Viewer, QuickPay, Templates, TemplateLauncher, Kit.Prepayments, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog);
+            Kit.Media, Kit.Viewer, QuickPay, Templates, TemplateLauncher, Kit.Prepayments, Kit.Clock, Kit.Localizer, Kit.Dialogs, Kit.Navigation, Kit.Toast, Kit.ErrorLog,
+            pdfReader: PdfReader, pdfLayouts: PdfLayouts);
 
     public BillsViewModel CreateBills(ISectionSelectionMemory? memory = null) =>
         new(Bills, Payments, Kit.Contracts, Kit.Suppliers, Kit.Categories, Kit.Properties, QuickPay, Drafts, Templates, Kit.Toast, Kit.Dialogs,

@@ -234,6 +234,7 @@ public sealed partial class DatabaseCleanUpViewModel : ViewModelBase
         ["Attachments"] = "CleanUpKind_Attachments",
         ["ImportBatches"] = "CleanUpKind_ImportBatches",
         ["ImportProfiles"] = "CleanUpKind_ImportProfiles",
+        ["PdfBillLayouts"] = "CleanUpKind_PdfBillLayouts",
     };
 
     protected override void RefreshTexts()

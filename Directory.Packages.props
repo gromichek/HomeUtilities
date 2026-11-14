@@ -5,6 +5,8 @@
   <ItemGroup>
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="ClosedXML" Version="0.105.0" />
+    <!-- PDF text extraction for bills (T-055): Apache-2.0, pure managed. -->
+    <PackageVersion Include="PdfPig" Version="0.1.16" />
     <PackageVersion Include="CommunityToolkit.Maui" Version="15.0.1" />
     <PackageVersion Include="Plugin.LocalNotification" Version="14.1.2" />
     <PackageVersion Include="Xamarin.GooglePlayServices.Auth" Version="122.0.0" />

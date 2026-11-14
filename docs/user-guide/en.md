@@ -706,6 +706,57 @@ with a **Confirm** button; **Save** keeps it a draft, **Confirm** saves it as a 
 Saving keeps you in the editor. Deleting a bill asks first; the money you paid for it stays on the contract as
 prepayment (a payment made with **Mark as paid** for this bill alone is removed together with the bill).
 
+### Filling a bill from a PDF
+
+Most suppliers send the bill as a PDF. Instead of typing the number, the dates and the amounts, you can let the app read them:
+in the bill editor, in the *Bill document* card, press **Fill from PDF** and pick the PDF (a file on Windows, a file from
+Downloads or a drive on a phone).
+
+**What a layout is.** Every supplier prints its bill differently, so the app needs a *PDF bill layout* for each one: it says
+which texts identify the supplier (for example its name and the words "BILL NO.") and, for each field, where its value is
+printed. A layout is **not part of the app** — it is part of *your* data, like a supplier or a contract: it is stored in the
+database, travels with the sync, and is in every backup. Layouts come as a `.json` file from the person who helps you
+set the app up; you do not write them yourself.
+
+**Getting layouts.** *Settings → Imports → PDF bill layouts*:
+
+- **Import layouts…** loads a layouts file (one file may hold several layouts). A layout with the same name as one you already
+  have **replaces** it, the others are added — so you can safely load an updated file. A file with a mistake is refused as a whole,
+  with the name of the layout and of the field.
+- **Export all…** saves all your layouts as one file in the same format.
+- **Delete layout** removes one layout after a confirmation.
+- **Show PDF text…** shows the text the app reads from a PDF you pick, with a **Copy** button. When a supplier is new or has
+  changed its bill, send this text to the person who writes the layouts. *The text contains personal data (names, addresses, numbers) — send it only to them.*
+
+**What happens when you press Fill from PDF.**
+
+1. The app reads the PDF and picks the layout whose texts all occur in it. If none fits, you get the message *No layout fits this PDF*
+   and nothing changes.
+2. Every value it finds goes into the form exactly as if you had typed it: *Bill number*, *Issued on*, *Period*, *Due on* and the
+   amounts. Fields it does not find keep what they had. The **Total** is taken as printed; with a printed VAT amount the *Amount excl. VAT*
+   is Total − VAT, with only a VAT rate the rest is calculated from it. The *kind* of the bill (regular, equalized…) is not changed.
+3. If the PDF does not print a period, the app uses the period a bill issued that day normally belongs to for this contract
+   (for example a bill issued in November for a contract paid in arrears is for October).
+4. The PDF is added to the *Bill document* card (once — the same file name is not added twice) and is stored when you save the bill.
+5. A summary shows the layout, the filled fields with their values, the fields that were not found and any warning.
+   **Nothing is saved yet:** compare the values with the paper bill, correct what is needed and press **Save** as usual.
+
+If the supplier of the contract has a *Registration number* and that number does not occur in the PDF, the summary warns
+*This PDF may be from another supplier* (the values are still filled in) — you may have picked the wrong file or the wrong contract.
+A PDF that is a scan or a photo has no text and cannot be read; a password-protected or damaged file is reported with the reason.
+
+The layout example (invented supplier) as the person who writes layouts sees it:
+
+```json
+{ "version": 1, "layouts": [ { "name": "Example Water", "markers": ["SIA \"Piemērs Ūdens\"", "RĒĶINS NR."],
+  "fields": [ { "field": "Number", "pattern": "RĒĶINS NR\\.:\\s+(\\S+)" },
+              { "field": "DueOn",  "pattern": "APMAKSAS TERMIŅŠ\\s+(\\d{2}\\.\\d{2}\\.\\d{4})" },
+              { "field": "Gross",  "pattern": "KOPĀ APMAKSAI EUR:\\s+([\\d.,]+)" } ] } ] }
+```
+
+*markers* — texts that must all occur in the PDF; *fields* — the field (`Number`, `IssuedOn`, `Period`, `DueOn`, `Gross`,
+`VatPercent`, `Vat`) and a regular expression whose first group is the value.
+
 ### Paid, Undo and Remove payment
 
 The **Mark as paid** button (on a row of the list and in the *Payment* card; the hint under it appears together with the button) records that you paid the bill: one bank
@@ -1569,6 +1620,8 @@ The **?** button on *Imports* and on the import wizard opens this part of the gu
 - A **profile** can be renamed (edit the name and press *Save name*), deleted, or **exported** to a `.json` file and loaded
   again with *Import profile from file* — for example to send it to the person who helps you. The file contains only the
   column numbers and settings (period rules, header texts): **no amounts and no readings**.
+- **PDF bill layouts** — how the app reads the header of a supplier's PDF bill for *Fill from PDF* in the bill editor: the list,
+  **Import layouts…**, **Export all…**, **Show PDF text…** and delete. See [Filling a bill from a PDF](#filling-a-bill-from-a-pdf).
 
 ### Export like your workbook
 

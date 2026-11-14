@@ -9,6 +9,7 @@ using HomeUtilities.Core.Charges;
 using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Equalized;
+using HomeUtilities.Core.PdfBills;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.ViewModels.Common;
 
@@ -55,6 +56,8 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
     private readonly IAttachmentStore _attachmentStore;
     private readonly IAttachmentFileSync? _fileSync;
     private readonly IMediaService _media;
+    private readonly IPdfTextReader? _pdfReader;
+    private readonly IPdfBillLayoutStore? _pdfLayouts;
     private readonly IFileViewer _viewer;
     private readonly QuickPayService _quickPay;
     private readonly IBillTemplateStore _templateStore;
@@ -296,9 +299,13 @@ public sealed partial class BillEditViewModel : PaneEditorViewModel
         ISnackbarService snackbar,
         IErrorLog errorLog,
         IAttachmentFileSync? fileSync = null,
-        DeleteUndoSupport? undo = null)
+        DeleteUndoSupport? undo = null,
+        IPdfTextReader? pdfReader = null,
+        IPdfBillLayoutStore? pdfLayouts = null)
         : base(localizer, dialogs, navigation, snackbar)
     {
+        _pdfReader = pdfReader;
+        _pdfLayouts = pdfLayouts;
         UndoSupport = undo;
         _fileSync = fileSync;
         _bills = bills;

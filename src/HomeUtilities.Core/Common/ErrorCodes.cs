@@ -392,4 +392,28 @@ public static class ErrorCodes
 
     /// <summary>The day limit of a period rule is not a day of the month (1–31).</summary>
     public const string ImportDayLimitInvalid = "import.day_limit_invalid";
+
+    /// <summary>The file is not a PDF bill layouts file.</summary>
+    public const string PdfLayoutFileInvalid = "pdf.layout_file_invalid";
+
+    /// <summary>A layout has no name. Field: the layout's position in the file.</summary>
+    public const string PdfLayoutNameRequired = "pdf.layout_name_required";
+
+    /// <summary>A layout has no marker, so it could never be chosen. Args: the layout name.</summary>
+    public const string PdfLayoutMarkersRequired = "pdf.layout_markers_required";
+
+    /// <summary>A pattern of a layout is not a valid regular expression. Field: the field name; Args: layout name, field name, the error.</summary>
+    public const string PdfLayoutPatternInvalid = "pdf.layout_pattern_invalid";
+
+    /// <summary>The PDF is larger than the limit.</summary>
+    public const string PdfTooLarge = "pdf.too_large";
+
+    /// <summary>The PDF is protected by a password.</summary>
+    public const string PdfEncrypted = "pdf.encrypted";
+
+    /// <summary>The file could not be read as a PDF.</summary>
+    public const string PdfUnreadable = "pdf.unreadable";
+
+    /// <summary>The PDF has no text (for example a scan).</summary>
+    public const string PdfNoText = "pdf.no_text";
 }

@@ -5,6 +5,7 @@ using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Import;
+using HomeUtilities.Core.PdfBills;
 using HomeUtilities.Core.Tariffs;
 using HomeUtilities.Data.Conversion;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,9 @@ public class HomeUtilitiesDbContext(DbContextOptions<HomeUtilitiesDbContext> opt
     public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
 
     public DbSet<SavedImportProfile> ImportProfiles => Set<SavedImportProfile>();
+
+    /// <summary>PDF bill layouts (T-055).</summary>
+    public DbSet<PdfBillLayout> PdfBillLayouts => Set<PdfBillLayout>();
 
     /// <inheritdoc />
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

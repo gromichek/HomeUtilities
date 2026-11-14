@@ -4,6 +4,7 @@ using HomeUtilities.Core.Common;
 using HomeUtilities.Core.Consumption;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Import;
+using HomeUtilities.Core.PdfBills;
 using HomeUtilities.Core.Equalized;
 using HomeUtilities.Core.Payments;
 using HomeUtilities.Core.Taxes;
@@ -32,7 +33,7 @@ public class SampleDataGeneratorTests
             VatRates = new VatRateStore(_test.Factory);
             Bills = new BillStore(_test.Factory);
             Payments = new PaymentStore(_test.Factory);
-            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), new BillTemplateStore(_test.Factory, _test.Clock), Bills, Payments, new ImportProfileStore(_test.Factory), new ChargeInputLoader(_test.Factory), _test.Clock);
+            Generator = new SampleDataGenerator(Properties, Suppliers, new CategoryStore(_test.Factory), Contracts, Meters, Tariffs, new EqualizedPlanStore(_test.Factory), new BillTemplateStore(_test.Factory, _test.Clock), Bills, Payments, new ImportProfileStore(_test.Factory), new PdfBillLayoutStore(_test.Factory), new ChargeInputLoader(_test.Factory), _test.Clock);
             Loader = new ChargeInputLoader(_test.Factory);
         }
 
@@ -103,6 +104,24 @@ public class SampleDataGeneratorTests
         Assert.Equal(waste.Id, saved.Profile.ContractId);
         Assert.True(ImportProfileValidator.Validate(saved.Profile).IsValid);
         Assert.Empty(await new ImportBatchStore(rig.Factory).ListAsync());
+    }
+
+    [Fact]
+    public async Task One_invented_pdf_bill_layout_is_saved_and_valid()
+    {
+        using var rig = new Rig();
+        await rig.Generator.FillAsync();
+
+        var layout = Assert.Single(await new PdfBillLayoutStore(rig.Factory).ListAsync());
+        Assert.True(PdfBillLayoutFile.Validate(layout).Count == 0);
+        Assert.Contains("sample", layout.Name, StringComparison.OrdinalIgnoreCase);
+        // The layout reads a bill text with the same invented supplier.
+        var text = "SIA \"Piemērs Ūdens\"  RĒĶINS NR.: UD-1\nDATUMS: 06.11.2026\nPERIODS: 2026. gada oktobris\nAPMAKSAS TERMIŅŠ: 20.11.2026\nPVN 21 %\nKOPĀ APMAKSAI EUR: 59,49\n";
+        var result = PdfBillReader.Read(text, [layout]);
+        Assert.Equal("UD-1", result.Values.Number);
+        Assert.Equal(59.49m, result.Values.Gross);
+        Assert.Equal(new YearMonth(2026, 10), result.Values.Period);
+        Assert.Equal([PdfBillField.Vat], result.NotFound);
     }
 
     [Fact]
