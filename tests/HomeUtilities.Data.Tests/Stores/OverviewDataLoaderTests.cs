@@ -193,7 +193,7 @@ public class OverviewDataLoaderTests
         var generator = new SampleDataGenerator(
             new PropertyStore(factory), new SupplierStore(factory), new CategoryStore(factory), new ContractStore(factory),
             new MeterStore(factory), new TariffStore(factory), new EqualizedPlanStore(factory), new BillTemplateStore(factory, test.Clock), new BillStore(factory),
-            new PaymentStore(factory), new ImportProfileStore(factory), new ChargeInputLoader(factory), test.Clock);
+            new PaymentStore(factory), new ImportProfileStore(factory), new PdfBillLayoutStore(factory), new ChargeInputLoader(factory), test.Clock);
         Assert.True(await generator.FillAsync());
 
         var counting = new CountingChargeLoader(new ChargeInputLoader(factory));

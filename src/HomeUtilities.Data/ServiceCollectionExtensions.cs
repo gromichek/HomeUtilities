@@ -51,6 +51,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBillTemplateStore, BillTemplateStore>();
         services.AddSingleton<IPaymentStore, PaymentStore>();
         services.AddSingleton<IImportProfileStore, ImportProfileStore>();
+        services.AddSingleton<IPdfBillLayoutStore, PdfBillLayoutStore>();
         services.AddSingleton<IImportBatchStore, ImportBatchStore>();
         services.AddSingleton<IAttachmentStore>(provider => new AttachmentStore(
             provider.GetRequiredService<IDbContextFactory<HomeUtilitiesDbContext>>(),

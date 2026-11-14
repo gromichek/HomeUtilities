@@ -29,6 +29,7 @@ public sealed partial class SampleDataGenerator(
     IBillStore bills,
     IPaymentStore payments,
     IImportProfileStore importProfiles,
+    IPdfBillLayoutStore pdfLayouts,
     IChargeInputLoader chargeLoader,
     IClock clock) : ISampleDataGenerator
 {
@@ -116,6 +117,7 @@ public sealed partial class SampleDataGenerator(
         await AddTaxInstallmentsAsync(cLand, 2, 58.30m, supplierOf, ct);
         await AddOtherTemplatesAsync(flat, cottage, ct);
         await AddImportProfileAsync(cWaste, ct);
+        await AddPdfBillLayoutAsync(ct);
         await CreateDraftsAsync(ct);
         return true;
     }
