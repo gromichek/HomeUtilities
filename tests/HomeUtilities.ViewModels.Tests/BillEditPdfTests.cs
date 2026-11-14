@@ -142,6 +142,11 @@ public class BillEditPdfTests : IDisposable
         await vm.FillFromPdfCommand.ExecuteAsync(null);
 
         Assert.Equal(new YearMonth(2026, 11), vm.Period);
+
+        // The summary says where the period came from and does not list it as not found.
+        var (_, message) = Assert.Single(_kit.Kit.Dialogs.Alerts);
+        Assert.Contains("PdfSummaryPeriodFromIssue PdfField_Period [en]", message);
+        Assert.DoesNotContain("PdfSummaryNotFound", message);
     }
 
     [Fact]

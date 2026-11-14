@@ -1777,6 +1777,7 @@
   <data name="PdfSummaryLayout" xml:space="preserve"><value>Макет: {0}</value></data>
   <data name="PdfSummaryFilled" xml:space="preserve"><value>Заполнено:</value></data>
   <data name="PdfSummaryNotFound" xml:space="preserve"><value>Не найдено (оставлено как было): {0}</value></data>
+  <data name="PdfSummaryPeriodFromIssue" xml:space="preserve"><value>{0}: {1} (по дате счёта и времени выставления договора)</value></data>
   <data name="PdfSummaryCheck" xml:space="preserve"><value>Сверьте значения с бумажным счётом и сохраните счёт как обычно. Пока ничего не сохранено.</value></data>
   <data name="PdfWarningTimeout" xml:space="preserve"><value>{0}: поиск занял слишком много времени и пропущен.</value></data>
   <data name="PdfWarningUnparsable" xml:space="preserve"><value>{0}: найден текст «{1}», но это не подходящее значение, поэтому он пропущен.</value></data>

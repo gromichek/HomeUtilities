@@ -60,12 +60,13 @@ public sealed partial class BillEditViewModel
         }
 
         var supplierWarning = await IsOtherSupplierAsync(read.Text);
-        ApplyPdfValues(result.Values);
+        var derivedPeriod = ApplyPdfValues(result.Values);
         AddPendingPdf(file);
-        await Dialogs.AlertAsync(title, BuildPdfSummary(result, supplierWarning));
+        await Dialogs.AlertAsync(title, BuildPdfSummary(result, supplierWarning, derivedPeriod));
     });
 
-    private void ApplyPdfValues(PdfBillValues values)
+    // Returns the period taken from the issue date when the PDF has none (shown in the summary), otherwise null.
+    private YearMonth? ApplyPdfValues(PdfBillValues values)
     {
         // Every assignment goes through the same property the user edits, so checks, defaults and the comparison follow.
         var issuedOn = values.IssuedOn;
@@ -94,6 +95,7 @@ public sealed partial class BillEditViewModel
         }
 
         ApplyPdfAmounts(values);
+        return values.Period is null ? period : null;
     }
 
     private void ApplyPdfAmounts(PdfBillValues values)
@@ -147,20 +149,26 @@ public sealed partial class BillEditViewModel
         return digits.Length > 0 && !pdfText.Contains(digits, StringComparison.Ordinal);
     }
 
-    private string BuildPdfSummary(PdfBillResult result, bool otherSupplier)
+    private string BuildPdfSummary(PdfBillResult result, bool otherSupplier, YearMonth? derivedPeriod)
     {
         var lines = new List<string> { _localizer.Get("PdfSummaryLayout", result.LayoutName ?? string.Empty), string.Empty };
         var found = result.Found.Select(f => $"{FieldName(f)}: {FormatPdfValue(result.Values, f)}").ToList();
+        if (derivedPeriod is { } derived)
+        {
+            found.Add(_localizer.Get("PdfSummaryPeriodFromIssue", FieldName(PdfBillField.Period), MonthFormat.Long(derived)));
+        }
+
+        IReadOnlyList<PdfBillField> notFound = derivedPeriod is null ? result.NotFound : [.. result.NotFound.Where(f => f != PdfBillField.Period)];
         if (found.Count > 0)
         {
             lines.Add(_localizer["PdfSummaryFilled"]);
             lines.AddRange(found);
         }
 
-        if (result.NotFound.Count > 0)
+        if (notFound.Count > 0)
         {
             lines.Add(string.Empty);
-            lines.Add(_localizer.Get("PdfSummaryNotFound", string.Join(", ", result.NotFound.Select(FieldName))));
+            lines.Add(_localizer.Get("PdfSummaryNotFound", string.Join(", ", notFound.Select(FieldName))));
         }
 
         foreach (var warning in result.Warnings)

@@ -1777,6 +1777,7 @@ Database size: {1} → {2}.</value></data>
   <data name="PdfSummaryLayout" xml:space="preserve"><value>Layout: {0}</value></data>
   <data name="PdfSummaryFilled" xml:space="preserve"><value>Filled in:</value></data>
   <data name="PdfSummaryNotFound" xml:space="preserve"><value>Not found (left as they were): {0}</value></data>
+  <data name="PdfSummaryPeriodFromIssue" xml:space="preserve"><value>{0}: {1} (from the issue date and the contract's billing timing)</value></data>
   <data name="PdfSummaryCheck" xml:space="preserve"><value>Check the values against the paper bill, then save the bill as usual. Nothing has been saved yet.</value></data>
   <data name="PdfWarningTimeout" xml:space="preserve"><value>{0}: the search took too long and was skipped.</value></data>
   <data name="PdfWarningUnparsable" xml:space="preserve"><value>{0}: the text "{1}" was found but is not a valid value, so it was skipped.</value></data>
