@@ -29,7 +29,7 @@ public sealed record CategorySlice(Guid? CategoryId, decimal Amount);
 
 /// <summary>What this year cost so far, by category.</summary>
 /// <param name="Year">This year.</param>
-/// <param name="ThroughMonth">The last month counted: the last month of this year with a bill, at most the current month (1–12).</param>
+/// <param name="ThroughMonth">The last month counted: the last month of this year with a bill, may be later than the current month (1–12).</param>
 /// <param name="Currency">The currency of the amounts.</param>
 /// <param name="Total">Gross of all the bills counted.</param>
 /// <param name="Slices">One slice per category with bills, the largest first; bills without a known category form one last-resort slice with a null id.</param>
@@ -87,7 +87,7 @@ public static class OverviewCharts
 
     /// <summary>
     /// Gross of the bills by bill month for this year and the year before, in the currency most bills are in. Null if there is no
-    /// bill this year. Future months are empty; the current month and months with a draft bill are marked approximate.
+    /// bill this year. Later months of this year show their bar once a bill is entered for them (marked approximate, like a draft month); later months without bills are empty (T-054).
     /// </summary>
     /// <param name="data">The loaded data.</param>
     /// <param name="today">Today.</param>
@@ -106,13 +106,13 @@ public static class OverviewCharts
         bills = [.. bills.Where(b => b.Currency == currency)];
         var drafts = data.Drafts.Where(d => !d.IsDeleted && Visible(data, d.PropertyId, propertyId)).Select(d => d.Period).ToHashSet();
 
-        var (thisYear, thisApprox) = Months(bills, drafts, today.Year, today.Month);
+        var (thisYear, thisApprox) = Months(bills, drafts, today.Year, 12, today.Month);
         var hasLastYear = bills.Any(b => b.Period.Year == today.Year - 1);
-        var (lastYear, lastApprox) = hasLastYear ? Months(bills, drafts, today.Year - 1, 12) : (new decimal?[12], new bool[12]);
+        var (lastYear, lastApprox) = hasLastYear ? Months(bills, drafts, today.Year - 1, 12, 12) : (new decimal?[12], new bool[12]);
         return new MonthlyBars(today.Year, currency, thisYear, thisApprox, lastYear, lastApprox, hasLastYear);
     }
 
-    private static (decimal?[] Values, bool[] Approximate) Months(List<Bill> bills, HashSet<YearMonth> drafts, int year, int lastMonth)
+    private static (decimal?[] Values, bool[] Approximate) Months(List<Bill> bills, HashSet<YearMonth> drafts, int year, int lastMonth, int currentMonth)
     {
         var values = new decimal?[12];
         var approximate = new bool[12];
@@ -121,14 +121,14 @@ public static class OverviewCharts
             var period = new YearMonth(year, month);
             var ofMonth = bills.Where(b => b.Period == period).ToList();
             values[month - 1] = ofMonth.Count == 0 ? null : ofMonth.Sum(b => b.Gross);
-            approximate[month - 1] = drafts.Contains(period);
+            approximate[month - 1] = drafts.Contains(period) || (month > currentMonth && values[month - 1] is not null);
         }
 
         return (values, approximate);
     }
 
     /// <summary>
-    /// Gross of the bills from January to the last month that has a bill (at most the month of <paramref name="today"/>) by the bill's category, largest first: one slice
+    /// Gross of the bills from January to the last month that has a bill (bills entered for later months of this year count) by the bill's category, largest first: one slice
     /// per category, plus one slice (null id) for bills whose category is missing or deleted. Null if there is no bill.
     /// </summary>
     /// <param name="data">The loaded data.</param>
@@ -138,7 +138,7 @@ public static class OverviewCharts
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        var bills = CountedBills(data, propertyId).Where(b => b.Period.Year == today.Year && b.Period.Month <= today.Month).ToList();
+        var bills = CountedBills(data, propertyId).Where(b => b.Period.Year == today.Year).ToList();
         if (bills.Count == 0)
         {
             return null;
@@ -146,7 +146,7 @@ public static class OverviewCharts
 
         var currency = PrimaryCurrency(bills);
         bills = [.. bills.Where(b => b.Currency == currency)];
-        var throughMonth = bills.Max(b => b.Period.Month);   // bills arrive a month late: stop at the last month with a bill
+        var throughMonth = bills.Max(b => b.Period.Month);   // stop at the last month with a bill (it may be after the current month)
         var known = data.Categories.Where(c => !c.IsDeleted).Select(c => c.Id).ToHashSet();
         var groups = bills
             .GroupBy(b => known.Contains(b.CategoryId) ? (Guid?)b.CategoryId : null)

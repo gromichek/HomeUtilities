@@ -30,7 +30,7 @@ public class ChargesViewModelTests : IDisposable
 
     public void Dispose() => CultureInfo.CurrentCulture = _culture;
 
-    private Contract AddContract(string title, int? from = 25, int? to = 28, DateOnly? validFrom = null, DateOnly? validTo = null, Property? property = null)
+    private Contract AddContract(string title, int? from = 25, int? to = 28, DateOnly? validFrom = null, DateOnly? validTo = null, Property? property = null, BillingTiming timing = BillingTiming.InServiceMonth)
     {
         var supplier = _kit.Suppliers.Stored.FirstOrDefault() ?? new Supplier { Name = "Water utility" };
         if (_kit.Suppliers.Stored.All(s => s.Id != supplier.Id))
@@ -49,6 +49,7 @@ public class ChargesViewModelTests : IDisposable
             ValidTo = validTo,
             ReadingDayFrom = from,
             ReadingDayTo = to,
+            BillingTiming = timing,
         };
         _kit.Contracts.Stored.Add(contract);
         return contract;
@@ -655,7 +656,7 @@ public class ChargesViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task DefaultMonth_IsTheCurrentOneOnceAWindowHasStarted_ElseThePreviousOne()
+    public async Task DefaultMonth_IsAlwaysTheCurrentOne_EvenBeforeAReadingWindowStarts()
     {
         AddContract("Water", 25, 28);
         _kit.Clock.Today = new DateOnly(2026, 10, 24);
@@ -663,9 +664,8 @@ public class ChargesViewModelTests : IDisposable
         _kit.Clock.Today = new DateOnly(2026, 10, 25);
         var started = await LoadAsync();
 
-        Assert.Equal(new YearMonth(2026, 9), before.Month);
+        Assert.Equal(new YearMonth(2026, 10), before.Month);
         Assert.Equal(new YearMonth(2026, 10), started.Month);
-        Assert.Equal("ChargesNoContracts [en]", before.NoContractsText);
     }
 
     [Fact]
@@ -713,8 +713,8 @@ public class ChargesViewModelTests : IDisposable
         vm.SelectedPropertyIndex = vm.Properties.ToList().FindIndex(p => p.Id == cottage.Id);
         await vm.PendingPropertyChange;
 
-        // window 28–3 has not started on 27 Oct → September
-        Assert.Equal(new YearMonth(2026, 9), vm.Month);
+        // back to the default: the current month (T-054)
+        Assert.Equal(new YearMonth(2026, 10), vm.Month);
         Assert.Equal(["Cottage power"], vm.Cards.Select(c => c.Title));
         Assert.Equal(cottage.Id.ToString(), _kit.Settings.Values[ChargesViewModel.LastPropertyKey]);
         Assert.Equal(cottage.Id, (await LoadAsync()).SelectedPropertyId);
@@ -1012,5 +1012,136 @@ public class ChargesViewModelTests : IDisposable
         Assert.True(card.Warnings.Count >= 2);
         Assert.Equal(card.Warnings.Count(w => w.HasAction), card.Warnings.Where(w => w.HasAction).Select(w => w.Message).Distinct().Count());
         Assert.Equal(2, card.Warnings.Count(w => w.HasAction && w.ActionText == "ChargeOpenTariff [en]"));
+    }
+
+    // ---- Month of payment (T-054) ---------------------------------------------------------------------------------
+
+    /// <summary>Arrears "Heating", service-month "House", advance "Internet", each with a fixed fee and a bill of its own service month.</summary>
+    private (Contract Arrears, Contract InMonth, Contract Advance, Bill ArrearsBill, Bill InMonthBill, Bill AdvanceBill) AddThreeTimings()
+    {
+        _kit.Clock.Today = new DateOnly(2026, 11, 14);
+        var arrears = AddContract("Heating", timing: BillingTiming.InArrears);
+        var inMonth = AddContract("House", timing: BillingTiming.InServiceMonth);
+        var advance = AddContract("Internet", timing: BillingTiming.InAdvance);
+        AddComponent(arrears, "Fee", ChargeBasis.FixedMonthly, 10m);
+        AddComponent(inMonth, "Fee", ChargeBasis.FixedMonthly, 20m);
+        AddComponent(advance, "Fee", ChargeBasis.FixedMonthly, 30m);
+        Bill Add(Contract contract, int month, decimal gross)
+        {
+            var bill = Bill.CreateFor(contract, new YearMonth(2026, month), _kit.Clock);
+            bill.Gross = gross;
+            _kit.Bills.All.Add(bill);
+            return bill;
+        }
+
+        return (arrears, inMonth, advance, Add(arrears, 10, 12.10m), Add(inMonth, 11, 24.20m), Add(advance, 12, 36.30m));
+    }
+
+    private ChargeCardViewModel CardOf(ChargesViewModel vm, Contract contract) => Assert.Single(vm.Cards, c => c.ContractId == contract.Id);
+
+    [Fact]
+    public async Task PaymentMonth_ShowsEachContractForItsServiceMonth_AndTheBillOfThatMonth()
+    {
+        // November is paid: arrears -> October, in the month -> November, in advance -> December.
+        // Fees 10.00 + 20.00 + 30.00 = 60.00 net; VAT 21 % = 12.60; total 72.60.
+        var (arrears, inMonth, advance, arrearsBill, inMonthBill, advanceBill) = AddThreeTimings();
+
+        var vm = await LoadAsync();
+
+        Assert.Equal(new YearMonth(2026, 11), vm.Month);
+        Assert.Equal("ChargesMonthHeader November 2026 [en]", vm.MonthLabel);
+        Assert.Equal("ChargeServiceMonth October 2026 [en]", CardOf(vm, arrears).ServiceMonthText);
+        Assert.Equal("ChargeServiceMonth November 2026 [en]", CardOf(vm, inMonth).ServiceMonthText);
+        Assert.Equal("ChargeServiceMonth December 2026 [en]", CardOf(vm, advance).ServiceMonthText);
+        Assert.Contains("12.10", CardOf(vm, arrears).BillText);
+        Assert.Contains("24.20", CardOf(vm, inMonth).BillText);
+        Assert.Contains("36.30", CardOf(vm, advance).BillText);
+        Assert.Contains("72.60", vm.TotalsText);
+
+        foreach (var (contract, bill) in new[] { (arrears, arrearsBill), (inMonth, inMonthBill), (advance, advanceBill) })
+        {
+            CardOf(vm, contract).OpenBillCommand!.Execute(null);
+            await vm.PendingMonthChange;
+            var (route, parameters) = _kit.Navigation.Visited[^1];
+            Assert.Equal(Routes.BillEdit, route);
+            Assert.Equal(bill.Id, parameters![EditorNavigation.IdParameter]);
+        }
+    }
+
+    [Fact]
+    public async Task DefaultMonth_IsTheCurrentOne_AlsoOnTheFirstWhileAnArrearsWindowIsOpen()
+    {
+        AddContract("Water", 25, 3, timing: BillingTiming.InArrears);
+        _kit.Clock.Today = new DateOnly(2026, 11, 1);
+
+        var vm = await LoadAsync();
+
+        Assert.Equal(new YearMonth(2026, 11), vm.Month);
+    }
+
+    [Fact]
+    public async Task EnterBill_UsesTheServiceMonthOfTheCard()
+    {
+        var (arrears, _, advance, _, _, _) = AddThreeTimings();
+        _kit.Bills.All.Clear();
+        var vm = await LoadAsync();
+
+        CardOf(vm, advance).EnterBillCommand!.Execute(null);
+        await Task.Delay(50);
+        Assert.Equal("2026-12", _kit.Navigation.Visited[^1].Parameters![BillEditViewModel.PeriodParameter]);
+
+        CardOf(vm, arrears).EnterBillCommand!.Execute(null);
+        await Task.Delay(50);
+        Assert.Equal("2026-10", _kit.Navigation.Visited[^1].Parameters![BillEditViewModel.PeriodParameter]);
+    }
+
+    [Fact]
+    public async Task PreviousMonth_MovesAllThreeContractsOneMonthBack()
+    {
+        var (arrears, inMonth, advance, _, _, _) = AddThreeTimings();
+        var vm = await LoadAsync();
+
+        await vm.PreviousMonthCommand.ExecuteAsync(null);
+
+        Assert.Equal(new YearMonth(2026, 10), vm.Month);
+        Assert.Equal("ChargeServiceMonth September 2026 [en]", CardOf(vm, arrears).ServiceMonthText);
+        Assert.Equal("ChargeServiceMonth October 2026 [en]", CardOf(vm, inMonth).ServiceMonthText);
+        Assert.Equal("ChargeServiceMonth November 2026 [en]", CardOf(vm, advance).ServiceMonthText);
+        Assert.True(CardOf(vm, arrears).EnterBillCommand is not null);   // no bill for 09.2026
+        Assert.True(CardOf(vm, inMonth).EnterBillCommand is not null);   // no bill for 10.2026
+        Assert.True(CardOf(vm, advance).EnterBillCommand is not null);   // no bill for 11.2026
+    }
+
+    [Fact]
+    public async Task ReadingsLink_OfAnArrearsCard_IsDatedInItsServiceMonth()
+    {
+        // Screen month November, arrears service month October: the readings open on 31 Oct, not on the screen month.
+        _kit.Clock.Today = new DateOnly(2026, 11, 14);
+        var contract = AddContract("Water", timing: BillingTiming.InArrears);
+        var meter = AddMeter(contract, "Bathroom cold");
+        Read(meter, new DateOnly(2026, 9, 26), 100m);
+        AddComponent(contract, "Water supply", ChargeBasis.PerUnit, 1.41m);
+
+        var vm = await LoadAsync();
+        var warning = Assert.Single(vm.Cards).Warnings.First(w => w.HasAction);
+        await warning.ActionCommand!.ExecuteAsync(null);
+
+        var (route, parameters) = _kit.Navigation.Visited[^1];
+        Assert.Equal(Routes.ReadingsFor, route);
+        Assert.Equal(new DateOnly(2026, 10, 31), parameters![ReadingsViewModel.DateParameter]);
+    }
+
+    [Fact]
+    public async Task OpenForAsync_ShowsTheGivenPaymentMonthWithTheContractFocused()
+    {
+        var (_, _, advance, _, _, _) = AddThreeTimings();
+        var vm = _kit.CreateCharges();
+
+        await vm.OpenForAsync(_kit.Property.Id, advance.Id, new YearMonth(2026, 11));
+        await vm.ReloadAsync();
+
+        Assert.Equal(new YearMonth(2026, 11), vm.Month);
+        Assert.Equal(advance.Id, vm.FocusedCard!.ContractId);
+        Assert.Contains("36.30", vm.FocusedCard.BillText);
     }
 }

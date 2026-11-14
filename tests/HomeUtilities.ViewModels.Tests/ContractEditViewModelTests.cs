@@ -816,6 +816,7 @@ public class ContractEditViewModelTests
         Assert.Equal(Routes.ChargesFor, route);
         Assert.Equal(contract.PropertyId, parameters![EditorNavigation.PropertyIdParameter]);
         Assert.Equal(contract.Id, parameters[EditorNavigation.ContractIdParameter]);
+        Assert.False(parameters.ContainsKey(ChargesViewModel.MonthParameter));   // no month: the screen opens on the current month (T-054)
         Assert.Equal("ContractShowCharges [en]", vm.ShowChargesText);
 
         var fresh = await FilledNewAsync();

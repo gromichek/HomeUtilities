@@ -588,7 +588,25 @@ public class BillEditViewModelTests : IDisposable
         Assert.Equal(Routes.ChargesFor, route);
         Assert.Equal(contract.Id, parameters![EditorNavigation.ContractIdParameter]);
         Assert.Equal(_kit.Kit.Property.Id, parameters[EditorNavigation.PropertyIdParameter]);
-        Assert.Equal("2026-10", parameters[ChargesViewModel.MonthParameter]);
+        // The bill's period (10.2026) is the service month; an arrears contract is paid in the next month (T-054).
+        Assert.Equal("2026-11", parameters[ChargesViewModel.MonthParameter]);
+    }
+
+    [Theory]
+    [InlineData(BillingTiming.InArrears, 1)]
+    [InlineData(BillingTiming.InServiceMonth, 0)]
+    [InlineData(BillingTiming.InAdvance, -1)]
+    public async Task Comparison_ShowCharges_OpensThePaymentMonthOfTheBillsServiceMonth(BillingTiming timing, int offset)
+    {
+        var contract = _kit.AddWaterContract();
+        contract.BillingTiming = timing;
+        var vm = await NewEditorAsync(contract);
+
+        await vm.ShowChargesCommand.ExecuteAsync(null);
+
+        var (_, parameters) = Assert.Single(_kit.Kit.Navigation.Visited);
+        // payment month = the bill's period (service month) + arrival offset
+        Assert.Equal(vm.Period.AddMonths(offset).ToString(), parameters![ChargesViewModel.MonthParameter]);
     }
 
     // ---- Snapshot -------------------------------------------------------------------------------------------------

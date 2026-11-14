@@ -178,6 +178,9 @@ public sealed partial class ChargeCardViewModel : ObservableObject
 
     public Guid ContractId { get; }
 
+    /// <summary>"for October 2026": the service month this card is calculated for (T-054).</summary>
+    public string ServiceMonthText { get; set; } = string.Empty;
+
     public string Title { get; }
 
     public string SupplierName { get; }

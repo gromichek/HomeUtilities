@@ -208,18 +208,18 @@ Both years are counted over the same months **for each contract**: from January 
 year; last year the same months of the same contract. Contracts are billed differently (water in arrears, house maintenance or
 internet in the service month), so one early bill for the current month does not drag last year's full month in for the others.
 One-off bills without a contract form one group of their own. A contract without any bill this year (it may have ended) is
-left out of both years. A bill for a later month is counted when its month comes. If there is no bill at all in the same months of last
+left out of both years. A bill already entered for a later month of this year (for example internet for December, entered in November) is counted at once, and last year's same contract is compared over the same months. If there is no bill at all in the same months of last
 year, the line shows only this year (*2026: 1 245,30 €*) instead of an invented *0,00 €*. Tap to open the Bills screen for that year.
 
 Under the lines a **chart of the months** shows what each month of this year cost (the same bills with VAT, counted by the
 bill's month) as a bar next to the same month of last year, which is the lighter bar; the legend names the two years. Months
-that have not come yet are empty. The current month, and a month in which a draft bill is still waiting, are drawn
+without a bill that have not come yet are empty; a later month that already has a bill shows its bar. The current month, a later month with a bill, and a month in which a draft bill is still waiting, are drawn
 paler with a dashed outline: they may still change. Without any bill in last year only this year's bars are shown. **Tap a month**
 to open the Bills screen for that month (and the chosen property). The chart is read-only and has a text description for screen readers.
 
 ### Spending by category
 
-**Spending in {year} by category** shows where this year's money went: the gross total of this year's bills from January up to the current month, split by the bill's category (the colour of the category is the colour of the bar). One bar shows the shares; below it
+**Spending in {year} by category** shows where this year's money went: the gross total of this year's bills (also those already entered for later months), split by the bill's category (the colour of the category is the colour of the bar). One bar shows the shares; below it
 there is a row per category with the amount and its share in percent (*< 1 %* for a very small share), the largest first. Every
 category with bills this year is listed; bills without a known category form one row **No category**. The line under the title shows the total, for example *since the start of the year, total 1,002.00 €*. Tap a row to open the Bills screen with this category for the whole year (**No category** opens all the
 year's bills). Without any bill this year the card says so in one line instead of showing an empty chart.
@@ -481,11 +481,20 @@ one row per rate: *VAT 12 % of 39,18 € = 4,70 €*. Example (invented): hot wa
 difference 0,48 = 39,18 net; VAT 12 % = 4,7016 → 4,70; total 43,88 €. When all lines of a rate are priced including VAT,
 the VAT is split out of their sum instead. With the switch off, the rounded VAT of each line is added up.
 
-**Choosing the month.** Pick the **property** and the **month** with ‹ › or by tapping the month. When you open the
-screen it shows the **current** month if the reading window of one of the property's contracts has already started
-this month (for example the window is 25–28 October: from 25 October the screen shows October), otherwise the
-**previous** month. The top of the screen shows the total of all contracts: net, VAT and total, and says
+**Choosing the month.** Pick the **property** and the **month** with ‹ › or by tapping the month. The screen shows what
+you **pay in the chosen month** («November 2026 · to pay»): for each contract the month given by its *Billing timing*, and the
+card says which one (*for October 2026*). It always opens on the **current** month (also when you come from a contract or
+switch the property). The top of the screen shows the amount to pay in that month for all contracts: net, VAT and total, and says
 *Incomplete* when some amount could not be calculated.
+
+| Screen month (November) | *In arrears* | *In the service month* | *In advance* |
+|---|---|---|---|
+| Card shows | October | November | December |
+
+An arrears contract at the very start of the month may say *no readings* until its reading window closes — that is expected.
+Everything on a card — **New bill**, the bill, readings, tariff, warnings — belongs to the card's month, not to the screen month.
+The link from a bill opens the screen on the month in which that bill is paid, with its contract expanded.
+Limitation: if you change a contract's *Billing timing* later, past months are shown with the **current** timing.
 
 **One card per contract** that is active in the month, with its category colour, supplier, status (*✓ Calculated*,
 *⚠ Incomplete*, *From the bill*, *No tariff*) and the month's total. The total is shown only when it was really

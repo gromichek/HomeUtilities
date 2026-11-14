@@ -661,7 +661,7 @@ public class OverviewViewModelTests : IDisposable
         var water = _kit.AddWaterContract(tariff: false);
         _kit.AddBill(water, new YearMonth(2026, 3), 1000m, due: null);
         _kit.AddBill(water, new YearMonth(2026, 10), 245.30m, due: null);
-        _kit.AddBill(water, new YearMonth(2026, 11), 22.95m, due: null); // next month: not counted yet
+        _kit.AddBill(water, new YearMonth(2026, 11), 22.95m, due: null); // entered for a later month of this year: counts (T-054)
         _kit.AddBill(water, new YearMonth(2025, 3), 900m, due: null);
         _kit.AddBill(water, new YearMonth(2025, 10), 280.10m, due: null);
         _kit.AddBill(water, new YearMonth(2025, 12), 700m, due: null); // after October: not the same period
@@ -669,7 +669,7 @@ public class OverviewViewModelTests : IDisposable
 
         var block = Assert.Single(vm.YearBlocks);
         var line = Assert.Single(block.Lines);
-        Assert.Equal($"OverviewYearLine 2026|{Money("1,245.30")}|2025|{Money("1,180.10")}|+5.5\u00A0% [en]", line.Text);
+        Assert.Equal($"OverviewYearLine 2026|{Money("1,268.25")}|2025|{Money("1,180.10")}|+7.5\u00A0% [en]", line.Text);
 
         await line.OpenCommand.ExecuteAsync(null);
 

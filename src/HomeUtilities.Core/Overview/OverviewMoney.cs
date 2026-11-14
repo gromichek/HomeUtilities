@@ -213,14 +213,14 @@ public static class OverviewMoney
 
     /// <summary>
     /// Per property and currency: the gross of the bills of this year, for each contract from January to its own last month with a bill
-    /// (at most the month of <paramref name="today"/>), and of the same months of the same contract last year (by the bill's period, like the
+    /// (bills already entered for later months of this year count, T-054), and of the same months of the same contract last year (by the bill's period, like the
     /// period filter of the Bills screen). Bills without a contract form one group. A contract without a bill this year counts in neither year.
     /// </summary>
     public static IReadOnlyList<YearComparison> YearToDate(OverviewData data, DateOnly today)
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        var bills = data.Bills.Where(b => !b.IsDeleted && !b.IsDraft && b.Period.Month <= today.Month).ToList();
+        var bills = data.Bills.Where(b => !b.IsDeleted && !b.IsDraft && b.Period.Year <= today.Year).ToList();
         var result = new List<YearComparison>();
         foreach (var property in data.Properties.Where(p => !p.IsDeleted))
         {

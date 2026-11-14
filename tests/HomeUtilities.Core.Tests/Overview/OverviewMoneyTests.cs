@@ -117,12 +117,12 @@ public class OverviewMoneyTests
     {
         var scenario = new OverviewScenario();
         var water = scenario.AddContract("Water");
-        // This year up to October: 100.30 + 200.00 + 945.00 = 1245.30; a prepaid November bill is not counted yet.
+        // This year up to October: 100.30 + 200.00 + 945.00 = 1245.30; a bill already entered for November counts too (T-054): 1245.30 + 22.95 = 1268.25.
         scenario.AddBill(water, 100.30m, null, new YearMonth(2026, 1));
         scenario.AddBill(water, 200m, null, new YearMonth(2026, 6));
         scenario.AddBill(water, 945m, null, new YearMonth(2026, 10));
         scenario.AddBill(water, 22.95m, null, new YearMonth(2026, 11));
-        // Last year, January to October: 80.10 + 150.00 + 950.00 = 1180.10; November and December of last year are left out.
+        // Last year, January to November (this contract's last month this year): 80.10 + 150.00 + 950.00 = 1180.10; December of last year is left out.
         scenario.AddBill(water, 80.10m, null, new YearMonth(2025, 1));
         scenario.AddBill(water, 150m, null, new YearMonth(2025, 6));
         scenario.AddBill(water, 950m, null, new YearMonth(2025, 10));
@@ -131,8 +131,31 @@ public class OverviewMoneyTests
 
         var comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, Today));
 
-        Assert.Equal((2026, 1245.30m, 1180.10m), (comparison.Year, comparison.ThisYear, comparison.LastYear));
-        Assert.Equal(5.5m, comparison.ChangePercent); // (1245.30 − 1180.10) / 1180.10 = 5.525 %
+        Assert.Equal((2026, 1268.25m, 1180.10m), (comparison.Year, comparison.ThisYear, comparison.LastYear));
+        Assert.Equal(7.5m, comparison.ChangePercent); // (1268.25 − 1180.10) / 1180.10 = 7.469 %
+    }
+
+    [Fact]
+    public void Year_to_date_counts_a_December_bill_entered_in_October_and_compares_the_same_months_per_contract()
+    {
+        var scenario = new OverviewScenario();
+        var water = scenario.AddContract("Water");
+        var internet = scenario.AddContract("Internet");
+        scenario.AddBill(water, 100m, null, new YearMonth(2026, 1));
+        scenario.AddBill(water, 100m, null, new YearMonth(2025, 1));
+        scenario.AddBill(water, 500m, null, new YearMonth(2025, 12));   // water ends in January: December of last year is left out
+        // Internet: January 20.00 + December 30.00 = 50.00 this year; last year January to December: 20.00 + 25.00 + 30.00 = 75.00
+        scenario.AddBill(internet, 20m, null, new YearMonth(2026, 1));
+        scenario.AddBill(internet, 30m, null, new YearMonth(2026, 12));
+        scenario.AddBill(internet, 20m, null, new YearMonth(2025, 1));
+        scenario.AddBill(internet, 25m, null, new YearMonth(2025, 6));
+        scenario.AddBill(internet, 30m, null, new YearMonth(2025, 12));
+        scenario.AddBill(internet, 999m, null, new YearMonth(2026, 12)).IsDraft = true;   // a draft is not counted
+
+        var comparison = Assert.Single(OverviewMoney.YearToDate(scenario.Data, Today));
+
+        // water 100.00 + internet 50.00 = 150.00; last year water 100.00 + internet 75.00 = 175.00
+        Assert.Equal((150m, 175m, 12), (comparison.ThisYear, comparison.LastYear, comparison.ThroughMonth));
     }
 
     [Fact]
