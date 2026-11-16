@@ -113,9 +113,8 @@
                     </Border>
 
                     <!-- Automatic copies on this device (T-029). -->
-                    <Border Style="{StaticResource SectionCard}">
+                    <views:CollapsibleCard Card="{Binding AutoBackupCard}">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="{Binding AutoBackupHeader}" Style="{StaticResource SectionHeader}" />
                             <Label Text="{Binding AutoBackupHint}" Style="{StaticResource MutedLabel}" />
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                 <Label Text="{Binding AutoBackupEnabledLabel}" VerticalOptions="Center" />
@@ -149,11 +148,10 @@
                             <Label Text="{Binding LastAutoBackupErrorText}" Style="{StaticResource ErrorLabel}"
                                    IsVisible="{Binding HasLastAutoBackupError}" />
                         </VerticalStackLayout>
-                    </Border>
+                    </views:CollapsibleCard>
 
-                    <Border Style="{StaticResource SectionCard}">
+                    <views:CollapsibleCard Card="{Binding CopiesCard}">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="{Binding CopiesHeader}" Style="{StaticResource SectionHeader}" />
                             <Label Text="{Binding CopiesEmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoCopies}" />
                             <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Copies}">
                                 <BindableLayout.ItemTemplate>
@@ -170,29 +168,27 @@
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
-                    </Border>
+                    </views:CollapsibleCard>
 
                     <!-- Hard-delete the records the user deleted, and the files of deleted attachments (T-037). -->
-                    <Border Style="{StaticResource SectionCard}" BindingContext="{Binding CleanUp}" x:DataType="vm:DatabaseCleanUpViewModel">
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="{Binding Header}" Style="{StaticResource SectionHeader}" />
+                    <views:CollapsibleCard Card="{Binding CleanUpCard}">
+                        <VerticalStackLayout Spacing="8" BindingContext="{Binding CleanUp}" x:DataType="vm:DatabaseCleanUpViewModel">
                             <Label Text="{Binding Hint}" Style="{StaticResource MutedLabel}" />
                             <Button Text="{Binding ButtonText}" Command="{Binding CleanUpCommand}"
                                     Style="{StaticResource SecondaryButton}" />
                         </VerticalStackLayout>
-                    </Border>
+                    </views:CollapsibleCard>
 
                     <!-- Everything as one readable file (JSON). -->
-                    <Border Style="{StaticResource SectionCard}">
+                    <views:CollapsibleCard Card="{Binding DataExportCard}">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="{Binding DataExportHeader}" Style="{StaticResource SectionHeader}" />
                             <Label Text="{Binding DataExportHint}" Style="{StaticResource MutedLabel}" />
                             <Button Text="{Binding ExportJsonText}" Command="{Binding ExportJsonCommand}"
                                     Style="{StaticResource SecondaryButton}" />
                             <Button Text="{Binding ImportJsonText}" Command="{Binding ImportJsonCommand}"
                                     Style="{StaticResource SecondaryButton}" />
                         </VerticalStackLayout>
-                    </Border>
+                    </views:CollapsibleCard>
 
                 </VerticalStackLayout>
             </ContentView>

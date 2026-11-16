@@ -26,9 +26,8 @@
             </VerticalStackLayout>
 
             <!-- Finished imports; each can be undone as a whole. -->
-            <Border Style="{StaticResource SectionCard}">
+            <views:CollapsibleCard Card="{Binding BatchesCard}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding BatchesHeader}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding BatchesEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoBatches}" />
                     <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding BatchItems}">
                         <BindableLayout.ItemTemplate>
@@ -44,12 +43,11 @@
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-            </Border>
+            </views:CollapsibleCard>
 
             <!-- Saved profiles: rename, export (no amounts or readings inside), delete. -->
-            <Border Style="{StaticResource SectionCard}">
+            <views:CollapsibleCard Card="{Binding ProfilesCard}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding ProfilesHeader}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding ProfilesHint}" Style="{StaticResource MutedLabel}" FontSize="13" />
                     <Label Text="{Binding ProfilesEmpty}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoProfiles}" />
                     <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding ProfileItems}">
@@ -74,12 +72,11 @@
                     <Button Text="{Binding ImportProfileText}" Command="{Binding ImportProfileCommand}"
                             Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
                 </VerticalStackLayout>
-            </Border>
+            </views:CollapsibleCard>
 
             <!-- PDF bill layouts (T-055): how to read the header of a supplier's PDF bill; they come as a file. -->
-            <Border Style="{StaticResource SectionCard}">
+            <views:CollapsibleCard Card="{Binding PdfLayoutsCard}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding PdfLayouts.Header}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding PdfLayouts.Hint}" Style="{StaticResource MutedLabel}" FontSize="13" />
                     <Label Text="{Binding PdfLayouts.EmptyText}" Style="{StaticResource MutedLabel}" IsVisible="{Binding PdfLayouts.HasNoLayouts}" />
                     <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding PdfLayouts.Items}">
@@ -102,12 +99,11 @@
                     <Button Text="{Binding PdfLayouts.ShowTextText}" Command="{Binding PdfLayouts.ShowTextCommand}"
                             Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" />
                 </VerticalStackLayout>
-            </Border>
+            </views:CollapsibleCard>
 
             <!-- Repair: links that start after the meter was installed hide the earlier readings. -->
-            <Border Style="{StaticResource SectionCard}">
+            <views:CollapsibleCard Card="{Binding LinkRepairCard}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="{Binding LinkRepairHeader}" Style="{StaticResource SectionHeader}" />
                     <Label Text="{Binding LinkRepairHint}" Style="{StaticResource MutedLabel}" FontSize="13" />
                     <Label Text="{Binding LinkRepairNone}" Style="{StaticResource MutedLabel}" IsVisible="{Binding HasNoLinkRepair}" />
                     <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding LinkRepairLines}" IsVisible="{Binding HasLinkRepair}">
@@ -120,7 +116,7 @@
                     <Button Text="{Binding LinkRepairButtonText}" Command="{Binding RepairLinksCommand}"
                             Style="{StaticResource SecondaryButton}" HorizontalOptions="Fill" IsVisible="{Binding HasLinkRepair}" />
                 </VerticalStackLayout>
-            </Border>
+            </views:CollapsibleCard>
 
             <ActivityIndicator IsRunning="True" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" />
         </VerticalStackLayout>
