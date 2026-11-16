@@ -44,6 +44,17 @@ public sealed class AdaptiveFieldGrid : Grid
         propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).CenterSingleColumn());
 
     /// <summary>
+    /// Above 0: when the width would give two or more columns, the grid uses one column of at most this width, centred (wide Windows
+    /// window, T-058). 0 = off. Set to 0 on Android, so the layout there is unchanged.
+    /// </summary>
+    public static readonly BindableProperty WideSingleColumnMaxWidthProperty = BindableProperty.Create(
+        nameof(WideSingleColumnMaxWidth),
+        typeof(double),
+        typeof(AdaptiveFieldGrid),
+        0d,
+        propertyChanged: (grid, _, _) => ((AdaptiveFieldGrid)grid).Arrange());
+
+    /// <summary>
     /// A child with <c>FullRow="True"</c> starts a new row and spans all columns (buttons and notes under the cards: on a wide
     /// window they must not become a cell next to a card and stretch to its height — owner, 2026-11-02).
     /// </summary>
@@ -116,6 +127,13 @@ public sealed class AdaptiveFieldGrid : Grid
         set => SetValue(SingleColumnMaxWidthProperty, value);
     }
 
+    /// <summary>One centred column of at most this width instead of two or more columns; 0 = off.</summary>
+    public double WideSingleColumnMaxWidth
+    {
+        get => (double)GetValue(WideSingleColumnMaxWidthProperty);
+        set => SetValue(WideSingleColumnMaxWidthProperty, value);
+    }
+
     /// <summary>Upper limit of the columns chosen from <see cref="MinColumnWidth"/>.</summary>
     public int MaxColumns
     {
@@ -145,7 +163,7 @@ public sealed class AdaptiveFieldGrid : Grid
         }
 
         var design = DesignPadding;
-        var side = EffectiveColumns() == 1 ? ListLayoutRules.SideMarginFor(Width - design.HorizontalThickness, SingleColumnMaxWidth) : 0;
+        var side = Layout().SideMargin;
         var wanted = new Thickness(design.Left + side, design.Top, design.Right + side, design.Bottom);
         if (Padding != wanted)
         {
@@ -153,22 +171,11 @@ public sealed class AdaptiveFieldGrid : Grid
         }
     }
 
-    private int EffectiveColumns()
-    {
-        if (MinColumnWidth <= 0)
-        {
-            return Math.Max(1, Columns);
-        }
+    private (int Columns, double SideMargin) Layout() =>
+        ListLayoutRules.EditorLayoutFor(
+            Width - DesignPadding.HorizontalThickness, MinColumnWidth, MaxColumns, ColumnSpacing, SingleColumnMaxWidth, WideSingleColumnMaxWidth);
 
-        var available = Width - DesignPadding.HorizontalThickness;
-        if (available <= 0)
-        {
-            return 1;
-        }
-
-        var fit = (int)Math.Floor((available + ColumnSpacing) / (MinColumnWidth + ColumnSpacing));
-        return Math.Clamp(fit, 1, Math.Max(1, MaxColumns));
-    }
+    private int EffectiveColumns() => MinColumnWidth <= 0 ? Math.Max(1, Columns) : Layout().Columns;
 
     private void Arrange()
     {

@@ -20,7 +20,7 @@
     <Grid>
 
         <ScrollView>
-            <views:AdaptiveFieldGrid Padding="16" RowSpacing="16" ColumnSpacing="16" MinColumnWidth="560" MaxColumns="2">
+            <views:AdaptiveFieldGrid Padding="16" RowSpacing="16" ColumnSpacing="16" MinColumnWidth="560" MaxColumns="2" WideSingleColumnMaxWidth="{OnPlatform Default=0, WinUI=840}">
 
                 <!-- 1. General -->
                 <Border Style="{StaticResource SectionCard}">
