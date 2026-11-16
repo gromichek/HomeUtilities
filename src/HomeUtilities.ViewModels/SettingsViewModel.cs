@@ -201,6 +201,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         Reminders = reminders;
         Sync = sync;
         CleanUp = cleanUp;
+        // The Backup cards that are rarely needed start collapsed and remember their state on this device (T-057).
+        AutoBackupCard = new CollapsibleCardViewModel(settings, localizer, "Backup.Auto", defaultExpanded: false);
+        CopiesCard = new CollapsibleCardViewModel(settings, localizer, "Backup.Copies", defaultExpanded: false);
+        CleanUpCard = new CollapsibleCardViewModel(settings, localizer, "Backup.CleanUp", defaultExpanded: false);
+        DataExportCard = new CollapsibleCardViewModel(settings, localizer, "Backup.DataExport", defaultExpanded: false);
         _auto = autoBackup;
         _exchange = dataExchange;
         _backup = backup;
@@ -222,6 +227,13 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         Version = appInfo.Version;
         BuildNumber = appInfo.BuildNumber;
         DatabasePath = appPaths.DatabasePath;
+        CleanUp.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(DatabaseCleanUpViewModel.Header))
+            {
+                UpdateBackupSummaries();
+            }
+        };
         Reminders.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(ReminderSettingsViewModel.IsEnabled) or nameof(ReminderSettingsViewModel.Time))
@@ -250,6 +262,15 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
 
     /// <summary>The "Clean up the database…" card of the Backup section (T-037).</summary>
     public DatabaseCleanUpViewModel CleanUp { get; }
+
+    /// <summary>Open/closed state and header summary of the collapsible Backup cards (T-057); the manual backup card is never collapsed.</summary>
+    public CollapsibleCardViewModel AutoBackupCard { get; }
+
+    public CollapsibleCardViewModel CopiesCard { get; }
+
+    public CollapsibleCardViewModel CleanUpCard { get; }
+
+    public CollapsibleCardViewModel DataExportCard { get; }
 
     public string Version { get; }
 
@@ -388,6 +409,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         HasLastAutoBackupError = error is not null;
         LastAutoBackupErrorText = error is null ? string.Empty : _localizer.Get("SettingsBackupAutoFailed", error);
         RefreshLastBackupText();
+        UpdateBackupSummaries();
     }
 
     private AutoBackupRowViewModel CreateRow(AutoBackupInfo copy) => new(
@@ -404,6 +426,33 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         var settings = _auto.Settings;
         AutoIntervalValue = IntervalName(settings.IntervalDays);
         AutoKeepValue = settings.KeepCopies.ToString(CultureInfo.CurrentCulture);
+        UpdateBackupSummaries();
+    }
+
+    /// <summary>
+    /// Titles and header summaries of the collapsible Backup cards: "Every day · keep 7" / "off" (an error of the last automatic
+    /// backup replaces it, in the error style, so collapsing never hides it), "8 copies · last 16.11.2026 03:00" / "none".
+    /// </summary>
+    private void UpdateBackupSummaries()
+    {
+        var settings = _auto.Settings;
+        if (HasLastAutoBackupError)
+        {
+            AutoBackupCard.SetTexts(AutoBackupHeader, LastAutoBackupErrorText, isError: true);
+        }
+        else
+        {
+            AutoBackupCard.SetTexts(
+                AutoBackupHeader,
+                settings.Enabled
+                    ? _localizer.Get("CardSummaryAutoOn", IntervalName(settings.IntervalDays), settings.KeepCopies.ToString(CultureInfo.CurrentCulture))
+                    : _localizer["CardSummaryAutoOff"]);
+        }
+
+        DateTimeOffset? last = Copies.Count > 0 ? Copies[0].Copy.CreatedAt : null;
+        CopiesCard.SetTexts(CopiesHeader, CardSummaryText.CountAndLastTime(_localizer, "CardSummaryCopies", Copies.Count, last));
+        CleanUpCard.SetTexts(CleanUp.Header, string.Empty);
+        DataExportCard.SetTexts(DataExportHeader, string.Empty);
     }
 
     private string FormatSize(long bytes) => bytes >= 1024 * 1024
@@ -574,6 +623,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
         {
             _auto.Save(_auto.Settings with { Enabled = value });
         }
+
+        UpdateBackupSummaries();
     }
 
     private async Task<int?> ChooseNumberAsync(string titleKey, IReadOnlyList<int> choices, Func<int, string> name, int? current = null)
@@ -794,6 +845,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IRecipient<Layout
             FillSampleDataText = _localizer["SettingsTestDataFill"];
             DeleteAllDataText = _localizer["SettingsTestDataDelete"];
             RefreshLastBackupText();
+            UpdateBackupSummaries();
             LanguageLabel = _localizer["SettingsLanguage"];
             ThemeLabel = _localizer["SettingsTheme"];
             VersionText = VersionLine();

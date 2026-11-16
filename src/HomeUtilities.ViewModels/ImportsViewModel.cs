@@ -173,9 +173,22 @@ public sealed partial class ImportsViewModel : ViewModelBase
         ISnackbarService snackbar,
         ILocalizer localizer,
         WorkbookExportFlow export,
-        PdfLayoutsViewModel pdfLayouts)
+        PdfLayoutsViewModel pdfLayouts,
+        ISettingsStore settings)
     {
         PdfLayouts = pdfLayouts;
+        // Rarely needed cards start collapsed; each remembers its state on this device (T-057).
+        BatchesCard = new CollapsibleCardViewModel(settings, localizer, "Imports.Batches", defaultExpanded: false);
+        ProfilesCard = new CollapsibleCardViewModel(settings, localizer, "Imports.Profiles", defaultExpanded: false);
+        PdfLayoutsCard = new CollapsibleCardViewModel(settings, localizer, "Imports.PdfLayouts", defaultExpanded: false);
+        LinkRepairCard = new CollapsibleCardViewModel(settings, localizer, "Imports.LinkRepair", defaultExpanded: false);
+        PdfLayouts.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(PdfLayoutsViewModel.Items) or nameof(PdfLayoutsViewModel.Header))
+            {
+                UpdateSummaries();
+            }
+        };
         _export = export;
         _batches = batches;
         _profiles = profiles;
@@ -192,6 +205,15 @@ public sealed partial class ImportsViewModel : ViewModelBase
 
     /// <summary>The "PDF bill layouts" section (T-055).</summary>
     public PdfLayoutsViewModel PdfLayouts { get; }
+
+    /// <summary>The collapsible cards of the screen (T-057); the import and export buttons above them are never collapsed.</summary>
+    public CollapsibleCardViewModel BatchesCard { get; }
+
+    public CollapsibleCardViewModel ProfilesCard { get; }
+
+    public CollapsibleCardViewModel PdfLayoutsCard { get; }
+
+    public CollapsibleCardViewModel LinkRepairCard { get; }
 
     public bool HasBatches => BatchItems.Count > 0;
 
@@ -210,18 +232,33 @@ public sealed partial class ImportsViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(HasLinkRepair));
         OnPropertyChanged(nameof(HasNoLinkRepair));
+        UpdateSummaries();
     }
 
     partial void OnBatchItemsChanged(IReadOnlyList<ImportBatchItemViewModel> value)
     {
         OnPropertyChanged(nameof(HasBatches));
         OnPropertyChanged(nameof(HasNoBatches));
+        UpdateSummaries();
     }
 
     partial void OnProfileItemsChanged(IReadOnlyList<ImportProfileItemViewModel> value)
     {
         OnPropertyChanged(nameof(HasProfiles));
         OnPropertyChanged(nameof(HasNoProfiles));
+        UpdateSummaries();
+    }
+
+    /// <summary>The titles and one-line summaries of the collapsed cards ("12 imports · last 10.11.2026", "3 profiles", …).</summary>
+    private void UpdateSummaries()
+    {
+        DateTimeOffset? lastImport = BatchItems.Count > 0 ? BatchItems.Max(b => b.Batch.ImportedAt) : null;
+        BatchesCard.SetTexts(BatchesHeader, CardSummaryText.CountAndLastDate(_localizer, "CardSummaryImports", BatchItems.Count, lastImport));
+        ProfilesCard.SetTexts(ProfilesHeader, CardSummaryText.Count(_localizer, "CardSummaryProfiles", ProfileItems.Count));
+        PdfLayoutsCard.SetTexts(PdfLayouts.Header, CardSummaryText.Count(_localizer, "CardSummaryLayouts", PdfLayouts.Items.Count));
+        LinkRepairCard.SetTexts(
+            LinkRepairHeader,
+            HasLinkRepair ? _localizer.Get("CardSummaryRepairFound", LinkRepairLines.Count) : _localizer["CardSummaryRepairNone"]);
     }
 
     public override Task OnAppearingAsync() => RunSafeAsync(() => RunGatedLoadAsync(ct => ReloadAsync(ct), () => BatchItems.Count + ProfileItems.Count + PdfLayouts.Items.Count, _loaded));
@@ -352,6 +389,7 @@ public sealed partial class ImportsViewModel : ViewModelBase
         LinkRepairHint = _localizer["ImportsLinkRepairHint"];
         LinkRepairNone = _localizer["ImportsLinkRepairNone"];
         LinkRepairButtonText = _localizer["ImportsLinkRepairButton"];
+        UpdateSummaries();
     }
 
     private Task UndoAsync(ImportBatchItemViewModel item) => RunSafeAsync(async () =>

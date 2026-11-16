@@ -1,3 +1,4 @@
+using System.Globalization;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Backup;
 
@@ -779,6 +780,93 @@ public class SettingsViewModelTests
         theme = new FakeThemeService();
         layout = new FakeLayoutModeService();
         return new SettingsViewModel(new FakeLocalizer(language), language, theme, layout, new FakeAppInfo(IsDebug), new FakeAppPaths(), navigation, ErrorLog, Clipboard, Toast, Backup, BackupFiles, Dialogs, App, Settings, Sample, new FixedClock(), AutoBackup, DataExchange, Reminders(), SyncSettingsViewModelTests.Create(language), CleanUpVm(language));
+    }
+
+    // ---- T-057: collapsible Backup cards ----
+
+    [Fact]
+    public async Task BackupCards_Start_collapsed_and_the_main_card_has_no_state()
+    {
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+
+        Assert.False(vm.AutoBackupCard.IsExpanded);
+        Assert.False(vm.CopiesCard.IsExpanded);
+        Assert.False(vm.CleanUpCard.IsExpanded);
+        Assert.False(vm.DataExportCard.IsExpanded);
+        Assert.Equal("SettingsBackupAutoHeader [en]", vm.AutoBackupCard.Title);
+        Assert.Equal("SettingsBackupCopiesHeader [en]", vm.CopiesCard.Title);
+        Assert.Equal("CleanUpTitle [en]", vm.CleanUpCard.Title);
+        Assert.Equal("SettingsBackupDataHeader [en]", vm.DataExportCard.Title);
+        Assert.False(vm.CleanUpCard.HasSummary);
+        Assert.False(vm.DataExportCard.HasSummary);
+    }
+
+    [Fact]
+    public async Task BackupCards_AutoSummary_shows_interval_and_kept_copies_or_off()
+    {
+        AutoBackup.Settings = new AutoBackupSettings(true, 1, 14);
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+        Assert.Equal("CardSummaryAutoOn BackupInterval_1 [en]|14 [en]", vm.AutoBackupCard.Summary);
+        Assert.False(vm.AutoBackupCard.SummaryIsError);
+
+        AutoBackup.Settings = new AutoBackupSettings(false, 1, 14);
+        await vm.RefreshBackupSectionAsync();
+        Assert.Equal("CardSummaryAutoOff [en]", vm.AutoBackupCard.Summary);
+
+        vm.AutoBackupEnabled = true; // the switch saves the setting and the summary follows
+        Assert.Equal("CardSummaryAutoOn BackupInterval_1 [en]|14 [en]", vm.AutoBackupCard.Summary);
+    }
+
+    [Fact]
+    public async Task BackupCards_AnErrorOf_the_last_automatic_backup_is_shown_in_the_header_in_the_error_style()
+    {
+        AutoBackup.LastError = "disk full";
+        var vm = Create(out _, out _, out _);
+
+        await vm.RefreshBackupSectionAsync();
+
+        Assert.True(vm.AutoBackupCard.SummaryIsError);
+        Assert.Equal(vm.LastAutoBackupErrorText, vm.AutoBackupCard.Summary);
+        Assert.Contains("disk full", vm.AutoBackupCard.Summary);
+        Assert.False(vm.AutoBackupCard.IsExpanded); // collapsed, yet the error is visible
+
+        AutoBackup.LastError = null;
+        await vm.RefreshBackupSectionAsync();
+
+        Assert.False(vm.AutoBackupCard.SummaryIsError);
+    }
+
+    [Fact]
+    public async Task BackupCards_CopiesSummary_follows_a_new_copy()
+    {
+        var vm = Create(out _, out _, out _);
+        await vm.RefreshBackupSectionAsync();
+        Assert.Equal("CardSummaryNone [en]", vm.CopiesCard.Summary);
+
+        AutoBackup.CopyList.Add(OldCopy);
+        await vm.RefreshBackupSectionAsync();
+        Assert.StartsWith("CardSummaryWithLastTime CardSummaryCopies_One 1 [en]|", vm.CopiesCard.Summary);
+
+        AutoBackup.CopyList.Insert(0, NewCopy); // newest first, as the service lists them
+        await vm.RefreshBackupSectionAsync();
+        Assert.StartsWith("CardSummaryWithLastTime CardSummaryCopies_Many 2 [en]|", vm.CopiesCard.Summary);
+        Assert.Contains(NewCopy.CreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture), vm.CopiesCard.Summary);
+    }
+
+    [Fact]
+    public void BackupCards_Remember_their_state_per_card()
+    {
+        var vm = Create(out _, out _, out _);
+        vm.CopiesCard.ToggleCommand.Execute(null);
+
+        var next = Create(out _, out _, out _);
+
+        Assert.True(next.CopiesCard.IsExpanded);
+        Assert.False(next.AutoBackupCard.IsExpanded);
+        Assert.False(next.CleanUpCard.IsExpanded);
+        Assert.False(next.DataExportCard.IsExpanded);
     }
 
     private DatabaseCleanUpViewModel CleanUpVm(FakeLanguageService language) =>

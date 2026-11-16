@@ -2,6 +2,7 @@ using System.Text;
 using HomeUtilities.Core.Abstractions;
 using HomeUtilities.Core.Domain;
 using HomeUtilities.Core.Import;
+using HomeUtilities.Core.PdfBills;
 
 namespace HomeUtilities.ViewModels.Tests;
 
@@ -17,9 +18,11 @@ public class ImportsViewModelTests
     private readonly FakeDialogService _dialogs = new();
     private readonly FakeNavigationService _navigation = new();
     private readonly FakeSnackbarService _snackbar = new();
+    private readonly FakeSettingsStore _settings = new();
+    private readonly FakePdfLayoutStore _layouts = new();
 
     private ImportsViewModel Create() =>
-        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow(), new PdfLayoutsViewModel(new FakePdfLayoutStore(), _files, _saver, new FakeMediaService(), new FakePdfTextReader(), _dialogs, _navigation, _snackbar, new FakeLocalizer(_language)));
+        new(_batches, _profiles, _files, _saver, _meters, _contracts, _dialogs, _navigation, _snackbar, new FakeLocalizer(_language), ExportFlow(), new PdfLayoutsViewModel(_layouts, _files, _saver, new FakeMediaService(), new FakePdfTextReader(), _dialogs, _navigation, _snackbar, new FakeLocalizer(_language)), _settings);
 
     private WorkbookExportFlow ExportFlow() => new(
         new FakeExportLoader(), new FakePaymentStore(), new FakeSupplierStore(), _profiles, new FakeExportWriter(), _saver, _dialogs, _snackbar, new FakeLocalizer(_language), new TestClock(new DateOnly(2026, 10, 29)));
@@ -359,5 +362,71 @@ public class ImportsViewModelTests
             Saved.Add((fileName, contentType, folder, Encoding.UTF8.GetString(stream.ToArray())));
             return new FileSaveResult(true, null);
         }
+    }
+
+    // ---- T-057: collapsible cards ----
+
+    [Fact]
+    public async Task Cards_start_collapsed_with_a_summary_in_the_header()
+    {
+        _batches.Batches.Add(new ImportBatch { FileName = "a.xlsx", SheetName = "S", ImportedAt = new DateTimeOffset(2026, 11, 10, 12, 0, 0, TimeSpan.Zero) });
+        _profiles.Stored.Add(new SavedImportProfile { Name = "P1", Profile = new ImportProfile { SheetName = "S" } });
+        _profiles.Stored.Add(new SavedImportProfile { Name = "P2", Profile = new ImportProfile { SheetName = "S" } });
+        var vm = Create();
+
+        await vm.OnAppearingAsync();
+
+        Assert.False(vm.BatchesCard.IsExpanded);
+        Assert.False(vm.ProfilesCard.IsExpanded);
+        Assert.False(vm.PdfLayoutsCard.IsExpanded);
+        Assert.False(vm.LinkRepairCard.IsExpanded);
+        Assert.Equal("ImportBatchesHeader [en]", vm.BatchesCard.Title);
+        Assert.StartsWith("CardSummaryWithLastDate CardSummaryImports_One 1 [en]|", vm.BatchesCard.Summary);
+        Assert.Equal("CardSummaryProfiles_Many 2 [en]", vm.ProfilesCard.Summary);
+        Assert.Equal("CardSummaryNone [en]", vm.PdfLayoutsCard.Summary);
+        Assert.Equal("CardSummaryRepairNone [en]", vm.LinkRepairCard.Summary);
+    }
+
+    [Fact]
+    public async Task Cards_OpeningIs_remembered_by_the_next_view_model()
+    {
+        var vm = Create();
+        vm.PdfLayoutsCard.ToggleCommand.Execute(null);
+
+        var next = Create();
+        await next.OnAppearingAsync();
+
+        Assert.True(next.PdfLayoutsCard.IsExpanded);
+        Assert.False(next.ProfilesCard.IsExpanded);
+        Assert.False(next.BatchesCard.IsExpanded);
+    }
+
+    [Fact]
+    public async Task Cards_ProfileSummary_follows_a_delete()
+    {
+        _profiles.Stored.Add(new SavedImportProfile { Name = "P1", Profile = new ImportProfile { SheetName = "S" } });
+        _profiles.Stored.Add(new SavedImportProfile { Name = "P2", Profile = new ImportProfile { SheetName = "S" } });
+        var vm = Create();
+        await vm.OnAppearingAsync();
+        Assert.Equal("CardSummaryProfiles_Many 2 [en]", vm.ProfilesCard.Summary);
+
+        await vm.ProfileItems[0].DeleteCommand.ExecuteAsync(null);
+
+        Assert.Equal("CardSummaryProfiles_One 1 [en]", vm.ProfilesCard.Summary);
+    }
+
+    [Fact]
+    public async Task Cards_LayoutSummary_follows_a_delete()
+    {
+        _layouts.Stored.Add(new PdfBillLayout { Name = "A", Markers = ["m"] });
+        _layouts.Stored.Add(new PdfBillLayout { Name = "B", Markers = ["m"] });
+        var vm = Create();
+        await vm.OnAppearingAsync();
+        Assert.Equal("CardSummaryLayouts_Many 2 [en]", vm.PdfLayoutsCard.Summary);
+
+        await vm.PdfLayouts.Items[0].DeleteCommand.ExecuteAsync(null);
+
+        Assert.Equal("CardSummaryLayouts_One 1 [en]", vm.PdfLayoutsCard.Summary);
+        Assert.Equal("PdfLayoutsHeader [en]", vm.PdfLayoutsCard.Title);
     }
 }
