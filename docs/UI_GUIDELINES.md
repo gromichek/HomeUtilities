@@ -125,7 +125,10 @@ Icon-only buttons always have a tooltip (`ToolTipProperties.Text`) and an access
   "Cancel" — Back cancels.
 - **[CHANGED] Delete** is always a red **"Удалить …"** button at the **end of the form** (full-row, natural width). It is
   not put into the ⋮ menu. (The ⋮ menu is for rare secondary commands: export, duplicate, history.)
-- **Wide windows:** the cards flow into up to 2 columns (`AdaptiveFieldGrid MinColumnWidth="560" MaxColumns="2"`).
+- **Wide windows:** **[CHANGED] (owner 2026-11-16, T-058)** on **Windows** the editor is **one centred column** (max
+  840 dp, `WideSingleColumnMaxWidth`), short fields of the bill and payment editors in pairs — two columns of cards left
+  holes and stretched every field. On **Android** (tablet landscape) the cards still flow into up to 2 columns
+  (`AdaptiveFieldGrid MinColumnWidth="560" MaxColumns="2"`).
   Buttons and notes that are direct children of that grid get `views:AdaptiveFieldGrid.FullRow="True"`.
   **[NEW]** Cards in a row align to the top (`VerticalOptions="Start"`) — a short card is not stretched to the height
   of its neighbour.
