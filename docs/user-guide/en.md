@@ -1298,7 +1298,7 @@ you how many components use it. A component can also skip the catalog and use it
 
 ### Backup
 
-**Settings → Backup** has four cards: the **backup file** you keep yourself (*Save backup…*, *Restore from backup…*), the **automatic copies** the app keeps on the device, **all data as one JSON file**, and *Clean up the database…* (see below). The row in the list shows the date of the last backup you saved.
+**Settings → Backup** has five cards: the **backup file** you keep yourself (*Save backup…*, *Restore from backup…*) — it is always open —, the **automatic backups** (the settings), the **automatic copies on this device** (the list), **all data as one JSON file**, and *Clean up the database…* (see below). The last four are **collapsed** to one line; **tap the line** to open a card or close it again. A closed card shows a short summary: for the settings *Every day · keep 7* or *off*, for the list *8 copies · last 16.11.2026 03:00*. If the last automatic backup **failed**, the error is shown in that line in red, so it is not hidden while the card is closed. The app remembers on this device which cards you left open, also after a restart. The row in the list shows the date of the last backup you saved.
 
 Everything you type (properties, suppliers, contracts, meters, readings) and all attachments and photos live only
 inside the app. If you uninstall the app, they are deleted with it. A backup is a single file
@@ -1665,7 +1665,9 @@ date, that part is skipped — so importing the same sheet twice adds nothing. A
 
 The **?** button on *Imports* and on the import wizard opens this part of the guide.
 
-**Settings → Imports** lists the finished imports (date, file, sheet, how many readings, bills, payments and meter replacements) and the saved profiles.
+**Settings → Imports** starts a new import (*Import from Excel*) and exports your data like your workbook — these two stay open at the top. Below them are four cards that you rarely need, so they are **collapsed**: *Finished imports*, *Saved profiles*, *PDF bill layouts* and *Meter links*. A closed card is one line with a short summary (for example *12 imports · last 10.11.2026*, *3 profiles*, *nothing to repair*); **tap the line** to open the card or to close it again. The app remembers on this device which cards you left open, also after a restart.
+
+**Finished imports** lists the finished imports (date, file, sheet, how many readings, bills, payments and meter replacements); **Saved profiles** and **PDF bill layouts** hold the profiles and layouts described below.
 
 - **Undo import** hides everything that import created — its bills, their payments, readings and the meters it added — in one go,
   puts the replaced meters and their contract links back, and the balances return to what they were. Nothing is erased for good. If you edited some of those records after the import, the app
