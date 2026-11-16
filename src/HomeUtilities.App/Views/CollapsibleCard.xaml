@@ -5,7 +5,10 @@
              x:Class="HomeUtilities.App.Views.CollapsibleCard">
 
     <!-- A SectionCard whose header (title, one-line summary, chevron) is the whole tap target (UI_GUIDELINES "Collapsible cards").
-         The body is attached only while the card is open, so a collapsed card builds none of its rows (T-057). -->
+         The body is attached only while the card is open, so a collapsed card builds none of its rows (T-057).
+         Content is set as a property element: the class's [ContentProperty] is CardContent (the body given by the page), so a
+         plain child here would become the body and the control would show nothing. -->
+    <ContentView.Content>
     <Border Style="{StaticResource SectionCard}">
         <VerticalStackLayout Spacing="8">
             <Grid x:Name="Header" x:DataType="vm:CollapsibleCardViewModel" ColumnDefinitions="*,Auto" ColumnSpacing="8"
@@ -36,4 +39,5 @@
             <ContentView x:Name="Body" IsVisible="False" />
         </VerticalStackLayout>
     </Border>
+    </ContentView.Content>
 </ContentView>
