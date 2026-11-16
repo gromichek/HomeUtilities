@@ -1832,4 +1832,24 @@
   <data name="Error_pdf_layout_format_invalid" xml:space="preserve"><value>Макет «{0}», поле {1}: «format» допускается только для Notes.</value></data>
   <data name="Error_pdf_layout_lines_description_required" xml:space="preserve"><value>Макет «{0}», поле Lines: в выражении нужна группа с именем «description».</value></data>
   <data name="CleanUpKind_PdfBillLayouts" xml:space="preserve"><value>макеты PDF-счетов</value></data>
+  <data name="CollapsibleCardToggle" xml:space="preserve"><value>Развернуть или свернуть: {0}</value></data>
+  <data name="CardSummaryNone" xml:space="preserve"><value>нет</value></data>
+  <data name="CardSummaryWithLastDate" xml:space="preserve"><value>{0} · последний: {1:d}</value></data>
+  <data name="CardSummaryWithLastTime" xml:space="preserve"><value>{0} · последняя: {1:g}</value></data>
+  <data name="CardSummaryImports_One" xml:space="preserve"><value>{0} импорт</value></data>
+  <data name="CardSummaryImports_Few" xml:space="preserve"><value>{0} импорта</value></data>
+  <data name="CardSummaryImports_Many" xml:space="preserve"><value>{0} импортов</value></data>
+  <data name="CardSummaryProfiles_One" xml:space="preserve"><value>{0} профиль</value></data>
+  <data name="CardSummaryProfiles_Few" xml:space="preserve"><value>{0} профиля</value></data>
+  <data name="CardSummaryProfiles_Many" xml:space="preserve"><value>{0} профилей</value></data>
+  <data name="CardSummaryLayouts_One" xml:space="preserve"><value>{0} макет</value></data>
+  <data name="CardSummaryLayouts_Few" xml:space="preserve"><value>{0} макета</value></data>
+  <data name="CardSummaryLayouts_Many" xml:space="preserve"><value>{0} макетов</value></data>
+  <data name="CardSummaryCopies_One" xml:space="preserve"><value>{0} копия</value></data>
+  <data name="CardSummaryCopies_Few" xml:space="preserve"><value>{0} копии</value></data>
+  <data name="CardSummaryCopies_Many" xml:space="preserve"><value>{0} копий</value></data>
+  <data name="CardSummaryRepairNone" xml:space="preserve"><value>исправлять нечего</value></data>
+  <data name="CardSummaryRepairFound" xml:space="preserve"><value>найдено: {0}</value></data>
+  <data name="CardSummaryAutoOn" xml:space="preserve"><value>{0} · хранить {1}</value></data>
+  <data name="CardSummaryAutoOff" xml:space="preserve"><value>выключено</value></data>
 </root>
