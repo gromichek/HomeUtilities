@@ -396,3 +396,10 @@ No other sizes in pages; styles carry the sizes.
 
 ### List rows with an action (owner 2026-11-12, #329)
 A row that has a title, a detail line, an amount and an action button: **icon column | one content column (title with the amount on its right, detail, action buttons as text buttons under the text) | chevron**. Never put the text button in its own column next to the text — on a phone in portrait it squeezes the title into a narrow column (Overview → «Что сделать» before #329).
+
+### Collapsible cards (owner 2026-11-16, T-057)
+Use `views:CollapsibleCard` on long settings screens for cards that are rarely needed (lists, advanced options). Header =
+title + a short summary of what is inside ("3 layouts", "8 copies · last 16.11.2026 03:00", "off") + chevron; the **whole
+header** is the tap target (≥ 48 dp). The open/closed state is remembered per card on this device (`ISettingsStore`, not
+synced). The **main action of a screen is never collapsed**, and an error must stay visible in the summary of a collapsed
+card. The body is attached only while the card is open, so a collapsed list builds no rows.
