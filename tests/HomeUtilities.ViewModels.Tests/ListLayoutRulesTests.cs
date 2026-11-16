@@ -28,4 +28,27 @@ public class ListLayoutRulesTests
     [InlineData(1240, 0, 0)] // no limit
     public void A_date_list_is_centred_with_a_side_margin_that_leaves_at_most_760(double width, double max, double expected) =>
         Assert.Equal(expected, ListLayoutRules.SideMarginFor(width, max));
+
+    [Fact]
+    public void A_wide_Windows_editor_uses_one_column_of_840_centred() =>
+        // 1800 dp would give 2 columns of 560; the wide rule: 1 column, (1800 - 840) / 2 = 480 on each side
+        Assert.Equal((1, 480d), ListLayoutRules.EditorLayoutFor(1800, 560, 2, 16, 600, 840));
+
+    [Fact]
+    public void A_narrow_Windows_editor_keeps_the_single_column_rule() =>
+        // 1000 dp gives 1 column anyway: the 600 maximum applies, (1000 - 600) / 2 = 200
+        Assert.Equal((1, 200d), ListLayoutRules.EditorLayoutFor(1000, 560, 2, 16, 600, 840));
+
+    [Theory]
+    [InlineData(600, 1, 0)] // a phone-sized page: the whole width
+    [InlineData(1000, 1, 200)] // 1 column, centred at 600
+    [InlineData(1135, 1, 267)] // 2 * 560 + 16 = 1136 would be needed
+    [InlineData(1200, 2, 0)] // two columns as today
+    [InlineData(1800, 2, 0)] // never more than MaxColumns
+    public void Without_the_wide_option_the_result_is_the_one_of_today(double available, int columns, double margin) =>
+        Assert.Equal((columns, margin), ListLayoutRules.EditorLayoutFor(available, 560, 2, 16, 600, 0));
+
+    [Fact]
+    public void An_unknown_width_gives_one_column_without_margin() =>
+        Assert.Equal((1, 0d), ListLayoutRules.EditorLayoutFor(0, 560, 2, 16, 600, 840));
 }
