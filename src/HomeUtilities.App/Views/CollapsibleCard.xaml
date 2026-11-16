@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeUtilities.ViewModels.Common;assembly=HomeUtilities.ViewModels"
+             x:Class="HomeUtilities.App.Views.CollapsibleCard">
+
+    <!-- A SectionCard whose header (title, one-line summary, chevron) is the whole tap target (UI_GUIDELINES "Collapsible cards").
+         The body is attached only while the card is open, so a collapsed card builds none of its rows (T-057). -->
+    <Border Style="{StaticResource SectionCard}">
+        <VerticalStackLayout Spacing="8">
+            <Grid x:Name="Header" x:DataType="vm:CollapsibleCardViewModel" ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                  MinimumHeightRequest="{StaticResource TouchSize}"
+                  SemanticProperties.Description="{Binding ToggleDescription}">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleCommand}" />
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding Title}" Style="{StaticResource SectionHeader}" LineBreakMode="WordWrap" />
+                    <Label Text="{Binding Summary}" IsVisible="{Binding HasSummary}" Style="{StaticResource MutedLabel}" LineBreakMode="WordWrap">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" x:DataType="vm:CollapsibleCardViewModel" Binding="{Binding SummaryIsError}" Value="True">
+                                <Setter Property="Style" Value="{StaticResource ErrorLabel}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+                <Label Grid.Column="1" Text="{StaticResource IconExpand}" FontFamily="{DynamicResource IconFontFamily}" FontSize="24"
+                       VerticalOptions="Center" Style="{StaticResource MutedLabel}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" x:DataType="vm:CollapsibleCardViewModel" Binding="{Binding IsExpanded}" Value="True">
+                            <Setter Property="Text" Value="{StaticResource IconCollapse}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Grid>
+            <ContentView x:Name="Body" IsVisible="False" />
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

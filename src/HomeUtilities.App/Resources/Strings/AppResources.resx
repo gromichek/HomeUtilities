@@ -1832,4 +1832,24 @@ Database size: {1} → {2}.</value></data>
   <data name="Error_pdf_layout_format_invalid" xml:space="preserve"><value>Layout "{0}", field {1}: "format" is only allowed for Notes.</value></data>
   <data name="Error_pdf_layout_lines_description_required" xml:space="preserve"><value>Layout "{0}", field Lines: the pattern needs a group named "description".</value></data>
   <data name="CleanUpKind_PdfBillLayouts" xml:space="preserve"><value>PDF bill layouts</value></data>
+  <data name="CollapsibleCardToggle" xml:space="preserve"><value>Expand or collapse {0}</value></data>
+  <data name="CardSummaryNone" xml:space="preserve"><value>none</value></data>
+  <data name="CardSummaryWithLastDate" xml:space="preserve"><value>{0} · last {1:d}</value></data>
+  <data name="CardSummaryWithLastTime" xml:space="preserve"><value>{0} · last {1:g}</value></data>
+  <data name="CardSummaryImports_One" xml:space="preserve"><value>{0} import</value></data>
+  <data name="CardSummaryImports_Few" xml:space="preserve"><value>{0} imports</value></data>
+  <data name="CardSummaryImports_Many" xml:space="preserve"><value>{0} imports</value></data>
+  <data name="CardSummaryProfiles_One" xml:space="preserve"><value>{0} profile</value></data>
+  <data name="CardSummaryProfiles_Few" xml:space="preserve"><value>{0} profiles</value></data>
+  <data name="CardSummaryProfiles_Many" xml:space="preserve"><value>{0} profiles</value></data>
+  <data name="CardSummaryLayouts_One" xml:space="preserve"><value>{0} layout</value></data>
+  <data name="CardSummaryLayouts_Few" xml:space="preserve"><value>{0} layouts</value></data>
+  <data name="CardSummaryLayouts_Many" xml:space="preserve"><value>{0} layouts</value></data>
+  <data name="CardSummaryCopies_One" xml:space="preserve"><value>{0} copy</value></data>
+  <data name="CardSummaryCopies_Few" xml:space="preserve"><value>{0} copies</value></data>
+  <data name="CardSummaryCopies_Many" xml:space="preserve"><value>{0} copies</value></data>
+  <data name="CardSummaryRepairNone" xml:space="preserve"><value>nothing to repair</value></data>
+  <data name="CardSummaryRepairFound" xml:space="preserve"><value>found: {0}</value></data>
+  <data name="CardSummaryAutoOn" xml:space="preserve"><value>{0} · keep {1}</value></data>
+  <data name="CardSummaryAutoOff" xml:space="preserve"><value>off</value></data>
 </root>
